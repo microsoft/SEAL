@@ -16,7 +16,7 @@ commented examples that should serve as a self-contained introduction to using S
 In addition, the header files contain detailed comments for the public API.
 
 # License
-SEAL is licensed under the MIT license. 
+SEAL is licensed under the MIT license; see LICENSE.txt.
 
 # Contributing
 
