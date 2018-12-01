@@ -71,19 +71,22 @@ worse than in Release mode.
 #### Library
 
 If you have root access to the system you can install SEAL system-wide as follows:
-    cd src
-    cmake .
-    make
-    sudo make install
-    cd ..
-
+````
+cd src
+cmake .
+make
+sudo make install
+cd ..
+````
 #### Examples
 
 To build the examples do:
-    cd examples
-    cmake .
-    make
-    cd ..
+````
+cd examples
+cmake .
+make
+cd ..
+````
 
 After completing the above steps the sealexamples executable can be found in bin/. 
 See examples/CMakeLists.txt for how to link SEAL with your own project using cmake.
@@ -92,10 +95,12 @@ See examples/CMakeLists.txt for how to link SEAL with your own project using cma
 
 To build the unit tests, make sure you have the Google Test library (libgtest-dev)
 installed. Then do: 
-    cd tests
-    cmake .
-    make
-    cd ..
+````
+cd tests
+cmake .
+make
+cd ..
+````
 
 After completing these steps the sealtest executable can be found in bin/. All unit 
 tests should pass successfully.
@@ -105,19 +110,23 @@ tests should pass successfully.
 #### Library
 
 To install SEAL locally, e.g., to ~/mylibs, do the following:
-    cd src
-    cmake -DCMAKE_INSTALL_PREFIX=~/mylibs .
-    make
-    make install
-    cd ..
+````
+cd src
+cmake -DCMAKE_INSTALL_PREFIX=~/mylibs .
+make
+make install
+cd ..
+````
 
 #### Examples 
 
 To build the examples do:
-    cd examples
-    cmake -DCMAKE_PREFIX_PATH=~/mylibs .
-    make
-    cd ..
+````
+cd examples
+cmake -DCMAKE_PREFIX_PATH=~/mylibs .
+make
+cd ..
+````
 
 After completing the above steps the sealexamples executable can be found in bin/. 
 See examples/CMakeLists.txt for how to link SEAL with your own project using cmake.
@@ -126,10 +135,12 @@ See examples/CMakeLists.txt for how to link SEAL with your own project using cma
 
 To build the unit tests, make sure you have the Google Test library (libgtest-dev)
 installed. Then do:
-    cd tests
-    cmake -DCMAKE_PREFIX_PATH=~/mylibs .
-    make
-    cd ..
+````
+cd tests
+cmake -DCMAKE_PREFIX_PATH=~/mylibs .
+make
+cd ..
+````
 
 After completing these steps the sealtest executable can be found in bin/. All unit 
 tests should pass successfully.
