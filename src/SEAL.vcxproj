@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="seal\batchencoder.h" />
+    <ClInclude Include="seal\biguint.h" />
+    <ClInclude Include="seal\ciphertext.h" />
+    <ClInclude Include="seal\ckks.h" />
+    <ClInclude Include="seal\context.h" />
+    <ClInclude Include="seal\decryptor.h" />
+    <ClInclude Include="seal\defaultparams.h" />
+    <ClInclude Include="seal\encoder.h" />
+    <ClInclude Include="seal\encryptionparams.h" />
+    <ClInclude Include="seal\encryptor.h" />
+    <ClInclude Include="seal\evaluator.h" />
+    <ClInclude Include="seal\galoiskeys.h" />
+    <ClInclude Include="seal\intarray.h" />
+    <ClInclude Include="seal\keygenerator.h" />
+    <ClInclude Include="seal\memorymanager.h" />
+    <ClInclude Include="seal\plaintext.h" />
+    <ClInclude Include="seal\publickey.h" />
+    <ClInclude Include="seal\randomgen.h" />
+    <ClInclude Include="seal\relinkeys.h" />
+    <ClInclude Include="seal\seal.h" />
+    <ClInclude Include="seal\secretkey.h" />
+    <ClInclude Include="seal\smallmodulus.h" />
+    <ClInclude Include="seal\util\aes.h" />
+    <ClInclude Include="seal\util\baseconverter.h" />
+    <ClInclude Include="seal\util\clang.h" />
+    <ClInclude Include="seal\util\clipnormal.h" />
+    <ClInclude Include="seal\util\common.h" />
+    <ClInclude Include="seal\util\defines.h" />
+    <ClInclude Include="seal\util\gcc.h" />
+    <ClInclude Include="seal\util\globals.h" />
+    <ClInclude Include="seal\util\hash.h" />
+    <ClInclude Include="seal\util\locks.h" />
+    <ClInclude Include="seal\util\mempool.h" />
+    <ClInclude Include="seal\util\msvc.h" />
+    <ClInclude Include="seal\util\numth.h" />
+    <ClInclude Include="seal\util\pointer.h" />
+    <ClInclude Include="seal\util\polyarith.h" />
+    <ClInclude Include="seal\util\polyarithmod.h" />
+    <ClInclude Include="seal\util\polyarithsmallmod.h" />
+    <ClInclude Include="seal\util\polycore.h" />
+    <ClInclude Include="seal\util\randomtostd.h" />
+    <ClInclude Include="seal\util\smallntt.h" />
+    <ClInclude Include="seal\util\uintarith.h" />
+    <ClInclude Include="seal\util\uintarithmod.h" />
+    <ClInclude Include="seal\util\uintarithsmallmod.h" />
+    <ClInclude Include="seal\util\uintcore.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="seal\ckks.cpp" />
+    <ClCompile Include="seal\memorymanager.cpp" />
+    <ClCompile Include="seal\ciphertext.cpp" />
+    <ClCompile Include="seal\encoder.cpp" />
+    <ClCompile Include="seal\plaintext.cpp" />
+    <ClCompile Include="seal\biguint.cpp" />
+    <ClCompile Include="seal\context.cpp" />
+    <ClCompile Include="seal\decryptor.cpp" />
+    <ClCompile Include="seal\encryptionparams.cpp" />
+    <ClCompile Include="seal\encryptor.cpp" />
+    <ClCompile Include="seal\relinkeys.cpp" />
+    <ClCompile Include="seal\evaluator.cpp" />
+    <ClCompile Include="seal\keygenerator.cpp" />
+    <ClCompile Include="seal\batchencoder.cpp" />
+    <ClCompile Include="seal\randomgen.cpp" />
+    <ClCompile Include="seal\galoiskeys.cpp" />
+    <ClCompile Include="seal\util\aes.cpp" />
+    <ClCompile Include="seal\util\baseconverter.cpp" />
+    <ClCompile Include="seal\util\globals.cpp" />
+    <ClCompile Include="seal\util\numth.cpp" />
+    <ClCompile Include="seal\smallmodulus.cpp" />
+    <ClCompile Include="seal\util\hash.cpp" />
+    <ClCompile Include="seal\util\clipnormal.cpp" />
+    <ClCompile Include="seal\util\mempool.cpp" />
+    <ClCompile Include="seal\util\polyarith.cpp" />
+    <ClCompile Include="seal\util\polyarithmod.cpp" />
+    <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
+    <ClCompile Include="seal\util\smallntt.cpp" />
+    <ClCompile Include="seal\util\uintarith.cpp" />
+    <ClCompile Include="seal\util\uintarithmod.cpp" />
+    <ClCompile Include="seal\util\uintarithsmallmod.cpp" />
+    <ClCompile Include="seal\util\uintcore.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+    <Text Include="seal\CMakeLists.txt" />
+    <Text Include="seal\util\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cmake\Findmsgsl.cmake" />
+    <None Include="cmake\SEALConfig.cmake.in" />
+    <None Include="seal\util\config.h.in" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7EA96C25-FC0D-485A-BB71-32B6DA55652A}</ProjectGuid>
+    <RootNamespace>SEAL</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)lib\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.lib</TargetExt>
+    <TargetName>seal</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)lib\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.lib</TargetExt>
+    <TargetName>seal</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)tools\scripts\cmake_config.cmd" $(Configuration) "$(DevEnvDir)" "$(IncludePath)"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Configure SEAL through CMake</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)tools\scripts\cmake_config.cmd" $(Configuration) "$(DevEnvDir)" "$(IncludePath)"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Configure SEAL through CMake</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

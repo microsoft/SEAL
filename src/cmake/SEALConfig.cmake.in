@@ -1,0 +1,34 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
+# Exports target SEAL::seal
+#
+# Creates variables:
+#   SEAL_BUILD_TYPE : The build configuration used
+#   SEAL_DEBUG : Set to non-zero value if SEAL is compiled with extra debugging code (very slow!)
+#   SEAL_ENFORCE_HE_STD_SECURITY : Set to non-zero value if SEAL is compiled to enforce at least
+#       a 128-bit security level based on HomomorphicEncryption.org security estimates
+#   SEAL_USE_MSGSL : Set to non-zero value if SEAL is compiled with Microsoft GSL support
+#   MSGSL_INCLUDE_DIR : Holds the path to Microsoft GSL if SEAL is compiled with Microsoft GSL support
+
+include(CMakeFindDependencyMacro)
+
+set(SEAL_BUILD_TYPE @CMAKE_BUILD_TYPE@)
+set(SEAL_DEBUG @SEAL_DEBUG@)
+set(SEAL_USE_CXX17 @SEAL_USE_CXX17@)
+set(SEAL_ENFORCE_HE_STD_SECURITY @SEAL_ENFORCE_HE_STD_SECURITY@)
+set(SEAL_USE_MSGSL @SEAL_USE_MSGSL@)
+if(SEAL_USE_MSGSL)
+    set(MSGSL_INCLUDE_DIR @MSGSL_INCLUDE_DIR@)
+endif()
+
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_dependency(Threads REQUIRED)
+
+include(${CMAKE_CURRENT_LIST_DIR}/SEALTargets.cmake)
+
+message(STATUS "SEAL detected (version ${SEAL_VERSION})")
+if(SEAL_DEBUG)
+    message(STATUS "Performance warning: SEAL compiled in debug mode")
+endif()
