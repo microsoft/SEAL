@@ -14,6 +14,6 @@ SEALDLL HRESULT SEALCALL Decryptor_Create(void* context, void* secret_key, void*
 
 SEALDLL HRESULT SEALCALL Decryptor_Destroy(void* thisptr);
 
-SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void* destination, void* pool_handle);
+SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void* destination);
 
-SEALDLL HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void* thisptr, void* encrypted, void* pool_handle, int* invariant_noise_budget);
+SEALDLL HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void* thisptr, void* encrypted, int* invariant_noise_budget);

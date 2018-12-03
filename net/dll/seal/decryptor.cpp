@@ -42,7 +42,7 @@ SEALDLL HRESULT SEALCALL Decryptor_Destroy(void* thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void* destination, void* pool_handle)
+SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void* destination)
 {
     Decryptor* decryptor = FromVoid<Decryptor>(thisptr);
     IfNullRet(decryptor, E_POINTER);
@@ -50,13 +50,10 @@ SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void*
     IfNullRet(encryptedptr, E_POINTER);
     Plaintext* destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool_handle);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
 
     try
     {
-        decryptor->decrypt(*encryptedptr, *destinationptr, *handle);
+        decryptor->decrypt(*encryptedptr, *destinationptr);
         return S_OK;
     }
     catch (const invalid_argument&)
@@ -65,20 +62,17 @@ SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void*
     }
 }
 
-SEALDLL HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void* thisptr, void* encrypted, void* pool_handle, int* invariant_noise_budget)
+SEALDLL HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void* thisptr, void* encrypted, int* invariant_noise_budget)
 {
     Decryptor* decryptor = FromVoid<Decryptor>(thisptr);
     IfNullRet(decryptor, E_POINTER);
     Ciphertext* encryptedptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encryptedptr, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool_handle);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
     IfNullRet(invariant_noise_budget, E_POINTER);
 
     try
     {
-        *invariant_noise_budget = decryptor->invariant_noise_budget(*encryptedptr, *handle);
+        *invariant_noise_budget = decryptor->invariant_noise_budget(*encryptedptr);
         return S_OK;
     }
     catch (const invalid_argument&)

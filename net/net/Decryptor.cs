@@ -61,22 +61,18 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="encrypted">The ciphertext to decrypt</param>
         /// <param name="destination">The plaintext to overwrite with the decrypted ciphertext</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted or destination are null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void Decrypt(Ciphertext encrypted, Plaintext destination,
-            MemoryPoolHandle pool = null)
+        public void Decrypt(Ciphertext encrypted, Plaintext destination)
         {
             if (null == encrypted)
                 throw new ArgumentNullException(nameof(encrypted));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-
-            NativeMethods.Decryptor_Decrypt(NativePtr, encrypted.NativePtr, destination.NativePtr, poolPtr);
+            NativeMethods.Decryptor_Decrypt(NativePtr, encrypted.NativePtr, destination.NativePtr);
         }
 
         /// <summary>
@@ -100,21 +96,17 @@ namespace Microsoft.Research.SEAL
         /// </para>
         /// </remarks>
         /// <param name="encrypted">The ciphertext</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypted is null</exception>
         /// <exception cref="ArgumentException">if the scheme is not BFV</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public int InvariantNoiseBudget(Ciphertext encrypted,
-            MemoryPoolHandle pool = null)
+        public int InvariantNoiseBudget(Ciphertext encrypted)
         {
             if (null == encrypted)
                 throw new ArgumentNullException(nameof(encrypted));
 
-            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-
-            NativeMethods.Decryptor_InvariantNoiseBudget(NativePtr, encrypted.NativePtr, poolPtr, out int result);
+            NativeMethods.Decryptor_InvariantNoiseBudget(NativePtr, encrypted.NativePtr, out int result);
             return result;
         }
 

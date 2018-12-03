@@ -865,10 +865,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void Decryptor_Destroy(IntPtr thisptr);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Decryptor_Decrypt(IntPtr thisptr, IntPtr encrypted, IntPtr destination, IntPtr poolHandle);
+        internal static extern void Decryptor_Decrypt(IntPtr thisptr, IntPtr encrypted, IntPtr destination);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Decryptor_InvariantNoiseBudget(IntPtr thisptr, IntPtr encrypted, IntPtr poolHandle, out int invariantNoiseBudget);
+        internal static extern void Decryptor_InvariantNoiseBudget(IntPtr thisptr, IntPtr encrypted, out int invariantNoiseBudget);
 
         #endregion
 
