@@ -67,7 +67,7 @@ namespace Microsoft.Research.SEAL
         /// 
         /// <remarks>
         /// Creates an empty encryption parameters. At a minimum, the user needs to specify 
-        /// the parameters <see cref="PolyModulus"/>, <see cref="CoeffModulus"/>, and 
+        /// the parameters <see cref="PolyModulusDegree"/>, <see cref="CoeffModulus"/>, and 
         /// <see cref="PlainModulus"/> for the parameters to be valid.
         /// </remarks>
         /// <param name="scheme">Scheme for the encryption parameters</param>
