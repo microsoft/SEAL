@@ -217,3 +217,25 @@ SEALDLL HRESULT SEALCALL EncParams_SetNoiseStandardDeviation(void* thisptr, doub
         return E_INVALIDARG;
     }
 }
+
+SEALDLL HRESULT SEALCALL EncParams_NoiseMaxDeviation(void* thisptr, double* nmd)
+{
+    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    IfNullRet(params, E_POINTER);
+    IfNullRet(nmd, E_POINTER);
+
+    *nmd = params->noise_max_deviation();
+    return S_OK;
+}
+
+SEALDLL HRESULT SEALCALL EncParams_Equals(void* thisptr, void* otherptr, bool* result)
+{
+    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    IfNullRet(params, E_POINTER);
+    EncryptionParameters* other = FromVoid<EncryptionParameters>(otherptr);
+    IfNullRet(other, E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    *result = (*params == *other);
+    return S_OK;
+}

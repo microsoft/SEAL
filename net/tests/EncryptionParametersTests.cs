@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace SEALNetTest
@@ -51,6 +52,46 @@ namespace SEALNetTest
             Assert.AreEqual(2, newCoeffs.Count);
             Assert.AreEqual(0x007fffffff380001ul, newCoeffs[0].Value);
             Assert.AreEqual(0x003fffffff000001ul, newCoeffs[1].Value);
+        }
+
+        [TestMethod]
+        public void SaveLoadTest()
+        {
+            List<SmallModulus> coeffModulus = new List<SmallModulus>
+            {
+                DefaultParams.SmallMods40Bit(0),
+                DefaultParams.SmallMods40Bit(1)
+            };
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 8,
+                PlainModulus = new SmallModulus(257),
+                CoeffModulus = coeffModulus
+            };
+
+            EncryptionParameters loaded = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                EncryptionParameters.Save(parms, stream);
+
+                stream.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+                loaded = EncryptionParameters.Load(stream);
+            }
+
+            Assert.AreEqual(SchemeType.BFV, loaded.Scheme);
+            Assert.AreEqual(8, loaded.PolyModulusDegree);
+            Assert.AreEqual(257ul, loaded.PlainModulus.Value);
+
+            List<SmallModulus> loadedCoeffModulus = new List<SmallModulus>(loaded.CoeffModulus);
+            Assert.AreEqual(2, loadedCoeffModulus.Count);
+            Assert.AreNotSame(coeffModulus[0], loadedCoeffModulus[0]);
+            Assert.AreNotSame(coeffModulus[1], loadedCoeffModulus[1]);
+            Assert.AreEqual(coeffModulus[0], loadedCoeffModulus[0]);
+            Assert.AreEqual(coeffModulus[1], loadedCoeffModulus[1]);
+            Assert.AreEqual(parms.NoiseMaxDeviation, loaded.NoiseMaxDeviation, delta: 0.001);
+            Assert.AreEqual(parms.NoiseStandardDeviation, loaded.NoiseStandardDeviation, delta: 0.001);
         }
     }
 }

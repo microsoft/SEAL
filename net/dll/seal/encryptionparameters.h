@@ -39,3 +39,7 @@ SEALDLL HRESULT SEALCALL EncParams_SetPlainModulus2(void* thisptr, uint64_t plai
 SEALDLL HRESULT SEALCALL EncParams_NoiseStandardDeviation(void* thisptr, double* nsd);
 
 SEALDLL HRESULT SEALCALL EncParams_SetNoiseStandardDeviation(void* thisptr, double nsd);
+
+SEALDLL HRESULT SEALCALL EncParams_NoiseMaxDeviation(void* thisptr, double* nmd);
+
+SEALDLL HRESULT SEALCALL EncParams_Equals(void* thisptr, void* otherptr, bool* result);

@@ -271,8 +271,8 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                // TODO: implement
-                throw new NotImplementedException();
+                NativeMethods.EncParams_NoiseMaxDeviation(NativePtr, out double nmd);
+                return nmd;
             }
         }
 
@@ -295,13 +295,32 @@ namespace Microsoft.Research.SEAL
         /// Saves the EncryptionParameters to an output stream. The output is in binary format
         /// and is not human-readable. The output stream must have the "Binary" flag set.
         /// </remarks>
+        /// <param name="parms">Encryption Parameters to save</param>
         /// <param name="stream">The stream to save the EncryptionParameters to</param>
-        /// <exception cref="System.ArgumentNullException">if stream is null</exception>
+        /// <exception cref="System.ArgumentNullException">if either parms or stream are null</exception>
         /// <seealso cref="Load()">See Load() to load a saved EncryptionParameters instance.</seealso>
-        public void Save(Stream stream)
+        public static void Save(EncryptionParameters parms, Stream stream)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == parms)
+                throw new ArgumentNullException(nameof(parms));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                writer.Write((int)parms.Scheme);
+                writer.Write(parms.PolyModulusDegree);
+
+                List<SmallModulus> coeffModulus = new List<SmallModulus>(parms.CoeffModulus);
+                writer.Write(coeffModulus.Count);
+                foreach (SmallModulus mod in coeffModulus)
+                {
+                    mod.Save(writer.BaseStream);
+                }
+
+                parms.PlainModulus.Save(writer.BaseStream);
+                writer.Write(parms.NoiseStandardDeviation);
+            }
         }
 
         /// <summary>
@@ -312,11 +331,51 @@ namespace Microsoft.Research.SEAL
         /// <param name="stream">The stream to load the EncryptionParameters from</param>
         /// <exception cref="System.ArgumentNullException">if stream is null</exception>
         /// <exception cref="System.ArgumentException">if parameters cannot be read correctly</exception>
-        /// <seealso cref="Save()">See Save() to save an EncryptionParameters instance.</seealso>
-        public void Load(Stream stream)
+        /// <seealso cref="Save(EncryptionParameters, Stream)">See Save(EncryptionParameters, Stream) to save an EncryptionParameters instance.</seealso>
+        public static EncryptionParameters Load(Stream stream)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            try
+            {
+                EncryptionParameters parms = null;
+
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    SchemeType scheme = (SchemeType)reader.ReadInt32();
+                    parms = new EncryptionParameters(scheme);
+
+                    parms.PolyModulusDegree = reader.ReadInt32();
+                    int coeffModulusCount = reader.ReadInt32();
+
+                    List<SmallModulus> coeffModulus = new List<SmallModulus>(coeffModulusCount);
+                    for (int i = 0; i < coeffModulusCount; i++)
+                    {
+                        SmallModulus sm = new SmallModulus();
+                        sm.Load(reader.BaseStream);
+                        coeffModulus.Add(sm);
+                    }
+
+                    parms.CoeffModulus = coeffModulus;
+
+                    SmallModulus plainModulus = new SmallModulus();
+                    plainModulus.Load(reader.BaseStream);
+                    parms.PlainModulus = plainModulus;
+
+                    parms.NoiseStandardDeviation = reader.ReadDouble();
+                }
+
+                return parms;
+            }
+            catch (EndOfStreamException ex)
+            {
+                throw new ArgumentException("End of stream reached", ex);
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not read Encryption Parameters", ex);
+            }
         }
 
         /// <summary>
@@ -354,8 +413,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public override int GetHashCode()
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            return Utilities.ComputeArrayHashCode(ParmsId.Block);
         }
 
         #region IEquatable<EncryptionParameters> methods
@@ -373,8 +431,11 @@ namespace Microsoft.Research.SEAL
         /// <param name="other">The EncryptionParameters to compare against</param>
         public bool Equals(EncryptionParameters other)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == other)
+                return false;
+
+            NativeMethods.EncParams_Equals(NativePtr, other.NativePtr, out bool result);
+            return result;
         }
 
         #endregion

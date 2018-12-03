@@ -298,6 +298,12 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void EncParams_SetNoiseStandardDeviation(IntPtr thisptr, double nsd);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void EncParams_NoiseMaxDeviation(IntPtr thisptr, out double nmd);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void EncParams_Equals(IntPtr thisptr, IntPtr otherptr, out bool result);
+
         #endregion
 
         #region DefaultParams methods
