@@ -1,0 +1,625 @@
+﻿using Microsoft.Research.SEAL.Tools;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace Microsoft.Research.SEAL
+{
+    /// <summary>
+    /// Class to store a ciphertext element. The data for a ciphertext consists 
+    /// of two or more polynomials, which are in SEAL stored in a CRT form with 
+    /// respect to the factors of the coefficient modulus. This data itself is 
+    /// not meant to be modified directly by the user, but is instead operated 
+    /// on by functions in the Evaluator class. The size of the backing array of 
+    /// a ciphertext depends on the encryption parameters and the size of the 
+    /// ciphertext (at least 2). If the degree of the poly_modulus encryption 
+    /// parameter is N, and the number of primes in the coeff_modulus encryption 
+    /// parameter is K, then the ciphertext backing array requires precisely 
+    /// 8*N*K*size bytes of memory. A ciphertext also carries with it the 
+    /// parmsId of its associated encryption parameters, which is used to check 
+    /// the validity of the ciphertext for homomorphic operations and decryption.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Memory Management
+    /// The size of a ciphertext refers to the number of polynomials it contains,
+    /// whereas its capacity refers to the number of polynomials that fit in the 
+    /// current memory allocation. In high-performance applications unnecessary 
+    /// re-allocations should be avoided by reserving enough memory for the 
+    /// ciphertext to begin with either by providing the desired capacity to the 
+    /// constructor as an extra argument, or by calling the reserve function at 
+    /// any time.
+    /// </para>
+    /// <para>
+    /// Thread Safety
+    /// In general, reading from ciphertext is thread-safe as long as no other 
+    /// thread is concurrently mutating it. This is due to the underlying data 
+    /// structure storing the ciphertext not being thread-safe.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="Plaintext">See Plaintext for the class that stores plaintexts.</seealso>
+    public class Ciphertext : NativeObject
+    {
+        /// <summary>
+        /// Constructs an empty ciphertext allocating no memory.
+        /// </summary>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="System.ArgumentException">if pool is uninitialized</exception>
+        public Ciphertext(MemoryPoolHandle pool = null)
+        {
+            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Ciphertext_Create1(poolPtr, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs an empty ciphertext with capacity 2. In addition to the 
+        /// capacity, the allocation size is determined by the highest-level
+        /// parameters associated to the given SEALContext.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Ciphertext(SEALContext context,
+                    MemoryPoolHandle pool = null)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Ciphertext_Create3(context.NativePtr, poolPtr, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs an empty ciphertext with capacity 2. In addition to the 
+        /// capacity, the allocation size is determined by the encryption parameters 
+        /// with given parmsId.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// parameters to be used</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Ciphertext(SEALContext context, 
+                    ParmsId parmsId,
+                    MemoryPoolHandle pool = null)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == parmsId)
+                throw new ArgumentNullException(nameof(parmsId));
+
+            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Ciphertext_Create4(context.NativePtr, parmsId.Block, poolPtr, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs an empty ciphertext with given capacity. In addition to 
+        /// the capacity, the allocation size is determined by the given 
+        /// encryption parameters.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// parameters to be used</param>
+        /// <param name="sizeCapacity">The capacity</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Ciphertext(SEALContext context, 
+                    ParmsId parmsId, int sizeCapacity,
+                    MemoryPoolHandle pool = null)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == parmsId)
+                throw new ArgumentNullException(nameof(parmsId));
+
+            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Ciphertext_Create5(context.NativePtr, parmsId.Block, sizeCapacity, poolPtr, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs a new ciphertext by copying a given one.
+        /// </summary>
+        /// <param name="copy">The ciphertext to copy from</param>
+        /// <exception cref="ArgumentNullException">if copy is null</exception>
+        public Ciphertext(Ciphertext copy)
+        {
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            NativeMethods.Ciphertext_Create2(copy.NativePtr, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs a new ciphertext by initializing it with a native
+        /// object pointer.
+        /// </summary>
+        /// <param name="ciphertextPtr">The native Ciphertext pointer</param>
+        /// <param name="owned">Whether this object owns the native pointer</param>
+        internal Ciphertext(IntPtr ciphertextPtr, bool owned = true)
+            : base(ciphertextPtr, owned)
+        {
+        }
+
+        /// <summary>
+        /// Allocates enough memory to accommodate the backing array of a ciphertext 
+        /// with given capacity. In addition to the capacity, the allocation size is 
+        /// determined by the encryption parameters corresponing to the given 
+        /// parmsId.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// parameters to be used</param>
+        /// <param name="sizeCapacity">The capacity</param>
+        /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
+        public void Reserve(SEALContext context,
+                    ParmsId parmsId, int sizeCapacity)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == parmsId)
+                throw new ArgumentNullException(nameof(parmsId));
+
+            NativeMethods.Ciphertext_Reserve(NativePtr, context.NativePtr, parmsId.Block, sizeCapacity);
+        }
+
+        /// <summary>
+        /// Allocates enough memory to accommodate the backing array of a ciphertext
+        /// with given capacity. In addition to the capacity, the allocation size is 
+        /// determined by the highest-level parameters associated to the given 
+        /// SEALContext.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="sizeCapacity">The capacity</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
+        public void Reserve(SEALContext context,
+                    int sizeCapacity)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.Ciphertext_Reserve(NativePtr, context.NativePtr, sizeCapacity);
+        }
+
+        /// <summary>
+        /// Allocates enough memory to accommodate the backing array of a ciphertext 
+        /// with given capacity. In addition to the capacity, the allocation size is 
+        /// determined by the current encryption parameters.
+        /// </summary>
+        /// <param name="sizeCapacity">The capacity</param>
+        /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
+        public void Reserve(int sizeCapacity)
+        {
+            NativeMethods.Ciphertext_Reserve(NativePtr, sizeCapacity);
+        }
+
+        /// <summary>
+        /// Resizes the ciphertext to given size, reallocating if the capacity 
+        /// of the ciphertext is too small. The ciphertext parameters are 
+        /// determined by the given SEALContext and parmsId.
+        /// 
+        /// This function is mainly intended for internal use and is called
+        /// automatically by functions such as Evaluator::multiply and
+        /// Evaluator::relinearize. A normal user should never have a reason
+        /// to manually resize a ciphertext.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// parameters to be used</param>
+        /// <param name="size">The new size</param>
+        /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
+        public void Resize(SEALContext context,
+            ParmsId parmsId, int size)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == parmsId)
+                throw new ArgumentNullException(nameof(parmsId));
+
+            NativeMethods.Ciphertext_Resize(NativePtr, context.NativePtr, parmsId.Block, size);
+        }
+
+        /// <summary>
+        /// Resizes the ciphertext to given size, reallocating if the capacity
+        /// of the ciphertext is too small. The ciphertext parameters are
+        /// determined by the highest-level parameters associated to the given 
+        /// SEALContext. 
+        /// 
+        /// This function is mainly intended for internal use and is called 
+        /// automatically by functions such as Evaluator::multiply and 
+        /// Evaluator::relinearize. A normal user should never have a reason 
+        /// to manually resize a ciphertext.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="size">The new size</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
+        public void Resize(SEALContext context, int size)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.Ciphertext_Resize(NativePtr, context.NativePtr, size);
+        }
+
+        /// <summary>
+        /// Resizes the ciphertext to given size, reallocating if the capacity
+        /// of the ciphertext is too small.
+        /// 
+        /// This function is mainly intended for internal use and is called
+        /// automatically by functions such as Evaluator::multiply and
+        /// Evaluator::relinearize. A normal user should never have a reason
+        /// to manually resize a ciphertext.
+        /// </summary>
+        /// <param name="size">The new size</param>
+        /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
+        public void Resize(int size)
+        {
+            NativeMethods.Ciphertext_Resize(NativePtr, size);
+        }
+
+        /// <summary>
+        /// Resizes the ciphertext to the given size, poly modulus degree and
+        /// coefficient mod count. This is a helper for loading a ciphertext
+        /// from a stream.
+        /// </summary>
+        /// <param name="size">The new size</param>
+        /// <param name="polyModulusDegree">The new poly modulus degree</param>
+        /// <param name="coeffModCount">The new coefficient mod count</param>
+        private void Resize(int size, int polyModulusDegree, int coeffModCount)
+        {
+            NativeMethods.Ciphertext_Resize(NativePtr, size, polyModulusDegree, coeffModCount);
+        }
+
+        /// <summary>
+        /// Resets the ciphertext. This function releases any memory allocated 
+        /// by the ciphertext, returning it to the memory pool. It also sets all
+        /// encryption parameter specific size information to zero.
+        /// </summary>
+        public void Release()
+        {
+            NativeMethods.Ciphertext_Release(NativePtr);
+        }
+
+        /// <summary>
+        /// Copies a given ciphertext to the current one.
+        /// </summary>
+        /// 
+        /// <param name="assign">The ciphertext to copy from</param>
+        /// <exception cref="ArgumentNullException">if assign is null</exception>
+        public void Set(Ciphertext assign)
+        {
+            if (null == assign)
+                throw new ArgumentNullException(nameof(assign));
+
+            NativeMethods.Ciphertext_Set(NativePtr, assign.NativePtr);
+        }
+
+        /// <summary>
+        /// Returns the polynomial coefficient at a particular index in the ciphertext data. If the 
+        /// polynomial modulus has degree N, and the number of primes in the coefficient modulus is K, then
+        /// the ciphertext contains size*N*K coefficients. Thus, the index has a range of [0, size*N*K).
+        /// </summary>
+        /// <param name="coeffIndex">The index of the coefficient</param>
+        /// <exception cref="IndexOutOfRangeException">if coeff_index is out of range</exception>
+        public ulong this[int coeffIndex]
+        {
+            get
+            {
+                try
+                {
+                    NativeMethods.Ciphertext_GetDataAt(NativePtr, coeffIndex, out ulong value);
+                    return value;
+                }
+                catch (COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidIndex)
+                        throw new IndexOutOfRangeException(nameof(coeffIndex), ex);
+                    throw;
+                }
+            }
+
+            set
+            {
+                try
+                {
+                    NativeMethods.Ciphertext_SetDataAt(NativePtr, coeffIndex, value);
+                }
+                catch (COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidIndex)
+                        throw new IndexOutOfRangeException(nameof(coeffIndex), ex);
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the value of a coefficient at the given index from
+        /// a particular polynomial in the ciphertext 
+        /// data. Note that SEAL stores each polynomial in the ciphertext 
+        /// modulo all of the K primes in the coefficient modulus. The data 
+        /// returned by this function is to the beginning (constant coefficient)
+        /// of the first one of these K polynomials.
+        /// </summary>
+        /// <param name="polyIndex">The index of the polynomial in the ciphertext</param>
+        /// <param name="coeffIndex">The index of the polynomial data</param>
+        /// <exception cref="IndexOutOfRangeException">if polyIndex is less than 0 or bigger 
+        /// than the size of the ciphertext</exception>
+        /// <exception cref="IndexOutOfRangeException">if coeffIndex is less than 0 or bigger
+        /// than the size of the ciphertext</exception>
+        public ulong this[int polyIndex, int coeffIndex]
+        {
+            get
+            {
+                if (polyIndex < 0)
+                    throw new IndexOutOfRangeException(nameof(polyIndex));
+                if (coeffIndex < 0)
+                    throw new IndexOutOfRangeException(nameof(coeffIndex));
+
+                try
+                {
+                    NativeMethods.Ciphertext_GetDataAt(NativePtr, polyIndex, coeffIndex, out ulong data);
+                    return data;
+                }
+                catch(COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidIndex)
+                        throw new IndexOutOfRangeException("polyIndex or coeffIndex out of range", ex);
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the number of primes in the coefficient modulus of the 
+        /// associated encryption parameters. This directly affects the 
+        /// allocation size of the ciphertext.
+        /// </summary>
+        public int CoeffModCount
+        {
+            get
+            {
+                NativeMethods.Ciphertext_CoeffModCount(NativePtr, out int coeffModCount);
+                return coeffModCount;
+            }
+        }
+
+
+        /// <summary>
+        /// Returns the degree of the polynomial modulus of the associated 
+        /// encryption parameters.This directly affects the allocation size
+        /// of the ciphertext.
+        /// </summary>
+        public int PolyModulusDegree
+        {
+            get
+            {
+                NativeMethods.Ciphertext_PolyModulusDegree(NativePtr, out int polyModulusDegree);
+                return polyModulusDegree;
+            }
+        }
+
+        /// <summary>
+        /// Returns the capacity of the allocation. This means the largest size 
+        /// of the ciphertext that can be stored in the current allocation with 
+        /// the current encryption parameters.
+        /// </summary>
+        public int SizeCapacity
+        {
+            get
+            {
+                NativeMethods.Ciphertext_SizeCapacity(NativePtr, out int sizeCapacity);
+                return sizeCapacity;
+            }
+        }
+
+        /// <summary>
+        /// Returns the size of the ciphertext.
+        /// </summary>
+        public int Size
+        {
+            get
+            {
+                NativeMethods.Ciphertext_Size(NativePtr, out int size);
+                return size;
+            }
+        }
+
+        /// <summary>
+        /// Returns the total size of the current allocation in 64-bit words.
+        /// </summary>
+        public int UInt64CountCapacity
+        {
+            get
+            {
+                NativeMethods.Ciphertext_UInt64CountCapacity(NativePtr, out int capacity);
+                return capacity;
+            }
+        }
+
+        /// <summary>
+        /// Returns the total size of the current ciphertext in 64-bit words.
+        /// </summary>
+        public int UInt64Count
+        {
+            get
+            {
+                NativeMethods.Ciphertext_UInt64Count(NativePtr, out int uint64Count);
+                return uint64Count;
+            }
+        }
+
+        /// <summary>
+        /// Saves the ciphertext to an output stream. The output is in binary 
+        /// format and not human-readable. The output stream must have the 
+        /// "binary" flag set.
+        /// </summary>
+        /// <param name="stream">The stream to save the ciphertext to</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <seealso cref="Load(Stream)">See Load() to load a saved ciphertext.</seealso>
+        public void Save(Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                ParmsId.Save(writer.BaseStream);
+
+                writer.Write(Size);
+                writer.Write(PolyModulusDegree);
+                writer.Write(CoeffModCount);
+
+                int ulongCount = Size * PolyModulusDegree * CoeffModCount;
+                for (int i = 0; i < ulongCount; i++)
+                {
+                    writer.Write(this[i]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads a ciphertext from an input stream overwriting the current 
+        /// ciphertext.
+        /// </summary>
+        /// <param name="stream">The stream to load the ciphertext from</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the loaded ciphertext data is invalid</exception>
+        /// <seealso cref="Save(Stream)">See Save() to save a ciphertext.</seealso>
+        public void Load(Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            try
+            {
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    ParmsId parms = new ParmsId();
+                    parms.Load(reader.BaseStream);
+                    ParmsId = parms;
+
+                    int size = reader.ReadInt32();
+                    int polyModulusDegree = reader.ReadInt32();
+                    int coeffModCount = reader.ReadInt32();
+                    int ulongCount = size * polyModulusDegree * coeffModCount;
+
+                    Resize(size, polyModulusDegree, coeffModCount);
+
+                    for (int i = 0; i < ulongCount; i++)
+                    {
+                        this[i] = reader.ReadUInt64();
+                    }
+                }
+            }
+            catch(EndOfStreamException ex)
+            {
+                throw new ArgumentException("Stream ended unexpectedly", ex);
+            }
+            catch(IOException ex)
+            {
+                throw new ArgumentException("Error reading ciphertext", ex);
+            }
+        }
+
+        /// <summary>
+        /// Returns whether the ciphertext is in NTT form.
+        /// </summary>
+        public bool IsNTTForm
+        {
+            get
+            {
+                NativeMethods.Ciphertext_IsNTTForm(NativePtr, out bool isNTTForm);
+                return isNTTForm;
+            }
+        }
+
+        /// <summary>
+        /// Returns a copy of parmsId.
+        /// </summary>
+        /// <seealso cref="EncryptionParameters">See EncryptionParameters for more information about parmsId.</seealso>
+        public ParmsId ParmsId
+        {
+            get
+            {
+                ParmsId parmsId = new ParmsId();
+                NativeMethods.Ciphertext_ParmsId(NativePtr, parmsId.Block);
+                return parmsId;
+            }
+            private set
+            {
+                NativeMethods.Ciphertext_SetParmsId(NativePtr, value.Block);
+            }
+        }
+
+        /// <summary>
+        /// Returns a reference to the scale. This is only needed when using the
+        /// CKKS encryption scheme. The user should have little or no reason to ever
+        /// change the scale by hand.
+        /// </summary>
+        public double Scale
+        {
+            get
+            {
+                NativeMethods.Ciphertext_Scale(NativePtr, out double scale);
+                return scale;
+            }
+        }
+
+        /// <summary>
+        /// Returns the currently used MemoryPoolHandle.
+        /// </summary>
+        public MemoryPoolHandle Pool
+        {
+            get
+            {
+                // TODO: implement
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Destroy native object.
+        /// </summary>
+        protected override void DestroyNativeObject()
+        {
+            NativeMethods.Ciphertext_Destroy(NativePtr);
+        }
+    }
+}

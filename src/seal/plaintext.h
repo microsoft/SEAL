@@ -614,6 +614,11 @@ namespace seal
             return data_.pool();
         }
 
+        /**
+        Enables access to private members of seal::Plaintext for .NET wrapper.
+        */
+        struct PlaintextPrivateHelper;
+
     private:
         parms_id_type parms_id_ = parms_id_zero;
 

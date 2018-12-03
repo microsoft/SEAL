@@ -232,6 +232,11 @@ namespace seal
             return pool_;
         }
 
+        /**
+        Enables access to private members of seal::GaloisKeys for .NET wrapper.
+        */
+        struct GaloisKeysPrivateHelper;
+
     private:
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

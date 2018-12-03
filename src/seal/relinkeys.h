@@ -233,6 +233,11 @@ namespace seal
             return pool_;
         }
 
+        /**
+        Enables access to private members of seal::RelinKeys for .NET wrapper.
+        */
+        struct RelinKeysPrivateHelper;
+
     private:
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

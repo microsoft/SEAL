@@ -616,6 +616,11 @@ namespace seal
             return data_.pool();
         }
 
+        /**
+        Enables access to private members of seal::Ciphertext for .NET wrapper.
+        */
+        struct CiphertextPrivateHelper;
+
     private:
         void reserve_internal(size_type size_capacity, 
             size_type poly_modulus_degree, size_type coeff_mod_count);

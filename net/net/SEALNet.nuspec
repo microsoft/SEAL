@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.Research.SEALNet</id>
+    <version>1.0.0</version>
+    <title>Simple Encrypted Arithmetic Library</title>
+    <authors>Microsoft Corporation</authors>
+    <owners>Microsoft Corporation</owners>
+    <licenseUrl>https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/#!license</licenseUrl>
+    <projectUrl>https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Simple Encrypted Arithmetic Library</description>
+    <releaseNotes>First release of .Net library.</releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags>c# crypto cryptography</tags>
+  </metadata>
+  <files>
+    <file src="..\bin\x64\$Configuration$\SEALdll.dll" target="build\x64\SEALdll.dll" />
+    <file src="SEALNet.targets" target="build\Microsoft.Research.SEALNet.targets" />
+    <file src="bin\$Configuration$\netstandard2.0\SEALNet.*" target="lib\netstandard2.0\" exclude="**\*.pdb" />
+  </files>
+</package>

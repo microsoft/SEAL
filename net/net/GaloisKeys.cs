@@ -1,0 +1,342 @@
+﻿using Microsoft.Research.SEAL.Tools;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+namespace Microsoft.Research.SEAL
+{
+    /// <summary>
+    /// Class to store Galois keys.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Slot Rotations
+    /// Galois keys are used together with batching (<see cref="BatchEncoder"/>). If the polynomial modulus
+    /// is a polynomial of degree N, in batching the idea is to view a plaintext polynomial as
+    /// a 2-by-(N/2) matrix of integers modulo plaintext modulus. Normal homomorphic computations
+    /// operate on such encrypted matrices element (slot) wise. However, special rotation
+    /// operations allow us to also rotate the matrix rows cyclically in either direction, and 
+    /// rotate the columns (swap the rows). These operations require the Galois keys.
+    /// </para>
+    /// <para>
+    /// Decomposition Bit Count
+    /// Decomposition bit count (dbc) is a parameter that describes a performance trade-off in
+    /// the rotation operation. Its function is exactly the same as in relinearization. Namely, 
+    /// the polynomials in the ciphertexts (with large coefficients) get decomposed into a smaller
+    /// base 2^dbc, coefficient-wise. Each of the decomposition factors corresponds to a piece of 
+    /// data in the Galois keys, so the smaller the dbc is, the larger the Galois keys are. 
+    /// Moreover, a smaller dbc results in less invariant noise budget being consumed in the
+    /// rotation operation. However, using a large dbc is much faster, and often one would want 
+    /// to optimize the dbc to be as large as possible for performance. The dbc is upper-bounded 
+    /// by the value of 60, and lower-bounded by the value of 1.
+    /// </para>
+    /// <para>
+    /// Thread Safety
+    /// In general, reading from GaloisKeys is thread-safe as long as no other thread is 
+    /// concurrently mutating it. This is due to the underlying data structure storing the
+    /// Galois keys not being thread-safe.
+    /// </para>
+    /// </remarks>
+    /// <see cref="SecretKey">see SecretKey for the class that stores the secret key.</see>
+    /// <see cref="PublicKey">see PublicKey for the class that stores the public key.</see>
+    /// <see cref="RelinKeys">see RelinKeys for the class that stores the relinearization keys.</see>
+    /// <see cref="KeyGenerator">see KeyGenerator for the class that generates the Galois keys.</see>
+    public class GaloisKeys : NativeObject
+    {
+        /// <summary>
+        /// Creates an empty set of Galois keys.
+        /// </summary>
+        public GaloisKeys()
+        {
+            NativeMethods.GaloisKeys_Create(out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Creates a new GaloisKeys instance by copying a given instance.
+        /// </summary>
+        /// <param name="copy">The GaloisKeys to copy from</param>
+        /// <exception cref="ArgumentNullException">if copy is null</exception>
+        public GaloisKeys(GaloisKeys copy)
+        {
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            NativeMethods.GaloisKeys_Create(copy.NativePtr, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Creates a new GaloisKeys instance initialized with a pointer to a
+        /// native GaloisKeys object.
+        /// </summary>
+        /// <param name="galoisKeys">Pointer to native GaloisKeys object</param>
+        internal GaloisKeys(IntPtr galoisKeys, bool owned = true)
+            : base(galoisKeys, owned)
+        {
+        }
+
+        /// <summary>
+        /// Copies a given GaloisKeys instance to the current one.
+        /// </summary>
+        ///
+        /// <param name="assign">The GaloisKeys to copy from</param>
+        /// <exception cref="ArgumentNullException">if assign is null</exception>
+        public void Set(GaloisKeys assign)
+        {
+            if (null == assign)
+                throw new ArgumentNullException(nameof(assign));
+
+            NativeMethods.GaloisKeys_Set(NativePtr, assign.NativePtr);
+        }
+
+        /// <summary>
+        /// Returns the current number of Galois keys.
+        /// </summary>
+        public int Size
+        {
+            get
+            {
+                NativeMethods.GaloisKeys_Size(NativePtr, out int size);
+                return size;
+            }
+        }
+
+        /// <summary>
+        /// Returns the decomposition bit count.
+        /// </summary>
+        public int DecompositionBitCount
+        {
+            get
+            {
+                NativeMethods.GaloisKeys_DBC(NativePtr, out int dbc);
+                return dbc;
+            }
+            private set
+            {
+                NativeMethods.GaloisKeys_SetDBC(NativePtr, value);
+            }
+        }
+
+        /// <summary>
+        /// Returns a copy of the Galois keys data.
+        /// </summary>
+        public IEnumerable<IEnumerable<Ciphertext>> Data
+        {
+            get
+            {
+                List<List<Ciphertext>> result = new List<List<Ciphertext>>();
+                NativeMethods.GaloisKeys_GetKeyCount(NativePtr, out int size);
+
+                for (int i = 0; i < size; i++)
+                {
+                    int count = 0;
+                    NativeMethods.GaloisKeys_GetKeyList(NativePtr, i, ref count, null);
+
+                    IntPtr[] pointers = new IntPtr[count];
+                    NativeMethods.GaloisKeys_GetKeyList(NativePtr, i, ref count, pointers);
+
+                    List<Ciphertext> ciphers = new List<Ciphertext>(count);
+                    foreach(IntPtr ptr in pointers)
+                    {
+                        ciphers.Add(new Ciphertext(ptr));
+                    }
+
+                    result.Add(ciphers);
+                }
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Returns a copy of a Galois key.
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// Returns a copy of a Galois key. The returned Galois key corresponds to the given 
+        /// Galois element.
+        /// </remarks>
+        /// <param name="galoisElt">The Galois element</param>
+        /// <exception cref="ArgumentException">if the key corresponding to galoisElt does 
+        /// not exist</exception>
+        public IEnumerable<Ciphertext> Key(ulong galoisElt)
+        {
+            int count = 0;
+            NativeMethods.GaloisKeys_GetKey(NativePtr, galoisElt, ref count, null);
+
+            IntPtr[] ciphers = new IntPtr[count];
+            NativeMethods.GaloisKeys_GetKey(NativePtr, galoisElt, ref count, ciphers);
+
+            List<Ciphertext> result = new List<Ciphertext>(count);
+            foreach (IntPtr ptr in ciphers)
+            {
+                result.Add(new Ciphertext(ptr));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns whether a Galois key corresponding to a given Galois key element
+        /// exists.
+        /// </summary>
+        /// 
+        /// <param name="galoisElt">The Galois element</param>
+        /// <exception cref="ArgumentException">if Galois element is not valid</exception>
+        public bool HasKey(ulong galoisElt)
+        {
+            NativeMethods.GaloisKeys_HasKey(NativePtr, galoisElt, out bool hasKey);
+            return hasKey;
+        }
+
+        /// <summary>
+        /// Returns a reference to parmsId.
+        /// </summary>
+        /// <see cref="EncryptionParameters">see EncryptionParameters for more information about parmsId.</see>
+        public ParmsId ParmsId
+        {
+            get
+            {
+                ParmsId parms = new ParmsId();
+                NativeMethods.GaloisKeys_GetParmsId(NativePtr, parms.Block);
+                return parms;
+            }
+            private set
+            {
+                NativeMethods.GaloisKeys_SetParmsId(NativePtr, value.Block);
+            }
+        }
+
+        /// <summary>
+        /// Saves the GaloisKeys instance to an output stream.
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// Saves the GaloisKeys instance to an output stream. The output is in binary format 
+        /// and not human-readable. The output stream must have the "binary" flag set.
+        /// </remarks>
+        /// <param name="stream">The stream to save the GaloisKeys to</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <seealso cref="Load(Stream)">See Load() to load a saved GaloisKeys instance.</seealso>
+        public void Save(Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                // Save the ParmsId
+                ParmsId.Save(writer.BaseStream);
+
+                // Save the Decomposition Bit Count
+                writer.Write(DecompositionBitCount);
+
+                // Save the size of Keys
+                IEnumerable<IEnumerable<Ciphertext>> data = Data;
+                writer.Write(data.Count());
+
+                // Loop over entries in the first list
+                foreach (IEnumerable<Ciphertext> keyList in data)
+                {
+                    writer.Write(keyList.Count());
+
+                    // Loop over ciphertexts and save all
+                    foreach(Ciphertext cipher in keyList)
+                    {
+                        cipher.Save(writer.BaseStream);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads an GaloisKeys instance from an input stream overwriting the current 
+        /// GaloisKeys instance.
+        /// </summary>
+        /// 
+        /// <param name="stream">The stream to load the GaloisKeys instance from</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the loaded data is invalid</exception>
+        /// <seealso cref="Save(Stream)">See Save() to save an GaloisKeys instance.</seealso>
+        public void Load(Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            try
+            {
+                // Read the ParmsId
+                ParmsId parmsId = new ParmsId();
+                parmsId.Load(stream);
+                ParmsId = parmsId;
+
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    // Read the decomposition bit count
+                    int dbc = reader.ReadInt32();
+                    DecompositionBitCount = dbc;
+
+                    // Read the size
+                    int size = reader.ReadInt32();
+
+                    // Clear current data and reserve new size
+                    NativeMethods.GaloisKeys_ClearDataAndReserve(NativePtr, size);
+
+                    // Read all lists
+                    for (int i = 0; i < size; i++)
+                    {
+                        // Read size of second list
+                        int keySize = reader.ReadInt32();
+                        List<Ciphertext> ciphers = new List<Ciphertext>(keySize);
+
+                        // Load all ciphertexts
+                        for (int j = 0; j < keySize; j++)
+                        {
+                            Ciphertext cipher = new Ciphertext();
+                            cipher.Load(reader.BaseStream);
+                            ciphers.Add(cipher);
+                        }
+
+                        IntPtr[] pointers = ciphers.Select(c =>
+                        {
+                            return c.NativePtr;
+                        }).ToArray();
+
+                        NativeMethods.GaloisKeys_AddKeyList(NativePtr, pointers.Length, pointers);
+                    }
+                }
+            }
+            catch(EndOfStreamException ex)
+            {
+                throw new ArgumentException("Stream ended unexpectedly", ex);
+            }
+            catch(IOException ex)
+            {
+                throw new ArgumentException("Error reading keys", ex);
+            }
+        }
+
+        /// <summary>
+        /// Returns the currently used MemoryPoolHandle.
+        /// </summary>
+        public MemoryPoolHandle Pool
+        {
+            get
+            {
+                // TODO: implement
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Destroy native object.
+        /// </summary>
+        protected override void DestroyNativeObject()
+        {
+            NativeMethods.GaloisKeys_Destroy(NativePtr);
+        }
+    }
+}
