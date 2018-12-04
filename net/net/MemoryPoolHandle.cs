@@ -108,25 +108,33 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a MemoryPoolHandle pointing to the global memory pool.
         /// </summary>
-        public static MemoryPoolHandle Global
+        public static MemoryPoolHandle Global()
         {
-            get
-            {
-                // TODO: implement
-                throw new NotImplementedException();
-            }
+            // TODO: implement
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns a MemoryPoolHandle pointing to the thread-local memory pool. Note
+        /// that the thread-local memory pool cannot be used to communicate across
+        /// different threads.
+        /// </summary>
+        public static MemoryPoolHandle ThreadLocal()
+        {
+            // TODO: implement
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Returns a MemoryPoolHandle pointing to a new thread-safe memory pool.
         /// </summary>
-        public static MemoryPoolHandle New
+        /// <param name="clearOnDestruction">Indicates whether the memory pool data 
+        /// should be cleared when destroyed.This can be important when memory pools
+        /// are used to store private data.</param>
+        public static MemoryPoolHandle New(bool clearOnDestruction = false)
         {
-            get
-            {
-                // TODO: implement
-                throw new NotImplementedException();
-            }
+            // TODO: implement
+            throw new NotImplementedException();
         }
 
         /// <summary>
