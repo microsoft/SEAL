@@ -271,18 +271,14 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Loads a GaloisKeys from an input stream overwriting the current GaloisKeys.
-        /// The loaded GaloisKeys is verified to be valid for the given SEALContext.
+        /// No checking of the validity of the GaloisKeys data against encryption
+        /// parameters is performed. This function should not be used unless the 
+        /// GaloisKeys comes from a fully trusted source.
         /// </summary>
-        /// 
-        /// <param name="context">The SEALContext</param>
-        /// <param name="stream">The stream to load the GaloisKeys instance from</param>
-        /// <exception cref="ArgumentNullException">if either stream or context are null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded data is invalid or is not
-        /// valid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save an GaloisKeys instance.</seealso>
-        public void Load(SEALContext context, Stream stream)
+        /// <param name="stream">The stream to load the GaloisKeys from</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if a valid GaloisKeys could not be read from stream</exception>
+        void UnsafeLoad(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
@@ -317,7 +313,7 @@ namespace Microsoft.Research.SEAL
                         for (int j = 0; j < keySize; j++)
                         {
                             Ciphertext cipher = new Ciphertext();
-                            cipher.Load(context, reader.BaseStream);
+                            cipher.UnsafeLoad(reader.BaseStream);
                             ciphers.Add(cipher);
                         }
 
@@ -329,17 +325,42 @@ namespace Microsoft.Research.SEAL
                         NativeMethods.GaloisKeys_AddKeyList(NativePtr, pointers.Length, pointers);
                     }
                 }
-
-                if (!IsValidFor(context))
-                    throw new ArgumentException("GaloisKeys data is invalid for the context");
             }
-            catch(EndOfStreamException ex)
+            catch (EndOfStreamException ex)
             {
                 throw new ArgumentException("Stream ended unexpectedly", ex);
             }
-            catch(IOException ex)
+            catch (IOException ex)
             {
                 throw new ArgumentException("Error reading keys", ex);
+            }
+        }
+
+        /// <summary>
+        /// Loads a GaloisKeys from an input stream overwriting the current GaloisKeys.
+        /// The loaded GaloisKeys is verified to be valid for the given SEALContext.
+        /// </summary>
+        /// 
+        /// <param name="context">The SEALContext</param>
+        /// <param name="stream">The stream to load the GaloisKeys instance from</param>
+        /// <exception cref="ArgumentNullException">if either stream or context are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the loaded data is invalid or is not
+        /// valid for the context</exception>
+        /// <seealso cref="Save(Stream)">See Save() to save an GaloisKeys instance.</seealso>
+        public void Load(SEALContext context, Stream stream)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            UnsafeLoad(stream);
+
+            if (!IsValidFor(context))
+            {
+                throw new ArgumentException("GaloisKeys data is invalid for the context");
             }
         }
 

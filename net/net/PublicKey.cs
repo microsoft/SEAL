@@ -101,6 +101,24 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Loads a PublicKey from an input stream overwriting the current PublicKey.
+        /// No checking of the validity of the PublicKey data against encryption
+        /// parameters is performed. This function should not be used unless the 
+        /// PublicKey comes from a fully trusted source.
+        /// </summary>
+        /// <param name="stream">The stream to load the PublicKey from</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if a valid PublicKey could not be read from stream</exception>
+        public void UnsafeLoad(Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            Data.UnsafeLoad(stream);
+        }
+
+
+        /// <summary>
         /// Loads a PublicKey from an input stream overwriting the current 
         /// PublicKey.
         /// </summary>
@@ -118,10 +136,12 @@ namespace Microsoft.Research.SEAL
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            Data.Load(context, stream);
+            UnsafeLoad(stream);
 
             if (!IsValidFor(context))
+            {
                 throw new ArgumentException("PublicKey data is invalid for the context");
+            }
         }
 
         /// <summary>

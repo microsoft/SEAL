@@ -284,21 +284,16 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Loads a RelinKeys from an input stream overwriting the current RelinKeys.
-        /// The loaded RelinKeys is verified to be valid for the given SEALContext.
+        /// No checking of the validity of the RelinKeys data against encryption
+        /// parameters is performed. This function should not be used unless the 
+        /// RelinKeys comes from a fully trusted source.
         /// </summary>
-        /// 
-        /// <param name="context">The SEALContext</param>
-        /// <param name="stream">The stream to load the RelinKeys instance from</param>
-        /// <exception cref="ArgumentNullException">if either stream or context are null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">If the stream data is invalid or is not
-        /// valid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save an RelinKeys instance.</seealso>
-        public void Load(SEALContext context, Stream stream)
+        /// <param name="stream">The stream to load the RelinKeys from</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if valid RelinKeys could not be read
+        /// from stream</exception>
+        public void UnsafeLoad(Stream stream)
         {
-            if (null == context)
-                throw new ArgumentNullException(nameof(context));
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
@@ -332,7 +327,7 @@ namespace Microsoft.Research.SEAL
                         for (int j = 0; j < keySize; j++)
                         {
                             Ciphertext cipher = new Ciphertext();
-                            cipher.Load(context, reader.BaseStream);
+                            cipher.UnsafeLoad(reader.BaseStream);
                             ciphers.Add(cipher);
                         }
 
@@ -344,9 +339,6 @@ namespace Microsoft.Research.SEAL
                         NativeMethods.RelinKeys_AddKeyList(NativePtr, pointers.Length, pointers);
                     }
                 }
-
-                if (!IsValidFor(context))
-                    throw new ArgumentException("RelinKeys data is invalid for the context");
             }
             catch (EndOfStreamException ex)
             {
@@ -355,6 +347,35 @@ namespace Microsoft.Research.SEAL
             catch (IOException ex)
             {
                 throw new ArgumentException("Error reading keys", ex);
+            }
+        }
+
+
+        /// <summary>
+        /// Loads a RelinKeys from an input stream overwriting the current RelinKeys.
+        /// The loaded RelinKeys is verified to be valid for the given SEALContext.
+        /// </summary>
+        /// 
+        /// <param name="context">The SEALContext</param>
+        /// <param name="stream">The stream to load the RelinKeys instance from</param>
+        /// <exception cref="ArgumentNullException">if either stream or context are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">If the stream data is invalid or is not
+        /// valid for the context</exception>
+        /// <seealso cref="Save(Stream)">See Save() to save an RelinKeys instance.</seealso>
+        public void Load(SEALContext context, Stream stream)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            UnsafeLoad(stream);
+
+            if (!IsValidFor(context))
+            {
+                throw new ArgumentException("RelinKeys data is invalid for the context");
             }
         }
 

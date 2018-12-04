@@ -534,20 +534,15 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Loads a ciphertext from an input stream overwriting the current ciphertext.
-        /// The loaded ciphertext is verified to be valid for the given SEALContext.
+        /// No checking of the validity of the ciphertext data against encryption
+        /// parameters is performed. This function should not be used unless the 
+        /// ciphertext comes from a fully trusted source.
         /// </summary>
-        /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the ciphertext from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded ciphertext data is invalid or
-        /// is invalid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save a ciphertext.</seealso>
-        public void Load(SEALContext context, Stream stream)
+        /// <exception cref="ArgumentException">if a valid ciphertext could not be read from stream</exception>
+        public void UnsafeLoad(Stream stream)
         {
-            if (null == context)
-                throw new ArgumentNullException(nameof(context));
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
@@ -573,19 +568,42 @@ namespace Microsoft.Research.SEAL
                         this[i] = reader.ReadUInt64();
                     }
                 }
-
-                if (!IsValidFor(context))
-                {
-                    throw new ArgumentException("Ciphertext data is invalid for the SEALContext");
-                }
             }
-            catch(EndOfStreamException ex)
+            catch (EndOfStreamException ex)
             {
                 throw new ArgumentException("Stream ended unexpectedly", ex);
             }
-            catch(IOException ex)
+            catch (IOException ex)
             {
                 throw new ArgumentException("Error reading ciphertext", ex);
+            }
+        }
+
+
+        /// <summary>
+        /// Loads a ciphertext from an input stream overwriting the current ciphertext.
+        /// The loaded ciphertext is verified to be valid for the given SEALContext.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="stream">The stream to load the ciphertext from</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the loaded ciphertext data is invalid or
+        /// is invalid for the context</exception>
+        /// <seealso cref="Save(Stream)">See Save() to save a ciphertext.</seealso>
+        public void Load(SEALContext context, Stream stream)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            UnsafeLoad(stream);
+
+            if (!IsValidFor(context))
+            {
+                throw new ArgumentException("Ciphertext data is invalid for the SEALContext");
             }
         }
 
