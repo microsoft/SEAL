@@ -211,6 +211,23 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Check whether the current GaloisKeys is valid for a given SEALContext. If 
+        /// the given SEALContext is not set, the encryption parameters are invalid, 
+        /// or the GaloisKeys data does not match the SEALContext, this function returns 
+        /// false. Otherwise, returns true.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        bool IsValidFor(SEALContext context)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.GaloisKeys_IsValidFor(NativePtr, context.NativePtr, out bool result);
+            return result;
+        }
+
+        /// <summary>
         /// Saves the GaloisKeys instance to an output stream.
         /// </summary>
         /// 
@@ -253,15 +270,19 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Loads an GaloisKeys instance from an input stream overwriting the current 
-        /// GaloisKeys instance.
+        /// Loads a GaloisKeys from an input stream overwriting the current GaloisKeys.
+        /// The loaded GaloisKeys is verified to be valid for the given SEALContext.
         /// </summary>
         /// 
+        /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the GaloisKeys instance from</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if the loaded data is invalid</exception>
+        /// <exception cref="ArgumentNullException">if either stream or context are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the loaded data is invalid or is not
+        /// valid for the context</exception>
         /// <seealso cref="Save(Stream)">See Save() to save an GaloisKeys instance.</seealso>
-        public void Load(Stream stream)
+        public void Load(SEALContext context, Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
@@ -296,7 +317,7 @@ namespace Microsoft.Research.SEAL
                         for (int j = 0; j < keySize; j++)
                         {
                             Ciphertext cipher = new Ciphertext();
-                            cipher.Load(reader.BaseStream);
+                            cipher.Load(context, reader.BaseStream);
                             ciphers.Add(cipher);
                         }
 
@@ -308,6 +329,9 @@ namespace Microsoft.Research.SEAL
                         NativeMethods.GaloisKeys_AddKeyList(NativePtr, pointers.Length, pointers);
                     }
                 }
+
+                if (!IsValidFor(context))
+                    throw new ArgumentException("GaloisKeys data is invalid for the context");
             }
             catch(EndOfStreamException ex)
             {

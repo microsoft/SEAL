@@ -219,3 +219,15 @@ SEALDLL HRESULT SEALCALL GaloisKeys_SetParmsId(void* thisptr, uint64_t* parms_id
     CopyParmsId(parms_id, keys->parms_id());
     return S_OK;
 }
+
+SEALDLL HRESULT SEALCALL GaloisKeys_IsValidFor(void* thisptr, void* contextptr, bool* result)
+{
+    GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
+    IfNullRet(keys, E_POINTER);
+    const auto& sharedctx = SharedContextFromVoid(contextptr);
+    IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    *result = keys->is_valid_for(sharedctx);
+    return S_OK;
+}

@@ -122,7 +122,7 @@ namespace SEALNetTest
 
                 mem.Seek(offset: 0, loc: SeekOrigin.Begin);
 
-                loaded.Load(mem);
+                loaded.Load(context, mem);
             }
 
             Assert.AreEqual(2, loaded.Size);

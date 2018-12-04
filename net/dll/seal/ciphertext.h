@@ -62,6 +62,10 @@ SEALDLL HRESULT SEALCALL Ciphertext_SetDataAt(void* thisptr, int index, uint64_t
 
 SEALDLL HRESULT SEALCALL Ciphertext_IsNTTForm(void* thisptr, bool* is_ntt_form);
 
+SEALDLL HRESULT SEALCALL Ciphertext_SetIsNTTForm(void* thisptr, bool is_ntt_form);
+
 SEALDLL HRESULT SEALCALL Ciphertext_Scale(void* thisptr, double* scale);
 
 SEALDLL HRESULT SEALCALL Ciphertext_Release(void* thisptr);
+
+SEALDLL HRESULT SEALCALL Ciphertext_IsValidFor(void* thisptr, void* context, bool* result);

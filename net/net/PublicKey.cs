@@ -94,20 +94,51 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         public void Save(Stream stream)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            Data.Save(stream);
         }
 
         /// <summary>
         /// Loads a PublicKey from an input stream overwriting the current 
         /// PublicKey.
         /// </summary>
+        /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the PublicKey from</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
-        public void Load(Stream stream)
+        /// <exception cref="ArgumentNullException">if either context or stream are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the loaded PublicKey is invalid for the
+        /// context</exception>
+        public void Load(SEALContext context, Stream stream)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            Data.Load(context, stream);
+
+            if (!IsValidFor(context))
+                throw new ArgumentException("PublicKey data is invalid for the context");
+        }
+
+        /// <summary>
+        /// Check whether the current PublicKey is valid for a given SEALContext. If 
+        /// the given SEALContext is not set, the encryption parameters are invalid, 
+        /// or the PublicKey data does not match the SEALContext, this function returns
+        /// false. Otherwise, returns true.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        public bool IsValidFor(SEALContext context)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.PublicKey_IsValidFor(NativePtr, context.NativePtr, out bool result);
+            return result;
         }
 
         /// <summary>
@@ -117,8 +148,9 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                // TODO: implement
-                throw new NotImplementedException();
+                ParmsId parmsId = new ParmsId();
+                NativeMethods.PublicKey_ParmsId(NativePtr, parmsId.Block);
+                return parmsId;
             }
         }
 

@@ -17,10 +17,15 @@ namespace seal
     */
     struct Ciphertext::CiphertextPrivateHelper
     {
-        static void resize(seal::Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree,
+        static void resize(seal::Ciphertext* ciphertext, size_t size, size_t poly_modulus_degree,
             size_t coeff_mod_count)
         {
             ciphertext->resize_internal(size, poly_modulus_degree, coeff_mod_count);
+        }
+
+        static void set_ntt_form(seal::Ciphertext* ciphertext, bool is_ntt_form)
+        {
+            ciphertext->is_ntt_form_ = is_ntt_form;
         }
     };
 }
@@ -427,6 +432,15 @@ SEALDLL HRESULT SEALCALL Ciphertext_IsNTTForm(void* thisptr, bool* is_ntt_form)
     return S_OK;
 }
 
+SEALDLL HRESULT SEALCALL Ciphertext_SetIsNTTForm(void* thisptr, bool is_ntt_form)
+{
+    Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+
+    Ciphertext::CiphertextPrivateHelper::set_ntt_form(cipher, is_ntt_form);
+    return S_OK;
+}
+
 SEALDLL HRESULT SEALCALL Ciphertext_Scale(void* thisptr, double* scale)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
@@ -443,5 +457,17 @@ SEALDLL HRESULT SEALCALL Ciphertext_Release(void* thisptr)
     IfNullRet(cipher, E_POINTER);
 
     cipher->release();
+    return S_OK;
+}
+
+SEALDLL HRESULT SEALCALL Ciphertext_IsValidFor(void* thisptr, void* context, bool* result)
+{
+    Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    const auto& sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    *result = cipher->is_valid_for(sharedctx);
     return S_OK;
 }

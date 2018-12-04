@@ -486,6 +486,23 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Check whether the current ciphertext is valid for a given SEALContext.
+        /// If the given SEALContext is not set, the encryption parameters are invalid, 
+        /// or the ciphertext data does not match the SEALContext, this function 
+        /// returns false. Otherwise, returns true.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        public bool IsValidFor(SEALContext context)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.Ciphertext_IsValidFor(NativePtr, context.NativePtr, out bool result);
+            return result;
+        }
+
+        /// <summary>
         /// Saves the ciphertext to an output stream. The output is in binary 
         /// format and not human-readable. The output stream must have the 
         /// "binary" flag set.
@@ -502,6 +519,7 @@ namespace Microsoft.Research.SEAL
             {
                 ParmsId.Save(writer.BaseStream);
 
+                writer.Write(IsNTTForm);
                 writer.Write(Size);
                 writer.Write(PolyModulusDegree);
                 writer.Write(CoeffModCount);
@@ -515,15 +533,21 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Loads a ciphertext from an input stream overwriting the current 
-        /// ciphertext.
+        /// Loads a ciphertext from an input stream overwriting the current ciphertext.
+        /// The loaded ciphertext is verified to be valid for the given SEALContext.
         /// </summary>
+        /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the ciphertext from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if the loaded ciphertext data is invalid</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the loaded ciphertext data is invalid or
+        /// is invalid for the context</exception>
         /// <seealso cref="Save(Stream)">See Save() to save a ciphertext.</seealso>
-        public void Load(Stream stream)
+        public void Load(SEALContext context, Stream stream)
         {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
@@ -535,17 +559,24 @@ namespace Microsoft.Research.SEAL
                     parms.Load(reader.BaseStream);
                     ParmsId = parms;
 
+                    bool isNTT = reader.ReadBoolean();
                     int size = reader.ReadInt32();
                     int polyModulusDegree = reader.ReadInt32();
                     int coeffModCount = reader.ReadInt32();
                     int ulongCount = size * polyModulusDegree * coeffModCount;
 
+                    IsNTTForm = isNTT;
                     Resize(size, polyModulusDegree, coeffModCount);
 
                     for (int i = 0; i < ulongCount; i++)
                     {
                         this[i] = reader.ReadUInt64();
                     }
+                }
+
+                if (!IsValidFor(context))
+                {
+                    throw new ArgumentException("Ciphertext data is invalid for the SEALContext");
                 }
             }
             catch(EndOfStreamException ex)
@@ -567,6 +598,11 @@ namespace Microsoft.Research.SEAL
             {
                 NativeMethods.Ciphertext_IsNTTForm(NativePtr, out bool isNTTForm);
                 return isNTTForm;
+            }
+
+            private set
+            {
+                NativeMethods.Ciphertext_SetIsNTTForm(NativePtr, value);
             }
         }
 

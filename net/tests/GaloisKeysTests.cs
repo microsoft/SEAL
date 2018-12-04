@@ -53,7 +53,7 @@ namespace SEALNetTest
 
                 ms.Seek(offset: 0, loc: SeekOrigin.Begin);
 
-                other.Load(ms);
+                other.Load(context, ms);
             }
 
             Assert.AreEqual(30, other.DecompositionBitCount);

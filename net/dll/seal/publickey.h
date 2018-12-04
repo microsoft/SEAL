@@ -18,4 +18,8 @@ SEALDLL HRESULT SEALCALL PublicKey_Set(void* thisptr, void* assign);
 
 SEALDLL HRESULT SEALCALL PublicKey_Data(void* thisptr, void** data);
 
+SEALDLL HRESULT SEALCALL PublicKey_ParmsId(void* thisptr, uint64_t* parms_id);
+
+SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void* thisptr, void* context, bool* result);
+
 SEALDLL HRESULT SEALCALL PublicKey_Destroy(void* thisptr);

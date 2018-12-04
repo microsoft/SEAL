@@ -99,13 +99,18 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Loads a SecretKey from an input stream overwriting the current 
-        /// SecretKey.
+        /// Loads a SecretKey from an input stream overwriting the current SecretKey.
+        /// The loaded SecretKey is verified to be valid for the given SEALContext.
         /// </summary>
         /// 
+        /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the SecretKey from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        public void Load(Stream stream)
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the loaded SecretKey is invalid or is
+        /// invalid for the context</exception>
+        public void Load(SEALContext context, Stream stream)
         {
             // TODO: implement
             throw new NotImplementedException();

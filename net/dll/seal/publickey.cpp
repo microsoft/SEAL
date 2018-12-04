@@ -55,6 +55,28 @@ SEALDLL HRESULT SEALCALL PublicKey_Data(void* thisptr, void** data)
     return S_OK;
 }
 
+SEALDLL HRESULT SEALCALL PublicKey_ParmsId(void* thisptr, uint64_t* parms_id)
+{
+    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    IfNullRet(pkey, E_POINTER);
+    IfNullRet(parms_id, E_POINTER);
+
+    CopyParmsId(pkey->parms_id(), parms_id);
+    return S_OK;
+}
+
+SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void* thisptr, void* context, bool* result)
+{
+    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    IfNullRet(pkey, E_POINTER);
+    const auto& sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    *result = pkey->is_valid_for(sharedctx);
+    return S_OK;
+}
+
 SEALDLL HRESULT SEALCALL PublicKey_Destroy(void* thisptr)
 {
     PublicKey* pkey = FromVoid<PublicKey>(thisptr);

@@ -580,10 +580,16 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_IsNTTForm(IntPtr thisptr, out bool isNTTForm);
 
         [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Ciphertext_SetIsNTTForm(IntPtr thisptr, bool isNTTForm);
+
+        [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Ciphertext_Scale(IntPtr thisptr, out double scale);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Ciphertext_Release(IntPtr thisptr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Ciphertext_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
         #endregion
 
@@ -725,6 +731,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void GaloisKeys_HasKey(IntPtr thisptr, ulong galoisElt, out bool hasKey);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void GaloisKeys_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
         #endregion
 
         #region KeyGenerator methods
@@ -802,6 +811,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void RelinKeys_SetParmsId(IntPtr thisptr, ulong[] parmsId);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void RelinKeys_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
         #endregion
 
         #region PublicKey methods
@@ -817,6 +829,12 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void PublicKey_Data(IntPtr thisptr, out IntPtr data);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void PublicKey_ParmsId(IntPtr thisptr, ulong[] parmsId);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void PublicKey_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void PublicKey_Destroy(IntPtr thisptr);
