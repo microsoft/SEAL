@@ -2,6 +2,7 @@
 using Microsoft.Research.SEAL.Util;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.Research.SEAL
@@ -63,19 +64,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public MemoryPoolHandle()
         {
-            // TODO: implement
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Creates a MemoryPoolHandle pointing to a given MemoryPool object.
-        /// </summary>
-        /// <param name="pool">Pool to point to</param>
-        /// <exception cref="ArgumentNullException">if pool is null</exception>
-        public MemoryPoolHandle(MemoryPool pool)
-        {
-            // TODO: implement
-            throw new NotImplementedException();
+            NativeMethods.MemoryPoolHandle_Create(out IntPtr handlePtr);
+            NativePtr = handlePtr;
         }
 
         /// <summary>
@@ -87,8 +77,21 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if copy is null.</exception>
         public MemoryPoolHandle(MemoryPoolHandle copy)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            NativeMethods.MemoryPoolHandle_Create(copy.NativePtr, out IntPtr handlePtr);
+            NativePtr = handlePtr;
+        }
+
+        /// <summary>
+        /// Create a MemoryPoolHandle through a native object pointer.
+        /// </summary>
+        /// <param name="ptr">Pointer to native MemoryPoolHandle</param>
+        /// <param name="owned">Whether this instance owns the native pointer</param>
+        internal MemoryPoolHandle(IntPtr ptr, bool owned = true)
+            : base(ptr, owned)
+        {
         }
 
         /// <summary>
@@ -101,8 +104,10 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if assign is null.</exception>
         public void Set(MemoryPoolHandle assign)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == assign)
+                throw new ArgumentNullException(nameof(assign));
+
+            NativeMethods.MemoryPoolHandle_Set(NativePtr, assign.NativePtr);
         }
 
         /// <summary>
@@ -110,8 +115,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public static MemoryPoolHandle Global()
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            NativeMethods.MemoryPoolHandle_Global(out IntPtr handlePtr);
+            MemoryPoolHandle handle = new MemoryPoolHandle(handlePtr);
+            return handle;
         }
 
         /// <summary>
@@ -121,8 +127,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public static MemoryPoolHandle ThreadLocal()
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            NativeMethods.MemoryPoolHandle_ThreadLocal(out IntPtr handlePtr);
+            MemoryPoolHandle handle = new MemoryPoolHandle(handlePtr);
+            return handle;
         }
 
         /// <summary>
@@ -133,8 +140,9 @@ namespace Microsoft.Research.SEAL
         /// are used to store private data.</param>
         public static MemoryPoolHandle New(bool clearOnDestruction = false)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            NativeMethods.MemoryPoolHandle_New(clearOnDestruction, out IntPtr handlePtr);
+            MemoryPoolHandle handle = new MemoryPoolHandle(handlePtr);
+            return handle;
         }
 
         /// <summary>
@@ -150,8 +158,17 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                // TODO: implement
-                throw new NotImplementedException();
+                try
+                {
+                    NativeMethods.MemoryPoolHandle_PoolCount(NativePtr, out ulong count);
+                    return count;
+                }
+                catch(COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                        throw new InvalidOperationException("MemoryPoolHandle is uninitialized", ex);
+                    throw;
+                }
             }
         }
 
@@ -165,8 +182,17 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                // TODO: implement
-                throw new NotImplementedException();
+                try
+                {
+                    NativeMethods.MemoryPoolHandle_AllocByteCount(NativePtr, out ulong count);
+                    return count;
+                }
+                catch (COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                        throw new InvalidOperationException("MemoryPoolHandle is uninitialized", ex);
+                    throw;
+                }
             }
         }
 
@@ -177,8 +203,8 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                // TODO: implement
-                throw new NotImplementedException();
+                NativeMethods.MemoryPoolHandle_IsInitialized(NativePtr, out bool result);
+                return result;
             }
         }
 
@@ -189,8 +215,12 @@ namespace Microsoft.Research.SEAL
         /// <param name="obj">Object to compare to.</param>
         public override bool Equals(object obj)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            MemoryPoolHandle other = obj as MemoryPoolHandle;
+            if (null == other)
+                return false;
+
+            NativeMethods.MemoryPoolHandle_Equals(NativePtr, other.NativePtr, out bool result);
+            return result;
         }
 
         /// <summary>
@@ -206,7 +236,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         protected override void DestroyNativeObject()
         {
-            NativeMethods.MemPoolHandle_Destroy(NativePtr);
+            NativeMethods.MemoryPoolHandle_Destroy(NativePtr);
         }
     }
 }

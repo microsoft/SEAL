@@ -171,6 +171,8 @@
     <ClInclude Include="seal\evaluator.h" />
     <ClInclude Include="seal\galoiskeys.h" />
     <ClInclude Include="seal\keygenerator.h" />
+    <ClInclude Include="seal\memorymanager.h" />
+    <ClInclude Include="seal\memorypoolhandle.h" />
     <ClInclude Include="seal\plaintext.h" />
     <ClInclude Include="seal\publickey.h" />
     <ClInclude Include="seal\relinkeys.h" />
@@ -195,6 +197,8 @@
     <ClCompile Include="seal\evaluator.cpp" />
     <ClCompile Include="seal\galoiskeys.cpp" />
     <ClCompile Include="seal\keygenerator.cpp" />
+    <ClCompile Include="seal\memorymanager.cpp" />
+    <ClCompile Include="seal\memorypoolhandle.cpp" />
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\publickey.cpp" />
     <ClCompile Include="seal\relinkeys.cpp" />

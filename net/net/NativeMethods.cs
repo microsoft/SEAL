@@ -872,10 +872,51 @@ namespace Microsoft.Research.SEAL
 
         #endregion
 
+        #region MemoryManager methods
+
+        [DllImport(SEALdll, EntryPoint = "MemoryManager_GetPool1", PreserveSig = false)]
+        internal static extern void MemoryManager_GetPool(int profOpt, bool clearOnDestruction, out IntPtr handle);
+
+        [DllImport(SEALdll, EntryPoint = "MemoryManager_GetPool2", PreserveSig = false)]
+        internal static extern void MemoryManager_GetPool(out IntPtr handle);
+
+
+        #endregion
+
         #region MemoryPoolHandle methods
 
+        [DllImport(SEALdll, EntryPoint = "MemoryPoolHandle_Create1", PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_Create(out IntPtr handlePtr);
+
+        [DllImport(SEALdll, EntryPoint = "MemoryPoolHandle_Create2", PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_Create(IntPtr other, out IntPtr handlePtr);
+
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void MemPoolHandle_Destroy(IntPtr thisptr);
+        internal static extern void MemoryPoolHandle_Destroy(IntPtr thisptr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_Set(IntPtr thisptr, IntPtr assignptr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_Global(out IntPtr handlePtr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_ThreadLocal(out IntPtr handlePtr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_New(bool clearOnDestruction, out IntPtr handlePtr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_PoolCount(IntPtr thisptr, out ulong count);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_AllocByteCount(IntPtr thisptr, out ulong count);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_IsInitialized(IntPtr thisptr, out bool initialized);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_Equals(IntPtr thisptr, IntPtr otherptr, out bool result);
 
         #endregion
 

@@ -26,15 +26,15 @@ namespace Microsoft.Research.SEAL
         /// independent of the current profile:
         /// 
         /// 
-        ///     MMProfOpt.ForceNew: return MemoryPoolHandle::New()
-        ///     MMProfOpt.ForceGlobal: return MemoryPoolHandle::Global()
-        ///     MMProfOpt.ForceThreadLocal: return MemoryPoolHandle::ThreadLocal()
+        ///     MMProfOpt.ForceNew: return MemoryPoolHandle.New()
+        ///     MMProfOpt.ForceGlobal: return MemoryPoolHandle.Global()
+        ///     MMProfOpt.ForceThreadLocal: return MemoryPoolHandle.ThreadLocal()
         /// 
         /// Other values for prof_opt are forwarded to the current profile and, depending 
         /// on the profile, may or may not have an effect. The value mm_prof_opt::DEFAULT
         /// will always invoke a default behavior for the current profile.
         /// </summary>
-        /// <param name="profOpt">A mm_prof_opt_t parameter used to provide additional
+        /// <param name="profOpt">A MMProfOpt parameter used to provide additional
         /// instructions to the memory manager profile for internal logic.</param>
         /// <param name="clearOnDestruction">Indicates whether the memory pool data 
         /// should be cleared when destroyed.This can be important when memory pools
@@ -42,14 +42,19 @@ namespace Microsoft.Research.SEAL
         /// and ignored in all other cases.</param>
         public static MemoryPoolHandle GetPool(MMProfOpt profOpt, bool clearOnDestruction = false)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            NativeMethods.MemoryManager_GetPool((int)profOpt, clearOnDestruction, out IntPtr handlePtr);
+            MemoryPoolHandle handle = new MemoryPoolHandle(handlePtr);
+            return handle;
         }
 
+        /// <summary>
+        /// Returns a MemoryPoolHandle according to the currently set memory manager profile.
+        /// </summary>
         public static MemoryPoolHandle GetPool()
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            NativeMethods.MemoryManager_GetPool(out IntPtr handlePtr);
+            MemoryPoolHandle handle = new MemoryPoolHandle(handlePtr);
+            return handle;
         }
     }
 }

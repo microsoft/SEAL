@@ -84,6 +84,12 @@
     <ClInclude Include="seal\contextdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="seal\memorymanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\memorypoolhandle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\batchencoder.cpp">
@@ -150,6 +156,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\contextdata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\memorymanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\memorypoolhandle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
