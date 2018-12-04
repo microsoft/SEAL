@@ -682,6 +682,12 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Plaintext_Equals(IntPtr thisptr, IntPtr otherptr, out bool result);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Plaintext_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Plaintext_SwapData(IntPtr thisptr, int count, ulong[] newData);
+
         #endregion
 
         #region GaloisKeys methods
@@ -858,6 +864,12 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void SecretKey_Destroy(IntPtr thisptr);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void SecretKey_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void SecretKey_ParmsId(IntPtr thisptr, ulong[] parmsId);
+
         #endregion
 
         #region MemoryPoolHandle methods
@@ -970,6 +982,7 @@ namespace Microsoft.Research.SEAL
             public const uint InvalidOperation = 4317;
             public const uint HRPointer = 0x80004003;
             public const uint HRInvalidIndex = 0x80070585;
+            public const uint HRInvalidOperation = 0x800710DD;
         }
     }
 }

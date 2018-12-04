@@ -221,7 +221,7 @@ namespace SEALNetTest
 
                 stream.Seek(offset: 0, loc: SeekOrigin.Begin);
 
-                other.Load(stream);
+                other.UnsafeLoad(stream);
             }
 
             Assert.AreNotSame(plain, other);

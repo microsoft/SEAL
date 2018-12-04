@@ -52,8 +52,7 @@ namespace Microsoft.Research.SEAL
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            IntPtr ptr;
-            NativeMethods.Plaintext_Create(poolPtr, out ptr);
+            NativeMethods.Plaintext_Create(poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -71,8 +70,7 @@ namespace Microsoft.Research.SEAL
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            IntPtr ptr;
-            NativeMethods.Plaintext_Create(coeffCount, poolPtr, out ptr);
+            NativeMethods.Plaintext_Create(coeffCount, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -93,8 +91,7 @@ namespace Microsoft.Research.SEAL
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            IntPtr ptr;
-            NativeMethods.Plaintext_Create(capacity, coeffCount, poolPtr, out ptr);
+            NativeMethods.Plaintext_Create(capacity, coeffCount, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -134,8 +131,7 @@ namespace Microsoft.Research.SEAL
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            IntPtr ptr;
-            NativeMethods.Plaintext_Create(hexPoly, poolPtr, out ptr);
+            NativeMethods.Plaintext_Create(hexPoly, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -198,7 +194,16 @@ namespace Microsoft.Research.SEAL
             if (coeffCount < 0)
                 throw new ArgumentException(nameof(coeffCount));
 
-            NativeMethods.Plaintext_Resize(NativePtr, coeffCount);
+            try
+            {
+                NativeMethods.Plaintext_Resize(NativePtr, coeffCount);
+            }
+            catch(COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Plaintext is NTT transformed", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -442,6 +447,23 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Check whether the current Plaintext is valid for a given SEALContext. If 
+        /// the given SEALContext is not set, the encryption parameters are invalid, 
+        /// or the Plaintext data does not match the SEALContext, this function returns 
+        /// false. Otherwise, returns true.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        public bool IsValidFor(SEALContext context)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.Plaintext_IsValidFor(NativePtr, context.NativePtr, out bool result);
+            return result;
+        }
+
+        /// <summary>
         /// Saves the plaintext to an output stream.
         /// </summary>
         /// 
@@ -475,14 +497,14 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Loads a plaintext from an input stream overwriting the current plaintext.
+        /// No checking of the validity of the plaintext data against encryption
+        /// parameters is performed. This function should not be used unless the 
+        /// plaintext comes from a fully trusted source.
         /// </summary>
-        /// 
         /// <param name="stream">The stream to load the plaintext from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="InvalidOperationException">if MMProf cannot be switched</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save a plaintext.</seealso>
-        /// */
-        public void Load(Stream stream)
+        /// <exception cref="ArgumentException">if a valid plaintext could not be read from stream</exception>
+        public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
@@ -499,21 +521,51 @@ namespace Microsoft.Research.SEAL
                     int coeffCount = reader.ReadInt32();
 
                     Scale = scale;
-                    Resize(coeffCount);
+
+                    ulong[] newData = new ulong[coeffCount];
 
                     for (int i = 0; i < coeffCount; i++)
                     {
-                        this[i] = reader.ReadUInt64();
+                        newData[i] = reader.ReadUInt64();
                     }
+
+                    NativeMethods.Plaintext_SwapData(NativePtr, coeffCount, newData);
                 }
             }
-            catch(EndOfStreamException ex)
+            catch (EndOfStreamException ex)
             {
-                throw new ArgumentException("Stream ened unexpectedly", ex);
+                throw new ArgumentException("Stream ended unexpectedly", ex);
             }
-            catch(IOException ex)
+            catch (IOException ex)
             {
                 throw new ArgumentException("Could not read Plaintext", ex);
+            }
+        }
+
+        /// <summary>
+        /// Loads a plaintext from an input stream overwriting the current plaintext.
+        /// The loaded plaintext is verified to be valid for the given SEALContext.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="stream">The stream to load the plaintext from</param>
+        /// <exception cref="ArgumentNullException">if either context or stream are null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the loaded plaintext is invalid, or it is
+        /// invalid for the context</exception>
+        /// <seealso cref="Save(Stream)">See Save() to save a plaintext.</seealso>
+        public void Load(SEALContext context, Stream stream)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            UnsafeLoad(stream);
+
+            if (!IsValidFor(context))
+            {
+                throw new ArgumentException("Plaintext data is invalid for context");
             }
         }
 

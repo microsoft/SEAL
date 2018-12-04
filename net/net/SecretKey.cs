@@ -83,6 +83,23 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Check whether the current SecretKey is valid for a given SEALContext. If 
+        /// the given SEALContext is not set, the encryption parameters are invalid, 
+        /// or the SecretKey data does not match the SEALContext, this function returns 
+        /// false. Otherwise, returns true.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        public bool IsValidFor(SEALContext context)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.SecretKey_IsValidFor(NativePtr, context.NativePtr, out bool result);
+            return result;
+        }
+
+        /// <summary>
         /// Saves the SecretKey to an output stream.
         /// </summary>
         /// 
@@ -94,8 +111,27 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         public void Save(Stream stream)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            Data.Save(stream);
+        }
+
+        /// <summary>
+        /// Loads a SecretKey from an input stream overwriting the current SecretKey.
+        /// No checking of the validity of the SecretKey data against encryption
+        /// parameters is performed. This function should not be used unless the 
+        /// SecretKey comes from a fully trusted source.
+        /// </summary>
+        /// <param name="stream">The stream to load the SecretKey from</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if a valid SecretKey could not be read from stream</exception>
+        public void UnsafeLoad(Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            Data.UnsafeLoad(stream);
         }
 
         /// <summary>
@@ -112,8 +148,17 @@ namespace Microsoft.Research.SEAL
         /// invalid for the context</exception>
         public void Load(SEALContext context, Stream stream)
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            UnsafeLoad(stream);
+
+            if (!IsValidFor(context))
+            {
+                throw new ArgumentException("SecretKey data is invalid for context");
+            }
         }
 
         /// <summary>
@@ -123,8 +168,9 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                // TODO: implement
-                throw new NotImplementedException();
+                ParmsId parms = new ParmsId();
+                NativeMethods.SecretKey_ParmsId(NativePtr, parms.Block);
+                return parms;
             }
         }
 

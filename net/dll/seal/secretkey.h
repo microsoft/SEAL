@@ -19,3 +19,7 @@ SEALDLL HRESULT SEALCALL SecretKey_Set(void* thisptr, void* assign);
 SEALDLL HRESULT SEALCALL SecretKey_Data(void* thisptr, void** data);
 
 SEALDLL HRESULT SEALCALL SecretKey_Destroy(void* thisptr);
+
+SEALDLL HRESULT SEALCALL SecretKey_IsValidFor(void* thisptr, void* contextptr, bool* result);
+
+SEALDLL HRESULT SEALCALL SecretKey_ParmsId(void* thisptr, uint64_t* parms_id);

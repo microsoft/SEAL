@@ -66,3 +66,6 @@ SEALDLL HRESULT SEALCALL Plaintext_SetScale(void* thisptr, double scale);
 
 SEALDLL HRESULT SEALCALL Plaintext_Equals(void *thisptr, void* other, bool* result);
 
+SEALDLL HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void* contextpr, bool* result);
+
+SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, int count, uint64_t* new_data);
