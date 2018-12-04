@@ -10,13 +10,17 @@ namespace SEALNetTest
     [TestClass]
     public class PlaintextTests
     {
-        // TODO: Add tests for all constructors
         [TestMethod]
         public void CreateTest()
         {
             Plaintext plain = new Plaintext();
             Assert.IsNotNull(plain);
             Assert.AreEqual(0, plain.CoeffCount);
+
+            Plaintext plain2 = new Plaintext(capacity: 20, coeffCount: 10);
+            Assert.IsNotNull(plain2);
+            Assert.AreEqual(20, plain2.Capacity);
+            Assert.AreEqual(10, plain2.CoeffCount);
         }
         
         [TestMethod]
