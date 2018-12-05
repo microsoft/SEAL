@@ -69,3 +69,5 @@ SEALDLL HRESULT SEALCALL Plaintext_Equals(void *thisptr, void* other, bool* resu
 SEALDLL HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void* contextpr, bool* result);
 
 SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, int count, uint64_t* new_data);
+
+SEALDLL HRESULT SEALCALL Plaintext_Pool(void* thisptr, void** pool);

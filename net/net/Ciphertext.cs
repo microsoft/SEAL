@@ -663,8 +663,9 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                // TODO: implement
-                throw new NotImplementedException();
+                NativeMethods.Ciphertext_Pool(NativePtr, out IntPtr pool);
+                MemoryPoolHandle handle = new MemoryPoolHandle(pool);
+                return handle;
             }
         }
 

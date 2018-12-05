@@ -467,3 +467,14 @@ SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, int count, uint64_t* 
     Plaintext::PlaintextPrivateHelper::swap_data(plain, new_array);
     return S_OK;
 }
+
+SEALDLL HRESULT SEALCALL Plaintext_Pool(void* thisptr, void** pool)
+{
+    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+    IfNullRet(pool, E_POINTER);
+
+    MemoryPoolHandle* handleptr = new MemoryPoolHandle(plain->pool());
+    *pool = handleptr;
+    return S_OK;
+}

@@ -77,6 +77,17 @@ SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void* thisptr, void* context, bool
     return S_OK;
 }
 
+SEALDLL HRESULT SEALCALL PublicKey_Pool(void* thisptr, void** pool)
+{
+    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    IfNullRet(pkey, E_POINTER);
+    IfNullRet(pool, E_POINTER);
+
+    MemoryPoolHandle* handleptr = new MemoryPoolHandle(pkey->pool());
+    *pool = handleptr;
+    return S_OK;
+}
+
 SEALDLL HRESULT SEALCALL PublicKey_Destroy(void* thisptr)
 {
     PublicKey* pkey = FromVoid<PublicKey>(thisptr);

@@ -120,6 +120,7 @@ namespace SEALNetTest
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys(decompositionBitCount: 30);
+            MemoryPoolHandle handle = keys.Pool;
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
@@ -137,6 +138,8 @@ namespace SEALNetTest
 
             IEnumerable<Ciphertext> key2 = keys.Key(9);
             Assert.AreEqual(2, key2.Count());
+
+            Assert.IsTrue(handle.AllocByteCount > 0ul);
         }
     }
 }

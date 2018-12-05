@@ -41,3 +41,5 @@ SEALDLL HRESULT SEALCALL GaloisKeys_GetParmsId(void* thisptr, uint64_t* parms_id
 SEALDLL HRESULT SEALCALL GaloisKeys_SetParmsId(void* thisptr, uint64_t* parms_id);
 
 SEALDLL HRESULT SEALCALL GaloisKeys_IsValidFor(void* thisptr, void* contextptr, bool* result);
+
+SEALDLL HRESULT SEALCALL GaloisKeys_Pool(void* thisptr, void** pool);

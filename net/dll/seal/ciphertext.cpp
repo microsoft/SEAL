@@ -471,3 +471,14 @@ SEALDLL HRESULT SEALCALL Ciphertext_IsValidFor(void* thisptr, void* context, boo
     *result = cipher->is_valid_for(sharedctx);
     return S_OK;
 }
+
+SEALDLL HRESULT SEALCALL Ciphertext_Pool(void* thisptr, void** pool)
+{
+    Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    IfNullRet(pool, E_POINTER);
+
+    MemoryPoolHandle* handleptr = new MemoryPoolHandle(cipher->pool());
+    *pool = handleptr;
+    return S_OK;
+}

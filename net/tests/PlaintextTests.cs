@@ -135,11 +135,15 @@ namespace SEALNetTest
         public void ReserveResizeTest()
         {
             Plaintext plain = new Plaintext();
+            MemoryPoolHandle handle = plain.Pool;
 
             Assert.AreEqual(0, plain.CoeffCount);
             Assert.AreEqual(0, plain.Capacity);
 
             plain.Reserve(capacity: 10);
+
+            ulong alloced = handle.AllocByteCount;
+            Assert.IsTrue(alloced > 0ul);
 
             Assert.AreEqual(0, plain.CoeffCount);
             Assert.AreEqual(10, plain.Capacity);
@@ -149,6 +153,7 @@ namespace SEALNetTest
             Assert.AreEqual(11, plain.CoeffCount);
             Assert.AreEqual(11, plain.Capacity);
             Assert.AreEqual(0, plain.SignificantCoeffCount);
+            Assert.IsTrue(handle.AllocByteCount != alloced);
         }
 
         [TestMethod]

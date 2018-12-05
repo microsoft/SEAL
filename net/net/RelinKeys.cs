@@ -386,8 +386,9 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                // TODO: implement
-                throw new NotImplementedException();
+                NativeMethods.RelinKeys_Pool(NativePtr, out IntPtr pool);
+                MemoryPoolHandle handle = new MemoryPoolHandle(pool);
+                return handle;
             }
         }
 

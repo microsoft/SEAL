@@ -85,3 +85,14 @@ SEALDLL HRESULT SEALCALL SecretKey_ParmsId(void* thisptr, uint64_t* parms_id)
     CopyParmsId(skey->parms_id(), parms_id);
     return S_OK;
 }
+
+SEALDLL HRESULT SEALCALL SecretKey_Pool(void* thisptr, void** pool)
+{
+    SecretKey* skey = FromVoid<SecretKey>(thisptr);
+    IfNullRet(skey, E_POINTER);
+    IfNullRet(pool, E_POINTER);
+
+    MemoryPoolHandle* handleptr = new MemoryPoolHandle(skey->pool());
+    *pool = handleptr;
+    return S_OK;
+}

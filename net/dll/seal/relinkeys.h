@@ -39,3 +39,5 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetParmsId(void* thisptr, uint64_t* parms_id)
 SEALDLL HRESULT SEALCALL RelinKeys_SetParmsId(void* thisptr, uint64_t* parms_id);
 
 SEALDLL HRESULT SEALCALL RelinKeys_IsValidFor(void* thisptr, void* context, bool* result);
+
+SEALDLL HRESULT SEALCALL RelinKeys_Pool(void* thisptr, void** pool);

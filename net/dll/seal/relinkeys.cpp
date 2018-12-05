@@ -211,3 +211,14 @@ SEALDLL HRESULT SEALCALL RelinKeys_IsValidFor(void* thisptr, void* context, bool
     *result = keys->is_valid_for(sharedctx);
     return S_OK;
 }
+
+SEALDLL HRESULT SEALCALL RelinKeys_Pool(void* thisptr, void** pool)
+{
+    RelinKeys* keys = FromVoid<RelinKeys>(thisptr);
+    IfNullRet(keys, E_POINTER);
+    IfNullRet(pool, E_POINTER);
+
+    MemoryPoolHandle* handleptr = new MemoryPoolHandle(keys->pool());
+    *pool = handleptr;
+    return S_OK;
+}

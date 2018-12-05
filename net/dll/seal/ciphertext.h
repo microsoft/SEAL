@@ -69,3 +69,5 @@ SEALDLL HRESULT SEALCALL Ciphertext_Scale(void* thisptr, double* scale);
 SEALDLL HRESULT SEALCALL Ciphertext_Release(void* thisptr);
 
 SEALDLL HRESULT SEALCALL Ciphertext_IsValidFor(void* thisptr, void* context, bool* result);
+
+SEALDLL HRESULT SEALCALL Ciphertext_Pool(void* thisptr, void** pool);

@@ -231,3 +231,14 @@ SEALDLL HRESULT SEALCALL GaloisKeys_IsValidFor(void* thisptr, void* contextptr, 
     *result = keys->is_valid_for(sharedctx);
     return S_OK;
 }
+
+SEALDLL HRESULT SEALCALL GaloisKeys_Pool(void* thisptr, void** pool)
+{
+    GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
+    IfNullRet(keys, E_POINTER);
+    IfNullRet(pool, E_POINTER);
+
+    MemoryPoolHandle* handleptr = new MemoryPoolHandle(keys->pool());
+    *pool = handleptr;
+    return S_OK;
+}

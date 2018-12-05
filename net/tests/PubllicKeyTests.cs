@@ -33,6 +33,8 @@ namespace SEALNetTest
             Assert.IsTrue(pub.Data.IsNTTForm);
 
             PublicKey pub2 = new PublicKey();
+            MemoryPoolHandle handle = pub2.Pool;
+
             Assert.AreEqual(0, pub2.Data.Size);
             Assert.IsFalse(pub2.Data.IsNTTForm);
             Assert.AreEqual(ParmsId.Zero, pub2.ParmsId);
@@ -51,6 +53,7 @@ namespace SEALNetTest
             Assert.IsTrue(pub2.Data.IsNTTForm);
             Assert.AreEqual(pub.ParmsId, pub2.ParmsId);
             Assert.AreNotEqual(ParmsId.Zero, pub2.ParmsId);
+            Assert.IsTrue(handle.AllocByteCount != 0ul);
         }
     }
 }

@@ -214,8 +214,15 @@ namespace SEALNetTest
             Evaluator evaluator = new Evaluator(context);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
-            Ciphertext encrypted = new Ciphertext();
+            MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceNew);
+            Assert.AreEqual(0ul, pool.AllocByteCount);
+
+            Ciphertext encrypted = new Ciphertext(pool);
             Plaintext plain = new Plaintext();
+
+            MemoryPoolHandle cipherPool = encrypted.Pool;
+            Assert.IsNotNull(cipherPool);
+            Assert.AreEqual(0ul, cipherPool.AllocByteCount);
 
             List<Complex> input = new List<Complex>()
             {
@@ -233,6 +240,7 @@ namespace SEALNetTest
             evaluator.RescaleToNextInplace(encrypted);
 
             Assert.AreEqual(Math.Pow(2, 30), encrypted.Scale, delta: 10000);
+            Assert.AreNotEqual(0ul, cipherPool.AllocByteCount);
         }
     }
 }

@@ -591,6 +591,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Ciphertext_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Ciphertext_Pool(IntPtr thisptr, out IntPtr pool);
+
         #endregion
 
         #region Plaintext methods
@@ -688,6 +691,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Plaintext_SwapData(IntPtr thisptr, int count, ulong[] newData);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Plaintext_Pool(IntPtr thisptr, out IntPtr pool);
+
         #endregion
 
         #region GaloisKeys methods
@@ -739,6 +745,9 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void GaloisKeys_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void GaloisKeys_Pool(IntPtr thisptr, out IntPtr pool);
 
         #endregion
 
@@ -820,6 +829,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void RelinKeys_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void RelinKeys_Pool(IntPtr thisptr, out IntPtr pool);
+
         #endregion
 
         #region PublicKey methods
@@ -841,6 +853,9 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void PublicKey_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void PublicKey_Pool(IntPtr thisptr, out IntPtr pool);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void PublicKey_Destroy(IntPtr thisptr);
@@ -869,6 +884,9 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void SecretKey_ParmsId(IntPtr thisptr, ulong[] parmsId);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void SecretKey_Pool(IntPtr thisptr, out IntPtr pool);
 
         #endregion
 
