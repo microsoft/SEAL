@@ -63,7 +63,7 @@ namespace SEALNetTest
 
             Assert.AreEqual(30, other.DecompositionBitCount);
             Assert.AreEqual(2, other.Size);
-            Assert.IsTrue(handle.AllocByteCount != alloced);
+            Assert.IsTrue(handle.AllocByteCount > 0ul);
 
             List<IEnumerable<Ciphertext>> keysData = new List<IEnumerable<Ciphertext>>(keys.Data);
             List<IEnumerable<Ciphertext>> otherData = new List<IEnumerable<Ciphertext>>(other.Data);

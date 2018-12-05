@@ -153,7 +153,7 @@ namespace SEALNetTest
             Assert.AreEqual(11, plain.CoeffCount);
             Assert.AreEqual(11, plain.Capacity);
             Assert.AreEqual(0, plain.SignificantCoeffCount);
-            Assert.IsTrue(handle.AllocByteCount != alloced);
+            Assert.IsTrue(handle.AllocByteCount > 0ul);
         }
 
         [TestMethod]

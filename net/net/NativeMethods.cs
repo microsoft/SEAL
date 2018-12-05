@@ -898,6 +898,39 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, EntryPoint = "MemoryManager_GetPool2", PreserveSig = false)]
         internal static extern void MemoryManager_GetPool(out IntPtr handle);
 
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MemoryManager_SwitchProfile(IntPtr newProfile, out IntPtr oldProfile);
+
+        #endregion
+
+        #region MMProf methods
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_CreateGlobal(out IntPtr profile);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_CreateFixed(IntPtr pool, out IntPtr profile);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_CreateNew(out IntPtr profile);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_CreateThreadLocal(out IntPtr profile);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_GetPool(IntPtr thisptr, out IntPtr pool);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_DestroyGlobal(IntPtr thisptr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_DestroyFixed(IntPtr thisptr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_DestroyNew(IntPtr thisptr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_DestroyThreadLocal(IntPtr thisptr);
 
         #endregion
 

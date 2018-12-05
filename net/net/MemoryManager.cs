@@ -21,6 +21,37 @@ namespace Microsoft.Research.SEAL
     public static class MemoryManager
     {
         /// <summary>
+        /// Static initialization of MemoryManager
+        /// </summary>
+        static MemoryManager()
+        {
+            // The default profile is Global
+            profile_ = new MMProfGlobal();
+        }
+
+        /// <summary>
+        /// Sets the current profile to a given one and returns an instance pointing 
+        /// to the previously set profile.
+        /// </summary>
+        /// <param name="newProfile">New memory manager profile</param>
+        /// <exception cref="ArgumentNullException">if newProfile is null</exception>
+        public static MMProf SwitchProfile(MMProf newProfile)
+        {
+            if (null == newProfile)
+                throw new ArgumentNullException(nameof(newProfile));
+
+            NativeMethods.MemoryManager_SwitchProfile(newProfile.NativePtr, out IntPtr oldProfilePtr);
+
+            // After setting the profile, the memory manager takes ownership of the profile
+            newProfile.Owned = false;
+
+            MMProf oldProfile = profile_;
+            profile_ = newProfile;
+
+            return oldProfile;
+        }
+
+        /// <summary>
         /// Returns a MemoryPoolHandle according to the currently set memory manager 
         /// profile and prof_opt. The following values for prof_opt have an effect 
         /// independent of the current profile:
@@ -56,5 +87,10 @@ namespace Microsoft.Research.SEAL
             MemoryPoolHandle handle = new MemoryPoolHandle(handlePtr);
             return handle;
         }
+
+        /// <summary>
+        /// Currently set profile
+        /// </summary>
+        private static MMProf profile_ = null;
     }
 }
