@@ -8,10 +8,9 @@ namespace Microsoft.Research.SEAL
     /// <summary>
     /// The MMProf is a pure virtual class that every profile for the MemoryManager
     /// should inherit from. The only functionality this class implements is the 
-    /// get_pool(mm_prof_opt_t) function that returns a MemoryPoolHandle pointing 
-    /// to a pool selected by internal logic optionally using the input parameter 
-    /// of type mm_prof_opt_t. The returned MemoryPoolHandle must point to a valid 
-    /// memory pool. 
+    /// GetPool() function that returns a MemoryPoolHandle pointing 
+    /// to a pool selected by internal logic. The returned MemoryPoolHandle must
+    /// point to a valid memory pool. 
     /// </summary>
     public abstract class MMProf : NativeObject
     {

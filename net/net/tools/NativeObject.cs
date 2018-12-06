@@ -19,7 +19,7 @@ namespace Microsoft.Research.SEAL.Tools
         public NativeObject()
         {
             NativePtr = IntPtr.Zero;
-            Owned = true;
+            owned_ = true;
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Microsoft.Research.SEAL.Tools
         public NativeObject(IntPtr nativePtr, bool owned = true)
         {
             NativePtr = nativePtr;
-            Owned = owned;
+            owned_ = owned;
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Microsoft.Research.SEAL.Tools
         {
             base.DisposeNativeResources();
 
-            if (Owned && !IntPtr.Zero.Equals(NativePtr))
+            if (owned_ && !IntPtr.Zero.Equals(NativePtr))
             {
                 DestroyNativeObject();
             }
@@ -67,10 +67,6 @@ namespace Microsoft.Research.SEAL.Tools
         /// <summary>
         /// Whether this instance owns the native pointer.
         /// </summary>
-        internal bool Owned
-        {
-            get;
-            set;
-        }
+        private readonly bool owned_ = true;
     }
 }

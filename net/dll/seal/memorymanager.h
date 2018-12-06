@@ -24,6 +24,8 @@ SEALDLL HRESULT SEALCALL MMProf_CreateNew(void** profile);
 
 SEALDLL HRESULT SEALCALL MMProf_CreateThreadLocal(void** profile);
 
+SEALDLL HRESULT SEALCALL MMProf_CreateCopy(void* profile, void** copy);
+
 SEALDLL HRESULT SEALCALL MMProf_GetPool(void* thisptr, void** pool_handle);
 
 SEALDLL HRESULT SEALCALL MMProf_Destroy(void* thisptr);

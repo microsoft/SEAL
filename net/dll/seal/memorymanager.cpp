@@ -14,6 +14,14 @@ namespace
 {
     // Keep instance of old profile alive, as it may be used in the native side.
     unique_ptr<MMProf> old_profile_;
+
+    template<class T>
+    HRESULT CreateCopy(T* original, void** copyptr)
+    {
+        T* copy = new T(*original);
+        *copyptr = copy;
+        return S_OK;
+    }
 }
 
 
@@ -47,6 +55,13 @@ SEALDLL HRESULT SEALCALL MemoryManager_GetPool2(void** pool_handle)
     MemoryPoolHandle* handle_ptr = new MemoryPoolHandle(move(handle));
     *pool_handle = handle_ptr;
     return S_OK;
+}
+
+void Test()
+{
+    MemoryPoolHandle handle = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW);
+    MMProfFixed* myf = new MMProfFixed(handle);
+    MMProfFixed* my2 = new MMProfFixed(*myf);
 }
 
 SEALDLL HRESULT SEALCALL MemoryManager_SwitchProfile(void* new_profile, void** old_profile)
@@ -98,6 +113,40 @@ SEALDLL HRESULT SEALCALL MMProf_CreateThreadLocal(void** profile)
     MMProfThreadLocal* threadlocal = new MMProfThreadLocal();
     *profile = threadlocal;
     return S_OK;
+}
+
+SEALDLL HRESULT SEALCALL MMProf_CreateCopy(void* thisptr, void** copyptr)
+{
+    MMProf* profile = FromVoid<MMProf>(thisptr);
+    IfNullRet(profile, E_POINTER);
+    IfNullRet(copyptr, E_POINTER);
+
+    MMProfGlobal* global = dynamic_cast<MMProfGlobal*>(profile);
+    if (nullptr != global)
+    {
+        return CreateCopy(global, copyptr);
+    }
+
+    MMProfFixed* fixed = dynamic_cast<MMProfFixed*>(profile);
+    if (nullptr != fixed)
+    {
+        return CreateCopy(fixed, copyptr);
+    }
+
+    MMProfNew* newprof = dynamic_cast<MMProfNew*>(profile);
+    if (nullptr != newprof)
+    {
+        return CreateCopy(newprof, copyptr);
+    }
+
+    MMProfThreadLocal* threadlocal = dynamic_cast<MMProfThreadLocal*>(profile);
+    if (nullptr != threadlocal)
+    {
+        return CreateCopy(threadlocal, copyptr);
+    }
+
+    // No matching profile.
+    return E_UNEXPECTED;
 }
 
 SEALDLL HRESULT SEALCALL MMProf_GetPool(void* thisptr, void** pool_handle)

@@ -918,6 +918,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void MMProf_CreateThreadLocal(out IntPtr profile);
 
         [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void MMProf_CreateCopy(IntPtr thisptr, out IntPtr copyPtr);
+
+        [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void MMProf_GetPool(IntPtr thisptr, out IntPtr pool);
 
         [DllImport(SEALdll, PreserveSig = false)]
