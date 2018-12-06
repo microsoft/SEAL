@@ -16,7 +16,7 @@ namespace
     unique_ptr<MMProf> old_profile_;
 
     template<class T>
-    HRESULT CreateCopy(T* original, void** copyptr)
+    HRESULT CreateProfileCopy(T* original, void** copyptr)
     {
         T* copy = new T(*original);
         *copyptr = copy;
@@ -124,25 +124,25 @@ SEALDLL HRESULT SEALCALL MMProf_CreateCopy(void* thisptr, void** copyptr)
     MMProfGlobal* global = dynamic_cast<MMProfGlobal*>(profile);
     if (nullptr != global)
     {
-        return CreateCopy(global, copyptr);
+        return CreateProfileCopy(global, copyptr);
     }
 
     MMProfFixed* fixed = dynamic_cast<MMProfFixed*>(profile);
     if (nullptr != fixed)
     {
-        return CreateCopy(fixed, copyptr);
+        return CreateProfileCopy(fixed, copyptr);
     }
 
     MMProfNew* newprof = dynamic_cast<MMProfNew*>(profile);
     if (nullptr != newprof)
     {
-        return CreateCopy(newprof, copyptr);
+        return CreateProfileCopy(newprof, copyptr);
     }
 
     MMProfThreadLocal* threadlocal = dynamic_cast<MMProfThreadLocal*>(profile);
     if (nullptr != threadlocal)
     {
-        return CreateCopy(threadlocal, copyptr);
+        return CreateProfileCopy(threadlocal, copyptr);
     }
 
     // No matching profile.
