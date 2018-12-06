@@ -390,6 +390,13 @@ namespace SEALNetTest
 
             Assert.AreEqual(1, plaindest.CoeffCount);
             Assert.AreEqual(24ul, plaindest[0]);
+
+            Assert.ThrowsException<ArgumentException>(() =>
+            {
+                // Uninitialized memory pool handle
+                MemoryPoolHandle pool = new MemoryPoolHandle();
+                evaluator.MultiplyMany(encrypteds, relinKeys, encdest, pool);
+            });
         }
 
         [TestMethod]
@@ -442,6 +449,13 @@ namespace SEALNetTest
             Assert.AreEqual(4ul, plaindest[1]);
             Assert.AreEqual(6ul, plaindest[2]);
             Assert.AreEqual(8ul, plaindest[3]);
+
+            Assert.ThrowsException<ArgumentException>(() =>
+            {
+                // Uninitialized pool
+                MemoryPoolHandle pool = new MemoryPoolHandle();
+                evaluator.MultiplyPlain(encrypted, plain, encdest, pool);
+            });
         }
 
         [TestMethod]
