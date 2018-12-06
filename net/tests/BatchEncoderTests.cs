@@ -158,12 +158,16 @@ namespace SEALNetTest
         [TestMethod]
         public void EncodeInPlaceTest()
         {
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
-            parms.PolyModulusDegree = 64;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>();
-            coeffModulus.Add(DefaultParams.SmallMods60Bit(0));
-            parms.CoeffModulus = coeffModulus;
-            parms.PlainModulus = new SmallModulus(257);
+            List<SmallModulus> coeffModulus = new List<SmallModulus>()
+            {
+                DefaultParams.SmallMods60Bit(0)
+            };
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 64,
+                CoeffModulus = coeffModulus,
+                PlainModulus = new SmallModulus(257)
+            };
 
             SEALContext context = SEALContext.Create(parms);
 
@@ -190,6 +194,30 @@ namespace SEALNetTest
             {
                 Assert.AreEqual(0ul, plain[i]);
             }
+        }
+
+        [TestMethod]
+        public void SchemeIsCKKSTest()
+        {
+            List<SmallModulus> coeffModulus = new List<SmallModulus>
+            {
+                DefaultParams.SmallMods40Bit(0),
+                DefaultParams.SmallMods40Bit(1),
+                DefaultParams.SmallMods40Bit(2),
+                DefaultParams.SmallMods40Bit(3)
+            };
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 8,
+                CoeffModulus = coeffModulus
+            };
+
+            SEALContext context = SEALContext.Create(parms);
+
+            Assert.ThrowsException<ArgumentException>(() =>
+            {
+                BatchEncoder encoder = new BatchEncoder(context);
+            });
         }
     }
 }

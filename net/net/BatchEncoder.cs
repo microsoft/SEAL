@@ -141,7 +141,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(plain));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-
             NativeMethods.BatchEncoder_Encode(NativePtr, plain.NativePtr, poolPtr);
         }
 
