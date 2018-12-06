@@ -1,5 +1,4 @@
-﻿using Microsoft.Research.SEAL.Util;
-using Microsoft.Research.SEAL.Tools;
+﻿using Microsoft.Research.SEAL.Tools;
 using System;
 
 namespace Microsoft.Research.SEAL
@@ -206,42 +205,6 @@ namespace Microsoft.Research.SEAL
                 {
                     NativeMethods.ContextData_TotalCoeffModulusBitCount(NativePtr, out int bitCount);
                     return bitCount;
-                }
-            }
-
-            /// <summary>
-            /// Returns the base converter.
-            /// </summary>
-            public BaseConverter BaseConverter
-            {
-                get
-                {
-                    // TODO: implement
-                    throw new NotImplementedException();
-                }
-            }
-
-            /// <summary>
-            /// Returns a const reference to the NTT tables.
-            /// </summary>
-            public SmallNTTTables SmallNTTTables
-            {
-                get
-                {
-                    // TODO: implement
-                    throw new NotImplementedException();
-                }
-            }
-
-            /// <summary>
-            /// Returns a const reference to the NTT tables.
-            /// </summary>
-            public SmallNTTTables PlainNTTTables
-            {
-                get
-                {
-                    // TODO: implement
-                    throw new NotImplementedException();
                 }
             }
 

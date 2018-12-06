@@ -1,9 +1,6 @@
 ﻿using Microsoft.Research.SEAL.Tools;
-using Microsoft.Research.SEAL.Util;
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Microsoft.Research.SEAL
 {
