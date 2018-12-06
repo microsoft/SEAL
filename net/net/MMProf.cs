@@ -24,6 +24,14 @@ namespace Microsoft.Research.SEAL
             MemoryPoolHandle handle = new MemoryPoolHandle(pool);
             return handle;
         }
+
+        /// <summary>
+        /// Destroy native backing object.
+        /// </summary>
+        protected override void DestroyNativeObject()
+        {
+            NativeMethods.MMProf_Destroy(NativePtr);
+        }
     }
 
     /// <summary>
@@ -39,14 +47,6 @@ namespace Microsoft.Research.SEAL
         {
             NativeMethods.MMProf_CreateGlobal(out IntPtr profile);
             NativePtr = profile;
-        }
-
-        /// <summary>
-        /// Destroy native backing object.
-        /// </summary>
-        protected override void DestroyNativeObject()
-        {
-            NativeMethods.MMProf_DestroyGlobal(NativePtr);
         }
     }
 
@@ -72,14 +72,6 @@ namespace Microsoft.Research.SEAL
             NativeMethods.MMProf_CreateFixed(poolCopy, out IntPtr profile);
             NativePtr = profile;
         }
-
-        /// <summary>
-        /// Destroy native backing object.
-        /// </summary>
-        protected override void DestroyNativeObject()
-        {
-            NativeMethods.MMProf_DestroyFixed(NativePtr);
-        }
     }
 
     /// <summary>
@@ -96,14 +88,6 @@ namespace Microsoft.Research.SEAL
         {
             NativeMethods.MMProf_CreateNew(out IntPtr profile);
             NativePtr = profile;
-        }
-
-        /// <summary>
-        /// Destroy native backing object.
-        /// </summary>
-        protected override void DestroyNativeObject()
-        {
-            NativeMethods.MMProf_DestroyNew(NativePtr);
         }
     }
 
@@ -125,14 +109,6 @@ namespace Microsoft.Research.SEAL
         {
             NativeMethods.MMProf_CreateThreadLocal(out IntPtr profile);
             NativePtr = profile;
-        }
-
-        /// <summary>
-        /// Destroy native backing object.
-        /// </summary>
-        protected override void DestroyNativeObject()
-        {
-            NativeMethods.MMProf_DestroyThreadLocal(NativePtr);
         }
     }
 }

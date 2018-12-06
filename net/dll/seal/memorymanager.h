@@ -29,11 +29,3 @@ SEALDLL HRESULT SEALCALL MMProf_CreateCopy(void* profile, void** copy);
 SEALDLL HRESULT SEALCALL MMProf_GetPool(void* thisptr, void** pool_handle);
 
 SEALDLL HRESULT SEALCALL MMProf_Destroy(void* thisptr);
-
-SEALDLL HRESULT SEALCALL MMProf_DestroyGlobal(void* thisptr);
-
-SEALDLL HRESULT SEALCALL MMProf_DestroyFixed(void* thisptr);
-
-SEALDLL HRESULT SEALCALL MMProf_DestroyNew(void* thisptr);
-
-SEALDLL HRESULT SEALCALL MMProf_DestroyThreadLocal(void* thisptr);

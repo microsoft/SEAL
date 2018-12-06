@@ -924,16 +924,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void MMProf_GetPool(IntPtr thisptr, out IntPtr pool);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void MMProf_DestroyGlobal(IntPtr thisptr);
-
-        [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void MMProf_DestroyFixed(IntPtr thisptr);
-
-        [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void MMProf_DestroyNew(IntPtr thisptr);
-
-        [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void MMProf_DestroyThreadLocal(IntPtr thisptr);
+        internal static extern void MMProf_Destroy(IntPtr thisptr);
 
         #endregion
 

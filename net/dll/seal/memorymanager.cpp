@@ -169,39 +169,3 @@ SEALDLL HRESULT SEALCALL MMProf_Destroy(void* thisptr)
     delete profile;
     return S_OK;
 }
-
-SEALDLL HRESULT SEALCALL MMProf_DestroyGlobal(void* thisptr)
-{
-    MMProfGlobal* profile = FromVoid<MMProfGlobal>(thisptr);
-    IfNullRet(profile, E_POINTER);
-
-    delete profile;
-    return S_OK;
-}
-
-SEALDLL HRESULT SEALCALL MMProf_DestroyFixed(void* thisptr)
-{
-    MMProfFixed* profile = FromVoid<MMProfFixed>(thisptr);
-    IfNullRet(profile, E_POINTER);
-
-    delete profile;
-    return S_OK;
-}
-
-SEALDLL HRESULT SEALCALL MMProf_DestroyNew(void* thisptr)
-{
-    MMProfNew* profile = FromVoid<MMProfNew>(thisptr);
-    IfNullRet(profile, E_POINTER);
-
-    delete profile;
-    return S_OK;
-}
-
-SEALDLL HRESULT SEALCALL MMProf_DestroyThreadLocal(void* thisptr)
-{
-    MMProfThreadLocal* profile = FromVoid<MMProfThreadLocal>(thisptr);
-    IfNullRet(profile, E_POINTER);
-
-    delete profile;
-    return S_OK;
-}
