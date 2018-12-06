@@ -157,7 +157,6 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
         public void IndexRangeFail1Test()
         {
             SEALContext context = GlobalContext.Context;
@@ -168,12 +167,14 @@ namespace SEALNetTest
 
             encryptor.Encrypt(plain, cipher);
 
-            // We only have 2 polynomials
-            ulong data = cipher[2, 0];
+            Assert.ThrowsException<IndexOutOfRangeException>(() =>
+            {
+                // We only have 2 polynomials
+                ulong data = cipher[2, 0];
+            });
         }
 
         [TestMethod]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
         public void IndexRangeFail2Test()
         {
             SEALContext context = GlobalContext.Context;
@@ -189,7 +190,11 @@ namespace SEALNetTest
 
             // We should have 8192 coefficients
             data = cipher[0, 8191]; // This will succeed
-            data = cipher[0, 8192]; // This will fail
+
+            Assert.ThrowsException<IndexOutOfRangeException>(() =>
+            {
+                data = cipher[0, 8192]; // This will fail
+            });
         }
 
         [TestMethod]
