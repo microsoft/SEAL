@@ -377,7 +377,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void ContextData_Destroy(IntPtr thisptr);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void ContextData_TotalCoeffModulus(IntPtr thisptr, ref int count, ulong[] totalCoeffModulus);
+        internal static extern void ContextData_TotalCoeffModulus(IntPtr thisptr, ref ulong count, ulong[] totalCoeffModulus);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void ContextData_TotalCoeffModulusBitCount(IntPtr thisptr, out int bitCount);
@@ -389,19 +389,19 @@ namespace Microsoft.Research.SEAL
         internal static extern void ContextData_Qualifiers(IntPtr thisptr, out IntPtr epq);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void ContextData_CoeffDivPlainModulus(IntPtr thisptr, ref int count, ulong[] coefDivPlainMod);
+        internal static extern void ContextData_CoeffDivPlainModulus(IntPtr thisptr, ref ulong count, ulong[] coefDivPlainMod);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void ContextData_PlainUpperHalfThreshold(IntPtr thisptr, out ulong puht);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void ContextData_PlainUpperHalfIncrement(IntPtr thisptr, ref int count, ulong[] puhi);
+        internal static extern void ContextData_PlainUpperHalfIncrement(IntPtr thisptr, ref ulong count, ulong[] puhi);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void ContextData_UpperHalfThreshold(IntPtr thisptr, ref int count, ulong[] uht);
+        internal static extern void ContextData_UpperHalfThreshold(IntPtr thisptr, ref ulong count, ulong[] uht);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void ContextData_UpperHalfIncrement(IntPtr thisptr, ref int count, ulong[] uhi);
+        internal static extern void ContextData_UpperHalfIncrement(IntPtr thisptr, ref ulong count, ulong[] uhi);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void ContextData_NextContextData(IntPtr thisptr, out IntPtr nextContextData);

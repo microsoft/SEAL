@@ -20,13 +20,13 @@ SEALDLL HRESULT SEALCALL ContextData_Destroy(void* thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulus(void* thisptr, int* count, uint64_t* total_coeff_modulus)
+SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulus(void* thisptr, uint64_t* count, uint64_t* total_coeff_modulus)
 {
     SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
-    *count = static_cast<int>(cont_data->parms().coeff_modulus().size());
+    *count = cont_data->parms().coeff_modulus().size();
 
     if (nullptr == total_coeff_modulus)
     {
@@ -34,7 +34,7 @@ SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulus(void* thisptr, int* count
         return S_OK;
     }
 
-    for (int i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < *count; i++)
     {
         total_coeff_modulus[i] = cont_data->total_coeff_modulus()[i];
     }
@@ -73,13 +73,13 @@ SEALDLL HRESULT SEALCALL ContextData_Qualifiers(void* thisptr, void** epq)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_CoeffDivPlainModulus(void* thisptr, int* count, uint64_t* coeff_div)
+SEALDLL HRESULT SEALCALL ContextData_CoeffDivPlainModulus(void* thisptr, uint64_t* count, uint64_t* coeff_div)
 {
     SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
-    *count = static_cast<int>(cont_data->parms().coeff_modulus().size());
+    *count = cont_data->parms().coeff_modulus().size();
 
     if (nullptr == coeff_div)
     {
@@ -87,7 +87,7 @@ SEALDLL HRESULT SEALCALL ContextData_CoeffDivPlainModulus(void* thisptr, int* co
         return S_OK;
     }
 
-    for (int i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < *count; i++)
     {
         coeff_div[i] = cont_data->coeff_div_plain_modulus()[i];
     }
@@ -105,13 +105,13 @@ SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfThreshold(void* thisptr, uint
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void* thisptr, int* count, uint64_t* puhi)
+SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void* thisptr, uint64_t* count, uint64_t* puhi)
 {
     SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
-    *count = static_cast<int>(cont_data->parms().coeff_modulus().size());
+    *count = cont_data->parms().coeff_modulus().size();
 
     if (nullptr == puhi)
     {
@@ -119,7 +119,7 @@ SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void* thisptr, int*
         return S_OK;
     }
 
-    for (int i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < *count; i++)
     {
         puhi[i] = cont_data->plain_upper_half_increment()[i];
     }
@@ -127,7 +127,7 @@ SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void* thisptr, int*
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_UpperHalfThreshold(void* thisptr, int* count, uint64_t* uht)
+SEALDLL HRESULT SEALCALL ContextData_UpperHalfThreshold(void* thisptr, uint64_t* count, uint64_t* uht)
 {
     SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -140,7 +140,7 @@ SEALDLL HRESULT SEALCALL ContextData_UpperHalfThreshold(void* thisptr, int* coun
         return S_OK;
     }
 
-    *count = static_cast<int>(cont_data->parms().coeff_modulus().size());
+    *count = cont_data->parms().coeff_modulus().size();
 
     if (nullptr == uht)
     {
@@ -148,7 +148,7 @@ SEALDLL HRESULT SEALCALL ContextData_UpperHalfThreshold(void* thisptr, int* coun
         return S_OK;
     }
 
-    for (int i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < *count; i++)
     {
         uht[i] = cont_data->upper_half_threshold()[i];
     }
@@ -156,7 +156,7 @@ SEALDLL HRESULT SEALCALL ContextData_UpperHalfThreshold(void* thisptr, int* coun
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_UpperHalfIncrement(void* thisptr, int* count, uint64_t* uhi)
+SEALDLL HRESULT SEALCALL ContextData_UpperHalfIncrement(void* thisptr, uint64_t* count, uint64_t* uhi)
 {
     SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -168,7 +168,7 @@ SEALDLL HRESULT SEALCALL ContextData_UpperHalfIncrement(void* thisptr, int* coun
         return S_OK;
     }
 
-    *count = static_cast<int>(cont_data->parms().coeff_modulus().size());
+    *count = cont_data->parms().coeff_modulus().size();
 
     if (nullptr == uhi)
     {
@@ -176,7 +176,7 @@ SEALDLL HRESULT SEALCALL ContextData_UpperHalfIncrement(void* thisptr, int* coun
         return S_OK;
     }
 
-    for (int i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < *count; i++)
     {
         uhi[i] = cont_data->upper_half_increment()[i];
     }

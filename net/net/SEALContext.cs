@@ -186,7 +186,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    int count = 0;
+                    ulong count = 0;
                     NativeMethods.ContextData_TotalCoeffModulus(NativePtr, ref count, null);
 
                     ulong[] result = new ulong[count];
@@ -216,7 +216,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    int count = 0;
+                    ulong count = 0;
                     NativeMethods.ContextData_CoeffDivPlainModulus(NativePtr, ref count, null);
 
                     ulong[] cdpm = new ulong[count];
@@ -249,7 +249,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    int count = 0;
+                    ulong count = 0;
                     NativeMethods.ContextData_PlainUpperHalfIncrement(NativePtr, ref count, null);
 
                     ulong[] puhi = new ulong[count];
@@ -267,7 +267,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    int count = 0;
+                    ulong count = 0;
                     NativeMethods.ContextData_UpperHalfThreshold(NativePtr, ref count, null);
 
                     if (count == 0)
@@ -295,7 +295,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    int count = 0;
+                    ulong count = 0;
                     NativeMethods.ContextData_UpperHalfIncrement(NativePtr, ref count, null);
 
                     if (count == 0)
