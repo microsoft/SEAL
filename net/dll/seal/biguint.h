@@ -28,9 +28,9 @@ SEALDLL HRESULT SEALCALL BigUInt_IsAlias(void* thispt, bool* is_alias);
 
 SEALDLL HRESULT SEALCALL BigUInt_BitCount(void* thispt, int* bit_count);
 
-SEALDLL HRESULT SEALCALL BigUInt_ByteCount(void* thispt, int* byte_count);
+SEALDLL HRESULT SEALCALL BigUInt_ByteCount(void* thispt, uint64_t* byte_count);
 
-SEALDLL HRESULT SEALCALL BigUInt_UInt64Count(void* thispt, int* uint64_count);
+SEALDLL HRESULT SEALCALL BigUInt_UInt64Count(void* thispt, uint64_t* uint64_count);
 
 SEALDLL HRESULT SEALCALL BigUInt_IsZero(void* thispt, bool* is_zero);
 

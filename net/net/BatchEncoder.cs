@@ -88,7 +88,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             ulong[] valarray = values.ToArray();
-            NativeMethods.BatchEncoder_Encode(NativePtr, valarray.Length, valarray, destination.NativePtr);
+            NativeMethods.BatchEncoder_Encode(NativePtr, (ulong)valarray.LongLength, valarray, destination.NativePtr);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             long[] valarray = values.ToArray();
-            NativeMethods.BatchEncoder_Encode(NativePtr, valarray.Length, valarray, destination.NativePtr);
+            NativeMethods.BatchEncoder_Encode(NativePtr, (ulong)valarray.LongLength, valarray, destination.NativePtr);
         }
 
         /// <summary>
@@ -168,14 +168,14 @@ namespace Microsoft.Research.SEAL
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            int count = 0;
+            ulong count = 0;
             NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref count, (ulong[])null, poolPtr);
 
             ulong[] dest = new ulong[count];
             NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref count, dest, poolPtr);
 
             destination.Clear();
-            for (int i = 0; i < count; i++)
+            for (ulong i = 0; i < count; i++)
             {
                 destination.Add(dest[i]);
             }
@@ -205,14 +205,14 @@ namespace Microsoft.Research.SEAL
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            int count = 0;
+            ulong count = 0;
             NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref count, (long[])null, poolPtr);
 
             long[] dest = new long[count];
             NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref count, dest, poolPtr);
 
             destination.Clear();
-            for (int i = 0; i < count; i++)
+            for (ulong i = 0; i < count; i++)
             {
                 destination.Add(dest[i]);
             }

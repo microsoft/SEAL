@@ -14,15 +14,15 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Create(void* context, void** batch_encoder
 
 SEALDLL HRESULT SEALCALL BatchEncoder_Destroy(void* thisptr);
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Encode1(void* thisptr, int count, uint64_t* values, void* destination);
+SEALDLL HRESULT SEALCALL BatchEncoder_Encode1(void* thisptr, uint64_t count, uint64_t* values, void* destination);
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Encode2(void* thisptr, int count, int64_t* values, void* destination);
+SEALDLL HRESULT SEALCALL BatchEncoder_Encode2(void* thisptr, uint64_t count, int64_t* values, void* destination);
 
 SEALDLL HRESULT SEALCALL BatchEncoder_Encode3(void* thisptr, void* plain, void* pool);
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Decode1(void* thisptr, void* plain, int* count, uint64_t* destination, void* pool);
+SEALDLL HRESULT SEALCALL BatchEncoder_Decode1(void* thisptr, void* plain, uint64_t* count, uint64_t* destination, void* pool);
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Decode2(void* thisptr, void* plain, int* count, int64_t* destination, void* pool);
+SEALDLL HRESULT SEALCALL BatchEncoder_Decode2(void* thisptr, void* plain, uint64_t* count, int64_t* destination, void* pool);
 
 SEALDLL HRESULT SEALCALL BatchEncoder_Decode3(void* thisptr, void* plain, void* pool);
 

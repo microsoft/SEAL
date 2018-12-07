@@ -38,10 +38,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void BigUInt_BitCount(IntPtr thisptr, out int bitCount);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void BigUInt_ByteCount(IntPtr thisptr, out int byteCount);
+        internal static extern void BigUInt_ByteCount(IntPtr thisptr, out ulong byteCount);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void BigUInt_UInt64Count(IntPtr thisptr, out int uint64Count);
+        internal static extern void BigUInt_UInt64Count(IntPtr thisptr, out ulong uint64Count);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void BigUInt_IsZero(IntPtr thisptr, out bool isZero);
@@ -1034,19 +1034,19 @@ namespace Microsoft.Research.SEAL
         internal static extern void BatchEncoder_Destroy(IntPtr thisptr);
 
         [DllImport(SEALdll, EntryPoint = "BatchEncoder_Encode1", PreserveSig = false)]
-        internal static extern void BatchEncoder_Encode(IntPtr thisptr, int count, ulong[] values, IntPtr destination);
+        internal static extern void BatchEncoder_Encode(IntPtr thisptr, ulong count, ulong[] values, IntPtr destination);
 
         [DllImport(SEALdll, EntryPoint = "BatchEncoder_Encode2", PreserveSig = false)]
-        internal static extern void BatchEncoder_Encode(IntPtr thisptr, int count, long[] values, IntPtr destination);
+        internal static extern void BatchEncoder_Encode(IntPtr thisptr, ulong count, long[] values, IntPtr destination);
 
         [DllImport(SEALdll, EntryPoint = "BatchEncoder_Encode3", PreserveSig = false)]
         internal static extern void BatchEncoder_Encode(IntPtr thisptr, IntPtr plain, IntPtr pool);
 
         [DllImport(SEALdll, EntryPoint = "BatchEncoder_Decode1", PreserveSig = false)]
-        internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, ref int count, ulong[] destination, IntPtr pool);
+        internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, ref ulong count, ulong[] destination, IntPtr pool);
 
         [DllImport(SEALdll, EntryPoint = "BatchEncoder_Decode2", PreserveSig = false)]
-        internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, ref int count, long[] destination, IntPtr pool);
+        internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, ref ulong count, long[] destination, IntPtr pool);
 
         [DllImport(SEALdll, EntryPoint = "BatchEncoder_Decode3", PreserveSig = false)]
         internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, IntPtr pool);

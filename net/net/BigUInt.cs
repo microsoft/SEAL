@@ -225,12 +225,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>Returns the number of bytes in the backing array used to store the BigUInt value.</summary>
         /// 
         /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of the format of the backing array.</seealso>
-        public int ByteCount
+        public ulong ByteCount
         {
             get
             {
-                int byteCount;
-                NativeMethods.BigUInt_ByteCount(NativePtr, out byteCount);
+                NativeMethods.BigUInt_ByteCount(NativePtr, out ulong byteCount);
                 return byteCount;
             }
         }
@@ -238,12 +237,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>Returns the number of System.UInt64 in the backing array used to store the BigUInt value.</summary>
         /// 
         /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of the format of the backing array.</seealso>
-        public int UInt64Count
+        public ulong UInt64Count
         {
             get
             {
-                int uint64Count = -1;
-                NativeMethods.BigUInt_UInt64Count(NativePtr, out uint64Count);
+                NativeMethods.BigUInt_UInt64Count(NativePtr, out ulong uint64Count);
                 return uint64Count;
             }
         }
@@ -261,7 +259,7 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                if (index < 0 || index >= ByteCount)
+                if (index < 0 || index >= (int)ByteCount)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
                 byte result;
@@ -270,7 +268,7 @@ namespace Microsoft.Research.SEAL
             }
             set
             {
-                if (index < 0 || index >= ByteCount)
+                if (index < 0 || index >= (int)ByteCount)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
                 NativeMethods.BigUInt_Set(NativePtr, index, value);
@@ -291,7 +289,7 @@ namespace Microsoft.Research.SEAL
         /// <returns></returns>
         public ulong Data(int index)
         {
-            if (index < 0 || index >= UInt64Count)
+            if (index < 0 || index >= (int)UInt64Count)
                 throw new IndexOutOfRangeException(nameof(index));
 
             ulong result;
@@ -404,7 +402,7 @@ namespace Microsoft.Research.SEAL
             using (BinaryWriter writer = new BinaryWriter(stream, Encoding.Default, leaveOpen: true))
             {
                 writer.Write(BitCount);
-                int byteCount = ByteCount;
+                int byteCount = (int)ByteCount;
 
                 for (int i = 0; i < byteCount; i++)
                 {
@@ -468,7 +466,7 @@ namespace Microsoft.Research.SEAL
         /// <returns></returns>
         public BigInteger ToBigInteger()
         {
-            int byteCount = ByteCount;
+            int byteCount = (int)ByteCount;
             byte[] bytes = new byte[byteCount + 1];
             for (int i = 0; i < byteCount; i++)
             {

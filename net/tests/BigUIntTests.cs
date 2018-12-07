@@ -25,7 +25,7 @@ namespace SEALNetTest
 
             Assert.IsTrue(bui.IsZero);
             Assert.AreEqual(70, bui.BitCount);
-            Assert.AreEqual(2, bui.UInt64Count);
+            Assert.AreEqual(2ul, bui.UInt64Count);
             Assert.AreEqual(0, bui.GetSignificantBitCount());
         }
 
@@ -35,7 +35,7 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt("1234567890ABCDEF1234567890ABCDEF");
 
             Assert.IsFalse(bui.IsZero);
-            Assert.AreEqual(2, bui.UInt64Count);
+            Assert.AreEqual(2ul, bui.UInt64Count);
             Assert.AreEqual(125, bui.BitCount);
             Assert.AreEqual(125, bui.GetSignificantBitCount());
 
@@ -45,7 +45,7 @@ namespace SEALNetTest
             bui = new BigUInt("FEDCBAFEDCBA0987654321");
 
             Assert.IsFalse(bui.IsZero);
-            Assert.AreEqual(2, bui.UInt64Count);
+            Assert.AreEqual(2ul, bui.UInt64Count);
             Assert.AreEqual(88, bui.BitCount);
             Assert.AreEqual(88, bui.GetSignificantBitCount());
 
@@ -55,7 +55,7 @@ namespace SEALNetTest
             bui = new BigUInt(bitCount: 80, hexString: "DEADBEEF");
 
             Assert.IsFalse(bui.IsZero);
-            Assert.AreEqual(2, bui.UInt64Count);
+            Assert.AreEqual(2ul, bui.UInt64Count);
             Assert.AreEqual(80, bui.BitCount);
             Assert.AreEqual(32, bui.GetSignificantBitCount());
             Assert.AreEqual(0ul, bui.Data(1));
@@ -68,7 +68,7 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt(bitCount: 80, value: 12345ul);
 
             Assert.IsFalse(bui.IsZero);
-            Assert.AreEqual(2, bui.UInt64Count);
+            Assert.AreEqual(2ul, bui.UInt64Count);
             Assert.AreEqual(14, bui.GetSignificantBitCount());
             Assert.AreEqual(0ul, bui.Data(1));
             Assert.AreEqual(12345ul, bui.Data(0));
@@ -82,9 +82,9 @@ namespace SEALNetTest
 
             Assert.IsFalse(bui.IsZero);
             Assert.AreEqual(14, bui.BitCount);
-            Assert.AreEqual(2, bui.ByteCount);
+            Assert.AreEqual(2ul, bui.ByteCount);
             Assert.AreEqual(14, bui.GetSignificantBitCount());
-            Assert.AreEqual(1, bui.UInt64Count);
+            Assert.AreEqual(1ul, bui.UInt64Count);
             Assert.AreEqual(12345ul, bui.Data(0));
         }
 
@@ -96,14 +96,14 @@ namespace SEALNetTest
 
             BigUInt bui3 = new BigUInt(bui1);
 
-            Assert.AreEqual(1, bui3.UInt64Count);
+            Assert.AreEqual(1ul, bui3.UInt64Count);
             Assert.AreEqual(32, bui3.GetSignificantBitCount());
             Assert.AreEqual(0xDEADBEEFul, bui3.Data(0));
             Assert.IsTrue(bui1.Equals(bui3));
 
             bui3 = new BigUInt(bui2);
 
-            Assert.AreEqual(2, bui3.UInt64Count);
+            Assert.AreEqual(2ul, bui3.UInt64Count);
             Assert.AreEqual(125, bui3.BitCount);
             Assert.AreEqual(125, bui3.GetSignificantBitCount());
             Assert.AreEqual(0x1234567890ABCDEFul, bui3.Data(0));
@@ -116,9 +116,9 @@ namespace SEALNetTest
         {
             var biguint = new BigUInt();
             Assert.AreEqual(0, biguint.BitCount);
-            Assert.AreEqual(0, biguint.ByteCount);
-            Assert.AreEqual(0, biguint.UInt64Count);
-            Assert.IsTrue(biguint.UInt64Count == 0);
+            Assert.AreEqual(0ul, biguint.ByteCount);
+            Assert.AreEqual(0ul, biguint.UInt64Count);
+            Assert.IsTrue(biguint.UInt64Count == 0ul);
             Assert.AreEqual(0, biguint.GetSignificantBitCount());
             Assert.AreEqual("0", biguint.ToString());
             Assert.IsTrue(biguint.IsZero);
@@ -130,12 +130,12 @@ namespace SEALNetTest
 
             biguint.Resize(1);
             Assert.AreEqual(1, biguint.BitCount);
-            Assert.IsTrue(biguint.UInt64Count != 0);
+            Assert.IsTrue(biguint.UInt64Count != 0ul);
             Assert.IsFalse(biguint.IsAlias);
 
             biguint.Resize(0);
             Assert.AreEqual(0, biguint.BitCount);
-            Assert.IsTrue(biguint.UInt64Count == 0);
+            Assert.IsTrue(biguint.UInt64Count == 0ul);
             Assert.IsFalse(biguint.IsAlias);
         }
 
@@ -144,8 +144,8 @@ namespace SEALNetTest
         {
             var biguint = new BigUInt(64);
             Assert.AreEqual(64, biguint.BitCount);
-            Assert.AreEqual(8, biguint.ByteCount);
-            Assert.AreEqual(1, biguint.UInt64Count);
+            Assert.AreEqual(8ul, biguint.ByteCount);
+            Assert.AreEqual(1ul, biguint.UInt64Count);
             Assert.AreEqual(0, biguint.GetSignificantBitCount());
             Assert.AreEqual("0", biguint.ToString());
             Assert.IsTrue(biguint.IsZero);
@@ -224,9 +224,9 @@ namespace SEALNetTest
         {
             var biguint = new BigUInt(99);
             Assert.AreEqual(99, biguint.BitCount);
-            Assert.IsTrue(biguint.UInt64Count != 0);
-            Assert.AreEqual(13, biguint.ByteCount);
-            Assert.AreEqual(2, biguint.UInt64Count);
+            Assert.IsTrue(biguint.UInt64Count != 0ul);
+            Assert.AreEqual(13ul, biguint.ByteCount);
+            Assert.AreEqual(2ul, biguint.UInt64Count);
             Assert.AreEqual(0, biguint.GetSignificantBitCount());
             Assert.AreEqual("0", biguint.ToString());
             Assert.IsTrue(biguint.IsZero);
@@ -250,8 +250,8 @@ namespace SEALNetTest
             Assert.AreEqual(1, biguint.GetSignificantBitCount());
             Assert.AreEqual("1", biguint.ToString());
             Assert.IsFalse(biguint.IsZero);
-            Assert.AreEqual(13, biguint.ByteCount);
-            Assert.AreEqual(2, biguint.UInt64Count);
+            Assert.AreEqual(13ul, biguint.ByteCount);
+            Assert.AreEqual(2ul, biguint.UInt64Count);
             Assert.AreEqual(1UL, biguint.Data(0));
             Assert.AreEqual(0UL, biguint.Data(1));
             Assert.AreEqual(1, biguint[0]);
@@ -365,17 +365,17 @@ namespace SEALNetTest
 
             biguint.Resize(8);
             Assert.AreEqual(8, biguint.BitCount);
-            Assert.AreEqual(1, biguint.UInt64Count);
+            Assert.AreEqual(1ul, biguint.UInt64Count);
             Assert.AreEqual("23", biguint.ToString());
 
             biguint.Resize(100);
             Assert.AreEqual(100, biguint.BitCount);
-            Assert.AreEqual(2, biguint.UInt64Count);
+            Assert.AreEqual(2ul, biguint.UInt64Count);
             Assert.AreEqual("23", biguint.ToString());
 
             biguint.Resize(0);
             Assert.AreEqual(0, biguint.BitCount);
-            Assert.AreEqual(0, biguint.UInt64Count);
+            Assert.AreEqual(0ul, biguint.UInt64Count);
             Assert.IsTrue(biguint.UInt64Count == 0);
         }
 
@@ -558,16 +558,16 @@ namespace SEALNetTest
 
             BigUInt result = bui.DivideRemainder(op, remainder);
 
-            Assert.AreEqual(1, result.UInt64Count);
+            Assert.AreEqual(1ul, result.UInt64Count);
             Assert.AreEqual(0x12a90ul, result.Data(0));
-            Assert.AreEqual(1, remainder.UInt64Count);
+            Assert.AreEqual(1ul, remainder.UInt64Count);
             Assert.AreEqual(0x227Ful, remainder.Data(0));
 
             BigUInt result2 = bui.DivideRemainder(0xDEADul, remainder);
 
-            Assert.AreEqual(1, result2.UInt64Count);
+            Assert.AreEqual(1ul, result2.UInt64Count);
             Assert.AreEqual(0x10000ul, result2.Data(0));
-            Assert.AreEqual(1, remainder.UInt64Count);
+            Assert.AreEqual(1ul, remainder.UInt64Count);
             Assert.AreEqual(0xBEEFul, remainder.Data(0));
         }
 
@@ -577,7 +577,7 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt("DEADBEEF");
             BigUInt newone = +bui;
 
-            Assert.AreEqual(1, newone.UInt64Count);
+            Assert.AreEqual(1ul, newone.UInt64Count);
             Assert.AreEqual(0xDEADBEEFul, newone.Data(0));
         }
 
@@ -587,7 +587,7 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt("DEADBEEF");
             BigUInt newone = -bui;
 
-            Assert.AreEqual(1, newone.UInt64Count);
+            Assert.AreEqual(1ul, newone.UInt64Count);
             Assert.AreEqual(0x21524111ul, newone.Data(0));
         }
 
@@ -597,7 +597,7 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt("DEADBEEF");
             BigUInt newone = ~bui;
 
-            Assert.AreEqual(1, newone.UInt64Count);
+            Assert.AreEqual(1ul, newone.UInt64Count);
             Assert.AreEqual(0x21524110ul, newone.Data(0));
         }
 
@@ -607,7 +607,7 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt("12345678901234567890");
             bui++;
 
-            Assert.AreEqual(2, bui.UInt64Count);
+            Assert.AreEqual(2ul, bui.UInt64Count);
             Assert.AreEqual(0x1234ul, bui.Data(1));
             Assert.AreEqual(0x5678901234567891ul, bui.Data(0));
         }
@@ -618,7 +618,7 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt("12345678901234567890");
             bui--;
 
-            Assert.AreEqual(2, bui.UInt64Count);
+            Assert.AreEqual(2ul, bui.UInt64Count);
             Assert.AreEqual(0x1234ul, bui.Data(1));
             Assert.AreEqual(0x567890123456788Ful, bui.Data(0));
         }
@@ -631,12 +631,12 @@ namespace SEALNetTest
 
             BigUInt result = bui + op;
 
-            Assert.AreEqual(1, result.UInt64Count);
+            Assert.AreEqual(1ul, result.UInt64Count);
             Assert.AreEqual(0x123AAAAAA0ul, result.Data(0));
 
             BigUInt result2 = bui + 0x9876543210ul;
 
-            Assert.AreEqual(1, result2.UInt64Count);
+            Assert.AreEqual(1ul, result2.UInt64Count);
             Assert.AreEqual(0xAAAAAAAAA0ul, result2.Data(0));
         }
 
@@ -648,12 +648,12 @@ namespace SEALNetTest
 
             BigUInt result = bui - op;
 
-            Assert.AreEqual(1, result.UInt64Count);
+            Assert.AreEqual(1ul, result.UInt64Count);
             Assert.AreEqual(0x122E024680ul, result.Data(0));
 
             result = bui - 0x76543210ul;
 
-            Assert.AreEqual(1, result.UInt64Count);
+            Assert.AreEqual(1ul, result.UInt64Count);
             Assert.AreEqual(0x11BE024680ul, result.Data(0));
         }
 
@@ -665,12 +665,12 @@ namespace SEALNetTest
 
             BigUInt result = bui * op;
 
-            Assert.AreEqual(1, result.UInt64Count);
+            Assert.AreEqual(1ul, result.UInt64Count);
             Assert.AreEqual(0xC379652E6Bul, result.Data(0));
 
             result = bui * 0xFEDCBAul;
 
-            Assert.AreEqual(1, result.UInt64Count);
+            Assert.AreEqual(1ul, result.UInt64Count);
             Assert.AreEqual(0x121F998EC22ul, result.Data(0));
         }
 
@@ -682,12 +682,12 @@ namespace SEALNetTest
 
             BigUInt result = bui / op;
 
-            Assert.AreEqual(1, result.UInt64Count);
+            Assert.AreEqual(1ul, result.UInt64Count);
             Assert.AreEqual(0x18687Dul, result.Data(0));
 
             result = bui / 0xDEAD;
 
-            Assert.AreEqual(1, result.UInt64Count);
+            Assert.AreEqual(1ul, result.UInt64Count);
             Assert.AreEqual(0x14EDC6ul, result.Data(0));
         }
 
@@ -699,13 +699,13 @@ namespace SEALNetTest
 
             BigUInt result = bui & op;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0xCCCCCCCCul, result.Data(1));
             Assert.AreEqual(0xAAAAAAAAAAAAAAAAul, result.Data(0));
 
             result = bui & 0xF0F0F0F0F0;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0ul, result.Data(1));
             Assert.AreEqual(0xA0A0A0A0A0ul, result.Data(0));
         }
@@ -718,13 +718,13 @@ namespace SEALNetTest
 
             BigUInt result = bui | op;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0xEDEDEDEDul, result.Data(1));
             Assert.AreEqual(0xEBEBEBEBEBEBEBEBul, result.Data(0));
 
             result = bui | 0x1010101010;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0xCDCDCDCDul, result.Data(1));
             Assert.AreEqual(0xABABABBBBBBBBBBBul, result.Data(0));
         }
@@ -737,13 +737,13 @@ namespace SEALNetTest
 
             BigUInt result = bui ^ op;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0xCDCD3232ul, result.Data(1));
             Assert.AreEqual(0x5454ABABABABABABul, result.Data(0));
 
             result = bui ^ 0xF0F0F0F0F0;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0xCDCDCDCDul, result.Data(1));
             Assert.AreEqual(0xABABAB5B5B5B5B5Bul, result.Data(0));
         }
@@ -755,13 +755,13 @@ namespace SEALNetTest
 
             BigUInt result = bui << 1;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0x19B9B9B9Bul, result.Data(1));
             Assert.AreEqual(0x5757575757575756ul, result.Data(0));
 
             result = bui << 2;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0x337373736ul, result.Data(1));
             Assert.AreEqual(0xAEAEAEAEAEAEAEACul, result.Data(0));
         }
@@ -773,13 +773,13 @@ namespace SEALNetTest
 
             BigUInt result = bui >> 1;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0x66E6E6E6ul, result.Data(1));
             Assert.AreEqual(0xD5D5D5D5D5D5D5D5ul, result.Data(0));
 
             result = bui >> 2;
 
-            Assert.AreEqual(2, result.UInt64Count);
+            Assert.AreEqual(2ul, result.UInt64Count);
             Assert.AreEqual(0x33737373ul, result.Data(1));
             Assert.AreEqual(0x6AEAEAEAEAEAEAEAul, result.Data(0));
         }
