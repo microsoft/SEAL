@@ -268,13 +268,13 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void EncParams_GetCoeffModulus(
             IntPtr thisptr,
-            ref int length,
+            ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void EncParams_SetCoeffModulus(
             IntPtr thisptr,
-            int length,
+            ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(SEALdll, PreserveSig = false)]
@@ -310,33 +310,33 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void DefParams_CoeffModulus128(
-            int polyModulusDegree,
-            ref int length,
+            ulong polyModulusDegree,
+            ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void DefParams_CoeffModulus192(
-            int polyModulusDegree,
-            ref int length,
+            ulong polyModulusDegree,
+            ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void DefParams_CoeffModulus256(
-            int polyModulusDegree,
-            ref int length,
+            ulong polyModulusDegree,
+            ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void DefParams_SmallMods60Bit(int index, out IntPtr smallModulus);
+        internal static extern void DefParams_SmallMods60Bit(ulong index, out IntPtr smallModulus);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void DefParams_SmallMods50Bit(int index, out IntPtr smallModulus);
+        internal static extern void DefParams_SmallMods50Bit(ulong index, out IntPtr smallModulus);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void DefParams_SmallMods40Bit(int index, out IntPtr smallModulus);
+        internal static extern void DefParams_SmallMods40Bit(ulong index, out IntPtr smallModulus);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void DefParams_SmallMods30Bit(int index, out IntPtr smallModulus);
+        internal static extern void DefParams_SmallMods30Bit(ulong index, out IntPtr smallModulus);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void DefParams_DBCMax(out int dbcMax);

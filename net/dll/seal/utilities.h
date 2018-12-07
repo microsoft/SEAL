@@ -29,7 +29,7 @@ namespace seal
         /**
         Build and array of SmallModulus pointers from a vector
         */
-        void BuildCoeffPointers(const std::vector<seal::SmallModulus>& coefficients, int* length, void** coeffs);
+        void BuildCoeffPointers(const std::vector<seal::SmallModulus>& coefficients, uint64_t* length, void** coeffs);
 
         /**
         Get a shared pointer to a SEALContext from a void pointer.

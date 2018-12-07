@@ -86,7 +86,7 @@ SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void* thisptr, uint64_t 
     }
 }
 
-SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void* thisptr, int* length, void** coeffs)
+SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void* thisptr, uint64_t* length, void** coeffs)
 {
     EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
@@ -96,7 +96,7 @@ SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void* thisptr, int* length, v
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_SetCoeffModulus(void* thisptr, int length, void** coeffs)
+SEALDLL HRESULT SEALCALL EncParams_SetCoeffModulus(void* thisptr, uint64_t length, void** coeffs)
 {
     EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
@@ -105,7 +105,7 @@ SEALDLL HRESULT SEALCALL EncParams_SetCoeffModulus(void* thisptr, int length, vo
     SmallModulus** coeff_array = reinterpret_cast<SmallModulus**>(coeffs);
     vector<SmallModulus> coefficients(length);
 
-    for (int i = 0; i < length; i++)
+    for (uint64_t i = 0; i < length; i++)
     {
         coefficients[i] = *coeff_array[i];
     }

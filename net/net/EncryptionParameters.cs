@@ -164,13 +164,13 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                int length = 0;
+                ulong length = 0;
                 NativeMethods.EncParams_GetCoeffModulus(NativePtr, ref length, null);
 
                 IntPtr[] coeffArray = new IntPtr[length];
                 NativeMethods.EncParams_GetCoeffModulus(NativePtr, ref length, coeffArray);
 
-                List<SmallModulus> result = new List<SmallModulus>(length);
+                List<SmallModulus> result = new List<SmallModulus>((int)length);
                 foreach(IntPtr sm in coeffArray)
                 {
                     result.Add(new SmallModulus(sm));
@@ -185,7 +185,7 @@ namespace Microsoft.Research.SEAL
                     throw new ArgumentNullException(nameof(value));
 
                 IntPtr[] coeffArray = value.Select(sm => sm.NativePtr).ToArray();
-                NativeMethods.EncParams_SetCoeffModulus(NativePtr, coeffArray.Length, coeffArray);
+                NativeMethods.EncParams_SetCoeffModulus(NativePtr, (ulong)coeffArray.LongLength, coeffArray);
             }
         }
 

@@ -23,9 +23,9 @@ namespace seal
     }
 }
 
-void seal::dll::BuildCoeffPointers(const vector<SmallModulus>& coefficients, int* length, void** coeffs)
+void seal::dll::BuildCoeffPointers(const vector<SmallModulus>& coefficients, uint64_t* length, void** coeffs)
 {
-    *length = static_cast<int>(coefficients.size());
+    *length = coefficients.size();
 
     if (coeffs == nullptr)
     {
@@ -33,7 +33,7 @@ void seal::dll::BuildCoeffPointers(const vector<SmallModulus>& coefficients, int
         return;
     }
 
-    int count = 0;
+    uint64_t count = 0;
     SmallModulus** coeff_array = reinterpret_cast<SmallModulus**>(coeffs);
 
     for (const auto& coeff : coefficients)

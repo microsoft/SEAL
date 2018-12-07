@@ -23,19 +23,19 @@ namespace Microsoft.Research.SEAL
         /// <param name="polyModulusDegree">The degree of the polynomial modulus</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if poly_modulus_degree is
         /// not 1024, 2048, 4096, 8192, 16384, or 32768</exception>
-        public static IEnumerable<SmallModulus> CoeffModulus128(int polyModulusDegree)
+        public static IEnumerable<SmallModulus> CoeffModulus128(ulong polyModulusDegree)
         {
             List<SmallModulus> result = null;
 
             try
             {
-                int length = 0;
+                ulong length = 0;
                 NativeMethods.DefParams_CoeffModulus128(polyModulusDegree, ref length, null);
 
                 IntPtr[] coeff_array = new IntPtr[length];
                 NativeMethods.DefParams_CoeffModulus128(polyModulusDegree, ref length, coeff_array);
 
-                result = new List<SmallModulus>(length);
+                result = new List<SmallModulus>((int)length);
                 foreach (IntPtr sm in coeff_array)
                 {
                     result.Add(new SmallModulus(sm));
@@ -66,19 +66,19 @@ namespace Microsoft.Research.SEAL
         /// <param name="polyModulusDegree">The degree of the polynomial modulus</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if poly_modulus_degree is
         /// not 1024, 2048, 4096, 8192, 16384, or 32768</exception>
-        public static IEnumerable<SmallModulus> CoeffModulus192(int polyModulusDegree)
+        public static IEnumerable<SmallModulus> CoeffModulus192(ulong polyModulusDegree)
         {
             List<SmallModulus> result = null;
 
             try
             {
-                int length = 0;
+                ulong length = 0;
                 NativeMethods.DefParams_CoeffModulus192(polyModulusDegree, ref length, null);
 
                 IntPtr[] coeff_array = new IntPtr[length];
                 NativeMethods.DefParams_CoeffModulus192(polyModulusDegree, ref length, coeff_array);
 
-                result = new List<SmallModulus>(length);
+                result = new List<SmallModulus>((int)length);
                 foreach (IntPtr sm in coeff_array)
                 {
                     result.Add(new SmallModulus(sm));
@@ -109,19 +109,19 @@ namespace Microsoft.Research.SEAL
         /// <param name="polyModulusDegree">The degree of the polynomial modulus</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if poly_modulus_degree is
         /// not 1024, 2048, 4096, 8192, 16384, or 32768</exception>
-        public static IEnumerable<SmallModulus> CoeffModulus256(int polyModulusDegree)
+        public static IEnumerable<SmallModulus> CoeffModulus256(ulong polyModulusDegree)
         {
             List<SmallModulus> result = null;
 
             try
             {
-                int length = 0;
+                ulong length = 0;
                 NativeMethods.DefParams_CoeffModulus256(polyModulusDegree, ref length, null);
 
                 IntPtr[] coeff_array = new IntPtr[length];
                 NativeMethods.DefParams_CoeffModulus256(polyModulusDegree, ref length, coeff_array);
 
-                result = new List<SmallModulus>(length);
+                result = new List<SmallModulus>((int)length);
                 foreach (IntPtr sm in coeff_array)
                 {
                     result.Add(new SmallModulus(sm));
@@ -144,12 +144,11 @@ namespace Microsoft.Research.SEAL
         /// <param name="index">The list index of the prime</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if index is not within 
         /// [0, 64)</exception>
-        public static SmallModulus SmallMods60Bit(int index)
+        public static SmallModulus SmallMods60Bit(ulong index)
         {
             try
             {
-                IntPtr sm;
-                NativeMethods.DefParams_SmallMods60Bit(index, out sm);
+                NativeMethods.DefParams_SmallMods60Bit(index, out IntPtr sm);
                 return new SmallModulus(sm);
             }
             catch (COMException ex)
@@ -167,12 +166,11 @@ namespace Microsoft.Research.SEAL
         /// <param name="index">The list index of the prime</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if index is not within
         /// [0, 64)</exception>
-        public static SmallModulus SmallMods50Bit(int index)
+        public static SmallModulus SmallMods50Bit(ulong index)
         {
             try
             {
-                IntPtr sm;
-                NativeMethods.DefParams_SmallMods50Bit(index, out sm);
+                NativeMethods.DefParams_SmallMods50Bit(index, out IntPtr sm);
                 return new SmallModulus(sm);
             }
             catch (COMException ex)
@@ -190,12 +188,11 @@ namespace Microsoft.Research.SEAL
         /// <param name="index">The list index of the prime</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if index is not within
         /// [0, 64)</exception>
-        public static SmallModulus SmallMods40Bit(int index)
+        public static SmallModulus SmallMods40Bit(ulong index)
         {
             try
             {
-                IntPtr sm;
-                NativeMethods.DefParams_SmallMods40Bit(index, out sm);
+                NativeMethods.DefParams_SmallMods40Bit(index, out IntPtr sm);
                 return new SmallModulus(sm);
             }
             catch (COMException ex)
@@ -213,12 +210,11 @@ namespace Microsoft.Research.SEAL
         /// <param name="index">The list index of the prime</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if index is not within
         /// [0, 64)</exception>
-        public static SmallModulus SmallMods30Bit(int index)
+        public static SmallModulus SmallMods30Bit(ulong index)
         {
             try
             {
-                IntPtr sm;
-                NativeMethods.DefParams_SmallMods30Bit(index, out sm);
+                NativeMethods.DefParams_SmallMods30Bit(index, out IntPtr sm);
                 return new SmallModulus(sm);
             }
             catch (COMException ex)

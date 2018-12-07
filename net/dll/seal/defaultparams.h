@@ -10,19 +10,19 @@
 #include "defines.h"
 #include <stdint.h>
 
-SEALDLL HRESULT SEALCALL DefParams_CoeffModulus128(int polyModulusDegree, int* length, void** coeffs);
+SEALDLL HRESULT SEALCALL DefParams_CoeffModulus128(uint64_t polyModulusDegree, uint64_t* length, void** coeffs);
 
-SEALDLL HRESULT SEALCALL DefParams_CoeffModulus192(int polyModulusDegree, int* length, void** coeffs);
+SEALDLL HRESULT SEALCALL DefParams_CoeffModulus192(uint64_t polyModulusDegree, uint64_t* length, void** coeffs);
 
-SEALDLL HRESULT SEALCALL DefParams_CoeffModulus256(int polyModulusDegree, int* length, void** coeffs);
+SEALDLL HRESULT SEALCALL DefParams_CoeffModulus256(uint64_t polyModulusDegree, uint64_t* length, void** coeffs);
 
-SEALDLL HRESULT SEALCALL DefParams_SmallMods60Bit(int index, void** small_modulus);
+SEALDLL HRESULT SEALCALL DefParams_SmallMods60Bit(uint64_t index, void** small_modulus);
 
-SEALDLL HRESULT SEALCALL DefParams_SmallMods50Bit(int index, void** small_modulus);
+SEALDLL HRESULT SEALCALL DefParams_SmallMods50Bit(uint64_t index, void** small_modulus);
 
-SEALDLL HRESULT SEALCALL DefParams_SmallMods40Bit(int index, void** small_modulus);
+SEALDLL HRESULT SEALCALL DefParams_SmallMods40Bit(uint64_t index, void** small_modulus);
 
-SEALDLL HRESULT SEALCALL DefParams_SmallMods30Bit(int index, void** small_modulus);
+SEALDLL HRESULT SEALCALL DefParams_SmallMods30Bit(uint64_t index, void** small_modulus);
 
 SEALDLL HRESULT SEALCALL DefParams_DBCMax(int* dbc_max_value);
 

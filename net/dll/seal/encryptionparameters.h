@@ -22,9 +22,9 @@ SEALDLL HRESULT SEALCALL EncParams_GetPolyModulusDegree(void* thisptr, uint64_t*
 
 SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void* thisptr, uint64_t degree);
 
-SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void* thisptr, int* length, void** coeffs);
+SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void* thisptr, uint64_t* length, void** coeffs);
 
-SEALDLL HRESULT SEALCALL EncParams_SetCoeffModulus(void* thisptr, int length, void** coeffs);
+SEALDLL HRESULT SEALCALL EncParams_SetCoeffModulus(void* thisptr, uint64_t length, void** coeffs);
 
 SEALDLL HRESULT SEALCALL EncParams_GetScheme(void* thisptr, int* scheme);
 
