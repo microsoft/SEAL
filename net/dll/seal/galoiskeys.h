@@ -18,7 +18,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_Destroy(void* thisptr);
 
 SEALDLL HRESULT SEALCALL GaloisKeys_Set(void* thisptr, void* assign);
 
-SEALDLL HRESULT SEALCALL GaloisKeys_Size(void* thisptr, int* size);
+SEALDLL HRESULT SEALCALL GaloisKeys_Size(void* thisptr, uint64_t* size);
 
 SEALDLL HRESULT SEALCALL GaloisKeys_DBC(void* thisptr, int* dbc);
 

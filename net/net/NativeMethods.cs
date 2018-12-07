@@ -711,7 +711,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void GaloisKeys_Set(IntPtr thisptr, IntPtr assignptr);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void GaloisKeys_Size(IntPtr thisptr, out int size);
+        internal static extern void GaloisKeys_Size(IntPtr thisptr, out ulong size);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void GaloisKeys_DBC(IntPtr thisptr, out int dbc);

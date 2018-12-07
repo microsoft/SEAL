@@ -81,13 +81,13 @@ SEALDLL HRESULT SEALCALL GaloisKeys_Set(void* thisptr, void* assign)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_Size(void* thisptr, int* size)
+SEALDLL HRESULT SEALCALL GaloisKeys_Size(void* thisptr, uint64_t* size)
 {
     GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
     IfNullRet(size, E_POINTER);
 
-    *size = static_cast<int>(keys->size());
+    *size = keys->size();
     return S_OK;
 }
 

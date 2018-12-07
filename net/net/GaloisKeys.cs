@@ -95,11 +95,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the current number of Galois keys.
         /// </summary>
-        public int Size
+        public ulong Size
         {
             get
             {
-                NativeMethods.GaloisKeys_Size(NativePtr, out int size);
+                NativeMethods.GaloisKeys_Size(NativePtr, out ulong size);
                 return size;
             }
         }

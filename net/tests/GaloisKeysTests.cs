@@ -17,7 +17,7 @@ namespace SEALNetTest
             GaloisKeys keys = new GaloisKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(0, keys.Size);
+            Assert.AreEqual(0ul, keys.Size);
             Assert.AreEqual(0, keys.DecompositionBitCount);
         }
 
@@ -31,7 +31,7 @@ namespace SEALNetTest
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
-            Assert.AreEqual(22, keys.Size);
+            Assert.AreEqual(22ul, keys.Size);
         }
 
         [TestMethod]
@@ -45,7 +45,7 @@ namespace SEALNetTest
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
-            Assert.AreEqual(22, keys.Size);
+            Assert.AreEqual(22ul, keys.Size);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -57,7 +57,7 @@ namespace SEALNetTest
             }
 
             Assert.AreEqual(30, other.DecompositionBitCount);
-            Assert.AreEqual(22, other.Size);
+            Assert.AreEqual(22ul, other.Size);
 
             List<IEnumerable<Ciphertext>> keysData = new List<IEnumerable<Ciphertext>>(keys.Data);
             List<IEnumerable<Ciphertext>> otherData = new List<IEnumerable<Ciphertext>>(other.Data);
@@ -98,19 +98,19 @@ namespace SEALNetTest
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
-            Assert.AreEqual(22, keys.Size);
+            Assert.AreEqual(22ul, keys.Size);
 
             GaloisKeys keys2 = new GaloisKeys();
 
             Assert.IsNotNull(keys2);
             Assert.AreEqual(0, keys2.DecompositionBitCount);
-            Assert.AreEqual(0, keys2.Size);
+            Assert.AreEqual(0ul, keys2.Size);
 
             keys2.Set(keys);
 
             Assert.AreNotSame(keys, keys2);
             Assert.AreEqual(30, keys2.DecompositionBitCount);
-            Assert.AreEqual(22, keys2.Size);
+            Assert.AreEqual(22ul, keys2.Size);
         }
 
         [TestMethod]
@@ -124,7 +124,7 @@ namespace SEALNetTest
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
-            Assert.AreEqual(22, keys.Size);
+            Assert.AreEqual(22ul, keys.Size);
 
             Assert.IsFalse(keys.HasKey(galoisElt: 1));
             Assert.IsTrue(keys.HasKey(galoisElt: 3));

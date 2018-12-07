@@ -201,6 +201,6 @@ SEALDLL HRESULT SEALCALL ContextData_ChainIndex(void* thisptr, uint64_t* index)
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(index, E_POINTER);
 
-    *index = static_cast<uint64_t>(cont_data->chain_index());
+    *index = cont_data->chain_index();
     return S_OK;
 }
