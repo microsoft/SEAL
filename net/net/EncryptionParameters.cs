@@ -132,12 +132,11 @@ namespace Microsoft.Research.SEAL
         /// the degree of the polynomial modulus must be a power of 2 (e.g. 1024, 2048, 4096,
         /// 8192, 16384, or 32768).
         /// </remarks>
-        public int PolyModulusDegree
+        public ulong PolyModulusDegree
         {
             get
             {
-                int result;
-                NativeMethods.EncParams_GetPolyModulusDegree(NativePtr, out result);
+                NativeMethods.EncParams_GetPolyModulusDegree(NativePtr, out ulong result);
                 return result;
             }
             set
@@ -346,7 +345,7 @@ namespace Microsoft.Research.SEAL
                     SchemeType scheme = (SchemeType)reader.ReadInt32();
                     parms = new EncryptionParameters(scheme);
 
-                    parms.PolyModulusDegree = reader.ReadInt32();
+                    parms.PolyModulusDegree = reader.ReadUInt64();
                     int coeffModulusCount = reader.ReadInt32();
 
                     List<SmallModulus> coeffModulus = new List<SmallModulus>(coeffModulusCount);

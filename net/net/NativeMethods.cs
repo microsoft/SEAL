@@ -260,10 +260,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void EncParams_Set(IntPtr thisptr, IntPtr assign);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void EncParams_GetPolyModulusDegree(IntPtr thisptr, out int polyModulusDegree);
+        internal static extern void EncParams_GetPolyModulusDegree(IntPtr thisptr, out ulong polyModulusDegree);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void EncParams_SetPolyModulusDegree(IntPtr thisptr, int polyModulusDegree);
+        internal static extern void EncParams_SetPolyModulusDegree(IntPtr thisptr, ulong polyModulusDegree);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void EncParams_GetCoeffModulus(

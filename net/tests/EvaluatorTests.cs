@@ -998,7 +998,7 @@ namespace SEALNetTest
             };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
-                PolyModulusDegree = 2 * slotSize,
+                PolyModulusDegree = 2 * (ulong)slotSize,
                 CoeffModulus = coeffModulus
             };
             SEALContext context = SEALContext.Create(parms);
@@ -1066,7 +1066,7 @@ namespace SEALNetTest
             };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
-                PolyModulusDegree = 2 * slotSize,
+                PolyModulusDegree = 2 * (ulong)slotSize,
                 CoeffModulus = coeffModulus
             };
             SEALContext context = SEALContext.Create(parms);

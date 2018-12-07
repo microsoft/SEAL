@@ -18,9 +18,9 @@ SEALDLL HRESULT SEALCALL EncParams_Destroy(void* thisptr);
 
 SEALDLL HRESULT SEALCALL EncParams_Set(void* thisptr, void* assign);
 
-SEALDLL HRESULT SEALCALL EncParams_GetPolyModulusDegree(void* thisptr, int* degree);
+SEALDLL HRESULT SEALCALL EncParams_GetPolyModulusDegree(void* thisptr, uint64_t* degree);
 
-SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void* thisptr, int degree);
+SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void* thisptr, uint64_t degree);
 
 SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void* thisptr, int* length, void** coeffs);
 

@@ -60,17 +60,17 @@ SEALDLL HRESULT SEALCALL EncParams_Set(void* thisptr, void* assign)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_GetPolyModulusDegree(void* thisptr, int* degree)
+SEALDLL HRESULT SEALCALL EncParams_GetPolyModulusDegree(void* thisptr, uint64_t* degree)
 {
     EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(degree, E_POINTER);
 
-    *degree = static_cast<int>(params->poly_modulus_degree());
+    *degree = params->poly_modulus_degree();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void* thisptr, int degree)
+SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void* thisptr, uint64_t degree)
 {
     EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);

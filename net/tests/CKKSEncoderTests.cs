@@ -48,7 +48,7 @@ namespace SEALNetTest
 
             int slots = 32;
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
-            parms.PolyModulusDegree = slots * 2;
+            parms.PolyModulusDegree = (ulong)slots * 2;
             List<SmallModulus> coeffModulus = new List<SmallModulus>(4);
             coeffModulus.Add(DefaultParams.SmallMods40Bit(0));
             coeffModulus.Add(DefaultParams.SmallMods40Bit(1));
@@ -77,7 +77,7 @@ namespace SEALNetTest
         {
             int slots = 32;
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
-            parms.PolyModulusDegree = slots * 2;
+            parms.PolyModulusDegree = (ulong)slots * 2;
             List<SmallModulus> coeffModulus = new List<SmallModulus>(4);
             coeffModulus.Add(DefaultParams.SmallMods60Bit(0));
             coeffModulus.Add(DefaultParams.SmallMods60Bit(1));

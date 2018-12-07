@@ -81,7 +81,7 @@ namespace SEALNetTest
             }
 
             Assert.AreEqual(SchemeType.BFV, loaded.Scheme);
-            Assert.AreEqual(8, loaded.PolyModulusDegree);
+            Assert.AreEqual(8ul, loaded.PolyModulusDegree);
             Assert.AreEqual(257ul, loaded.PlainModulus.Value);
 
             List<SmallModulus> loadedCoeffModulus = new List<SmallModulus>(loaded.CoeffModulus);
