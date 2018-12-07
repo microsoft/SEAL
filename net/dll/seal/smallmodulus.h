@@ -22,7 +22,7 @@ SEALDLL HRESULT SEALCALL SmallModulus_Value(void* thisptr, uint64_t* value);
 
 SEALDLL HRESULT SEALCALL SmallModulus_BitCount(void* thisptr, int* bit_count);
 
-SEALDLL HRESULT SEALCALL SmallModulus_UInt64Count(void* thisptr, int* uint64_count);
+SEALDLL HRESULT SEALCALL SmallModulus_UInt64Count(void* thisptr, uint64_t* uint64_count);
 
 SEALDLL HRESULT SEALCALL SmallModulus_Set1(void* thisptr, void* assign);
 

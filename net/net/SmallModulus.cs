@@ -113,11 +113,11 @@ namespace Microsoft.Research.SEAL
         /// Returns the size (in 64-bit words) of the value of the current 
         /// SmallModulus.
         /// </summary>
-        public int UInt64Count
+        public ulong UInt64Count
         {
             get
             {
-                NativeMethods.SmallModulus_UInt64Count(NativePtr, out int result);
+                NativeMethods.SmallModulus_UInt64Count(NativePtr, out ulong result);
                 return result;
             }
         }
@@ -201,7 +201,7 @@ namespace Microsoft.Research.SEAL
                 using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
                 {
                     int bitCount = reader.ReadInt32();
-                    int uint64Count = reader.ReadInt32();
+                    ulong uint64Count = reader.ReadUInt64();
                     ulong value = reader.ReadUInt64();
                     Set(value);
 

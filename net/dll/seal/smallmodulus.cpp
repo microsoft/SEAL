@@ -76,13 +76,13 @@ SEALDLL HRESULT SEALCALL SmallModulus_BitCount(void* thisptr, int* bit_count)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_UInt64Count(void* thisptr, int* uint64_count)
+SEALDLL HRESULT SEALCALL SmallModulus_UInt64Count(void* thisptr, uint64_t* uint64_count)
 {
     SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
     IfNullRet(uint64_count, E_POINTER);
 
-    *uint64_count = static_cast<int>(sm->uint64_count());
+    *uint64_count = sm->uint64_count();
     return S_OK;
 }
 

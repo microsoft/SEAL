@@ -19,7 +19,7 @@ namespace SEALNetTest
             Assert.IsTrue(sm.IsZero);
             Assert.AreEqual(0ul, sm.Value);
             Assert.AreEqual(0, sm.BitCount);
-            Assert.AreEqual(1, sm.UInt64Count);
+            Assert.AreEqual(1ul, sm.UInt64Count);
         }
 
         [TestMethod]
@@ -39,7 +39,7 @@ namespace SEALNetTest
             Assert.IsFalse(sm2.IsZero);
             Assert.AreEqual(0x3FFFFFFFFFFFFFFFul, sm2.Value);
             Assert.AreEqual(62, sm2.BitCount);
-            Assert.AreEqual(1, sm2.UInt64Count);
+            Assert.AreEqual(1ul, sm2.UInt64Count);
         }
 
         [TestMethod]

@@ -223,7 +223,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void SmallModulus_BitCount(IntPtr thisptr, out int bitCount);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void SmallModulus_UInt64Count(IntPtr thisptr, out int uint64Count);
+        internal static extern void SmallModulus_UInt64Count(IntPtr thisptr, out ulong uint64Count);
 
         [DllImport(SEALdll, EntryPoint = "SmallModulus_Set1", PreserveSig = false)]
         internal static extern void SmallModulus_Set(IntPtr thisptr, IntPtr assign);
