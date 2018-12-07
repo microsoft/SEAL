@@ -1,7 +1,9 @@
-﻿using Microsoft.Research.SEAL.Tools;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
+using Microsoft.Research.SEAL.Tools;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.Research.SEAL

@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright (c) Microsoft Corporation. All rights reserved.
+     Licensed under the MIT license. -->
+       
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Microsoft.Research.SEALNet</id>
-    <version>1.0.0</version>
+    <version>3.1.0</version>
     <title>Simple Encrypted Arithmetic Library</title>
     <authors>Microsoft Corporation</authors>
     <owners>Microsoft Corporation</owners>
     <licenseUrl>https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/#!license</licenseUrl>
     <projectUrl>https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Simple Encrypted Arithmetic Library</description>
-    <releaseNotes>First release of .Net library.</releaseNotes>
+    <description>The Simple Encrypted Arithmetic Library (SEAL) is an easy-to-use but powerful open-source homomorphic encryption library, developed by researchers in the Cryptography Research Group at Microsoft Research. SEAL is written in standard C++; it has no external dependencies, so it is easy to compile in many different environments. SEAL is licensed under the MIT license.</description>
+    <releaseNotes>https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/#!news</releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>c# crypto cryptography</tags>
   </metadata>
