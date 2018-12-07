@@ -266,7 +266,7 @@ namespace Microsoft.Research.SEAL
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted1 or encrypted2 is not in the default
         /// NTT form</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void MultiplyInplace(Ciphertext encrypted1, Ciphertext encrypted2,
@@ -295,7 +295,7 @@ namespace Microsoft.Research.SEAL
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted1 or encrypted2 is not in the default
         /// NTT form</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void Multiply(Ciphertext encrypted1, 
@@ -325,7 +325,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void SquareInplace(Ciphertext encrypted,
@@ -349,7 +349,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void Square(Ciphertext encrypted, Ciphertext destination,
@@ -440,7 +440,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the scale is too 
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too 
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void ModSwitchToNext(Ciphertext encrypted, Ciphertext destination,
@@ -467,7 +467,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the scale is too 
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too 
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void ModSwitchToNextInplace(Ciphertext encrypted,
@@ -488,7 +488,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if plain is not in NTT form</exception>
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the scale is too
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         public void ModSwitchToNextInplace(Plaintext plain)
         {
@@ -508,7 +508,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if plain is not in NTT form</exception>
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the scale is too
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void ModSwitchToNext(Plaintext plain, Plaintext destination)
@@ -537,7 +537,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
         /// than the parameters corresponding to parms_id</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the scale is too
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void ModSwitchToInplace(Ciphertext encrypted, ParmsId parmsId,
@@ -567,7 +567,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
         /// than the parameters corresponding to parms_id</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the scale is too
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void ModSwitchTo(Ciphertext encrypted, 
@@ -597,7 +597,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is already at lower level in modulus chain
         /// than the parameters corresponding to parms_id</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the scale is too
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         public void ModSwitchToInplace(Plaintext plain, ParmsId parmsId)
         {
@@ -623,7 +623,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is already at lower level in modulus chain
         /// than the parameters corresponding to parms_id</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the scale is too
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         public void ModSwitchTo(Plaintext plain, ParmsId parmsId,
             Plaintext destination)
@@ -768,12 +768,12 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The ciphertext to overwrite with the multiplication result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypteds, relinKeys or destination are null</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if encrypteds is empty</exception>
         /// <exception cref="ArgumentException">if the ciphertexts or relin_keys are not valid for
         /// the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypteds are not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if the size of relin_keys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
@@ -805,11 +805,11 @@ namespace Microsoft.Research.SEAL
         /// <param name="relinKeys">The relinearization keys</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted or relinKeys are null</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if encrypted or relin_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if exponent is zero</exception>
         /// <exception cref="ArgumentException">if the size of relin_keys is too small</exception>
@@ -839,11 +839,11 @@ namespace Microsoft.Research.SEAL
         /// <param name="relinKeys">The relinearization keys</param>
         /// <param name="destination">The ciphertext to overwrite with the power</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if encrypted or relin_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if exponent is zero</exception>
         /// <exception cref="ArgumentException">if the size of relin_keys is too small</exception>
@@ -980,7 +980,7 @@ namespace Microsoft.Research.SEAL
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted and plain are in different NTT forms</exception>
         /// <exception cref="ArgumentException">if plain is zero</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void MultiplyPlainInplace(Ciphertext encrypted, Plaintext plain,
@@ -1012,7 +1012,7 @@ namespace Microsoft.Research.SEAL
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted and plain are in different NTT forms</exception>
         /// <exception cref="ArgumentException">if plain is zero</exception>
-        /// <exception cref="ArgumentException">if, when using scheme_type::CKKS, the output scale
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void MultiplyPlain(Ciphertext encrypted, 
@@ -1268,7 +1268,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
@@ -1306,7 +1306,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted, galoisKeys or destination are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
@@ -1344,7 +1344,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
@@ -1379,7 +1379,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted, galoisKeys or destination are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
@@ -1417,7 +1417,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::CKKS</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
         /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
@@ -1455,7 +1455,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted, galoisKeys or destination are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::CKKS</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
         /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
@@ -1491,7 +1491,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::CKKS</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
         /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
@@ -1524,7 +1524,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The ciphertext to overwrite with the rotated result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not scheme_type::CKKS</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
         /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level

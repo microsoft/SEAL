@@ -41,7 +41,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if context is null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption parameters 
         /// are not valid</exception>
-        /// <exception cref="ArgumentException">if scheme is not scheme_type::CKKS</exception>
+        /// <exception cref="ArgumentException">if scheme is not SchemeType.CKKS</exception>
         public CKKSEncoder(SEALContext context)
         {
             if (null == context)
