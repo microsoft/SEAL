@@ -47,11 +47,11 @@ namespace SEALNetTest
             Assert.AreEqual(2ul, cipher.Size);
 
             Plaintext decrypted = new Plaintext();
-            Assert.AreEqual(0, decrypted.CoeffCount);
+            Assert.AreEqual(0ul, decrypted.CoeffCount);
 
             decryptor.Decrypt(cipher, decrypted);
 
-            Assert.AreEqual(2, decrypted.CoeffCount);
+            Assert.AreEqual(2ul, decrypted.CoeffCount);
             Assert.AreEqual(2ul, decrypted[0]);
             Assert.AreEqual(1ul, decrypted[1]);
         }

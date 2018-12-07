@@ -29,7 +29,7 @@ namespace SEALNetTest
 
             Plaintext plain = secKey.Data;
             Assert.IsNotNull(plain);
-            Assert.AreEqual(8192, plain.CoeffCount);
+            Assert.AreEqual(8192ul, plain.CoeffCount);
         }
 
         [TestMethod]

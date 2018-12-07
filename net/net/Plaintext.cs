@@ -66,7 +66,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentException">if coeff_count is negative</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Plaintext(int coeffCount, MemoryPoolHandle pool = null)
+        public Plaintext(ulong coeffCount, MemoryPoolHandle pool = null)
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
@@ -86,7 +86,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if capacity is less than coeff_count</exception>
         /// <exception cref="ArgumentException">if coeff_count is negative</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Plaintext(int capacity, int coeffCount,
+        public Plaintext(ulong capacity, ulong coeffCount,
                     MemoryPoolHandle pool = null)
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
@@ -152,7 +152,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="capacity">The capacity</param>
         /// <exception cref="ArgumentException">if capacity is negative</exception>
         /// <exception cref="InvalidOperationException">if the plaintext is NTT transformed</exception>
-        public void Reserve(int capacity)
+        public void Reserve(ulong capacity)
         {
             if (capacity < 0)
                 throw new ArgumentException(nameof(capacity));
@@ -189,7 +189,7 @@ namespace Microsoft.Research.SEAL
         /// polynomial</param>
         /// <exception cref="ArgumentException">if coeff_count is negative</exception>
         /// <exception cref="InvalidOperationException">if the plaintext is NTT transformed</exception>
-        public void Resize(int coeffCount)
+        public void Resize(ulong coeffCount)
         {
             if (coeffCount < 0)
                 throw new ArgumentException(nameof(coeffCount));
@@ -335,7 +335,7 @@ namespace Microsoft.Research.SEAL
         /// 
         /// <param name="coeffIndex">The index of the coefficient in the plaintext polynomial</param>
         /// <exception cref="ArgumentOutOfRangeException">if coeffIndex is not within [0, CoeffCount)</exception>
-        public ulong this[int coeffIndex]
+        public ulong this[ulong coeffIndex]
         {
             get
             {
@@ -364,11 +364,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the capacity of the current allocation.
         /// </summary>
-        public int Capacity
+        public ulong Capacity
         {
             get
             {
-                NativeMethods.Plaintext_Capacity(NativePtr, out int capacity);
+                NativeMethods.Plaintext_Capacity(NativePtr, out ulong capacity);
                 return capacity;
             }
         }
@@ -376,11 +376,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the coefficient count of the current plaintext polynomial.
         /// </summary>
-        public int CoeffCount
+        public ulong CoeffCount
         {
             get
             {
-                NativeMethods.Plaintext_CoeffCount(NativePtr, out int result);
+                NativeMethods.Plaintext_CoeffCount(NativePtr, out ulong result);
                 return result;
             }
         }
@@ -388,11 +388,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the significant coefficient count of the current plaintext polynomial.
         /// </summary>
-        public int SignificantCoeffCount
+        public ulong SignificantCoeffCount
         {
             get
             {
-                NativeMethods.Plaintext_SignificantCoeffCount(NativePtr, out int result);
+                NativeMethods.Plaintext_SignificantCoeffCount(NativePtr, out ulong result);
                 return result;
             }
         }
@@ -436,9 +436,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public override int GetHashCode()
         {
-            int coeffCount = CoeffCount;
+            ulong coeffCount = CoeffCount;
             ulong[] coeffs = new ulong[coeffCount];
-            for (int i = 0; i < coeffCount; i++)
+            for (ulong i = 0; i < coeffCount; i++)
             {
                 coeffs[i] = this[i];
             }
@@ -487,7 +487,7 @@ namespace Microsoft.Research.SEAL
             {
                 writer.Write(Scale);
                 writer.Write(CoeffCount);
-                for (int i = 0; i < CoeffCount; i++)
+                for (ulong i = 0; i < CoeffCount; i++)
                 {
                     ulong data = this[i];
                     writer.Write(data);
@@ -518,13 +518,13 @@ namespace Microsoft.Research.SEAL
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
                     double scale = reader.ReadDouble();
-                    int coeffCount = reader.ReadInt32();
+                    ulong coeffCount = reader.ReadUInt64();
 
                     Scale = scale;
 
                     ulong[] newData = new ulong[coeffCount];
 
-                    for (int i = 0; i < coeffCount; i++)
+                    for (ulong i = 0; i < coeffCount; i++)
                     {
                         newData[i] = reader.ReadUInt64();
                     }

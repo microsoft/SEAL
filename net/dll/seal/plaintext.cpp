@@ -56,7 +56,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Create1(void* memoryPoolHandle, void** plaint
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Create2(int coeffCount, void* memoryPoolHandle, void** plaintext)
+SEALDLL HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void* memoryPoolHandle, void** plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(memoryPoolHandle);
@@ -78,7 +78,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Create2(int coeffCount, void* memoryPoolHandl
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Create3(int capacity, int coeffCount, void* memoryPoolHandle, void** plaintext)
+SEALDLL HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void* memoryPoolHandle, void** plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(memoryPoolHandle);
@@ -179,17 +179,17 @@ SEALDLL HRESULT SEALCALL Plaintext_Destroy(void* thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_CoeffCount(void* thisptr, int* coeff_count)
+SEALDLL HRESULT SEALCALL Plaintext_CoeffCount(void* thisptr, uint64_t* coeff_count)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(coeff_count, E_POINTER);
 
-    *coeff_count = static_cast<int>(plain->coeff_count());
+    *coeff_count = plain->coeff_count();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_CoeffAt(void* thisptr, int index, uint64_t* coeff)
+SEALDLL HRESULT SEALCALL Plaintext_CoeffAt(void* thisptr, uint64_t index, uint64_t* coeff)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -210,7 +210,7 @@ SEALDLL HRESULT SEALCALL Plaintext_CoeffAt(void* thisptr, int index, uint64_t* c
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_SetCoeffAt(void* thisptr, int index, uint64_t value)
+SEALDLL HRESULT SEALCALL Plaintext_SetCoeffAt(void* thisptr, uint64_t index, uint64_t value)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -330,7 +330,7 @@ SEALDLL HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, int start_coeff, int 
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Reserve(void* thisptr, int capacity)
+SEALDLL HRESULT SEALCALL Plaintext_Reserve(void* thisptr, uint64_t capacity)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -350,7 +350,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Reserve(void* thisptr, int capacity)
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Resize(void* thisptr, int coeff_count)
+SEALDLL HRESULT SEALCALL Plaintext_Resize(void* thisptr, uint64_t coeff_count)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -388,23 +388,23 @@ SEALDLL HRESULT SEALCALL Plaintext_Release(void* thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Capacity(void* thisptr, int* capacity)
+SEALDLL HRESULT SEALCALL Plaintext_Capacity(void* thisptr, uint64_t* capacity)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(capacity, E_POINTER);
 
-    *capacity = static_cast<int>(plain->capacity());
+    *capacity = plain->capacity();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_SignificantCoeffCount(void* thisptr, int* significant_coeff_count)
+SEALDLL HRESULT SEALCALL Plaintext_SignificantCoeffCount(void* thisptr, uint64_t* significant_coeff_count)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(significant_coeff_count, E_POINTER);
 
-    *significant_coeff_count = static_cast<int>(plain->significant_coeff_count());
+    *significant_coeff_count = plain->significant_coeff_count();
     return S_OK;
 }
 
@@ -451,7 +451,7 @@ SEALDLL HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void* contextptr, b
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, int count, uint64_t* new_data)
+SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, uint64_t count, uint64_t* new_data)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);

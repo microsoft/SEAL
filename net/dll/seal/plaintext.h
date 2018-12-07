@@ -12,9 +12,9 @@
 
 SEALDLL HRESULT SEALCALL Plaintext_Create1(void* memoryPoolHandle, void** plaintext);
 
-SEALDLL HRESULT SEALCALL Plaintext_Create2(int coeffCount, void* memoryPoolHandle, void** plaintext);
+SEALDLL HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void* memoryPoolHandle, void** plaintext);
 
-SEALDLL HRESULT SEALCALL Plaintext_Create3(int capacity, int coeffCount, void* memoryPoolHandle, void** plaintext);
+SEALDLL HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void* memoryPoolHandle, void** plaintext);
 
 SEALDLL HRESULT SEALCALL Plaintext_Create4(char* hexPoly, void* memoryPoolHandle, void** plaintext);
 
@@ -26,11 +26,11 @@ SEALDLL HRESULT SEALCALL Plaintext_Set3(void *thisptr, uint64_t const_coeff);
 
 SEALDLL HRESULT SEALCALL Plaintext_Destroy(void* thisptr);
 
-SEALDLL HRESULT SEALCALL Plaintext_CoeffCount(void* thisptr, int* coeff_count);
+SEALDLL HRESULT SEALCALL Plaintext_CoeffCount(void* thisptr, uint64_t* coeff_count);
 
-SEALDLL HRESULT SEALCALL Plaintext_CoeffAt(void* thisptr, int index, uint64_t* coeff);
+SEALDLL HRESULT SEALCALL Plaintext_CoeffAt(void* thisptr, uint64_t index, uint64_t* coeff);
 
-SEALDLL HRESULT SEALCALL Plaintext_SetCoeffAt(void* thisptr, int index, uint64_t value);
+SEALDLL HRESULT SEALCALL Plaintext_SetCoeffAt(void* thisptr, uint64_t index, uint64_t value);
 
 SEALDLL HRESULT SEALCALL Plaintext_ToString(void* thispt, int* length, char* outstr);
 
@@ -48,17 +48,17 @@ SEALDLL HRESULT SEALCALL Plaintext_GetParmsId(void* thisptr, uint64_t* parms_id)
 
 SEALDLL HRESULT SEALCALL Plaintext_SetParmsId(void* thisptr, uint64_t* parms_id);
 
-SEALDLL HRESULT SEALCALL Plaintext_Reserve(void* thisptr, int capacity);
+SEALDLL HRESULT SEALCALL Plaintext_Reserve(void* thisptr, uint64_t capacity);
 
-SEALDLL HRESULT SEALCALL Plaintext_Resize(void* thisptr, int coeff_count);
+SEALDLL HRESULT SEALCALL Plaintext_Resize(void* thisptr, uint64_t coeff_count);
 
 SEALDLL HRESULT SEALCALL Plaintext_ShrinkToFit(void* thisptr);
 
 SEALDLL HRESULT SEALCALL Plaintext_Release(void* thisptr);
 
-SEALDLL HRESULT SEALCALL Plaintext_Capacity(void* thisptr, int* capacity);
+SEALDLL HRESULT SEALCALL Plaintext_Capacity(void* thisptr, uint64_t* capacity);
 
-SEALDLL HRESULT SEALCALL Plaintext_SignificantCoeffCount(void* thisptr, int* significant_coeff_count);
+SEALDLL HRESULT SEALCALL Plaintext_SignificantCoeffCount(void* thisptr, uint64_t* significant_coeff_count);
 
 SEALDLL HRESULT SEALCALL Plaintext_Scale(void* thisptr, double* scale);
 
@@ -68,6 +68,6 @@ SEALDLL HRESULT SEALCALL Plaintext_Equals(void *thisptr, void* other, bool* resu
 
 SEALDLL HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void* contextpr, bool* result);
 
-SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, int count, uint64_t* new_data);
+SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, uint64_t count, uint64_t* new_data);
 
 SEALDLL HRESULT SEALCALL Plaintext_Pool(void* thisptr, void** pool);

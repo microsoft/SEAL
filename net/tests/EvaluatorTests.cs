@@ -159,7 +159,7 @@ namespace SEALNetTest
             evaluator.AddPlainInplace(encrypted, plain);
             decryptor.Decrypt(encrypted, plaindest);
 
-            Assert.AreEqual(4, plaindest.CoeffCount);
+            Assert.AreEqual(4ul, plaindest.CoeffCount);
             Assert.AreEqual(3ul, plaindest[0]);
             Assert.AreEqual(3ul, plaindest[1]);
             Assert.AreEqual(3ul, plaindest[2]);
@@ -283,7 +283,7 @@ namespace SEALNetTest
             evaluator.SubPlain(encrypted, plain, encdest);
             decryptor.Decrypt(encdest, plaindest);
 
-            Assert.AreEqual(3, plaindest.CoeffCount);
+            Assert.AreEqual(3ul, plaindest.CoeffCount);
             Assert.AreEqual(1ul, plaindest[0]);
             Assert.AreEqual(0x3Ful, plaindest[1]); // -1
             Assert.AreEqual(0x3Bul, plaindest[2]); // -5
@@ -293,7 +293,7 @@ namespace SEALNetTest
             evaluator.SubPlainInplace(encrypted, plain);
             decryptor.Decrypt(encrypted, plaindest);
 
-            Assert.AreEqual(4, plaindest.CoeffCount);
+            Assert.AreEqual(4ul, plaindest.CoeffCount);
             Assert.AreEqual(10ul, plaindest[0]);
             Assert.AreEqual(4ul, plaindest[1]);
             Assert.AreEqual(9ul, plaindest[2]);
@@ -331,7 +331,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encdest, plaindest);
 
             // {3x^6 + 8x^5 + Ex^4 + 14x^3 + 1Ax^2 + Ex^1 + 5}
-            Assert.AreEqual(7, plaindest.CoeffCount);
+            Assert.AreEqual(7ul, plaindest.CoeffCount);
             Assert.AreEqual(5ul, plaindest[0]);
             Assert.AreEqual(14ul, plaindest[1]);
             Assert.AreEqual(26ul, plaindest[2]);
@@ -346,7 +346,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted1, plaindest);
 
             // {8x^3 + 16x^2 + 1Fx^1 + 14}
-            Assert.AreEqual(4, plaindest.CoeffCount);
+            Assert.AreEqual(4ul, plaindest.CoeffCount);
             Assert.AreEqual(20ul, plaindest[0]);
             Assert.AreEqual(31ul, plaindest[1]);
             Assert.AreEqual(22ul, plaindest[2]);
@@ -388,7 +388,7 @@ namespace SEALNetTest
             evaluator.MultiplyMany(encrypteds, relinKeys, encdest);
             decryptor.Decrypt(encdest, plaindest);
 
-            Assert.AreEqual(1, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(24ul, plaindest[0]);
 
             Assert.ThrowsException<ArgumentException>(() =>
@@ -431,7 +431,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encdest, plaindest);
 
             // {6x^4 + 7x^2 + 2}
-            Assert.AreEqual(5, plaindest.CoeffCount);
+            Assert.AreEqual(5ul, plaindest.CoeffCount);
             Assert.AreEqual(2ul, plaindest[0]);
             Assert.AreEqual(0ul, plaindest[1]);
             Assert.AreEqual(7ul, plaindest[2]);
@@ -444,7 +444,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted, plaindest);
 
             // {8x^3 + 6x^2 + 4x^1 + 3}
-            Assert.AreEqual(4, plaindest.CoeffCount);
+            Assert.AreEqual(4ul, plaindest.CoeffCount);
             Assert.AreEqual(3ul, plaindest[0]);
             Assert.AreEqual(4ul, plaindest[1]);
             Assert.AreEqual(6ul, plaindest[2]);
@@ -489,7 +489,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encdest, plaindest);
 
             // {4x^4 + Cx^3 + 19x^2 + 18x^1 + 10}
-            Assert.AreEqual(5, plaindest.CoeffCount);
+            Assert.AreEqual(5ul, plaindest.CoeffCount);
             Assert.AreEqual(16ul, plaindest[0]);
             Assert.AreEqual(24ul, plaindest[1]);
             Assert.AreEqual(25ul, plaindest[2]);
@@ -501,7 +501,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted, plaindest);
 
             // {9x^2 + Cx^1 + 4}
-            Assert.AreEqual(3, plaindest.CoeffCount);
+            Assert.AreEqual(3ul, plaindest.CoeffCount);
             Assert.AreEqual(4ul, plaindest[0]);
             Assert.AreEqual(12ul, plaindest[1]);
             Assert.AreEqual(9ul, plaindest[2]);
@@ -538,7 +538,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encdest, plain);
 
             // {8x^6 + Cx^4 + 6x^2 + 1}
-            Assert.AreEqual(7, plain.CoeffCount);
+            Assert.AreEqual(7ul, plain.CoeffCount);
             Assert.AreEqual(1ul, plain[0]);
             Assert.AreEqual(0ul, plain[1]);
             Assert.AreEqual(6ul, plain[2]);
@@ -552,7 +552,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted, plain);
 
             // {11x^12 + 18x^9 + 18x^6 + 20x^3 + 10}
-            Assert.AreEqual(13, plain.CoeffCount);
+            Assert.AreEqual(13ul, plain.CoeffCount);
             Assert.AreEqual(16ul, plain[0]);
             Assert.AreEqual(0ul, plain[1]);
             Assert.AreEqual(0ul, plain[2]);
@@ -599,7 +599,7 @@ namespace SEALNetTest
             evaluator.ApplyGalois(encrypted, galoisElt: 1, galoisKeys: galoisKeys, destination: encdest);
             decryptor.Decrypt(encdest, plaindest);
 
-            Assert.AreEqual(1, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(1ul, plaindest[0]);
 
             plain.Set("1x^1");
@@ -608,7 +608,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encdest, plaindest);
 
             // {1x^1}
-            Assert.AreEqual(2, plaindest.CoeffCount);
+            Assert.AreEqual(2ul, plaindest.CoeffCount);
             Assert.AreEqual(0ul, plaindest[0]);
             Assert.AreEqual(1ul, plaindest[1]);
 
@@ -616,7 +616,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted, plaindest);
 
             // {1x^3}
-            Assert.AreEqual(4, plaindest.CoeffCount);
+            Assert.AreEqual(4ul, plaindest.CoeffCount);
             Assert.AreEqual(0ul, plaindest[0]);
             Assert.AreEqual(0ul, plaindest[1]);
             Assert.AreEqual(0ul, plaindest[2]);
@@ -626,7 +626,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encdest, plaindest);
 
             // {100x^7}
-            Assert.AreEqual(8, plaindest.CoeffCount);
+            Assert.AreEqual(8ul, plaindest.CoeffCount);
             Assert.AreEqual(0ul, plaindest[0]);
             Assert.AreEqual(0ul, plaindest[1]);
             Assert.AreEqual(0ul, plaindest[2]);
@@ -642,7 +642,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted, plaindest);
 
             // {1x^2}
-            Assert.AreEqual(3, plaindest.CoeffCount);
+            Assert.AreEqual(3ul, plaindest.CoeffCount);
             Assert.AreEqual(0ul, plaindest[0]);
             Assert.AreEqual(0ul, plaindest[1]);
             Assert.AreEqual(1ul, plaindest[2]);
@@ -651,7 +651,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted, plaindest);
 
             // {1x^6}
-            Assert.AreEqual(7, plaindest.CoeffCount);
+            Assert.AreEqual(7ul, plaindest.CoeffCount);
             Assert.AreEqual(0ul, plaindest[0]);
             Assert.AreEqual(0ul, plaindest[1]);
             Assert.AreEqual(0ul, plaindest[2]);
@@ -664,7 +664,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted, plaindest);
 
             // {100x^6}
-            Assert.AreEqual(7, plaindest.CoeffCount);
+            Assert.AreEqual(7ul, plaindest.CoeffCount);
             Assert.AreEqual(0ul, plaindest[0]);
             Assert.AreEqual(0ul, plaindest[1]);
             Assert.AreEqual(0ul, plaindest[2]);
@@ -706,7 +706,7 @@ namespace SEALNetTest
             evaluator.TransformToNTTInplace(plain, parms.ParmsId);
             Assert.IsTrue(plain.IsNTTForm);
 
-            for (int i = 0; i < 256; i++)
+            for (ulong i = 0; i < 256; i++)
             {
                 Assert.AreEqual(1ul, plain[i]);
             }
@@ -748,7 +748,7 @@ namespace SEALNetTest
             Assert.IsFalse(encdest2.IsNTTForm);
 
             decryptor.Decrypt(encdest2, plaindest);
-            Assert.AreEqual(1, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(0ul, plaindest[0]);
             Assert.AreEqual(parms.ParmsId, encdest2.ParmsId);
 
@@ -763,7 +763,7 @@ namespace SEALNetTest
 
             decryptor.Decrypt(encrypted, plaindest);
 
-            Assert.AreEqual(1, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(1ul, plaindest[0]);
             Assert.AreEqual(parms.ParmsId, encrypted.ParmsId);
         }
@@ -799,7 +799,7 @@ namespace SEALNetTest
             evaluator.ModSwitchToNext(encrypted, encdest);
             decryptor.Decrypt(encdest, plain);
 
-            Assert.AreEqual(1, plain.CoeffCount);
+            Assert.AreEqual(1ul, plain.CoeffCount);
             Assert.AreEqual(0ul, plain[0]);
 
             plain.Set("1");
@@ -807,7 +807,7 @@ namespace SEALNetTest
             evaluator.ModSwitchToNextInplace(encrypted);
             decryptor.Decrypt(encrypted, plain);
 
-            Assert.AreEqual(1, plain.CoeffCount);
+            Assert.AreEqual(1ul, plain.CoeffCount);
             Assert.AreEqual(1ul, plain[0]);
         }
 
@@ -842,7 +842,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encdest, plaindest);
 
             Assert.IsTrue(encdest.ParmsId == parms.ParmsId);
-            Assert.AreEqual(1, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(1ul, plaindest[0]);
 
             encryptor.Encrypt(new Plaintext("2"), encrypted);
@@ -850,7 +850,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted, plaindest);
 
             Assert.IsTrue(encrypted.ParmsId == parms.ParmsId);
-            Assert.AreEqual(1, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(2ul, plaindest[0]);
         }
 
@@ -966,7 +966,7 @@ namespace SEALNetTest
             evaluator.RelinearizeInplace(encrypted1, relinKeys);
             decryptor.Decrypt(encrypted1, plain2);
 
-            Assert.AreEqual(1, plain2.CoeffCount);
+            Assert.AreEqual(1ul, plain2.CoeffCount);
             Assert.AreEqual(0ul, plain2[0]);
 
             plain1.Set("1x^10 + 2");
@@ -977,7 +977,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encrypted2, plain2);
 
             // {1x^40 + 8x^30 + 18x^20 + 20x^10 + 10}
-            Assert.AreEqual(41, plain2.CoeffCount);
+            Assert.AreEqual(41ul, plain2.CoeffCount);
             Assert.AreEqual(16ul, plain2[0]);
             Assert.AreEqual(32ul, plain2[10]);
             Assert.AreEqual(24ul, plain2[20]);

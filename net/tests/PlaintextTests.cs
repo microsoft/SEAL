@@ -15,12 +15,12 @@ namespace SEALNetTest
         {
             Plaintext plain = new Plaintext();
             Assert.IsNotNull(plain);
-            Assert.AreEqual(0, plain.CoeffCount);
+            Assert.AreEqual(0ul, plain.CoeffCount);
 
             Plaintext plain2 = new Plaintext(capacity: 20, coeffCount: 10);
             Assert.IsNotNull(plain2);
-            Assert.AreEqual(20, plain2.Capacity);
-            Assert.AreEqual(10, plain2.CoeffCount);
+            Assert.AreEqual(20ul, plain2.Capacity);
+            Assert.AreEqual(10ul, plain2.CoeffCount);
         }
         
         [TestMethod]
@@ -28,7 +28,7 @@ namespace SEALNetTest
         {
             Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 1");
             Assert.IsNotNull(plain);
-            Assert.AreEqual(6, plain.CoeffCount);
+            Assert.AreEqual(6ul, plain.CoeffCount);
             Assert.AreEqual(1ul, plain[0]);
             Assert.AreEqual(2ul, plain[1]);
             Assert.AreEqual(3ul, plain[2]);
@@ -48,7 +48,7 @@ namespace SEALNetTest
             plain[4] = 5;
             plain[5] = 6;
 
-            Assert.AreEqual(6, plain.CoeffCount);
+            Assert.AreEqual(6ul, plain.CoeffCount);
 
             string str = plain.ToString();
             Assert.AreEqual("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 1", str);
@@ -137,22 +137,22 @@ namespace SEALNetTest
             Plaintext plain = new Plaintext();
             MemoryPoolHandle handle = plain.Pool;
 
-            Assert.AreEqual(0, plain.CoeffCount);
-            Assert.AreEqual(0, plain.Capacity);
+            Assert.AreEqual(0ul, plain.CoeffCount);
+            Assert.AreEqual(0ul, plain.Capacity);
 
             plain.Reserve(capacity: 10);
 
             ulong alloced = handle.AllocByteCount;
             Assert.IsTrue(alloced > 0ul);
 
-            Assert.AreEqual(0, plain.CoeffCount);
-            Assert.AreEqual(10, plain.Capacity);
+            Assert.AreEqual(0ul, plain.CoeffCount);
+            Assert.AreEqual(10ul, plain.Capacity);
 
             plain.Resize(coeffCount: 11);
 
-            Assert.AreEqual(11, plain.CoeffCount);
-            Assert.AreEqual(11, plain.Capacity);
-            Assert.AreEqual(0, plain.SignificantCoeffCount);
+            Assert.AreEqual(11ul, plain.CoeffCount);
+            Assert.AreEqual(11ul, plain.Capacity);
+            Assert.AreEqual(0ul, plain.SignificantCoeffCount);
             Assert.IsTrue(handle.AllocByteCount > 0ul);
         }
 
@@ -163,19 +163,19 @@ namespace SEALNetTest
 
             plain.Reserve(10000);
 
-            Assert.AreEqual(10000, plain.Capacity);
-            Assert.AreEqual(0, plain.CoeffCount);
+            Assert.AreEqual(10000ul, plain.Capacity);
+            Assert.AreEqual(0ul, plain.CoeffCount);
 
             plain.Set("1");
 
-            Assert.AreEqual(10000, plain.Capacity);
-            Assert.AreEqual(1, plain.CoeffCount);
-            Assert.AreEqual(1, plain.SignificantCoeffCount);
+            Assert.AreEqual(10000ul, plain.Capacity);
+            Assert.AreEqual(1ul, plain.CoeffCount);
+            Assert.AreEqual(1ul, plain.SignificantCoeffCount);
 
             plain.ShrinkToFit();
 
-            Assert.AreEqual(1, plain.Capacity);
-            Assert.AreEqual(1, plain.CoeffCount);
+            Assert.AreEqual(1ul, plain.Capacity);
+            Assert.AreEqual(1ul, plain.CoeffCount);
             Assert.AreEqual(1ul, plain[0]);
         }
 
@@ -187,13 +187,13 @@ namespace SEALNetTest
 
             plain.Set("3x^2 + 4x^1 + 5");
 
-            Assert.AreEqual(10000, plain.Capacity);
-            Assert.AreEqual(3, plain.CoeffCount);
+            Assert.AreEqual(10000ul, plain.Capacity);
+            Assert.AreEqual(3ul, plain.CoeffCount);
 
             plain.Release();
 
-            Assert.AreEqual(0, plain.Capacity);
-            Assert.AreEqual(0, plain.CoeffCount);
+            Assert.AreEqual(0ul, plain.Capacity);
+            Assert.AreEqual(0ul, plain.CoeffCount);
         }
 
         [TestMethod]
@@ -208,8 +208,8 @@ namespace SEALNetTest
             plain1.Set("4x^3 + 5x^2 + 6x^1 + 7");
             plain2.Set("4x^3 + 5x^2 + 6x^1 + 7");
 
-            Assert.AreEqual(10000, plain1.Capacity);
-            Assert.AreEqual(500, plain2.Capacity);
+            Assert.AreEqual(10000ul, plain1.Capacity);
+            Assert.AreEqual(500ul, plain2.Capacity);
 
             Assert.AreNotSame(plain1, plain2);
             Assert.AreEqual(plain1, plain2);

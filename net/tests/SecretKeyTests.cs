@@ -28,7 +28,7 @@ namespace SEALNetTest
 
             SecretKey secret = keygen.SecretKey;
 
-            Assert.AreEqual(64, secret.Data.CoeffCount);
+            Assert.AreEqual(64ul, secret.Data.CoeffCount);
             Assert.IsTrue(secret.Data.IsNTTForm);
             Assert.AreNotEqual(ParmsId.Zero, secret.ParmsId);
 
@@ -36,7 +36,7 @@ namespace SEALNetTest
             MemoryPoolHandle handle = secret2.Pool;
 
             Assert.IsNotNull(secret2);
-            Assert.AreEqual(0, secret2.Data.CoeffCount);
+            Assert.AreEqual(0ul, secret2.Data.CoeffCount);
             Assert.IsFalse(secret2.Data.IsNTTForm);
             ulong alloced = handle.AllocByteCount;
 
@@ -50,7 +50,7 @@ namespace SEALNetTest
             }
 
             Assert.AreNotSame(secret, secret2);
-            Assert.AreEqual(64, secret2.Data.CoeffCount);
+            Assert.AreEqual(64ul, secret2.Data.CoeffCount);
             Assert.IsTrue(secret2.Data.IsNTTForm);
             Assert.AreNotEqual(ParmsId.Zero, secret2.ParmsId);
             Assert.AreEqual(secret.ParmsId, secret2.ParmsId);

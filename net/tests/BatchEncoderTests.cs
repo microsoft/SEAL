@@ -176,21 +176,21 @@ namespace SEALNetTest
             Assert.AreEqual(64, encoder.SlotCount);
 
             Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 1");
-            Assert.AreEqual(6, plain.CoeffCount);
+            Assert.AreEqual(6ul, plain.CoeffCount);
 
             encoder.Encode(plain);
 
-            Assert.AreEqual(64, plain.CoeffCount);
+            Assert.AreEqual(64ul, plain.CoeffCount);
 
             encoder.Decode(plain);
-            Assert.AreEqual(64, plain.CoeffCount);
+            Assert.AreEqual(64ul, plain.CoeffCount);
 
-            for (int i = 0; i < 6; i++)
+            for (ulong i = 0; i < 6; i++)
             {
-                Assert.AreEqual((ulong)(i + 1), plain[i]);
+                Assert.AreEqual((i + 1), plain[i]);
             }
 
-            for (int i = 6; i < plain.CoeffCount; i++)
+            for (ulong i = 6; i < plain.CoeffCount; i++)
             {
                 Assert.AreEqual(0ul, plain[i]);
             }

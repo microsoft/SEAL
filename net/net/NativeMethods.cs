@@ -602,10 +602,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_Create(IntPtr memoryPoolHandle, out IntPtr plainText);
 
         [DllImport(SEALdll, EntryPoint = "Plaintext_Create2", PreserveSig = false)]
-        internal static extern void Plaintext_Create(int coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
+        internal static extern void Plaintext_Create(ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
 
         [DllImport(SEALdll, EntryPoint = "Plaintext_Create3", PreserveSig = false)]
-        internal static extern void Plaintext_Create(int capacity, int coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
+        internal static extern void Plaintext_Create(ulong capacity, ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
 
         [DllImport(SEALdll, EntryPoint = "Plaintext_Create4", PreserveSig = false, CharSet = CharSet.Ansi)]
         internal static extern void Plaintext_Create(string hexPoly, IntPtr memoryPoolHandle, out IntPtr plainText);
@@ -623,13 +623,13 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_Destroy(IntPtr thisptr);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Plaintext_CoeffCount(IntPtr thisptr, out int coeffCount);
+        internal static extern void Plaintext_CoeffCount(IntPtr thisptr, out ulong coeffCount);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Plaintext_CoeffAt(IntPtr thisptr, int index, out ulong coeff);
+        internal static extern void Plaintext_CoeffAt(IntPtr thisptr, ulong index, out ulong coeff);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Plaintext_SetCoeffAt(IntPtr thisptr, int index, ulong value);
+        internal static extern void Plaintext_SetCoeffAt(IntPtr thisptr, ulong index, ulong value);
 
         [DllImport(SEALdll, PreserveSig = false, CharSet = CharSet.Ansi)]
         internal static extern void Plaintext_ToString(
@@ -659,10 +659,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_SetParmsId(IntPtr thisptr, ulong[] parmsId);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Plaintext_Reserve(IntPtr thisptr, int capacity);
+        internal static extern void Plaintext_Reserve(IntPtr thisptr, ulong capacity);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Plaintext_Resize(IntPtr thisptr, int coeffCount);
+        internal static extern void Plaintext_Resize(IntPtr thisptr, ulong coeffCount);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Plaintext_ShrinkToFit(IntPtr thisptr);
@@ -671,10 +671,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_Release(IntPtr thisptr);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Plaintext_Capacity(IntPtr thisptr, out int capacity);
+        internal static extern void Plaintext_Capacity(IntPtr thisptr, out ulong capacity);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Plaintext_SignificantCoeffCount(IntPtr thisptr, out int significantCoeffCount);
+        internal static extern void Plaintext_SignificantCoeffCount(IntPtr thisptr, out ulong significantCoeffCount);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Plaintext_Scale(IntPtr thisptr, out double scale);
@@ -689,7 +689,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Plaintext_SwapData(IntPtr thisptr, int count, ulong[] newData);
+        internal static extern void Plaintext_SwapData(IntPtr thisptr, ulong count, ulong[] newData);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Plaintext_Pool(IntPtr thisptr, out IntPtr pool);
