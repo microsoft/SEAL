@@ -123,7 +123,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public Ciphertext(SEALContext context, 
-                    ParmsId parmsId, int sizeCapacity,
+                    ParmsId parmsId, ulong sizeCapacity,
                     MemoryPoolHandle pool = null)
         {
             if (null == context)
@@ -178,7 +178,7 @@ namespace Microsoft.Research.SEAL
         /// parameters</exception>
         /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
         public void Reserve(SEALContext context,
-                    ParmsId parmsId, int sizeCapacity)
+                    ParmsId parmsId, ulong sizeCapacity)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -201,7 +201,7 @@ namespace Microsoft.Research.SEAL
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
         public void Reserve(SEALContext context,
-                    int sizeCapacity)
+                    ulong sizeCapacity)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -216,7 +216,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="sizeCapacity">The capacity</param>
         /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
-        public void Reserve(int sizeCapacity)
+        public void Reserve(ulong sizeCapacity)
         {
             NativeMethods.Ciphertext_Reserve(NativePtr, sizeCapacity);
         }
@@ -242,7 +242,7 @@ namespace Microsoft.Research.SEAL
         /// parameters</exception>
         /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
         public void Resize(SEALContext context,
-            ParmsId parmsId, int size)
+            ParmsId parmsId, ulong size)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -269,7 +269,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
-        public void Resize(SEALContext context, int size)
+        public void Resize(SEALContext context, ulong size)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -288,7 +288,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="size">The new size</param>
         /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
-        public void Resize(int size)
+        public void Resize(ulong size)
         {
             NativeMethods.Ciphertext_Resize(NativePtr, size);
         }
@@ -301,7 +301,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="size">The new size</param>
         /// <param name="polyModulusDegree">The new poly modulus degree</param>
         /// <param name="coeffModCount">The new coefficient mod count</param>
-        private void Resize(int size, int polyModulusDegree, int coeffModCount)
+        private void Resize(ulong size, ulong polyModulusDegree, ulong coeffModCount)
         {
             NativeMethods.Ciphertext_Resize(NativePtr, size, polyModulusDegree, coeffModCount);
         }
@@ -337,7 +337,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="coeffIndex">The index of the coefficient</param>
         /// <exception cref="IndexOutOfRangeException">if coeff_index is out of range</exception>
-        public ulong this[int coeffIndex]
+        public ulong this[ulong coeffIndex]
         {
             get
             {
@@ -383,7 +383,7 @@ namespace Microsoft.Research.SEAL
         /// than the size of the ciphertext</exception>
         /// <exception cref="IndexOutOfRangeException">if coeffIndex is less than 0 or bigger
         /// than the size of the ciphertext</exception>
-        public ulong this[int polyIndex, int coeffIndex]
+        public ulong this[ulong polyIndex, ulong coeffIndex]
         {
             get
             {
@@ -411,11 +411,11 @@ namespace Microsoft.Research.SEAL
         /// associated encryption parameters. This directly affects the 
         /// allocation size of the ciphertext.
         /// </summary>
-        public int CoeffModCount
+        public ulong CoeffModCount
         {
             get
             {
-                NativeMethods.Ciphertext_CoeffModCount(NativePtr, out int coeffModCount);
+                NativeMethods.Ciphertext_CoeffModCount(NativePtr, out ulong coeffModCount);
                 return coeffModCount;
             }
         }
@@ -426,11 +426,11 @@ namespace Microsoft.Research.SEAL
         /// encryption parameters.This directly affects the allocation size
         /// of the ciphertext.
         /// </summary>
-        public int PolyModulusDegree
+        public ulong PolyModulusDegree
         {
             get
             {
-                NativeMethods.Ciphertext_PolyModulusDegree(NativePtr, out int polyModulusDegree);
+                NativeMethods.Ciphertext_PolyModulusDegree(NativePtr, out ulong polyModulusDegree);
                 return polyModulusDegree;
             }
         }
@@ -440,11 +440,11 @@ namespace Microsoft.Research.SEAL
         /// of the ciphertext that can be stored in the current allocation with 
         /// the current encryption parameters.
         /// </summary>
-        public int SizeCapacity
+        public ulong SizeCapacity
         {
             get
             {
-                NativeMethods.Ciphertext_SizeCapacity(NativePtr, out int sizeCapacity);
+                NativeMethods.Ciphertext_SizeCapacity(NativePtr, out ulong sizeCapacity);
                 return sizeCapacity;
             }
         }
@@ -452,11 +452,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the size of the ciphertext.
         /// </summary>
-        public int Size
+        public ulong Size
         {
             get
             {
-                NativeMethods.Ciphertext_Size(NativePtr, out int size);
+                NativeMethods.Ciphertext_Size(NativePtr, out ulong size);
                 return size;
             }
         }
@@ -464,11 +464,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the total size of the current allocation in 64-bit words.
         /// </summary>
-        public int UInt64CountCapacity
+        public ulong UInt64CountCapacity
         {
             get
             {
-                NativeMethods.Ciphertext_UInt64CountCapacity(NativePtr, out int capacity);
+                NativeMethods.Ciphertext_UInt64CountCapacity(NativePtr, out ulong capacity);
                 return capacity;
             }
         }
@@ -476,11 +476,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the total size of the current ciphertext in 64-bit words.
         /// </summary>
-        public int UInt64Count
+        public ulong UInt64Count
         {
             get
             {
-                NativeMethods.Ciphertext_UInt64Count(NativePtr, out int uint64Count);
+                NativeMethods.Ciphertext_UInt64Count(NativePtr, out ulong uint64Count);
                 return uint64Count;
             }
         }
@@ -524,8 +524,8 @@ namespace Microsoft.Research.SEAL
                 writer.Write(PolyModulusDegree);
                 writer.Write(CoeffModCount);
 
-                int ulongCount = Size * PolyModulusDegree * CoeffModCount;
-                for (int i = 0; i < ulongCount; i++)
+                ulong ulongCount = Size * PolyModulusDegree * CoeffModCount;
+                for (ulong i = 0; i < ulongCount; i++)
                 {
                     writer.Write(this[i]);
                 }
@@ -555,15 +555,15 @@ namespace Microsoft.Research.SEAL
                     ParmsId = parms;
 
                     bool isNTT = reader.ReadBoolean();
-                    int size = reader.ReadInt32();
-                    int polyModulusDegree = reader.ReadInt32();
-                    int coeffModCount = reader.ReadInt32();
-                    int ulongCount = size * polyModulusDegree * coeffModCount;
+                    ulong size = reader.ReadUInt64();
+                    ulong polyModulusDegree = reader.ReadUInt64();
+                    ulong coeffModCount = reader.ReadUInt64();
+                    ulong ulongCount = size * polyModulusDegree * coeffModCount;
 
                     IsNTTForm = isNTT;
                     Resize(size, polyModulusDegree, coeffModCount);
 
-                    for (int i = 0; i < ulongCount; i++)
+                    for (ulong i = 0; i < ulongCount; i++)
                     {
                         this[i] = reader.ReadUInt64();
                     }

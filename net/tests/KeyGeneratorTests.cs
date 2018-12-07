@@ -25,7 +25,7 @@ namespace SEALNetTest
 
             Ciphertext cipher = pubKey.Data;
             Assert.IsNotNull(cipher);
-            Assert.AreEqual(16384, cipher.UInt64Count);
+            Assert.AreEqual(16384ul, cipher.UInt64Count);
 
             Plaintext plain = secKey.Data;
             Assert.IsNotNull(plain);

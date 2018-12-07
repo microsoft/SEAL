@@ -107,7 +107,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Create4(void* context, uint64_t* parms_id, v
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Create5(void* context, uint64_t* parms_id, int capacity, void* pool, void** ciphertext)
+SEALDLL HRESULT SEALCALL Ciphertext_Create5(void* context, uint64_t* parms_id, uint64_t capacity, void* pool, void** ciphertext)
 {
     const auto& sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -132,7 +132,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Create5(void* context, uint64_t* parms_id, i
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Reserve1(void* thisptr, void* context, uint64_t* parms_id, int size_capacity)
+SEALDLL HRESULT SEALCALL Ciphertext_Reserve1(void* thisptr, void* context, uint64_t* parms_id, uint64_t size_capacity)
 {
     const auto& sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -154,7 +154,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Reserve1(void* thisptr, void* context, uint6
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Reserve2(void* thisptr, void* context, int size_capacity)
+SEALDLL HRESULT SEALCALL Ciphertext_Reserve2(void* thisptr, void* context, uint64_t size_capacity)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -172,7 +172,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Reserve2(void* thisptr, void* context, int s
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Reserve3(void* thisptr, int size_capacity)
+SEALDLL HRESULT SEALCALL Ciphertext_Reserve3(void* thisptr, uint64_t size_capacity)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -208,63 +208,63 @@ SEALDLL HRESULT SEALCALL Ciphertext_Destroy(void* thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_UInt64Count(void* thisptr, int* uint64_count)
+SEALDLL HRESULT SEALCALL Ciphertext_UInt64Count(void* thisptr, uint64_t* uint64_count)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
     IfNullRet(uint64_count, E_POINTER);
 
-    *uint64_count = static_cast<int>(cipher->uint64_count());
+    *uint64_count = cipher->uint64_count();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_UInt64CountCapacity(void* thisptr, int* uint64_count_capacity)
+SEALDLL HRESULT SEALCALL Ciphertext_UInt64CountCapacity(void* thisptr, uint64_t* uint64_count_capacity)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
     IfNullRet(uint64_count_capacity, E_POINTER);
 
-    *uint64_count_capacity = static_cast<int>(cipher->uint64_count_capacity());
+    *uint64_count_capacity = cipher->uint64_count_capacity();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Size(void* thisptr, int* size)
+SEALDLL HRESULT SEALCALL Ciphertext_Size(void* thisptr, uint64_t* size)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
     IfNullRet(size, E_POINTER);
 
-    *size = static_cast<int>(cipher->size());
+    *size = cipher->size();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_SizeCapacity(void* thisptr, int* size_capacity)
+SEALDLL HRESULT SEALCALL Ciphertext_SizeCapacity(void* thisptr, uint64_t* size_capacity)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
     IfNullRet(size_capacity, E_POINTER);
 
-    *size_capacity = static_cast<int>(cipher->size_capacity());
+    *size_capacity = cipher->size_capacity();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_PolyModulusDegree(void* thisptr, int* poly_modulus_degree)
+SEALDLL HRESULT SEALCALL Ciphertext_PolyModulusDegree(void* thisptr, uint64_t* poly_modulus_degree)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
     IfNullRet(poly_modulus_degree, E_POINTER);
 
-    *poly_modulus_degree = static_cast<int>(cipher->poly_modulus_degree());
+    *poly_modulus_degree = cipher->poly_modulus_degree();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_CoeffModCount(void* thisptr, int* coeff_mod_count)
+SEALDLL HRESULT SEALCALL Ciphertext_CoeffModCount(void* thisptr, uint64_t* coeff_mod_count)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
     IfNullRet(coeff_mod_count, E_POINTER);
 
-    *coeff_mod_count = static_cast<int>(cipher->coeff_mod_count());
+    *coeff_mod_count = cipher->coeff_mod_count();
     return S_OK;
 }
 
@@ -292,7 +292,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_SetParmsId(void* thisptr, uint64_t* parms_id
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Resize1(void* thisptr, void* context, uint64_t* parms_id, int size)
+SEALDLL HRESULT SEALCALL Ciphertext_Resize1(void* thisptr, void* context, uint64_t* parms_id, uint64_t size)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -314,7 +314,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Resize1(void* thisptr, void* context, uint64
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Resize2(void* thisptr, void* context, int size)
+SEALDLL HRESULT SEALCALL Ciphertext_Resize2(void* thisptr, void* context, uint64_t size)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -333,7 +333,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Resize2(void* thisptr, void* context, int si
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Resize3(void* thisptr, int size)
+SEALDLL HRESULT SEALCALL Ciphertext_Resize3(void* thisptr, uint64_t size)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -349,7 +349,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Resize3(void* thisptr, int size)
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_Resize4(void* thisptr, int size, int polyModulusDegree, int coeffModCount)
+SEALDLL HRESULT SEALCALL Ciphertext_Resize4(void* thisptr, uint64_t size, uint64_t polyModulusDegree, uint64_t coeffModCount)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -365,7 +365,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Resize4(void* thisptr, int size, int polyMod
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_GetDataAt1(void* thisptr, int index, uint64_t* data)
+SEALDLL HRESULT SEALCALL Ciphertext_GetDataAt1(void* thisptr, uint64_t index, uint64_t* data)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -382,7 +382,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_GetDataAt1(void* thisptr, int index, uint64_
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_GetDataAt2(void* thisptr, int poly_index, int coeff_index, uint64_t* data)
+SEALDLL HRESULT SEALCALL Ciphertext_GetDataAt2(void* thisptr, uint64_t poly_index, uint64_t coeff_index, uint64_t* data)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -406,7 +406,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_GetDataAt2(void* thisptr, int poly_index, in
     }
 }
 
-SEALDLL HRESULT SEALCALL Ciphertext_SetDataAt(void* thisptr, int index, uint64_t value)
+SEALDLL HRESULT SEALCALL Ciphertext_SetDataAt(void* thisptr, uint64_t index, uint64_t value)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);

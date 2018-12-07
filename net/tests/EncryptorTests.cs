@@ -22,12 +22,12 @@ namespace SEALNetTest
             Ciphertext cipher = new Ciphertext();
             Plaintext plain = new Plaintext("1x^1 + 1");
 
-            Assert.AreEqual(0, cipher.Size);
+            Assert.AreEqual(0ul, cipher.Size);
 
             encryptor.Encrypt(plain, cipher);
 
             Assert.IsNotNull(cipher);
-            Assert.AreEqual(2, cipher.Size);
+            Assert.AreEqual(2ul, cipher.Size);
         }
     }
 }

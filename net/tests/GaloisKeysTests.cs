@@ -79,8 +79,8 @@ namespace SEALNetTest
                     Assert.AreEqual(keysCipher.PolyModulusDegree, otherCipher.PolyModulusDegree);
                     Assert.AreEqual(keysCipher.CoeffModCount, otherCipher.CoeffModCount);
 
-                    int coeffCount = keysCipher.Size * keysCipher.PolyModulusDegree * keysCipher.CoeffModCount;
-                    for (int k = 0; k < coeffCount; k++)
+                    ulong coeffCount = keysCipher.Size * keysCipher.PolyModulusDegree * keysCipher.CoeffModCount;
+                    for (ulong k = 0; k < coeffCount; k++)
                     {
                         Assert.AreEqual(keysCipher[k], otherCipher[k]);
                     }

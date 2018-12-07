@@ -514,16 +514,16 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_Create4(IntPtr context, ulong[] parmsId, IntPtr pool, out IntPtr cipher);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Ciphertext_Create5(IntPtr context, ulong[] parmsId, int capacity, IntPtr pool, out IntPtr cipher);
+        internal static extern void Ciphertext_Create5(IntPtr context, ulong[] parmsId, ulong capacity, IntPtr pool, out IntPtr cipher);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_Reserve1", PreserveSig = false)]
-        internal static extern void Ciphertext_Reserve(IntPtr thisptr, IntPtr context, ulong[] parmsId, int sizeCapacity);
+        internal static extern void Ciphertext_Reserve(IntPtr thisptr, IntPtr context, ulong[] parmsId, ulong sizeCapacity);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_Reserve2", PreserveSig = false)]
-        internal static extern void Ciphertext_Reserve(IntPtr thisptr, IntPtr context, int sizeCapacity);
+        internal static extern void Ciphertext_Reserve(IntPtr thisptr, IntPtr context, ulong sizeCapacity);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_Reserve3", PreserveSig = false)]
-        internal static extern void Ciphertext_Reserve(IntPtr thisptr, int sizeCapacity);
+        internal static extern void Ciphertext_Reserve(IntPtr thisptr, ulong sizeCapacity);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Ciphertext_Set(IntPtr thisptr, IntPtr assign);
@@ -532,22 +532,22 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_Destroy(IntPtr thisptr);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Ciphertext_UInt64Count(IntPtr thisptr, out int uint64Count);
+        internal static extern void Ciphertext_UInt64Count(IntPtr thisptr, out ulong uint64Count);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Ciphertext_UInt64CountCapacity(IntPtr thisptr, out int uint64CountCapacity);
+        internal static extern void Ciphertext_UInt64CountCapacity(IntPtr thisptr, out ulong uint64CountCapacity);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Ciphertext_Size(IntPtr thisptr, out int size);
+        internal static extern void Ciphertext_Size(IntPtr thisptr, out ulong size);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Ciphertext_SizeCapacity(IntPtr thisptr, out int size_capacity);
+        internal static extern void Ciphertext_SizeCapacity(IntPtr thisptr, out ulong size_capacity);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Ciphertext_PolyModulusDegree(IntPtr thisptr, out int polyModulusDegree);
+        internal static extern void Ciphertext_PolyModulusDegree(IntPtr thisptr, out ulong polyModulusDegree);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Ciphertext_CoeffModCount(IntPtr thisptr, out int coeffModCount);
+        internal static extern void Ciphertext_CoeffModCount(IntPtr thisptr, out ulong coeffModCount);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Ciphertext_ParmsId(IntPtr thisptr, ulong[] parmsId);
@@ -556,25 +556,25 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_SetParmsId(IntPtr thisptr, ulong[] parmsId);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_Resize1", PreserveSig = false)]
-        internal static extern void Ciphertext_Resize(IntPtr thisptr, IntPtr context, ulong[] parms_id, int size);
+        internal static extern void Ciphertext_Resize(IntPtr thisptr, IntPtr context, ulong[] parms_id, ulong size);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_Resize2", PreserveSig = false)]
-        internal static extern void Ciphertext_Resize(IntPtr thisptr, IntPtr context, int size);
+        internal static extern void Ciphertext_Resize(IntPtr thisptr, IntPtr context, ulong size);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_Resize3", PreserveSig = false)]
-        internal static extern void Ciphertext_Resize(IntPtr thisptr, int size);
+        internal static extern void Ciphertext_Resize(IntPtr thisptr, ulong size);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_Resize4", PreserveSig = false)]
-        internal static extern void Ciphertext_Resize(IntPtr thisptr, int size, int polyModulusDegree, int coeffModCount);
+        internal static extern void Ciphertext_Resize(IntPtr thisptr, ulong size, ulong polyModulusDegree, ulong coeffModCount);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_GetDataAt1", PreserveSig = false)]
-        internal static extern void Ciphertext_GetDataAt(IntPtr thisptr, int index, out ulong data);
+        internal static extern void Ciphertext_GetDataAt(IntPtr thisptr, ulong index, out ulong data);
 
         [DllImport(SEALdll, EntryPoint = "Ciphertext_GetDataAt2", PreserveSig = false)]
-        internal static extern void Ciphertext_GetDataAt(IntPtr thisptr, int polyIndex, int coeffIndex, out ulong data);
+        internal static extern void Ciphertext_GetDataAt(IntPtr thisptr, ulong polyIndex, ulong coeffIndex, out ulong data);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void Ciphertext_SetDataAt(IntPtr thisptr, int index, ulong value);
+        internal static extern void Ciphertext_SetDataAt(IntPtr thisptr, ulong index, ulong value);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Ciphertext_IsNTTForm(IntPtr thisptr, out bool isNTTForm);

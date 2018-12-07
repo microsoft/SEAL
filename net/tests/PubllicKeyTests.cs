@@ -29,13 +29,13 @@ namespace SEALNetTest
             PublicKey pub = keygen.PublicKey;
 
             Assert.IsNotNull(pub);
-            Assert.AreEqual(2, pub.Data.Size);
+            Assert.AreEqual(2ul, pub.Data.Size);
             Assert.IsTrue(pub.Data.IsNTTForm);
 
             PublicKey pub2 = new PublicKey();
             MemoryPoolHandle handle = pub2.Pool;
 
-            Assert.AreEqual(0, pub2.Data.Size);
+            Assert.AreEqual(0ul, pub2.Data.Size);
             Assert.IsFalse(pub2.Data.IsNTTForm);
             Assert.AreEqual(ParmsId.Zero, pub2.ParmsId);
 
@@ -49,7 +49,7 @@ namespace SEALNetTest
             }
 
             Assert.AreNotSame(pub, pub2);
-            Assert.AreEqual(2, pub2.Data.Size);
+            Assert.AreEqual(2ul, pub2.Data.Size);
             Assert.IsTrue(pub2.Data.IsNTTForm);
             Assert.AreEqual(pub.ParmsId, pub2.ParmsId);
             Assert.AreNotEqual(ParmsId.Zero, pub2.ParmsId);

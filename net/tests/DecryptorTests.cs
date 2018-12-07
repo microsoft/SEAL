@@ -40,11 +40,11 @@ namespace SEALNetTest
             Plaintext plain = new Plaintext("1x^1 + 2");
             Ciphertext cipher = new Ciphertext();
 
-            Assert.AreEqual(0, cipher.Size);
+            Assert.AreEqual(0ul, cipher.Size);
 
             encryptor.Encrypt(plain, cipher);
 
-            Assert.AreEqual(2, cipher.Size);
+            Assert.AreEqual(2ul, cipher.Size);
 
             Plaintext decrypted = new Plaintext();
             Assert.AreEqual(0, decrypted.CoeffCount);
