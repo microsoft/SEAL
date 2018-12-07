@@ -2074,7 +2074,7 @@ namespace seal
             while (encrypted.parms_id() != parms_id)
             {
                 // Modulus switching with scaling
-                mod_switch_scale_to_next(encrypted, encrypted, move(pool));
+                mod_switch_scale_to_next(encrypted, encrypted, pool);
             }
             return;
 
