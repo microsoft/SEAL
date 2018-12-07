@@ -12,15 +12,45 @@ using namespace seal::dll;
 
 namespace
 {
-    // Keep instance of old profile alive, as it may be used in the native side.
-    unique_ptr<MMProf> old_profile_;
-
     template<class T>
-    HRESULT CreateProfileCopy(T* original, void** copyptr)
+    HRESULT GenericCreateProfileCopy(T* original, MMProf** copyptr)
     {
         T* copy = new T(*original);
         *copyptr = copy;
         return S_OK;
+    }
+
+    HRESULT CreateProfileCopy(MMProf* profile, MMProf** copyptr)
+    {
+        IfNullRet(profile, E_POINTER);
+        IfNullRet(copyptr, E_POINTER);
+
+        MMProfGlobal* global = dynamic_cast<MMProfGlobal*>(profile);
+        if (nullptr != global)
+        {
+            return GenericCreateProfileCopy(global, copyptr);
+        }
+
+        MMProfFixed* fixed = dynamic_cast<MMProfFixed*>(profile);
+        if (nullptr != fixed)
+        {
+            return GenericCreateProfileCopy(fixed, copyptr);
+        }
+
+        MMProfNew* newprof = dynamic_cast<MMProfNew*>(profile);
+        if (nullptr != newprof)
+        {
+            return GenericCreateProfileCopy(newprof, copyptr);
+        }
+
+        MMProfThreadLocal* threadlocal = dynamic_cast<MMProfThreadLocal*>(profile);
+        if (nullptr != threadlocal)
+        {
+            return GenericCreateProfileCopy(threadlocal, copyptr);
+        }
+
+        // No matching profile.
+        return E_UNEXPECTED;
     }
 }
 
@@ -57,21 +87,17 @@ SEALDLL HRESULT SEALCALL MemoryManager_GetPool2(void** pool_handle)
     return S_OK;
 }
 
-void Test()
-{
-    MemoryPoolHandle handle = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW);
-    MMProfFixed* myf = new MMProfFixed(handle);
-    MMProfFixed* my2 = new MMProfFixed(*myf);
-}
-
-SEALDLL HRESULT SEALCALL MemoryManager_SwitchProfile(void* new_profile, void** old_profile)
+SEALDLL HRESULT SEALCALL MemoryManager_SwitchProfile(void* new_profile)
 {
     MMProf* profile = FromVoid<MMProf>(new_profile);
     IfNullRet(profile, E_POINTER);
-    IfNullRet(old_profile, E_POINTER);
 
-    old_profile_ = MemoryManager::SwitchProfile(static_cast<MMProf*>(profile));
-    *old_profile = old_profile_.get();
+    // SwitchProfile takes ownership of the profile pointer that is passed.
+    // The managed side will keep ownership of the new_profile parameter, so we
+    // need to make a copy that will be owned by the Memory Manager.
+    MMProf* new_mm_profile = nullptr;
+    IfFailRet(CreateProfileCopy(profile, &new_mm_profile));
+    MemoryManager::SwitchProfile(static_cast<MMProf*>(new_mm_profile));
     return S_OK;
 }
 
@@ -113,40 +139,6 @@ SEALDLL HRESULT SEALCALL MMProf_CreateThreadLocal(void** profile)
     MMProfThreadLocal* threadlocal = new MMProfThreadLocal();
     *profile = threadlocal;
     return S_OK;
-}
-
-SEALDLL HRESULT SEALCALL MMProf_CreateCopy(void* thisptr, void** copyptr)
-{
-    MMProf* profile = FromVoid<MMProf>(thisptr);
-    IfNullRet(profile, E_POINTER);
-    IfNullRet(copyptr, E_POINTER);
-
-    MMProfGlobal* global = dynamic_cast<MMProfGlobal*>(profile);
-    if (nullptr != global)
-    {
-        return CreateProfileCopy(global, copyptr);
-    }
-
-    MMProfFixed* fixed = dynamic_cast<MMProfFixed*>(profile);
-    if (nullptr != fixed)
-    {
-        return CreateProfileCopy(fixed, copyptr);
-    }
-
-    MMProfNew* newprof = dynamic_cast<MMProfNew*>(profile);
-    if (nullptr != newprof)
-    {
-        return CreateProfileCopy(newprof, copyptr);
-    }
-
-    MMProfThreadLocal* threadlocal = dynamic_cast<MMProfThreadLocal*>(profile);
-    if (nullptr != threadlocal)
-    {
-        return CreateProfileCopy(threadlocal, copyptr);
-    }
-
-    // No matching profile.
-    return E_UNEXPECTED;
 }
 
 SEALDLL HRESULT SEALCALL MMProf_GetPool(void* thisptr, void** pool_handle)

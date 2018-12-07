@@ -40,9 +40,7 @@ namespace Microsoft.Research.SEAL
             if (null == newProfile)
                 throw new ArgumentNullException(nameof(newProfile));
 
-            // Create a copy of newProfile, as the MemoryManager takes ownership of the pointer.
-            NativeMethods.MMProf_CreateCopy(newProfile.NativePtr, out IntPtr profileCopy);
-            NativeMethods.MemoryManager_SwitchProfile(profileCopy, out IntPtr oldProfilePtr);
+            NativeMethods.MemoryManager_SwitchProfile(newProfile.NativePtr);
 
             MMProf oldProfile = profile_;
             profile_ = newProfile;

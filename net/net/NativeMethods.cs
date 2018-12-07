@@ -899,7 +899,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void MemoryManager_GetPool(out IntPtr handle);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void MemoryManager_SwitchProfile(IntPtr newProfile, out IntPtr oldProfile);
+        internal static extern void MemoryManager_SwitchProfile(IntPtr newProfile);
 
         #endregion
 
@@ -916,9 +916,6 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void MMProf_CreateThreadLocal(out IntPtr profile);
-
-        [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void MMProf_CreateCopy(IntPtr thisptr, out IntPtr copyPtr);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void MMProf_GetPool(IntPtr thisptr, out IntPtr pool);
