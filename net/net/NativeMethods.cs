@@ -720,19 +720,19 @@ namespace Microsoft.Research.SEAL
         internal static extern void GaloisKeys_SetDBC(IntPtr thisptr, int value);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void GaloisKeys_ClearDataAndReserve(IntPtr thisptr, int size);
+        internal static extern void GaloisKeys_ClearDataAndReserve(IntPtr thisptr, ulong size);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void GaloisKeys_GetKeyCount(IntPtr thisptr, out int keyCount);
+        internal static extern void GaloisKeys_GetKeyCount(IntPtr thisptr, out ulong keyCount);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void GaloisKeys_GetKeyList(IntPtr thisptr, int index, ref int count, IntPtr[] ciphers);
+        internal static extern void GaloisKeys_GetKeyList(IntPtr thisptr, ulong index, ref ulong count, IntPtr[] ciphers);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void GaloisKeys_GetKey(IntPtr thisptr, ulong galoisElt, ref int count, IntPtr[] ciphers);
+        internal static extern void GaloisKeys_GetKey(IntPtr thisptr, ulong galoisElt, ref ulong count, IntPtr[] ciphers);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void GaloisKeys_AddKeyList(IntPtr thisptr, int count, IntPtr[] ciphers);
+        internal static extern void GaloisKeys_AddKeyList(IntPtr thisptr, ulong count, IntPtr[] ciphers);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void GaloisKeys_GetParmsId(IntPtr thisptr, ulong[] parmsId);

@@ -128,17 +128,17 @@ namespace Microsoft.Research.SEAL
             get
             {
                 List<List<Ciphertext>> result = new List<List<Ciphertext>>();
-                NativeMethods.GaloisKeys_GetKeyCount(NativePtr, out int size);
+                NativeMethods.GaloisKeys_GetKeyCount(NativePtr, out ulong size);
 
-                for (int i = 0; i < size; i++)
+                for (ulong i = 0; i < size; i++)
                 {
-                    int count = 0;
+                    ulong count = 0;
                     NativeMethods.GaloisKeys_GetKeyList(NativePtr, i, ref count, null);
 
                     IntPtr[] pointers = new IntPtr[count];
                     NativeMethods.GaloisKeys_GetKeyList(NativePtr, i, ref count, pointers);
 
-                    List<Ciphertext> ciphers = new List<Ciphertext>(count);
+                    List<Ciphertext> ciphers = new List<Ciphertext>((int)count);
                     foreach(IntPtr ptr in pointers)
                     {
                         ciphers.Add(new Ciphertext(ptr));
@@ -164,13 +164,13 @@ namespace Microsoft.Research.SEAL
         /// not exist</exception>
         public IEnumerable<Ciphertext> Key(ulong galoisElt)
         {
-            int count = 0;
+            ulong count = 0;
             NativeMethods.GaloisKeys_GetKey(NativePtr, galoisElt, ref count, null);
 
             IntPtr[] ciphers = new IntPtr[count];
             NativeMethods.GaloisKeys_GetKey(NativePtr, galoisElt, ref count, ciphers);
 
-            List<Ciphertext> result = new List<Ciphertext>(count);
+            List<Ciphertext> result = new List<Ciphertext>((int)count);
             foreach (IntPtr ptr in ciphers)
             {
                 result.Add(new Ciphertext(ptr));
@@ -300,7 +300,7 @@ namespace Microsoft.Research.SEAL
                     int size = reader.ReadInt32();
 
                     // Clear current data and reserve new size
-                    NativeMethods.GaloisKeys_ClearDataAndReserve(NativePtr, size);
+                    NativeMethods.GaloisKeys_ClearDataAndReserve(NativePtr, (ulong)size);
 
                     // Read all lists
                     for (int i = 0; i < size; i++)
@@ -322,7 +322,7 @@ namespace Microsoft.Research.SEAL
                             return c.NativePtr;
                         }).ToArray();
 
-                        NativeMethods.GaloisKeys_AddKeyList(NativePtr, pointers.Length, pointers);
+                        NativeMethods.GaloisKeys_AddKeyList(NativePtr, (ulong)pointers.Length, pointers);
                     }
                 }
             }

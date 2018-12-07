@@ -24,15 +24,15 @@ SEALDLL HRESULT SEALCALL GaloisKeys_DBC(void* thisptr, int* dbc);
 
 SEALDLL HRESULT SEALCALL GaloisKeys_SetDBC(void* thisptr, int dbc);
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyCount(void* thisptr, int* key_count);
+SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyCount(void* thisptr, uint64_t* key_count);
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyList(void* thisptr, int index, int* count, void** ciphers);
+SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyList(void* thisptr, uint64_t index, uint64_t* count, void** ciphers);
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKey(void* thisptr, uint64_t galois_elt, int* count, void** ciphers);
+SEALDLL HRESULT SEALCALL GaloisKeys_GetKey(void* thisptr, uint64_t galois_elt, uint64_t* count, void** ciphers);
 
-SEALDLL HRESULT SEALCALL GaloisKeys_ClearDataAndReserve(void* thisptr, int size);
+SEALDLL HRESULT SEALCALL GaloisKeys_ClearDataAndReserve(void* thisptr, uint64_t size);
 
-SEALDLL HRESULT SEALCALL GaloisKeys_AddKeyList(void* thisptr, int count, void** ciphers);
+SEALDLL HRESULT SEALCALL GaloisKeys_AddKeyList(void* thisptr, uint64_t count, void** ciphers);
 
 SEALDLL HRESULT SEALCALL GaloisKeys_HasKey(void* thisptr, uint64_t galois_elt, bool* has_key);
 

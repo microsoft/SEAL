@@ -22,9 +22,9 @@ namespace seal
 }
 
 namespace {
-    HRESULT GetKeyFromVector(const vector<Ciphertext> key, int* count, void** ciphers)
+    HRESULT GetKeyFromVector(const vector<Ciphertext> key, uint64_t* count, void** ciphers)
     {
-        *count = static_cast<int>(key.size());
+        *count = key.size();
 
         if (nullptr == ciphers)
         {
@@ -110,17 +110,17 @@ SEALDLL HRESULT SEALCALL GaloisKeys_SetDBC(void* thisptr, int dbc)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyCount(void* thisptr, int* key_count)
+SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyCount(void* thisptr, uint64_t* key_count)
 {
     GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
     IfNullRet(key_count, E_POINTER);
 
-    *key_count = static_cast<int>(keys->data().size());
+    *key_count = keys->data().size();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyList(void* thisptr, int index, int* count, void** ciphers)
+SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyList(void* thisptr, uint64_t index, uint64_t* count, void** ciphers)
 {
     GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -130,7 +130,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyList(void* thisptr, int index, int* co
     return GetKeyFromVector(list, count, ciphers);
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKey(void* thisptr, uint64_t galois_elt, int* count, void** ciphers)
+SEALDLL HRESULT SEALCALL GaloisKeys_GetKey(void* thisptr, uint64_t galois_elt, uint64_t* count, void** ciphers)
 {
     GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -145,7 +145,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_GetKey(void* thisptr, uint64_t galois_elt, i
     return GetKeyFromVector(key, count, ciphers);
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_ClearDataAndReserve(void* thisptr, int size)
+SEALDLL HRESULT SEALCALL GaloisKeys_ClearDataAndReserve(void* thisptr, uint64_t size)
 {
     GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -155,7 +155,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_ClearDataAndReserve(void* thisptr, int size)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_AddKeyList(void* thisptr, int count, void** ciphers)
+SEALDLL HRESULT SEALCALL GaloisKeys_AddKeyList(void* thisptr, uint64_t count, void** ciphers)
 {
     GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
