@@ -19,10 +19,12 @@ SEALDLL HRESULT SEALCALL EPQ_Destroy(void* thisptr);
 
 SEALDLL HRESULT SEALCALL EPQ_ParametersSet(void* thisptr, bool* parameters_set);
 
-SEALDLL HRESULT SEALCALL EPQ_EnableFFT(void* thisptr, bool* enable_fft);
+SEALDLL HRESULT SEALCALL EPQ_UsingFFT(void* thisptr, bool* using_fft);
 
-SEALDLL HRESULT SEALCALL EPQ_EnableNTT(void* thisptr, bool* enable_ntt);
+SEALDLL HRESULT SEALCALL EPQ_UsingNTT(void* thisptr, bool* using_ntt);
 
-SEALDLL HRESULT SEALCALL EPQ_EnableBatching(void* thisptr, bool* enable_batching);
+SEALDLL HRESULT SEALCALL EPQ_UsingBatching(void* thisptr, bool* using_batching);
 
-SEALDLL HRESULT SEALCALL EPQ_EnableFastPlainLift(void* thisptr, bool* enable_fast_plain_lift);
+SEALDLL HRESULT SEALCALL EPQ_UsingFastPlainLift(void* thisptr, bool* using_fast_plain_lift);
+
+SEALDLL HRESULT SEALCALL EPQ_UsingHEStdSecurity(void* thisptr, bool* using_HE_std_security);

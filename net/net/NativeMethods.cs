@@ -192,16 +192,19 @@ namespace Microsoft.Research.SEAL
         internal static extern void EPQ_ParametersSet(IntPtr thisptr, out bool parametersSet);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void EPQ_EnableFFT(IntPtr thisptr, out bool enableFFT);
+        internal static extern void EPQ_UsingFFT(IntPtr thisptr, out bool usingFFT);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void EPQ_EnableNTT(IntPtr thisptr, out bool enableNTT);
+        internal static extern void EPQ_UsingNTT(IntPtr thisptr, out bool usingNTT);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void EPQ_EnableBatching(IntPtr thisptr, out bool enableBatching);
+        internal static extern void EPQ_UsingBatching(IntPtr thisptr, out bool usingBatching);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void EPQ_EnableFastPlainLift(IntPtr thisptr, out bool enableFastPlainLift);
+        internal static extern void EPQ_UsingFastPlainLift(IntPtr thisptr, out bool usingFastPlainLift);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void EPQ_UsingHEStdSecurity(IntPtr thisptr, out bool usingHEStdSecurity);
 
         #endregion
 

@@ -101,10 +101,11 @@ namespace SEALNetTest
             Assert.IsNotNull(qualifiers);
 
             Assert.IsTrue(qualifiers.ParametersSet);
-            Assert.IsFalse(qualifiers.EnableBatching);
-            Assert.IsTrue(qualifiers.EnableFastPlainLift);
-            Assert.IsTrue(qualifiers.EnableFFT);
-            Assert.IsTrue(qualifiers.EnableNTT);
+            Assert.IsFalse(qualifiers.UsingBatching);
+            Assert.IsTrue(qualifiers.UsingFastPlainLift);
+            Assert.IsTrue(qualifiers.UsingFFT);
+            Assert.IsTrue(qualifiers.UsingNTT);
+            Assert.IsTrue(qualifiers.UsingHEStdSecurity);
 
             ulong[] cdpm = data.CoeffDivPlainModulus;
             Assert.AreEqual(3, cdpm.Length);
