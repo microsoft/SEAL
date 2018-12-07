@@ -42,7 +42,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Destroy(void* thisptr)
 }
 
 // Array of doubles
-SEALDLL HRESULT SEALCALL CKKSEncoder_Encode1(void* thisptr, int value_count, double* values, uint64_t* parms_id, double scale, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL CKKSEncoder_Encode1(void* thisptr, uint64_t value_count, double* values, uint64_t* parms_id, double scale, void* destination, void* pool)
 {
     CKKSEncoder* encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -57,7 +57,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode1(void* thisptr, int value_count, dou
     CopyParmsId(parms_id, parms);
 
     vector<double> input(value_count);
-    for (int i = 0; i < value_count; i++)
+    for (uint64_t i = 0; i < value_count; i++)
     {
         input[i] = values[i];
     }
@@ -74,7 +74,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode1(void* thisptr, int value_count, dou
 }
 
 // Array of complex numbers (two doubles per value)
-SEALDLL HRESULT SEALCALL CKKSEncoder_Encode2(void* thisptr, int value_count, double* complex_values, uint64_t* parms_id, double scale, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL CKKSEncoder_Encode2(void* thisptr, uint64_t value_count, double* complex_values, uint64_t* parms_id, double scale, void* destination, void* pool)
 {
     CKKSEncoder* encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -89,7 +89,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode2(void* thisptr, int value_count, dou
     CopyParmsId(parms_id, parms);
 
     vector<complex<double>> input(value_count);
-    for (int i = 0; i < value_count; i++)
+    for (uint64_t i = 0; i < value_count; i++)
     {
         input[i] = complex<double>(complex_values[i*2],
                                    complex_values[i*2 + 1]);
@@ -184,7 +184,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode5(void* thisptr, uint64_t value, uint
 }
 
 // Array of doubles
-SEALDLL HRESULT SEALCALL CKKSEncoder_Decode1(void* thisptr, void* plain, int* value_count, double* values, void* pool)
+SEALDLL HRESULT SEALCALL CKKSEncoder_Decode1(void* thisptr, void* plain, uint64_t* value_count, double* values, void* pool)
 {
     CKKSEncoder* encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -206,7 +206,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode1(void* thisptr, void* plain, int* va
         return E_INVALIDARG;
     }
 
-    *value_count = static_cast<int>(destination.size());
+    *value_count = destination.size();
 
     if (nullptr == values)
     {
@@ -215,7 +215,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode1(void* thisptr, void* plain, int* va
     }
 
     // Copy to actual destination
-    for (int i = 0; i < destination.size(); i++)
+    for (uint64_t i = 0; i < destination.size(); i++)
     {
         values[i] = destination[i];
     }
@@ -224,7 +224,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode1(void* thisptr, void* plain, int* va
 }
 
 // Array of complex numbers
-SEALDLL HRESULT SEALCALL CKKSEncoder_Decode2(void* thisptr, void* plain, int* value_count, double* values, void* pool)
+SEALDLL HRESULT SEALCALL CKKSEncoder_Decode2(void* thisptr, void* plain, uint64_t* value_count, double* values, void* pool)
 {
     CKKSEncoder* encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -246,7 +246,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode2(void* thisptr, void* plain, int* va
         return E_INVALIDARG;
     }
 
-    *value_count = static_cast<int>(destination.size());
+    *value_count = destination.size();
 
     if (nullptr == values)
     {
@@ -255,7 +255,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode2(void* thisptr, void* plain, int* va
     }
 
     // Copy to actual destination
-    for (int i = 0; i < destination.size(); i++)
+    for (uint64_t i = 0; i < destination.size(); i++)
     {
         values[i*2]     = destination[i].real();
         values[i*2 + 1] = destination[i].imag();

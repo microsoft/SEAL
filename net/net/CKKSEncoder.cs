@@ -82,7 +82,7 @@ namespace Microsoft.Research.SEAL
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             double[] valuearray = values.ToArray();
-            NativeMethods.CKKSEncoder_EncodeDouble(NativePtr, valuearray.Length, valuearray,
+            NativeMethods.CKKSEncoder_EncodeDouble(NativePtr, (ulong)valuearray.LongLength, valuearray,
                 parmsId.Block, scale, destination.NativePtr, poolPtr);
         }
 
@@ -127,7 +127,7 @@ namespace Microsoft.Research.SEAL
 
             // Note that we should pass values.Count as the length instead of valuearray.Length,
             // since we are using two doubles in the array per element.
-            NativeMethods.CKKSEncoder_EncodeComplex(NativePtr, values.Count(), valuearray,
+            NativeMethods.CKKSEncoder_EncodeComplex(NativePtr, (ulong)values.LongCount(), valuearray,
                 parmsId.Block, scale, destination.NativePtr, poolPtr);
         }
 
@@ -358,7 +358,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            int destCount = 0;
+            ulong destCount = 0;
 
             // Find out what is the actual result size
             NativeMethods.CKKSEncoder_DecodeDouble(NativePtr, plain.NativePtr, ref destCount, null, poolPtr);
@@ -396,7 +396,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            int destCount = 0;
+            ulong destCount = 0;
 
             // Find out what is the actual result size
             NativeMethods.CKKSEncoder_DecodeComplex(NativePtr, plain.NativePtr, ref destCount, null, poolPtr);
@@ -407,7 +407,7 @@ namespace Microsoft.Research.SEAL
 
             // Transfer result to actual destination
             destination.Clear();
-            for (int i = 0; i < destCount; i++)
+            for (ulong i = 0; i < destCount; i++)
             {
                 destination.Add(new Complex(destarray[i * 2], destarray[i * 2 + 1]));
             }

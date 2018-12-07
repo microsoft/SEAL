@@ -245,11 +245,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the number of slots.
         /// </summary>
-        public int SlotCount
+        public ulong SlotCount
         {
             get
             {
-                NativeMethods.BatchEncoder_GetSlotCount(NativePtr, out int slotCount);
+                NativeMethods.BatchEncoder_GetSlotCount(NativePtr, out ulong slotCount);
                 return slotCount;
             }
         }

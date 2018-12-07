@@ -23,10 +23,10 @@ namespace SEALNetTest
 
             BatchEncoder encoder = new BatchEncoder(context);
 
-            Assert.AreEqual(64, encoder.SlotCount);
+            Assert.AreEqual(64ul, encoder.SlotCount);
 
             List<ulong> plainList = new List<ulong>();
-            for (int i = 0; i < encoder.SlotCount; i++)
+            for (ulong i = 0; i < encoder.SlotCount; i++)
             {
                 plainList.Add((ulong)i);
             }
@@ -37,14 +37,14 @@ namespace SEALNetTest
             List<ulong> plainList2 = new List<ulong>();
             encoder.Decode(plain, plainList2);
 
-            for (int i = 0; i < encoder.SlotCount; i++)
+            for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[i], plainList2[i]);
+                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
             }
 
-            for (int i = 0; i < encoder.SlotCount; i++)
+            for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                plainList[i] = 5;
+                plainList[(int)i] = 5;
             }
 
             encoder.Encode(plainList, plain);
@@ -52,9 +52,9 @@ namespace SEALNetTest
 
             encoder.Decode(plain, plainList2);
 
-            for (int i = 0; i < encoder.SlotCount; i++)
+            for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[i], plainList2[i]);
+                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
             }
 
             List<ulong> shortList = new List<ulong>();
@@ -76,9 +76,9 @@ namespace SEALNetTest
                 Assert.AreEqual(shortList[i], shortList2[i]);
             }
 
-            for (int i = 20; i < encoder.SlotCount; i++)
+            for (ulong i = 20; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(0ul, shortList2[i]);
+                Assert.AreEqual(0ul, shortList2[(int)i]);
             }
         }
 
@@ -96,10 +96,10 @@ namespace SEALNetTest
 
             BatchEncoder encoder = new BatchEncoder(context);
 
-            Assert.AreEqual(64, encoder.SlotCount);
+            Assert.AreEqual(64ul, encoder.SlotCount);
 
             List<long> plainList = new List<long>();
-            for (int i = 0; i < encoder.SlotCount; i++)
+            for (ulong i = 0; i < encoder.SlotCount; i++)
             {
                 plainList.Add((long)i);
             }
@@ -110,14 +110,14 @@ namespace SEALNetTest
             List<long> plainList2 = new List<long>();
             encoder.Decode(plain, plainList2);
 
-            for (int i = 0; i < encoder.SlotCount; i++)
+            for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[i], plainList2[i]);
+                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
             }
 
-            for (int i = 0; i < encoder.SlotCount; i++)
+            for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                plainList[i] = 5;
+                plainList[(int)i] = 5;
             }
 
             encoder.Encode(plainList, plain);
@@ -125,9 +125,9 @@ namespace SEALNetTest
 
             encoder.Decode(plain, plainList2);
 
-            for (int i = 0; i < encoder.SlotCount; i++)
+            for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[i], plainList2[i]);
+                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
             }
 
             List<long> shortList = new List<long>();
@@ -149,9 +149,9 @@ namespace SEALNetTest
                 Assert.AreEqual(shortList[i], shortList2[i]);
             }
 
-            for (int i = 20; i < encoder.SlotCount; i++)
+            for (ulong i = 20; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(0L, shortList2[i]);
+                Assert.AreEqual(0L, shortList2[(int)i]);
             }
         }
 
@@ -173,7 +173,7 @@ namespace SEALNetTest
 
             BatchEncoder encoder = new BatchEncoder(context);
 
-            Assert.AreEqual(64, encoder.SlotCount);
+            Assert.AreEqual(64ul, encoder.SlotCount);
 
             Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 1");
             Assert.AreEqual(6ul, plain.CoeffCount);

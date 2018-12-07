@@ -1000,10 +1000,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void CKKSEncoder_Destroy(IntPtr thisptr);
 
         [DllImport(SEALdll, EntryPoint = "CKKSEncoder_Encode1", PreserveSig = false)]
-        internal static extern void CKKSEncoder_EncodeDouble(IntPtr thisptr, int valueCount, double[] values, ulong[] parms_id, double scale, IntPtr destination, IntPtr pool);
+        internal static extern void CKKSEncoder_EncodeDouble(IntPtr thisptr, ulong valueCount, double[] values, ulong[] parms_id, double scale, IntPtr destination, IntPtr pool);
 
         [DllImport(SEALdll, EntryPoint = "CKKSEncoder_Encode2", PreserveSig = false)]
-        internal static extern void CKKSEncoder_EncodeComplex(IntPtr thisptr, int valueCount, double[] values, ulong[] parms_id, double scale, IntPtr destination, IntPtr pool);
+        internal static extern void CKKSEncoder_EncodeComplex(IntPtr thisptr, ulong valueCount, double[] values, ulong[] parms_id, double scale, IntPtr destination, IntPtr pool);
 
         [DllImport(SEALdll, EntryPoint = "CKKSEncoder_Encode3", PreserveSig = false)]
         internal static extern void CKKSEncoder_Encode(IntPtr thisptr, double value, ulong[] parms_id, double scale, IntPtr destination, IntPtr pool);
@@ -1015,10 +1015,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void CKKSEncoder_Encode(IntPtr thisptr, ulong value, ulong[] parms_id, IntPtr destination);
 
         [DllImport(SEALdll, EntryPoint = "CKKSEncoder_Decode1", PreserveSig = false)]
-        internal static extern void CKKSEncoder_DecodeDouble(IntPtr thisptr, IntPtr plain, ref int valueCount, double[] values, IntPtr pool);
+        internal static extern void CKKSEncoder_DecodeDouble(IntPtr thisptr, IntPtr plain, ref ulong valueCount, double[] values, IntPtr pool);
 
         [DllImport(SEALdll, EntryPoint = "CKKSEncoder_Decode2", PreserveSig = false)]
-        internal static extern void CKKSEncoder_DecodeComplex(IntPtr thisptr, IntPtr plain, ref int valueCount, double[] values, IntPtr pool);
+        internal static extern void CKKSEncoder_DecodeComplex(IntPtr thisptr, IntPtr plain, ref ulong valueCount, double[] values, IntPtr pool);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void CKKSEncoder_SlotCount(IntPtr thisptr, out ulong slotCount);
@@ -1052,7 +1052,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, IntPtr pool);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void BatchEncoder_GetSlotCount(IntPtr thisptr, out int slotCount);
+        internal static extern void BatchEncoder_GetSlotCount(IntPtr thisptr, out ulong slotCount);
 
         #endregion
 

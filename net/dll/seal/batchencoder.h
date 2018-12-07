@@ -26,4 +26,4 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode2(void* thisptr, void* plain, uint64
 
 SEALDLL HRESULT SEALCALL BatchEncoder_Decode3(void* thisptr, void* plain, void* pool);
 
-SEALDLL HRESULT SEALCALL BatchEncoder_GetSlotCount(void* thisptr, int* slot_count);
+SEALDLL HRESULT SEALCALL BatchEncoder_GetSlotCount(void* thisptr, uint64_t* slot_count);
