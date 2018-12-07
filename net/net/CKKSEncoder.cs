@@ -117,8 +117,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            double[] valuearray = new double[values.Count() * 2];
-            int idx = 0;
+            double[] valuearray = new double[values.LongCount() * 2];
+            ulong idx = 0;
             foreach(Complex complex in values)
             {
                 valuearray[idx++] = complex.Real;

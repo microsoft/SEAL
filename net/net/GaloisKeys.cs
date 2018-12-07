@@ -253,12 +253,12 @@ namespace Microsoft.Research.SEAL
 
                 // Save the size of Keys
                 IEnumerable<IEnumerable<Ciphertext>> data = Data;
-                writer.Write(data.Count());
+                writer.Write((ulong)data.LongCount());
 
                 // Loop over entries in the first list
                 foreach (IEnumerable<Ciphertext> keyList in data)
                 {
-                    writer.Write(keyList.Count());
+                    writer.Write((ulong)keyList.LongCount());
 
                     // Loop over ciphertexts and save all
                     foreach(Ciphertext cipher in keyList)
@@ -297,20 +297,20 @@ namespace Microsoft.Research.SEAL
                     DecompositionBitCount = dbc;
 
                     // Read the size
-                    int size = reader.ReadInt32();
+                    ulong size = reader.ReadUInt64();
 
                     // Clear current data and reserve new size
-                    NativeMethods.GaloisKeys_ClearDataAndReserve(NativePtr, (ulong)size);
+                    NativeMethods.GaloisKeys_ClearDataAndReserve(NativePtr, size);
 
                     // Read all lists
-                    for (int i = 0; i < size; i++)
+                    for (ulong i = 0; i < size; i++)
                     {
                         // Read size of second list
-                        int keySize = reader.ReadInt32();
-                        List<Ciphertext> ciphers = new List<Ciphertext>(keySize);
+                        ulong keySize = reader.ReadUInt64();
+                        List<Ciphertext> ciphers = new List<Ciphertext>((int)keySize);
 
                         // Load all ciphertexts
-                        for (int j = 0; j < keySize; j++)
+                        for (ulong j = 0; j < keySize; j++)
                         {
                             Ciphertext cipher = new Ciphertext();
                             cipher.UnsafeLoad(reader.BaseStream);
@@ -322,7 +322,7 @@ namespace Microsoft.Research.SEAL
                             return c.NativePtr;
                         }).ToArray();
 
-                        NativeMethods.GaloisKeys_AddKeyList(NativePtr, (ulong)pointers.Length, pointers);
+                        NativeMethods.GaloisKeys_AddKeyList(NativePtr, (ulong)pointers.LongLength, pointers);
                     }
                 }
             }
