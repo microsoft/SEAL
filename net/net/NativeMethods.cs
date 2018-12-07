@@ -797,7 +797,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void RelinKeys_Destroy(IntPtr thisptr);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void RelinKeys_Size(IntPtr thisptr, out int size);
+        internal static extern void RelinKeys_Size(IntPtr thisptr, out ulong size);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void RelinKeys_DBC(IntPtr thisptr, out int dbc);
@@ -806,19 +806,19 @@ namespace Microsoft.Research.SEAL
         internal static extern void RelinKeys_SetDBC(IntPtr thisptr, int value);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void RelinKeys_ClearDataAndReserve(IntPtr thisptr, int size);
+        internal static extern void RelinKeys_ClearDataAndReserve(IntPtr thisptr, ulong size);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void RelinKeys_GetKeyList(IntPtr thisptr, int index, ref int count, IntPtr[] ciphers);
+        internal static extern void RelinKeys_GetKeyList(IntPtr thisptr, ulong index, ref ulong count, IntPtr[] ciphers);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void RelinKeys_GetKey(IntPtr thisptr, int keyPower, ref int count, IntPtr[] ciphers);
+        internal static extern void RelinKeys_GetKey(IntPtr thisptr, ulong keyPower, ref ulong count, IntPtr[] ciphers);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void RelinKeys_HasKey(IntPtr thisptr, int keyPower, out bool hasKey);
+        internal static extern void RelinKeys_HasKey(IntPtr thisptr, ulong keyPower, out bool hasKey);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void RelinKeys_AddKeyList(IntPtr thisptr, int count, IntPtr[] ciphers);
+        internal static extern void RelinKeys_AddKeyList(IntPtr thisptr, ulong count, IntPtr[] ciphers);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void RelinKeys_GetParmsId(IntPtr thisptr, ulong[] parmsId);

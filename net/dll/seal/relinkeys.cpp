@@ -63,13 +63,13 @@ SEALDLL HRESULT SEALCALL RelinKeys_Destroy(void* thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_Size(void* thisptr, int* size)
+SEALDLL HRESULT SEALCALL RelinKeys_Size(void* thisptr, uint64_t* size)
 {
     RelinKeys* keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
     IfNullRet(size, E_POINTER);
 
-    *size = static_cast<int>(keys->size());
+    *size = keys->size();
     return S_OK;
 }
 
@@ -92,7 +92,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_SetDBC(void* thisptr, int dbc)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void* thisptr, int index, int* count, void** ciphers)
+SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void* thisptr, uint64_t index, uint64_t* count, void** ciphers)
 {
     RelinKeys* keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -105,7 +105,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void* thisptr, int index, int* cou
 
     auto list = keys->data()[index];
 
-    *count = static_cast<int>(list.size());
+    *count = list.size();
 
     if (nullptr == ciphers)
     {
@@ -114,7 +114,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void* thisptr, int index, int* cou
     }
 
     auto ciphertexts = reinterpret_cast<Ciphertext**>(ciphers);
-    for (int i = 0; i < list.size(); i++)
+    for (uint64_t i = 0; i < list.size(); i++)
     {
         ciphertexts[i] = new Ciphertext(list[i]);
     }
@@ -122,7 +122,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void* thisptr, int index, int* cou
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_HasKey(void* thisptr, int key_power, bool* has_key)
+SEALDLL HRESULT SEALCALL RelinKeys_HasKey(void* thisptr, uint64_t key_power, bool* has_key)
 {
     RelinKeys* keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -132,7 +132,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_HasKey(void* thisptr, int key_power, bool* ha
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_GetKey(void* thisptr, int key_power, int* count, void** ciphers)
+SEALDLL HRESULT SEALCALL RelinKeys_GetKey(void* thisptr, uint64_t key_power, uint64_t* count, void** ciphers)
 {
     RelinKeys* keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -142,7 +142,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetKey(void* thisptr, int key_power, int* cou
 }
 
 
-SEALDLL HRESULT SEALCALL RelinKeys_ClearDataAndReserve(void* thisptr, int size)
+SEALDLL HRESULT SEALCALL RelinKeys_ClearDataAndReserve(void* thisptr, uint64_t size)
 {
     RelinKeys* keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -152,7 +152,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_ClearDataAndReserve(void* thisptr, int size)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_AddKeyList(void* thisptr, int count, void** ciphers)
+SEALDLL HRESULT SEALCALL RelinKeys_AddKeyList(void* thisptr, uint64_t count, void** ciphers)
 {
     RelinKeys* keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -164,7 +164,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_AddKeyList(void* thisptr, int count, void** c
     keys->data().emplace_back();
     keys->data().back().reserve(count);
 
-    for (int i = 0; i < count; i++)
+    for (uint64_t i = 0; i < count; i++)
     {
         Ciphertext* cipher = ciphertexts[i];
         Ciphertext new_key(keys->pool());

@@ -16,7 +16,7 @@ namespace SEALNetTest
             RelinKeys keys = new RelinKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(0, keys.Size);
+            Assert.AreEqual(0ul, keys.Size);
             Assert.AreEqual(0, keys.DecompositionBitCount);
         }
 
@@ -30,7 +30,7 @@ namespace SEALNetTest
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
-            Assert.AreEqual(1, keys.Size);
+            Assert.AreEqual(1ul, keys.Size);
         }
 
         [TestMethod]
@@ -43,13 +43,13 @@ namespace SEALNetTest
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
-            Assert.AreEqual(2, keys.Size);
+            Assert.AreEqual(2ul, keys.Size);
 
             RelinKeys other = new RelinKeys();
             MemoryPoolHandle handle = other.Pool;
 
             Assert.AreEqual(0, other.DecompositionBitCount);
-            Assert.AreEqual(0, other.Size);
+            Assert.AreEqual(0ul, other.Size);
             ulong alloced = handle.AllocByteCount;
 
             using (MemoryStream ms = new MemoryStream())
@@ -62,7 +62,7 @@ namespace SEALNetTest
             }
 
             Assert.AreEqual(30, other.DecompositionBitCount);
-            Assert.AreEqual(2, other.Size);
+            Assert.AreEqual(2ul, other.Size);
             Assert.IsTrue(handle.AllocByteCount > 0ul);
 
             List<IEnumerable<Ciphertext>> keysData = new List<IEnumerable<Ciphertext>>(keys.Data);

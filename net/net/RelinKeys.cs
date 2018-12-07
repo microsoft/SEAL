@@ -100,11 +100,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the current number of evaluation keys.
         /// </summary>
-        public int Size
+        public ulong Size
         {
             get
             {
-                NativeMethods.RelinKeys_Size(NativePtr, out int size);
+                NativeMethods.RelinKeys_Size(NativePtr, out ulong size);
                 return size;
             }
         }
@@ -133,17 +133,17 @@ namespace Microsoft.Research.SEAL
             get
             {
                 List<List<Ciphertext>> result = new List<List<Ciphertext>>();
-                int size = Size;
+                ulong size = Size;
 
-                for (int i = 0; i < size; i++)
+                for (ulong i = 0; i < size; i++)
                 {
-                    int count = 0;
+                    ulong count = 0;
                     NativeMethods.RelinKeys_GetKeyList(NativePtr, i, ref count, null);
 
                     IntPtr[] pointers = new IntPtr[count];
                     NativeMethods.RelinKeys_GetKeyList(NativePtr, i, ref count, pointers);
 
-                    List<Ciphertext> ciphers = new List<Ciphertext>(count);
+                    List<Ciphertext> ciphers = new List<Ciphertext>((int)count);
                     foreach (IntPtr ptr in pointers)
                     {
                         ciphers.Add(new Ciphertext(ptr));
@@ -167,17 +167,17 @@ namespace Microsoft.Research.SEAL
         /// <param name="keyPower">The power of the secret key</param>
         /// <exception cref="ArgumentOutOfRangeException">if the key corresponding to keyPower does not 
         /// exist</exception>
-        public IEnumerable<Ciphertext> Key(int keyPower)
+        public IEnumerable<Ciphertext> Key(ulong keyPower)
         {
             try
             {
-                int count = 0;
+                ulong count = 0;
                 NativeMethods.RelinKeys_GetKey(NativePtr, keyPower, ref count, null);
 
                 IntPtr[] ciphers = new IntPtr[count];
                 NativeMethods.RelinKeys_GetKey(NativePtr, keyPower, ref count, ciphers);
 
-                List<Ciphertext> result = new List<Ciphertext>(count);
+                List<Ciphertext> result = new List<Ciphertext>((int)count);
                 foreach(IntPtr cipherptr in ciphers)
                 {
                     result.Add(new Ciphertext(cipherptr));
@@ -199,7 +199,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// 
         /// <param name="keyPower">The power of the secret key</param>
-        public bool HasKey(int keyPower)
+        public bool HasKey(ulong keyPower)
         {
             NativeMethods.RelinKeys_HasKey(NativePtr, keyPower, out bool hasKey);
             return hasKey;
@@ -314,7 +314,7 @@ namespace Microsoft.Research.SEAL
                     int size = reader.ReadInt32();
 
                     // Clear current data and reserve new size
-                    NativeMethods.RelinKeys_ClearDataAndReserve(NativePtr, size);
+                    NativeMethods.RelinKeys_ClearDataAndReserve(NativePtr, (ulong)size);
 
                     // Read all lists
                     for (int i = 0; i < size; i++)
@@ -336,7 +336,7 @@ namespace Microsoft.Research.SEAL
                             return c.NativePtr;
                         }).ToArray();
 
-                        NativeMethods.RelinKeys_AddKeyList(NativePtr, pointers.Length, pointers);
+                        NativeMethods.RelinKeys_AddKeyList(NativePtr, (ulong)pointers.Length, pointers);
                     }
                 }
             }
