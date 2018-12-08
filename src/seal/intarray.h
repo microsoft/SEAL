@@ -32,11 +32,12 @@ namespace seal
     In general, reading from IntArray is thread-safe as long as no other thread 
     is concurrently mutating it.
     */
-    template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+    template<typename T_, typename = std::enable_if_t<std::is_integral<T_>::value>>
     class IntArray
     {
     public:
         using size_type = std::size_t;
+        using T = typename std::decay<T_>::type;
 
         /**
         Creates a new IntArray. No memory is allocated by this constructor.

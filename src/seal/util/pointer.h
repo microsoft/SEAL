@@ -190,7 +190,7 @@ namespace seal
             Pointer(class MemoryPoolHead *head)
             {
 #ifdef SEAL_DEBUG
-                if(!head)
+                if (!head)
                 {
                     throw std::invalid_argument("head cannot be nullptr");
                 }
@@ -490,7 +490,7 @@ namespace seal
             Pointer(class MemoryPoolHead *head)
             {
 #ifdef SEAL_DEBUG
-                if(!head)
+                if (!head)
                 {
                     throw std::invalid_argument("head cannot be nullptr");
                 }
@@ -512,7 +512,7 @@ namespace seal
             Pointer(class MemoryPoolHead *head, Args &&...args)
             {
 #ifdef SEAL_DEBUG
-                if(!head)
+                if (!head)
                 {
                     throw std::invalid_argument("head cannot be nullptr");
                 }
@@ -732,7 +732,7 @@ namespace seal
             ConstPointer(class MemoryPoolHead *head)            
             {
 #ifdef SEAL_DEBUG
-                if(!head)
+                if (!head)
                 {
                     throw std::invalid_argument("head cannot be nullptr");
                 }
@@ -1140,7 +1140,7 @@ namespace seal
             ConstPointer(class MemoryPoolHead *head)
             {
 #ifdef SEAL_DEBUG
-                if(!head)
+                if (!head)
                 {
                     throw std::invalid_argument("head cannot be nullptr");
                 }
@@ -1162,7 +1162,7 @@ namespace seal
             ConstPointer(class MemoryPoolHead *head, Args &&...args)
             {
 #ifdef SEAL_DEBUG
-                if(!head)
+                if (!head)
                 {
                     throw std::invalid_argument("head cannot be nullptr");
                 }
@@ -1187,31 +1187,31 @@ namespace seal
         };
 
         // Allocate single element
-        template<typename T, typename... Args,
-            typename = std::enable_if<std::is_standard_layout<T>::value>>
+        template<typename T_, typename... Args,
+            typename = std::enable_if<std::is_standard_layout<T_>::value>>
         inline auto allocate(MemoryPool &pool, Args &&...args)
         {
-            using T_ = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-            return Pointer<T_>(pool.get_for_byte_count(sizeof(T_)), 
+            using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
+            return Pointer<T>(pool.get_for_byte_count(sizeof(T)), 
                 std::forward<Args>(args)...);
         }
 
         // Allocate array of elements
-        template<typename T, typename... Args,
-            typename = std::enable_if<std::is_standard_layout<T>::value>>
+        template<typename T_, typename... Args,
+            typename = std::enable_if<std::is_standard_layout<T_>::value>>
         inline auto allocate(std::size_t count, MemoryPool &pool, Args &&...args)
         {
-            using T_ = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-            return Pointer<T_>(pool.get_for_byte_count(util::mul_safe(count, sizeof(T_))), 
+            using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
+            return Pointer<T>(pool.get_for_byte_count(util::mul_safe(count, sizeof(T))), 
                 std::forward<Args>(args)...);
         }
 
-        template<typename T, 
-            typename = std::enable_if<std::is_standard_layout<T>::value>>
-        inline auto duplicate_if_needed(T *original, std::size_t count, 
+        template<typename T_, 
+            typename = std::enable_if<std::is_standard_layout<T_>::value>>
+        inline auto duplicate_if_needed(T_ *original, std::size_t count, 
             bool condition, MemoryPool &pool)
         {
-            using T_ = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+            using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
 #ifdef SEAL_DEBUG
             if (original == nullptr && count > 0)
             {
@@ -1220,19 +1220,19 @@ namespace seal
 #endif
             if (condition == false)
             {
-                return Pointer<T_>::Aliasing(original);
+                return Pointer<T>::Aliasing(original);
             }
-            auto allocation(allocate<T_>(count, pool));
+            auto allocation(allocate<T>(count, pool));
             std::copy_n(original, count, allocation.get());
             return allocation;
         }
 
-        template<typename T, 
-            typename = std::enable_if<std::is_standard_layout<T>::value>> 
-        inline auto duplicate_if_needed(const T *original, 
+        template<typename T_, 
+            typename = std::enable_if<std::is_standard_layout<T_>::value>> 
+        inline auto duplicate_if_needed(const T_ *original, 
             std::size_t count, bool condition, MemoryPool &pool)
         {
-            using T_ = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+            using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
 #ifdef SEAL_DEBUG
             if (original == nullptr && count > 0)
             {
@@ -1241,11 +1241,11 @@ namespace seal
 #endif
             if (condition == false)
             {
-                return ConstPointer<T_>::Aliasing(original);
+                return ConstPointer<T>::Aliasing(original);
             }
-            auto allocation(allocate<T_>(count, pool));
+            auto allocation(allocate<T>(count, pool));
             std::copy_n(original, count, allocation.get());
-            return ConstPointer<T_>(std::move(allocation));
+            return ConstPointer<T>(std::move(allocation));
         }
     }
 }
