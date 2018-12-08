@@ -70,20 +70,17 @@ namespace seal
             }
             first_item_ = nullptr;
 
+            // Do we need to clear the memory?
             if (clear_on_destruction_)
             {
                 // Delete the memory
                 for (auto &alloc : allocs_)
                 {
-                    // Do we need to clear the memory?
-                    if (clear_on_destruction_)
+                    size_t curr_alloc_byte_count = mul_safe(item_byte_count_, alloc.size);
+                    volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE*>(alloc.data_ptr);
+                    while (curr_alloc_byte_count--)
                     {
-                        std::size_t curr_alloc_byte_count = mul_safe(item_byte_count_, alloc.size);
-                        volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE*>(alloc.data_ptr);
-                        while (curr_alloc_byte_count--)
-                        {
-                            *data_ptr++ = static_cast<SEAL_BYTE>(0);
-                        }
+                        *data_ptr++ = static_cast<SEAL_BYTE>(0);
                     }
 
                     // Delete this allocation
@@ -218,20 +215,17 @@ namespace seal
             }
             first_item_ = nullptr;
 
+            // Do we need to clear the memory?
             if (clear_on_destruction_)
             {
                 // Delete the memory
                 for (auto &alloc : allocs_)
                 {
-                    // Do we need to clear the memory?
-                    if (clear_on_destruction_)
+                    size_t curr_alloc_byte_count = mul_safe(item_byte_count_, alloc.size);
+                    volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE*>(alloc.data_ptr);
+                    while (curr_alloc_byte_count--)
                     {
-                        std::size_t curr_alloc_byte_count = mul_safe(item_byte_count_, alloc.size);
-                        volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE*>(alloc.data_ptr);
-                        while (curr_alloc_byte_count--)
-                        {
-                            *data_ptr++ = static_cast<SEAL_BYTE>(0);
-                        }
+                        *data_ptr++ = static_cast<SEAL_BYTE>(0);
                     }
 
                     // Delete this allocation
@@ -338,7 +332,7 @@ namespace seal
         MemoryPoolMT::~MemoryPoolMT() noexcept
         {
             WriterLock lock(pools_locker_.acquire_write());
-            for(MemoryPoolHead *head : pools_)
+            for (MemoryPoolHead *head : pools_)
             {
                 delete head;
             }
@@ -436,7 +430,7 @@ namespace seal
 
         MemoryPoolST::~MemoryPoolST() noexcept
         {
-            for(MemoryPoolHead *head : pools_)
+            for (MemoryPoolHead *head : pools_)
             {
                 delete head;
             }
