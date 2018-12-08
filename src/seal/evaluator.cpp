@@ -1193,8 +1193,6 @@ namespace seal
 #endif
         // q/qi mod qi
         auto &first_context_data = *context_->context_data();
-        auto &inv_coeff_products_mod_coeff_array =
-            first_context_data.base_converter()->get_inv_coeff_mod_coeff_array();
         auto &coeff_small_ntt_tables = first_context_data.small_ntt_tables();
 
         // Decompose encrypted_array[count-1] into base w
@@ -1218,14 +1216,14 @@ namespace seal
         In this case, this means sum_i relin_keys.data()[encrypted_size - 3][i].size() / 2 <= 63.
         */
         const uint64_t *encrypted_coeff = encrypted + (encrypted_size - 1) * rns_poly_uint64_count;
-        auto encrypted_coeff_prod_inv_coeff(allocate_uint(coeff_count, pool));
 
-        for (size_t i = 0; i < coeff_mod_count; i++)
+        for (size_t i = 0; i < coeff_mod_count; i++, encrypted_coeff += coeff_count)
         {
-            multiply_poly_scalar_coeffmod(
-                encrypted_coeff + (i * coeff_count), coeff_count,
-                inv_coeff_products_mod_coeff_array[i], coeff_modulus[i],
-                encrypted_coeff_prod_inv_coeff.get());
+            // We use HPS improvement to Bajard's RNS key switching so scaling by q_i/q not needed
+            // multiply_poly_scalar_coeffmod(
+            //     encrypted_coeff, coeff_count,
+            //     inv_coeff_products_mod_coeff_array[i], coeff_modulus[i],
+            //     encrypted_coeff_prod_inv_coeff.get());
 
             int shift = 0;
             auto &key_component_ref = relin_keys.data()[encrypted_size - 3][i];
@@ -1240,7 +1238,7 @@ namespace seal
                 for (size_t coeff_index = 0; coeff_index < coeff_count; coeff_index++)
                 {
                     decomp_encrypted_last[coeff_index] =
-                        encrypted_coeff_prod_inv_coeff[coeff_index] >> shift;
+                        encrypted_coeff[coeff_index] >> shift;
                     decomp_encrypted_last[coeff_index] &= 
                         (uint64_t(1) << decomposition_bit_count) - 1;
                 }
@@ -1357,8 +1355,6 @@ namespace seal
 #endif
         // q/qi mod qi
         auto &first_context_data = *context_->context_data();
-        auto &inv_coeff_products_mod_coeff_array =
-            first_context_data.base_converter()->get_inv_coeff_mod_coeff_array();
         auto &coeff_small_ntt_tables = first_context_data.small_ntt_tables();
 
         // Decompose encrypted_array[count-1] into base w
@@ -1382,19 +1378,18 @@ namespace seal
         In this case, this means sum_i evaluation_keys.data()[encrypted_size - 3][i].size() / 2 <= 63.
         */
         uint64_t *encrypted_coeff = encrypted + (encrypted_size - 1) * rns_poly_uint64_count;
-        auto encrypted_coeff_prod_inv_coeff(allocate_uint(coeff_count, pool));
 
         // inner product of evaluation keys and the bit-decomposition of the last ciphertext polynomial
-        for (size_t i = 0; i < coeff_mod_count; i++)
+        for (size_t i = 0; i < coeff_mod_count; i++, encrypted_coeff += coeff_count)
         {
             // Convert the last polynomial of encrypted from NTT to create a bit-decomposition
-            inverse_ntt_negacyclic_harvey(
-                encrypted_coeff + (i * coeff_count), coeff_small_ntt_tables[i]);
-            // c*(q_i/q) mod q_i
-            multiply_poly_scalar_coeffmod(
-                encrypted_coeff + (i * coeff_count), coeff_count,
-                inv_coeff_products_mod_coeff_array[i], coeff_modulus[i],
-                encrypted_coeff_prod_inv_coeff.get());
+            inverse_ntt_negacyclic_harvey(encrypted_coeff, coeff_small_ntt_tables[i]);
+
+            // We use HPS improvement to Bajard's RNS key switching so scaling by q_i/q not needed
+            // multiply_poly_scalar_coeffmod(
+            //     encrypted_coeff, coeff_count,
+            //     inv_coeff_products_mod_coeff_array[i], coeff_modulus[i],
+            //     encrypted_coeff_prod_inv_coeff.get());
 
             int shift = 0;
             auto &key_component_ref = relin_keys.data()[encrypted_size - 3][i];
@@ -1409,7 +1404,7 @@ namespace seal
                 for (size_t coeff_index = 0; coeff_index < coeff_count; coeff_index++)
                 {
                     decomp_encrypted_last[coeff_index] =
-                        encrypted_coeff_prod_inv_coeff[coeff_index] >> shift;
+                        encrypted_coeff[coeff_index] >> shift;
                     decomp_encrypted_last[coeff_index] &= 
                         (uint64_t(1) << decomposition_bit_count) - 1;
                 }
@@ -2728,8 +2723,6 @@ namespace seal
         }
 
         auto &first_context_data = *context_->context_data();
-        auto &inv_coeff_products_mod_coeff_array =
-            first_context_data.base_converter()->get_inv_coeff_mod_coeff_array();
         auto &coeff_small_ntt_tables = first_context_data.small_ntt_tables();
 
         // Check if Galois key is generated or not.
@@ -2820,7 +2813,6 @@ namespace seal
 
         // Calculate (temp1 * galois_key.first, temp1 * galois_key.second) + (temp0, 0)
         const uint64_t *encrypted_coeff = temp1.get();
-        auto encrypted_coeff_prod_inv_coeff(allocate_uint(coeff_count, pool));
 
         // decompose encrypted_array[count-1] into base w
         // want to create an array of polys, each of whose components i is
@@ -2842,12 +2834,13 @@ namespace seal
         We need this to be at most 128, thus we need bit_length(K) <= 6. Thus, we need K <= 63.
         In this case, this means sum_i galois_keys.key(galois_elt)[i].size() / 2 <= 63.
         */
-        for (size_t i = 0; i < coeff_mod_count; i++)
+        for (size_t i = 0; i < coeff_mod_count; i++, encrypted_coeff += coeff_count)
         {
-            multiply_poly_scalar_coeffmod(
-                encrypted_coeff + (i * coeff_count), coeff_count,
-                inv_coeff_products_mod_coeff_array[i], coeff_modulus[i],
-                encrypted_coeff_prod_inv_coeff.get());
+            // We use HPS improvement to Bajard's RNS key switching so scaling by q_i/q not needed
+            // multiply_poly_scalar_coeffmod(
+            //     encrypted_coeff, coeff_count,
+            //     inv_coeff_products_mod_coeff_array[i], coeff_modulus[i],
+            //     encrypted_coeff_prod_inv_coeff.get());
 
             int shift = 0;
             auto &key_component_ref = galois_keys.key(galois_elt)[i];
@@ -2862,7 +2855,7 @@ namespace seal
                 for (size_t coeff_index = 0; coeff_index < coeff_count; coeff_index++)
                 {
                     decomp_encrypted_last[coeff_index] = 
-                        encrypted_coeff_prod_inv_coeff[coeff_index] >> shift;
+                        encrypted_coeff[coeff_index] >> shift;
                     decomp_encrypted_last[coeff_index] &= 
                         (uint64_t(1) << decomposition_bit_count) - 1;
                 }

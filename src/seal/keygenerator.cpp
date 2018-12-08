@@ -803,7 +803,8 @@ namespace seal
         secret_key_array_.acquire(new_secret_key_array);
     }
 
-    // decomposition_factors[i][j] = 2^(w*j) * hat-q_i mod q_i
+    // decomposition_factors[i][j] = 2^(w*j) * hat-q_i * hat-q_i^(-1) mod q_i
+    // This is HPS improvement to Bajard's RNS key switching 
     void KeyGenerator::populate_decomposition_factors(
         const SEALContext::ContextData &context_data, 
         int decomposition_bit_count,
@@ -820,28 +821,16 @@ namespace seal
         decomposition_factors.resize(coeff_mod_count);
         uint64_t power_of_w = uint64_t(1) << decomposition_bit_count;
 
-        // Compute hat-q_i mod q_i
-        vector<uint64_t> coeff_prod_mod(coeff_mod_count);
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            coeff_prod_mod[i] = 1;
-            for (size_t j = 0; j < coeff_mod_count; j++)
-            {
-                if (i != j)
-                {
-                    coeff_prod_mod[i] = multiply_uint_uint_mod(coeff_prod_mod[i], 
-                        coeff_modulus[j].value(), coeff_modulus[i]);
-                }
-            }
-        }
+            // We use HPS improvement to Bajard's RNS key switching 
+            uint64_t current_decomposition_factor = 1;
 
-        for (size_t i = 0; i < coeff_mod_count; i++)
-        {
-            uint64_t current_decomposition_factor = coeff_prod_mod[i];
             uint64_t current_smallmod = coeff_modulus[i].value();
             while (current_smallmod != 0)
             {
                 decomposition_factors[i].emplace_back(current_decomposition_factor);
+
                 //multiply 2^w mod q_i
                 current_decomposition_factor = multiply_uint_uint_mod(
                     current_decomposition_factor, power_of_w, coeff_modulus[i]);
