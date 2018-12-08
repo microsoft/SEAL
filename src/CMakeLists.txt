@@ -177,7 +177,7 @@ if(SEAL_USE_INTRIN)
 		if(SEAL_USE___BUILTIN_CLZLL)
 			check_cxx_source_runs("
 				int main() {
-					volatile auto = __builtin_clzll(0);
+					volatile auto res = __builtin_clzll(0);
 					return 0;
 				}"
 				USE_BUILTIN_CLZLL
