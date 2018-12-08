@@ -414,223 +414,65 @@ namespace seal
             }
         }
 
-        // Perform Karatsuba multiplication on size 2 ciphertexts
-        if (encrypted1_size == 2 && encrypted2_size == 2)
+        // Perform multiplication on arbitrary size ciphertexts
+        for (size_t secret_power_index = 0; 
+            secret_power_index < dest_count; secret_power_index++)
         {
-            auto tmp_first_mul_coeff_base(allocate_poly(coeff_count, coeff_mod_count, pool));
+            // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
+            // component [j] such that [i+j]=[secret_power_index]
+            // Only need to check encrypted1 components up to and including [secret_power_index],
+            // and strictly less than [encrypted_array.size()]
+            current_encrypted1_limit = min(encrypted1_size, secret_power_index + 1);
 
-            // Compute c0 + c1 and c0*d0 in base q
-            uint64_t *temp_ptr_1 = tmp1_poly_coeff_base.get();
-            uint64_t *temp_ptr_2 = copy_encrypted1_ntt_coeff_mod.get();
-            uint64_t *temp_ptr_3 = temp_ptr_2 + encrypted_ptr_increment;
-            for (size_t i = 0; i < coeff_mod_count; i++)
+            for (size_t encrypted1_index = 0; 
+                encrypted1_index < current_encrypted1_limit; encrypted1_index++)
             {
-                //add_poly_poly_coeffmod(copy_encrypted1_ntt_coeff_mod.get() + (i * coeff_count),
-                //    copy_encrypted1_ntt_coeff_mod.get() + (i * coeff_count) + encrypted_ptr_increment,
-                //    coeff_count, coeff_modulus_[i], tmp1_poly_coeff_base.get() + (i * coeff_count));
-
-                // Lazy reduction
-                for (size_t j = 0; j < coeff_count; j++)
+                // check if a corresponding component in encrypted2 exists
+                if (encrypted2_size > secret_power_index - encrypted1_index)
                 {
-                    *temp_ptr_1++ = *temp_ptr_2++ + *temp_ptr_3++;
-                }
-                dyadic_product_coeffmod(
-                    copy_encrypted1_ntt_coeff_mod.get() + (i * coeff_count),
-                    copy_encrypted2_ntt_coeff_mod.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i],
-                    tmp_first_mul_coeff_base.get() + (i * coeff_count));
-            }
+                    size_t encrypted2_index = secret_power_index - encrypted1_index;
 
-            auto tmp_first_mul_bsk_base(allocate_poly(coeff_count, bsk_base_mod_count, pool));
-
-            // Compute c0 + c1 and c0*d0 in base bsk
-            temp_ptr_1 = tmp1_poly_bsk_base.get();
-            temp_ptr_2 = copy_encrypted1_ntt_bsk_base_mod.get();
-            temp_ptr_3 = temp_ptr_2 + encrypted_bsk_ptr_increment;
-            for (size_t i = 0; i < bsk_base_mod_count; i++)
-            {
-                //add_poly_poly_coeffmod(copy_encrypted1_ntt_bsk_base_mod.get() + (i * coeff_count),
-                //    copy_encrypted1_ntt_bsk_base_mod.get() + (i * coeff_count) + encrypted_bsk_ptr_increment,
-                //    coeff_count, bsk_mod_array_[i], tmp1_poly_bsk_base.get() + (i * coeff_count));
-                for (size_t j = 0; j < coeff_count; j++)
-                {
-                    *temp_ptr_1++ = *temp_ptr_2++ + *temp_ptr_3++;
-                }
-                dyadic_product_coeffmod(
-                    copy_encrypted1_ntt_bsk_base_mod.get() + (i * coeff_count),
-                    copy_encrypted2_ntt_bsk_base_mod.get() + (i * coeff_count),
-                    coeff_count, bsk_modulus[i],
-                    tmp_first_mul_bsk_base.get() + (i * coeff_count));
-            }
-
-            auto tmp_second_mul_coeff_base(allocate_poly(coeff_count, coeff_mod_count, pool));
-
-            // Compute d0 + d1 and c1*d1 in base q
-            temp_ptr_1 = tmp2_poly_coeff_base.get();
-            temp_ptr_2 = copy_encrypted2_ntt_coeff_mod.get();
-            temp_ptr_3 = temp_ptr_2 + encrypted_ptr_increment;
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                //add_poly_poly_coeffmod(copy_encrypted2_ntt_coeff_mod.get() + (i * coeff_count),
-                //    copy_encrypted2_ntt_coeff_mod.get() + (i * coeff_count) + encrypted_ptr_increment,
-                //    coeff_count, coeff_modulus_[i], tmp2_poly_coeff_base.get() + (i * coeff_count));
-                for (size_t j = 0; j < coeff_count; j++)
-                {
-                    *temp_ptr_1++ = *temp_ptr_2++ + *temp_ptr_3++;
-                }
-                dyadic_product_coeffmod(
-                    copy_encrypted1_ntt_coeff_mod.get() + (i * coeff_count) + encrypted_ptr_increment,
-                    copy_encrypted2_ntt_coeff_mod.get() + (i * coeff_count) + encrypted_ptr_increment,
-                    coeff_count, coeff_modulus[i], tmp_second_mul_coeff_base.get() + (i * coeff_count));
-            }
-
-            auto tmp_second_mul_bsk_base(allocate_poly(coeff_count, bsk_base_mod_count, pool));
-
-            // Compute d0 + d1 and c1*d1 in base bsk
-            temp_ptr_1 = tmp2_poly_bsk_base.get();
-            temp_ptr_2 = copy_encrypted2_ntt_bsk_base_mod.get();
-            temp_ptr_3 = temp_ptr_2 + encrypted_bsk_ptr_increment;
-            for (size_t i = 0; i < bsk_base_mod_count; i++)
-            {
-                //add_poly_poly_coeffmod(copy_encrypted2_ntt_bsk_base_mod.get() + (i * coeff_count),
-                //    copy_encrypted2_ntt_bsk_base_mod.get() + (i * coeff_count) + encrypted_bsk_ptr_increment,
-                //    coeff_count, bsk_mod_array_[i], tmp2_poly_bsk_base.get() + (i * coeff_count));
-                for (size_t j = 0; j < coeff_count; j++)
-                {
-                    *temp_ptr_1++ = *temp_ptr_2++ + *temp_ptr_3++;
-                }
-                dyadic_product_coeffmod(
-                    copy_encrypted1_ntt_bsk_base_mod.get() + (i * coeff_count) + encrypted_bsk_ptr_increment,
-                    copy_encrypted2_ntt_bsk_base_mod.get() + (i * coeff_count) + encrypted_bsk_ptr_increment,
-                    coeff_count, bsk_modulus[i], tmp_second_mul_bsk_base.get() + (i * coeff_count));
-            }
-
-            auto tmp_mul_poly_coeff_base(allocate_poly(coeff_count, coeff_mod_count, pool));
-            auto tmp_mul_poly_bsk_base(allocate_poly(coeff_count, bsk_base_mod_count, pool));
-
-            // Set destination first and third polys in base q
-            // Des[0] in base q
-            set_poly_poly(tmp_first_mul_coeff_base.get(), coeff_count,
-                coeff_mod_count, tmp_des_coeff_base.get());
-
-            // Des[2] in base q
-            set_poly_poly(tmp_second_mul_coeff_base.get(), coeff_count,
-                coeff_mod_count, tmp_des_coeff_base.get() + 2 * encrypted_ptr_increment);
-
-            // Compute (c0 + c1)*(d0 + d1) - c0*d0 - c1*d1 in base q
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                dyadic_product_coeffmod(
-                    tmp1_poly_coeff_base.get() + (i * coeff_count),
-                    tmp2_poly_coeff_base.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i],
-                    tmp_mul_poly_coeff_base.get() + (i * coeff_count));
-                sub_poly_poly_coeffmod(
-                    tmp_mul_poly_coeff_base.get() + (i * coeff_count),
-                    tmp_first_mul_coeff_base.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i],
-                    tmp_mul_poly_coeff_base.get() + (i * coeff_count));
-
-                // Des[1] in base q
-                sub_poly_poly_coeffmod(
-                    tmp_mul_poly_coeff_base.get() + (i * coeff_count),
-                    tmp_second_mul_coeff_base.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i],
-                    tmp_des_coeff_base.get() + (i * coeff_count) + encrypted_ptr_increment);
-            }
-
-            // Set destination first and third polys in base bsk
-            // Des[0] in base bsk
-            set_poly_poly(tmp_first_mul_bsk_base.get(), coeff_count,
-                bsk_base_mod_count, tmp_des_bsk_base.get());
-
-            // Des[2] in base q
-            set_poly_poly(tmp_second_mul_bsk_base.get(), coeff_count, bsk_base_mod_count,
-                tmp_des_bsk_base.get() + 2 * encrypted_bsk_ptr_increment);
-
-            // Compute (c0 + c1)*(d0 + d1)  - c0d0 - c1d1 in base bsk
-            for (size_t i = 0; i < bsk_base_mod_count; i++)
-            {
-                dyadic_product_coeffmod(
-                    tmp1_poly_bsk_base.get() + (i * coeff_count),
-                    tmp2_poly_bsk_base.get() + (i * coeff_count),
-                    coeff_count, bsk_modulus[i],
-                    tmp_mul_poly_bsk_base.get() + (i * coeff_count));
-                sub_poly_poly_coeffmod(
-                    tmp_mul_poly_bsk_base.get() + (i * coeff_count),
-                    tmp_first_mul_bsk_base.get() + (i * coeff_count),
-                    coeff_count, bsk_modulus[i],
-                    tmp_mul_poly_bsk_base.get() + (i * coeff_count));
-
-                // Des[1] in bsk
-                sub_poly_poly_coeffmod(
-                    tmp_mul_poly_bsk_base.get() + (i * coeff_count),
-                    tmp_second_mul_bsk_base.get() + (i * coeff_count),
-                    coeff_count, bsk_modulus[i],
-                    tmp_des_bsk_base.get() + (i * coeff_count) + encrypted_bsk_ptr_increment);
-            }
-        }
-        else
-        {
-            // Perform multiplication on arbitrary size ciphertexts
-            for (size_t secret_power_index = 0; 
-                secret_power_index < dest_count; secret_power_index++)
-            {
-                // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
-                // component [j] such that [i+j]=[secret_power_index]
-                // Only need to check encrypted1 components up to and including [secret_power_index],
-                // and strictly less than [encrypted_array.size()]
-                current_encrypted1_limit = min(encrypted1_size, secret_power_index + 1);
-
-                for (size_t encrypted1_index = 0; 
-                    encrypted1_index < current_encrypted1_limit; encrypted1_index++)
-                {
-                    // check if a corresponding component in encrypted2 exists
-                    if (encrypted2_size > secret_power_index - encrypted1_index)
+                    // NTT Multiplication and addition for results in q
+                    for (size_t i = 0; i < coeff_mod_count; i++)
                     {
-                        size_t encrypted2_index = secret_power_index - encrypted1_index;
+                        dyadic_product_coeffmod(
+                            copy_encrypted1_ntt_coeff_mod.get() + (i * coeff_count) +
+                            (encrypted_ptr_increment * encrypted1_index),
+                            copy_encrypted2_ntt_coeff_mod.get() + (i * coeff_count) +
+                            (encrypted_ptr_increment * encrypted2_index),
+                            coeff_count, coeff_modulus[i],
+                            tmp1_poly_coeff_base.get() + (i * coeff_count));
+                        add_poly_poly_coeffmod(
+                            tmp1_poly_coeff_base.get() + (i * coeff_count),
+                            tmp_des_coeff_base.get() + (i * coeff_count) +
+                            (secret_power_index * coeff_count * coeff_mod_count),
+                            coeff_count, coeff_modulus[i],
+                            tmp_des_coeff_base.get() + (i * coeff_count) +
+                            (secret_power_index * coeff_count * coeff_mod_count));
+                    }
 
-                        // NTT Multiplication and addition for results in q
-                        for (size_t i = 0; i < coeff_mod_count; i++)
-                        {
-                            dyadic_product_coeffmod(
-                                copy_encrypted1_ntt_coeff_mod.get() + (i * coeff_count) +
-                                (encrypted_ptr_increment * encrypted1_index),
-                                copy_encrypted2_ntt_coeff_mod.get() + (i * coeff_count) +
-                                (encrypted_ptr_increment * encrypted2_index),
-                                coeff_count, coeff_modulus[i],
-                                tmp1_poly_coeff_base.get() + (i * coeff_count));
-                            add_poly_poly_coeffmod(
-                                tmp1_poly_coeff_base.get() + (i * coeff_count),
-                                tmp_des_coeff_base.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_mod_count),
-                                coeff_count, coeff_modulus[i],
-                                tmp_des_coeff_base.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_mod_count));
-                        }
-
-                        // NTT Multiplication and addition for results in Bsk
-                        for (size_t i = 0; i < bsk_base_mod_count; i++)
-                        {
-                            dyadic_product_coeffmod(
-                                copy_encrypted1_ntt_bsk_base_mod.get() + (i * coeff_count) +
-                                (encrypted_bsk_ptr_increment * encrypted1_index),
-                                copy_encrypted2_ntt_bsk_base_mod.get() + (i * coeff_count) +
-                                (encrypted_bsk_ptr_increment * encrypted2_index),
-                                coeff_count, bsk_modulus[i],
-                                tmp1_poly_bsk_base.get() + (i * coeff_count));
-                            add_poly_poly_coeffmod(
-                                tmp1_poly_bsk_base.get() + (i * coeff_count),
-                                tmp_des_bsk_base.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * bsk_base_mod_count),
-                                coeff_count, bsk_modulus[i],
-                                tmp_des_bsk_base.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * bsk_base_mod_count));
-                        }
+                    // NTT Multiplication and addition for results in Bsk
+                    for (size_t i = 0; i < bsk_base_mod_count; i++)
+                    {
+                        dyadic_product_coeffmod(
+                            copy_encrypted1_ntt_bsk_base_mod.get() + (i * coeff_count) +
+                            (encrypted_bsk_ptr_increment * encrypted1_index),
+                            copy_encrypted2_ntt_bsk_base_mod.get() + (i * coeff_count) +
+                            (encrypted_bsk_ptr_increment * encrypted2_index),
+                            coeff_count, bsk_modulus[i],
+                            tmp1_poly_bsk_base.get() + (i * coeff_count));
+                        add_poly_poly_coeffmod(
+                            tmp1_poly_bsk_base.get() + (i * coeff_count),
+                            tmp_des_bsk_base.get() + (i * coeff_count) +
+                            (secret_power_index * coeff_count * bsk_base_mod_count),
+                            coeff_count, bsk_modulus[i],
+                            tmp_des_bsk_base.get() + (i * coeff_count) +
+                            (secret_power_index * coeff_count * bsk_base_mod_count));
                     }
                 }
             }
         }
+
         // Convert back outputs from NTT form
         for (size_t i = 0; i < dest_count; i++)
         {
@@ -648,8 +490,10 @@ namespace seal
             }
         }
 
-        // Now we multiply plain modulus to both results in base q and Bsk and allocate them together in one
-        // container as (te0)q(te'0)Bsk | ... |te count)q (te' count)Bsk to make it ready for fast_floor
+        // Now we multiply plain modulus to both results in base q and Bsk and 
+        // allocate them together in one container as 
+        // (te0)q(te'0)Bsk | ... |te count)q (te' count)Bsk to make it ready for 
+        // fast_floor
         auto tmp_coeff_bsk_together(allocate_poly(
             coeff_count, dest_count * (coeff_mod_count + bsk_base_mod_count), pool));
         uint64_t *tmp_coeff_bsk_together_ptr = tmp_coeff_bsk_together.get();
@@ -758,136 +602,48 @@ namespace seal
         set_poly_poly(encrypted2.data(), coeff_count * encrypted2_size,
             coeff_mod_count, copy_encrypted2_ntt.get());
 
-        // Perform Karatsuba multiplication on size 2 ciphertexts
-        if (encrypted1_size == 2 && encrypted2_size == 2)
+        // Perform multiplication on arbitrary size ciphertexts
+
+        // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
+        // component [j] such that [i+j]=[secret_power_index]
+        // Only need to check encrypted1 components up to and including [secret_power_index],
+        // and strictly less than [encrypted_array.size()]
+
+        // Number of encrypted1 components to check
+        size_t current_encrypted1_limit = 0;
+
+        for (size_t secret_power_index = 0;
+            secret_power_index < dest_count; secret_power_index++)
         {
-            //Compute c0 + c1 and c0*d0 modulo q
-            //tmp poly to keep c0 * d0
-            auto tmp_first_mul(allocate_poly(coeff_count, coeff_mod_count, pool));
+            current_encrypted1_limit = min(encrypted1_size, secret_power_index + 1);
 
-            uint64_t *temp_ptr_1 = tmp1_poly.get(); //pointer to the result of c0 + c1 in NTT
-            uint64_t *temp_ptr_2 = copy_encrypted1_ntt.get(); //Pointer to NTT version of c0
-            uint64_t *temp_ptr_3 = temp_ptr_2 + encrypted_ptr_increment; //Pointer to NTT version of c1
-
-            for (size_t i = 0; i < coeff_mod_count; i++)
+            for (size_t encrypted1_index = 0;
+                encrypted1_index < current_encrypted1_limit; encrypted1_index++)
             {
-                //Lazy reduction (c0 + c1)
-                for (size_t j = 0; j < coeff_count; j++)
+                // check if a corresponding component in encrypted2 exists
+                if (encrypted2_size > secret_power_index - encrypted1_index)
                 {
-                    *temp_ptr_1++ = *temp_ptr_2++ + *temp_ptr_3++;
-                }
-                //c0 * d0 in NTT
-                dyadic_product_coeffmod(
-                    copy_encrypted1_ntt.get() + (i * coeff_count),
-                    copy_encrypted2_ntt.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i],
-                    tmp_first_mul.get() + (i * coeff_count));
-            }
+                    size_t encrypted2_index = secret_power_index - encrypted1_index;
 
-            //Compute d0 + d1 and c1 * d1 modulo q
-            //tmp poly to keep c1 * d1
-            auto tmp_second_mul(allocate_poly(coeff_count, coeff_mod_count, pool));
-
-            // Compute d0 + d1 and c1*d1 in base q
-            temp_ptr_1 = tmp2_poly.get(); //Pointer to the result of d0 + d1
-            temp_ptr_2 = copy_encrypted2_ntt.get(); //Pointer to d0
-            temp_ptr_3 = temp_ptr_2 + encrypted_ptr_increment; //Pointer to d1
-
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                //Lazy reduction (d0 + d1)
-                for (size_t j = 0; j < coeff_count; j++)
-                {
-                    *temp_ptr_1++ = *temp_ptr_2++ + *temp_ptr_3++;
-                }
-
-                //c1 * d1 in NTT
-                dyadic_product_coeffmod(
-                    copy_encrypted1_ntt.get() + (i * coeff_count) + encrypted_ptr_increment,
-                    copy_encrypted2_ntt.get() + (i * coeff_count) + encrypted_ptr_increment,
-                    coeff_count, coeff_modulus[i], tmp_second_mul.get() + (i * coeff_count));
-            }
-
-            // Set destination of the first and third polys in base q
-            // Des[0] in base q
-            set_poly_poly(tmp_first_mul.get(), coeff_count,
-                coeff_mod_count, tmp_des.get());
-
-            // Des[2] in base q
-            set_poly_poly(tmp_second_mul.get(), coeff_count,
-                coeff_mod_count, tmp_des.get() + 2 * encrypted_ptr_increment);
-
-            // Compute (c0 + c1) * (d0 + d1) - c0 * d0 - c1 * d1 modulo q
-            auto tmp_mul_poly(allocate_poly(coeff_count, coeff_mod_count, pool));
-
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                // (c0 + c1) * (d0 + d1) in NTT
-                dyadic_product_coeffmod(
-                    tmp1_poly.get() + (i * coeff_count),
-                    tmp2_poly.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i],
-                    tmp_mul_poly.get() + (i * coeff_count));
-                // (c0 + c1) * (d0 + d1) - c0 * d0 in NTT
-                sub_poly_poly_coeffmod(
-                    tmp_mul_poly.get() + (i * coeff_count),
-                    tmp_first_mul.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i],
-                    tmp_mul_poly.get() + (i * coeff_count));
-                // (c0 + c1) * (d0 + d1) - c0 * d0 - c1 * d1 in NTT
-                // set the result to Des[1]
-                sub_poly_poly_coeffmod(
-                    tmp_mul_poly.get() + (i * coeff_count),
-                    tmp_second_mul.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i],
-                    tmp_des.get() + (i * coeff_count) + encrypted_ptr_increment);
-            }
-        }
-        else
-        {
-            // Perform multiplication on arbitrary size ciphertexts
-
-            // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
-            // component [j] such that [i+j]=[secret_power_index]
-            // Only need to check encrypted1 components up to and including [secret_power_index],
-            // and strictly less than [encrypted_array.size()]
-
-            // Number of encrypted1 components to check
-            size_t current_encrypted1_limit = 0;
-
-            for (size_t secret_power_index = 0;
-                secret_power_index < dest_count; secret_power_index++)
-            {
-                current_encrypted1_limit = min(encrypted1_size, secret_power_index + 1);
-
-                for (size_t encrypted1_index = 0;
-                    encrypted1_index < current_encrypted1_limit; encrypted1_index++)
-                {
-                    // check if a corresponding component in encrypted2 exists
-                    if (encrypted2_size > secret_power_index - encrypted1_index)
+                    // NTT Multiplication and addition for results in q
+                    for (size_t i = 0; i < coeff_mod_count; i++)
                     {
-                        size_t encrypted2_index = secret_power_index - encrypted1_index;
-
-                        // NTT Multiplication and addition for results in q
-                        for (size_t i = 0; i < coeff_mod_count; i++)
-                        {
-                            // ci * dj
-                            dyadic_product_coeffmod(
-                                copy_encrypted1_ntt.get() + (i * coeff_count) +
-                                (encrypted_ptr_increment * encrypted1_index),
-                                copy_encrypted2_ntt.get() + (i * coeff_count) +
-                                (encrypted_ptr_increment * encrypted2_index),
-                                coeff_count, coeff_modulus[i],
-                                tmp1_poly.get() + (i * coeff_count));
-                            // Dest[i+j]
-                            add_poly_poly_coeffmod(
-                                tmp1_poly.get() + (i * coeff_count),
-                                tmp_des.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_mod_count),
-                                coeff_count, coeff_modulus[i],
-                                tmp_des.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_mod_count));
-                        }
+                        // ci * dj
+                        dyadic_product_coeffmod(
+                            copy_encrypted1_ntt.get() + (i * coeff_count) +
+                            (encrypted_ptr_increment * encrypted1_index),
+                            copy_encrypted2_ntt.get() + (i * coeff_count) +
+                            (encrypted_ptr_increment * encrypted2_index),
+                            coeff_count, coeff_modulus[i],
+                            tmp1_poly.get() + (i * coeff_count));
+                        // Dest[i+j]
+                        add_poly_poly_coeffmod(
+                            tmp1_poly.get() + (i * coeff_count),
+                            tmp_des.get() + (i * coeff_count) +
+                            (secret_power_index * coeff_count * coeff_mod_count),
+                            coeff_count, coeff_modulus[i],
+                            tmp_des.get() + (i * coeff_count) +
+                            (secret_power_index * coeff_count * coeff_mod_count));
                     }
                 }
             }
