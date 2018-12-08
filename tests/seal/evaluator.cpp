@@ -2196,6 +2196,80 @@ namespace SEALTest
                 }
             }
         }
+        {
+            //multiplying two random vectors 100 times
+            size_t slot_size = 16;
+            parms.set_poly_modulus_degree(128);
+            parms.set_coeff_modulus({
+                small_mods_30bit(0), small_mods_30bit(1),
+                small_mods_30bit(2), small_mods_30bit(3) });
+            auto context = SEALContext::Create(parms);
+            KeyGenerator keygen(context);
+
+            CKKSEncoder encoder(context);
+            Encryptor encryptor(context, keygen.public_key());
+            Decryptor decryptor(context, keygen.secret_key());
+            Evaluator evaluator(context);
+            RelinKeys rlk = keygen.relin_keys(4, 1);
+
+            Ciphertext encrypted1;
+            Ciphertext encrypted2;
+            Ciphertext encryptedRes;
+            Plaintext plain1;
+            Plaintext plain2;
+            Plaintext plainRes;
+
+            std::vector<std::complex<double>> input1(slot_size, 0.0);
+            std::vector<std::complex<double>> input2(slot_size, 0.0);
+            std::vector<std::complex<double>> expected(slot_size, 0.0);
+
+            for (int round = 0; round < 100; round++)
+            {
+                int data_bound = 1 << 7;
+                srand(static_cast<unsigned>(time(NULL)));
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    input1[i] = static_cast<double>(rand() % data_bound);
+                    input2[i] = static_cast<double>(rand() % data_bound);
+                    expected[i] = input1[i] * input2[i] * input2[i];
+                }
+
+                std::vector<std::complex<double>> output(slot_size);
+                double delta = static_cast<double>(1ULL << 30);
+                encoder.encode(input1, parms.parms_id(), delta, plain1);
+                encoder.encode(input2, parms.parms_id(), delta, plain2);
+
+                encryptor.encrypt(plain1, encrypted1);
+                encryptor.encrypt(plain2, encrypted2);
+
+                //check correctness of encryption
+                ASSERT_TRUE(encrypted1.parms_id() == parms.parms_id());
+                //check correctness of encryption
+                ASSERT_TRUE(encrypted2.parms_id() == parms.parms_id());
+
+                evaluator.multiply_inplace(encrypted1, encrypted2);
+                evaluator.relinearize_inplace(encrypted1, rlk);
+                evaluator.multiply_inplace(encrypted1, encrypted2);
+                evaluator.relinearize_inplace(encrypted1, rlk);
+
+                // Scale down by two levels
+                auto target_parms = context->context_data()
+                    ->next_context_data()->next_context_data()->parms().parms_id();
+                evaluator.rescale_to_inplace(encrypted1, target_parms);
+
+                //check correctness of modulo switching
+                ASSERT_TRUE(encrypted1.parms_id() == target_parms);
+
+                decryptor.decrypt(encrypted1, plainRes);
+                encoder.decode(plainRes, output);
+
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(expected[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
+            }
+        }
     }
     TEST(EvaluatorTest, CKKSEncryptSquareRelinRescaleDecrypt)
     {
