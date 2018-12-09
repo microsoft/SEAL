@@ -268,7 +268,7 @@ void example_bfv_basics_i()
     more details on the basics of the BFV scheme, we refer the reader to the
     original paper https://eprint.iacr.org/2012/144. In truth, to achieve good 
     performance SEAL implements the "FullRNS" optimization as described in 
-    https://eprint.iacr.org/2016/510, but this optiomization is invisible to 
+    https://eprint.iacr.org/2016/510, but this optimization is invisible to 
     the user and has no security implications. We will discuss the CKKS scheme
     in later examples.
 
