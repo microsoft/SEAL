@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "contextdata.h"
+#include "contextdata_wrapper.h"
 #include "utilities.h"
 
 // SEAL

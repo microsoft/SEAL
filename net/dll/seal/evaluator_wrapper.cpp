@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "evaluator.h"
+#include "evaluator_wrapper.h"
 #include "utilities.h"
 
 // SEAL

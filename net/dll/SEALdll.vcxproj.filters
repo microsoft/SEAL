@@ -15,61 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="seal\batchencoder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\biguint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\ciphertext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\ckksencoder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\decryptor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\defaultparams.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="seal\defines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\encryptionparameterqualifiers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\encryptionparameters.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\encryptor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\evaluator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\galoiskeys.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\keygenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\plaintext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\publickey.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\relinkeys.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\sealcontext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\secretkey.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\smallmodulus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="seal\stdafx.h">
@@ -81,72 +27,72 @@
     <ClInclude Include="seal\utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\contextdata.h">
+    <ClInclude Include="seal\batchencoder_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\memorymanager.h">
+    <ClInclude Include="seal\biguint_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\memorypoolhandle.h">
+    <ClInclude Include="seal\ciphertext_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\ckksencoder_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\contextdata_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\decryptor_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\defaultparams_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\encryptionparameterqualifiers_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\encryptionparameters_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\encryptor_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\evaluator_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\galoiskeys_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\keygenerator_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\memorymanager_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\memorypoolhandle_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\plaintext_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\publickey_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\relinkeys_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\sealcontext_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\secretkey_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\smallmodulus_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="seal\batchencoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\ciphertext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\ckksencoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\decryptor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\defaultparams.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="seal\dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\biguint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\encryptionparameterqualifiers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\encryptor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\evaluator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\galoiskeys.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\keygenerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\plaintext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\publickey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\relinkeys.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\sealcontext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\secretkey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\smallmodulus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\encryptionparameters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\utilities.cpp">
@@ -155,13 +101,67 @@
     <ClCompile Include="seal\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\contextdata.cpp">
+    <ClCompile Include="seal\batchencoder_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\memorymanager.cpp">
+    <ClCompile Include="seal\biguint_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\memorypoolhandle.cpp">
+    <ClCompile Include="seal\ciphertext_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\ckksencoder_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\contextdata_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\decryptor_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\defaultparams_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\encryptionparameterqualifiers_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\encryptionparameters_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\encryptor_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\evaluator_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\galoiskeys_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\keygenerator_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\memorymanager_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\memorypoolhandle_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\plaintext_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\publickey_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\relinkeys_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\sealcontext_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\secretkey_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\smallmodulus_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

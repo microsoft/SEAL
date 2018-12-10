@@ -6,7 +6,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "ckksencoder.h"
+#include "ckksencoder_wrapper.h"
 #include "utilities.h"
 
 // SEAL

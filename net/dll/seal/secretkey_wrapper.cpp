@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "secretkey.h"
+#include "secretkey_wrapper.h"
 #include "utilities.h"
 
 // SEAL

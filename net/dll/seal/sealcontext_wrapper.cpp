@@ -6,7 +6,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "sealcontext.h"
+#include "sealcontext_wrapper.h"
 #include "utilities.h"
 
 // SEAL

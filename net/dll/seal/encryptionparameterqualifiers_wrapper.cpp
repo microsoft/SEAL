@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "encryptionparameterqualifiers.h"
+#include "encryptionparameterqualifiers_wrapper.h"
 #include "utilities.h"
 
 // SEAL

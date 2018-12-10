@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "ciphertext.h"
+#include "ciphertext_wrapper.h"
 #include "utilities.h"
 
 // SEAL

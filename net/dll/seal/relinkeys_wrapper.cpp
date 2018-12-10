@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "relinkeys.h"
+#include "relinkeys_wrapper.h"
 #include "utilities.h"
 
 // SEAL

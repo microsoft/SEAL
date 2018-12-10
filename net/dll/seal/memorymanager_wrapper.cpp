@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "memorymanager.h"
+#include "memorymanager_wrapper.h"
 #include "utilities.h"
 
 // SEAL

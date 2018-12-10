@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "smallmodulus.h"
+#include "smallmodulus_wrapper.h"
 #include "utilities.h"
 
 // SEAL

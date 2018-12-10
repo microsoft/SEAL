@@ -6,7 +6,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "batchencoder.h"
+#include "batchencoder_wrapper.h"
 #include "utilities.h"
 
 // SEAL

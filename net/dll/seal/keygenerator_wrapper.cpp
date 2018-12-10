@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "keygenerator.h"
+#include "keygenerator_wrapper.h"
 #include "utilities.h"
 
 // SEAL

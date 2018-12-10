@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "defaultparams.h"
+#include "defaultparams_wrapper.h"
 #include "utilities.h"
 
 // SEAL

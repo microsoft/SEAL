@@ -6,7 +6,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "plaintext.h"
+#include "plaintext_wrapper.h"
 #include "utilities.h"
 
 // SEAL

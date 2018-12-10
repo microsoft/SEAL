@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "decryptor.h"
+#include "decryptor_wrapper.h"
 #include "utilities.h"
 
 // SEAL

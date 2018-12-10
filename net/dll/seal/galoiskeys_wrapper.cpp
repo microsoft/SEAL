@@ -3,7 +3,7 @@
 
 // SEALDll
 #include "stdafx.h"
-#include "galoiskeys.h"
+#include "galoiskeys_wrapper.h"
 #include "utilities.h"
 
 // SEAL
