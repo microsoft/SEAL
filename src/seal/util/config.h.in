@@ -8,6 +8,7 @@
 #cmakedefine SEAL_USE_STD_BYTE
 #cmakedefine SEAL_USE_SHARED_MUTEX
 #cmakedefine SEAL_ENFORCE_HE_STD_SECURITY
+#cmakedefine SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO
 #cmakedefine SEAL_USE_INTRIN
 #cmakedefine SEAL_USE__UMUL128
 #cmakedefine SEAL_USE__BITSCANREVERSE64

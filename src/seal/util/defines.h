@@ -139,11 +139,6 @@ namespace seal
 #define SEAL_MSB_INDEX_UINT64(result, value) get_msb_index_generic(result, value)
 #endif
 
-// Multiplication by a plaintext zero should not be allowed, and by default SEAL 
-// throws an exception in this case. For performance reasons one might want to 
-// undefine this if appropriate checks are guaranteed to be performed elsewhere.
-#define SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO
-
 // HomomorphicEncryption.org security tables only support dimensions up to 32768
 #ifdef SEAL_ENFORCE_HE_STD_SECURITY
     static_assert(SEAL_POLY_MOD_DEGREE_MAX <= 32768, "SEAL_POLY_MOD_DEGREE_MAX too large");

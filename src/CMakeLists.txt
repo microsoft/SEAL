@@ -55,7 +55,6 @@ message(STATUS "SEAL debug mode: ${SEAL_DEBUG}")
 # Should we use C++14 or C++17?
 set(SEAL_USE_CXX17_OPTION_STR "Use C++17")
 option(SEAL_USE_CXX17 ${SEAL_USE_CXX17_OPTION_STR} ON)
-message(STATUS "${SEAL_USE_CXX17_OPTION_STR} (SEAL_USE_CXX17): ${SEAL_USE_CXX17}")
 
 # Conditionally enable features from C++17
 set(SEAL_USE_STD_BYTE OFF)
@@ -74,6 +73,11 @@ endif()
 # Enforce at least 128-bit security level based on HomomorphicEncryption.org estimates
 set(SEAL_ENFORCE_HE_STD_SECURITY_STR "Enforce at least 128-bit security level from HomomorphicEncryption.org security standard")
 option(SEAL_ENFORCE_HE_STD_SECURITY ${SEAL_ENFORCE_HE_STD_SECURITY_STR} OFF)
+
+# Throw on multiply_plain by a zero plaintext
+set(SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO_STR "Throw an exception when calling Evaluator::multiply_plain by a zero plaintext")
+option(SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO ${SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO_STR} ON)
+mark_as_advanced(FORCE SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO)
 
 # Use intrinsics if available
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
@@ -97,7 +101,6 @@ if(SEAL_USE_INTRIN)
 		set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
 	endif()
 endif()
-message(STATUS "${SEAL_USE_INTRIN_OPTION_STR} (SEAL_USE_INTRIN): ${SEAL_USE_INTRIN}")
 
 # Specific intrinsics depending on SEAL_USE_INTRIN
 if(DEFINED MSVC)
@@ -243,7 +246,6 @@ if(SEAL_USE_INTRIN)
 			set(SEAL_USE_AES_NI_PRNG OFF CACHE BOOL ${SEAL_USE_AES_NI_PRNG_OPTION_STR} FORCE)
 		endif()
 	endif()
-	message(STATUS "${SEAL_USE_AES_NI_PRNG_OPTION_STR}: ${SEAL_USE_AES_NI_PRNG}")
 
 	cmake_pop_check_state()
 endif()
@@ -255,7 +257,6 @@ if(SEAL_USE_MSGSL)
 		set(SEAL_USE_MSGSL OFF CACHE BOOL ${SEAL_USE_MSGSL_OPTION_STR} FORCE)
 	endif()
 endif()
-message(STATUS "${SEAL_USE_MSGSL_OPTION_STR} (SEAL_USE_MSGSL): ${SEAL_USE_MSGSL}")
 
 # Specific options depending on SEAL_USE_MSGSL
 set(SEAL_USE_MSGSL_SPAN_OPTION_STR "Use gsl::span")
