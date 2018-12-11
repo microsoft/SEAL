@@ -7,4 +7,7 @@
     <Description>.Net wrapper for SEAL library</Description>
     <Copyright>Microsoft Corporation 2018</Copyright>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin/Release/SEALNet.xml</DocumentationFile>
+  </PropertyGroup>
 </Project>

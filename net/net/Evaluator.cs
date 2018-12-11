@@ -140,7 +140,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="encrypted1">The first ciphertext to add</param>
         /// <param name="encrypted2">The second ciphertext to add</param>
-        /// <exception cref="ArgumentNullException>">if either encrypted1 or encrypted2 are null</exception>
+        /// <exception cref="ArgumentNullException">if either encrypted1 or encrypted2 are null</exception>
         /// <exception cref="ArgumentException">if encrypted1 or encrypted2 is not valid for
         /// the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 are in different
@@ -1256,7 +1256,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Rotates plaintext matrix rows cyclically. When batching is used with the BFV scheme, 
         /// this function rotates the encrypted plaintext matrix rows cyclically to the left 
-        /// (steps > 0) or to the right (steps < 0). Since the size of the batched matrix is 
+        /// (steps &gt; 0) or to the right (steps &lt; 0). Since the size of the batched matrix is 
         /// 2-by-(N/2), where N is the degree of the polynomial modulus, the number of steps 
         /// to rotate must have absolute value at most N/2-1. Dynamic memory allocations in 
         /// the process are allocated from the memory pool pointed to by the given 
@@ -1293,7 +1293,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Rotates plaintext matrix rows cyclically. When batching is used with the BFV scheme, 
         /// this function rotates the encrypted plaintext matrix rows cyclically to the left 
-        /// (steps > 0) or to the right (steps < 0) and writes the result to the destination 
+        /// (steps &gt; 0) or to the right (steps &lt; 0) and writes the result to the destination 
         /// parameter. Since the size of the batched matrix is 2-by-(N/2), where N is the degree 
         /// of the polynomial modulus, the number of steps to rotate must have absolute value at
         /// most N/2-1. Dynamic memory allocations in the process are allocated from the memory 
@@ -1405,8 +1405,8 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Rotates plaintext vector cyclically. When using the CKKS scheme, this function
-        /// rotates the encrypted plaintext vector cyclically to the left (steps > 0) or to 
-        /// the right (steps < 0). Since the size of the batched matrix is 2-by-(N/2), where 
+        /// rotates the encrypted plaintext vector cyclically to the left (steps &gt; 0) or to 
+        /// the right (steps &lt; 0). Since the size of the batched matrix is 2-by-(N/2), where 
         /// N is the degree of the polynomial modulus, the number of steps to rotate must 
         /// have absolute value at most N/2-1. Dynamic memory allocations in the process are 
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
@@ -1441,8 +1441,8 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Rotates plaintext vector cyclically. When using the CKKS scheme, this function
-        /// rotates the encrypted plaintext vector cyclically to the left (steps > 0) or to
-        /// the right (steps < 0) and writes the result to the destination parameter. Since 
+        /// rotates the encrypted plaintext vector cyclically to the left (steps &gt; 0) or to
+        /// the right (steps &lt; 0) and writes the result to the destination parameter. Since 
         /// the size of the batched matrix is 2-by-(N/2), where N is the degree of the 
         /// polynomial modulus, the number of steps to rotate must have absolute value at 
         /// most N/2-1. Dynamic memory allocations in the process are allocated from the 

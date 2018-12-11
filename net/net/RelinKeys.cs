@@ -253,7 +253,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the RelinKeys to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(Stream)">See Load() to load a saved RelinKeys instance.</seealso>
+        /// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved RelinKeys instance.</seealso>
         public void Save(Stream stream)
         {
             if (null == stream)

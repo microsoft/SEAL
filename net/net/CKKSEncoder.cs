@@ -142,8 +142,6 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="values">The enumeration of double-precision floating-point numbers 
         /// to encode</param>
-        /// <param name="parmsId">parmsId determining the encryption parameters to be used 
-        /// by the result plaintext</param>
         /// <param name="scale">Scaling parameter defining encoding precision</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
@@ -172,8 +170,6 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="values">The enumeration of double-precision floating-point numbers 
         /// to encode</param>
-        /// <param name="parmsId">parmsId determining the encryption parameters to be used 
-        /// by the result plaintext</param>
         /// <param name="scale">Scaling parameter defining encoding precision</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>

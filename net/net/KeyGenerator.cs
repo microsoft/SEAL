@@ -14,10 +14,10 @@ namespace Microsoft.Research.SEAL
     /// Constructing a KeyGenerator requires only a SEALContext.
     /// </summary>
     /// <see cref="EncryptionParameters">see EncryptionParameters for more details on encryption parameters.</see>
-    /// <see cref="SecretKey">see SecretKey for more details on secret key.</see>
-    /// <see cref="PublicKey">see PublicKey for more details on public key.</see>
-    /// <see cref="RelinKeys">see RelinKeys for more details on relinearization keys.</see>
-    /// <see cref="GaloisKeys">see GaloisKeys for more details on Galois keys.</see>
+    /// <see cref="SEAL.SecretKey">see SecretKey for more details on secret key.</see>
+    /// <see cref="SEAL.PublicKey">see PublicKey for more details on public key.</see>
+    /// <see cref="SEAL.RelinKeys">see RelinKeys for more details on relinearization keys.</see>
+    /// <see cref="SEAL.GaloisKeys">see GaloisKeys for more details on Galois keys.</see>
     public class KeyGenerator : NativeObject
     {
         /// <summary>

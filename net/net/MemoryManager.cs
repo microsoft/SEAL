@@ -5,11 +5,29 @@ using System;
 
 namespace Microsoft.Research.SEAL
 {
+    /// <summary>
+    /// Memory Manager Profile Options used in MemoryManager.GetPool method
+    /// </summary>
     public enum MMProfOpt : ulong
     {
+        /// <summary>
+        /// Use default profile
+        /// </summary>
         Default = 0,
+
+        /// <summary>
+        /// Force use of the Global profile
+        /// </summary>
         ForceGlobal = 1,
+
+        /// <summary>
+        /// Force use of a New profile
+        /// </summary>
         ForceNew = 2,
+
+        /// <summary>
+        /// Force use of the Thread Local profile
+        /// </summary>
         ForceThreadLocal = 4
     }
 

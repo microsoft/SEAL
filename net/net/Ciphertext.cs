@@ -511,7 +511,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="stream">The stream to save the ciphertext to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(Stream)">See Load() to load a saved ciphertext.</seealso>
+        /// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved ciphertext.</seealso>
         public void Save(Stream stream)
         {
             if (null == stream)

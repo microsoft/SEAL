@@ -7,6 +7,9 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
+    /// <summary>
+    /// Static methods for creating encryption parameters
+    /// </summary>
     public static class DefaultParams
     {
         /// <summary>
@@ -226,7 +229,7 @@ namespace Microsoft.Research.SEAL
             }
         }
 
-        /// </summary>
+        /// <summary>
         /// Returns the largest allowed decomposition bit count (60).
         /// </summary>
         public static int DBCmax
@@ -239,7 +242,7 @@ namespace Microsoft.Research.SEAL
         }
 
 
-        /// </summary>
+        /// <summary>
         /// Returns the smallest allowed decomposition bit count (1).
         /// </summary>
         public static int DBCmin

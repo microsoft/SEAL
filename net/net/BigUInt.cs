@@ -16,7 +16,7 @@ namespace Microsoft.Research.SEAL
     /// <para>
     /// Represents an unsigned integer with a specified bit width. BigUInts are mutable and able to be resized. 
     /// The bit count for a BigUInt (which can be read with <see cref="BitCount"/>) is set initially by the 
-    /// constructor and can be resized either explicitly with the <see cref="Resize()"/> function or implicitly
+    /// constructor and can be resized either explicitly with the <see cref="Resize(int)"/> function or implicitly
     /// with an assignment operation (e.g., one of the Set() functions). A rich set of unsigned integer operations 
     /// are provided by the BigUInt class, including comparison, traditional arithmetic (addition, subtraction, 
     /// multiplication, division), and modular arithmetic functions.
@@ -173,10 +173,12 @@ namespace Microsoft.Research.SEAL
             NativePtr = ptr;
         }
 
-        /// <summary>Creates a BigUInt initialized and minimally sized to fit the unsigned hexadecimal integer specified
-        /// by the<see cref= "System.Numerics.BigInteger" />.</ summary >
+        /// <summary>
+        /// Creates a BigUInt initialized and minimally sized to fit the unsigned hexadecimal integer specified
+        /// by the<see cref= "System.Numerics.BigInteger" />.
+        /// </summary >
         /// 
-        /// < param name= "bigInteger" > The initial value of the BigUInt</param>
+        /// <param name= "bigInteger" > The initial value of the BigUInt</param>
         /// <exception cref = "System.ArgumentNullException" > If bigInteger is null</exception>
         public BigUInt(BigInteger bigInteger)
         {
@@ -395,7 +397,7 @@ namespace Microsoft.Research.SEAL
         /// 
         /// <param name="stream">The stream to save the BigUInt to</param>
         /// <exception cref="System.ArgumentNullException">If stream is null</exception>
-        /// <seealso cref="Load()">See Load() to load a saved BigUInt.</seealso>
+        /// <seealso cref="Load(Stream)">See Load() to load a saved BigUInt.</seealso>
         public void Save(Stream stream)
         {
             if (null == stream)
@@ -420,7 +422,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="System.ArgumentNullException">If stream is null</exception>
         /// <exception cref="System.InvalidOperationException">If BigUInt is an alias and the loaded BigUInt is too large to fit
         /// with the current bit width</exception>
-        /// <seealso cref="Save()">See Save() to save a BigUInt.</seealso>
+        /// <seealso cref="Save(Stream)">See Save() to save a BigUInt.</seealso>
         public void Load(Stream stream)
         {
             if (null == stream)

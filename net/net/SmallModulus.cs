@@ -23,7 +23,7 @@ namespace Microsoft.Research.SEAL
     /// is  concurrently mutating it.
     /// </para>
     /// </remarks>
-    /// <seealso cref="EncryptionParameters"/>See EncryptionParameters for a description 
+    /// <seealso cref="EncryptionParameters">See EncryptionParameters for a description 
     /// of the encryption parameters.</seealso>
     public class SmallModulus : NativeObject, IEquatable<SmallModulus>, IEquatable<ulong>
     {

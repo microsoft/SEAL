@@ -115,7 +115,7 @@ namespace Microsoft.Research.SEAL
         /// 5. Term with the exponent value of one must be exactly written as x^1
         /// 6. Term with the exponent value of zero (the constant term) must be written
         /// as just a hexadecimal number without exponent
-        /// 7. Terms must be separated by exactly <space>+<space> and minus is not
+        /// 7. Terms must be separated by exactly [space]+[space] and minus is not
         /// allowed
         /// 8. Other than the +, no other terms should have whitespace
         /// </remarks>
@@ -475,8 +475,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the plaintext to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(Stream)">See Load() to load a saved plaintext.</seealso>
-        /// */
+        /// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved plaintext.</seealso>
         public void Save(Stream stream)
         {
             if (null == stream)
@@ -641,6 +640,7 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// Returns whether or not the plaintext has the same semantic value as a given plaintext. Leading
         /// zero coefficients are ignored by the comparison.
+        /// </remarks>
         /// <param name="obj">The object to compare against</param>
         public override bool Equals(object obj)
         {

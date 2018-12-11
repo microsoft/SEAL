@@ -23,6 +23,10 @@ namespace Microsoft.Research.SEAL
     /// EncryptionParameterQualifiers corresponding to a certain parameter set.</seealso>
     public class EncryptionParameterQualifiers : NativeObject
     {
+        /// <summary>
+        /// Create a copy of an existing instance of  Encryption Parameter Qualifiers 
+        /// </summary>
+        /// <param name="copy">Original object to copy</param>
         public EncryptionParameterQualifiers(EncryptionParameterQualifiers copy)
         {
             if (null == copy)

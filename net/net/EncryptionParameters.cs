@@ -15,7 +15,14 @@ namespace Microsoft.Research.SEAL
     /// </summary>
     public enum SchemeType
     {
+        /// <summary>
+        /// Brakerski/Fan-Vercauteren scheme
+        /// </summary>
         BFV = 0x1,
+
+        /// <summary>
+        /// Cheon-Kim-Kim-Song scheme
+        /// </summary>
         CKKS = 0x2
     }
 
@@ -299,7 +306,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="parms">Encryption Parameters to save</param>
         /// <param name="stream">The stream to save the EncryptionParameters to</param>
         /// <exception cref="System.ArgumentNullException">if either parms or stream are null</exception>
-        /// <seealso cref="Load()">See Load() to load a saved EncryptionParameters instance.</seealso>
+        /// <seealso cref="Load(Stream)">See Load() to load a saved EncryptionParameters instance.</seealso>
         public static void Save(EncryptionParameters parms, Stream stream)
         {
             if (null == parms)

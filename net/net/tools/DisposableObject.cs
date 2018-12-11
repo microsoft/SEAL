@@ -5,16 +5,23 @@ using System;
 
 namespace Microsoft.Research.SEAL.Tools
 {
+    /// <summary>
+    /// Class that implements the Disposable pattern
+    /// </summary>
     public class DisposableObject : IDisposable
     {
+        /// <summary>
+        /// Derived classes should override this method to release managed resources.
+        /// </summary>
         protected virtual void DisposeManagedResources()
-        {
-            // Derived classes will override this behavior.
+        {            // Derived classes will override this behavior.
         }
 
+        /// <summary>
+        /// Derived classes should override this method to release native resources.
+        /// </summary>
         protected virtual void DisposeNativeResources()
         {
-            // Derived classes will override this behavior.
         }
 
         /// <summary>
@@ -47,13 +54,18 @@ namespace Microsoft.Research.SEAL.Tools
             }
         }
 
+        /// <summary>
+        /// DisposableObject destructor
+        /// </summary>
         ~DisposableObject()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(false);
         }
 
-        // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        /// This code is added to correctly implement the disposable pattern.
+        /// </summary>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.

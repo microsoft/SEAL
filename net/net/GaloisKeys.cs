@@ -76,6 +76,7 @@ namespace Microsoft.Research.SEAL
         /// native GaloisKeys object.
         /// </summary>
         /// <param name="galoisKeys">Pointer to native GaloisKeys object</param>
+        /// <param name="owned">Whether this instance owns the native pointer</param>
         internal GaloisKeys(IntPtr galoisKeys, bool owned = true)
             : base(galoisKeys, owned)
         {
@@ -240,7 +241,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the GaloisKeys to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(Stream)">See Load() to load a saved GaloisKeys instance.</seealso>
+        /// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved GaloisKeys instance.</seealso>
         public void Save(Stream stream)
         {
             if (null == stream)
