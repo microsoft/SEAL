@@ -100,9 +100,7 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Encode3(void* thisptr, void* plain, void* 
     IfNullRet(encoder, E_POINTER);
     Plaintext* plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     try
     {
@@ -122,9 +120,7 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode1(void* thisptr, void* plain, uint64
     IfNullRet(count, E_POINTER);
     Plaintext* plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     try
     {
@@ -159,9 +155,7 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode2(void* thisptr, void* plain, uint64
     IfNullRet(count, E_POINTER);
     Plaintext* plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     try
     {
@@ -195,9 +189,7 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode3(void* thisptr, void* plain, void* 
     IfNullRet(encoder, E_POINTER);
     Plaintext* plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     try
     {

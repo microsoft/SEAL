@@ -37,9 +37,7 @@ namespace seal
 SEALDLL HRESULT SEALCALL Ciphertext_Create1(void* memoryPoolHandle, void** ciphertext)
 {
     IfNullRet(ciphertext, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(memoryPoolHandle);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
 
     try
     {
@@ -69,9 +67,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Create3(void* context, void* pool, void** ci
     const auto& sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -91,9 +87,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Create4(void* context, uint64_t* parms_id, v
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(parms_id, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -116,9 +110,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_Create5(void* context, uint64_t* parms_id, u
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(parms_id, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {

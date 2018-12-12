@@ -52,9 +52,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode1(void* thisptr, uint64_t value_count
     Plaintext* destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
@@ -84,9 +82,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode2(void* thisptr, uint64_t value_count
     Plaintext* destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
@@ -117,9 +113,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode3(void* thisptr, double value, uint64
     Plaintext* destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
@@ -143,9 +137,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode4(void* thisptr, double real, double 
     Plaintext* destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
@@ -194,9 +186,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode1(void* thisptr, void* plain, uint64_
     IfNullRet(value_count, E_POINTER);
     Plaintext* plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     vector<double> destination;
 
@@ -234,9 +224,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode2(void* thisptr, void* plain, uint64_
     IfNullRet(value_count, E_POINTER);
     Plaintext* plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     vector<complex<double>> destination;
 

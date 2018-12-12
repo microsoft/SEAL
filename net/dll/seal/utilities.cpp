@@ -26,6 +26,17 @@ namespace seal
     }
 }
 
+unique_ptr<MemoryPoolHandle> seal::dll::MemHandleFromVoid(void* voidptr)
+{
+    if (nullptr == voidptr)
+    {
+        return make_unique<MemoryPoolHandle>(MemoryManager::GetPool());
+    }
+
+    MemoryPoolHandle* handle = reinterpret_cast<MemoryPoolHandle*>(voidptr);
+    return make_unique<MemoryPoolHandle>(*handle);
+}
+
 void seal::dll::BuildCoeffPointers(const vector<SmallModulus>& coefficients, uint64_t* length, void** coeffs)
 {
     *length = coefficients.size();

@@ -16,8 +16,13 @@
     <ProjectReference Include="..\net\SEALNet.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <SEALDllBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../../bin/x64/$(Configuration)/SEALdll.*" />
+    <SEALDllBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../../lib/libsealdll.*" />
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(ProjectDir)\..\..\bin\x64\$(Configuration)\SEALdll.dll&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;copy &quot;$(ProjectDir)\..\..\bin\x64\$(Configuration)\SEALdll.pdb&quot; &quot;$(TargetDir)&quot;" />
+    <Copy SourceFiles="@(SEALDllBinaryFiles)" DestinationFolder="$(TargetDir)" />
   </Target>
 
 </Project>

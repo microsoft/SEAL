@@ -42,7 +42,7 @@ tests/seal/util/cmake_install.cmake
 */*.code-workspace
 */.vscode
 */build
-*/*.build
+**/*.build
 */compile_commands.json
 
 ## Ignore Visual Studio temporary files, build results, and

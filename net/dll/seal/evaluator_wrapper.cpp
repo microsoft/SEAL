@@ -189,9 +189,7 @@ SEALDLL HRESULT SEALCALL Evaluator_Multiply(void* thisptr, void* encrypted1, voi
     IfNullRet(encrypted2_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -213,9 +211,7 @@ SEALDLL HRESULT SEALCALL Evaluator_MultiplyMany(void* thisptr, int count, void**
     IfNullRet(relin_keys_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     Ciphertext** encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
     vector<Ciphertext> encrypteds_vec(count);
@@ -246,9 +242,7 @@ SEALDLL HRESULT SEALCALL Evaluator_MultiplyPlain(void* thisptr, void* encrypted,
     IfNullRet(plain_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -269,9 +263,7 @@ SEALDLL HRESULT SEALCALL Evaluator_Square(void* thisptr, void* encrypted, void* 
     IfNullRet(encrypted_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -294,9 +286,7 @@ SEALDLL HRESULT SEALCALL Evaluator_Relinearize(void* thisptr, void* encrypted, v
     IfNullRet(relin_keys_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -317,9 +307,7 @@ SEALDLL HRESULT SEALCALL Evaluator_ModSwitchToNext1(void* thisptr, void* encrypt
     IfNullRet(encrypted_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -361,9 +349,7 @@ SEALDLL HRESULT SEALCALL Evaluator_ModSwitchTo1(void* thisptr, void* encrypted, 
     IfNullRet(parms_id, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
@@ -411,9 +397,7 @@ SEALDLL HRESULT SEALCALL Evaluator_RescaleToNext(void* thisptr, void* encrypted,
     IfNullRet(encrypted_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -435,9 +419,7 @@ SEALDLL HRESULT SEALCALL Evaluator_RescaleTo(void* thisptr, void* encrypted, uin
     IfNullRet(parms_id, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
@@ -463,9 +445,7 @@ SEALDLL HRESULT SEALCALL Evaluator_Exponentiate(void* thisptr, void* encrypted, 
     IfNullRet(relin_keys_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -487,9 +467,7 @@ SEALDLL HRESULT SEALCALL Evaluator_TransformToNTT1(void* thisptr, void* plain, u
     IfNullRet(parms_id, E_POINTER);
     Plaintext* destination_ptr = FromVoid<Plaintext>(destination_ntt);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
@@ -555,9 +533,7 @@ SEALDLL HRESULT SEALCALL Evaluator_ApplyGalois(void* thisptr, void* encrypted, u
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -580,9 +556,7 @@ SEALDLL HRESULT SEALCALL Evaluator_RotateRows(void* thisptr, void* encrypted, in
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -605,9 +579,7 @@ SEALDLL HRESULT SEALCALL Evaluator_RotateColumns(void* thisptr, void* encrypted,
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -630,9 +602,7 @@ SEALDLL HRESULT SEALCALL Evaluator_RotateVector(void* thisptr, void* encrypted, 
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
@@ -655,9 +625,7 @@ SEALDLL HRESULT SEALCALL Evaluator_ComplexConjugate(void* thisptr, void* encrypt
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    MemoryPoolHandle* pool_ptr = FromVoid<MemoryPoolHandle>(pool);
-    if (nullptr == pool_ptr)
-        pool_ptr = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {

@@ -43,9 +43,7 @@ SEALDLL HRESULT SEALCALL Encryptor_Encrypt(void* thisptr, void* plaintext, void*
     IfNullRet(plain, E_POINTER);
     Ciphertext* cipher = FromVoid<Ciphertext>(destination);
     IfNullRet(cipher, E_POINTER);
-    MemoryPoolHandle* pool = FromVoid<MemoryPoolHandle>(pool_handle);
-    if (nullptr == pool)
-        pool = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
 
     try
     {

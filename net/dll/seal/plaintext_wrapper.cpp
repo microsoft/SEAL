@@ -40,9 +40,7 @@ namespace seal
 SEALDLL HRESULT SEALCALL Plaintext_Create1(void* memoryPoolHandle, void** plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(memoryPoolHandle);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
     Plaintext* plain = nullptr;
 
     try
@@ -62,9 +60,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Create1(void* memoryPoolHandle, void** plaint
 SEALDLL HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void* memoryPoolHandle, void** plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(memoryPoolHandle);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
     Plaintext* plain = nullptr;
 
     try
@@ -84,9 +80,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void* memoryPool
 SEALDLL HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void* memoryPoolHandle, void** plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(memoryPoolHandle);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
     Plaintext* plain = nullptr;
 
     try
@@ -107,9 +101,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Create4(char* hexPoly, void* memoryPoolHandle
 {
     IfNullRet(plaintext, E_POINTER);
     IfNullRet(hexPoly, E_POINTER);
-    MemoryPoolHandle* handle = FromVoid<MemoryPoolHandle>(memoryPoolHandle);
-    if (nullptr == handle)
-        handle = &MemoryManager::GetPool();
+    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
     string hexPolyStr(hexPoly);
 
     try

@@ -9,6 +9,9 @@
 #include <unordered_map>
 #include <string>
 
+// SEALDLL
+#include "defines.h"
+
 // SEAL
 #include "seal/encryptionparams.h"
 
@@ -16,6 +19,7 @@ namespace seal
 {
     class SmallModulus;
     class SEALContext;
+    class MemoryPoolHandle;
 
     namespace dll
     {
@@ -28,6 +32,12 @@ namespace seal
             T* result = reinterpret_cast<T*>(voidptr);
             return result;
         }
+
+        /**
+        Get MemoryPoolHandle from a void pointer.
+        Returns a default if void pointer is null.
+        */
+        std::unique_ptr<seal::MemoryPoolHandle> MemHandleFromVoid(void* voidptr);
 
         /**
         Build and array of SmallModulus pointers from a vector
