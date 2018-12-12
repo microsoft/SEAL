@@ -23,3 +23,7 @@ target_link_libraries(sealdll SEAL::seal)
 # Add source files to library
 add_subdirectory(seal)
 
+# Install only the shared library. This library is not meant to be
+# used other than by SEALNet.
+install(TARGETS sealdll
+	LIBRARY DESTINATION lib)
