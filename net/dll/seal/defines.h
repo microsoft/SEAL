@@ -38,9 +38,8 @@
 #define ERROR_INVALID_INDEX              1413L
 #define ERROR_INVALID_OPERATION          4317L
 
-
-#define FAILED(x)  (((x) != S_OK) && ((x) != S_FALSE))
-
+#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
+#define FAILED(hr) (((HRESULT)(hr)) < 0)
 
 #endif // _MSC_VER
 
