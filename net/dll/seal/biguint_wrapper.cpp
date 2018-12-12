@@ -32,7 +32,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Create2(int bitCount, void** bui)
 
     try
     {
-        BigUInt* biguint = new BigUInt(bitCount, /* value */ 0UL);
+        BigUInt* biguint = new BigUInt(bitCount, /* value */ static_cast<uint64_t>(0));
         *bui = biguint;
         return S_OK;
     }
