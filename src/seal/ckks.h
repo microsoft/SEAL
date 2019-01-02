@@ -648,37 +648,45 @@ namespace seal
                         wide_tmp_dest.get() + (i * coeff_mod_count));
                 }
 
-                double res_accum = 0.0;
+                res[i] = 0.0;
+                double scaled_two_pow_64 = inv_scale;
                 if (util::is_greater_than_or_equal_uint_uint(
                     wide_tmp_dest.get() + (i * coeff_mod_count),
                     upper_half_threshold, coeff_mod_count))
                 {
-                    for (std::size_t j = 0; j < coeff_mod_count; j++)
+                    double scaled_two_pow_64 = inv_scale;
+                    for (std::size_t j = 0; j < coeff_mod_count; 
+                        j++, scaled_two_pow_64 *= two_pow_64)
                     {
-                        double diff = 0.0;
                         if (wide_tmp_dest[i * coeff_mod_count + j] > decryption_modulus[j])
                         {
-                            diff = static_cast<double>(wide_tmp_dest[i * coeff_mod_count + j]
-                                - decryption_modulus[j]);
+                            auto diff = wide_tmp_dest[i * coeff_mod_count + j] - decryption_modulus[j];
+                            res[i] += diff ? 
+                                static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                         else
                         {
-                            diff = -static_cast<double>(decryption_modulus[j]
-                                - wide_tmp_dest[i * coeff_mod_count + j]);
+                            auto diff = decryption_modulus[j] - wide_tmp_dest[i * coeff_mod_count + j];
+                            res[i] -= diff ? 
+                                static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
-                        res_accum += diff * pow(two_pow_64, j);
                     }
                 }
                 else
                 {
-                    for (std::size_t j = 0; j < coeff_mod_count; j++)
+                    for (std::size_t j = 0; j < coeff_mod_count; 
+                        j++, scaled_two_pow_64 *= two_pow_64)
                     {
-                        res_accum += static_cast<double>(
-                            wide_tmp_dest[i * coeff_mod_count + j]) * pow(two_pow_64, j);
+                        auto curr_coeff = wide_tmp_dest[i * coeff_mod_count + j];
+                        res[i] += curr_coeff ? 
+                            static_cast<double>(curr_coeff) * scaled_two_pow_64 : 0.0;
                     }
                 }
 
-                res[i] = res_accum * inv_scale;
+                // Scaling instead incorporated above; this can help in cases 
+                // where otherwise pow(two_pow_64, j) would overflow due to very
+                // large coeff_mod_count and very large scale
+                // res[i] = res_accum * inv_scale;
             }
 
             std::size_t tt = coeff_count;
@@ -729,8 +737,6 @@ namespace seal
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
         static constexpr double PI_ = 3.14159265358979323846;
-
-        static const double two_pow_64_;
 
         std::shared_ptr<SEALContext> context_{ nullptr };
 

@@ -171,6 +171,57 @@ namespace SEALTest
             }
         }
         {
+            // Many primes
+            uint32_t slots = 32;
+            parms.set_poly_modulus_degree(128);
+            parms.set_coeff_modulus({ 
+                small_mods_30bit(0), 
+                small_mods_30bit(1),
+                small_mods_30bit(2), 
+                small_mods_30bit(3), 
+                small_mods_30bit(4),
+                small_mods_30bit(5),
+                small_mods_30bit(6),
+                small_mods_30bit(7),
+                small_mods_30bit(8),
+                small_mods_30bit(9), 
+                small_mods_30bit(10),
+                small_mods_30bit(11), 
+                small_mods_30bit(12), 
+                small_mods_30bit(13),
+                small_mods_30bit(14),
+                small_mods_30bit(15),
+                small_mods_30bit(16),
+                small_mods_30bit(17),
+                small_mods_30bit(18),
+            });
+            auto context = SEALContext::Create(parms);
+
+            std::vector<std::complex<double>> values(slots);
+
+            srand(static_cast<unsigned>(time(NULL)));
+            int data_bound = (1 << 30);
+
+            for (size_t i = 0; i < slots; i++)
+            {
+                std::complex<double> value(static_cast<double>(rand() % data_bound), 0);
+                values[i] = value;
+            }
+
+            CKKSEncoder encoder(context);
+            double delta = (1ULL << 40);
+            Plaintext plain;
+            encoder.encode(values, parms.parms_id(), delta, plain);
+            std::vector<std::complex<double>> result;
+            encoder.decode(plain, result);
+
+            for (size_t i = 0; i < slots; ++i)
+            {
+                auto tmp = abs(values[i].real() - result[i].real());
+                ASSERT_TRUE(tmp < 0.5);
+            }
+        }
+        {
             uint32_t slots = 64;
             parms.set_poly_modulus_degree(2 * slots);
             parms.set_coeff_modulus({ small_mods_40bit(0), small_mods_40bit(1),
