@@ -11,6 +11,7 @@ namespace SEALNetExamples
         {
             while (true)
             {
+                Console.WriteLine();
                 Console.WriteLine("SEAL Examples:");
                 Console.WriteLine(" 1. BFV Basics I");
                 Console.WriteLine(" 2. BFV Basics II");
@@ -32,6 +33,8 @@ namespace SEALNetExamples
                 */
                 ulong megabytes = MemoryManager.GetPool().AllocByteCount >> 20;
                 Console.WriteLine($"Total memory allocated from the current memory pool: {megabytes} MB");
+                Console.WriteLine();
+                Console.Write("Run example: ");
 
                 ConsoleKeyInfo key;
                 do
@@ -47,15 +50,15 @@ namespace SEALNetExamples
                         break;
 
                     case ConsoleKey.D2:
-                        Console.WriteLine("2!");
+                        ExampleBFVBasicsII();
                         break;
 
                     case ConsoleKey.D3:
-                        Console.WriteLine("3!");
+                        ExampleBFVBasicsIII();
                         break;
 
                     case ConsoleKey.D4:
-                        Console.WriteLine("4!");
+                        ExampleBFVBasicsIV();
                         break;
 
                     case ConsoleKey.D5:
@@ -434,6 +437,732 @@ namespace SEALNetExamples
             Decode to obtain an integer result.
             */
             Console.WriteLine($"Decoded integer: {encoder.DecodeInt32(plainResult)}");
+        }
+
+        private static void ExampleBFVBasicsII()
+        {
+            Utilities.PrintExampleBanner("Example: BFV Basics II");
+
+            /*
+            In this example we explain what relinearization is, how to use it, and how 
+            it affects noise budget consumption. Relinearization is used both in the BFV
+            and the CKKS schemes but in this example (for the sake of simplicity) we 
+            again focus on BFV.
+
+            First we set the parameters, create a SEALContext, and generate the public
+            and secret keys. We use slightly larger parameters than before to be able to 
+            do more homomorphic multiplications.
+            */
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+            parms.PolyModulusDegree = 8192;
+
+            /*
+            The default coefficient modulus consists of the following primes:
+
+                0x7fffffff380001,  0x7ffffffef00001,
+                0x3fffffff000001,  0x3ffffffef40001
+
+            The total size is 218 bits.
+            */
+            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192);
+            parms.SetPlainModulus(1 << 10);
+
+            SEALContext context = SEALContext.Create(parms);
+            Utilities.PrintParameters(context);
+
+            /*
+            We generate the public and secret keys as before. 
+
+            There are actually two more types of keys in SEAL: `relinearization keys' 
+            and `Galois keys'. In this example we will discuss relinearization keys, and 
+            Galois keys will be discussed later in example_bfv_basics_iii().
+            */
+            KeyGenerator keygen = new KeyGenerator(context);
+            PublicKey publicKey = keygen.PublicKey;
+            SecretKey secretKey = keygen.SecretKey;
+
+            /*
+            We also set up an Encryptor, Evaluator, and Decryptor here. We will
+            encrypt polynomials directly in this example, so there is no need for
+            an encoder.
+            */
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Evaluator evaluator = new Evaluator(context);
+            Decryptor decryptor = new Decryptor(context, secretKey);
+
+            /*
+            We can easily construct a plaintext polynomial from a string. Again, note 
+            how there is no need for encoding since the BFV scheme natively encrypts
+            polynomials.
+            */
+            Plaintext plain1 = new Plaintext("1x^2 + 2x^1 + 3");
+            Ciphertext encrypted = new Ciphertext();
+            Console.Write($"Encrypting {plain1.ToString()}: ");
+            encryptor.Encrypt(plain1, encrypted);
+            Console.WriteLine("Done");
+
+            /*
+            In SEAL, a valid ciphertext consists of two or more polynomials whose 
+            coefficients are integers modulo the product of the primes in coeff_modulus. 
+            The current size of a ciphertext can be found using Ciphertext::size().
+            A freshly encrypted ciphertext always has size 2.
+            */
+            Console.WriteLine($"Size of a fresh encryption: {encrypted.Size}");
+            Console.WriteLine($"Noise budget in fresh encryption: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            /*
+            Homomorphic multiplication results in the output ciphertext growing in size. 
+            More precisely, if the input ciphertexts have size M and N, then the output 
+            ciphertext after homomorphic multiplication will have size M+N-1. In this
+            case we square encrypted twice to observe this growth (also observe noise
+            budget consumption).
+            */
+            evaluator.SquareInplace(encrypted);
+            Console.WriteLine($"Size after squaring: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.SquareInplace(encrypted);
+            Console.WriteLine($"Size after second squaring: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after second squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            /*
+            It does not matter that the size has grown -- decryption works as usual.
+            Observe from the print-out that the coefficients in the plaintext have grown 
+            quite large. One more squaring would cause some of them to wrap around the
+            plain_modulus (0x400) and as a result we would no longer obtain the expected 
+            result as an integer-coefficient polynomial. We can fix this problem to some 
+            extent by increasing plain_modulus. This makes sense since we still have 
+            plenty of noise budget left.
+            */
+            Plaintext plain2 = new Plaintext();
+            decryptor.Decrypt(encrypted, plain2);
+            Console.WriteLine($"Fourth power: {plain2.ToString()}");
+            Console.WriteLine();
+
+            /*
+            The problem here is that homomorphic operations on large ciphertexts are
+            computationally much more costly than on small ciphertexts. Specifically,
+            homomorphic multiplication on input ciphertexts of size M and N will require 
+            O(M*N) polynomial multiplications to be performed, and an addition will
+            require O(M+N) additions. Relinearization reduces the size of ciphertexts
+            after multiplication back to the initial size (2). Thus, relinearizing one
+            or both inputs before the next multiplication or e.g. before serializing the
+            ciphertexts, can have a huge positive impact on performance.
+
+            Another problem is that the noise budget consumption in multiplication is
+            bigger when the input ciphertexts sizes are bigger. In a complicated
+            computation the contribution of the sizes to the noise budget consumption
+            can actually become the dominant term. We will point this out again below
+            once we get to our example.
+
+            Relinearization itself has both a computational cost and a noise budget cost.
+            These both depend on a parameter called `decomposition bit count', which can
+            be any integer at least 1 [dbc_min()] and at most 60 [dbc_max()]. A large
+            decomposition bit count makes relinearization fast, but consumes more noise
+            budget. A small decomposition bit count can make relinearization slower, but 
+            might not change the noise budget by any observable amount.
+
+            Relinearization requires a special type of key called `relinearization keys'.
+            These can be created by the KeyGenerator for any decomposition bit count.
+            To relinearize a ciphertext of size M >= 2 back to size 2, we actually need 
+            M-2 relinearization keys. Attempting to relinearize a too large ciphertext 
+            with too few relinearization keys will result in an exception being thrown.
+
+            We repeat our computation, but this time relinearize after both squarings.
+            Since our ciphertext never grows past size 3 (we relinearize after every
+            multiplication), it suffices to generate only one relinearization key. This
+            (relinearizing after every multiplication) should be the preferred approach 
+            in almost all cases.
+
+            First, we need to create relinearization keys. We use a decomposition bit 
+            count of 16 here, which should be thought of as very small.
+
+            This function generates one single relinearization key. Another overload 
+            of KeyGenerator::relin_keys takes the number of keys to be generated as an 
+            argument, but one is all we need in this example (see above).
+            */
+            RelinKeys relinKeys16 = keygen.RelinKeys(decompositionBitCount: 16);
+
+            Console.Write($"Encrypting {plain1.ToString()}: ");
+            encryptor.Encrypt(plain1, encrypted);
+            Console.WriteLine("Done");
+            Console.WriteLine($"Size of a fresh encryption: {encrypted.Size}");
+            Console.WriteLine($"Noise budget in fresh encryption: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.SquareInplace(encrypted);
+            Console.WriteLine($"Size after squaring: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.RelinearizeInplace(encrypted, relinKeys16);
+            Console.WriteLine($"Size after relinearization: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after relinearizing (dbc = {relinKeys16.DecompositionBitCount}): {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.SquareInplace(encrypted);
+            Console.WriteLine($"Size after second squaring: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after second squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.RelinearizeInplace(encrypted, relinKeys16);
+            Console.WriteLine($"Size after relinearization: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after relinearizing (dbc = {relinKeys16.DecompositionBitCount}): {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            decryptor.Decrypt(encrypted, plain2);
+            Console.WriteLine($"Fourth power: {plain2.ToString()}");
+            Console.WriteLine();
+
+            /*
+            Of course the result is still the same, but this time we actually used less 
+            of our noise budget. This is not surprising for two reasons:
+
+                - We used a very small decomposition bit count, which is why
+                  relinearization itself did not consume the noise budget by any
+                  observable amount;
+                - Since our ciphertext sizes remain small throughout the two
+                  squarings, the noise budget consumption rate in multiplication
+                  remains as small as possible. Recall from above that operations
+                  on larger ciphertexts actually cause more noise growth.
+
+            To make things more clear, we repeat the computation a third time, now using 
+            the largest possible decomposition bit count (60). We are not measuring
+            running time here, but relinearization with relin_keys60 (below) is much 
+            faster than with relin_keys16.
+            */
+            RelinKeys relinKeys60 = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
+
+            Console.Write($"Encrypting: {plain1.ToString()}: ");
+            encryptor.Encrypt(plain1, encrypted);
+            Console.WriteLine("Done");
+            Console.WriteLine($"Size of a fresh encryption: {encrypted.Size}");
+            Console.WriteLine($"Noise budget in fresh encryption: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.SquareInplace(encrypted);
+            Console.WriteLine($"Size after squaring: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.RelinearizeInplace(encrypted, relinKeys60);
+            Console.WriteLine($"Size after relinearization: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after relinearizing (dbc = {relinKeys60.DecompositionBitCount}): {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.SquareInplace(encrypted);
+            Console.WriteLine($"Size after second squaring: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after second squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.RelinearizeInplace(encrypted, relinKeys60);
+            Console.WriteLine($"Size after relinearization: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after relinearizing (dbc = {relinKeys60.DecompositionBitCount}): {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            decryptor.Decrypt(encrypted, plain2);
+            Console.WriteLine($"Fourth power: {plain2.ToString()}");
+            Console.WriteLine();
+
+            /*
+            Observe from the print-out that we have now used significantly more of our
+            noise budget than in the two previous runs. This is again not surprising, 
+            since the first relinearization chops off a huge part of the noise budget.
+
+            However, note that the second relinearization does not change the noise
+            budget by any observable amount. This is very important to understand when
+            optimal performance is desired: relinearization always drops the noise
+            budget from the maximum (freshly encrypted ciphertext) down to a fixed 
+            amount depending on the encryption parameters and the decomposition bit 
+            count. On the other hand, homomorphic multiplication always consumes the
+            noise budget from its current level. This is why the second relinearization
+            does not change the noise budget anymore: it is already consumed past the
+            fixed amount determinted by the decomposition bit count and the encryption
+            parameters. 
+
+            We now perform a third squaring and observe an even further compounded
+            decrease in the noise budget. Again, relinearization does not consume the
+            noise budget at this point by any observable amount, even with the largest
+            possible decomposition bit count.
+            */
+            evaluator.SquareInplace(encrypted);
+            Console.WriteLine($"Size after third squaring: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after third squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            evaluator.RelinearizeInplace(encrypted, relinKeys60);
+            Console.WriteLine($"Size after relinearization: {encrypted.Size}");
+            Console.WriteLine($"Noise budget after relinearizing (dbc = {relinKeys60.DecompositionBitCount}): {decryptor.InvariantNoiseBudget(encrypted)} bits");
+
+            decryptor.Decrypt(encrypted, plain2);
+            Console.WriteLine($"Eigth power: {plain2.ToString()}");
+
+            /*
+            Observe from the print-out that the polynomial coefficients are no longer
+            correct as integers: they have been reduced modulo plain_modulus, and there
+            was no warning sign about this. It might be necessary to carefully analyze
+            the computation to make sure such overflow does not occur unexpectedly.
+
+            These experiments suggest that an optimal strategy might be to relinearize
+            first with relinearization keys with a small decomposition bit count, and 
+            later with relinearization keys with a larger decomposition bit count (for 
+            performance) when noise budget has already been consumed past the bound 
+            determined by the larger decomposition bit count. For example, the best 
+            strategy might have been to use relin_keys16 in the first relinearization 
+            and relin_keys60 in the next two relinearizations for optimal noise budget 
+            consumption/performance trade-off. Luckily, in most use-cases it is not so 
+            critical to squeeze out every last bit of performance, especially when 
+            larger parameters are used.
+            */
+        }
+
+        private static void ExampleBFVBasicsIII()
+        {
+            Utilities.PrintExampleBanner("Example: BFV Basics III");
+
+            /*
+            In this fundamental example we discuss and demonstrate a powerful technique 
+            called `batching'. If N denotes the degree of the polynomial modulus, and T
+            the plaintext modulus, then batching is automatically enabled for the BFV
+            scheme when T is a prime number congruent to 1 modulo 2*N. In batching the 
+            plaintexts are viewed as matrices of size 2-by-(N/2) with each element an 
+            integer modulo T. Homomorphic operations act element-wise between encrypted 
+            matrices, allowing the user to obtain speeds-ups of several orders of 
+            magnitude in naively vectorizable computations. We demonstrate two more 
+            homomorphic operations which act on encrypted matrices by rotating the rows 
+            cyclically, or rotate the columns (i.e. swap the rows). These operations 
+            require the construction of so-called `Galois keys', which are very similar 
+            to relinearization keys.
+
+            The batching functionality is totally optional in the BFV scheme and is 
+            exposed through the BatchEncoder class. 
+            */
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+
+            parms.PolyModulusDegree = 4096;
+            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 4096);
+
+            /*
+            Note that 40961 is a prime number and 2*4096 divides 40960, so batching will
+            automatically be enabled for these parameters.
+            */
+            parms.SetPlainModulus(40961);
+
+            SEALContext context = SEALContext.Create(parms);
+            Utilities.PrintParameters(context);
+
+            /*
+            We can verify that batching is indeed enabled by looking at the encryption
+            parameter qualifiers created by SEALContext.
+            */
+            EncryptionParameterQualifiers qualifiers = context.FirstContextData.Qualifiers;
+            Console.WriteLine($"Batching enabled: {qualifiers.UsingBatching.ToString()}");
+
+            KeyGenerator keygen = new KeyGenerator(context);
+            PublicKey publicKey = keygen.PublicKey;
+            SecretKey secretKey = keygen.SecretKey;
+
+            /*
+            We need to create so-called `Galois keys' for performing matrix row and 
+            column rotations on encrypted matrices. Like relinearization keys, the 
+            behavior of Galois keys depends on a decomposition bit count. The noise 
+            budget consumption behavior of matrix row and column rotations is exactly 
+            like that of relinearization (recall example_bfv_basics_ii()).
+
+            Here we use a moderate size decomposition bit count.
+            */
+            GaloisKeys galKeys = keygen.GaloisKeys(decompositionBitCount: 30);
+
+            /*
+            Since we are going to do some multiplications we will also relinearize.
+            */
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 30);
+
+            /*
+            We also set up an Encryptor, Evaluator, and Decryptor here.
+            */
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Evaluator evaluator = new Evaluator(context);
+            Decryptor decryptor = new Decryptor(context, secretKey);
+
+            /*
+            Batching is done through an instance of the BatchEncoder class so need to
+            construct one.
+            */
+            BatchEncoder batchEncoder = new BatchEncoder(context);
+
+            /*
+            The total number of batching `slots' is poly_modulus_degree. The matrices 
+            we encrypt are of size 2-by-(slot_count / 2).
+            */
+            ulong slotCount = batchEncoder.SlotCount;
+            ulong rowSize = slotCount / 2;
+            Console.WriteLine($"Plaintext matrix row size: {rowSize}");
+
+            /*
+            The matrix plaintext is simply given to BatchEncoder as a flattened vector
+            of numbers of size slot_count. The first row_size numbers form the first row, 
+            and the rest form the second row. Here we create the following matrix:
+
+                [ 0,  1,  2,  3,  0,  0, ...,  0 ]
+                [ 4,  5,  6,  7,  0,  0, ...,  0 ]
+            */
+            ulong[] podMatrix = new ulong[slotCount];
+            podMatrix[0] = 0;
+            podMatrix[1] = 1;
+            podMatrix[2] = 2;
+            podMatrix[3] = 3;
+            podMatrix[rowSize] = 4;
+            podMatrix[rowSize + 1] = 5;
+            podMatrix[rowSize + 2] = 6;
+            podMatrix[rowSize + 3] = 7;
+
+            Console.WriteLine("Input plaintext matrix:");
+            Utilities.PrintMatrix(podMatrix, (int)rowSize);
+
+            /*
+            First we use BatchEncoder to compose the matrix into a plaintext.
+            */
+            Plaintext plainMatrix = new Plaintext();
+            batchEncoder.Encode(podMatrix, plainMatrix);
+
+            /*
+            Next we encrypt the plaintext as usual.
+            */
+            Ciphertext encryptedMatrix = new Ciphertext();
+            Console.Write("Encrypting: ");
+            encryptor.Encrypt(plainMatrix, encryptedMatrix);
+            Console.WriteLine("Done");
+            Console.WriteLine($"Noise budget in fresh encryption: {decryptor.InvariantNoiseBudget(encryptedMatrix)} bits");
+
+            /*
+            Operating on the ciphertext results in homomorphic operations being performed
+            simultaneously in all 4096 slots (matrix elements). To illustrate this, we 
+            form another plaintext matrix
+
+                [ 1,  2,  1,  2,  1,  2, ..., 2 ]
+                [ 1,  2,  1,  2,  1,  2, ..., 2 ]
+
+            and compose it into a plaintext.
+            */
+            ulong[] podMatrix2 = new ulong[slotCount];
+            for (ulong i = 0; i < slotCount; i++)
+            {
+                podMatrix2[i] = ((i % 2) + 1);
+            }
+            Plaintext plainMatrix2 = new Plaintext();
+            batchEncoder.Encode(podMatrix2, plainMatrix2);
+            Console.WriteLine("Second input plaintext matrix:");
+            Utilities.PrintMatrix(podMatrix2, (int)rowSize);
+
+            /*
+            We now add the second (plaintext) matrix to the encrypted one using another 
+            new operation -- plain addition -- and square the sum.
+            */
+            Console.Write("Adding and squaring: ");
+            evaluator.AddPlainInplace(encryptedMatrix, plainMatrix2);
+            evaluator.SquareInplace(encryptedMatrix);
+            evaluator.RelinearizeInplace(encryptedMatrix, relinKeys);
+            Console.WriteLine("Done");
+
+            /*
+            How much noise budget do we have left?
+            */
+            Console.WriteLine($"Noise budget in result: {decryptor.InvariantNoiseBudget(encryptedMatrix)} bits");
+
+            /*
+            We decrypt and decompose the plaintext to recover the result as a matrix.
+            */
+            Plaintext plainResult = new Plaintext();
+            Console.Write("Decrypting result: ");
+            decryptor.Decrypt(encryptedMatrix, plainResult);
+            Console.WriteLine("Done");
+
+            List<ulong> podResult = new List<ulong>();
+            batchEncoder.Decode(plainResult, podResult);
+
+            Console.WriteLine("Result plaintext matrix:");
+            Utilities.PrintMatrix(podResult, (int)rowSize);
+
+            /*
+            Note how the operation was performed in one go for each of the elements of 
+            the matrix. It is possible to achieve incredible performance improvements by 
+            using this method when the computation is easily vectorizable.
+
+            Our discussion so far could have applied just as well for a simple vector 
+            data type (not matrix). Now we show how the matrix view of the plaintext can 
+            be used for more functionality. Namely, it is possible to rotate the matrix 
+            rows cyclically, and same for the columns (i.e. swap the two rows). For this
+            we need the Galois keys that we generated earlier.
+
+            We return to the original matrix that we started with.
+            */
+            encryptor.Encrypt(plainMatrix, encryptedMatrix);
+            Console.WriteLine("Unrotated matrix: ");
+            Utilities.PrintMatrix(podMatrix, (int)rowSize);
+            Console.WriteLine($"Noise budget in fresh encryption: {decryptor.InvariantNoiseBudget(encryptedMatrix)} bits");
+
+            /*
+            Now rotate the rows to the left 3 steps, decrypt, decompose, and print.
+            */
+            evaluator.RotateRowsInplace(encryptedMatrix, steps: 3, galoisKeys: galKeys);
+            Console.WriteLine("Rotated rows 3 steps left: ");
+            decryptor.Decrypt(encryptedMatrix, plainResult);
+            batchEncoder.Decode(plainResult, podResult);
+            Utilities.PrintMatrix(podResult, (int)rowSize);
+            Console.WriteLine($"Noise budget after rotation: {decryptor.InvariantNoiseBudget(encryptedMatrix)} bits");
+
+            /*
+            Rotate columns (swap rows), decrypt, decompose, and print.
+            */
+            evaluator.RotateColumnsInplace(encryptedMatrix, galKeys);
+            Console.WriteLine("Rotated columns: ");
+            decryptor.Decrypt(encryptedMatrix, plainResult);
+            batchEncoder.Decode(plainResult, podResult);
+            Utilities.PrintMatrix(podResult, (int)rowSize);
+            Console.WriteLine($"Noise budget after rotation: {decryptor.InvariantNoiseBudget(encryptedMatrix)} bits");
+
+            /*
+            Rotate rows to the right 4 steps, decrypt, decompose, and print.
+            */
+            evaluator.RotateRowsInplace(encryptedMatrix, steps: -4, galoisKeys: galKeys);
+            Console.WriteLine("Rotated rows 4 steps right:");
+            decryptor.Decrypt(encryptedMatrix, plainResult);
+            batchEncoder.Decode(plainResult, podResult);
+            Utilities.PrintMatrix(podResult, (int)rowSize);
+            Console.WriteLine($"Noise budget after rotation: {decryptor.InvariantNoiseBudget(encryptedMatrix)} bits");
+
+            /*
+            The output is as expected. Note how the noise budget gets a big hit in the
+            first rotation, but remains almost unchanged in the next rotations. This is 
+            again the same phenomenon that occurs with relinearization, where the noise 
+            budget is consumed down to some bound determined by the decomposition bit 
+            count and the encryption parameters. For example, after some multiplications 
+            have been performed rotations come basically for free (noise budget-wise), 
+            whereas they can be relatively expensive when the noise budget is nearly 
+            full unless a small decomposition bit count is used, which on the other hand
+            is computationally costly.
+            */
+        }
+
+        private static void ExampleBFVBasicsIV()
+        {
+            Utilities.PrintExampleBanner("Example: BFV Basics IV");
+
+            //            /*
+            //            In this example we describe the concept of `parms_id' in the context of the
+            //            BFV scheme and show how modulus switching can be used for improving both
+            //            computation and communication cost.
+
+            //            We start by setting up medium size parameters for BFV as usual.
+            //            */
+            //            EncryptionParameters parms(scheme_type::BFV);
+
+            //            parms.set_poly_modulus_degree(8192);
+            //            parms.set_coeff_modulus(coeff_modulus_128(8192));
+            //            parms.set_plain_modulus(1 << 20);
+
+            //            /*
+            //            In SEAL a particular set of encryption parameters (excluding the random
+            //            number generator) is identified uniquely by a SHA-3 hash of the parameters.
+            //            This hash is called the `parms_id' and can be easily accessed and printed
+            //            at any time. The hash will change as soon as any of the relevant parameters
+            //            is changed.
+            //            */
+            //            cout << "Current parms_id: " << parms.parms_id() << endl;
+            //            cout << "Changing plain_modulus ..." << endl;
+            //            parms.set_plain_modulus((1 << 20) + 1);
+            //            cout << "Current parms_id: " << parms.parms_id() << endl << endl;
+
+            //            /*
+            //            Create the context.
+            //            */
+            //            auto context = SEALContext::Create(parms);
+            //            print_parameters(context);
+
+            //            /*
+            //            All keys and ciphertext, and in the CKKS also plaintexts, carry the parms_id
+            //            for the encryption parameters they are created with, allowing SEAL to very 
+            //            quickly determine whether the objects are valid for use and compatible for 
+            //            homomorphic computations. SEAL takes care of managing, and verifying the 
+            //            parms_id for all objects so the user should have no reason to change it by 
+            //            hand. 
+            //            */
+            //            KeyGenerator keygen(context);
+            //            auto public_key = keygen.public_key();
+            //            auto secret_key = keygen.secret_key();
+            //            cout << "parms_id of public_key: " << public_key.parms_id() << endl;
+            //            cout << "parms_id of secret_key: " << secret_key.parms_id() << endl;
+
+            //            Encryptor encryptor(context, public_key);
+            //            Evaluator evaluator(context);
+            //            Decryptor decryptor(context, secret_key);
+
+            //            /*
+            //            Note how in the BFV scheme plaintexts do not carry the parms_id, but 
+            //            ciphertexts do.
+            //            */
+            //            Plaintext plain("1x^3 + 2x^2 + 3x^1 + 4");
+            //            Ciphertext encrypted;
+            //            encryptor.encrypt(plain, encrypted);
+            //            cout << "parms_id of plain: " << plain.parms_id() << " (not set)" << endl;
+            //            cout << "parms_id of encrypted: " << encrypted.parms_id() << endl << endl;
+
+            //            /*
+            //            When SEALContext is created from a given EncryptionParameters instance,
+            //            SEAL automatically creates a so-called "modulus switching chain", which is
+            //            a chain of other encryption parameters derived from the original set.
+            //            The parameters in the modulus switching chain are the same as the original 
+            //            parameters with the exception that size of the coefficient modulus is
+            //            decreasing going down the chain. More precisely, each parameter set in the
+            //            chain attempts to remove one of the coefficient modulus primes from the
+            //            previous set; this continues until the parameter set is no longer valid
+            //            (e.g. plain_modulus is larger than the remaining coeff_modulus). It is easy
+            //            to walk through the chain and access all the parameter sets. Additionally,
+            //            each parameter set in the chain has a `chain_index' that indicates its
+            //            position in the chain so that the last set has index 0. We say that a set
+            //            of encryption parameters, or an object carrying those encryption parameters,
+            //            is at a higher level in the chain than another set of parameters if its the
+            //            chain index is bigger, i.e. it is earlier in the chain. 
+            //            */
+            //            for (auto context_data = context->context_data(); context_data;
+            //                context_data = context_data->next_context_data())
+            //            {
+            //                cout << "Chain index: " << context_data->chain_index() << endl;
+            //                cout << "parms_id: " << context_data->parms().parms_id() << endl;
+            //                cout << "coeff_modulus primes: ";
+            //                cout << hex;
+            //                for (const auto &prime : context_data->parms().coeff_modulus())
+            //        {
+            //                cout << prime.value() << " ";
+            //            }
+            //            cout << dec << endl;
+            //            cout << "\\" << endl;
+            //            cout << " \\-->" << endl;
+            //        }
+            //        cout << "End of chain reached" << endl << endl;
+
+            //    /*
+            //    Modulus switching changes the ciphertext parameters to any set down the
+            //    chain from the current one. The function mod_switch_to_next(...) always
+            //    switches to the next set down the chain, whereas mod_switch_to(...) switches
+            //    to a parameter set down the chain corresponding to a given parms_id.
+            //    */
+            //    auto context_data = context->context_data();
+            //    while(context_data->next_context_data()) 
+            //    {
+            //        cout << "Chain index: " << context_data->chain_index() << endl;
+            //        cout << "parms_id of encrypted: " << encrypted.parms_id() << endl;
+            //        cout << "Noise budget at this level: "
+            //            << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+            //        cout << "\\" << endl;
+            //        cout << " \\-->" << endl;
+            //        evaluator.mod_switch_to_next_inplace(encrypted);
+            //        context_data = context_data->next_context_data();
+            //    }
+            //    cout << "Chain index: " << context_data->chain_index() << endl;
+            //    cout << "parms_id of encrypted: " << encrypted.parms_id() << endl;
+            //    cout << "Noise budget at this level: "
+            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+            //    cout << "\\" << endl;
+            //    cout << " \\-->" << endl;
+            //    cout << "End of chain reached" << endl << endl;
+
+            //    /*
+            //    At this point it is hard to see any benefit in doing this: we lost a huge 
+            //    amount of noise budget (i.e. computational power) at each switch and seemed
+            //    to get nothing in return. The ciphertext still decrypts to the exact same
+            //    value.
+            //    */
+            //    decryptor.decrypt(encrypted, plain);
+            //    cout << "Decryption: " << plain.to_string() << endl << endl;
+
+            //    /*
+            //    However, there is a hidden benefit: the size of the ciphertext depends
+            //    linearly on the number of primes in the coefficient modulus. Thus, if there 
+            //    is no need or intention to perform any more computations on a given 
+            //    ciphertext, we might as well switch it down to the smallest (last) set of 
+            //    parameters in the chain before sending it back to the secret key holder for 
+            //    decryption.
+
+            //    Also the lost noise budget is actually not as issue at all, if we do things
+            //    right, as we will see below. First we recreate the original ciphertext (with 
+            //    largest parameters) and perform some simple computations on it.
+            //    */
+            //    encryptor.encrypt(plain, encrypted);
+            //    auto relin_keys = keygen.relin_keys(60);
+            //    cout << "Noise budget before squaring: "
+            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+            //    evaluator.square_inplace(encrypted);
+            //    evaluator.relinearize_inplace(encrypted, relin_keys);
+            //    cout << "Noise budget after squaring: "
+            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+
+            //    /*
+            //    From the print-out we see that the noise budget after these computations is 
+            //    just slightly below the level we would have in a fresh ciphertext after one 
+            //    modulus switch (135 bits). Surprisingly, in this case modulus switching has 
+            //    no effect at all on the modulus.
+            //    */ 
+            //    evaluator.mod_switch_to_next_inplace(encrypted);
+            //    cout << "Noise budget after modulus switching: "
+            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+
+            //    /*
+            //    This means that there is no harm at all in dropping some of the coefficient
+            //    modulus after doing enough computations. In some cases one might want to
+            //    switch to a lower level slightly earlier, actually sacrificing some of the 
+            //    noise budget in the process, to gain computational performance from having
+            //    a smaller coefficient modulus. We see from the print-out that that the next 
+            //    modulus switch should be done ideally when the noise budget reaches 81 bits. 
+            //    */
+            //    evaluator.square_inplace(encrypted);
+            //    evaluator.relinearize_inplace(encrypted, relin_keys);
+            //    cout << "Noise budget after squaring: "
+            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+            //    evaluator.mod_switch_to_next_inplace(encrypted);
+            //    cout << "Noise budget after modulus switching: "
+            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+            //    evaluator.square_inplace(encrypted);
+            //    evaluator.relinearize_inplace(encrypted, relin_keys);
+            //    cout << "Noise budget after squaring: "
+            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+            //    evaluator.mod_switch_to_next_inplace(encrypted);
+            //    cout << "Noise budget after modulus switching: "
+            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl << endl;
+
+            //    /*
+            //    At this point the ciphertext still decrypts correctly, has very small size,
+            //    and the computation was as efficient as possible. Note that the decryptor
+            //    can be used to decrypt a ciphertext at any level in the modulus switching
+            //    chain as long as the secret key is at a higher level in the same chain.
+            //    */
+            //    decryptor.decrypt(encrypted, plain);
+            //    cout << "Decryption of eighth power: " << plain.to_string() << endl << endl;
+
+            //    /*
+            //    In BFV modulus switching is not necessary and in some cases the user might
+            //    not want to create the modulus switching chain. This can be done by passing
+            //    a bool `false' to the SEALContext::Create(...) function as follows.
+            //    */
+            //    context = SEALContext::Create(parms, false);
+
+            //    /*
+            //    We can check that indeed the modulus switching chain has not been created.
+            //    The following loop should execute only once.
+            //    */
+            //    for (context_data = context->context_data(); context_data;
+            //        context_data = context_data->next_context_data())
+            //    {
+            //        cout << "Chain index: " << context_data->chain_index() << endl;
+            //        cout << "parms_id: " << context_data->parms().parms_id() << endl;
+            //        cout << "coeff_modulus primes: ";
+            //        cout << hex;
+            //        for (const auto &prime : context_data->parms().coeff_modulus())
+            //        {
+            //            cout << prime.value() << " ";
+            //        }
+            //cout << dec << endl;
+            //        cout << "\\" << endl;
+            //        cout << " \\-->" << endl;
+            //    }
+            //    cout << "End of chain reached" << endl << endl;
+
+            /*
+            It is very important to understand how this example works since in the CKKS 
+            scheme modulus switching has a much more fundamental purpose and the next 
+            examples will be difficult to understand unless these basic properties are 
+            totally clear.
+            */
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Research.SEAL;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace SEALNetExamples
 {
@@ -77,5 +77,41 @@ namespace SEALNetExamples
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Helper function: Print the first and last printSize elements of a 2 row matrix
+        /// </summary>
+        public static void PrintMatrix(IEnumerable<ulong> matrixPar, int rowSize, int printSize = 5)
+        {
+            ulong[] matrix = matrixPar.ToArray();
+            Console.WriteLine();
+
+            /*
+            We're not going to print every column of the matrix (may be big). Instead
+            print printSize slots from beginning and end of the matrix.
+            */
+            Console.Write("    [");
+            for (int i = 0; i < printSize; i++)
+            {
+                Console.Write("{0,3}, ", matrix[i]);
+            }
+            Console.Write(" ...");
+            for (int i = rowSize - printSize; i < rowSize; i++)
+            {
+                Console.Write(", {0,3}", matrix[i]);
+            }
+            Console.WriteLine("  ]");
+            Console.Write("    [");
+            for (int i = rowSize; i < rowSize + printSize; i++)
+            {
+                Console.Write("{0,3}, ", matrix[i]);
+            }
+            Console.Write(" ...");
+            for (int i = 2 * rowSize - printSize; i < 2 * rowSize; i++)
+            {
+                Console.Write(", {0,3}", matrix[i]);
+            }
+            Console.WriteLine("  ]");
+            Console.WriteLine();
+        }
     }
 }
