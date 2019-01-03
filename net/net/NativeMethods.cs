@@ -1062,6 +1062,55 @@ namespace Microsoft.Research.SEAL
 
         #endregion
 
+        #region IntegerEncoder methods
+
+        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Create1", PreserveSig = false)]
+        internal static extern void IntegerEncoder_Create(IntPtr plainModulus, ulong baseval, out IntPtr encoder);
+
+        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Create2", PreserveSig = false)]
+        internal static extern void IntegerEncoder_Create(IntPtr copy, out IntPtr encoder);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_Destroy(IntPtr thisptr);
+
+        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Encode1", PreserveSig = false)]
+        internal static extern void IntegerEncoder_Encode(IntPtr thisptr, int value, IntPtr plain);
+
+        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Encode2", PreserveSig = false)]
+        internal static extern void IntegerEncoder_Encode(IntPtr thisptr, uint value, IntPtr plain);
+
+        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Encode3", PreserveSig = false)]
+        internal static extern void IntegerEncoder_Encode(IntPtr thisptr, ulong value, IntPtr plain);
+
+        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Encode4", PreserveSig = false)]
+        internal static extern void IntegerEncoder_Encode(IntPtr thisptr, long value, IntPtr plain);
+
+        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Encode5", PreserveSig = false)]
+        internal static extern void IntegerEncoder_Encode(IntPtr thisptr, IntPtr bigUInt, IntPtr plain);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_DecodeUInt32(IntPtr thisptr, IntPtr plain, out uint result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_DecodeUInt64(IntPtr thisptr, IntPtr plain, out ulong result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_DecodeInt32(IntPtr thisptr, IntPtr plain, out int result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_DecodeInt64(IntPtr thisptr, IntPtr plain, out long result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_DecodeBigUInt(IntPtr thisptr, IntPtr plain, IntPtr bigUInt);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_PlainModulus(IntPtr thisptr, out IntPtr smallModulus);
+
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_Base(IntPtr thisptr, out ulong result);
+
+        #endregion
+
         public static class Errors
         {
             public const uint NoError = 0;

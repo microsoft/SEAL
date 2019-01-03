@@ -165,6 +165,7 @@
     <ClInclude Include="seal\decryptor_wrapper.h" />
     <ClInclude Include="seal\defaultparams_wrapper.h" />
     <ClInclude Include="seal\defines.h" />
+    <ClInclude Include="seal\encoder_wrapper.h" />
     <ClInclude Include="seal\encryptionparameterqualifiers_wrapper.h" />
     <ClInclude Include="seal\encryptionparameters_wrapper.h" />
     <ClInclude Include="seal\encryptor_wrapper.h" />
@@ -192,6 +193,7 @@
     <ClCompile Include="seal\defaultparams_wrapper.cpp" />
     <ClCompile Include="seal\dllmain.cpp" />
     <ClCompile Include="seal\biguint_wrapper.cpp" />
+    <ClCompile Include="seal\encoder_wrapper.cpp" />
     <ClCompile Include="seal\encryptionparameterqualifiers_wrapper.cpp" />
     <ClCompile Include="seal\encryptor_wrapper.cpp" />
     <ClCompile Include="seal\evaluator_wrapper.cpp" />
