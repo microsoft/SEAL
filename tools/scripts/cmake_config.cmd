@@ -34,17 +34,14 @@ if not exist "%CMAKEPATH%" (
     exit 1
 )
 
-echo Found CMake at: %CMAKEPATH%
+echo Found CMake at %CMAKEPATH%
 
-%~d0
-cd %~dp0
-cd ..\..\src
+cd %~dp0\..\..\src
 if not exist ".config" (
     mkdir .config
 )
 cd .config
 
-echo Running CMake configuration in:
-echo %cd%
+echo Running CMake configuration in %cd%
 
 "%CMAKEPATH%" .. -G "Visual Studio 15 2017" -A x64 -DALLOW_COMMAND_LINE_BUILD=1 -DCMAKE_BUILD_TYPE=%PROJECTCONFIGURATION% -DMSGSL_INCLUDE_DIR="%INCLUDEPATH%"

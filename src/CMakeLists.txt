@@ -5,12 +5,12 @@ cmake_minimum_required(VERSION 3.10)
 
 project(SEAL VERSION 3.1.0 LANGUAGES CXX C)
 
-if(DEFINED MSVC AND NOT DEFINED ALLOW_COMMAND_LINE_BUILD)
-	message(FATAL_ERROR "Please build SEAL using the attached Visual Studio solution/project files")
-endif()
-
-if(${ALLOW_COMMAND_LINE_BUILD})
-	message(STATUS "Configuring for Visual Studio")
+if(DEFINED MSVC)
+	if(DEFINED ALLOW_COMMAND_LINE_BUILD)
+		message(STATUS "Configuring for Visual Studio")
+	else()
+		message(FATAL_ERROR "Please build SEAL using the attached Visual Studio solution/project files")
+	endif()
 endif()
 
 # Build in Release mode by default; otherwise use selected option
