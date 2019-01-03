@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\net\SEALNet.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SEALDllBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../../bin/x64/$(Configuration)/SEALdll.*" />
+    <SEALDllBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../../lib/libsealdll.*" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="@(SEALDllBinaryFiles)" DestinationFolder="$(TargetDir)" />
+  </Target>
+
+</Project>

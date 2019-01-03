@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetTest", "net\tests\SE
 		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E} = {D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetExamples", "net\examples\SEALNetExamples.csproj", "{18DA9F90-3131-461A-A3E8-40AC0B1D7632}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,14 @@ Global
 		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Release|x64.ActiveCfg = Release|Any CPU
 		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Release|x64.Build.0 = Release|Any CPU
+		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Debug|x64.Build.0 = Debug|Any CPU
+		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Release|x64.ActiveCfg = Release|Any CPU
+		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
