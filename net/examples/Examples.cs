@@ -313,133 +313,127 @@ namespace SEALNetExamples
             Here we choose to create an IntegerEncoder with base b=2. For most use-cases
             of the IntegerEncoder this is a good choice.
             */
-            //IntegerEncoder encoder(parms.plain_modulus());
+            IntegerEncoder encoder = new IntegerEncoder(parms.PlainModulus);
 
-            ///*
-            //We are now ready to generate the secret and public keys. For this purpose 
-            //we need an instance of the KeyGenerator class. Constructing a KeyGenerator 
-            //automatically generates the public and secret key, which can then be read to 
-            //local variables.
-            //*/
-            //KeyGenerator keygen(context);
-            //PublicKey public_key = keygen.public_key();
-            //SecretKey secret_key = keygen.secret_key();
+            /*
+            We are now ready to generate the secret and public keys. For this purpose 
+            we need an instance of the KeyGenerator class. Constructing a KeyGenerator 
+            automatically generates the public and secret key, which can then be read to 
+            local variables.
+            */
+            KeyGenerator keygen = new KeyGenerator(context);
+            PublicKey publicKey = keygen.PublicKey;
+            SecretKey secretKey = keygen.SecretKey;
 
-            ///*
-            //To be able to encrypt we need to construct an instance of Encryptor. Note 
-            //that the Encryptor only requires the public key, as expected.
-            //*/
-            //Encryptor encryptor(context, public_key);
+            /*
+            To be able to encrypt we need to construct an instance of Encryptor. Note 
+            that the Encryptor only requires the public key, as expected.
+            */
+            Encryptor encryptor = new Encryptor(context, publicKey);
 
-            ///*
-            //Computations on the ciphertexts are performed with the Evaluator class. In
-            //a real use-case the Evaluator would not be constructed by the same party 
-            //that holds the secret key.
-            //*/
-            //Evaluator evaluator(context);
+            /*
+            Computations on the ciphertexts are performed with the Evaluator class. In
+            a real use-case the Evaluator would not be constructed by the same party 
+            that holds the secret key.
+            */
+            Evaluator evaluator = new Evaluator(context);
 
-            ///*
-            //We will of course want to decrypt our results to verify that everything worked,
-            //so we need to also construct an instance of Decryptor. Note that the Decryptor
-            //requires the secret key.
-            //*/
-            //Decryptor decryptor(context, secret_key);
+            /*
+            We will of course want to decrypt our results to verify that everything worked,
+            so we need to also construct an instance of Decryptor. Note that the Decryptor
+            requires the secret key.
+            */
+            Decryptor decryptor = new Decryptor(context, secretKey);
 
-            ///*
-            //We start by encoding two integers as plaintext polynomials.
-            //*/
-            //int value1 = 5;
-            //Plaintext plain1 = encoder.encode(value1);
-            //cout << "Encoded " << value1 << " as polynomial " << plain1.to_string()
-            //    << " (plain1)" << endl;
+            /*
+            We start by encoding two integers as plaintext polynomials.
+            */
+            int value1 = 5;
+            Plaintext plain1 = encoder.Encode(value1);
+            Console.WriteLine($"Encoded {value1} as polynomial {plain1.ToString()} (plain1)");
 
-            //int value2 = -7;
-            //Plaintext plain2 = encoder.encode(value2);
-            //cout << "Encoded " << value2 << " as polynomial " << plain2.to_string()
-            //    << " (plain2)" << endl;
+            int value2 = -7;
+            Plaintext plain2 = encoder.Encode(value2);
+            Console.WriteLine($"Encoded {value2} as polynomial {plain2.ToString()} (plain2)");
 
-            ///*
-            //Encrypting the encoded values is easy.
-            //*/
-            //Ciphertext encrypted1, encrypted2;
-            //cout << "Encrypting plain1: ";
-            //encryptor.encrypt(plain1, encrypted1);
-            //cout << "Done (encrypted1)" << endl;
+            /*
+            Encrypting the encoded values is easy.
+            */
+            Ciphertext encrypted1 = new Ciphertext();
+            Ciphertext encrypted2 = new Ciphertext();
+            Console.Write("Encrypting plain1: ");
+            encryptor.Encrypt(plain1, encrypted1);
+            Console.WriteLine("Done (encrypted1)");
 
-            //cout << "Encrypting plain2: ";
-            //encryptor.encrypt(plain2, encrypted2);
-            //cout << "Done (encrypted2)" << endl;
+            Console.Write("Encrypting plain2: ");
+            encryptor.Encrypt(plain2, encrypted2);
+            Console.WriteLine("Done (encrypted2)");
 
-            ///*
-            //To illustrate the concept of noise budget, we print the budgets in the fresh 
-            //encryptions.
-            //*/
-            //cout << "Noise budget in encrypted1: "
-            //    << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
-            //cout << "Noise budget in encrypted2: "
-            //    << decryptor.invariant_noise_budget(encrypted2) << " bits" << endl;
+            /*
+            To illustrate the concept of noise budget, we print the budgets in the fresh 
+            encryptions.
+            */
+            Console.WriteLine($"Noise budget in encrypted1: {decryptor.InvariantNoiseBudget(encrypted1)} bits");
+            Console.WriteLine($"Noise budget in encrypted2: {decryptor.InvariantNoiseBudget(encrypted2)} bits");
 
-            ///*
-            //As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2. Most 
-            //basic arithmetic operations come as in-place two-argument versions that
-            //overwrite the first argument with the result, and as three-argument versions
-            //taking as separate destination parameter. In most cases the in-place variants
-            //are slightly faster.
-            //*/
+            /*
+            As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2. Most 
+            basic arithmetic operations come as in-place two-argument versions that
+            overwrite the first argument with the result, and as three-argument versions
+            taking as separate destination parameter. In most cases the in-place variants
+            are slightly faster.
+            */
 
-            ///*
-            //Negation is a unary operation and does not consume any noise budget.
-            //*/
-            //evaluator.negate_inplace(encrypted1);
-            //cout << "Noise budget in -encrypted1: "
-            //    << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
+            /*
+            Negation is a unary operation and does not consume any noise budget.
+            */
+            evaluator.NegateInplace(encrypted1);
+            Console.WriteLine($"Noise budget in -encrypted1: {decryptor.InvariantNoiseBudget(encrypted1)} bits");
 
-            ///*
-            //Compute the sum of encrypted1 and encrypted2; the sum overwrites encrypted1.
-            //*/
-            //evaluator.add_inplace(encrypted1, encrypted2);
+            /*
+            Compute the sum of encrypted1 and encrypted2; the sum overwrites encrypted1.
+            */
+            evaluator.AddInplace(encrypted1, encrypted2);
 
-            ///*
-            //Addition sets the noise budget to the minimum of the input noise budgets. 
-            //In this case both inputs had roughly the same budget going in, so the output 
-            //(in encrypted1) has just a slightly lower budget. Depending on probabilistic 
-            //effects the noise growth consumption may or may not be visible when measured 
-            //in whole bits.
-            //*/
-            //cout << "Noise budget in -encrypted1 + encrypted2: "
-            //    << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
+            /*
+            Addition sets the noise budget to the minimum of the input noise budgets. 
+            In this case both inputs had roughly the same budget going in, so the output 
+            (in encrypted1) has just a slightly lower budget. Depending on probabilistic 
+            effects the noise growth consumption may or may not be visible when measured 
+            in whole bits.
+            */
+            Console.WriteLine($"Noise budget in -encrypted1 + encrypted2: {decryptor.InvariantNoiseBudget(encrypted1)} bits");
 
-            ///*
-            //Finally multiply with encrypted2. Again, we use the in-place version of the
-            //function, overwriting encrypted1 with the product.
-            //*/
-            //evaluator.multiply_inplace(encrypted1, encrypted2);
+            /*
+            Finally multiply with encrypted2. Again, we use the in-place version of the
+            function, overwriting encrypted1 with the product.
+            */
+            evaluator.MultiplyInplace(encrypted1, encrypted2);
 
-            ///*
-            //Multiplication consumes a lot of noise budget. This is clearly seen in the
-            //print-out. The user can change the plain_modulus to see its effect on the
-            //rate of noise budget consumption.
-            //*/
-            //cout << "Noise budget in (-encrypted1 + encrypted2) * encrypted2: "
-            //    << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
+            /*
+            Multiplication consumes a lot of noise budget. This is clearly seen in the
+            print-out. The user can change the plain_modulus to see its effect on the
+            rate of noise budget consumption.
+            */
+            Console.WriteLine($"Noise budget in (-encrypted1 + encrypted2) * encrypted2: {decryptor.InvariantNoiseBudget(encrypted1)} bits");
 
-            ///*
-            //Now we decrypt and decode our result.
-            //*/
-            //Plaintext plain_result;
-            //cout << "Decrypting result: ";
-            //decryptor.decrypt(encrypted1, plain_result);
-            //cout << "Done" << endl;
+            /*
+            Now we decrypt and decode our result.
+            */
+            Plaintext plainResult = new Plaintext();
+            Console.Write("Decrypting result: ");
+            decryptor.Decrypt(encrypted1, plainResult);
+            Console.WriteLine("Done");
 
-            ///*
-            //Print the result plaintext polynomial.
-            //*/
-            //cout << "Plaintext polynomial: " << plain_result.to_string() << endl;
+            /*
+            Print the result plaintext polynomial.
+            */
+            Console.WriteLine($"Plaintext polynomial: {plainResult.ToString()}");
 
-            ///*
-            //Decode to obtain an integer result.
-            //*/
-            //cout << "Decoded integer: " << encoder.decode_int32(plain_result) << endl;
+            /*
+            Decode to obtain an integer result.
+            */
+            Console.WriteLine($"Decoded integer: {encoder.DecodeInt32(plainResult)}");
         }
     }
 }
