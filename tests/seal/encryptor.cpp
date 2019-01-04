@@ -8,7 +8,7 @@
 #include "seal/keygenerator.h"
 #include "seal/batchencoder.h"
 #include "seal/ckks.h"
-#include "seal/encoder.h"
+#include "seal/intencoder.h"
 #include "seal/defaultparams.h"
 #include <cstdint>
 #include <cstddef>
@@ -31,7 +31,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
 
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
@@ -84,7 +84,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
 
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
@@ -138,7 +138,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
 
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());

@@ -9,7 +9,7 @@
 #include "seal/keygenerator.h"
 #include "seal/batchencoder.h"
 #include "seal/ckks.h"
-#include "seal/encoder.h"
+#include "seal/intencoder.h"
 #include "seal/defaultparams.h"
 #include <cstdint>
 #include <cstddef>
@@ -31,7 +31,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -91,7 +91,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -725,7 +725,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -784,7 +784,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -838,7 +838,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -892,7 +892,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -946,7 +946,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -978,7 +978,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -1011,7 +1011,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -1079,7 +1079,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -1144,7 +1144,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -1202,14 +1202,14 @@ namespace SEALTest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 6);
+            SmallModulus plain_modulus(1 << 8);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus({ small_mods_40bit(0), small_mods_40bit(1) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            BalancedEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(plain_modulus);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -3067,14 +3067,14 @@ namespace SEALTest
     TEST(EvaluatorTest, FVEncryptSquareDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        SmallModulus plain_modulus(1 << 8);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus({ small_mods_40bit(0), small_mods_40bit(1) });
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -3135,7 +3135,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -3216,7 +3216,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -3263,7 +3263,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        BalancedEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(plain_modulus);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
