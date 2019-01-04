@@ -18,7 +18,7 @@
     <ClInclude Include="seal\context.h" />
     <ClInclude Include="seal\decryptor.h" />
     <ClInclude Include="seal\defaultparams.h" />
-    <ClInclude Include="seal\encoder.h" />
+    <ClInclude Include="seal\intencoder.h" />
     <ClInclude Include="seal\encryptionparams.h" />
     <ClInclude Include="seal\encryptor.h" />
     <ClInclude Include="seal\evaluator.h" />
@@ -62,7 +62,7 @@
     <ClCompile Include="seal\ckks.cpp" />
     <ClCompile Include="seal\memorymanager.cpp" />
     <ClCompile Include="seal\ciphertext.cpp" />
-    <ClCompile Include="seal\encoder.cpp" />
+    <ClCompile Include="seal\intencoder.cpp" />
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\biguint.cpp" />
     <ClCompile Include="seal\context.cpp" />

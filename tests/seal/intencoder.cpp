@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 #include "gtest/gtest.h"
-#include "seal/encoder.h"
+#include "seal/intencoder.h"
 #include "seal/context.h"
 #include "seal/defaultparams.h"
 #include <cstdint>
@@ -1009,101 +1009,5 @@ namespace SEALTest
         poly12 = encoder5.encode(value);
         ASSERT_EQ(4ULL, poly12.significant_coeff_count());
         ASSERT_TRUE(value == encoder5.decode_int32(poly12));
-    }
-
-    TEST(Encoder, BinaryFractionalEncodeDecode)
-    {
-        size_t poly_modulus_degree = 1024;
-        SmallModulus modulus(0x10000UL);
-        BinaryFractionalEncoder encoder(modulus, poly_modulus_degree, 500, 50);
-
-        Plaintext poly = encoder.encode(0.0);
-        ASSERT_TRUE(poly.is_zero());
-        ASSERT_EQ(0.0, encoder.decode(poly));
-
-        Plaintext poly1 = encoder.encode(-1.0);
-        ASSERT_EQ(-1.0, encoder.decode(poly1));
-
-        Plaintext poly2 = encoder.encode(0.1);
-        ASSERT_TRUE(fabs(encoder.decode(poly2) - 0.1) / 0.1 < 0.000001);
-
-        Plaintext poly3 = encoder.encode(3.123);
-        ASSERT_TRUE(fabs(encoder.decode(poly3) - 3.123) / 3.123 < 0.000001);
-
-        Plaintext poly4 = encoder.encode(-123.456);
-        ASSERT_TRUE(fabs(encoder.decode(poly4) + 123.456) / (-123.456) < 0.000001);
-
-        Plaintext poly5 = encoder.encode(12345.98765);
-        ASSERT_TRUE(fabs(encoder.decode(poly5) - 12345.98765) / 12345.98765 < 0.000001);
-    }
-
-    TEST(Encoder, BalancedFractionalEncodeDecode)
-    {
-        size_t poly_modulus_degree = 1024;
-        {
-            SmallModulus modulus(0x10000UL);
-            for (uint64_t b = 3; b < 20; ++b)
-            {
-                BalancedFractionalEncoder encoder(modulus, poly_modulus_degree, 500, 50, b);
-
-                Plaintext poly = encoder.encode(0.0);
-                ASSERT_TRUE(poly.is_zero());
-                ASSERT_EQ(0.0, encoder.decode(poly));
-
-                Plaintext poly1 = encoder.encode(-1.0);
-                ASSERT_EQ(-1.0, encoder.decode(poly1));
-
-                Plaintext poly2 = encoder.encode(0.1);
-                ASSERT_TRUE(fabs(encoder.decode(poly2) - 0.1) / 0.1 < 0.000001);
-
-                Plaintext poly3 = encoder.encode(3.123);
-                ASSERT_TRUE(fabs(encoder.decode(poly3) - 3.123) / 3.123 < 0.000001);
-
-                Plaintext poly4 = encoder.encode(-123.456);
-                ASSERT_TRUE(fabs(encoder.decode(poly4) + 123.456) / (-123.456) < 0.000001);
-
-                Plaintext poly5 = encoder.encode(12345.98765);
-                ASSERT_TRUE(fabs(encoder.decode(poly5) - 12345.98765) / 12345.98765 < 0.000001);
-
-                Plaintext poly6 = encoder.encode(-0.0);
-                ASSERT_EQ(0.0, encoder.decode(poly));
-
-                Plaintext poly7 = encoder.encode(0.115);
-                ASSERT_TRUE(fabs(encoder.decode(poly7) - 0.115) / 0.115 < 0.000001);
-            }
-        }
-
-        {
-            SmallModulus modulus(0x100000000000);
-            for (uint64_t b = 3; b < 20; ++b)
-            {
-                BalancedFractionalEncoder encoder(modulus, poly_modulus_degree, 500, 50, b);
-
-                Plaintext poly = encoder.encode(0.0);
-                ASSERT_TRUE(poly.is_zero());
-                ASSERT_EQ(0.0, encoder.decode(poly));
-
-                Plaintext poly1 = encoder.encode(-1.0);
-                ASSERT_EQ(-1.0, encoder.decode(poly1));
-
-                Plaintext poly2 = encoder.encode(0.1);
-                ASSERT_TRUE(fabs(encoder.decode(poly2) - 0.1) / 0.1 < 0.000001);
-
-                Plaintext poly3 = encoder.encode(3.123);
-                ASSERT_TRUE(fabs(encoder.decode(poly3) - 3.123) / 3.123 < 0.000001);
-
-                Plaintext poly4 = encoder.encode(-123.456);
-                ASSERT_TRUE(fabs(encoder.decode(poly4) + 123.456) / (-123.456) < 0.000001);
-
-                Plaintext poly5 = encoder.encode(12345.98765);
-                ASSERT_TRUE(fabs(encoder.decode(poly5) - 12345.98765) / 12345.98765 < 0.000001);
-
-                Plaintext poly6 = encoder.encode(-0.0);
-                ASSERT_EQ(0.0, encoder.decode(poly));
-
-                Plaintext poly7 = encoder.encode(0.115);
-                ASSERT_TRUE(fabs(encoder.decode(poly7) - 0.115) / 0.115 < 0.000001);
-            }
-        }
     }
 }

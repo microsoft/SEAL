@@ -9,7 +9,7 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
         ${CMAKE_CURRENT_LIST_DIR}/context.cpp
         ${CMAKE_CURRENT_LIST_DIR}/decryptor.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/encoder.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/intencoder.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/evaluator.cpp
@@ -31,7 +31,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/context.h
         ${CMAKE_CURRENT_LIST_DIR}/decryptor.h
         ${CMAKE_CURRENT_LIST_DIR}/defaultparams.h
-        ${CMAKE_CURRENT_LIST_DIR}/encoder.h
+        ${CMAKE_CURRENT_LIST_DIR}/intencoder.h
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.h
         ${CMAKE_CURRENT_LIST_DIR}/encryptor.h
         ${CMAKE_CURRENT_LIST_DIR}/evaluator.h

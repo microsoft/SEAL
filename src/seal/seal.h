@@ -9,7 +9,7 @@
 #include "seal/context.h"
 #include "seal/decryptor.h"
 #include "seal/defaultparams.h"
-#include "seal/encoder.h"
+#include "seal/intencoder.h"
 #include "seal/encryptionparams.h"
 #include "seal/encryptor.h"
 #include "seal/evaluator.h"

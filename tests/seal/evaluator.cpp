@@ -3331,21 +3331,6 @@ namespace SEALTest
         ASSERT_TRUE(encrypted3.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted4.parms_id() == sum.parms_id());
         ASSERT_TRUE(sum.parms_id() == parms.parms_id());
-
-        BalancedFractionalEncoder frac_encoder(plain_modulus, 128, 10, 15);
-        encryptor.encrypt(frac_encoder.encode(3.1415), encrypted1);
-        encryptor.encrypt(frac_encoder.encode(12.345), encrypted2);
-        encryptor.encrypt(frac_encoder.encode(98.765), encrypted3);
-        encryptor.encrypt(frac_encoder.encode(1.1111), encrypted4);
-        encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
-        evaluator.add_many(encrypteds, sum);
-        decryptor.decrypt(sum, plain);
-        ASSERT_TRUE(abs(frac_encoder.decode(plain) - 115.3626) < 0.000001);
-        ASSERT_TRUE(encrypted1.parms_id() == sum.parms_id());
-        ASSERT_TRUE(encrypted2.parms_id() == sum.parms_id());
-        ASSERT_TRUE(encrypted3.parms_id() == sum.parms_id());
-        ASSERT_TRUE(encrypted4.parms_id() == sum.parms_id());
-        ASSERT_TRUE(sum.parms_id() == parms.parms_id());
     }
 
     TEST(EvaluatorTest, TransformPlainToNTT)

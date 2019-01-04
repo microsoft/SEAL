@@ -22,7 +22,7 @@
     <ClCompile Include="seal\biguint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\encoder.cpp">
+    <ClCompile Include="seal\intencoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\encryptionparams.cpp">

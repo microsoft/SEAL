@@ -40,7 +40,7 @@
     <ClCompile Include="seal\ciphertext.cpp" />
     <ClCompile Include="seal\ckks.cpp" />
     <ClCompile Include="seal\context.cpp" />
-    <ClCompile Include="seal\encoder.cpp" />
+    <ClCompile Include="seal\intencoder.cpp" />
     <ClCompile Include="seal\encryptionparams.cpp" />
     <ClCompile Include="seal\encryptor.cpp" />
     <ClCompile Include="seal\evaluator.cpp" />

@@ -45,7 +45,7 @@
     <ClInclude Include="seal\decryptor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\encoder.h">
+    <ClInclude Include="seal\intencoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="seal\encryptionparams.h">
@@ -251,7 +251,7 @@
     <ClCompile Include="seal\ciphertext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\encoder.cpp">
+    <ClCompile Include="seal\intencoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\batchencoder.cpp">
