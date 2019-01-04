@@ -16,7 +16,7 @@ namespace seal
     Encodes integers into plaintext polynomials that Encryptor can encrypt. An instance of
     the IntegerEncoder class converts an integer into a plaintext polynomial by placing its
     binary digits as the coefficients of the polynomial. Decoding the integer amounts to
-    evaluating the plaintext polynomial at X=2.
+    evaluating the plaintext polynomial at x=2.
 
     Addition and multiplication on the integer side translate into addition and multiplication
     on the encoded plaintext polynomial side, provided that the length of the polynomial
@@ -59,16 +59,14 @@ namespace seal
         /**
         Destroys the IntegerEncoder.
         */
-        virtual ~IntegerEncoder() 
-        {
-        }
+        ~IntegerEncoder() = default;
 
         /**
         Encodes an unsigned integer (represented by std::uint64_t) into a plaintext polynomial.
 
         @param[in] value The unsigned integer to encode
         */
-        virtual Plaintext encode(std::uint64_t value) ;
+        Plaintext encode(std::uint64_t value);
 
         /**
         Encodes an unsigned integer (represented by std::uint64_t) into a plaintext polynomial.
@@ -76,25 +74,25 @@ namespace seal
         @param[in] value The unsigned integer to encode
         @param[out] destination The plaintext to overwrite with the encoding
         */
-        virtual void encode(std::uint64_t value, Plaintext &destination) ;
+        void encode(std::uint64_t value, Plaintext &destination);
 
         /**
         Decodes a plaintext polynomial and returns the result as std::uint32_t.
-        Mathematically this amounts to evaluating the input polynomial at X=2.
+        Mathematically this amounts to evaluating the input polynomial at x=2.
 
         @param[in] plain The plaintext to be decoded
         @throws std::invalid_argument if the output does not fit in std::uint32_t 
         */
-        virtual std::uint32_t decode_uint32(const Plaintext &plain) ;
+        std::uint32_t decode_uint32(const Plaintext &plain);
 
         /**
         Decodes a plaintext polynomial and returns the result as std::uint64_t.
-        Mathematically this amounts to evaluating the input polynomial at X=2.
+        Mathematically this amounts to evaluating the input polynomial at x=2.
 
         @param[in] plain The plaintext to be decoded
         @throws std::invalid_argument if the output does not fit in std::uint64_t 
         */
-        virtual std::uint64_t decode_uint64(const Plaintext &plain) ;
+        std::uint64_t decode_uint64(const Plaintext &plain);
 
         /**
         Encodes a signed integer (represented by std::uint64_t) into a plaintext polynomial.
@@ -107,7 +105,7 @@ namespace seal
 
         @param[in] value The signed integer to encode
         */
-        virtual Plaintext encode(std::int64_t value) ;
+        Plaintext encode(std::int64_t value);
 
         /**
         Encodes a signed integer (represented by std::int64_t) into a plaintext polynomial.
@@ -121,14 +119,14 @@ namespace seal
         @param[in] value The signed integer to encode
         @param[out] destination The plaintext to overwrite with the encoding
         */
-        virtual void encode(std::int64_t value, Plaintext &destination) ;
+        void encode(std::int64_t value, Plaintext &destination);
 
         /**
         Encodes an unsigned integer (represented by BigUInt) into a plaintext polynomial.
 
         @param[in] value The unsigned integer to encode
         */
-        virtual Plaintext encode(const BigUInt &value) ;
+        Plaintext encode(const BigUInt &value);
 
         /**
         Encodes an unsigned integer (represented by BigUInt) into a plaintext polynomial.
@@ -136,41 +134,41 @@ namespace seal
         @param[in] value The unsigned integer to encode
         @param[out] destination The plaintext to overwrite with the encoding
         */
-        virtual void encode(const BigUInt &value, Plaintext &destination) ;
+        void encode(const BigUInt &value, Plaintext &destination);
 
         /**
         Decodes a plaintext polynomial and returns the result as std::int32_t.
-        Mathematically this amounts to evaluating the input polynomial at X=2.
+        Mathematically this amounts to evaluating the input polynomial at x=2.
 
         @param[in] plain The plaintext to be decoded
         @throws std::invalid_argument if plain does not represent a valid plaintext polynomial
         @throws std::invalid_argument if the output does not fit in std::int32_t 
         */
-        virtual std::int32_t decode_int32(const Plaintext &plain) ;
+        std::int32_t decode_int32(const Plaintext &plain);
 
         /**
         Decodes a plaintext polynomial and returns the result as std::int64_t.
-        Mathematically this amounts to evaluating the input polynomial at X=2.
+        Mathematically this amounts to evaluating the input polynomial at x=2.
 
         @param[in] plain The plaintext to be decoded
         @throws std::invalid_argument if plain does not represent a valid plaintext polynomial
         @throws std::invalid_argument if the output does not fit in std::int64_t 
         */
-        virtual std::int64_t decode_int64(const Plaintext &plain) ;
+        std::int64_t decode_int64(const Plaintext &plain);
 
         /**
         Decodes a plaintext polynomial and returns the result as BigUInt.
-        Mathematically this amounts to evaluating the input polynomial at X=2.
+        Mathematically this amounts to evaluating the input polynomial at x=2.
 
         @param[in] plain The plaintext to be decoded
         @throws std::invalid_argument if plain does not represent a valid plaintext polynomial
         @throws std::invalid_argument if the output is negative
         */
-        virtual BigUInt decode_biguint(const Plaintext &plain) ;
+        BigUInt decode_biguint(const Plaintext &plain);
 
         /**
         Decodes a plaintext polynomial and stores the result in a given BigUInt.
-        Mathematically this amounts to evaluating the input polynomial at X=2.
+        Mathematically this amounts to evaluating the input polynomial at x=2.
 
         @param[in] plain The plaintext to be decoded
         @param[out] destination The BigUInt to overwrite with the decoding
@@ -178,7 +176,7 @@ namespace seal
         @throws std::invalid_argument if the output does not fit in destination
         @throws std::invalid_argument if the output is negative 
         */
-        virtual void decode_biguint(const Plaintext &plain, BigUInt &destination) ;
+        void decode_biguint(const Plaintext &plain, BigUInt &destination);
 
         /**
         Encodes a signed integer (represented by std::int32_t) into a plaintext polynomial.
@@ -191,7 +189,7 @@ namespace seal
 
         @param[in] value The signed integer to encode
         */
-        virtual Plaintext encode(std::int32_t value) 
+        Plaintext encode(std::int32_t value) 
         {
             return encode(static_cast<std::int64_t>(value));
         }
@@ -201,7 +199,7 @@ namespace seal
 
         @param[in] value The unsigned integer to encode
         */
-        virtual Plaintext encode(std::uint32_t value) 
+        Plaintext encode(std::uint32_t value) 
         {
             return encode(static_cast<std::uint64_t>(value));
         }
@@ -218,7 +216,7 @@ namespace seal
         @param[in] value The signed integer to encode
         @param[out] destination The plaintext to overwrite with the encoding
         */
-        virtual void encode(std::int32_t value, Plaintext &destination) 
+        void encode(std::int32_t value, Plaintext &destination) 
         {
             encode(static_cast<std::int64_t>(value), destination);
         }
@@ -229,7 +227,7 @@ namespace seal
         @param[in] value The unsigned integer to encode
         @param[out] destination The plaintext to overwrite with the encoding
         */
-        virtual void encode(std::uint32_t value, Plaintext &destination) 
+        void encode(std::uint32_t value, Plaintext &destination) 
         {
             encode(static_cast<std::uint64_t>(value), destination);
         }
@@ -237,25 +235,15 @@ namespace seal
         /**
         Returns a reference to the plaintext modulus.
         */
-        virtual const SmallModulus &plain_modulus() const 
+        const SmallModulus &plain_modulus() const 
         {
             return plain_modulus_;
-        }
-
-        /**
-        <summary>Returns the base used for encoding (2).</summary>
-        */
-        virtual std::uint64_t base() const 
-        {
-            return 2;
         }
 
     private:
         IntegerEncoder &operator =(const IntegerEncoder &assign) = delete;
 
         IntegerEncoder &operator =(IntegerEncoder &&assign) = delete;
-
-        MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
         SmallModulus plain_modulus_;
 
