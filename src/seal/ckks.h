@@ -649,7 +649,6 @@ namespace seal
                 }
 
                 res[i] = 0.0;
-                double scaled_two_pow_64 = inv_scale;
                 if (util::is_greater_than_or_equal_uint_uint(
                     wide_tmp_dest.get() + (i * coeff_mod_count),
                     upper_half_threshold, coeff_mod_count))
@@ -674,6 +673,7 @@ namespace seal
                 }
                 else
                 {
+                    double scaled_two_pow_64 = inv_scale;
                     for (std::size_t j = 0; j < coeff_mod_count; 
                         j++, scaled_two_pow_64 *= two_pow_64)
                     {
