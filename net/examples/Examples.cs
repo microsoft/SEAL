@@ -2,95 +2,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SEALNetExamples
 {
     class Examples
     {
-        static void Main(string[] args)
-        {
-            while (true)
-            {
-                Console.WriteLine();
-                Console.WriteLine("SEAL Examples:");
-                Console.WriteLine(" 1. BFV Basics I");
-                Console.WriteLine(" 2. BFV Basics II");
-                Console.WriteLine(" 3. BFV Basics III");
-                Console.WriteLine(" 4. BFV Basics IV");
-                Console.WriteLine(" 5. BFV Performance Test");
-                Console.WriteLine(" 6. CKKS Basics I");
-                Console.WriteLine(" 7. CKKS Basics II");
-                Console.WriteLine(" 8. CKKS Basics III");
-                Console.WriteLine(" 9. CKKS Performance Test");
-                Console.WriteLine(" 0. Exit");
-                Console.WriteLine();
-
-                /*
-                Print how much memory we have allocated from the current memory pool.
-                By default the memory pool will be a static global pool and the
-                MemoryManager class can be used to change it. Most users should have
-                little or no reason to touch the memory allocation system.
-                */
-                ulong megabytes = MemoryManager.GetPool().AllocByteCount >> 20;
-                Console.WriteLine($"Total memory allocated from the current memory pool: {megabytes} MB");
-                Console.WriteLine();
-                Console.Write("Run example: ");
-
-                ConsoleKeyInfo key;
-                do
-                {
-                    key = Console.ReadKey();
-                } while (key.KeyChar < '0' || key.KeyChar > '9');
-                Console.WriteLine();
-
-                switch(key.Key)
-                {
-                    case ConsoleKey.D1:
-                        ExampleBFVBasicsI();
-                        break;
-
-                    case ConsoleKey.D2:
-                        ExampleBFVBasicsII();
-                        break;
-
-                    case ConsoleKey.D3:
-                        ExampleBFVBasicsIII();
-                        break;
-
-                    case ConsoleKey.D4:
-                        ExampleBFVBasicsIV();
-                        break;
-
-                    case ConsoleKey.D5:
-                        Console.WriteLine("5!");
-                        break;
-
-                    case ConsoleKey.D6:
-                        Console.WriteLine("6!");
-                        break;
-
-                    case ConsoleKey.D7:
-                        Console.WriteLine("7!");
-                        break;
-
-                    case ConsoleKey.D8:
-                        Console.WriteLine("8!");
-                        break;
-
-                    case ConsoleKey.D9:
-                        Console.WriteLine("9!");
-                        break;
-
-                    case ConsoleKey.D0:
-                        return;
-
-                    default:
-                        Console.WriteLine("Invalid option.");
-                        break;
-                }
-            }
-        }
-
         private static void ExampleBFVBasicsI()
         {
             Utilities.PrintExampleBanner("Example: BFV Basics I");
@@ -1163,6 +1080,398 @@ namespace SEALNetExamples
             examples will be difficult to understand unless these basic properties are 
             totally clear.
             */
+        }
+
+        private static void ExampleBFVPerformance()
+        {
+            Utilities.PrintExampleBanner("Example: BFV Performance Test");
+
+            /*
+            In this example we time all the basic operations. We use the following 
+            local function to run the test.
+            */
+            void performanceTest(SEALContext context)
+            {
+                if (!Stopwatch.IsHighResolution)
+                {
+                    Console.WriteLine("WARNING: High resolution stopwatch not available in this machine.");
+                    Console.WriteLine("         Timings might not be accurate.");
+                }
+
+                Stopwatch timer;
+                Utilities.PrintParameters(context);
+
+                EncryptionParameters parameters = context.FirstContextData.Parms;
+                SmallModulus plainModulus = parameters.PlainModulus;
+                ulong polyModulusDegree = parameters.PolyModulusDegree;
+
+                /*
+                Set up keys. For both relinearization and rotations we use a large 
+                decomposition bit count for best possible computational performance.
+                */
+                Console.Write("Generating secret/public keys: ");
+                KeyGenerator keygen = new KeyGenerator(context);
+                Console.WriteLine("Done");
+
+                SecretKey secretKey = keygen.SecretKey;
+                PublicKey publicKey = keygen.PublicKey;
+
+                /*
+                Generate relinearization keys.
+                */
+                int dbc = DefaultParams.DBCmax;
+                Console.Write($"Generating relinearization keys (dbc = {dbc}): ");
+                timer = Stopwatch.StartNew();
+                RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: dbc);
+                double micros = timer.Elapsed.TotalMilliseconds * 1000;
+                Console.WriteLine($"Done [{micros} microseconds]");
+
+                /*
+                Generate Galois keys. In larger examples the Galois keys can use 
+                a significant amount of memory, which can be a problem in constrained 
+                systems. The user should try enabling some of the larger runs of the 
+                test (see below) and to observe their effect on the memory pool
+                allocation size. The key generation can also take a significant amount 
+                of time, as can be observed from the print-out.
+                */
+                if (!context.FirstContextData.Qualifiers.UsingBatching)
+                {
+                    Console.WriteLine("Given encryption parameters do not support batching.");
+                    return;
+                }
+
+                Console.Write($"Generating Galois keys (dbc = {dbc}): ");
+                timer = Stopwatch.StartNew();
+                GaloisKeys galKeys = keygen.GaloisKeys(decompositionBitCount: dbc);
+                micros = timer.Elapsed.TotalMilliseconds * 1000;
+                Console.WriteLine($"Done [{micros} microseconds]");
+
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Decryptor decryptor = new Decryptor(context, secretKey);
+                Evaluator evaluator = new Evaluator(context);
+                BatchEncoder batchEncoder = new BatchEncoder(context);
+                IntegerEncoder encoder = new IntegerEncoder(plainModulus);
+
+                /*
+                These will hold the total times used by each operation.
+                */
+                Stopwatch timeBatchSum = new Stopwatch();
+                Stopwatch timeUnbatchSum = new Stopwatch();
+                Stopwatch timeEncryptSum = new Stopwatch();
+                Stopwatch timeDecryptSum = new Stopwatch();
+                Stopwatch timeAddSum = new Stopwatch();
+                Stopwatch timeMultiplySum = new Stopwatch();
+                Stopwatch timeMultiplyPlainSum = new Stopwatch();
+                Stopwatch timeSquareSum = new Stopwatch();
+                Stopwatch timeRelinearizeSum = new Stopwatch();
+                Stopwatch timeRotateRowsOneStepSum = new Stopwatch();
+                Stopwatch timeRotateRowsRandomSum = new Stopwatch();
+                Stopwatch timeRotateColumnsSum = new Stopwatch();
+
+                if (timeRotateColumnsSum.IsRunning)
+                    throw new InvalidOperationException("Should not be running!!!!!");
+
+                /*
+                How many times to run the test?
+                */
+                int count = 10;
+
+                /*
+                Populate a vector of values to batch.
+                */
+                List<ulong> podList = new List<ulong>();
+
+                Random rnd = new Random();
+                for (ulong i = 0; i < batchEncoder.SlotCount; i++)
+                {
+                    podList.Add((ulong)rnd.Next() % plainModulus.Value);
+                }
+
+                Console.WriteLine("Running tests ");
+                for (int i = 0; i < count; i++)
+                {
+                    /*
+                    [Batching]
+                    There is nothing unusual here. We batch our random plaintext matrix 
+                    into the polynomial. The user can try changing the decomposition bit 
+                    count to something smaller to see the effect. Note how the plaintext 
+                    we create is of the exactly right size so unnecessary reallocations 
+                    are avoided.
+                    */
+                    Plaintext plain = new Plaintext(parameters.PolyModulusDegree, 0);
+                    timeBatchSum.Start();
+                    batchEncoder.Encode(podList, plain);
+                    timeBatchSum.Stop();
+
+                    /*
+                    [Unbatching]
+                    We unbatch what we just batched.
+                    */
+                    List<ulong> podList2 = new List<ulong>((int)batchEncoder.SlotCount);
+                    timeUnbatchSum.Start();
+                    batchEncoder.Decode(plain, podList2);
+                    timeUnbatchSum.Stop();
+
+                    /*
+                    [Encryption]
+                    We make sure our ciphertext is already allocated and large enough to 
+                    hold the encryption with these encryption parameters. We encrypt our
+                    random batched matrix here.
+                    */
+                    Ciphertext encrypted = new Ciphertext(context);
+                    timeEncryptSum.Start();
+                    encryptor.Encrypt(plain, encrypted);
+                    timeEncryptSum.Stop();
+
+                    /*
+                    [Decryption]
+                    We decrypt what we just encrypted.
+                    */
+                    Plaintext plain2 = new Plaintext(polyModulusDegree, 0);
+                    timeDecryptSum.Start();
+                    decryptor.Decrypt(encrypted, plain2);
+                    timeDecryptSum.Stop();
+                    if (!plain2.Equals(plain))
+                    {
+                        throw new InvalidOperationException("Encrypt/decrypt failed. Something is wrong.");
+                    }
+
+                    /*
+                    [Add]
+                    We create two ciphertexts that are both of size 2, and perform a few
+                    additions with them.
+                    */
+                    Ciphertext encrypted1 = new Ciphertext(context);
+                    encryptor.Encrypt(encoder.Encode(i), encrypted1);
+                    Ciphertext encrypted2 = new Ciphertext(context);
+                    encryptor.Encrypt(encoder.Encode(i + 1), encrypted2);
+
+                    timeAddSum.Start();
+                    evaluator.AddInplace(encrypted1, encrypted1);
+                    evaluator.AddInplace(encrypted2, encrypted2);
+                    evaluator.AddInplace(encrypted1, encrypted2);
+                    timeAddSum.Stop();
+
+                    /*
+                    [Multiply]
+                    We multiply two ciphertexts of size 2. Since the size of the result
+                    will be 3, and will overwrite the first argument, we reserve first
+                    enough memory to avoid reallocating during multiplication.
+                    */
+                    encrypted1.Reserve(3);
+                    timeMultiplySum.Start();
+                    evaluator.MultiplyInplace(encrypted1, encrypted2);
+                    timeMultiplySum.Stop();
+
+                    /*
+                    [Multiply Plain]
+                    We multiply a ciphertext of size 2 with a random plaintext. Recall
+                    that multiply_plain does not change the size of the ciphertext so we 
+                    use encrypted2 here, which still has size 2.
+                    */
+                    timeMultiplyPlainSum.Start();
+                    evaluator.MultiplyPlainInplace(encrypted2, plain);
+                    timeMultiplyPlainSum.Stop();
+
+                    /*
+                    [Square]
+                    We continue to use the size 2 ciphertext encrypted2. Now we square 
+                    it; this should be faster than generic homomorphic multiplication.
+                    */
+                    timeSquareSum.Start();
+                    evaluator.SquareInplace(encrypted2);
+                    timeSquareSum.Stop();
+
+                    /*
+                    [Relinearize]
+                    Time to get back to encrypted1; at this point it still has size 3. 
+                    We now relinearize it back to size 2. Since the allocation is 
+                    currently big enough to contain a ciphertext of size 3, no costly
+                    reallocations are needed in the process.
+                    */
+                    timeRelinearizeSum.Start();
+                    evaluator.RelinearizeInplace(encrypted1, relinKeys);
+                    timeRelinearizeSum.Stop();
+
+                    /*
+                    [Rotate Rows One Step]
+                    We rotate matrix rows by one step left and measure the time.
+                    */
+                    timeRotateRowsOneStepSum.Start();
+                    evaluator.RotateRowsInplace(encrypted, 1, galKeys);
+                    evaluator.RotateRowsInplace(encrypted, -1, galKeys);
+                    timeRotateRowsOneStepSum.Stop();
+
+                    /*
+                    [Rotate Rows Random]
+                    We rotate matrix rows by a random number of steps. This is more
+                    expensive than rotating by just one step.
+                    */
+                    int rowSize = (int)batchEncoder.SlotCount / 2;
+                    int randomRotation = rnd.Next() % rowSize;
+
+                    timeRotateRowsRandomSum.Start();
+                    evaluator.RotateRowsInplace(encrypted, randomRotation, galKeys);
+                    timeRotateRowsRandomSum.Stop();
+
+                    /*
+                    [Rotate Columns]
+                    Nothing surprising here.
+                    */
+                    timeRotateColumnsSum.Start();
+                    evaluator.RotateColumnsInplace(encrypted, galKeys);
+                    timeRotateColumnsSum.Stop();
+
+                    /*
+                    Print a dot to indicate progress.
+                    */
+                    Console.Write(".");
+                    Console.Out.Flush();
+                }
+
+                Console.WriteLine(" Done");
+                Console.WriteLine();
+                Console.Out.Flush();
+
+                double avgBatch = timeBatchSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgUnbatch = timeUnbatchSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgEncrypt = timeEncryptSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgDecrypt = timeDecryptSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgAdd = timeAddSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgMultiply = timeMultiplySum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgMultiplyPlain = timeMultiplyPlainSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgSquare = timeSquareSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgRelinearize = timeRelinearizeSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgRotateRowsOneStep = timeRotateRowsOneStepSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgRotateRowsRandom = timeRotateRowsRandomSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgRotateColumns = timeRotateColumnsSum.Elapsed.TotalMilliseconds * 1000 / count;
+
+                Console.WriteLine($"Average batch: {avgBatch} microseconds");
+                Console.WriteLine($"Average unbatch: {avgUnbatch} microseconds");
+                Console.WriteLine($"Average encrypt: {avgEncrypt} microseconds");
+                Console.WriteLine($"Average decrypt: {avgDecrypt} microseconds");
+                Console.WriteLine($"Average add: {avgAdd} microseconds");
+                Console.WriteLine($"Average multiply: {avgMultiply} microseconds");
+                Console.WriteLine($"Average multiply plain: {avgMultiplyPlain} microseconds");
+                Console.WriteLine($"Average square: {avgSquare} microseconds");
+                Console.WriteLine($"Average relinearize: {avgRelinearize} microseconds");
+                Console.WriteLine($"Average rotate rows one step: {avgRotateRowsOneStep} microseconds");
+                Console.WriteLine($"Average rotate rows random: {avgRotateRowsRandom} microseconds");
+                Console.WriteLine($"Average rotate columns: {avgRotateColumns} microseconds");
+                Console.Out.Flush();
+            }
+
+
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+            parms.PolyModulusDegree = 4096;
+            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 4096);
+            parms.SetPlainModulus(786433);
+            performanceTest(SEALContext.Create(parms));
+
+            Console.WriteLine();
+            parms.PolyModulusDegree = 8192;
+            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192);
+            parms.SetPlainModulus(786433);
+            performanceTest(SEALContext.Create(parms));
+
+            Console.WriteLine();
+            parms.PolyModulusDegree = 16384;
+            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 16384);
+            parms.SetPlainModulus(786433);
+            performanceTest(SEALContext.Create(parms));
+
+            /*
+            Comment out the following to run the biggest example.
+            */
+            //Console.WriteLine();
+            //parms.PolyModulusDegree = 32768;
+            //parms.CoeffModulus = DefaultParams.CoeffModulus128(32768);
+            //parms.SetPlainModulus(786433);
+            //performanceTest(SEALContext.Create(parms));
+        }
+
+        static void Main(string[] args)
+        {
+            while (true)
+            {
+                Console.WriteLine();
+                Console.WriteLine("SEAL Examples:");
+                Console.WriteLine(" 1. BFV Basics I");
+                Console.WriteLine(" 2. BFV Basics II");
+                Console.WriteLine(" 3. BFV Basics III");
+                Console.WriteLine(" 4. BFV Basics IV");
+                Console.WriteLine(" 5. BFV Performance Test");
+                Console.WriteLine(" 6. CKKS Basics I");
+                Console.WriteLine(" 7. CKKS Basics II");
+                Console.WriteLine(" 8. CKKS Basics III");
+                Console.WriteLine(" 9. CKKS Performance Test");
+                Console.WriteLine(" 0. Exit");
+                Console.WriteLine();
+
+                /*
+                Print how much memory we have allocated from the current memory pool.
+                By default the memory pool will be a static global pool and the
+                MemoryManager class can be used to change it. Most users should have
+                little or no reason to touch the memory allocation system.
+                */
+                ulong megabytes = MemoryManager.GetPool().AllocByteCount >> 20;
+                Console.WriteLine($"Total memory allocated from the current memory pool: {megabytes} MB");
+                Console.WriteLine();
+                Console.Write("Run example: ");
+
+                ConsoleKeyInfo key;
+                do
+                {
+                    key = Console.ReadKey();
+                } while (key.KeyChar < '0' || key.KeyChar > '9');
+                Console.WriteLine();
+
+                switch (key.Key)
+                {
+                    case ConsoleKey.D1:
+                        ExampleBFVBasicsI();
+                        break;
+
+                    case ConsoleKey.D2:
+                        ExampleBFVBasicsII();
+                        break;
+
+                    case ConsoleKey.D3:
+                        ExampleBFVBasicsIII();
+                        break;
+
+                    case ConsoleKey.D4:
+                        ExampleBFVBasicsIV();
+                        break;
+
+                    case ConsoleKey.D5:
+                        ExampleBFVPerformance();
+                        break;
+
+                    case ConsoleKey.D6:
+                        Console.WriteLine("6!");
+                        break;
+
+                    case ConsoleKey.D7:
+                        Console.WriteLine("7!");
+                        break;
+
+                    case ConsoleKey.D8:
+                        Console.WriteLine("8!");
+                        break;
+
+                    case ConsoleKey.D9:
+                        Console.WriteLine("9!");
+                        break;
+
+                    case ConsoleKey.D0:
+                        return;
+
+                    default:
+                        Console.WriteLine("Invalid option.");
+                        break;
+                }
+            }
         }
     }
 }
