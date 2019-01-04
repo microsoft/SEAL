@@ -101,6 +101,23 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Convert ParmsId to a string representation.
+        /// </summary>
+        public override string ToString()
+        {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < ULongCount; i++)
+            {
+                byte[] bytes = BitConverter.GetBytes(Block[i]);
+                result.Append(BitConverter.ToString(bytes).Replace("-", ""));
+                if (i < (ULongCount - 1))
+                    result.Append(" ");
+            }
+
+            return result.ToString();
+        }
+
+        /// <summary>
         /// Hash code for this object
         /// </summary>
         public override int GetHashCode()
