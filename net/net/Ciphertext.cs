@@ -656,6 +656,10 @@ namespace Microsoft.Research.SEAL
                 NativeMethods.Ciphertext_Scale(NativePtr, out double scale);
                 return scale;
             }
+            set
+            {
+                NativeMethods.Ciphertext_SetScale(NativePtr, value);
+            }
         }
 
         /// <summary>

@@ -592,6 +592,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_Scale(IntPtr thisptr, out double scale);
 
         [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Ciphertext_SetScale(IntPtr thisptr, double scale);
+
+        [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Ciphertext_Release(IntPtr thisptr);
 
         [DllImport(SEALdll, PreserveSig = false)]

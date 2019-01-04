@@ -446,6 +446,15 @@ SEALDLL HRESULT SEALCALL Ciphertext_Scale(void* thisptr, double* scale)
     return S_OK;
 }
 
+SEALDLL HRESULT SEALCALL Ciphertext_SetScale(void* thisptr, double scale)
+{
+    Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+
+    cipher->scale() = scale;
+    return S_OK;
+}
+
 SEALDLL HRESULT SEALCALL Ciphertext_Release(void* thisptr)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
