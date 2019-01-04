@@ -1168,9 +1168,6 @@ namespace SEALNetExamples
                 Stopwatch timeRotateRowsRandomSum = new Stopwatch();
                 Stopwatch timeRotateColumnsSum = new Stopwatch();
 
-                if (timeRotateColumnsSum.IsRunning)
-                    throw new InvalidOperationException("Should not be running!!!!!");
-
                 /*
                 How many times to run the test?
                 */
@@ -1390,6 +1387,212 @@ namespace SEALNetExamples
             //performanceTest(SEALContext.Create(parms));
         }
 
+        private static void ExampleCKKSBasicsI()
+        {
+            Utilities.PrintExampleBanner("Example: CKKS Basics ");
+
+            /*
+            In this example we demonstrate using the Cheon-Kim-Kim-Song (CKKS) scheme
+            for encrypting and computing on floating point numbers. For full details on 
+            the CKKS scheme, we refer the reader to https://eprint.iacr.org/2016/421.
+            For better performance, SEAL implements the "FullRNS" optimization for CKKS 
+            described in https://eprint.iacr.org/2018/931.
+            */
+
+            /*
+            We start by creating encryption parameters for the CKKS scheme. One major
+            difference to the BFV scheme is that the CKKS scheme does not use the
+            plain_modulus parameter.
+            */
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
+            parms.PolyModulusDegree = 8192;
+            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192);
+
+            /*
+            We create the SEALContext as usual and print the parameters.
+            */
+            SEALContext context = SEALContext.Create(parms);
+            Utilities.PrintParameters(context);
+
+            /*
+            Keys are created the same way as for the BFV scheme.
+            */
+            KeyGenerator keygen = new KeyGenerator(context);
+            PublicKey publicKey = keygen.PublicKey;
+            SecretKey secretKey = keygen.SecretKey;
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60);
+
+            /*
+            We also set up an Encryptor, Evaluator, and Decryptor as usual.
+            */
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Evaluator evaluator = new Evaluator(context);
+            Decryptor decryptor = new Decryptor(context, secretKey);
+
+            /*
+            To create CKKS plaintexts we need a special encoder: we cannot create them
+            directly from polynomials. Note that the IntegerEncoder, FractionalEncoder, 
+            and BatchEncoder cannot be used with the CKKS scheme. The CKKS scheme allows 
+            encryption and approximate computation on vectors of real or complex numbers 
+            which the CKKSEncoder converts into Plaintext objects. At a high level this 
+            looks a lot like BatchEncoder for the BFV scheme, but the theory behind it
+            is different.
+            */
+            CKKSEncoder encoder = new CKKSEncoder(context);
+
+            /*
+            In CKKS the number of slots is poly_modulus_degree / 2 and each slot encodes 
+            one complex (or real) number. This should be contrasted with BatchEncoder in
+            the BFV scheme, where the number of slots is equal to poly_modulus_degree 
+            and they are arranged into a 2-by-(poly_modulus_degree / 2) matrix. 
+            */
+            ulong slotCount = encoder.SlotCount;
+            Console.WriteLine($"Number of slots: {slotCount}");
+
+            /*
+            We create a small vector to encode; the CKKSEncoder will implicitly pad it 
+            with zeros to full size (poly_modulus_degree / 2) when encoding. 
+            */
+            List<double> input = new List<double> { 0.0, 1.1, 2.2, 3.3 };
+            Console.WriteLine("Input vector: ");
+            Utilities.PrintVector(input);
+
+            /*
+            Now we encode it with CKKSEncoder. The floating-point coefficients of input
+            will be scaled up by the parameter `scale'; this is necessary since even in
+            the CKKS scheme the plaintexts are polynomials with integer coefficients. 
+            It is instructive to think of the scale as determining the bit-precision of 
+            the encoding; naturally it will also affect the precision of the result. 
+
+            In CKKS the message is stored modulo coeff_modulus (in BFV it is stored 
+            modulo plain_modulus), so the scale must not get too close to the total size 
+            of coeff_modulus. In this case our coeff_modulus is quite large (218 bits) 
+            so we have little to worry about in this regard. For this example a 60-bit 
+            scale is more than enough.
+            */
+            Plaintext plain = new Plaintext();
+            double scale = Math.Pow(2.0, 60);
+            encoder.Encode(input, scale, plain);
+
+            /*
+            The vector is encrypted the same was as in BFV.
+            */
+            Ciphertext encrypted = new Ciphertext();
+            encryptor.Encrypt(plain, encrypted);
+
+            /*
+            Another difference to the BFV scheme is that in CKKS also plaintexts are
+            linked to specific parameter sets: they carry the corresponding parms_id.
+            An overload of CKKSEncoder::encode(...) allows the caller to specify which
+            parameter set in the modulus switching chain (identified by parms_id) should 
+            be used to encode the plaintext. This is important as we will see later.
+            */
+            Console.WriteLine($"ParmsId of plain: {plain.ParmsId}");
+            Console.WriteLine($"ParmsId of encrypted: {encrypted.ParmsId}");
+            Console.WriteLine();
+
+            /*
+            The ciphertexts will keep track of the scales in the underlying plaintexts.
+            The current scale in every plaintext and ciphertext is easy to access.
+            */
+            Console.WriteLine($"Scale in plain: {plain.Scale}");
+            Console.WriteLine($"Scale in encrypted: {encrypted.Scale}");
+            Console.WriteLine();
+
+            /*
+            Basic operations on the ciphertexts are still easy to do. Here we square 
+            the ciphertext, decrypt, decode, and print the result. We note also that 
+            decoding returns a vector of full size (poly_modulus_degree / 2); this is 
+            because of the implicit zero-padding mentioned above. 
+            */
+            evaluator.SquareInplace(encrypted);
+            evaluator.RelinearizeInplace(encrypted, relinKeys);
+            decryptor.Decrypt(encrypted, plain);
+            encoder.Decode(plain, input);
+            Console.WriteLine("Squared input:");
+            Utilities.PrintVector(input);
+
+            /*
+            We notice that the results are correct. We can also print the scale in the 
+            result and observe that it has increased. In fact, it is now the square of 
+            the original scale (2^60). 
+            */
+            Console.WriteLine($"Scale in the square: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+
+            /*
+            CKKS supports modulus switching just like the BFV scheme. We can switch
+            away parts of the coefficient modulus.
+            */
+            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine("Modulus switching...");
+            evaluator.ModSwitchToNextInplace(encrypted);
+            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine();
+
+            /*
+            At this point if we tried switching further SEAL would throw an exception.
+            This is because the scale is 120 bits and after modulus switching we would
+            be down to a total coeff_modulus smaller than that, which is not enough to
+            contain the plaintext. We decrypt and decode, and observe that the result 
+            is the same as before. 
+            */
+            decryptor.Decrypt(encrypted, plain);
+            encoder.Decode(plain, input);
+            Console.WriteLine("Squared input:");
+            Utilities.PrintVector(input);
+
+            /*
+            In some cases it can be convenient to change the scale of a ciphertext by
+            hand. For example, multiplying the scale by a number effectively divides the 
+            underlying plaintext by that number, and vice versa. The caveat is that the 
+            resulting scale can be incompatible with the scales of other ciphertexts.
+            Here we divide the ciphertext by 3.
+            */
+            encrypted.Scale *= 3;
+            decryptor.Decrypt(encrypted, plain);
+            encoder.Decode(plain, input);
+            Console.WriteLine("Divided by 3:");
+            Utilities.PrintVector(input);
+
+            /*
+            Homomorphic addition and subtraction naturally require that the scales of
+            the inputs are the same, but also that the encryption parameters (parms_id)
+            are the same. Here we add a plaintext to encrypted. Note that a scale or
+            parms_id mismatch would make Evaluator::add_plain(..) throw an exception;
+            there is no problem here since we encode the plaintext just-in-time with
+            exactly the right scale.
+            */
+            List<double> summand = new List<double> { 20.2, 30.3, 40.4, 50.5 };
+            Console.WriteLine("Plaintext summand:");
+            Utilities.PrintVector(summand);
+
+            /*
+            Get the parms_id and scale from encrypted and do the addition.
+            */
+            Plaintext plainSummand = new Plaintext();
+            encoder.Encode(summand, encrypted.ParmsId, encrypted.Scale,
+                plainSummand);
+            evaluator.AddPlainInplace(encrypted, plainSummand);
+
+            /*
+            Decryption and decoding should give the correct result.
+            */
+            decryptor.Decrypt(encrypted, plain);
+            encoder.Decode(plain, input);
+            Console.WriteLine("Sum:");
+            Utilities.PrintVector(input);
+
+            /*
+            Note that we have not mentioned noise budget at all. In fact, CKKS does not
+            have a similar concept of a noise budget as BFV; instead, the homomorphic
+            encryption noise will overlap the low-order bits of the message. This is why
+            scaling is needed: the message must be moved to higher-order bits to protect
+            it from the noise. Still, it is difficult to completely decouple the noise 
+            from the message itself; hence the noise/error budget cannot be exactly 
+            measured from a ciphertext alone. 
+            */
+        }
+
         static void Main(string[] args)
         {
             while (true)
@@ -1449,7 +1652,7 @@ namespace SEALNetExamples
                         break;
 
                     case ConsoleKey.D6:
-                        Console.WriteLine("6!");
+                        ExampleCKKSBasicsI();
                         break;
 
                     case ConsoleKey.D7:

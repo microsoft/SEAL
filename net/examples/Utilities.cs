@@ -113,5 +113,55 @@ namespace SEALNetExamples
             Console.WriteLine("  ]");
             Console.WriteLine();
         }
+
+        /// <summary>
+        /// Helper function: Convert a ulong to a hex string representation
+        /// </summary>
+        public static string ULongToString(ulong value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            return BitConverter.ToString(bytes).Replace("-", "");
+        }
+
+        /// <summary>
+        /// Helper function: Prints a vector of floating-point values.
+        /// </summary>
+        public static void PrintVector<T>(IEnumerable<T> vec, int printSize = 4)
+        {
+            T[] veca = vec.ToArray();
+            int slotCount = veca.Length;
+            if (slotCount <= 2 * printSize)
+            {
+                Console.Write("    [");
+                for (int i = 0; i < slotCount; i++)
+                {
+                    Console.Write(" {0:0.000}", veca[i]);
+                    if (i != (slotCount - 1))
+                        Console.Write(",");
+                    else
+                        Console.Write(" ]");
+                }
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write("    [");
+                for (int i = 0; i < printSize; i++)
+                {
+                    Console.Write(" {0:0.000},", veca[i]);
+                }
+                if (veca.Length > 2 * printSize)
+                {
+                    Console.Write(" ...");
+                }
+                for (int i = slotCount - printSize; i < slotCount; i++)
+                {
+                    Console.Write(", {0:0.000}", veca[i]);
+                }
+                Console.WriteLine(" ]");
+            }
+
+            Console.WriteLine();
+        }
     }
 }
