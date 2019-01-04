@@ -262,7 +262,5 @@ namespace seal
         std::uint64_t coeff_neg_threshold_;
 
         std::uint64_t neg_one_;
-
-        friend class BinaryFractionalEncoder;
     };
 }
