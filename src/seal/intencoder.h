@@ -167,18 +167,6 @@ namespace seal
         BigUInt decode_biguint(const Plaintext &plain);
 
         /**
-        Decodes a plaintext polynomial and stores the result in a given BigUInt.
-        Mathematically this amounts to evaluating the input polynomial at x=2.
-
-        @param[in] plain The plaintext to be decoded
-        @param[out] destination The BigUInt to overwrite with the decoding
-        @throws std::invalid_argument if plain does not represent a valid plaintext polynomial
-        @throws std::invalid_argument if the output does not fit in destination
-        @throws std::invalid_argument if the output is negative 
-        */
-        void decode_biguint(const Plaintext &plain, BigUInt &destination);
-
-        /**
         Encodes a signed integer (represented by std::int32_t) into a plaintext polynomial.
 
         @par Negative Integers

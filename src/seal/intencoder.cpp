@@ -145,9 +145,6 @@ namespace seal
 
     int64_t IntegerEncoder::decode_int64(const Plaintext &plain)
     {
-        unsigned long long pos_value;
-
-        // Determine coefficient threshold for negative numbers.
         int64_t result = 0;
         for (size_t bit_index = plain.significant_coeff_count(); bit_index--; )
         {
@@ -169,27 +166,20 @@ namespace seal
                 throw invalid_argument("plain does not represent a valid plaintext polynomial");
             }
             bool coeff_is_negative = coeff >= coeff_neg_threshold_;
-            const unsigned long long *pos_pointer;
+            unsigned long long pos_value = coeff;
             if (coeff_is_negative)
             {
-                if (sub_uint64(plain_modulus_.value(), coeff, 0, &pos_value))
-                {
-                    // Check for borrow, which means value is greater than plain_modulus.
-                    throw invalid_argument("plain does not represent a valid plaintext polynomial");
-                }
-                pos_pointer = &pos_value;
+                pos_value = plain_modulus_.value() - pos_value;
                 coeff_bit_count = get_significant_bit_count(pos_value);
             }
-            else
-            {
-                pos_pointer = &coeff;
-            }
+
             if (coeff_bit_count > bits_per_uint64 - 1)
             {
                 // Absolute value of coefficient is too large to represent in a int64_t, so overflow.
                 throw invalid_argument("output out of range");
             }
-            int64_t coeff_value = safe_cast<int64_t>(*pos_pointer);
+
+            int64_t coeff_value = safe_cast<int64_t>(pos_value);
             if (coeff_is_negative)
             {
                 coeff_value = -coeff_value;
@@ -210,9 +200,6 @@ namespace seal
 
     BigUInt IntegerEncoder::decode_biguint(const Plaintext &plain)
     {
-        unsigned long long pos_value;
-
-        // Determine coefficient threshold for negative numbers.
         size_t result_uint64_count = 1;
         size_t bits_per_uint64_sz = safe_cast<size_t>(bits_per_uint64);
         size_t result_bit_capacity = result_uint64_count * bits_per_uint64_sz;
@@ -242,30 +229,21 @@ namespace seal
                 throw invalid_argument("plain does not represent a valid plaintext polynomial");
             }
             bool coeff_is_negative = coeff >= coeff_neg_threshold_;
-            const unsigned long long *pos_pointer;
+            unsigned long long pos_value = coeff;
             if (coeff_is_negative)
             {
-                if (sub_uint64(plain_modulus_.value(), coeff, 0, &pos_value))
-                {
-                    // Check for borrow, which means value is greater than plain_modulus.
-                    throw invalid_argument("plain does not represent a valid plaintext polynomial");
-                }
-                pos_pointer = &pos_value;
-            }
-            else
-            {
-                pos_pointer = &coeff;
+                pos_value = plain_modulus_.value() - pos_value;
             }
 
             // Add or subtract-in coefficient.
             if (result_is_negative == coeff_is_negative)
             {
                 // Result and coefficient have same signs so add.
-                if (add_uint_uint64(result, *pos_pointer, result_uint64_count, result))
+                if (add_uint_uint64(result, pos_value, result_uint64_count, result))
                 {
                     // Add produced a carry that didn't fit, so resize and put it in.
                     int carry_bit_index = safe_cast<int>(mul_safe(
-                            result_uint64_count, bits_per_uint64_sz));
+                        result_uint64_count, bits_per_uint64_sz));
                     result_uint64_count++;
                     result_bit_capacity = mul_safe(
                         result_uint64_count, bits_per_uint64_sz); 
@@ -277,7 +255,7 @@ namespace seal
             else
             {
                 // Result and coefficient have opposite signs so subtract.
-                if (sub_uint_uint64(result, *pos_pointer, result_uint64_count, result))
+                if (sub_uint_uint64(result, pos_value, result_uint64_count, result))
                 {
                     // Subtraction produced a borrow so coefficient is larger (in magnitude) 
                     // than result, so need to negate result.
@@ -293,86 +271,5 @@ namespace seal
             throw invalid_argument("poly must decode to positive value");
         }
         return resultint;
-    }
-
-    void IntegerEncoder::decode_biguint(const Plaintext &plain, BigUInt &destination)
-    {
-        unsigned long long pos_value;
-
-        // Determine coefficient threshold for negative numbers.
-        destination.set_zero();
-        size_t bits_per_uint64_sz = static_cast<size_t>(bits_per_uint64);
-        size_t result_uint64_count = destination.uint64_count();
-        size_t result_bit_capacity = result_uint64_count * bits_per_uint64_sz;
-        bool result_is_negative = false;
-        uint64_t *result = destination.data();
-        for (size_t bit_index = plain.significant_coeff_count(); bit_index--; )
-        {
-            unsigned long long coeff = plain[bit_index];
-
-            // Left shift result, failing if highest bit set.
-            if (is_bit_set_uint(result, result_uint64_count, 
-                safe_cast<int>(result_bit_capacity) - 1))
-            {
-                throw invalid_argument("plain does not represent a valid plaintext polynomial");
-            }
-            left_shift_uint(result, 1, result_uint64_count, result);
-
-            // Get sign/magnitude of coefficient.
-            if (coeff >= plain_modulus_.value())
-            {
-                // Coefficient is bigger than plaintext modulus.
-                throw invalid_argument("plain does not represent a valid plaintext polynomial");
-            }
-            bool coeff_is_negative = coeff >= coeff_neg_threshold_;
-            const unsigned long long *pos_pointer;
-            if (coeff_is_negative)
-            {
-                if (sub_uint64(plain_modulus_.value(), coeff, 0, &pos_value))
-                {
-                    // Check for borrow, which means value is greater than plain_modulus.
-                    throw invalid_argument("plain does not represent a valid plaintext polynomial"); 
-                }
-                pos_pointer = &pos_value;
-            }
-            else
-            {
-                pos_pointer = &coeff;
-            }
-
-            // Add or subtract-in coefficient.
-            if (result_is_negative == coeff_is_negative)
-            {
-                // Result and coefficient have same signs so add.
-                if (add_uint_uint64(result, *pos_pointer, result_uint64_count, result))
-                {
-                    // Add produced a carry that didn't fit.
-                    throw invalid_argument("output out of range");
-                }
-            }
-            else
-            {
-                // Result and coefficient have opposite signs so subtract.
-                if (sub_uint_uint64(result, *pos_pointer, result_uint64_count, result))
-                {
-                    // Subtraction produced a borrow so coefficient is larger (in magnitude) 
-                    // than result, so need to negate result.
-                    negate_uint(result, result_uint64_count, result);
-                    result_is_negative = !result_is_negative;
-                }
-            }
-        }
-
-        // Verify result is non-negative.
-        if (result_is_negative && !destination.is_zero())
-        {
-            throw invalid_argument("poly must decode to a positive value");
-        }
-
-        // Verify result fits in actual bit-width (as opposed to capacity) of destination.
-        if (destination.significant_bit_count() > destination.bit_count())
-        {
-            throw invalid_argument("output out of range");
-        }
     }
 }
