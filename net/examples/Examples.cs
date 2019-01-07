@@ -1,6 +1,6 @@
 ﻿using Microsoft.Research.SEAL;
 using System;
-using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -1593,7 +1593,730 @@ namespace SEALNetExamples
             */
         }
 
-        static void Main(string[] args)
+        private static void ExampleCKKSBasicsII()
+        {
+            Utilities.PrintExampleBanner("Example: CKKS Basics II");
+
+            /*
+            The previous example did not really make it clear why CKKS is useful at all.
+            Certainly one can scale floating-point numbers to integers, encrypt them,
+            keep track of the scale, and operate on them by just using BFV. The problem
+            with this approach is that the scale quickly grows larger than the size of
+            the coefficient modulus, preventing further computations. The true power of 
+            CKKS is that it allows the scale to be switched down (`rescaling') without 
+            changing the encrypted values. 
+
+            To demonstrate this, we start by setting up the same environment we had in 
+            the previous example.
+            */
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
+            parms.PolyModulusDegree = 8192;
+            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192);
+
+            SEALContext context = SEALContext.Create(parms);
+            Utilities.PrintParameters(context);
+
+            KeyGenerator keygen = new KeyGenerator(context);
+            PublicKey publicKey = keygen.PublicKey;
+            SecretKey secretKey = keygen.SecretKey;
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Evaluator evaluator = new Evaluator(context);
+            Decryptor decryptor = new Decryptor(context, secretKey);
+
+            CKKSEncoder encoder = new CKKSEncoder(context);
+
+            ulong slotCount = encoder.SlotCount;
+            Console.WriteLine($"Number of slots: {slotCount}");
+
+            List<double> input = new List<double> { 0.0, 1.1, 2.2, 3.3 };
+            Console.WriteLine("Input vector:");
+            Utilities.PrintVector(input);
+
+            /*
+            We use a slightly smaller scale in this example.
+            */
+            Plaintext plain = new Plaintext();
+            double scale = Math.Pow(2.0, 60);
+            encoder.Encode(input, scale, plain);
+
+            Ciphertext encrypted = new Ciphertext();
+            encryptor.Encrypt(plain, encrypted);
+
+            /*
+            Print the scale and the parms_id for encrypted.
+            */
+            Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
+            Console.WriteLine($"Scale in encrypted before squaring: {encrypted.Scale}");
+
+            /*
+            We did this already in the previous example: square encrypted and observe 
+            the scale growth.
+            */
+            evaluator.SquareInplace(encrypted);
+            evaluator.RelinearizeInplace(encrypted, relinKeys);
+            Console.WriteLine($"Scale in encrypted after squaring: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine();
+
+            /*
+            Now, to prevent the scale from growing too large in subsequent operations,
+            we apply rescaling.
+            */
+            Console.WriteLine("Rescaling ...");
+            evaluator.RescaleToNextInplace(encrypted);
+            Console.WriteLine();
+
+            /*
+            Rescaling changes the coefficient modulus as modulus switching does. These
+            operations are in fact very closely related. Moreover, the scale indeed has 
+            been significantly reduced: rescaling divides the scale by the coefficient
+            modulus prime that was switched away. Since our coefficient modulus in this
+            case consisted of the primes (see seal/utils/global.cpp)
+
+                0x7fffffff380001,  0x7ffffffef00001,
+                0x3fffffff000001,  0x3ffffffef40001,
+
+            the last of which is 54 bits, the bit-size of the scale was reduced by 
+            precisely 54 bits. Finer granularity rescaling would require smaller primes
+            to be used, but this might lead to performance problems as the computational 
+            cost of homomorphic operations and the size of ciphertexts depends linearly 
+            on the number of primes in coeff_modulus.
+            */
+            Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
+            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine();
+
+            /*
+            We can even compute the fourth power of the input. Note that it is very
+            important to first relinearize and then rescale. Trying to do these two
+            operations in the opposite order will make SEAL throw and exception.
+            */
+            Console.WriteLine("Squaring and rescaling ...");
+            Console.WriteLine();
+            evaluator.SquareInplace(encrypted);
+            evaluator.RelinearizeInplace(encrypted, relinKeys);
+            evaluator.RescaleToNextInplace(encrypted);
+
+            Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
+            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine();
+
+            /*
+            At this point our scale is 78 bits and the coefficient modulus is 110 bits.
+            This means that we cannot square the result anymore, but if we rescale once
+            more and then square, things should work out better. We cannot relinearize
+            with relin_keys at this point due to the large decomposition bit count we 
+            used: the noise from relinearization would completely destroy our result 
+            due to the small scale we are at.
+            */
+            Console.WriteLine("Rescaling and squaring (no relinearization) ...");
+            Console.WriteLine();
+            evaluator.RescaleToNextInplace(encrypted);
+            evaluator.SquareInplace(encrypted);
+
+            Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
+            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine();
+
+            /*
+            We decrypt, decode, and print the results.
+            */
+            decryptor.Decrypt(encrypted, plain);
+            List<double> result = new List<double>();
+            encoder.Decode(plain, result);
+            Console.WriteLine("Eighth powers:");
+            Utilities.PrintVector(result);
+
+            /*
+            We have gone pretty low in the scale at this point and can no longer expect
+            to get entirely accurate results. Still, our results are quite accurate. 
+            */
+            List<double> preciseResult = new List<double>();
+            foreach (double d in input)
+            {
+                preciseResult.Add(Math.Pow(d, 8));
+            }
+            Console.WriteLine("Precise result:");
+            Utilities.PrintVector(preciseResult);
+        }
+
+        private static void ExampleCKKSBasicsIII()
+        {
+            Utilities.PrintExampleBanner("Example: CKKS Basics III");
+
+            /*
+            In this example we demonstrate evaluating a polynomial function on
+            floating-point input data. The challenges we encounter will be related to
+            matching scales and encryption parameters when adding together terms of
+            different degrees in the polynomial evaluation. We start by setting up an
+            environment similar to what we had in the above examples.
+            */
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
+            parms.PolyModulusDegree = 8192;
+
+            /*
+            In this example we decide to use four 40-bit moduli for more flexible 
+            rescaling. Note that 4*40 bits = 160 bits, which is well below the size of 
+            the default coefficient modulus (see seal/util/globals.cpp). It is always
+            more secure to use a smaller coefficient modulus while keeping the degree of
+            the polynomial modulus fixed. Since the coeff_mod_128(8192) default 218-bit 
+            coefficient modulus achieves already a 128-bit security level, this 160-bit 
+            modulus must be much more secure.
+
+            We use the small_mods_40bit(int) function to get primes from a hard-coded 
+            list of 40-bit prime numbers; it is important that all primes used for the
+            coefficient modulus are distinct.
+            */
+            parms.CoeffModulus = new List<SmallModulus>
+            {
+                DefaultParams.SmallMods40Bit(0),
+                DefaultParams.SmallMods40Bit(1),
+                DefaultParams.SmallMods40Bit(2),
+                DefaultParams.SmallMods40Bit(3)
+            };
+
+            SEALContext context = SEALContext.Create(parms);
+            Utilities.PrintParameters(context);
+
+            KeyGenerator keygen = new KeyGenerator(context);
+            PublicKey publicKey = keygen.PublicKey;
+            SecretKey secretKey = keygen.SecretKey;
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Evaluator evaluator = new Evaluator(context);
+            Decryptor decryptor = new Decryptor(context, secretKey);
+
+            CKKSEncoder encoder = new CKKSEncoder(context);
+            ulong slotCount = encoder.SlotCount;
+            Console.WriteLine($"Number of slots: {slotCount}");
+            Console.WriteLine();
+
+            /*
+            In this example our goal is to evaluate the polynomial PI*x^3 + 0.4x + 1 on 
+            an encrypted input x for 4096 equidistant points x in the interval [0, 1]. 
+            */
+            List<double> input = new List<double>();
+            input.Capacity = (int)slotCount;
+            double currPoint = 0, stepSize = 1.0 / (slotCount - 1);
+            for (ulong i = 0; i < slotCount; i++, currPoint += stepSize)
+            {
+                input.Add(currPoint);
+            }
+            Console.WriteLine("Input vector:");
+            Utilities.PrintVector(input, 3);
+            Console.WriteLine("Evaluating polynomial PI*x^3 + 0.4x + 1 ...");
+            Console.WriteLine();
+
+            /*
+            Now encode and encrypt the input using the last of the coeff_modulus primes 
+            as the scale for a reason that will become clear soon.
+            */
+            double scale = parms.CoeffModulus.Last().Value;
+            Plaintext plainX = new Plaintext();
+            encoder.Encode(input, scale, plainX);
+            Ciphertext encryptedX1 = new Ciphertext();
+            encryptor.Encrypt(plainX, encryptedX1);
+
+            /*
+            We create plaintext elements for PI, 0.4, and 1, using an overload of
+            CKKSEncoder::encode(...) that encodes the given floating-point value to
+            every slot in the vector.
+            */
+            Plaintext plainCoeff3 = new Plaintext(),
+                      plainCoeff1 = new Plaintext(),
+                      plainCoeff0 = new Plaintext();
+            encoder.Encode(3.14159265, scale, plainCoeff3);
+            encoder.Encode(0.4, scale, plainCoeff1);
+            encoder.Encode(1.0, scale, plainCoeff0);
+
+            /*
+            To compute x^3 we first compute x^2, relinearize, and rescale.
+            */
+            Ciphertext encryptedX3 = new Ciphertext();
+            evaluator.Square(encryptedX1, encryptedX3);
+            evaluator.RelinearizeInplace(encryptedX3, relinKeys);
+            evaluator.RescaleToNextInplace(encryptedX3);
+
+            /*
+            Now encrypted_x3 is at different encryption parameters than encrypted_x1, 
+            preventing us from multiplying them together to compute x^3. We could simply 
+            switch encrypted_x1 down to the next parameters in the modulus switching 
+            chain. Since we still need to multiply the x^3 term with PI (plain_coeff3), 
+            we instead compute PI*x first and multiply that with x^2 to obtain PI*x^3.
+            This product poses no problems since both inputs are at the same scale and 
+            use the same encryption parameters. We rescale afterwards to change the 
+            scale back to 40 bits, which will also drop the coefficient modulus down to 
+            120 bits. 
+            */
+            Ciphertext encryptedX1Coeff3 = new Ciphertext();
+            evaluator.MultiplyPlain(encryptedX1, plainCoeff3, encryptedX1Coeff3);
+            evaluator.RescaleToNextInplace(encryptedX1Coeff3);
+
+            /*
+            Since both encrypted_x3 and encrypted_x1_coeff3 now have the same scale and 
+            use same encryption parameters, we can multiply them together. We write the 
+            result to encrypted_x3.
+            */
+            evaluator.MultiplyInplace(encryptedX3, encryptedX1Coeff3);
+            evaluator.RelinearizeInplace(encryptedX3, relinKeys);
+            evaluator.RescaleToNextInplace(encryptedX3);
+
+            /*
+            Next we compute the degree one term. All this requires is one multiply_plain 
+            with plain_coeff1. We overwrite encrypted_x1 with the result.
+            */
+            evaluator.MultiplyPlainInplace(encryptedX1, plainCoeff1);
+            evaluator.RescaleToNextInplace(encryptedX1);
+
+            /*
+            Now we would hope to compute the sum of all three terms. However, there is 
+            a serious problem: the encryption parameters used by all three terms are 
+            different due to modulus switching from rescaling. 
+            */
+            Console.WriteLine("Parameters used by all three terms are different:");
+            Console.WriteLine($"Modulus chain index for encryptedX3: {context.GetContextData(encryptedX3.ParmsId).ChainIndex}");
+            Console.WriteLine($"Modulus chain index for encryptedX1: {context.GetContextData(encryptedX1.ParmsId).ChainIndex}");
+            Console.WriteLine($"Modulus chain index for plainCoeff0: {context.GetContextData(plainCoeff0.ParmsId).ChainIndex}");
+            Console.WriteLine();
+
+
+            /*
+            Let us carefully consider what the scales are at this point. If we denote 
+            the primes in coeff_modulus as q1, q2, q3, q4 (order matters here), then all
+            fresh encodings start with a scale equal to q4 (this was a choice we made 
+            above). After the computations above the scale in encrypted_x3 is q4^2/q3:
+
+                * The product x^2 has scale q4^2;
+                * The produt PI*x has scale q4^2;
+                * Rescaling both of these by q4 (last prime) results in scale q4; 
+                * Multiplication to obtain PI*x^3 raises the scale to q4^2;
+                * Rescaling by q3 (last prime) yields a scale of q4^2/q3.
+
+            The scale in both encrypted_x1 and plain_coeff0 is just q4.
+            */
+            Console.WriteLine("Scale in encryptedX3: {0:0.0000000000}", encryptedX3.Scale);
+            Console.WriteLine("Scale in encryptedX1: {0:0.0000000000}", encryptedX1.Scale);
+            Console.WriteLine("Scale in plainCoeff0: {0:0.0000000000}", plainCoeff0.Scale);
+            Console.WriteLine();
+
+            /*
+            There are a couple of ways to fix this this problem. Since q4 and q3 are 
+            really close to each other, we could simply "lie" to SEAL and set the scales 
+            to be the same. For example, changing the scale of encrypted_x3 to be q4
+            simply means that we scale the value of encrypted_x3 by q4/q3 which is very
+            close to 1; this should not result in any noticeable error. 
+
+            Another option would be to encode 1 with scale q4, perform a multiply_plain 
+            with encrypted_x1, and finally rescale. In this case we would additionally 
+            make sure to encode 1 with the appropriate encryption parameters (parms_id). 
+
+            A third option would be to initially encode plain_coeff1 with scale q4^2/q3. 
+            Then, after multiplication with encrypted_x1 and rescaling, the result would 
+            have scale q4^2/q3. Since encoding can be computationally costly, this may 
+            not be a realistic option in some cases.
+
+            In this example we will use the first (simplest) approach and simply change
+            the scale of encrypted_x3.
+            */
+            encryptedX3.Scale = encryptedX1.Scale;
+
+            /*
+            We still have a problem with mismatching encryption parameters. This is easy
+            to fix by using traditional modulus switching (no rescaling). Note that we
+            use here the Evaluator::mod_switch_to_inplace(...) function to switch to
+            encryption parameters down the chain with a specific parms_id.
+            */
+            evaluator.ModSwitchToInplace(encryptedX1, encryptedX3.ParmsId);
+            evaluator.ModSwitchToInplace(plainCoeff0, encryptedX3.ParmsId);
+
+            /*
+            All three ciphertexts are now compatible and can be added.
+            */
+            Ciphertext encryptedResult = new Ciphertext();
+            evaluator.Add(encryptedX3, encryptedX1, encryptedResult);
+            evaluator.AddPlainInplace(encryptedResult, plainCoeff0);
+
+            /*
+            Print the chain index and scale for encrypted_result. 
+            */
+            Console.WriteLine($"Modulus chain index for encrypted_result: {context.GetContextData(encryptedResult.ParmsId).ChainIndex}");
+            Console.WriteLine("Scale in encryptedResult: {0:0.0000000000} ({1} bits)",
+                encryptedResult.Scale,
+                Math.Log(encryptedResult.Scale, newBase: 2));
+
+            /*
+            We decrypt, decode, and print the result.
+            */
+            Plaintext plainResult = new Plaintext();
+            decryptor.Decrypt(encryptedResult, plainResult);
+            List<double> result = new List<double>();
+            encoder.Decode(plainResult, result);
+            Console.WriteLine("Result of PI*x^3 + 0.4x + 1:");
+            Utilities.PrintVector(result, 3);
+
+            /*
+            At this point if we wanted to multiply encrypted_result one more time, the 
+            other multiplicand would have to have scale less than 40 bits, otherwise 
+            the scale would become larger than the coeff_modulus itself. 
+            */
+            Console.WriteLine($"Current coeff_modulus size for encrypted_result: {context.GetContextData(encryptedResult.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine();
+
+            /*
+            A very extreme case for multiplication is where we multiply a ciphertext 
+            with a vector of values that are all the same integer. For example, let us 
+            multiply encrypted_result by 7. In this case we do not need any scaling in 
+            the multiplicand due to a different (much simpler) encoding process.
+            */
+            Plaintext plainIntegerScalar = new Plaintext();
+            encoder.Encode(7, encryptedResult.ParmsId, plainIntegerScalar);
+            evaluator.MultiplyPlainInplace(encryptedResult, plainIntegerScalar);
+
+            Console.WriteLine("Scale in plainIntegerScalar scale: {0:0.0000000000}", plainIntegerScalar.Scale);
+            Console.WriteLine("Scale in encryptedResult: {0:0.0000000000}", encryptedResult.Scale);
+
+            /*
+            We decrypt, decode, and print the result.
+            */
+            decryptor.Decrypt(encryptedResult, plainResult);
+            encoder.Decode(plainResult, result);
+            Console.WriteLine("Result of 7 * (PI*x^3 + 0.4x + 1):");
+            Utilities.PrintVector(result, 3);
+
+            /*
+            Finally, we show how to apply vector rotations on the encrypted data. This
+            is very similar to how matrix rotations work in the BFV scheme. We try this
+            with three sizes of Galois keys. In some cases it is desirable for memory
+            reasons to create Galois keys that support only specific rotations. This can
+            be done by passing to KeyGenerator::galois_keys(...) a vector of signed 
+            integers specifying the desired rotation step counts. Here we create Galois
+            keys that only allow cyclic rotation by a single step (at a time) to the left.
+            */
+            GaloisKeys galKeys30 = keygen.GaloisKeys(decompositionBitCount: 30, galoisElts: new ulong[] { 1, 3 });
+            GaloisKeys galKeys15 = keygen.GaloisKeys(decompositionBitCount: 15, galoisElts: new ulong[] { 1, 3 });
+
+            SEALContext.ContextData contextData = context.GetContextData(encryptedResult.ParmsId);
+            Console.WriteLine($"Batching? {contextData.Qualifiers.UsingBatching}");
+
+
+            Ciphertext rotatedResult = new Ciphertext();
+            evaluator.RotateVector(encryptedResult, 1, galKeys15, rotatedResult);
+            decryptor.Decrypt(rotatedResult, plainResult);
+            encoder.Decode(plainResult, result);
+            Console.WriteLine("Result rotated with dbc 15:");
+            Utilities.PrintVector(result, 3);
+
+            evaluator.RotateVector(encryptedResult, 1, galKeys30, rotatedResult);
+            decryptor.Decrypt(rotatedResult, plainResult);
+            encoder.Decode(plainResult, result);
+            Console.WriteLine("Result rotated with dbc 30:");
+            Utilities.PrintVector(result, 3);
+
+            /*
+            We notice that the using the smallest decomposition bit count introduces 
+            the least amount of error in the result. The problem is that our scale at 
+            this point is very small -- only 40 bits -- so a rotation with decomposition 
+            bit count 30 or bigger already destroys most or all of the message bits. 
+            Ideally rotations would be performed right after multiplications before any
+            rescaling takes place. This way the scale is as large as possible and the
+            additive noise coming from the rotation (or relinearization) will be totally
+            shadowed by the large scale, and subsequently scaled down by the following 
+            rescaling. Of course this may not always be possible to arrange.
+
+            We did not show any computations on complex numbers in these examples, but
+            the CKKSEncoder would allow us to have done that just as easily. Additions
+            and multiplications behave just as one would expect. It is also possible
+            to complex conjugate the values in a ciphertext by using the functions
+            Evaluator::complex_conjugate[_inplace](...).
+            */
+        }
+
+        private static void ExampleCKKSPerformance()
+        {
+            Utilities.PrintExampleBanner("Example: CKKS Performance Test");
+
+    //        /*
+    //        In this example we time all the basic operations. We use the following 
+    //        lambda function to run the test. This is largely similar to the function
+    //        in the previous example.
+    //        */
+    //        auto performance_test = [](auto context)
+    //{
+    //            chrono::high_resolution_clock::time_point time_start, time_end;
+
+    //            print_parameters(context);
+    //            auto & parms = context->context_data()->parms();
+    //            size_t poly_modulus_degree = parms.poly_modulus_degree();
+
+    //            cout << "Generating secret/public keys: ";
+    //            KeyGenerator keygen(context);
+    //            cout << "Done" << endl;
+
+    //            auto secret_key = keygen.secret_key();
+    //            auto public_key = keygen.public_key();
+
+    //            int dbc = dbc_max();
+    //            cout << "Generating relinearization keys (dbc = " << dbc << "): ";
+    //            time_start = chrono::high_resolution_clock::now();
+    //            auto relin_keys = keygen.relin_keys(dbc);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            auto time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+    //            cout << "Done [" << time_diff.count() << " microseconds]" << endl;
+
+    //            if (!context->context_data()->qualifiers().using_batching)
+    //            {
+    //                cout << "Given encryption parameters do not support batching." << endl;
+    //                return;
+    //            }
+    //            cout << "Generating Galois keys (dbc = " << dbc << "): ";
+    //            time_start = chrono::high_resolution_clock::now();
+    //            auto gal_keys = keygen.galois_keys(dbc);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+    //            cout << "Done [" << time_diff.count() << " microseconds]" << endl;
+
+    //            Encryptor encryptor(context, public_key);
+    //            Decryptor decryptor(context, secret_key);
+    //            Evaluator evaluator(context);
+    //            CKKSEncoder ckks_encoder(context);
+
+    //            chrono::microseconds time_encode_sum(0);
+    //            chrono::microseconds time_decode_sum(0);
+    //            chrono::microseconds time_encrypt_sum(0);
+    //            chrono::microseconds time_decrypt_sum(0);
+    //            chrono::microseconds time_add_sum(0);
+    //            chrono::microseconds time_multiply_sum(0);
+    //            chrono::microseconds time_multiply_plain_sum(0);
+    //            chrono::microseconds time_square_sum(0);
+    //            chrono::microseconds time_relinearize_sum(0);
+    //            chrono::microseconds time_rescale_sum(0);
+    //            chrono::microseconds time_rotate_one_step_sum(0);
+    //            chrono::microseconds time_rotate_random_sum(0);
+    //            chrono::microseconds time_conjugate_sum(0);
+
+    //            /*
+    //            How many times to run the test?
+    //            */
+    //            int count = 10;
+
+    //            /*
+    //            Populate a vector of floating-point values to batch.
+    //            */
+    //            vector<double> pod_vector;
+    //            random_device rd;
+    //            for (size_t i = 0; i < ckks_encoder.slot_count(); i++)
+    //            {
+    //                pod_vector.push_back(1.001 * static_cast<double>(i));
+    //            }
+
+    //            cout << "Running tests ";
+    //            for (int i = 0; i < count; i++)
+    //            {
+    //                /*
+    //                [Encoding]
+    //                */
+    //                Plaintext plain(parms.poly_modulus_degree() *
+    //                    parms.coeff_modulus().size(), 0);
+    //            time_start = chrono::high_resolution_clock::now();
+    //            ckks_encoder.encode(pod_vector,
+    //                static_cast<double>(parms.coeff_modulus().back().value()), plain);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_encode_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Decoding]
+    //            */
+    //            vector<double> pod_vector2(ckks_encoder.slot_count());
+    //            time_start = chrono::high_resolution_clock::now();
+    //            ckks_encoder.decode(plain, pod_vector2);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_decode_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Encryption]
+    //            */
+    //            Ciphertext encrypted(context);
+    //            time_start = chrono::high_resolution_clock::now();
+    //            encryptor.encrypt(plain, encrypted);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_encrypt_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Decryption]
+    //            */
+    //            Plaintext plain2(poly_modulus_degree, 0);
+    //            time_start = chrono::high_resolution_clock::now();
+    //            decryptor.decrypt(encrypted, plain2);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_decrypt_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Add]
+    //            */
+    //            Ciphertext encrypted1(context);
+    //            ckks_encoder.encode(i + 1, plain);
+    //            encryptor.encrypt(plain, encrypted1);
+    //            Ciphertext encrypted2(context);
+    //            ckks_encoder.encode(i + 1, plain2);
+    //            encryptor.encrypt(plain2, encrypted2);
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.add_inplace(encrypted1, encrypted1);
+    //            evaluator.add_inplace(encrypted2, encrypted2);
+    //            evaluator.add_inplace(encrypted1, encrypted2);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_add_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start) / 3;
+
+    //            /*
+    //            [Multiply]
+    //            */
+    //            encrypted1.reserve(3);
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.multiply_inplace(encrypted1, encrypted2);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_multiply_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Multiply Plain]
+    //            */
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.multiply_plain_inplace(encrypted2, plain);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_multiply_plain_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Square]
+    //            */
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.square_inplace(encrypted2);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_square_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Relinearize]
+    //            */
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.relinearize_inplace(encrypted1, relin_keys);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_relinearize_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Rescale]
+    //            */
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.rescale_to_next_inplace(encrypted1);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_rescale_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Rotate Vector]
+    //            */
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.rotate_vector_inplace(encrypted, 1, gal_keys);
+    //            evaluator.rotate_vector_inplace(encrypted, -1, gal_keys);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_rotate_one_step_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start) / 2;
+
+    //            /*
+    //            [Rotate Vector Random]
+    //            */
+    //            int random_rotation = static_cast<int>(rd() % ckks_encoder.slot_count());
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.rotate_vector_inplace(encrypted, random_rotation, gal_keys);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_rotate_random_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            [Complex Conjugate]
+    //            */
+    //            time_start = chrono::high_resolution_clock::now();
+    //            evaluator.complex_conjugate_inplace(encrypted, gal_keys);
+    //            time_end = chrono::high_resolution_clock::now();
+    //            time_conjugate_sum += chrono::duration_cast<
+    //                chrono::microseconds>(time_end - time_start);
+
+    //            /*
+    //            Print a dot to indicate progress.
+    //            */
+    //            cout << ".";
+    //            cout.flush();
+    //        }
+
+    //        cout << " Done" << endl << endl;
+    //        cout.flush();
+
+    //        auto avg_encode = time_encode_sum.count() / count;
+    //        auto avg_decode = time_decode_sum.count() / count;
+    //        auto avg_encrypt = time_encrypt_sum.count() / count;
+    //        auto avg_decrypt = time_decrypt_sum.count() / count;
+    //        auto avg_add = time_add_sum.count() / count;
+    //        auto avg_multiply = time_multiply_sum.count() / count;
+    //        auto avg_multiply_plain = time_multiply_plain_sum.count() / count;
+    //        auto avg_square = time_square_sum.count() / count;
+    //        auto avg_relinearize = time_relinearize_sum.count() / count;
+    //        auto avg_rescale = time_rescale_sum.count() / count;
+    //        auto avg_rotate_one_step = time_rotate_one_step_sum.count() / count;
+    //        auto avg_rotate_random = time_rotate_random_sum.count() / count;
+    //        auto avg_conjugate = time_conjugate_sum.count() / count;
+
+    //        cout << "Average encode: " << avg_encode << " microseconds" << endl;
+    //        cout << "Average decode: " << avg_decode << " microseconds" << endl;
+    //        cout << "Average encrypt: " << avg_encrypt << " microseconds" << endl;
+    //        cout << "Average decrypt: " << avg_decrypt << " microseconds" << endl;
+    //        cout << "Average add: " << avg_add << " microseconds" << endl;
+    //        cout << "Average multiply: " << avg_multiply << " microseconds" << endl;
+    //        cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << endl;
+    //        cout << "Average square: " << avg_square << " microseconds" << endl;
+    //        cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
+    //        cout << "Average rescale: " << avg_rescale << " microseconds" << endl;
+    //        cout << "Average rotate vector one step: " << avg_rotate_one_step << " microseconds" << endl;
+    //        cout << "Average rotate vector random: " << avg_rotate_random << " microseconds" << endl;
+    //        cout << "Average complex conjugate: " << avg_conjugate << " microseconds" << endl;
+    //        cout.flush();
+    //    };
+
+    //    EncryptionParameters parms(scheme_type::CKKS);
+    //    parms.set_poly_modulus_degree(4096);
+    //parms.set_coeff_modulus(coeff_modulus_128(4096));
+    //performance_test(SEALContext::Create(parms));
+
+    //    cout << endl;
+    //parms.set_poly_modulus_degree(8192);
+    //parms.set_coeff_modulus(coeff_modulus_128(8192));
+    //performance_test(SEALContext::Create(parms));
+
+    //    cout << endl;
+    //parms.set_poly_modulus_degree(16384);
+    //parms.set_coeff_modulus(coeff_modulus_128(16384));
+    //performance_test(SEALContext::Create(parms));
+
+        /*
+        Comment out the following to run the biggest example.
+        */
+        // cout << endl;
+        // parms.set_poly_modulus_degree(32768);
+        // parms.set_coeff_modulus(coeff_modulus_128(32768));
+        // performance_test(SEALContext::Create(parms));
+    }
+
+    static void Main(string[] args)
         {
             while (true)
             {
@@ -1656,15 +2379,15 @@ namespace SEALNetExamples
                         break;
 
                     case ConsoleKey.D7:
-                        Console.WriteLine("7!");
+                        ExampleCKKSBasicsII();
                         break;
 
                     case ConsoleKey.D8:
-                        Console.WriteLine("8!");
+                        ExampleCKKSBasicsIII();
                         break;
 
                     case ConsoleKey.D9:
-                        Console.WriteLine("9!");
+                        ExampleCKKSPerformance();
                         break;
 
                     case ConsoleKey.D0:
