@@ -1998,12 +1998,8 @@ namespace SEALNetExamples
             integers specifying the desired rotation step counts. Here we create Galois
             keys that only allow cyclic rotation by a single step (at a time) to the left.
             */
-            GaloisKeys galKeys30 = keygen.GaloisKeys(decompositionBitCount: 30, galoisElts: new ulong[] { 1, 3 });
-            GaloisKeys galKeys15 = keygen.GaloisKeys(decompositionBitCount: 15, galoisElts: new ulong[] { 1, 3 });
-
-            SEALContext.ContextData contextData = context.GetContextData(encryptedResult.ParmsId);
-            Console.WriteLine($"Batching? {contextData.Qualifiers.UsingBatching}");
-
+            GaloisKeys galKeys30 = keygen.GaloisKeys(decompositionBitCount: 30, steps: new int[] { 1 });
+            GaloisKeys galKeys15 = keygen.GaloisKeys(decompositionBitCount: 15, steps: new int[] { 1 });
 
             Ciphertext rotatedResult = new Ciphertext();
             evaluator.RotateVector(encryptedResult, 1, galKeys15, rotatedResult);
