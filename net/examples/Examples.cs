@@ -2041,282 +2041,261 @@ namespace SEALNetExamples
         {
             Utilities.PrintExampleBanner("Example: CKKS Performance Test");
 
-    //        /*
-    //        In this example we time all the basic operations. We use the following 
-    //        lambda function to run the test. This is largely similar to the function
-    //        in the previous example.
-    //        */
-    //        auto performance_test = [](auto context)
-    //{
-    //            chrono::high_resolution_clock::time_point time_start, time_end;
+            /*
+            In this example we time all the basic operations. We use the following 
+            local function to run the test. This is largely similar to the function
+            in the previous example.
+            */
+            void performanceTest(SEALContext context)
+            {
+                if (!Stopwatch.IsHighResolution)
+                {
+                    Console.WriteLine("WARNING: High resolution stopwatch not available in this machine.");
+                    Console.WriteLine("         Timings might not be accurate.");
+                }
 
-    //            print_parameters(context);
-    //            auto & parms = context->context_data()->parms();
-    //            size_t poly_modulus_degree = parms.poly_modulus_degree();
+                Utilities.PrintParameters(context);
+                EncryptionParameters parms = context.FirstContextData.Parms;
+                ulong polyModulusDegree = parms.PolyModulusDegree;
 
-    //            cout << "Generating secret/public keys: ";
-    //            KeyGenerator keygen(context);
-    //            cout << "Done" << endl;
+                Console.Write("Generating secret/public keys: ");
+                KeyGenerator keygen = new KeyGenerator(context);
+                Console.WriteLine("Done");
 
-    //            auto secret_key = keygen.secret_key();
-    //            auto public_key = keygen.public_key();
+                SecretKey secretKey = keygen.SecretKey;
+                PublicKey publicKey = keygen.PublicKey;
 
-    //            int dbc = dbc_max();
-    //            cout << "Generating relinearization keys (dbc = " << dbc << "): ";
-    //            time_start = chrono::high_resolution_clock::now();
-    //            auto relin_keys = keygen.relin_keys(dbc);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            auto time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
-    //            cout << "Done [" << time_diff.count() << " microseconds]" << endl;
+                int dbc = DefaultParams.DBCmax;
+                Console.Write($"Generating relinearization keys (dbc = {dbc}): ");
+                Stopwatch timer = Stopwatch.StartNew();
+                RelinKeys relinKeys = keygen.RelinKeys(dbc);
+                timer.Stop();
+                Console.WriteLine($"Done [{timer.Elapsed.TotalMilliseconds * 1000} microseconds]");
 
-    //            if (!context->context_data()->qualifiers().using_batching)
-    //            {
-    //                cout << "Given encryption parameters do not support batching." << endl;
-    //                return;
-    //            }
-    //            cout << "Generating Galois keys (dbc = " << dbc << "): ";
-    //            time_start = chrono::high_resolution_clock::now();
-    //            auto gal_keys = keygen.galois_keys(dbc);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
-    //            cout << "Done [" << time_diff.count() << " microseconds]" << endl;
+                if (!context.FirstContextData.Qualifiers.UsingBatching)
+                {
+                    Console.WriteLine("Given encryption parameters do not support batching.");
+                    return;
+                }
 
-    //            Encryptor encryptor(context, public_key);
-    //            Decryptor decryptor(context, secret_key);
-    //            Evaluator evaluator(context);
-    //            CKKSEncoder ckks_encoder(context);
+                Console.Write($"Generating Galois keys (dbc = {dbc}): ");
+                timer = Stopwatch.StartNew();
+                GaloisKeys galKeys = keygen.GaloisKeys(dbc);
+                timer.Stop();
+                Console.WriteLine($"Done [{timer.Elapsed.TotalMilliseconds * 1000} microseconds]");
 
-    //            chrono::microseconds time_encode_sum(0);
-    //            chrono::microseconds time_decode_sum(0);
-    //            chrono::microseconds time_encrypt_sum(0);
-    //            chrono::microseconds time_decrypt_sum(0);
-    //            chrono::microseconds time_add_sum(0);
-    //            chrono::microseconds time_multiply_sum(0);
-    //            chrono::microseconds time_multiply_plain_sum(0);
-    //            chrono::microseconds time_square_sum(0);
-    //            chrono::microseconds time_relinearize_sum(0);
-    //            chrono::microseconds time_rescale_sum(0);
-    //            chrono::microseconds time_rotate_one_step_sum(0);
-    //            chrono::microseconds time_rotate_random_sum(0);
-    //            chrono::microseconds time_conjugate_sum(0);
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Decryptor decryptor = new Decryptor(context, secretKey);
+                Evaluator evaluator = new Evaluator(context);
+                CKKSEncoder ckksEncoder = new CKKSEncoder(context);
 
-    //            /*
-    //            How many times to run the test?
-    //            */
-    //            int count = 10;
+                Stopwatch timeEncodeSum = new Stopwatch();
+                Stopwatch timeDecodeSum = new Stopwatch();
+                Stopwatch timeEncryptSum = new Stopwatch();
+                Stopwatch timeDecryptSum = new Stopwatch();
+                Stopwatch timeAddSum = new Stopwatch();
+                Stopwatch timeMultiplySum = new Stopwatch();
+                Stopwatch timeMultiplyPlainSum = new Stopwatch();
+                Stopwatch timeSquareSum = new Stopwatch();
+                Stopwatch timeRelinearizeSum = new Stopwatch();
+                Stopwatch timeRescaleSum = new Stopwatch();
+                Stopwatch timeRotateOneStepSum = new Stopwatch();
+                Stopwatch timeRotateRandomSum = new Stopwatch();
+                Stopwatch timeConjugateSum = new Stopwatch();
 
-    //            /*
-    //            Populate a vector of floating-point values to batch.
-    //            */
-    //            vector<double> pod_vector;
-    //            random_device rd;
-    //            for (size_t i = 0; i < ckks_encoder.slot_count(); i++)
-    //            {
-    //                pod_vector.push_back(1.001 * static_cast<double>(i));
-    //            }
+                Random rnd = new Random();
 
-    //            cout << "Running tests ";
-    //            for (int i = 0; i < count; i++)
-    //            {
-    //                /*
-    //                [Encoding]
-    //                */
-    //                Plaintext plain(parms.poly_modulus_degree() *
-    //                    parms.coeff_modulus().size(), 0);
-    //            time_start = chrono::high_resolution_clock::now();
-    //            ckks_encoder.encode(pod_vector,
-    //                static_cast<double>(parms.coeff_modulus().back().value()), plain);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_encode_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                /*
+                How many times to run the test?
+                */
+                int count = 10;
 
-    //            /*
-    //            [Decoding]
-    //            */
-    //            vector<double> pod_vector2(ckks_encoder.slot_count());
-    //            time_start = chrono::high_resolution_clock::now();
-    //            ckks_encoder.decode(plain, pod_vector2);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_decode_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                /*
+                Populate a vector of floating-point values to batch.
+                */
+                List<double> podList = new List<double>();
+                for (ulong i = 0; i < ckksEncoder.SlotCount; i++)
+                {
+                    podList.Add(1.001 * i);
+                }
 
-    //            /*
-    //            [Encryption]
-    //            */
-    //            Ciphertext encrypted(context);
-    //            time_start = chrono::high_resolution_clock::now();
-    //            encryptor.encrypt(plain, encrypted);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_encrypt_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                Console.WriteLine("Running tests");
 
-    //            /*
-    //            [Decryption]
-    //            */
-    //            Plaintext plain2(poly_modulus_degree, 0);
-    //            time_start = chrono::high_resolution_clock::now();
-    //            decryptor.decrypt(encrypted, plain2);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_decrypt_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                for (int i = 0; i < count; i++)
+                {
+                    /*
+                    [Encoding]
+                    */
+                    Plaintext plain = new Plaintext(parms.PolyModulusDegree *
+                        (ulong)parms.CoeffModulus.Count(), 0);
+                    timeEncodeSum.Start();
+                    ckksEncoder.Encode(podList, (double)parms.CoeffModulus.Last().Value, plain);
+                    timeEncodeSum.Stop();
 
-    //            /*
-    //            [Add]
-    //            */
-    //            Ciphertext encrypted1(context);
-    //            ckks_encoder.encode(i + 1, plain);
-    //            encryptor.encrypt(plain, encrypted1);
-    //            Ciphertext encrypted2(context);
-    //            ckks_encoder.encode(i + 1, plain2);
-    //            encryptor.encrypt(plain2, encrypted2);
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.add_inplace(encrypted1, encrypted1);
-    //            evaluator.add_inplace(encrypted2, encrypted2);
-    //            evaluator.add_inplace(encrypted1, encrypted2);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_add_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start) / 3;
+                    /*
+                    [Decoding]
+                    */
+                    List<double> podList2 = new List<double>((int)ckksEncoder.SlotCount);
+                    timeDecodeSum.Start();
+                    ckksEncoder.Decode(plain, podList2);
+                    timeDecodeSum.Stop();
 
-    //            /*
-    //            [Multiply]
-    //            */
-    //            encrypted1.reserve(3);
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.multiply_inplace(encrypted1, encrypted2);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_multiply_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                    /*
+                    [Encryption]
+                    */
+                    Ciphertext encrypted = new Ciphertext(context);
+                    timeEncryptSum.Start();
+                    encryptor.Encrypt(plain, encrypted);
+                    timeEncryptSum.Stop();
 
-    //            /*
-    //            [Multiply Plain]
-    //            */
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.multiply_plain_inplace(encrypted2, plain);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_multiply_plain_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                    /*
+                    [Decryption]
+                    */
+                    Plaintext plain2 = new Plaintext(polyModulusDegree, 0);
+                    timeDecryptSum.Start();
+                    decryptor.Decrypt(encrypted, plain2);
+                    timeDecryptSum.Stop();
 
-    //            /*
-    //            [Square]
-    //            */
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.square_inplace(encrypted2);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_square_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                    /*
+                    [Add]
+                    */
+                    Ciphertext encrypted1 = new Ciphertext(context);
+                    ckksEncoder.Encode((ulong)i + 1, plain);
+                    encryptor.Encrypt(plain, encrypted1);
+                    Ciphertext encrypted2 = new Ciphertext(context);
+                    ckksEncoder.Encode((ulong)i + 1, plain2);
+                    encryptor.Encrypt(plain2, encrypted2);
+                    timeAddSum.Start();
+                    evaluator.AddInplace(encrypted1, encrypted2);
+                    evaluator.AddInplace(encrypted2, encrypted2);
+                    evaluator.AddInplace(encrypted1, encrypted2);
+                    timeAddSum.Stop();
 
-    //            /*
-    //            [Relinearize]
-    //            */
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.relinearize_inplace(encrypted1, relin_keys);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_relinearize_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                    /*
+                    [Multiply]
+                    */
+                    encrypted1.Reserve(3);
+                    timeMultiplySum.Start();
+                    evaluator.MultiplyInplace(encrypted1, encrypted2);
+                    timeMultiplySum.Stop();
 
-    //            /*
-    //            [Rescale]
-    //            */
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.rescale_to_next_inplace(encrypted1);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_rescale_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                    /*
+                    [Multiply Plain]
+                    */
+                    timeMultiplyPlainSum.Start();
+                    evaluator.MultiplyPlainInplace(encrypted2, plain);
+                    timeMultiplyPlainSum.Stop();
 
-    //            /*
-    //            [Rotate Vector]
-    //            */
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.rotate_vector_inplace(encrypted, 1, gal_keys);
-    //            evaluator.rotate_vector_inplace(encrypted, -1, gal_keys);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_rotate_one_step_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start) / 2;
+                    /*
+                    [Square]
+                    */
+                    timeSquareSum.Start();
+                    evaluator.SquareInplace(encrypted2);
+                    timeSquareSum.Stop();
 
-    //            /*
-    //            [Rotate Vector Random]
-    //            */
-    //            int random_rotation = static_cast<int>(rd() % ckks_encoder.slot_count());
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.rotate_vector_inplace(encrypted, random_rotation, gal_keys);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_rotate_random_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                    /*
+                    [Relinearize]
+                    */
+                    timeRelinearizeSum.Start();
+                    evaluator.RelinearizeInplace(encrypted1, relinKeys);
+                    timeRelinearizeSum.Stop();
 
-    //            /*
-    //            [Complex Conjugate]
-    //            */
-    //            time_start = chrono::high_resolution_clock::now();
-    //            evaluator.complex_conjugate_inplace(encrypted, gal_keys);
-    //            time_end = chrono::high_resolution_clock::now();
-    //            time_conjugate_sum += chrono::duration_cast<
-    //                chrono::microseconds>(time_end - time_start);
+                    /*
+                    [Rescale]
+                    */
+                    timeRescaleSum.Start();
+                    evaluator.RescaleToNextInplace(encrypted1);
+                    timeRescaleSum.Stop();
 
-    //            /*
-    //            Print a dot to indicate progress.
-    //            */
-    //            cout << ".";
-    //            cout.flush();
-    //        }
+                    /*
+                    [Rotate Vector]
+                    */
+                    timeRotateOneStepSum.Start();
+                    evaluator.RotateVectorInplace(encrypted, 1, galKeys);
+                    evaluator.RotateVectorInplace(encrypted, -1, galKeys);
+                    timeRotateOneStepSum.Stop();
 
-    //        cout << " Done" << endl << endl;
-    //        cout.flush();
+                    /*
+                    [Rotate Vector Random]
+                    */
+                    int randomRotation = rnd.Next() % (int)ckksEncoder.SlotCount;
+                    timeRotateRandomSum.Start();
+                    evaluator.RotateVectorInplace(encrypted, randomRotation, galKeys);
+                    timeRotateRandomSum.Stop();
 
-    //        auto avg_encode = time_encode_sum.count() / count;
-    //        auto avg_decode = time_decode_sum.count() / count;
-    //        auto avg_encrypt = time_encrypt_sum.count() / count;
-    //        auto avg_decrypt = time_decrypt_sum.count() / count;
-    //        auto avg_add = time_add_sum.count() / count;
-    //        auto avg_multiply = time_multiply_sum.count() / count;
-    //        auto avg_multiply_plain = time_multiply_plain_sum.count() / count;
-    //        auto avg_square = time_square_sum.count() / count;
-    //        auto avg_relinearize = time_relinearize_sum.count() / count;
-    //        auto avg_rescale = time_rescale_sum.count() / count;
-    //        auto avg_rotate_one_step = time_rotate_one_step_sum.count() / count;
-    //        auto avg_rotate_random = time_rotate_random_sum.count() / count;
-    //        auto avg_conjugate = time_conjugate_sum.count() / count;
+                    /*
+                    [Complex Conjugate]
+                    */
+                    timeConjugateSum.Start();
+                    evaluator.ComplexConjugateInplace(encrypted, galKeys);
+                    timeConjugateSum.Stop();
 
-    //        cout << "Average encode: " << avg_encode << " microseconds" << endl;
-    //        cout << "Average decode: " << avg_decode << " microseconds" << endl;
-    //        cout << "Average encrypt: " << avg_encrypt << " microseconds" << endl;
-    //        cout << "Average decrypt: " << avg_decrypt << " microseconds" << endl;
-    //        cout << "Average add: " << avg_add << " microseconds" << endl;
-    //        cout << "Average multiply: " << avg_multiply << " microseconds" << endl;
-    //        cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << endl;
-    //        cout << "Average square: " << avg_square << " microseconds" << endl;
-    //        cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
-    //        cout << "Average rescale: " << avg_rescale << " microseconds" << endl;
-    //        cout << "Average rotate vector one step: " << avg_rotate_one_step << " microseconds" << endl;
-    //        cout << "Average rotate vector random: " << avg_rotate_random << " microseconds" << endl;
-    //        cout << "Average complex conjugate: " << avg_conjugate << " microseconds" << endl;
-    //        cout.flush();
-    //    };
+                    /*
+                    Print a dot to indicate progress.
+                    */
+                    Console.Write(".");
+                    Console.Out.Flush();
+                }
 
-    //    EncryptionParameters parms(scheme_type::CKKS);
-    //    parms.set_poly_modulus_degree(4096);
-    //parms.set_coeff_modulus(coeff_modulus_128(4096));
-    //performance_test(SEALContext::Create(parms));
+                Console.WriteLine(" Done");
+                Console.WriteLine();
+                Console.Out.Flush();
 
-    //    cout << endl;
-    //parms.set_poly_modulus_degree(8192);
-    //parms.set_coeff_modulus(coeff_modulus_128(8192));
-    //performance_test(SEALContext::Create(parms));
+                double avgEncode = timeEncodeSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgDecode = timeDecodeSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgEncrypt = timeEncryptSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgDecrypt = timeDecryptSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgAdd = timeAddSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgMultiply = timeMultiplySum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgMultiplyPlain = timeMultiplyPlainSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgSquare = timeSquareSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgRelinearize = timeRelinearizeSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgRescale = timeRescaleSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgRotateOneStep = timeRotateOneStepSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgRotateRandom = timeRotateRandomSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgConjugate = timeConjugateSum.Elapsed.TotalMilliseconds * 1000 / count;
 
-    //    cout << endl;
-    //parms.set_poly_modulus_degree(16384);
-    //parms.set_coeff_modulus(coeff_modulus_128(16384));
-    //performance_test(SEALContext::Create(parms));
+                Console.WriteLine($"Average encode: {avgEncode} microseconds");
+                Console.WriteLine($"Average decode: {avgDecode} microseconds");
+                Console.WriteLine($"Average encrypt: {avgEncrypt} microseconds");
+                Console.WriteLine($"Average decrypt: {avgDecrypt} microseconds");
+                Console.WriteLine($"Average add: {avgAdd} microseconds");
+                Console.WriteLine($"Average multiply: {avgMultiply} microseconds");
+                Console.WriteLine($"Average multiply plain: {avgMultiplyPlain} microseconds");
+                Console.WriteLine($"Average square: {avgSquare} microseconds");
+                Console.WriteLine($"Average relinearize: {avgRelinearize} microseconds");
+                Console.WriteLine($"Average rescale: {avgRescale} microseconds");
+                Console.WriteLine($"Average rotate vector one step: {avgRotateOneStep} microseconds");
+                Console.WriteLine($"Average rotate vector random: {avgRotateRandom} microseconds");
+                Console.WriteLine($"Average complex conjugate: {avgConjugate} microseconds");
+                Console.Out.Flush();
+            }
 
-        /*
-        Comment out the following to run the biggest example.
-        */
-        // cout << endl;
-        // parms.set_poly_modulus_degree(32768);
-        // parms.set_coeff_modulus(coeff_modulus_128(32768));
-        // performance_test(SEALContext::Create(parms));
-    }
+            EncryptionParameters encparms = new EncryptionParameters(SchemeType.CKKS);
+            encparms.PolyModulusDegree = 4096;
+            encparms.CoeffModulus = DefaultParams.CoeffModulus128(4096);
+            performanceTest(SEALContext.Create(encparms));
 
-    static void Main(string[] args)
+            Console.WriteLine();
+            encparms.PolyModulusDegree = 8192;
+            encparms.CoeffModulus = DefaultParams.CoeffModulus128(8192);
+            performanceTest(SEALContext.Create(encparms));
+
+            Console.WriteLine();
+            encparms.PolyModulusDegree = 16384;
+            encparms.CoeffModulus = DefaultParams.CoeffModulus128(16384);
+            performanceTest(SEALContext.Create(encparms));
+
+            /*
+            Comment out the following to run the biggest example.
+            */
+            //Console.WriteLine();
+            //encparms.PolyModulusDegree = 32768;
+            //encparms.CoeffModulus = DefaultParams.CoeffModulus128(32768);
+            //performanceTest(SEALContext.Create(encparms));
+        }
+
+        static void Main(string[] args)
         {
             while (true)
             {
