@@ -783,6 +783,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(SEALdll, EntryPoint = "KeyGenerator_GaloisKeys2", PreserveSig = false)]
         internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, int decompositionBitCount, int count, ulong[] galoisElts, out IntPtr galoisKeys);
 
+        [DllImport(SEALdll, EntryPoint = "KeyGenerator_GaloisKeys3", PreserveSig = false)]
+        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, int decompositionBitCount, int count, int[] steps, out IntPtr galoisKeys);
+
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void KeyGenerator_PublicKey(IntPtr thisptr, out IntPtr publicKey);
 

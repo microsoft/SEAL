@@ -27,6 +27,8 @@ SEALDLL HRESULT SEALCALL KeyGenerator_GaloisKeys1(void* thisptr, int decompositi
 
 SEALDLL HRESULT SEALCALL KeyGenerator_GaloisKeys2(void* thisptr, int decomposition_bit_count, int count, uint64_t* galois_elts, void** galois_keys);
 
+SEALDLL HRESULT SEALCALL KeyGenerator_GaloisKeys3(void* thisptr, int decomposition_bit_count, int count, int* steps, void** galois_keys);
+
 SEALDLL HRESULT SEALCALL KeyGenerator_PublicKey(void* thisptr, void** public_key);
 
 SEALDLL HRESULT SEALCALL KeyGenerator_SecretKey(void* thisptr, void** secret_key);

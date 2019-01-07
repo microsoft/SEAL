@@ -145,6 +145,35 @@ SEALDLL HRESULT SEALCALL KeyGenerator_GaloisKeys2(void* thisptr, int decompositi
     }
 }
 
+SEALDLL HRESULT SEALCALL KeyGenerator_GaloisKeys3(void* thisptr, int decomposition_bit_count, int count, int* steps, void** galois_keys)
+{
+    KeyGenerator* keygen = FromVoid<KeyGenerator>(thisptr);
+    IfNullRet(keygen, E_POINTER);
+    IfNullRet(steps, E_POINTER);
+    IfNullRet(galois_keys, E_POINTER);
+
+    vector<int> steps_vec(count);
+    for (int i = 0; i < count; i++)
+    {
+        steps_vec[i] = steps[i];
+    }
+
+    try
+    {
+        GaloisKeys* keys = new GaloisKeys(keygen->galois_keys(decomposition_bit_count, steps_vec));
+        *galois_keys = keys;
+        return S_OK;
+    }
+    catch (const invalid_argument&)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+}
+
 SEALDLL HRESULT SEALCALL KeyGenerator_PublicKey(void* thisptr, void** public_key)
 {
     KeyGenerator* keygen = FromVoid<KeyGenerator>(thisptr);

@@ -192,6 +192,33 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Generates and returns Galois keys. This function creates specific Galois 
+        /// keys that can be used to apply specific Galois automorphisms on encrypted 
+        /// data. The user needs to give as input a vector of desired Galois rotation 
+        /// step counts, where negative step counts correspond to rotations to the 
+        /// right and positive step counts correspond to rotations to the left. 
+        /// A step count of zero can be used to indicate a column rotation in the BFV 
+        /// scheme complex conjugation in the CKKS scheme.
+        /// </summary>
+        /// <param name="decompositionBitCount">The decomposition bit count</param>
+        /// <param name="steps">The rotation step counts for which to generate keys</param>
+        /// <exception cref="ArgumentNullException">if steps is null</exception>
+        /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching
+        /// and scheme is SchemeType.BFV</exception>
+        /// <exception cref="ArgumentException">if decompositionBitCount is not within [1, 60]</exception>
+        /// <exception cref="ArgumentException">if the step counts are not valid</exception>
+        public GaloisKeys GaloisKeys(int decompositionBitCount,
+            IEnumerable<int> steps)
+        {
+            if (null == steps)
+                throw new ArgumentNullException(nameof(steps));
+
+            int[] stepsArr = steps.ToArray();
+            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, stepsArr.Length, stepsArr, out IntPtr galoisKeys);
+            return new GaloisKeys(galoisKeys);
+        }
+
+        /// <summary>
         /// Destroy native object.
         /// </summary>
         protected override void DestroyNativeObject()
