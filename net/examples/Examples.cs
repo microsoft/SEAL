@@ -178,47 +178,42 @@ namespace SEALNetExamples
             encrypted. SEAL comes with a few basic encoders for the BFV scheme:
 
             [IntegerEncoder]
-            Given an integer base b, encodes integers as plaintext polynomials as follows. 
-            First, a base-b expansion of the integer is computed. This expansion uses 
-            a `balanced' set of representatives of integers modulo b as the coefficients. 
-            Namely, when b is odd the coefficients are integers between -(b-1)/2 and 
-            (b-1)/2. When b is even, the integers are between -b/2 and (b-1)/2, except 
-            when b is two and the usual binary expansion is used (coefficients 0 and 1). 
-            Decoding amounts to evaluating the polynomial at x=b. For example, if b=2, 
-            the integer 
-
+            The IntegerEncoder encodes integers to plaintext polynomials as follows. 
+            First, a binary expansion of the integer is computed. Next, a polynomial is
+            created with the bits as coefficients. For example, the integer 
+    
                 26 = 2^4 + 2^3 + 2^1
+    
+            is encoded as the polynomial 1x^4 + 1x^3 + 1x^1. Conversely, plaintext
+            polynomials are decoded by evaluating them at x=2. For negative numbers the
+            IntegerEncoder simply stores all coefficients as either 0 or -1, where -1 is
+            represented by the unsigned integer plain_modulus - 1 in memory.
 
-            is encoded as the polynomial 1x^4 + 1x^3 + 1x^1. When b=3, 
+            Since encrypted computations operate on the polynomials rather than on the
+            encoded integers themselves, the polynomial coefficients will grow in the
+            course of such computations. For example, computing the sum of the encrypted
+            encoded integer 26 with itself will result in an encrypted polynomial with
+            larger coefficients: 2x^4 + 2x^3 + 2x^1. Squaring the encrypted encoded
+            integer 26 results also in increased coefficients due to cross-terms, namely,
+    
+                (1x^4 + 1x^3 + 1x^1)^2 = 1x^8 + 2x^7 + 1x^6 + 2x^5 + 2x^4 + 1x^2; 
+    
+            further computations will quickly increase the coefficients much more. 
+            Decoding will still work correctly in this case (evaluating the polynomial 
+            at x=2), but since the coefficients of plaintext polynomials are really 
+            integers modulo plain_modulus, implicit reduction modulo plain_modulus may 
+            yield unexpected results. For example, adding 1x^4 + 1x^3 + 1x^1 to itself 
+            plain_modulus many times will result in the constant polynomial 0, which is 
+            clearly not equal to 26 * plain_modulus. It can be difficult to predict when 
+            such overflow will take place especially when computing several sequential
+            multiplications. BatchEncoder (discussed later) makes it easier to predict 
+            encoding overflow conditions but has a stronger restriction on the size of 
+            the numbers it can encode. 
 
-                26 = 3^3 - 3^0 
-
-            is encoded as the polynomial 1x^3 - 1. In memory polynomial coefficients are 
-            always stored as unsigned integers by storing their smallest non-negative 
-            representatives modulo plain_modulus. To create a base-b integer encoder, 
-            use the constructor IntegerEncoder(plain_modulus, b). If no b is given, b=2 
-            is used.
-
-            [FractionalEncoder]
-            The FractionalEncoder encodes fixed-precision rational numbers as follows. 
-            It expands the number in a given base b, possibly truncating an infinite 
-            fractional part to finite precision, e.g. 
-
-                26.75 = 2^4 + 2^3 + 2^1 + 2^(-1) + 2^(-2) 
-
-            when b=2. For the sake of the example, suppose poly_modulus is 1x^1024 + 1. 
-            It then represents the integer part of the number in the same way as in 
-            IntegerEncoder (with b=2 here), and moves the fractional part instead to the 
-            highest degree part of the polynomial, but with signs of the coefficients 
-            changed. In this example we would represent 26.75 as the polynomial 
-
-                -1x^1023 - 1x^1022 + 1x^4 + 1x^3 + 1x^1. 
-
-            In memory the negative coefficients of the polynomial will be represented as 
-            their negatives modulo plain_modulus. While easy to use, the fractional
-            encoder suffers from drawbacks that can be avoided using the CKKS scheme
-            instead of BFV; hence, we do not demonstrate the FractionalEncoder in these
-            examples.
+            The IntegerEncoder is easy to understand and use for simple computations, 
+            and can be a good starting point to learning SEAL. However, advanced users 
+            will probably prefer more efficient approaches, such as the BatchEncoder or 
+            the CKKSEncoder (discussed later).
 
             [BatchEncoder]
             If plain_modulus is a prime congruent to 1 modulo 2*poly_modulus_degree, the 
@@ -230,8 +225,7 @@ namespace SEALNetExamples
             important and useful encoder. In example_bfv_basics_iii() we show how to
             operate on encrypted matrix plaintexts.
 
-            Here we choose to create an IntegerEncoder with base b=2. For most use-cases
-            of the IntegerEncoder this is a good choice.
+            In this example we use the IntegerEncoder due to its simplicity. 
             */
             IntegerEncoder encoder = new IntegerEncoder(parms.PlainModulus);
 
