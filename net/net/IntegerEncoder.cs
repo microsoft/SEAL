@@ -257,7 +257,11 @@ namespace Microsoft.Research.SEAL
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
 
-            BigUInt bui = new BigUInt();
+            int resultUInt64Count = 1;
+            int bitsPerUInt64 = 64;
+            int resultBitCapacity = resultUInt64Count * bitsPerUInt64;
+
+            BigUInt bui = new BigUInt(resultBitCapacity);
             NativeMethods.IntegerEncoder_DecodeBigUInt(NativePtr, plain.NativePtr, bui.NativePtr);
             return bui;
         }

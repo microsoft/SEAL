@@ -77,6 +77,10 @@ namespace SEALNetTest
 
             int resultI32 = encoder.DecodeInt32(plain);
             Assert.AreEqual(26, resultI32);
+
+            BigUInt bui = encoder.DecodeBigUInt(plain);
+            Assert.IsNotNull(bui);
+            Assert.AreEqual(0, bui.CompareTo(26ul));
         }
     }
 }
