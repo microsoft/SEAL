@@ -5,6 +5,7 @@ using Microsoft.Research.SEAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
@@ -213,9 +214,18 @@ namespace Microsoft.Research.SEAL
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
 
-            int[] stepsArr = steps.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, stepsArr.Length, stepsArr, out IntPtr galoisKeys);
-            return new GaloisKeys(galoisKeys);
+            try
+            {
+                int[] stepsArr = steps.ToArray();
+                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, stepsArr.Length, stepsArr, out IntPtr galoisKeys);
+                return new GaloisKeys(galoisKeys);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw;
+            }
         }
 
         /// <summary>

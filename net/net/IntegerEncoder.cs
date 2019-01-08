@@ -41,9 +41,6 @@ namespace Microsoft.Research.SEAL
     /// directly, but this might change in future releases.
     /// </para>
     /// </remarks>
-    /// <see cref="BinaryEncoder">for encoding using the binary representation.</see>
-    /// <see cref="BalancedEncoder">for encoding using base-b representation for b greater than 2.</see>
-    /// <see cref="FractionalEncoder">for encoding real numbers.</see>
     public class IntegerEncoder : NativeObject
     {
         /// <summary>

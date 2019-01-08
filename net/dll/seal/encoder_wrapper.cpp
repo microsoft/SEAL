@@ -108,7 +108,7 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_Encode5(void* thisptr, void* biguint, vo
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUint32(void* thisptr, void* plainptr, uint32_t* result)
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt32(void* thisptr, void* plainptr, uint32_t* result)
 {
     IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -127,7 +127,7 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUint32(void* thisptr, void* plainp
     }
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUint64(void* thisptr, void* plainptr, uint64_t* result)
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt64(void* thisptr, void* plainptr, uint64_t* result)
 {
     IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);

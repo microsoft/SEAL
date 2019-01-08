@@ -29,9 +29,9 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_Encode4(void* thisptr, int64_t value, vo
 
 SEALDLL HRESULT SEALCALL IntegerEncoder_Encode5(void* thisptr, void* biguint, void* plain);
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUint32(void* thisptr, void* plain, uint32_t* result);
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt32(void* thisptr, void* plain, uint32_t* result);
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUint64(void* thisptr, void* plain, uint64_t* result);
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt64(void* thisptr, void* plain, uint64_t* result);
 
 SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt32(void* thisptr, void* plain, int32_t* result);
 

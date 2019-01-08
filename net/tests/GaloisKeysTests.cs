@@ -142,5 +142,55 @@ namespace SEALNetTest
 
             Assert.IsTrue(handle.AllocByteCount > 0ul);
         }
+        
+        [TestMethod]
+        public void KeyEltTest()
+        {
+            SEALContext context = GlobalContext.Context;
+            KeyGenerator keygen = new KeyGenerator(context);
+
+            GaloisKeys keys = keygen.GaloisKeys(decompositionBitCount: 15, galoisElts: new ulong[] { 1, 3 });
+            Assert.IsNotNull(keys);
+
+            Assert.AreEqual(15, keys.DecompositionBitCount);
+            Assert.AreEqual(2ul, keys.Size);
+
+            Assert.IsTrue(keys.HasKey(1));
+            Assert.IsTrue(keys.HasKey(3));
+            Assert.IsFalse(keys.HasKey(5));
+        }
+
+        [TestMethod]
+        public void KeyStepTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 64,
+                CoeffModulus = new List<SmallModulus>() {  DefaultParams.SmallMods60Bit(0) }
+            };
+            SEALContext context = SEALContext.Create(parms);
+            KeyGenerator keygen = new KeyGenerator(context);
+
+            GaloisKeys keys = keygen.GaloisKeys(decompositionBitCount: 15, steps: new int[] { 1, 2, 3 });
+            Assert.IsNotNull(keys);
+
+            Assert.AreEqual(15, keys.DecompositionBitCount);
+            Assert.AreEqual(3ul, keys.Size);
+
+            Assert.IsFalse(keys.HasKey(1));
+            Assert.IsTrue(keys.HasKey(3));
+            Assert.IsFalse(keys.HasKey(5));
+            Assert.IsFalse(keys.HasKey(7));
+            Assert.IsTrue(keys.HasKey(9));
+            Assert.IsFalse(keys.HasKey(11));
+            Assert.IsFalse(keys.HasKey(13));
+            Assert.IsFalse(keys.HasKey(15));
+            Assert.IsFalse(keys.HasKey(17));
+            Assert.IsFalse(keys.HasKey(19));
+            Assert.IsFalse(keys.HasKey(21));
+            Assert.IsFalse(keys.HasKey(23));
+            Assert.IsFalse(keys.HasKey(25));
+            Assert.IsTrue(keys.HasKey(27));
+        }
     }
 }
