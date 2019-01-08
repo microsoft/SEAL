@@ -1070,11 +1070,11 @@ namespace Microsoft.Research.SEAL
 
         #region IntegerEncoder methods
 
-        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Create1", PreserveSig = false)]
-        internal static extern void IntegerEncoder_Create(IntPtr plainModulus, ulong baseval, out IntPtr encoder);
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_Create1(IntPtr plainModulus, out IntPtr encoder);
 
-        [DllImport(SEALdll, EntryPoint = "IntegerEncoder_Create2", PreserveSig = false)]
-        internal static extern void IntegerEncoder_Create(IntPtr copy, out IntPtr encoder);
+        [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void IntegerEncoder_Create2(IntPtr copy, out IntPtr encoder);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void IntegerEncoder_Destroy(IntPtr thisptr);
@@ -1107,13 +1107,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void IntegerEncoder_DecodeInt64(IntPtr thisptr, IntPtr plain, out long result);
 
         [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void IntegerEncoder_DecodeBigUInt(IntPtr thisptr, IntPtr plain, IntPtr bigUInt);
+        internal static extern void IntegerEncoder_DecodeBigUInt(IntPtr thisptr, IntPtr plain, out IntPtr bigUInt);
 
         [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void IntegerEncoder_PlainModulus(IntPtr thisptr, out IntPtr smallModulus);
-
-        [DllImport(SEALdll, PreserveSig = false)]
-        internal static extern void IntegerEncoder_Base(IntPtr thisptr, out ulong result);
 
         #endregion
 

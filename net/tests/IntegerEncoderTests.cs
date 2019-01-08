@@ -11,17 +11,14 @@ namespace SEALNetTest
         {
             IntegerEncoder encoder = new IntegerEncoder(new SmallModulus(8192));
             Assert.IsNotNull(encoder);
-            Assert.AreEqual(2ul, encoder.Base);
             Assert.AreEqual(8192ul, encoder.PlainModulus.Value);
 
-            IntegerEncoder encoder2 = new IntegerEncoder(new SmallModulus(4096), 16);
+            IntegerEncoder encoder2 = new IntegerEncoder(new SmallModulus(4096));
             Assert.IsNotNull(encoder2);
-            Assert.AreEqual(16ul, encoder2.Base);
             Assert.AreEqual(4096ul, encoder2.PlainModulus.Value);
 
             IntegerEncoder encoder3 = new IntegerEncoder(encoder);
             Assert.IsNotNull(encoder3);
-            Assert.AreEqual(2ul, encoder3.Base);
             Assert.AreEqual(8192ul, encoder3.PlainModulus.Value);
         }
 

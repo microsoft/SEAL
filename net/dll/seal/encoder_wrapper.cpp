@@ -7,13 +7,13 @@
 #include "utilities.h"
 
 // SEAL
-#include "seal/encoder.h"
+#include "seal/intencoder.h"
 
 using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void* plain_modulus, uint64_t base, void** encoder)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void* plain_modulus, void** encoder)
 {
     SmallModulus* pm = FromVoid<SmallModulus>(plain_modulus);
     IfNullRet(pm, E_POINTER);
@@ -21,7 +21,7 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void* plain_modulus, uint64_t ba
 
     try
     {
-        IntegerEncoder* intEncoder = new IntegerEncoder(*pm, base);
+        IntegerEncoder* intEncoder = new IntegerEncoder(*pm);
         *encoder = intEncoder;
         return S_OK;
     }
@@ -184,18 +184,19 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt64(void* thisptr, void* plainpt
     }
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void* thisptr, void* plainptr, void* biguint)
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void* thisptr, void* plainptr, void** biguint)
 {
     IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
     Plaintext* plain = FromVoid<Plaintext>(plainptr);
     IfNullRet(plain, E_POINTER);
-    BigUInt* bui = FromVoid<BigUInt>(biguint);
-    IfNullRet(bui, E_POINTER);
+    IfNullRet(biguint, E_POINTER);
 
     try
     {
-        intenc->decode_biguint(*plain, *bui);
+        BigUInt result = intenc->decode_biguint(*plain);
+        BigUInt* resultPtr = new BigUInt(result);
+        *biguint = resultPtr;
         return S_OK;
     }
     catch (const std::invalid_argument&)
@@ -212,15 +213,5 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_PlainModulus(void* thisptr, void** small
 
     SmallModulus* sm = new SmallModulus(intenc->plain_modulus());
     *smallModPtr = sm;
-    return S_OK;
-}
-
-SEALDLL HRESULT SEALCALL IntegerEncoder_Base(void* thisptr, uint64_t* result)
-{
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
-    IfNullRet(intenc, E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = intenc->base();
     return S_OK;
 }

@@ -13,7 +13,7 @@
 #include "defines.h"
 #include <stdint.h>
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void* plain_modulus, uint64_t base, void** encoder);
+SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void* plain_modulus, void** encoder);
 
 SEALDLL HRESULT SEALCALL IntegerEncoder_Create2(void* copy, void** encoder);
 
@@ -37,8 +37,6 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt32(void* thisptr, void* plain, 
 
 SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt64(void* thisptr, void* plain, int64_t* result);
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void* thisptr, void* plain, void* biguint);
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void* thisptr, void* plain, void** biguint);
 
 SEALDLL HRESULT SEALCALL IntegerEncoder_PlainModulus(void* thisptr, void** smallModulus);
-
-SEALDLL HRESULT SEALCALL IntegerEncoder_Base(void* thisptr, uint64_t* result);

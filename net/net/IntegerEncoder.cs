@@ -1,21 +1,16 @@
-﻿using Microsoft.Research.SEAL.Tools;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
+using Microsoft.Research.SEAL.Tools;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
     /// Encodes integers into plaintext polynomials that Encryptor can encrypt. An instance of
     /// the IntegerEncoder class converts an integer into a plaintext polynomial by placing its
-    /// digits in balanced base-b representation as the coefficients of the polynomial. The base
-    /// b must be a positive integer at least 2 (which is the default value). When b is odd,
-    /// digits in such a balanced representation are integers in the range -(b-1)/2,...,(b-1)/2.
-    /// When b is even, digits are integers in the range -b/2,...,b/2-1. When b is 2, the 
-    /// coefficients are either all non-negative (0 and 1), or all non-positive (0 and -1). A larger 
-    /// base allows for more compact representation at the cost of having larger coefficients in 
-    /// freshly encoded plaintext polynomials. Decoding the integer amounts to evaluating the 
-    /// plaintext polynomial at X=b.
+    /// binary digits as the coefficients of the polynomial. Decoding the integer amounts to
+    /// evaluating the plaintext polynomial at x=2.
     /// 
     /// Addition and multiplication on the integer side translate into addition and multiplication
     /// on the encoded plaintext polynomial side, provided that the length of the polynomial
@@ -23,42 +18,30 @@ namespace Microsoft.Research.SEAL
     /// coefficients of the plaintext polynomials appearing throughout the computations never
     /// experience coefficients larger than the plaintext modulus (plain_modulus).
     /// </summary>
-    /// 
     /// <remarks>
     /// <para>
     /// Negative Integers
-    /// Negative integers in the base-b encoding are represented the same way as positive integers, 
-    /// namely, both positive and negative integers can have both positive and negative digits in their 
-    /// base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned 
-    /// integers that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1 
+    /// Negative integers are represented by using -1 instead of 1 in the binary representation,
+    /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
+    /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
     /// would be stored as a polynomial coefficient plain_modulus-1.
-    /// </para>
-    /// <para>
-    /// BinaryEncoder and BalancedEncoder
-    /// Under the hood IntegerEncoder uses either the BinaryEncoder or the BalancedEncoder classes
-    /// to do the encoding. The first one is used when the base is 2, and the second one when the
-    /// base is at least 3. Currently the BinaryEncoder and BalancedEncoder classes can also be used 
-    /// directly, but this might change in future releases.
     /// </para>
     /// </remarks>
     public class IntegerEncoder : NativeObject
     {
         /// <summary>
         /// Creates an IntegerEncoder object. The constructor takes as input a reference
-        /// to the plaintext modulus (represented by SmallModulus), and optionally an integer,
-        /// at least 2, that is used as a base in the encoding.
+        /// to the plaintext modulus (represented by SmallModulus).
         /// </summary>
         /// <param name="plainModulus">The plaintext modulus (represented by SmallModulus)</param>
-        /// <param name="baseVal">The base to be used for encoding (default value is 2)</param>
         /// <exception cref="ArgumentNullException">if plainModulus is null</exception>
-        /// <exception cref="ArgumentException">if base is not an integer and at least 2</exception>
-        /// <exception cref="ArgumentException">if plain_modulus is not at least base</exception>
-        public IntegerEncoder(SmallModulus plainModulus, ulong baseVal = 2)
+        /// <exception cref="ArgumentException">if plain_modulus is not at least 2</exception>
+        public IntegerEncoder(SmallModulus plainModulus)
         {
             if (null == plainModulus)
                 throw new ArgumentNullException(nameof(plainModulus));
 
-            NativeMethods.IntegerEncoder_Create(plainModulus.NativePtr, baseVal, out IntPtr encoderPtr);
+            NativeMethods.IntegerEncoder_Create1(plainModulus.NativePtr, out IntPtr encoderPtr);
             NativePtr = encoderPtr;
         }
 
@@ -72,7 +55,7 @@ namespace Microsoft.Research.SEAL
             if (null == copy)
                 throw new ArgumentNullException(nameof(copy));
 
-            NativeMethods.IntegerEncoder_Create(copy.NativePtr, out IntPtr ptr);
+            NativeMethods.IntegerEncoder_Create2(copy.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -103,7 +86,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Decodes a plaintext polynomial and returns the result as uint.
-        /// Mathematically this amounts to evaluating the input polynomial at X = base.
+        /// Mathematically this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -120,7 +103,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Decodes a plaintext polynomial and returns the result as std::uint64_t.
-        /// Mathematically this amounts to evaluating the input polynomial at X=base.
+        /// Mathematically this amounts to evaluating the input polynomial at X=2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -141,10 +124,9 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// <para>
         /// Negative Integers
-        /// Negative integers in the base-b encoding are represented the same way as positive integers,
-        /// namely, both positive and negative integers can have both positive and negative digits in their
-        /// base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-        /// integers that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        /// Negative integers are represented by using -1 instead of 1 in the binary representation,
+        /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
+        /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
         /// would be stored as a polynomial coefficient plain_modulus-1.
         /// </para>
         /// </remarks>
@@ -162,10 +144,9 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// <para>
         /// Negative Integers
-        /// Negative integers in the base-b encoding are represented the same way as positive integers,
-        /// namely, both positive and negative integers can have both positive and negative digits in their
-        /// base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-        /// integers that represent them modulo the plaintext modulus.Thus, for example, a coefficient of -1
+        /// Negative integers are represented by using -1 instead of 1 in the binary representation,
+        /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
+        /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
         /// would be stored as a polynomial coefficient plain_modulus-1.
         /// </para>
         /// </remarks>
@@ -212,7 +193,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Decodes a plaintext polynomial and returns the result as std::int32_t.
-        /// Mathematically this amounts to evaluating the input polynomial at X = base.
+        /// Mathematically this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -229,7 +210,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Decodes a plaintext polynomial and returns the result as std::int64_t.
-        /// Mathematically this amounts to evaluating the input polynomial at X = base.
+        /// Mathematically this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -246,7 +227,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Decodes a plaintext polynomial and returns the result as BigUInt.
-        /// Mathematically this amounts to evaluating the input polynomial at X = base.
+        /// Mathematically this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -257,33 +238,9 @@ namespace Microsoft.Research.SEAL
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
 
-            int resultUInt64Count = 1;
-            int bitsPerUInt64 = 64;
-            int resultBitCapacity = resultUInt64Count * bitsPerUInt64;
-
-            BigUInt bui = new BigUInt(resultBitCapacity);
-            NativeMethods.IntegerEncoder_DecodeBigUInt(NativePtr, plain.NativePtr, bui.NativePtr);
+            NativeMethods.IntegerEncoder_DecodeBigUInt(NativePtr, plain.NativePtr, out IntPtr buiPtr);
+            BigUInt bui = new BigUInt(buiPtr);
             return bui;
-        }
-
-        /// <summary>
-        /// Decodes a plaintext polynomial and stores the result in a given BigUInt.
-        /// Mathematically this amounts to evaluating the input polynomial at X = base.
-        /// </summary>
-        /// <param name="plain">The plaintext to be decoded</param>
-        /// <param name="destination">The BigUInt to overwrite with the decoding</param>
-        /// <exception cref="ArgumentNullException">if either plain or destination are null</exception>
-        /// <exception cref="ArgumentException">if plain does not represent a valid plaintext polynomial</exception>
-        /// <exception cref="ArgumentException">if the output does not fit in destination</exception>
-        /// <exception cref="ArgumentException">if the output is negative</exception>
-        public void DecodeBigUInt(Plaintext plain, BigUInt destination)
-        {
-            if (null == plain)
-                throw new ArgumentNullException(nameof(plain));
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            NativeMethods.IntegerEncoder_DecodeBigUInt(NativePtr, plain.NativePtr, destination.NativePtr);
         }
 
         /// <summary>
@@ -292,10 +249,9 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// <para>
         /// Negative Integers
-        /// Negative integers in the base-b encoding are represented the same way as positive integers,
-        /// namely, both positive and negative integers can have both positive and negative digits in their
-        /// base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-        /// integers that represent them modulo the plaintext modulus.Thus, for example, a coefficient of -1
+        /// Negative integers are represented by using -1 instead of 1 in the binary representation,
+        /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
+        /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
         /// would be stored as a polynomial coefficient plain_modulus-1.
         /// </para>
         /// </remarks>
@@ -308,7 +264,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes an unsigned integer(represented by std::uint32_t) into a plaintext polynomial.
+        /// Encodes an unsigned integer(represented by uint) into a plaintext polynomial.
         /// </summary>
         /// <param name="value">The unsigned integer to encode</param>
         public Plaintext Encode(uint value)
@@ -324,10 +280,9 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// <para>
         /// Negative Integers
-        /// Negative integers in the base-b encoding are represented the same way as positive integers,
-        /// namely, both positive and negative integers can have both positive and negative digits in their
-        ///  base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-        /// integers that represent them modulo the plaintext modulus.Thus, for example, a coefficient of -1
+        /// Negative integers are represented by using -1 instead of 1 in the binary representation,
+        /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
+        /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
         /// would be stored as a polynomial coefficient plain_modulus-1.
         /// </para>
         /// </remarks>
@@ -343,7 +298,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes an unsigned integer(represented by std::uint32_t) into a plaintext polynomial.
+        /// Encodes an unsigned integer(represented by uint) into a plaintext polynomial.
         /// </summary>
         /// <param name="value">The unsigned integer to encode</param>
         /// <param name="destination">The plaintext to overwrite with the encoding</param>
@@ -365,18 +320,6 @@ namespace Microsoft.Research.SEAL
             {
                 NativeMethods.IntegerEncoder_PlainModulus(NativePtr, out IntPtr sm);
                 SmallModulus result = new SmallModulus(sm);
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Get the base used for encoding
-        /// </summary>
-        public ulong Base
-        {
-            get
-            {
-                NativeMethods.IntegerEncoder_Base(NativePtr, out ulong result);
                 return result;
             }
         }

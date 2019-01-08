@@ -195,8 +195,9 @@ namespace Microsoft.Research.SEAL
         /// Creates a BigUInt from an IntPtr.
         /// </summary>
         /// <param name="ptr">Native pointer</param>
-        private BigUInt(IntPtr ptr)
-            : base(ptr)
+        /// <param name="owned">Whether this BigUInt instance owns the native pointer</param>
+        internal BigUInt(IntPtr ptr, bool owned = true)
+            : base(ptr, owned)
         {
         }
 
