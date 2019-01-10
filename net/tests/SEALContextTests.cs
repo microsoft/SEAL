@@ -170,5 +170,29 @@ namespace SEALNetTest
 
             Assert.IsNull(data4.NextContextData);
         }
+
+        [TestMethod]
+        public void ExpandModChainTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 4096,
+                CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 4096),
+                PlainModulus = new SmallModulus(1 << 20)
+            };
+
+            SEALContext context1 = SEALContext.Create(parms);
+
+            // By default there is a chain
+            SEALContext.ContextData contextData = context1.FirstContextData;
+            Assert.IsNotNull(contextData);
+            Assert.IsNotNull(contextData.NextContextData);
+
+            // This should not create a chain
+            SEALContext context2 = SEALContext.Create(parms, expandModChain: false);
+            contextData = context2.FirstContextData;
+            Assert.IsNotNull(contextData);
+            Assert.IsNull(contextData.NextContextData);
+        }
     }
 }

@@ -248,6 +248,10 @@ namespace SEALNetTest
 
             Assert.AreEqual(Math.Pow(2, 30), encrypted.Scale, delta: 10000);
             Assert.AreNotEqual(0ul, cipherPool.AllocByteCount);
+
+            double newScale = Math.Pow(2, 10);
+            encrypted.Scale = newScale;
+            Assert.AreEqual(newScale, encrypted.Scale, delta: 100);
         }
     }
 }

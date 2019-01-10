@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.Research.SEAL
@@ -213,6 +214,7 @@ namespace Microsoft.Research.SEAL
         ///     a particular form.
         /// </remarks>
         /// <exception cref="System.ArgumentNullException">if the value being set is null</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         public SmallModulus PlainModulus
         {
             get
@@ -224,7 +226,16 @@ namespace Microsoft.Research.SEAL
             }
             set
             {
-                NativeMethods.EncParams_SetPlainModulus(NativePtr, value.NativePtr);
+                try
+                {
+                    NativeMethods.EncParams_SetPlainModulus(NativePtr, value.NativePtr);
+                }
+                catch (COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                        throw new InvalidOperationException("Scheme is not SchemeType.BFV", ex);
+                    throw;
+                }
             }
         }
 
