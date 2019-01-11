@@ -93,7 +93,7 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void SmallMods64BitTest()
+        public void SmallMods60BitTest()
         {
             SmallModulus sm = DefaultParams.SmallMods60Bit(45);
 
@@ -105,9 +105,45 @@ namespace SEALNetTest
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void SmallMods64BitFailTest()
+        public void SmallMods60BitFailTest()
         {
             SmallModulus sm = DefaultParams.SmallMods60Bit(64);
+        }
+
+        [TestMethod]
+        public void SmallMods50BitTest()
+        {
+            SmallModulus sm = DefaultParams.SmallMods50Bit(30);
+
+            Assert.IsNotNull(sm);
+            Assert.AreEqual(50, sm.BitCount);
+            Assert.AreEqual(0x3FFFFF8B80001ul, sm.Value);
+
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => DefaultParams.SmallMods50Bit(64));
+        }
+
+        [TestMethod]
+        public void SmallMods40BitTest()
+        {
+            SmallModulus sm = DefaultParams.SmallMods40Bit(10);
+
+            Assert.IsNotNull(sm);
+            Assert.AreEqual(40, sm.BitCount);
+            Assert.AreEqual(0xFFFE100001ul, sm.Value);
+
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => DefaultParams.SmallMods40Bit(64));
+        }
+
+        [TestMethod]
+        public void SmallMods30BitTest()
+        {
+            SmallModulus sm = DefaultParams.SmallMods30Bit(20);
+
+            Assert.IsNotNull(sm);
+            Assert.AreEqual(30, sm.BitCount);
+            Assert.AreEqual(0x3BE80001ul, sm.Value);
+
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => DefaultParams.SmallMods30Bit(64));
         }
 
         [TestMethod]

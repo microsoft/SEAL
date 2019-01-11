@@ -27,6 +27,10 @@ namespace SEALNetTest
             oldProfile = MemoryManager.SwitchProfile(globalProfile);
 
             Assert.IsInstanceOfType(oldProfile, typeof(MMProfNew));
+
+            MemoryPoolHandle globalHandle = globalProfile.GetPool();
+            Assert.IsNotNull(globalHandle);
+            Assert.IsTrue(globalHandle.IsInitialized);
         }
     }
 }

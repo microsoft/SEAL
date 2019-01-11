@@ -253,7 +253,16 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if scheme is not CKKS</exception>
         public void SetPlainModulus(ulong plainModulus)
         {
-            NativeMethods.EncParams_SetPlainModulus(NativePtr, plainModulus);
+            try
+            {
+                NativeMethods.EncParams_SetPlainModulus(NativePtr, plainModulus);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Scheme is not SchemeType.BFV", ex);
+                throw;
+            }
         }
 
         /// <summary>

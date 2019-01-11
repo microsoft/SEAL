@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
 using Microsoft.Research.SEAL;
@@ -385,36 +385,37 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadUIntNET()
         {
-            var stream = new MemoryStream();
+            using (MemoryStream stream = new MemoryStream())
+            {
+                var value = new BigUInt();
+                var value2 = new BigUInt("100");
+                stream.Seek(0, SeekOrigin.Begin);
+                value.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                value2.Load(stream);
+                Assert.AreEqual(value, value2);
 
-            var value = new BigUInt();
-            var value2 = new BigUInt("100");
-            stream.Seek(0, SeekOrigin.Begin);
-            value.Save(stream);
-            stream.Seek(0, SeekOrigin.Begin);
-            value2.Load(stream);
-            Assert.AreEqual(value, value2);
+                value.Set("123");
+                stream.Seek(0, SeekOrigin.Begin);
+                value.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                value2.Load(stream);
+                Assert.AreEqual(value, value2);
 
-            value.Set("123");
-            stream.Seek(0, SeekOrigin.Begin);
-            value.Save(stream);
-            stream.Seek(0, SeekOrigin.Begin);
-            value2.Load(stream);
-            Assert.AreEqual(value, value2);
+                value.Set("FFFFFFFFFFFFFFFFFFFFFFFFFF");
+                stream.Seek(0, SeekOrigin.Begin);
+                value.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                value2.Load(stream);
+                Assert.AreEqual(value, value2);
 
-            value.Set("FFFFFFFFFFFFFFFFFFFFFFFFFF");
-            stream.Seek(0, SeekOrigin.Begin);
-            value.Save(stream);
-            stream.Seek(0, SeekOrigin.Begin);
-            value2.Load(stream);
-            Assert.AreEqual(value, value2);
-
-            value.Set("0");
-            stream.Seek(0, SeekOrigin.Begin);
-            value.Save(stream);
-            stream.Seek(0, SeekOrigin.Begin);
-            value2.Load(stream);
-            Assert.AreEqual(value, value2);
+                value.Set("0");
+                stream.Seek(0, SeekOrigin.Begin);
+                value.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                value2.Load(stream);
+                Assert.AreEqual(value, value2);
+            }
         }
 
         [TestMethod]
@@ -441,6 +442,40 @@ namespace SEALNetTest
             target.DuplicateFrom(original);
             Assert.AreEqual(target.BitCount, original.BitCount);
             Assert.IsTrue(target.Equals(original));
+        }
+
+        [TestMethod]
+        public void ToBigIntegerTest()
+        {
+            BigUInt bui = new BigUInt("DEADBEEF");
+            BigInteger bi = bui.ToBigInteger();
+            Assert.IsNotNull(bi);
+            Assert.IsFalse(bi.IsEven);
+            Assert.IsFalse(bi.IsZero);
+            Assert.AreEqual(0, bi.CompareTo(0xDEADBEEFul));
+        }
+
+        [TestMethod]
+        public void ToDecimalStringTest()
+        {
+            BigUInt bui = new BigUInt("DEADBEEF");
+            string decStr = bui.ToDecimalString();
+            Assert.IsNotNull(decStr);
+            Assert.IsTrue("3735928559".Equals(decStr));
+        }
+
+        [TestMethod]
+        public void CompareToTest()
+        {
+            BigUInt bui = new BigUInt("DEADBEEF");
+            BigUInt other = new BigUInt("DEADBFFF");
+            Assert.IsTrue(bui.CompareTo(other) < 0);
+            Assert.IsTrue(other.CompareTo(bui) > 0);
+
+            BigUInt third = new BigUInt(bui);
+            Assert.AreNotSame(bui, third);
+            Assert.AreEqual(0, bui.CompareTo(third));
+            Assert.IsTrue(bui.CompareTo(null) > 0);
         }
 
         [TestMethod]

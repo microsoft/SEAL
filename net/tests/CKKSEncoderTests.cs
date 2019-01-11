@@ -75,6 +75,37 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void EncodeDecodeComplexTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 64,
+                CoeffModulus = new List<SmallModulus>()
+                {
+                    DefaultParams.SmallMods40Bit(0),
+                    DefaultParams.SmallMods40Bit(1),
+                    DefaultParams.SmallMods40Bit(2),
+                    DefaultParams.SmallMods40Bit(3)
+                }
+            };
+
+            SEALContext context = SEALContext.Create(parms);
+            CKKSEncoder encoder = new CKKSEncoder(context);
+
+            Plaintext plain = new Plaintext();
+            Complex value = new Complex(3.1415, 2.71828);
+
+            encoder.Encode(value, scale: Math.Pow(2, 20), destination: plain);
+
+            List<Complex> result = new List<Complex>();
+            encoder.Decode(plain, result);
+
+            Assert.IsTrue(result.Count > 0);
+            Assert.AreEqual(3.1415, result[0].Real, delta: 0.0001);
+            Assert.AreEqual(2.71828, result[0].Imaginary, delta: 0.0001);
+        }
+
+        [TestMethod]
         public void EncodeDecodeVectorTest()
         {
             int slots = 32;
@@ -110,6 +141,35 @@ namespace SEALNetTest
                 double tmp = Math.Abs(values[i].Real - result[i].Real);
                 Assert.IsTrue(tmp < 0.5);
             }
+        }
+
+        [TestMethod]
+        public void EncodeDecodeVectorDoubleTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 64,
+                CoeffModulus = new List<SmallModulus>()
+                {
+                    DefaultParams.SmallMods30Bit(0),
+                    DefaultParams.SmallMods30Bit(1)
+                }
+            };
+
+            SEALContext context = SEALContext.Create(parms);
+            CKKSEncoder encoder = new CKKSEncoder(context);
+            Plaintext plain = new Plaintext();
+
+            double[] values = new double[] { 0.1, 2.3, 34.4 };
+            encoder.Encode(values, scale: Math.Pow(2, 20), destination: plain);
+
+            List<double> result = new List<double>();
+            encoder.Decode(plain, result);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0.1, result[0], delta: 0.001);
+            Assert.AreEqual(2.3, result[1], delta: 0.001);
+            Assert.AreEqual(34.4, result[2], delta: 0.001);
         }
     }
 }

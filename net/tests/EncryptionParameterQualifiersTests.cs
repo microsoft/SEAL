@@ -35,6 +35,16 @@ namespace SEALNetTest
             Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingFFT);
             Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingHEStdSecurity);
             Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingNTT);
+
+            EncryptionParameterQualifiers qualifiers = new EncryptionParameterQualifiers(context2.FirstContextData.Qualifiers);
+
+            Assert.IsNotNull(qualifiers);
+            Assert.IsTrue(qualifiers.ParametersSet);
+            Assert.IsTrue(qualifiers.UsingBatching);
+            Assert.IsFalse(qualifiers.UsingFastPlainLift);
+            Assert.IsTrue(qualifiers.UsingFFT);
+            Assert.IsTrue(qualifiers.UsingHEStdSecurity);
+            Assert.IsTrue(qualifiers.UsingNTT);
         }
     }
 }

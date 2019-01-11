@@ -3,6 +3,7 @@
 
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -31,6 +32,36 @@ namespace SEALNetTest
 
             Assert.AreEqual(encParams2.ParmsId, encParams3.ParmsId);
             Assert.AreNotEqual(encParams.ParmsId, encParams2.ParmsId);
+
+            EncryptionParameters copy = new EncryptionParameters(encParams);
+
+            Assert.AreEqual(encParams.ParmsId, copy.ParmsId);
+            Assert.AreEqual(SchemeType.BFV, copy.Scheme);
+            Assert.AreEqual(encParams, copy);
+            Assert.AreEqual(encParams.GetHashCode(), copy.GetHashCode());
+
+            EncryptionParameters third = new EncryptionParameters(SchemeType.CKKS);
+            third.Set(copy);
+
+            Assert.AreEqual(SchemeType.BFV, third.Scheme);
+            Assert.AreEqual(encParams, third);
+            Assert.AreEqual(encParams.GetHashCode(), third.GetHashCode());
+        }
+
+        [TestMethod]
+        public void SetPlainModulusCKKSTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
+
+            Assert.ThrowsException<InvalidOperationException>(() =>
+            {
+                parms.PlainModulus = new SmallModulus(8192);
+            });
+
+            Assert.ThrowsException<InvalidOperationException>(() =>
+            {
+                parms.SetPlainModulus(8192);
+            });
         }
 
         [TestMethod]

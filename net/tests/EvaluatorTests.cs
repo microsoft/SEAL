@@ -857,6 +857,73 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void ModSwitchToPlainTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 1024,
+                CoeffModulus = new List<SmallModulus>()
+                {
+                    DefaultParams.SmallMods40Bit(0),
+                    DefaultParams.SmallMods40Bit(1),
+                    DefaultParams.SmallMods40Bit(2),
+                    DefaultParams.SmallMods40Bit(3)
+                }
+            };
+
+            SEALContext context = SEALContext.Create(parms);
+            CKKSEncoder encoder = new CKKSEncoder(context);
+            KeyGenerator keygen = new KeyGenerator(context);
+            SecretKey secretKey = keygen.SecretKey;
+            PublicKey publicKey = keygen.PublicKey;
+            RelinKeys relinKeys = keygen.RelinKeys(60);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Evaluator evaluator = new Evaluator(context);
+            Decryptor decryptor = new Decryptor(context, secretKey);
+
+            double scale = parms.CoeffModulus.Last().Value;
+            Plaintext coeff1 = new Plaintext();
+            Plaintext coeff2 = new Plaintext();
+            Plaintext coeff3 = new Plaintext();
+            encoder.Encode(2.0, scale, coeff1);
+            encoder.Encode(3.0, scale, coeff2);
+            encoder.Encode(1.0, scale, coeff3);
+
+            Ciphertext encX1 = new Ciphertext();
+            Ciphertext encX3 = new Ciphertext();
+            encryptor.Encrypt(coeff1, encX1);
+            evaluator.Square(encX1, encX3);
+            evaluator.RelinearizeInplace(encX3, relinKeys);
+            evaluator.RescaleToNextInplace(encX3);
+
+            evaluator.ModSwitchToInplace(coeff3, encX3.ParmsId);
+            evaluator.ModSwitchToNextInplace(coeff2);
+
+            evaluator.MultiplyPlainInplace(encX3, coeff3);
+
+            Plaintext result = new Plaintext();
+            decryptor.Decrypt(encX3, result);
+            Assert.IsNotNull(result);
+
+            List<double> destination = new List<double>();
+            encoder.Decode(result, destination);
+
+            Assert.IsNotNull(destination);
+            foreach(double val in destination)
+            {
+                Assert.AreEqual(4.0, val, delta: 0.001);
+            }
+
+            encoder.Decode(coeff2, destination);
+
+            foreach(double val in destination)
+            {
+                Assert.AreEqual(3.0, val, delta: 0.001);
+            }
+        }
+
+        [TestMethod]
         public void RotateMatrixTest()
         {
             List<SmallModulus> coeffModulus = new List<SmallModulus>
