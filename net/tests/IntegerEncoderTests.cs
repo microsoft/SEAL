@@ -35,6 +35,21 @@ namespace SEALNetTest
             Assert.AreEqual(0ul, plain[2]);
             Assert.AreEqual(1ul, plain[3]);
 
+            plain = encoder.Encode(13u);
+            Assert.AreEqual(4ul, plain.CoeffCount);
+            Assert.AreEqual(1ul, plain[0]);
+            Assert.AreEqual(0ul, plain[1]);
+            Assert.AreEqual(1ul, plain[2]);
+            Assert.AreEqual(1ul, plain[3]);
+
+            plain = encoder.Encode(20L);
+            Assert.AreEqual(5ul, plain.CoeffCount);
+            Assert.AreEqual(0ul, plain[0]);
+            Assert.AreEqual(0ul, plain[1]);
+            Assert.AreEqual(1ul, plain[2]);
+            Assert.AreEqual(0ul, plain[3]);
+            Assert.AreEqual(1ul, plain[4]);
+
             plain = encoder.Encode(15ul);
             Assert.AreEqual(4ul, plain.CoeffCount);
             Assert.AreEqual(1ul, plain[0]);
@@ -53,6 +68,48 @@ namespace SEALNetTest
             Assert.AreEqual(1ul, plain[5]);
             Assert.AreEqual(0ul, plain[6]);
             Assert.AreEqual(1ul, plain[7]);
+
+            Plaintext plain2 = new Plaintext();
+
+            encoder.Encode(10, plain2);
+            Assert.AreEqual(4ul, plain2.CoeffCount);
+            Assert.AreEqual(0ul, plain2[0]);
+            Assert.AreEqual(1ul, plain2[1]);
+            Assert.AreEqual(0ul, plain2[2]);
+            Assert.AreEqual(1ul, plain2[3]);
+
+            encoder.Encode(13u, plain2);
+            Assert.AreEqual(4ul, plain2.CoeffCount);
+            Assert.AreEqual(1ul, plain2[0]);
+            Assert.AreEqual(0ul, plain2[1]);
+            Assert.AreEqual(1ul, plain2[2]);
+            Assert.AreEqual(1ul, plain2[3]);
+
+            encoder.Encode(20L, plain2);
+            Assert.AreEqual(5ul, plain2.CoeffCount);
+            Assert.AreEqual(0ul, plain2[0]);
+            Assert.AreEqual(0ul, plain2[1]);
+            Assert.AreEqual(1ul, plain2[2]);
+            Assert.AreEqual(0ul, plain2[3]);
+            Assert.AreEqual(1ul, plain2[4]);
+
+            encoder.Encode(15ul, plain2);
+            Assert.AreEqual(4ul, plain2.CoeffCount);
+            Assert.AreEqual(1ul, plain2[0]);
+            Assert.AreEqual(1ul, plain2[1]);
+            Assert.AreEqual(1ul, plain2[2]);
+            Assert.AreEqual(1ul, plain2[3]);
+
+            encoder.Encode(bui, plain2);
+            Assert.AreEqual(8ul, plain2.CoeffCount);
+            Assert.AreEqual(1ul, plain2[0]);
+            Assert.AreEqual(1ul, plain2[1]);
+            Assert.AreEqual(0ul, plain2[2]);
+            Assert.AreEqual(1ul, plain2[3]);
+            Assert.AreEqual(0ul, plain2[4]);
+            Assert.AreEqual(1ul, plain2[5]);
+            Assert.AreEqual(0ul, plain2[6]);
+            Assert.AreEqual(1ul, plain2[7]);
         }
 
         [TestMethod]
