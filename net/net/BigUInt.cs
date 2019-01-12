@@ -291,11 +291,11 @@ namespace Microsoft.Research.SEAL
         /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of the format of the backing array.</seealso>
         /// </remarks>
         /// <param name="index"></param>
-        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException">if index is not within [0, <see cref="UInt64Count")/></exception>
         public ulong Data(int index)
         {
             if (index < 0 || index >= (int)UInt64Count)
-                throw new IndexOutOfRangeException(nameof(index));
+                throw new ArgumentOutOfRangeException(nameof(index));
 
             ulong result;
             NativeMethods.BigUInt_GetU64(NativePtr, index, out result);
