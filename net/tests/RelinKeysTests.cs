@@ -3,6 +3,7 @@
 
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -32,6 +33,19 @@ namespace SEALNetTest
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
             Assert.AreEqual(1ul, keys.Size);
+
+            RelinKeys copy = new RelinKeys(keys);
+
+            Assert.IsNotNull(copy);
+            Assert.AreEqual(30, copy.DecompositionBitCount);
+            Assert.AreEqual(1ul, copy.Size);
+
+            RelinKeys copy2 = new RelinKeys();
+
+            copy2.Set(keys);
+            Assert.IsNotNull(copy2);
+            Assert.AreEqual(30, copy2.DecompositionBitCount);
+            Assert.AreEqual(1ul, copy2.Size);
         }
 
         [TestMethod]
@@ -109,6 +123,8 @@ namespace SEALNetTest
             Assert.IsTrue(relinKeys.HasKey(4));
             Assert.IsFalse(relinKeys.HasKey(5));
 
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => relinKeys.Key(1));
+
             List<Ciphertext> key1 = new List<Ciphertext>(relinKeys.Key(2));
             Assert.AreEqual(2, key1.Count);
             Assert.AreEqual(2ul, key1[0].CoeffModCount);
@@ -123,6 +139,26 @@ namespace SEALNetTest
             Assert.AreEqual(2, key3.Count);
             Assert.AreEqual(2ul, key3[0].CoeffModCount);
             Assert.AreEqual(2ul, key3[1].CoeffModCount);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            RelinKeys keys = new RelinKeys();
+            SEALContext context = GlobalContext.Context;
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys = new RelinKeys(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.Set(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.IsValidFor(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.Save(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.Load(context, null));
+            Assert.ThrowsException<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
+            Assert.ThrowsException<ArgumentException>(() => keys.Load(context, new MemoryStream()));
+            Assert.ThrowsException<ArgumentNullException>(() => keys.UnsafeLoad(null));
         }
     }
 }
