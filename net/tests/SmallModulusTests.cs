@@ -55,6 +55,14 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void ExplicitCreateTest()
+        {
+            SmallModulus sm = (SmallModulus)34ul;
+            Assert.IsNotNull(sm);
+            Assert.AreEqual(34ul, sm.Value);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFail1Test()
         {
@@ -131,8 +139,11 @@ namespace SEALNetTest
             SmallModulus sm2 = new SmallModulus(0x12345ul);
 
             Assert.AreEqual(sm1, sm2);
+            Assert.AreEqual(sm1.GetHashCode(), sm2.GetHashCode());
             Assert.IsTrue(sm1.Equals(0x12345ul));
             Assert.IsFalse(sm1.Equals(0x1234ul));
+
+            Assert.IsFalse(sm1.Equals(null));
         }
 
         [TestMethod]
@@ -160,6 +171,20 @@ namespace SEALNetTest
             Assert.AreEqual(sm1.ConstRatio.Item1, sm2.ConstRatio.Item1);
             Assert.AreEqual(sm1.ConstRatio.Item2, sm2.ConstRatio.Item2);
             Assert.AreEqual(sm1.ConstRatio.Item3, sm2.ConstRatio.Item3);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            SmallModulus sm = new SmallModulus(0x12345ul);
+
+            Assert.ThrowsException<ArgumentNullException>(() => sm = new SmallModulus(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => sm.Set(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => sm.Save(null));
+            Assert.ThrowsException<ArgumentNullException>(() => sm.Load(null));
+            Assert.ThrowsException<ArgumentException>(() => sm.Load(new MemoryStream()));
         }
     }
 }
