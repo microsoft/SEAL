@@ -3,6 +3,7 @@
 
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -11,6 +12,36 @@ namespace SEALNetTest
     [TestClass]
     public class PubllicKeyTests
     {
+        [TestMethod]
+        public void CreateTest()
+        {
+            List<SmallModulus> coeffModulus = new List<SmallModulus>
+            {
+                DefaultParams.SmallMods40Bit(0)
+            };
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 64,
+                PlainModulus = new SmallModulus(1 << 6),
+                CoeffModulus = coeffModulus
+            };
+            SEALContext context = SEALContext.Create(parms);
+            KeyGenerator keygen = new KeyGenerator(context);
+
+            PublicKey pub = keygen.PublicKey;
+            PublicKey copy = new PublicKey(pub);
+
+            Assert.IsNotNull(copy);
+            Assert.AreEqual(2ul, copy.Data.Size);
+            Assert.IsTrue(copy.Data.IsNTTForm);
+
+            PublicKey copy2 = new PublicKey();
+            copy2.Set(copy);
+
+            Assert.AreEqual(2ul, copy2.Data.Size);
+            Assert.IsTrue(copy2.Data.IsNTTForm);
+        }
+
         [TestMethod]
         public void SaveLoadTest()
         {
@@ -55,6 +86,26 @@ namespace SEALNetTest
             Assert.AreEqual(pub.ParmsId, pub2.ParmsId);
             Assert.AreNotEqual(ParmsId.Zero, pub2.ParmsId);
             Assert.IsTrue(handle.AllocByteCount != 0ul);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            SEALContext context = GlobalContext.Context;
+            PublicKey key = new PublicKey();
+
+            Assert.ThrowsException<ArgumentNullException>(() => key = new PublicKey(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => key.Set(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => key.Save(null));
+            Assert.ThrowsException<ArgumentNullException>(() => key.UnsafeLoad(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => key.Load(context, null));
+            Assert.ThrowsException<ArgumentNullException>(() => key.Load(null, new MemoryStream()));
+            Assert.ThrowsException<ArgumentException>(() => key.Load(context, new MemoryStream()));
+
+            Assert.ThrowsException<ArgumentNullException>(() => key.IsValidFor(null));
         }
     }
 }
