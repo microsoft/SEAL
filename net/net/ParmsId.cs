@@ -109,7 +109,10 @@ namespace Microsoft.Research.SEAL
             for (int i = 0; i < ULongCount; i++)
             {
                 byte[] bytes = BitConverter.GetBytes(Block[i]);
-                result.Append(BitConverter.ToString(bytes).Replace("-", ""));
+                for (int b = bytes.Length - 1; b >= 0; b--)
+                {
+                    result.Append(BitConverter.ToString(bytes, b, length: 1));
+                }
                 if (i < (ULongCount - 1))
                     result.Append(" ");
             }
