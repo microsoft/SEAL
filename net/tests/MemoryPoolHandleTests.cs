@@ -17,6 +17,7 @@ namespace SEALNetTest
             MemoryPoolHandle handle = new MemoryPoolHandle();
             Assert.IsFalse(handle.IsInitialized);
             ulong count = handle.PoolCount;
+            Assert.AreEqual(0ul, count);
         }
 
         [TestMethod]
@@ -26,6 +27,7 @@ namespace SEALNetTest
             MemoryPoolHandle handle = new MemoryPoolHandle();
             Assert.IsFalse(handle.IsInitialized);
             ulong count = handle.AllocByteCount;
+            Assert.AreEqual(0ul, count);
         }
 
         [TestMethod]
@@ -39,6 +41,12 @@ namespace SEALNetTest
             Assert.IsTrue(handle2.IsInitialized);
             Assert.AreEqual(handle.PoolCount, handle2.PoolCount);
             Assert.AreEqual(handle.AllocByteCount, handle2.AllocByteCount);
+
+            MemoryPoolHandle handle5 = new MemoryPoolHandle();
+            handle5.Set(handle);
+            Assert.IsTrue(handle5.IsInitialized);
+            Assert.AreEqual(handle.PoolCount, handle5.PoolCount);
+            Assert.AreEqual(handle.AllocByteCount, handle5.AllocByteCount);
 
             MemoryPoolHandle handle3 = MemoryManager.GetPool(MMProfOpt.ForceNew, clearOnDestruction: true);
             Assert.IsNotNull(handle3);
@@ -65,6 +73,33 @@ namespace SEALNetTest
             Assert.AreNotEqual(handle1, handle2);
             Assert.AreNotEqual(handle1, handle3);
             Assert.AreEqual(handle2, handle3);
+
+            Assert.AreNotEqual(handle1.GetHashCode(), handle2.GetHashCode());
+
+            Assert.IsFalse(handle3.Equals(null));
+        }
+
+        [TestMethod]
+        public void StaticMethodsTest()
+        {
+            MemoryPoolHandle handle1 = MemoryPoolHandle.Global();
+            Assert.IsNotNull(handle1);
+
+            MemoryPoolHandle handle2 = MemoryPoolHandle.New(clearOnDestruction: true);
+            Assert.IsNotNull(handle2);
+
+            MemoryPoolHandle handle3 = MemoryPoolHandle.ThreadLocal();
+            Assert.IsNotNull(handle3);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            MemoryPoolHandle handle = new MemoryPoolHandle();
+
+            Assert.ThrowsException<ArgumentNullException>(() => handle = new MemoryPoolHandle(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => handle.Set(null));
         }
     }
 }
