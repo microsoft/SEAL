@@ -256,7 +256,7 @@ namespace seal
 
             uint64_t modulus = context->context_data()->parms().plain_modulus().value(); 
             const pt_coeff_type *ptr = data();
-            for (size_t k = 0; k < poly_modulus_degree; k++, ptr++)
+            for (size_t k = 0; k < data_.size(); k++, ptr++)
             {
                 if (*ptr >= modulus)
                 {

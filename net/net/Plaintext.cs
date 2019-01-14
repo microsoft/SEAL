@@ -152,13 +152,9 @@ namespace Microsoft.Research.SEAL
         /// with given capacity.
         /// </summary>
         /// <param name="capacity">The capacity</param>
-        /// <exception cref="ArgumentException">if capacity is negative</exception>
         /// <exception cref="InvalidOperationException">if the plaintext is NTT transformed</exception>
         public void Reserve(ulong capacity)
         {
-            if (capacity < 0)
-                throw new ArgumentException(nameof(capacity));
-
             NativeMethods.Plaintext_Reserve(NativePtr, capacity);
         }
 
@@ -189,13 +185,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="coeffCount">The number of coefficients in the plaintext
         /// polynomial</param>
-        /// <exception cref="ArgumentException">if coeff_count is negative</exception>
         /// <exception cref="InvalidOperationException">if the plaintext is NTT transformed</exception>
         public void Resize(ulong coeffCount)
         {
-            if (coeffCount < 0)
-                throw new ArgumentException(nameof(coeffCount));
-
             try
             {
                 NativeMethods.Plaintext_Resize(NativePtr, coeffCount);
