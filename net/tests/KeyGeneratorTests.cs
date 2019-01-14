@@ -3,6 +3,8 @@
 
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 
 namespace SEALNetTest
 {
@@ -78,6 +80,42 @@ namespace SEALNetTest
 
             Assert.AreNotSame(plain, plain2);
             Assert.AreEqual(plain, plain2);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            SEALContext context = GlobalContext.Context;
+            KeyGenerator keygen = new KeyGenerator(context);
+            SecretKey secret = new SecretKey();
+            List<ulong> elts = new List<ulong>();
+            List<ulong> elts_null = null;
+            List<int> steps = new List<int>();
+            List<int> steps_null = null;
+
+            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(context, null));
+            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey));
+            Assert.ThrowsException<ArgumentException>(() => keygen = new KeyGenerator(context, secret));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(context, keygen.SecretKey, null));
+            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(context, null, keygen.PublicKey));
+            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey, keygen.PublicKey));
+            Assert.ThrowsException<ArgumentException>(() => keygen = new KeyGenerator(context, secret, keygen.PublicKey));
+
+            Assert.ThrowsException<ArgumentException>(() => keygen.RelinKeys(0, 1));
+            Assert.ThrowsException<ArgumentException>(() => keygen.RelinKeys(DefaultParams.DBCmax + 1, 1));
+            Assert.ThrowsException<ArgumentException>(() => keygen.RelinKeys(DefaultParams.DBCmax, -1));
+
+            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(0));
+            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(DefaultParams.DBCmax + 1));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(30, elts_null));
+            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(0, elts));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(30, steps_null));
+            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(0, steps));
         }
     }
 }
