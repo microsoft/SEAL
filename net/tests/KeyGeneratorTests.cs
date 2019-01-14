@@ -116,6 +116,7 @@ namespace SEALNetTest
 
             Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(30, steps_null));
             Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(0, steps));
+            Assert.ThrowsException<InvalidOperationException>(() => keygen.GaloisKeys(30, new List<int> { 1 }));
         }
     }
 }

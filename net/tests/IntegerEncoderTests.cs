@@ -1,5 +1,6 @@
 ﻿using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace SEALNetTest
 {
@@ -135,6 +136,35 @@ namespace SEALNetTest
             BigUInt bui = encoder.DecodeBigUInt(plain);
             Assert.IsNotNull(bui);
             Assert.AreEqual(0, bui.CompareTo(26ul));
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            SEALContext context = GlobalContext.Context;
+            IntegerEncoder enc = new IntegerEncoder(new SmallModulus(4ul));
+            SmallModulus sm_null = null;
+            IntegerEncoder copy_null = null;
+            BigUInt bui_null = null;
+            BigUInt bui = new BigUInt(5ul);
+            Plaintext plain = new Plaintext();
+
+            Assert.ThrowsException<ArgumentNullException>(() => enc = new IntegerEncoder(sm_null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc = new IntegerEncoder(copy_null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1ul, null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1L, null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1, null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1u, null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(bui_null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(bui, null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(bui_null, plain));
+
+            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeUInt32(null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeUInt64(null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeInt32(null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeInt64(null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeBigUInt(null));
         }
     }
 }
