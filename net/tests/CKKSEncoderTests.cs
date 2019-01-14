@@ -31,7 +31,7 @@ namespace SEALNetTest
             List<Complex> result = new List<Complex>();
 
             CKKSEncoder encoder = new CKKSEncoder(context);
-
+            Assert.AreEqual(32ul, encoder.SlotCount);
 
             double value = 10d;
             encoder.Encode(value, delta, plain);
@@ -170,6 +170,79 @@ namespace SEALNetTest
             Assert.AreEqual(0.1, result[0], delta: 0.001);
             Assert.AreEqual(2.3, result[1], delta: 0.001);
             Assert.AreEqual(34.4, result[2], delta: 0.001);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 64,
+                CoeffModulus = new List<SmallModulus>()
+                {
+                    DefaultParams.SmallMods30Bit(0),
+                    DefaultParams.SmallMods30Bit(1)
+                }
+            };
+
+            SEALContext context = SEALContext.Create(parms);
+            CKKSEncoder encoder = new CKKSEncoder(context);
+            List<double> vald = new List<double>();
+            List<double> vald_null = null;
+            List<Complex> valc = new List<Complex>();
+            List<Complex> valc_null = null;
+            Plaintext plain = new Plaintext();
+            Plaintext plain_null = null;
+            MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
+            Complex complex = new Complex(1, 2);
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder = new CKKSEncoder(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(vald, ParmsId.Zero, 10.0, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(vald, null, 10.0, plain));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(vald_null, ParmsId.Zero, 10.0, plain));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(vald, ParmsId.Zero, 10.0, plain, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(valc, ParmsId.Zero, 10.0, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(valc, null, 10.0, plain));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(valc_null, ParmsId.Zero, 10.0, plain));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(valc, ParmsId.Zero, 10.0, plain, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(vald, 10.0, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(vald_null, 10.0, plain));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(vald, -10.0, plain, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(valc, 10.0, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(valc_null, 10.0, plain));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(valc, -10.0, plain, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10.0, ParmsId.Zero, 20.0, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10.0, null, 20.0, plain));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(10.0, ParmsId.Zero, 20.0, plain, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10.0, 20.0, plain_null));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(10.0, -20.0, plain, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(complex, ParmsId.Zero, 10.0, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(complex, null, 10.0, plain));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(complex, ParmsId.Zero, 10.0, plain, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(complex, 10.0, plain_null));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(complex, -10.0, plain, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10ul, ParmsId.Zero, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10ul, null, plain));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(10ul, ParmsId.Zero, plain));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10ul, plain_null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Decode(plain, vald_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Decode(plain_null, vald));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Decode(plain, vald, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Decode(plain, valc_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Decode(plain_null, valc));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Decode(plain, valc, pool));
         }
     }
 }
