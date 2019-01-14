@@ -389,11 +389,6 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                if (polyIndex < 0)
-                    throw new IndexOutOfRangeException(nameof(polyIndex));
-                if (coeffIndex < 0)
-                    throw new IndexOutOfRangeException(nameof(coeffIndex));
-
                 try
                 {
                     NativeMethods.Ciphertext_GetDataAt(NativePtr, polyIndex, coeffIndex, out ulong data);

@@ -21,6 +21,12 @@ namespace SEALNetTest
             Assert.AreEqual(0ul, cipher.Size);
             Assert.AreEqual(0ul, cipher.PolyModulusDegree);
             Assert.AreEqual(0ul, cipher.CoeffModCount);
+
+            Ciphertext copy = new Ciphertext(cipher);
+            Assert.IsNotNull(copy);
+            Assert.AreEqual(0ul, copy.Size);
+            Assert.AreEqual(0ul, copy.PolyModulusDegree);
+            Assert.AreEqual(0ul, copy.CoeffModCount);
         }
 
         [TestMethod]
@@ -83,6 +89,14 @@ namespace SEALNetTest
 
             cipher3.Reserve(4);
             Assert.AreEqual(4ul, cipher3.SizeCapacity);
+
+            Ciphertext cipher4 = new Ciphertext(context);
+            cipher4.Resize(context, context.GetContextData(context.FirstParmsId).NextContextData.Parms.ParmsId, 4);
+            Assert.AreEqual(10ul, cipher.SizeCapacity);
+
+            Ciphertext cipher5 = new Ciphertext(context);
+            cipher5.Resize(context, 6ul);
+            Assert.AreEqual(2ul, cipher5.SizeCapacity);
         }
         
         [TestMethod]
@@ -200,6 +214,22 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void IndexRangeFail3Test()
+        {
+            SEALContext context = GlobalContext.Context;
+            KeyGenerator keygen = new KeyGenerator(context);
+            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            Plaintext plain = new Plaintext("1");
+            Ciphertext cipher = new Ciphertext();
+
+            encryptor.Encrypt(plain, cipher);
+            ulong data = 0;
+
+            Assert.ThrowsException<IndexOutOfRangeException>(() => data = cipher[65536]);
+            Assert.ThrowsException<IndexOutOfRangeException>(() => cipher[65536] = 10ul);
+        }
+
+        [TestMethod]
         public void ScaleTest()
         {
             List<SmallModulus> coeffModulus = new List<SmallModulus>()
@@ -244,6 +274,10 @@ namespace SEALNetTest
 
             Assert.AreEqual(delta, encrypted.Scale, delta: Math.Pow(2, 60));
 
+            Ciphertext encrypted2 = new Ciphertext();
+            encrypted2.Set(encrypted);
+            Assert.AreEqual(delta, encrypted2.Scale, delta: Math.Pow(2, 60));
+
             evaluator.RescaleToNextInplace(encrypted);
 
             Assert.AreEqual(Math.Pow(2, 30), encrypted.Scale, delta: 10000);
@@ -252,6 +286,53 @@ namespace SEALNetTest
             double newScale = Math.Pow(2, 10);
             encrypted.Scale = newScale;
             Assert.AreEqual(newScale, encrypted.Scale, delta: 100);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            SEALContext context = GlobalContext.Context;
+            MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
+            MemoryPoolHandle poolu = new MemoryPoolHandle();
+            Ciphertext cipher = new Ciphertext();
+            Ciphertext copy = null;
+
+            Assert.ThrowsException<ArgumentNullException>(() => copy = new Ciphertext((Ciphertext)null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(context, null, pool));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, pool));
+            Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, pool));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext((SEALContext)null, poolu));
+            Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, poolu));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(context, null, 6ul));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, 6ul, poolu));
+            Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, 6ul, poolu));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Reserve(context, null, 10ul));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Reserve(null, ParmsId.Zero, 10ul));
+            Assert.ThrowsException<ArgumentException>(() => cipher.Reserve(context, ParmsId.Zero, 10ul));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Reserve(null, 10ul));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Resize(context, null, 10ul));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Resize(null, ParmsId.Zero, 10ul));
+            Assert.ThrowsException<ArgumentException>(() => cipher.Resize(context, ParmsId.Zero, 10ul));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Resize(null, 10ul));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Set(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.IsValidFor(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Save(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.UnsafeLoad(null));
+            Assert.ThrowsException<ArgumentException>(() => cipher.UnsafeLoad(new MemoryStream()));
+
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Load(null, new MemoryStream()));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.Load(context, null));
         }
     }
 }
