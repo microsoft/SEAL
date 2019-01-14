@@ -3,6 +3,7 @@
 
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,6 +34,12 @@ namespace SEALNetTest
             Assert.IsNotNull(keys);
             Assert.AreEqual(30, keys.DecompositionBitCount);
             Assert.AreEqual(22ul, keys.Size);
+
+            GaloisKeys copy = new GaloisKeys(keys);
+
+            Assert.IsNotNull(copy);
+            Assert.AreEqual(30, copy.DecompositionBitCount);
+            Assert.AreEqual(22ul, copy.Size);
         }
 
         [TestMethod]
@@ -191,6 +198,27 @@ namespace SEALNetTest
             Assert.IsFalse(keys.HasKey(23));
             Assert.IsFalse(keys.HasKey(25));
             Assert.IsTrue(keys.HasKey(27));
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            SEALContext context = GlobalContext.Context;
+            GaloisKeys keys = new GaloisKeys();
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys = new GaloisKeys(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.Set(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.IsValidFor(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.Save(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.UnsafeLoad(null));
+            Assert.ThrowsException<ArgumentException>(() => keys.UnsafeLoad(new MemoryStream()));
+
+            Assert.ThrowsException<ArgumentNullException>(() => keys.Load(context, null));
+            Assert.ThrowsException<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
         }
     }
 }

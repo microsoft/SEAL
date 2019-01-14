@@ -222,7 +222,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="context">The SEALContext</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        bool IsValidFor(SEALContext context)
+        public bool IsValidFor(SEALContext context)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -282,7 +282,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="stream">The stream to load the GaloisKeys from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if a valid GaloisKeys could not be read from stream</exception>
-        void UnsafeLoad(Stream stream)
+        public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
