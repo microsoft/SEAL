@@ -3,6 +3,7 @@
 
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace SEALNetTest
 {
@@ -69,6 +70,25 @@ namespace SEALNetTest
 
             int budget = decryptor.InvariantNoiseBudget(cipher);
             Assert.IsTrue(budget > 80);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            Decryptor decryptor = new Decryptor(context_, secretKey_);
+            SecretKey secret = new SecretKey();
+            Ciphertext cipher = new Ciphertext();
+            Plaintext plain = new Plaintext();
+
+            Assert.ThrowsException<ArgumentNullException>(() => decryptor = new Decryptor(context_, null));
+            Assert.ThrowsException<ArgumentNullException>(() => decryptor = new Decryptor(null, secretKey_));
+            Assert.ThrowsException<ArgumentException>(() => decryptor = new Decryptor(context_, secret));
+
+            Assert.ThrowsException<ArgumentNullException>(() => decryptor.Decrypt(cipher, null));
+            Assert.ThrowsException<ArgumentNullException>(() => decryptor.Decrypt(null, plain));
+            Assert.ThrowsException<ArgumentException>(() => decryptor.Decrypt(cipher, plain));
+
+            Assert.ThrowsException<ArgumentNullException>(() => decryptor.InvariantNoiseBudget(null));
         }
     }
 }
