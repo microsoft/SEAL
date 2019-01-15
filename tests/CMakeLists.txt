@@ -14,17 +14,17 @@ add_executable(sealtest seal/testrunner.cpp)
 find_package(SEAL 3.1.0 EXACT REQUIRED)
 
 if(SEAL_ENFORCE_HE_STD_SECURITY)
-    message(FATAL_ERROR "SEAL is configured with SEAL_ENFORCE_HE_STD_SECURITY=ON which is incompatible with unit tests")
+    message(FATAL_ERROR "SEAL is configured with SEAL_ENFORCE_HE_STD_SECURITY which is incompatible with unit tests")
 endif()
 
 # Import Google target_link_libraries
 find_library(GTEST gtest)
-if (NOT GTEST)
+if(NOT GTEST)
     message(FATAL_ERROR "Failed to find Google Test library required for unit tests")
 endif()
 
 # Link SEAL
-target_link_libraries(sealtest SEAL::seal gtest)
+target_link_libraries(sealtest SEAL::seal ${GTEST})
 
 # Add source files
 add_subdirectory(seal)
