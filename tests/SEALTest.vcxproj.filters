@@ -17,6 +17,15 @@
       <UniqueIdentifier>{6c39d93e-a64a-44b3-95ca-ba22fd03ea17}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Other">
+      <UniqueIdentifier>{c2fb4c08-c2b6-492e-872b-05c104d883e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other\seal">
+      <UniqueIdentifier>{ba659d9a-0bce-409b-8429-a60c1b9506ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other\seal\util">
+      <UniqueIdentifier>{86489695-28b4-44f1-8f0d-2637ecd43cb3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\biguint.cpp">
@@ -130,8 +139,24 @@
     <ClCompile Include="seal\ckks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="seal\testrunner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Text Include="CMakeLists.txt">
+      <Filter>Other</Filter>
+    </Text>
+    <Text Include="seal\CMakeLists.txt">
+      <Filter>Other\seal</Filter>
+    </Text>
+    <Text Include="seal\util\CMakeLists.txt">
+      <Filter>Other\seal\util</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <Filter>Other</Filter>
+    </None>
   </ItemGroup>
 </Project>
