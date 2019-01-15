@@ -10,7 +10,7 @@ namespace SEALNetTest
     public class EncryptionParameterQualifiersTests
     {
         [TestMethod]
-        public void SomeTest()
+        public void PropertiesTest()
         {
             SEALContext context = GlobalContext.Context;
 
@@ -45,6 +45,15 @@ namespace SEALNetTest
             Assert.IsTrue(qualifiers.UsingFFT);
             Assert.IsTrue(qualifiers.UsingHEStdSecurity);
             Assert.IsTrue(qualifiers.UsingNTT);
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            EncryptionParameterQualifiers epq1 = GlobalContext.Context.FirstContextData.Qualifiers;
+            EncryptionParameterQualifiers epq2 = null;
+
+            Assert.ThrowsException<ArgumentNullException>(() => epq2 = new EncryptionParameterQualifiers(null));
         }
     }
 }
