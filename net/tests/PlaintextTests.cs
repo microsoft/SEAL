@@ -271,7 +271,9 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             Plaintext plain = new Plaintext();
             MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
+            MemoryPoolHandle pool_uninit = new MemoryPoolHandle();
 
+            Assert.ThrowsException<ArgumentException>(() => plain = new Plaintext(pool_uninit));
             Assert.ThrowsException<ArgumentNullException>(() => plain = new Plaintext((string)null, pool));
 
             Assert.ThrowsException<ArgumentNullException>(() => plain.Set((Plaintext)null));

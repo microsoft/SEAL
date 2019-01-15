@@ -125,5 +125,43 @@ namespace SEALNetTest
             Assert.AreEqual(parms.NoiseMaxDeviation, loaded.NoiseMaxDeviation, delta: 0.001);
             Assert.AreEqual(parms.NoiseStandardDeviation, loaded.NoiseStandardDeviation, delta: 0.001);
         }
+
+        [TestMethod]
+        public void EqualsTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 8,
+                PlainModulus = new SmallModulus(257),
+                CoeffModulus = new List<SmallModulus>()
+                {
+                    DefaultParams.SmallMods40Bit(0),
+                    DefaultParams.SmallMods40Bit(1)
+                }
+            };
+
+            EncryptionParameters parms2 = new EncryptionParameters(SchemeType.CKKS);
+
+            Assert.AreNotEqual(parms, parms2);
+            Assert.IsFalse(parms.Equals(null));
+        }
+
+        [TestMethod]
+        public void ExceptionsTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+
+            Assert.ThrowsException<ArgumentNullException>(() => parms = new EncryptionParameters(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => parms.Set(null));
+
+            Assert.ThrowsException<ArgumentNullException>(() => parms.CoeffModulus = null);
+
+            Assert.ThrowsException<ArgumentNullException>(() => EncryptionParameters.Save(parms, null));
+            Assert.ThrowsException<ArgumentNullException>(() => EncryptionParameters.Save(null, new MemoryStream()));
+
+            Assert.ThrowsException<ArgumentNullException>(() => EncryptionParameters.Load(null));
+            Assert.ThrowsException<ArgumentException>(() => EncryptionParameters.Load(new MemoryStream()));
+        }
     }
 }
