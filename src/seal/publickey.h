@@ -98,6 +98,27 @@ namespace seal
         }
 
         /**
+        Check whether the current PublicKey is valid for a given SEALContext. If 
+        the given SEALContext is not set, the encryption parameters are invalid, 
+        or the PublicKey data does not match the SEALContext, this function returns 
+        false. Otherwise, returns true. This function only checks the metadata
+        and not the public key data itself.
+
+        @param[in] context The SEALContext
+        */
+        inline bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept
+        {
+            // Verify parameters
+            if (!context || !context->parameters_set())
+            {
+                return false;
+            }
+            auto parms_id = context->first_parms_id();
+            return pk_.is_metadata_valid_for(std::move(context)) && 
+                pk_.is_ntt_form() && pk_.parms_id() == parms_id;
+        }
+
+        /**
         Saves the PublicKey to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 

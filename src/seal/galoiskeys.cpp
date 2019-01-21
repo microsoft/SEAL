@@ -68,6 +68,33 @@ namespace seal
         return true;
     }
 
+    bool GaloisKeys::is_metadata_valid_for(shared_ptr<const SEALContext> context) const noexcept
+    {
+        // Verify parameters
+        if (!context || !context->parameters_set())
+        {
+            return false;
+        }
+        if (parms_id_ != context->first_parms_id())
+        {
+            return false;
+        }
+
+        for (auto &a : keys_)
+        {
+            for (auto &b : a)
+            {
+                if (!b.is_metadata_valid_for(context) || !b.is_ntt_form() || 
+                    b.parms_id() != parms_id_)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     void GaloisKeys::save(std::ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();

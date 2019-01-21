@@ -171,6 +171,31 @@ namespace seal
         return true;
     }
 
+    bool Ciphertext::is_metadata_valid_for(shared_ptr<const SEALContext> context) const noexcept
+    {
+        // Verify parameters
+        if (!context || !context->parameters_set())
+        {
+            return false;
+        }
+
+        auto context_data_ptr = context->context_data(parms_id_);
+        if (!context_data_ptr)
+        {
+            return false;
+        }
+
+        auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
+        size_t poly_modulus_degree = context_data_ptr->parms().poly_modulus_degree();
+        if ((coeff_modulus.size() != coeff_mod_count_) ||
+            (poly_modulus_degree != poly_modulus_degree_))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     void Ciphertext::save(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();

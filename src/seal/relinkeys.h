@@ -183,6 +183,17 @@ namespace seal
         bool is_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
 
         /**
+        Check whether the current RelinKeys is valid for a given SEALContext. If 
+        the given SEALContext is not set, the encryption parameters are invalid, 
+        or the RelinKeys data does not match the SEALContext, this function returns 
+        false. Otherwise, returns true. This function only checks the metadata
+        and not the relinearization key data itself.
+
+        @param[in] context The SEALContext
+        */
+        bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
+
+        /**
         Saves the RelinKeys instance to an output stream. The output is in binary 
         format and not human-readable. The output stream must have the "binary" 
         flag set.

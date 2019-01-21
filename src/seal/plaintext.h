@@ -516,6 +516,17 @@ namespace seal
         bool is_valid_for(std::shared_ptr<const SEALContext> context) const;
 
         /**
+        Check whether the current Plaintext is valid for a given SEALContext. If 
+        the given SEALContext is not set, the encryption parameters are invalid, 
+        or the Plaintext data does not match the SEALContext, this function returns 
+        false. Otherwise, returns true. This function only checks the metadata
+        and not the plaintext data itself.
+
+        @param[in] context The SEALContext
+        */
+        bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const;
+
+        /**
         Saves the plaintext to an output stream. The output is in binary format 
         and not human-readable. The output stream must have the "binary" flag set.
 
