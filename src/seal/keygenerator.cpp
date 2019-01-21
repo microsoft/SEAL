@@ -52,9 +52,10 @@ namespace seal
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (secret_key.parms_id() != context_->first_parms_id())
+        if (!secret_key.is_valid_for(context_) ||
+            secret_key.parms_id() != context_->first_parms_id())
         {
-            throw invalid_argument("secret key is not valid for encryption parameters");
+            throw invalid_argument("secret_key is not valid for encryption parameters");
         }
 
         // Set the secret key
@@ -78,13 +79,15 @@ namespace seal
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (secret_key.parms_id() != context_->first_parms_id())
+        if (!secret_key.is_valid_for(context_) ||
+            secret_key.parms_id() != context_->first_parms_id())
         {
-            throw invalid_argument("secret key is not valid for encryption parameters");
+            throw invalid_argument("secret_key is not valid for encryption parameters");
         }
-        if (public_key.parms_id() != context_->first_parms_id())
+        if (!public_key.is_valid_for(context_) ||
+            public_key.parms_id() != context_->first_parms_id())
         {
-            throw invalid_argument("public key is not valid for encryption parameters");
+            throw invalid_argument("public_key is not valid for encryption parameters");
         }
 
         // Extract encryption parameters.

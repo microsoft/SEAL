@@ -417,6 +417,11 @@ namespace seal
         */
         inline void mod_switch_to_next_inplace(Plaintext &plain)
         {
+            // Verify parameters.
+            if (!plain.is_valid_for(context_))
+            {
+                throw std::invalid_argument("plain is not valid for encryption parameters");
+            }
             mod_switch_drop_to_next(plain);
         }
 

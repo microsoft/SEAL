@@ -203,7 +203,7 @@ namespace seal
         return *this;
     }
 
-    bool Plaintext::is_valid_for(shared_ptr<SEALContext> context) const
+    bool Plaintext::is_valid_for(shared_ptr<const SEALContext> context) const
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -219,9 +219,10 @@ namespace seal
                 return false;
             }
 
-            auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
+            auto &parms = context_data_ptr->parms();
+            auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
-            size_t poly_modulus_degree = context_data_ptr->parms().poly_modulus_degree();
+            size_t poly_modulus_degree = parms.poly_modulus_degree();
             if (mul_safe(coeff_modulus.size(), poly_modulus_degree) != data_.size())
             {
                 return false;
@@ -242,19 +243,19 @@ namespace seal
         }
         else
         {
-            auto context_data_ptr = context->context_data();
-            if (context_data_ptr->parms().scheme() != scheme_type::BFV)
+            auto &parms = context->context_data()->parms();
+            if (parms.scheme() != scheme_type::BFV)
             {
                 return false;
             }
 
-            size_t poly_modulus_degree = context_data_ptr->parms().poly_modulus_degree();
+            size_t poly_modulus_degree = parms.poly_modulus_degree();
             if (data_.size() > poly_modulus_degree)
             {
                 return false;
             }
 
-            uint64_t modulus = context->context_data()->parms().plain_modulus().value(); 
+            uint64_t modulus = parms.plain_modulus().value(); 
             const pt_coeff_type *ptr = data();
             for (size_t k = 0; k < data_.size(); k++, ptr++)
             {

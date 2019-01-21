@@ -60,6 +60,12 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
+        // Verify that plain is valid.
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
+
         auto &context_data = *context_->context_data();
         auto &parms = context_data.parms();
 
@@ -94,20 +100,8 @@ namespace seal
             context_->context_data()->parms().coeff_modulus().size();
         size_t coeff_mod_count = coeff_modulus.size();
 
-        // Verify more parameters.
-        if (plain.coeff_count() > coeff_count)
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-
         auto &small_ntt_tables = context_data.small_ntt_tables();
-#ifdef SEAL_DEBUG
-        if (!are_poly_coefficients_less_than(plain.data(), 
-            plain.coeff_count(), parms.plain_modulus().value()))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
+
         // Make destination have right size and parms_id
         destination.resize(context_, parms.parms_id(), 2);
         destination.is_ntt_form() = false;
@@ -187,13 +181,7 @@ namespace seal
         size_t coeff_mod_count = coeff_modulus.size();
 
         auto &small_ntt_tables = context_data.small_ntt_tables();
-#ifdef SEAL_DEBUG
-        // Check that the plaintext doesn't have more coefficients than allowed
-        if (unsigned_gt(plain.coeff_count(), mul_safe(coeff_count, coeff_mod_count)))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
+
         // Make destination have right size and hash block
         destination.resize(context_, parms.parms_id(), 2);
         destination.is_ntt_form() = true;

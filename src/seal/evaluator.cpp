@@ -62,14 +62,13 @@ namespace seal
     void Evaluator::negate_inplace(Ciphertext &encrypted)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_data_ptr;
+        auto &context_data = *context_->context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -90,8 +89,11 @@ namespace seal
     void Evaluator::add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted1.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted1.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted1 is not valid for encryption parameters");
+        }
+        if (!encrypted2.is_valid_for(context_))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
         }
@@ -109,7 +111,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_data_ptr;
+        auto &context_data = *context_->context_data(encrypted1.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -171,10 +173,13 @@ namespace seal
     void Evaluator::sub_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted1.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted1.is_valid_for(context_))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
+        }
+        if (!encrypted2.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
         if (encrypted1.parms_id() != encrypted2.parms_id())
         {
@@ -190,7 +195,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_data_ptr;
+        auto &context_data = *context_->context_data(encrypted1.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -236,16 +241,20 @@ namespace seal
         const Ciphertext &encrypted2, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted1.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted1.is_valid_for(context_))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
+        }
+        if (!encrypted2.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
         if (encrypted1.parms_id() != encrypted2.parms_id())
         {
             throw invalid_argument("encrypted1 and encrypted2 parameter mismatch");
         }
 
+        auto context_data_ptr = context_->context_data(encrypted1.parms_id());
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -660,12 +669,12 @@ namespace seal
     void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
+        auto context_data_ptr = context_->context_data(encrypted.parms_id());
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -1074,10 +1083,13 @@ namespace seal
         MemoryPoolHandle pool)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+        if (!relin_keys.is_valid_for(context_))
+        {
+            throw invalid_argument("relin_keys is not valid for encryption parameters");
         }
         if (relin_keys.parms_id() != context_->first_parms_id())
         {
@@ -1089,7 +1101,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_data_ptr;
+        auto &context_data = *context_->context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         size_t encrypted_size = encrypted.size();
 
@@ -1113,7 +1125,7 @@ namespace seal
         size_t relins_needed = encrypted_size - destination_size;
 
         // Update temp to store the current result after relinearization
-        switch (context_data_ptr->parms().scheme())
+        switch (context_data.parms().scheme())
         {
             case scheme_type::BFV:
             {
@@ -1483,7 +1495,6 @@ namespace seal
     void Evaluator::mod_switch_scale_to_next(const Ciphertext &encrypted, 
         Ciphertext &destination, MemoryPoolHandle pool)
     {
-        // Verify parameters.
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
         if (context_data_ptr->parms().scheme() == scheme_type::BFV &&
             encrypted.is_ntt_form())
@@ -1578,7 +1589,6 @@ namespace seal
     void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted, 
         Ciphertext &destination)
     {
-        // Verify parameters.
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
         if (context_data_ptr->parms().scheme() == scheme_type::CKKS && 
             !encrypted.is_ntt_form())
@@ -1627,12 +1637,7 @@ namespace seal
 
     void Evaluator::mod_switch_drop_to_next(Plaintext &plain)
     {
-        // Verify parameters.
         auto context_data_ptr = context_->context_data(plain.parms_id());
-        if (!context_data_ptr)
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
         if (!plain.is_ntt_form())
         {
             throw invalid_argument("plain is not in NTT form");
@@ -1669,11 +1674,13 @@ namespace seal
     void Evaluator::mod_switch_to_next(const Ciphertext &encrypted, 
         Ciphertext &destination, MemoryPoolHandle pool)
     {
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
+        // Verify parameters.
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
+
+        auto context_data_ptr = context_->context_data(encrypted.parms_id());
         if (context_->last_parms_id() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
@@ -1760,6 +1767,12 @@ namespace seal
     void Evaluator::rescale_to_next(const Ciphertext &encrypted, Ciphertext &destination,
         MemoryPoolHandle pool)
     {
+        // Verify parameters.
+        if (!encrypted.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
         if (!context_data_ptr)
         {
@@ -1797,6 +1810,11 @@ namespace seal
         MemoryPoolHandle pool)
     {
         // Verify parameters.
+        if (!encrypted.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
         auto target_context_data_ptr = context_->context_data(parms_id);
         if (!context_data_ptr)
@@ -1939,18 +1957,22 @@ namespace seal
     void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (context_data_ptr->parms().scheme() == scheme_type::BFV &&
-            encrypted.is_ntt_form())
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
+
+        auto &context_data = *context_->context_data(encrypted.parms_id());
+        auto &parms = context_data.parms();
+        if (parms.scheme() == scheme_type::BFV && encrypted.is_ntt_form())
         {
             throw invalid_argument("BFV encrypted cannot be in NTT form");
         }
-        if (context_data_ptr->parms().scheme() == scheme_type::CKKS &&
-            !encrypted.is_ntt_form())
+        if (parms.scheme() == scheme_type::CKKS && !encrypted.is_ntt_form())
         {
             throw invalid_argument("CKKS encrypted must be in NTT form");
         }
@@ -1969,8 +1991,6 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_data_ptr;
-        auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
@@ -1985,18 +2005,6 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            // Verify more parameters.
-            if (plain.coeff_count() > coeff_count)
-            {
-                throw invalid_argument("plain is not valid for encryption parameters");
-            }
-#ifdef SEAL_DEBUG
-            if (!are_poly_coefficients_less_than(plain.data(),
-                plain.coeff_count(), parms.plain_modulus().value()))
-            {
-                throw invalid_argument("plain is not valid for encryption parameters");
-            }
-#endif
             auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
             auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
             auto upper_half_increment = context_data.upper_half_increment();
@@ -2039,13 +2047,6 @@ namespace seal
         {
             for (size_t j = 0; j < coeff_mod_count; j++)
             {
-#ifdef SEAL_DEBUG
-                if (!are_poly_coefficients_less_than(plain.data(j * coeff_count),
-                    coeff_count, coeff_modulus[j].value()))
-                {
-                    throw invalid_argument("plain is not valid for encryption parameters");
-                }
-#endif
                 add_poly_poly_coeffmod(encrypted.data() + (j * coeff_count), 
                     plain.data() + (j*coeff_count), coeff_count, 
                     coeff_modulus[j], encrypted.data() + (j * coeff_count));
@@ -2061,18 +2062,22 @@ namespace seal
     void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (context_data_ptr->parms().scheme() == scheme_type::BFV &&
-            encrypted.is_ntt_form())
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
+
+        auto &context_data = *context_->context_data(encrypted.parms_id());
+        auto &parms = context_data.parms();
+        if (parms.scheme() == scheme_type::BFV && encrypted.is_ntt_form())
         {
             throw invalid_argument("BFV encrypted cannot be in NTT form");
         }
-        if (context_data_ptr->parms().scheme() == scheme_type::CKKS &&
-            !encrypted.is_ntt_form())
+        if (parms.scheme() == scheme_type::CKKS && !encrypted.is_ntt_form())
         {
             throw invalid_argument("CKKS encrypted must be in NTT form");
         }
@@ -2091,8 +2096,6 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_data_ptr;
-        auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
@@ -2107,18 +2110,6 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            // Verify more parameters.
-            if (plain.coeff_count() > coeff_count)
-            {
-                throw invalid_argument("plain is not valid for encryption parameters");
-            }
-#ifdef SEAL_DEBUG
-            if (!are_poly_coefficients_less_than(plain.data(),
-                plain.coeff_count(), parms.plain_modulus().value()))
-            {
-                throw invalid_argument("plain is not valid for encryption parameters");
-            }
-#endif
             auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
             auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
             auto upper_half_increment = context_data.upper_half_increment();
@@ -2177,6 +2168,14 @@ namespace seal
         const Plaintext &plain, MemoryPoolHandle pool)
     {
         // Verify parameters.
+        if (!encrypted.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
         if (!context_->context_data(encrypted.parms_id()))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
@@ -2232,22 +2231,11 @@ namespace seal
             throw invalid_argument("scale out of bounds");
         }
 
-        // Verify more parameters.
 #ifdef SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO
+        // Don't allow multiplication by identically zero plaintext.
         if (plain.is_zero())
         {
             throw invalid_argument("plain cannot be zero");
-        }
-#endif
-        if (plain.coeff_count() > coeff_count)
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        if (!are_poly_coefficients_less_than(plain.data(),
-            plain.coeff_count(), parms.plain_modulus().value()))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
         }
 #endif
         // Set the scale
@@ -2439,22 +2427,8 @@ namespace seal
             throw invalid_argument("scale out of bounds");
         }
 
-        // Verify more parameters.
-        if (plain_ntt.coeff_count() != coeff_count * coeff_mod_count)
-        {
-            throw invalid_argument("plain_ntt is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        for (size_t i = 0; i < coeff_mod_count; i++)
-        {
-            if (poly_infty_norm_coeffmod(plain_ntt.data(i * coeff_count), coeff_count,
-                coeff_modulus[i]) >= coeff_modulus[i].value())
-            {
-                throw invalid_argument("plain_ntt is not valid for encryption parameters");
-            }
-        }
-#endif
 #ifdef SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO
+        // Don't allow multiplication by identically zero plaintext.
         if (plain_ntt.is_zero())
         {
             throw invalid_argument("plain_ntt cannot be zero");
@@ -2480,6 +2454,11 @@ namespace seal
         parms_id_type parms_id, MemoryPoolHandle pool)
     {
         // Verify parameters.
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
+
         auto context_data_ptr = context_->context_data(parms_id);
         if (!context_data_ptr)
         {
@@ -2505,18 +2484,6 @@ namespace seal
         auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
         auto plain_upper_half_increment = context_data.plain_upper_half_increment();
 
-        // Verify more parameters.
-        if (plain.coeff_count() > coeff_count)
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        if (!are_poly_coefficients_less_than(plain.data(),
-            plain.coeff_count(), parms.plain_modulus().value()))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
         auto &coeff_small_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
@@ -2584,6 +2551,11 @@ namespace seal
     void Evaluator::transform_to_ntt_inplace(Ciphertext &encrypted)
     {
         // Verify parameters.
+        if (!encrypted.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
         if (!context_data_ptr)
         {
@@ -2627,6 +2599,11 @@ namespace seal
     void Evaluator::transform_from_ntt_inplace(Ciphertext &encrypted_ntt)
     {
         // Verify parameters.
+        if (!encrypted_ntt.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+
         auto context_data_ptr = context_->context_data(encrypted_ntt.parms_id());
         if (!context_data_ptr)
         {
@@ -2670,22 +2647,26 @@ namespace seal
         const GaloisKeys &galois_keys, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
+        if (!galois_keys.is_valid_for(context_))
+        {
+            throw invalid_argument("galois_keys is not valid for encryption parameters");
+        }
+
+        auto &context_data = *context_->context_data(encrypted.parms_id());
+        auto &parms = context_data.parms();
         if (galois_keys.parms_id() != context_->first_parms_id())
         {
             throw invalid_argument("parameter mismatch");
         }
-        if (context_data_ptr->parms().scheme() == scheme_type::BFV && 
-            encrypted.is_ntt_form())
+        if (parms.scheme() == scheme_type::BFV && encrypted.is_ntt_form())
         {
             throw invalid_argument("BFV encrypted cannot be in NTT form");
         }
-        if (context_data_ptr->parms().scheme() == scheme_type::CKKS && 
-            !encrypted.is_ntt_form())
+        if (parms.scheme() == scheme_type::CKKS && !encrypted.is_ntt_form())
         {
             throw invalid_argument("CKKS encrypted must be in NTT form");
         }
@@ -2695,8 +2676,6 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_data_ptr;
-        auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
@@ -2771,7 +2750,7 @@ namespace seal
         auto temp0(allocate_zero_uint(coeff_count * coeff_mod_count, pool));
         auto temp1(allocate_zero_uint(coeff_count * coeff_mod_count, pool));
 
-        if (context_data_ptr->parms().scheme() == scheme_type::BFV)
+        if (parms.scheme() == scheme_type::BFV)
         {
             // Apply Galois for each ciphertext
             for (size_t i = 0; i < coeff_mod_count; i++)
@@ -2785,7 +2764,7 @@ namespace seal
                     galois_elt, coeff_modulus[i], temp1.get() + (i * coeff_count));
             }
         }
-        else if (context_data_ptr->parms().scheme() == scheme_type::CKKS)
+        else if (parms.scheme() == scheme_type::CKKS)
         {
             // Apply Galois for each ciphertext
             for (size_t i = 0; i < coeff_mod_count; i++)
@@ -2912,7 +2891,7 @@ namespace seal
                 *innerresult_coeff_ptr = barrett_reduce_128(
                     wide_innerresult_coeff_ptr, coeff_modulus[i]);
             }
-            if (context_data_ptr->parms().scheme() == scheme_type::BFV)
+            if (parms.scheme() == scheme_type::BFV)
             {
                 inverse_ntt_negacyclic_harvey(innerresult_poly_ptr, 
                     coeff_small_ntt_tables[i]);
@@ -2935,14 +2914,14 @@ namespace seal
                 *innerresult_coeff_ptr = barrett_reduce_128(
                     wide_innerresult_coeff_ptr, coeff_modulus[i]);
             }
-            if (context_data_ptr->parms().scheme() == scheme_type::BFV)
+            if (parms.scheme() == scheme_type::BFV)
             {
                 inverse_ntt_negacyclic_harvey(encrypted_ptr, coeff_small_ntt_tables[i]);
             }
         }
 
         // If CKKS, mark encrypted as NTT form
-        if (context_data_ptr->parms().scheme() == scheme_type::CKKS)
+        if (parms.scheme() == scheme_type::CKKS)
         {
             encrypted.is_ntt_form() = true;
         }
@@ -2952,14 +2931,16 @@ namespace seal
         const GaloisKeys &galois_keys, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
+        if (!galois_keys.is_valid_for(context_))
+        {
+            throw invalid_argument("galois_keys is not valid for encryption parameters");
+        }
 
-        // Extract encryption parameters.
-        auto &context_data = *context_data_ptr;
+        auto &context_data = *context_->context_data(encrypted.parms_id());
         if (!context_data.qualifiers().using_batching)
         {
             throw logic_error("encryption parameters do not support batching");
@@ -2971,8 +2952,7 @@ namespace seal
             return;
         }
 
-        auto &parms = context_data.parms();
-        size_t coeff_count = parms.poly_modulus_degree();
+        size_t coeff_count = context_data.parms().poly_modulus_degree();
 
         // Perform rotation and key switching
         apply_galois_inplace(encrypted, 

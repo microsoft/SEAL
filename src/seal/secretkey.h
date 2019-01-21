@@ -107,7 +107,7 @@ namespace seal
 
         @param[in] context The SEALContext
         */
-        inline bool is_valid_for(std::shared_ptr<SEALContext> context) const 
+        inline bool is_valid_for(std::shared_ptr<const SEALContext> context) const 
         {
             // Verify parameters
             if (!context || !context->parameters_set())

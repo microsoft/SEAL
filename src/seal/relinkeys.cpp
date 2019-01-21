@@ -41,7 +41,7 @@ namespace seal
         return *this;
     }
 
-    bool RelinKeys::is_valid_for(shared_ptr<SEALContext> context) const noexcept
+    bool RelinKeys::is_valid_for(shared_ptr<const SEALContext> context) const noexcept
     {
         // Verify parameters
         if (!context || !context->parameters_set())

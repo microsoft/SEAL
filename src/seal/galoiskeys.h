@@ -180,7 +180,7 @@ namespace seal
 
         @param[in] context The SEALContext
         */
-        bool is_valid_for(std::shared_ptr<SEALContext> context) const noexcept;
+        bool is_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
 
         /**
         Saves the GaloisKeys instance to an output stream. The output is in binary 

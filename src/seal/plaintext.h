@@ -513,7 +513,7 @@ namespace seal
 
         @param[in] context The SEALContext
         */
-        bool is_valid_for(std::shared_ptr<SEALContext> context) const;
+        bool is_valid_for(std::shared_ptr<const SEALContext> context) const;
 
         /**
         Saves the plaintext to an output stream. The output is in binary format 

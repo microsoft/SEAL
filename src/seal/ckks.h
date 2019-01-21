@@ -561,6 +561,10 @@ namespace seal
             MemoryPoolHandle pool)
         {
             // Verify parameters.
+            if (!plain.is_valid_for(context_))
+            {
+                throw std::invalid_argument("plain is not valid for encryption parameters");
+            }
             if (!plain.is_ntt_form())
             {
                 throw std::invalid_argument("plain is not in NTT form");
@@ -571,11 +575,6 @@ namespace seal
             }
 
             auto context_data_ptr = context_->context_data(plain.parms_id());
-            if (!context_data_ptr)
-            {
-                throw std::invalid_argument("parms_id is not valid for encryption parameters");
-            }
-
             auto &parms = context_data_ptr->parms();
             auto &coeff_modulus = parms.coeff_modulus();
             std::size_t coeff_mod_count = coeff_modulus.size();

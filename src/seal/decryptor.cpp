@@ -54,8 +54,8 @@ namespace seal
 
     void Decryptor::decrypt(const Ciphertext &encrypted, Plaintext &destination)
     {
-        // Verify parameters.
-        if (!context_->context_data(encrypted.parms_id()))
+        // Verify that encrypted is valid.
+        if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -440,23 +440,22 @@ namespace seal
 
     int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
     {
+        // Verify that encrypted is valid.
+        if (!encrypted.is_valid_for(context_))
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+
         if (context_->context_data()->parms().scheme() != scheme_type::BFV)
         {
             throw logic_error("unsupported scheme");
-        }
-
-        // Verify parameters.
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
-        {
-            throw invalid_argument("encrypted is not valid for encryption parameters");
         }
         if (encrypted.is_ntt_form())
         {
             throw invalid_argument("encrypted cannot be in NTT form");
         }
 
-        auto &context_data = *context_data_ptr;
+        auto &context_data = *context_->context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();

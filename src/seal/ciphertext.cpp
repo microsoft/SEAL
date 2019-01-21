@@ -130,7 +130,7 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
-    bool Ciphertext::is_valid_for(shared_ptr<SEALContext> context) const noexcept
+    bool Ciphertext::is_valid_for(shared_ptr<const SEALContext> context) const noexcept
     {
         // Verify parameters
         if (!context || !context->parameters_set())

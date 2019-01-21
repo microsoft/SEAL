@@ -325,6 +325,10 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, vector<uint64_t> &destination,
         MemoryPoolHandle pool)
     {
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
         if (plain.is_ntt_form())
         {
             throw invalid_argument("plain cannot be in NTT form");
@@ -336,18 +340,6 @@ namespace seal
 
         auto &context_data = *context_->context_data();
 
-        // Validate input parameters
-        if (plain.coeff_count() > context_data.parms().poly_modulus_degree())
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        if (!are_poly_coefficients_less_than(plain.data(),
-            plain.coeff_count(), context_data.parms().plain_modulus().value()))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
         // Set destination size
         destination.resize(slots_);
 
@@ -373,6 +365,10 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, vector<int64_t> &destination,
         MemoryPoolHandle pool)
     {
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
         if (plain.is_ntt_form())
         {
             throw invalid_argument("plain cannot be in NTT form");
@@ -385,17 +381,6 @@ namespace seal
         auto &context_data = *context_->context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
-        // Validate input parameters
-        if (plain.coeff_count() > context_data.parms().poly_modulus_degree())
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        if (!are_poly_coefficients_less_than(plain.data(), plain.coeff_count(), modulus))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
         // Set destination size
         destination.resize(slots_);
 
@@ -425,6 +410,10 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, gsl::span<uint64_t> destination,
         MemoryPoolHandle pool)
     {
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
         if (plain.is_ntt_form())
         {
             throw invalid_argument("plain cannot be in NTT form");
@@ -436,18 +425,6 @@ namespace seal
 
         auto &context_data = *context_->context_data();
 
-        // Validate input parameters
-        if (plain.coeff_count() > context_data.parms().poly_modulus_degree())
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        if (!are_poly_coefficients_less_than(plain.data(),
-            plain.coeff_count(), context_data.parms().plain_modulus().value()))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
         using index_type = decltype(destination)::index_type;
         if(unsigned_gt(destination.size(), numeric_limits<int>::max()) || 
             unsigned_neq(destination.size(), slots_))
@@ -477,6 +454,10 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, gsl::span<int64_t> destination,
         MemoryPoolHandle pool)
     {
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
         if (plain.is_ntt_form())
         {
             throw invalid_argument("plain cannot be in NTT form");
@@ -489,17 +470,6 @@ namespace seal
         auto &context_data = *context_->context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
-        // Validate input parameters
-        if (plain.coeff_count() > context_data.parms().poly_modulus_degree())
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        if (!are_poly_coefficients_less_than(plain.data(), plain.coeff_count(), modulus))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
         using index_type = decltype(destination)::index_type;
         if(unsigned_gt(destination.size(), numeric_limits<int>::max()) || 
             unsigned_neq(destination.size(), slots_))
@@ -532,6 +502,10 @@ namespace seal
 #endif
     void BatchEncoder::decode(Plaintext &plain, MemoryPoolHandle pool)
     {
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
         if (plain.is_ntt_form())
         {
             throw invalid_argument("plain cannot be in NTT form");
@@ -543,18 +517,6 @@ namespace seal
 
         auto &context_data = *context_->context_data();
 
-        // Validate input parameters
-        if (plain.coeff_count() > context_data.parms().poly_modulus_degree())
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        if (!are_poly_coefficients_less_than(plain.data(),
-            plain.coeff_count(), context_data.parms().plain_modulus().value()))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
         // Never include the leading zero coefficient (if present)
         size_t plain_coeff_count = min(plain.coeff_count(), slots_);
 
