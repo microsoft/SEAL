@@ -1087,10 +1087,14 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
+#ifdef SEAL_DEBUG
+        // Check the relinearization keys for validity at this point.
+        // This is only done in debug mode due to heavy computational cost.
         if (!relin_keys.is_valid_for(context_))
         {
             throw invalid_argument("relin_keys is not valid for encryption parameters");
         }
+#endif
         if (relin_keys.parms_id() != context_->first_parms_id())
         {
             throw invalid_argument("parameter mismatch");
@@ -2651,10 +2655,13 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (!galois_keys.is_valid_for(context_))
-        {
-            throw invalid_argument("galois_keys is not valid for encryption parameters");
-        }
+
+        // Checking Galois keys for validity can be very slow so we postpone it
+        // and check only those keys that are actually used.
+        // if (!galois_keys.is_valid_for(context_))
+        // {
+        //     throw invalid_argument("galois_keys is not valid for encryption parameters");
+        // }
 
         auto &context_data = *context_->context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
@@ -2746,7 +2753,18 @@ namespace seal
             }
             return;
         }
-
+#ifdef SEAL_DEBUG
+        // Check the Galois key for galois_elt at this point.
+        // This is only done in debug mode due to heavy computational cost.
+        for (auto &b : galois_keys.key(galois_elt))
+        {
+            if (!b.is_valid_for(context_) || !b.is_ntt_form() || 
+                b.parms_id() != galois_keys.parms_id())
+            {
+                throw invalid_argument("galois_keys is not valid for encryption parameters");
+            }
+        }
+#endif
         auto temp0(allocate_zero_uint(coeff_count * coeff_mod_count, pool));
         auto temp1(allocate_zero_uint(coeff_count * coeff_mod_count, pool));
 
@@ -2934,10 +2952,6 @@ namespace seal
         if (!encrypted.is_valid_for(context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
-        }
-        if (!galois_keys.is_valid_for(context_))
-        {
-            throw invalid_argument("galois_keys is not valid for encryption parameters");
         }
 
         auto &context_data = *context_->context_data(encrypted.parms_id());
