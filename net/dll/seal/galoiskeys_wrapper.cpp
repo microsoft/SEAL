@@ -25,7 +25,7 @@ namespace seal
 }
 
 namespace {
-    HRESULT GetKeyFromVector(const vector<Ciphertext> key, uint64_t* count, void** ciphers)
+    HRESULT GetKeyFromVector(const vector<Ciphertext> &key, uint64_t* count, void** ciphers)
     {
         *count = key.size();
 

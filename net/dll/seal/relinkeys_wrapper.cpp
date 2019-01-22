@@ -25,7 +25,6 @@ namespace seal
     };
 }
 
-
 SEALDLL HRESULT SEALCALL RelinKeys_Create1(void** relin_keys)
 {
     IfNullRet(relin_keys, E_POINTER);
