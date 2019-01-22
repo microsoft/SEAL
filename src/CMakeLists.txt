@@ -32,6 +32,8 @@ endif()
 
 # Required files and directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
+set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/../bin)
 set(SEAL_INCLUDES_INSTALL_DIR include)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
@@ -69,6 +71,23 @@ if(SEAL_USE_CXX17)
 	set(SEAL_USE_MAYBE_UNUSED ON)
 	set(SEAL_LANG_FLAG "-std=c++17")
 endif()
+
+# Should we build a shared library?
+set(SEAL_DEFAULT_LIB_BUILD_TYPE "static")
+if(NOT SEAL_LIB_BUILD_TYPE)
+	set(SEAL_LIB_BUILD_TYPE ${SEAL_DEFAULT_LIB_BUILD_TYPE} CACHE
+		STRING "Library build type" FORCE)
+	set_property(CACHE SEAL_LIB_BUILD_TYPE PROPERTY STRINGS
+		"static" "static_PIC" "shared")
+endif()
+message(STATUS "Library build type (SEAL_LIB_BUILD_TYPE): ${SEAL_LIB_BUILD_TYPE}")
+# optionally enable CMAKE_POSITION_INDEPENDENT_CODE
+if(${SEAL_LIB_BUILD_TYPE} STREQUAL "static")
+  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+else()
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+message(STATUS "Position-independent code: ${CMAKE_POSITION_INDEPENDENT_CODE}")
 
 # Enforce at least 128-bit security level based on HomomorphicEncryption.org estimates
 set(SEAL_ENFORCE_HE_STD_SECURITY_STR "Enforce at least 128-bit security level from HomomorphicEncryption.org security standard")
@@ -228,7 +247,7 @@ if(SEAL_USE_INTRIN)
 		set(SEAL_USE_AES_NI_PRNG OFF CACHE BOOL ${SEAL_USE_AES_NI_PRNG_OPTION_STR} FORCE)
 	endif()
 
-	# Check that AES-NI runs 
+	# Check that AES-NI runs
 	if(SEAL_USE_AES_NI_PRNG)
 		if(NOT DEFINED MSVC)
 			set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -maes")
@@ -293,7 +312,11 @@ if(SEAL_USE_MSGSL)
 endif()
 
 # Create library but add no source files yet
-add_library(seal STATIC "")
+if(${SEAL_LIB_BUILD_TYPE} STREQUAL "shared")
+  add_library(seal SHARED "")
+else()
+  add_library(seal STATIC "")
+endif()
 
 # Add source files to library and header files to install
 add_subdirectory(seal)
@@ -342,6 +365,8 @@ endif()
 # Associate seal to export seal_export
 install(TARGETS seal EXPORT seal_export
 	ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 	INCLUDES DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
 
 # Export the targets

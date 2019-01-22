@@ -20,3 +20,4 @@
 #cmakedefine SEAL_USE_MSGSL
 #cmakedefine SEAL_USE_MSGSL_SPAN
 #cmakedefine SEAL_USE_MSGSL_MULTISPAN
+#cmakedefine SEAL_LIB_BUILD_TYPE
