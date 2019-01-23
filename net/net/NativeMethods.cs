@@ -851,6 +851,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void RelinKeys_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
         [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void RelinKeys_IsMetadataValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void RelinKeys_Pool(IntPtr thisptr, out IntPtr pool);
 
         #endregion

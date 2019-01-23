@@ -78,6 +78,7 @@ namespace SEALNetTest
 
             Assert.AreEqual(30, other.DecompositionBitCount);
             Assert.AreEqual(2ul, other.Size);
+            Assert.IsTrue(other.IsMetadataValidFor(context));
             Assert.IsTrue(handle.AllocByteCount > 0ul);
 
             List<IEnumerable<Ciphertext>> keysData = new List<IEnumerable<Ciphertext>>(keys.Data);
@@ -152,6 +153,7 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => keys.Set(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => keys.IsValidFor(null));
+            Assert.ThrowsException<ArgumentNullException>(() => keys.IsMetadataValidFor(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => keys.Save(null));
 
