@@ -469,10 +469,11 @@ namespace SEALNetExamples
 
             Relinearization itself has both a computational cost and a noise budget cost.
             These both depend on a parameter called `decomposition bit count', which can
-            be any integer at least 1 [dbc_min()] and at most 60 [dbc_max()]. A large
-            decomposition bit count makes relinearization fast, but consumes more noise
-            budget. A small decomposition bit count can make relinearization slower, but 
-            might not change the noise budget by any observable amount.
+            be any integer at least 1 [DefaultParams.DBCmin] and at most 60
+            [DefaultParams.DBCmax]. A large decomposition bit count makes relinearization
+            fast, but consumes more noise budget. A small decomposition bit count can
+            make relinearization slower, but  might not change the noise budget by any
+            observable amount.
 
             Relinearization requires a special type of key called `relinearization keys'.
             These can be created by the KeyGenerator for any decomposition bit count.
@@ -535,8 +536,8 @@ namespace SEALNetExamples
 
             To make things more clear, we repeat the computation a third time, now using 
             the largest possible decomposition bit count (60). We are not measuring
-            running time here, but relinearization with relin_keys60 (below) is much 
-            faster than with relin_keys16.
+            running time here, but relinearization with relinKeys60 (below) is much 
+            faster than with relinKeys16.
             */
             RelinKeys relinKeys60 = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
 
@@ -609,8 +610,8 @@ namespace SEALNetExamples
             later with relinearization keys with a larger decomposition bit count (for 
             performance) when noise budget has already been consumed past the bound 
             determined by the larger decomposition bit count. For example, the best 
-            strategy might have been to use relin_keys16 in the first relinearization 
-            and relin_keys60 in the next two relinearizations for optimal noise budget 
+            strategy might have been to use relinKeys16 in the first relinearization 
+            and relinKeys60 in the next two relinearizations for optimal noise budget 
             consumption/performance trade-off. Luckily, in most use-cases it is not so 
             critical to squeeze out every last bit of performance, especially when 
             larger parameters are used.
@@ -668,7 +669,7 @@ namespace SEALNetExamples
             column rotations on encrypted matrices. Like relinearization keys, the 
             behavior of Galois keys depends on a decomposition bit count. The noise 
             budget consumption behavior of matrix row and column rotations is exactly 
-            like that of relinearization (recall example_bfv_basics_ii()).
+            like that of relinearization (recall ExampleBFVBasicsII()).
 
             Here we use a moderate size decomposition bit count.
             */
@@ -702,7 +703,7 @@ namespace SEALNetExamples
 
             /*
             The matrix plaintext is simply given to BatchEncoder as a flattened vector
-            of numbers of size slot_count. The first row_size numbers form the first row, 
+            of numbers of size slotCount. The first row_size numbers form the first row, 
             and the rest form the second row. Here we create the following matrix:
 
                 [ 0,  1,  2,  3,  0,  0, ...,  0 ]
@@ -851,7 +852,7 @@ namespace SEALNetExamples
             Utilities.PrintExampleBanner("Example: BFV Basics IV");
 
             /*
-            In this example we describe the concept of `parms_id' in the context of the
+            In this example we describe the concept of `ParmsId' in the context of the
             BFV scheme and show how modulus switching can be used for improving both
             computation and communication cost.
 
@@ -867,7 +868,7 @@ namespace SEALNetExamples
             /*
             In SEAL a particular set of encryption parameters (excluding the random
             number generator) is identified uniquely by a SHA-3 hash of the parameters.
-            This hash is called the `parms_id' and can be easily accessed and printed
+            This hash is called the `ParmsId' and can be easily accessed and printed
             at any time. The hash will change as soon as any of the relevant parameters
             is changed.
             */
@@ -884,11 +885,11 @@ namespace SEALNetExamples
             Utilities.PrintParameters(context);
 
             /*
-            All keys and ciphertext, and in the CKKS also plaintexts, carry the parms_id
+            All keys and ciphertext, and in the CKKS also plaintexts, carry the ParmsId
             for the encryption parameters they are created with, allowing SEAL to very 
             quickly determine whether the objects are valid for use and compatible for 
             homomorphic computations. SEAL takes care of managing, and verifying the 
-            parms_id for all objects so the user should have no reason to change it by 
+            ParmsId for all objects so the user should have no reason to change it by 
             hand. 
             */
             KeyGenerator keygen = new KeyGenerator(context);
@@ -902,7 +903,7 @@ namespace SEALNetExamples
             Decryptor decryptor = new Decryptor(context, secretKey);
 
             /*
-            Note how in the BFV scheme plaintexts do not carry the parms_id, but 
+            Note how in the BFV scheme plaintexts do not carry the ParmsId, but 
             ciphertexts do.
             */
             Plaintext plain = new Plaintext("1x^3 + 2x^2 + 3x^1 + 4");
@@ -923,7 +924,7 @@ namespace SEALNetExamples
             previous set; this continues until the parameter set is no longer valid
             (e.g. PlainModulus is larger than the remaining CoeffModulus). It is easy
             to walk through the chain and access all the parameter sets. Additionally,
-            each parameter set in the chain has a `chain_index' that indicates its
+            each parameter set in the chain has a `ChainIndex' that indicates its
             position in the chain so that the last set has index 0. We say that a set
             of encryption parameters, or an object carrying those encryption parameters,
             is at a higher level in the chain than another set of parameters if its the
@@ -953,9 +954,9 @@ namespace SEALNetExamples
 
             /*
             Modulus switching changes the ciphertext parameters to any set down the
-            chain from the current one. The function mod_switch_to_next(...) always
-            switches to the next set down the chain, whereas mod_switch_to(...) switches
-            to a parameter set down the chain corresponding to a given parms_id.
+            chain from the current one. The function ModSwitchToNext(...) always
+            switches to the next set down the chain, whereas ModSwitchTo(...) switches
+            to a parameter set down the chain corresponding to a given ParmsId.
             */
             contextData = context.FirstContextData;
             while (null != contextData.NextContextData)
@@ -1048,7 +1049,7 @@ namespace SEALNetExamples
             /*
             In BFV modulus switching is not necessary and in some cases the user might
             not want to create the modulus switching chain. This can be done by passing
-            a bool `false' to the SEALContext::Create(...) function as follows.
+            a bool `false' to the SEALContext.Create(...) function as follows.
             */
             context = SEALContext.Create(parms, expandModChain: false);
 
@@ -1263,7 +1264,7 @@ namespace SEALNetExamples
                     /*
                     [Multiply Plain]
                     We multiply a ciphertext of size 2 with a random plaintext. Recall
-                    that multiply_plain does not change the size of the ciphertext so we 
+                    that MultiplyPlain does not change the size of the ciphertext so we 
                     use encrypted2 here, which still has size 2.
                     */
                     timeMultiplyPlainSum.Start();
@@ -1482,9 +1483,9 @@ namespace SEALNetExamples
 
             /*
             Another difference to the BFV scheme is that in CKKS also plaintexts are
-            linked to specific parameter sets: they carry the corresponding parms_id.
-            An overload of CKKSEncoder::encode(...) allows the caller to specify which
-            parameter set in the modulus switching chain (identified by parms_id) should 
+            linked to specific parameter sets: they carry the corresponding ParmsId.
+            An overload of CKKSEncoder.Encode(...) allows the caller to specify which
+            parameter set in the modulus switching chain (identified by ParmsId) should 
             be used to encode the plaintext. This is important as we will see later.
             */
             Console.WriteLine($"ParmsId of plain: {plain.ParmsId}");
@@ -1556,9 +1557,9 @@ namespace SEALNetExamples
 
             /*
             Homomorphic addition and subtraction naturally require that the scales of
-            the inputs are the same, but also that the encryption parameters (parms_id)
+            the inputs are the same, but also that the encryption parameters (ParmsId)
             are the same. Here we add a plaintext to encrypted. Note that a scale or
-            parms_id mismatch would make Evaluator::add_plain(..) throw an exception;
+            ParmsId mismatch would make Evaluator.AddPlain(..) throw an exception;
             there is no problem here since we encode the plaintext just-in-time with
             exactly the right scale.
             */
@@ -1567,7 +1568,7 @@ namespace SEALNetExamples
             Utilities.PrintVector(summand);
 
             /*
-            Get the parms_id and scale from encrypted and do the addition.
+            Get the ParmsId and scale from encrypted and do the addition.
             */
             Plaintext plainSummand = new Plaintext();
             encoder.Encode(summand, encrypted.ParmsId, encrypted.Scale,
@@ -1645,7 +1646,7 @@ namespace SEALNetExamples
             encryptor.Encrypt(plain, encrypted);
 
             /*
-            Print the scale and the parms_id for encrypted.
+            Print the scale and the ParmsId for encrypted.
             */
             Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
             Console.WriteLine($"Scale in encrypted before squaring: {encrypted.Scale}");
@@ -1764,11 +1765,11 @@ namespace SEALNetExamples
             rescaling. Note that 4*40 bits = 160 bits, which is well below the size of 
             the default coefficient modulus (see seal/util/globals.cpp). It is always
             more secure to use a smaller coefficient modulus while keeping the degree of
-            the polynomial modulus fixed. Since the coeff_mod_128(8192) default 218-bit 
+            the polynomial modulus fixed. Since the CoeffMod128(8192) default 218-bit 
             coefficient modulus achieves already a 128-bit security level, this 160-bit 
             modulus must be much more secure.
 
-            We use the small_mods_40bit(int) function to get primes from a hard-coded 
+            We use the SmallMods40bit(int) function to get primes from a hard-coded 
             list of 40-bit prime numbers; it is important that all primes used for the
             coefficient modulus are distinct.
             */
@@ -1825,7 +1826,7 @@ namespace SEALNetExamples
 
             /*
             We create plaintext elements for PI, 0.4, and 1, using an overload of
-            CKKSEncoder::encode(...) that encodes the given floating-point value to
+            CKKSEncoder.Encode(...) that encodes the given floating-point value to
             every slot in the vector.
             */
             Plaintext plainCoeff3 = new Plaintext(),
@@ -1846,8 +1847,8 @@ namespace SEALNetExamples
             /*
             Now encrypted_x3 is at different encryption parameters than encrypted_x1, 
             preventing us from multiplying them together to compute x^3. We could simply 
-            switch encrypted_x1 down to the next parameters in the modulus switching 
-            chain. Since we still need to multiply the x^3 term with PI (plain_coeff3), 
+            switch encryptedX1 down to the next parameters in the modulus switching 
+            chain. Since we still need to multiply the x^3 term with PI (plainCoeff3), 
             we instead compute PI*x first and multiply that with x^2 to obtain PI*x^3.
             This product poses no problems since both inputs are at the same scale and 
             use the same encryption parameters. We rescale afterwards to change the 
@@ -1859,17 +1860,17 @@ namespace SEALNetExamples
             evaluator.RescaleToNextInplace(encryptedX1Coeff3);
 
             /*
-            Since both encrypted_x3 and encrypted_x1_coeff3 now have the same scale and 
+            Since both encryptedX3 and encryptedX1Coeff3 now have the same scale and 
             use same encryption parameters, we can multiply them together. We write the 
-            result to encrypted_x3.
+            result to encryptedX3.
             */
             evaluator.MultiplyInplace(encryptedX3, encryptedX1Coeff3);
             evaluator.RelinearizeInplace(encryptedX3, relinKeys);
             evaluator.RescaleToNextInplace(encryptedX3);
 
             /*
-            Next we compute the degree one term. All this requires is one multiply_plain 
-            with plain_coeff1. We overwrite encrypted_x1 with the result.
+            Next we compute the degree one term. All this requires is one MultiplyPlain 
+            with plainCoeff1. We overwrite encryptedX1 with the result.
             */
             evaluator.MultiplyPlainInplace(encryptedX1, plainCoeff1);
             evaluator.RescaleToNextInplace(encryptedX1);
@@ -1890,7 +1891,7 @@ namespace SEALNetExamples
             Let us carefully consider what the scales are at this point. If we denote 
             the primes in CoeffModulus as q1, q2, q3, q4 (order matters here), then all
             fresh encodings start with a scale equal to q4 (this was a choice we made 
-            above). After the computations above the scale in encrypted_x3 is q4^2/q3:
+            above). After the computations above the scale in encryptedX3 is q4^2/q3:
 
                 * The product x^2 has scale q4^2;
                 * The produt PI*x has scale q4^2;
@@ -1898,7 +1899,7 @@ namespace SEALNetExamples
                 * Multiplication to obtain PI*x^3 raises the scale to q4^2;
                 * Rescaling by q3 (last prime) yields a scale of q4^2/q3.
 
-            The scale in both encrypted_x1 and plain_coeff0 is just q4.
+            The scale in both encryptedX1 and plainCoeff0 is just q4.
             */
             Console.WriteLine("Scale in encryptedX3: {0:0.0000000000}", encryptedX3.Scale);
             Console.WriteLine("Scale in encryptedX1: {0:0.0000000000}", encryptedX1.Scale);
@@ -1908,29 +1909,29 @@ namespace SEALNetExamples
             /*
             There are a couple of ways to fix this this problem. Since q4 and q3 are 
             really close to each other, we could simply "lie" to SEAL and set the scales 
-            to be the same. For example, changing the scale of encrypted_x3 to be q4
-            simply means that we scale the value of encrypted_x3 by q4/q3 which is very
+            to be the same. For example, changing the scale of encryptedX3 to be q4
+            simply means that we scale the value of encryptedX3 by q4/q3 which is very
             close to 1; this should not result in any noticeable error. 
 
-            Another option would be to encode 1 with scale q4, perform a multiply_plain 
-            with encrypted_x1, and finally rescale. In this case we would additionally 
-            make sure to encode 1 with the appropriate encryption parameters (parms_id). 
+            Another option would be to encode 1 with scale q4, perform a MultiplyPlain 
+            with encryptedX1, and finally rescale. In this case we would additionally 
+            make sure to encode 1 with the appropriate encryption parameters (ParmsId). 
 
-            A third option would be to initially encode plain_coeff1 with scale q4^2/q3. 
+            A third option would be to initially encode plainCoeff1 with scale q4^2/q3. 
             Then, after multiplication with encrypted_x1 and rescaling, the result would 
             have scale q4^2/q3. Since encoding can be computationally costly, this may 
             not be a realistic option in some cases.
 
             In this example we will use the first (simplest) approach and simply change
-            the scale of encrypted_x3.
+            the scale of encryptedX3.
             */
             encryptedX3.Scale = encryptedX1.Scale;
 
             /*
             We still have a problem with mismatching encryption parameters. This is easy
             to fix by using traditional modulus switching (no rescaling). Note that we
-            use here the Evaluator::mod_switch_to_inplace(...) function to switch to
-            encryption parameters down the chain with a specific parms_id.
+            use here the Evaluator.ModSwitchToInplace(...) function to switch to
+            encryption parameters down the chain with a specific ParmsId.
             */
             evaluator.ModSwitchToInplace(encryptedX1, encryptedX3.ParmsId);
             evaluator.ModSwitchToInplace(plainCoeff0, encryptedX3.ParmsId);
@@ -1961,7 +1962,7 @@ namespace SEALNetExamples
             Utilities.PrintVector(result, 3);
 
             /*
-            At this point if we wanted to multiply encrypted_result one more time, the 
+            At this point if we wanted to multiply encryptedResult one more time, the 
             other multiplicand would have to have scale less than 40 bits, otherwise 
             the scale would become larger than the CoeffModulus itself. 
             */
@@ -1971,7 +1972,7 @@ namespace SEALNetExamples
             /*
             A very extreme case for multiplication is where we multiply a ciphertext 
             with a vector of values that are all the same integer. For example, let us 
-            multiply encrypted_result by 7. In this case we do not need any scaling in 
+            multiply encryptedResult by 7. In this case we do not need any scaling in 
             the multiplicand due to a different (much simpler) encoding process.
             */
             Plaintext plainIntegerScalar = new Plaintext();
@@ -1994,7 +1995,7 @@ namespace SEALNetExamples
             is very similar to how matrix rotations work in the BFV scheme. We try this
             with three sizes of Galois keys. In some cases it is desirable for memory
             reasons to create Galois keys that support only specific rotations. This can
-            be done by passing to KeyGenerator::galois_keys(...) a vector of signed 
+            be done by passing to KeyGenerator.GaloisKeys(...) a vector of signed 
             integers specifying the desired rotation step counts. Here we create Galois
             keys that only allow cyclic rotation by a single step (at a time) to the left.
             */
@@ -2029,7 +2030,7 @@ namespace SEALNetExamples
             the CKKSEncoder would allow us to have done that just as easily. Additions
             and multiplications behave just as one would expect. It is also possible
             to complex conjugate the values in a ciphertext by using the functions
-            Evaluator::complex_conjugate[_inplace](...).
+            Evaluator.ComplexConjugate[Inplace](...).
             */
         }
 
