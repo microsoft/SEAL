@@ -500,6 +500,24 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Check whether the current ciphertext is valid for a given SEALContext.
+        /// If the given SEALContext is not set, the encryption parameters are invalid,
+        /// or the ciphertext data does not match the SEALContext, this function
+        /// returns false. Otherwise, returns true. This function only checks the metadata
+        /// and not the ciphertext data itself.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        public bool IsMetadataValidFor(SEALContext context)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.Ciphertext_IsMetadataValidFor(NativePtr, context.NativePtr, out bool result);
+            return result;
+        }
+
+        /// <summary>
         /// Saves the ciphertext to an output stream. The output is in binary 
         /// format and not human-readable. The output stream must have the 
         /// "binary" flag set.

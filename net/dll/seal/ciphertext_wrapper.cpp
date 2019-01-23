@@ -476,6 +476,18 @@ SEALDLL HRESULT SEALCALL Ciphertext_IsValidFor(void* thisptr, void* context, boo
     return S_OK;
 }
 
+SEALDLL HRESULT SEALCALL Ciphertext_IsMetadataValidFor(void* thisptr, void* context, bool* result)
+{
+    Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    const auto& sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    *result = cipher->is_metadata_valid_for(sharedctx);
+    return S_OK;
+}
+
 SEALDLL HRESULT SEALCALL Ciphertext_Pool(void* thisptr, void** pool)
 {
     Ciphertext* cipher = FromVoid<Ciphertext>(thisptr);

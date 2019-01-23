@@ -144,6 +144,7 @@ namespace SEALNetTest
             Assert.AreEqual(2ul, loaded.Size);
             Assert.AreEqual(4096ul, loaded.PolyModulusDegree);
             Assert.AreEqual(2ul, loaded.CoeffModCount);
+            Assert.IsTrue(loaded.IsMetadataValidFor(context));
 
             ulong ulongCount = cipher.Size * cipher.PolyModulusDegree * cipher.CoeffModCount;
             for (ulong i = 0; i < ulongCount; i++)
@@ -325,6 +326,7 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => cipher.Set(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher.IsValidFor(null));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher.IsMetadataValidFor(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher.Save(null));
 

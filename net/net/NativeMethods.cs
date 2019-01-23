@@ -601,6 +601,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
         [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Ciphertext_IsMetadataValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Ciphertext_Pool(IntPtr thisptr, out IntPtr pool);
 
         #endregion
