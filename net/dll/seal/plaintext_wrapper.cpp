@@ -446,6 +446,18 @@ SEALDLL HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void* contextptr, b
     return S_OK;
 }
 
+SEALDLL HRESULT SEALCALL Plaintext_IsMetadataValidFor(void *thisptr, void* contextptr, bool* result)
+{
+    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+    const auto& sharedctx = SharedContextFromVoid(contextptr);
+    IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    *result = plain->is_metadata_valid_for(sharedctx);
+    return S_OK;
+}
+
 SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, uint64_t count, uint64_t* new_data)
 {
     Plaintext* plain = FromVoid<Plaintext>(thisptr);

@@ -246,6 +246,7 @@ namespace SEALNetTest
 
             Assert.AreNotSame(plain, other);
             Assert.AreEqual(plain, other);
+            Assert.IsTrue(other.IsMetadataValidFor(context));
         }
 
         [TestMethod]
@@ -287,6 +288,7 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
 
             Assert.ThrowsException<ArgumentNullException>(() => plain.IsValidFor(null));
+            Assert.ThrowsException<ArgumentNullException>(() => plain.IsMetadataValidFor(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => plain.Save(null));
 

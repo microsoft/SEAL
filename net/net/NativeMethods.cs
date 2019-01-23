@@ -701,6 +701,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
         [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void Plaintext_IsMetadataValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void Plaintext_SwapData(IntPtr thisptr, ulong count, ulong[] newData);
 
         [DllImport(SEALdll, PreserveSig = false)]
