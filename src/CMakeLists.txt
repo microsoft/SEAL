@@ -343,9 +343,6 @@ if(SEAL_USE_AES_NI_PRNG)
     target_compile_options(seal PUBLIC "-maes")
 endif()
 
-# Generate position independent code by default
-target_compile_options(seal PUBLIC "-fPIC")
-
 # Require thread library
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
