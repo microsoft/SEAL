@@ -291,7 +291,7 @@ namespace Microsoft.Research.SEAL
         /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of the format of the backing array.</seealso>
         /// </remarks>
         /// <param name="index"></param>
-        /// <exception cref="ArgumentOutOfRangeException">if index is not within [0, <see cref="UInt64Count")/></exception>
+        /// <exception cref="ArgumentOutOfRangeException">if index is not within [0, <see cref="UInt64Count"/>)</exception>
         public ulong Data(int index)
         {
             if (index < 0 || index >= (int)UInt64Count)

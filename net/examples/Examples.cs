@@ -31,15 +31,15 @@ namespace SEALNetExamples
             affect the encryption scheme, performance, and the security level. There are 
             three encryption parameters that are necessary to set: 
 
-                - poly_modulus_degree (degree of polynomial modulus);
-                - coeff_modulus ([ciphertext] coefficient modulus);
-                - plain_modulus (plaintext modulus).
+                - PolyModulusDegree (degree of polynomial modulus);
+                - CoeffModulus ([ciphertext] coefficient modulus);
+                - PlainModulus (plaintext modulus).
 
-            A fourth parameter -- noise_standard_deviation -- has a default value 3.20 
+            A fourth parameter -- NoiseStandardDeviation -- has a default value 3.20 
             and should not be necessary to modify unless the user has a specific reason 
             to do so and has an in-depth understanding of the security implications.
 
-            A fifth parameter -- random_generator -- can be set to use customized random
+            A fifth parameter -- RandomGenerator -- can be set to use customized random
             number generators. By default, SEAL uses hardware-based AES in counter mode
             for pseudo-randomness with key generated using std::random_device. If the 
             AES-NI instruction set is not available, all randomness is generated from 
@@ -78,7 +78,7 @@ namespace SEALNetExamples
             parms.PolyModulusDegree = 2048;
 
             /*
-            Next we set the [ciphertext] coefficient modulus (coeff_modulus). The size 
+            Next we set the [ciphertext] coefficient modulus (CoeffModulus). The size 
             of the coefficient modulus should be thought of as the most significant 
             factor in determining the noise budget in a freshly encrypted ciphertext: 
             bigger means more noise budget, which is desirable. On the other hand, 
@@ -99,9 +99,9 @@ namespace SEALNetExamples
             Our recommended values for the coefficient modulus can be easily accessed 
             through the functions 
 
-                coeff_modulus_128bit(int)
-                coeff_modulus_192bit(int)
-                coeff_modulus_256bit(int)
+                DefaultParams.CoeffModulus128(int)
+                DefaultParams.CoeffModulus192(int)
+                DefaultParams.CoeffModulus256(int)
 
             for 128-bit, 192-bit, and 256-bit security levels. The integer parameter is 
             the degree of the polynomial modulus used.
@@ -110,24 +110,25 @@ namespace SEALNetExamples
             of distinct primes of size up to 60 bits. When we talk about the size of the 
             coefficient modulus we mean the bit length of the product of the primes. The 
             small primes are represented by instances of the SmallModulus class so for
-            example coeff_modulus_128bit(int) returns a vector of SmallModulus instances. 
+            example DefaultParams.CoeffModulus128(int) returns an enumeration of SmallModulus
+            instances. 
 
             It is possible for the user to select their own small primes. Since SEAL uses
             the Number Theoretic Transform (NTT) for polynomial multiplications modulo the
             factors of the coefficient modulus, the factors need to be prime numbers
-            congruent to 1 modulo 2*poly_modulus_degree. We have generated a list of such
+            congruent to 1 modulo 2*PolyModulusDegree. We have generated a list of such
             prime numbers of various sizes that the user can easily access through the
             functions 
 
-                small_mods_60bit(int)
-                small_mods_50bit(int)
-                small_mods_40bit(int)
-                small_mods_30bit(int)
+                DefaultParams.SmallMods60bit(int)
+                DefaultParams.SmallMods50bit(int)
+                DefaultParams.SmallMods40bit(int)
+                DefaultParams.SmallMods30bit(int)
 
             each of which gives access to an array of primes of the denoted size. These 
             primes are located in the source file util/globals.cpp. Again, please keep 
-            in mind that the choice of coeff_modulus has a dramatic effect on security 
-            and should almost always be obtained through coeff_modulus_xxx(int).
+            in mind that the choice of CoeffModulus has a dramatic effect on security 
+            and should almost always be obtained through CoeffModulusXXX(int).
 
             Performance is mainly affected by the size of the polynomial modulus, and 
             the number of prime factors in the coefficient modulus; hence in some cases
@@ -150,10 +151,10 @@ namespace SEALNetExamples
             essential to try to keep the plaintext data type as small as possible for 
             best performance. The noise budget in a freshly encrypted ciphertext is 
 
-                ~ log2(coeff_modulus/plain_modulus) (bits)
+                ~ log2(CoeffModulus/PlainModulus) (bits)
 
             and the noise budget consumption in a homomorphic multiplication is of the 
-            form log2(plain_modulus) + (other terms).
+            form log2(PlainModulus) + (other terms).
             */
             parms.PlainModulus = new SmallModulus(1 << 8);
 
@@ -171,7 +172,7 @@ namespace SEALNetExamples
 
             /*
             Plaintexts in the BFV scheme are polynomials with coefficients integers 
-            modulo plain_modulus. This is not a very practical object to encrypt: much
+            modulo PlainModulus. This is not a very practical object to encrypt: much
             more useful would be encrypting integers or floating point numbers. For this
             we need an `encoding scheme' to convert data from integer representation to
             an appropriate plaintext polynomial representation than can subsequently be 
@@ -187,7 +188,7 @@ namespace SEALNetExamples
             is encoded as the polynomial 1x^4 + 1x^3 + 1x^1. Conversely, plaintext
             polynomials are decoded by evaluating them at x=2. For negative numbers the
             IntegerEncoder simply stores all coefficients as either 0 or -1, where -1 is
-            represented by the unsigned integer plain_modulus - 1 in memory.
+            represented by the unsigned integer PlainModulus - 1 in memory.
 
             Since encrypted computations operate on the polynomials rather than on the
             encoded integers themselves, the polynomial coefficients will grow in the
@@ -201,10 +202,10 @@ namespace SEALNetExamples
             further computations will quickly increase the coefficients much more. 
             Decoding will still work correctly in this case (evaluating the polynomial 
             at x=2), but since the coefficients of plaintext polynomials are really 
-            integers modulo plain_modulus, implicit reduction modulo plain_modulus may 
+            integers modulo PlainModulus, implicit reduction modulo PlainModulus may 
             yield unexpected results. For example, adding 1x^4 + 1x^3 + 1x^1 to itself 
-            plain_modulus many times will result in the constant polynomial 0, which is 
-            clearly not equal to 26 * plain_modulus. It can be difficult to predict when 
+            PlainModulus many times will result in the constant polynomial 0, which is 
+            clearly not equal to 26 * PlainModulus. It can be difficult to predict when 
             such overflow will take place especially when computing several sequential
             multiplications. BatchEncoder (discussed later) makes it easier to predict 
             encoding overflow conditions but has a stronger restriction on the size of 
@@ -216,13 +217,13 @@ namespace SEALNetExamples
             the CKKSEncoder (discussed later).
 
             [BatchEncoder]
-            If plain_modulus is a prime congruent to 1 modulo 2*poly_modulus_degree, the 
-            plaintext elements can be viewed as 2-by-(poly_modulus_degree / 2) matrices
-            with elements integers modulo plain_modulus. When a desired computation can 
+            If PlainModulus is a prime congruent to 1 modulo 2*PolyModulusDegree, the 
+            plaintext elements can be viewed as 2-by-(PolyModulusDegree / 2) matrices
+            with elements integers modulo PlainModulus. When a desired computation can 
             be vectorized, using BatchEncoder can result in a massive performance boost
             over naively encrypting and operating on each input number separately. Thus, 
             in more complicated computations this is likely to be by far the most 
-            important and useful encoder. In example_bfv_basics_iii() we show how to
+            important and useful encoder. In ExampleBFVBasicsIII() we show how to
             operate on encrypted matrix plaintexts.
 
             In this example we use the IntegerEncoder due to its simplicity. 
@@ -326,7 +327,7 @@ namespace SEALNetExamples
 
             /*
             Multiplication consumes a lot of noise budget. This is clearly seen in the
-            print-out. The user can change the plain_modulus to see its effect on the
+            print-out. The user can change the PlainModulus to see its effect on the
             rate of noise budget consumption.
             */
             Console.WriteLine($"Noise budget in (-encrypted1 + encrypted2) * encrypted2: {decryptor.InvariantNoiseBudget(encrypted1)} bits");
@@ -386,7 +387,7 @@ namespace SEALNetExamples
 
             There are actually two more types of keys in SEAL: `relinearization keys' 
             and `Galois keys'. In this example we will discuss relinearization keys, and 
-            Galois keys will be discussed later in example_bfv_basics_iii().
+            Galois keys will be discussed later in ExampleBFVBasicsIII().
             */
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
@@ -414,8 +415,8 @@ namespace SEALNetExamples
 
             /*
             In SEAL, a valid ciphertext consists of two or more polynomials whose 
-            coefficients are integers modulo the product of the primes in coeff_modulus. 
-            The current size of a ciphertext can be found using Ciphertext::size().
+            coefficients are integers modulo the product of the primes in CoeffModulus. 
+            The current size of a ciphertext can be found using Ciphertext.Size.
             A freshly encrypted ciphertext always has size 2.
             */
             Console.WriteLine($"Size of a fresh encryption: {encrypted.Size}");
@@ -440,9 +441,9 @@ namespace SEALNetExamples
             It does not matter that the size has grown -- decryption works as usual.
             Observe from the print-out that the coefficients in the plaintext have grown 
             quite large. One more squaring would cause some of them to wrap around the
-            plain_modulus (0x400) and as a result we would no longer obtain the expected 
+            PlainModulus (0x400) and as a result we would no longer obtain the expected 
             result as an integer-coefficient polynomial. We can fix this problem to some 
-            extent by increasing plain_modulus. This makes sense since we still have 
+            extent by increasing PlainModulus. This makes sense since we still have 
             plenty of noise budget left.
             */
             Plaintext plain2 = new Plaintext();
@@ -599,7 +600,7 @@ namespace SEALNetExamples
 
             /*
             Observe from the print-out that the polynomial coefficients are no longer
-            correct as integers: they have been reduced modulo plain_modulus, and there
+            correct as integers: they have been reduced modulo PlainModulus, and there
             was no warning sign about this. It might be necessary to carefully analyze
             the computation to make sure such overflow does not occur unexpectedly.
 
@@ -692,7 +693,7 @@ namespace SEALNetExamples
             BatchEncoder batchEncoder = new BatchEncoder(context);
 
             /*
-            The total number of batching `slots' is poly_modulus_degree. The matrices 
+            The total number of batching `slots' is PolyModulusDegree. The matrices 
             we encrypt are of size 2-by-(slot_count / 2).
             */
             ulong slotCount = batchEncoder.SlotCount;
@@ -849,224 +850,229 @@ namespace SEALNetExamples
         {
             Utilities.PrintExampleBanner("Example: BFV Basics IV");
 
-            //            /*
-            //            In this example we describe the concept of `parms_id' in the context of the
-            //            BFV scheme and show how modulus switching can be used for improving both
-            //            computation and communication cost.
+            /*
+            In this example we describe the concept of `parms_id' in the context of the
+            BFV scheme and show how modulus switching can be used for improving both
+            computation and communication cost.
 
-            //            We start by setting up medium size parameters for BFV as usual.
-            //            */
-            //            EncryptionParameters parms(scheme_type::BFV);
+            We start by setting up medium size parameters for BFV as usual.
+            */
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 8192,
+                CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192),
+                PlainModulus = new SmallModulus(1 << 20)
+            };
 
-            //            parms.set_poly_modulus_degree(8192);
-            //            parms.set_coeff_modulus(coeff_modulus_128(8192));
-            //            parms.set_plain_modulus(1 << 20);
+            /*
+            In SEAL a particular set of encryption parameters (excluding the random
+            number generator) is identified uniquely by a SHA-3 hash of the parameters.
+            This hash is called the `parms_id' and can be easily accessed and printed
+            at any time. The hash will change as soon as any of the relevant parameters
+            is changed.
+            */
+            Console.WriteLine($"Current ParmsId: {parms.ParmsId}");
+            Console.WriteLine("Changing PlainModulus...");
+            parms.SetPlainModulus((1 << 20) + 1);
+            Console.WriteLine($"Current ParmsId: {parms.ParmsId}");
+            Console.WriteLine();
 
-            //            /*
-            //            In SEAL a particular set of encryption parameters (excluding the random
-            //            number generator) is identified uniquely by a SHA-3 hash of the parameters.
-            //            This hash is called the `parms_id' and can be easily accessed and printed
-            //            at any time. The hash will change as soon as any of the relevant parameters
-            //            is changed.
-            //            */
-            //            cout << "Current parms_id: " << parms.parms_id() << endl;
-            //            cout << "Changing plain_modulus ..." << endl;
-            //            parms.set_plain_modulus((1 << 20) + 1);
-            //            cout << "Current parms_id: " << parms.parms_id() << endl << endl;
+            /*
+            Create the context.
+            */
+            SEALContext context = SEALContext.Create(parms);
+            Utilities.PrintParameters(context);
 
-            //            /*
-            //            Create the context.
-            //            */
-            //            auto context = SEALContext::Create(parms);
-            //            print_parameters(context);
+            /*
+            All keys and ciphertext, and in the CKKS also plaintexts, carry the parms_id
+            for the encryption parameters they are created with, allowing SEAL to very 
+            quickly determine whether the objects are valid for use and compatible for 
+            homomorphic computations. SEAL takes care of managing, and verifying the 
+            parms_id for all objects so the user should have no reason to change it by 
+            hand. 
+            */
+            KeyGenerator keygen = new KeyGenerator(context);
+            PublicKey publicKey = keygen.PublicKey;
+            SecretKey secretKey = keygen.SecretKey;
+            Console.WriteLine($"ParmsId of public key: {publicKey.ParmsId}");
+            Console.WriteLine($"ParmsId of secret key: {secretKey.ParmsId}");
 
-            //            /*
-            //            All keys and ciphertext, and in the CKKS also plaintexts, carry the parms_id
-            //            for the encryption parameters they are created with, allowing SEAL to very 
-            //            quickly determine whether the objects are valid for use and compatible for 
-            //            homomorphic computations. SEAL takes care of managing, and verifying the 
-            //            parms_id for all objects so the user should have no reason to change it by 
-            //            hand. 
-            //            */
-            //            KeyGenerator keygen(context);
-            //            auto public_key = keygen.public_key();
-            //            auto secret_key = keygen.secret_key();
-            //            cout << "parms_id of public_key: " << public_key.parms_id() << endl;
-            //            cout << "parms_id of secret_key: " << secret_key.parms_id() << endl;
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Evaluator evaluator = new Evaluator(context);
+            Decryptor decryptor = new Decryptor(context, secretKey);
 
-            //            Encryptor encryptor(context, public_key);
-            //            Evaluator evaluator(context);
-            //            Decryptor decryptor(context, secret_key);
+            /*
+            Note how in the BFV scheme plaintexts do not carry the parms_id, but 
+            ciphertexts do.
+            */
+            Plaintext plain = new Plaintext("1x^3 + 2x^2 + 3x^1 + 4");
+            Ciphertext encrypted = new Ciphertext();
+            encryptor.Encrypt(plain, encrypted);
+            Console.WriteLine($"ParmsId of plain: {plain.ParmsId} (not set)");
+            Console.WriteLine($"ParmsId of encrypted: {encrypted.ParmsId}");
+            Console.WriteLine();
 
-            //            /*
-            //            Note how in the BFV scheme plaintexts do not carry the parms_id, but 
-            //            ciphertexts do.
-            //            */
-            //            Plaintext plain("1x^3 + 2x^2 + 3x^1 + 4");
-            //            Ciphertext encrypted;
-            //            encryptor.encrypt(plain, encrypted);
-            //            cout << "parms_id of plain: " << plain.parms_id() << " (not set)" << endl;
-            //            cout << "parms_id of encrypted: " << encrypted.parms_id() << endl << endl;
+            /*
+            When SEALContext is created from a given EncryptionParameters instance,
+            SEAL automatically creates a so-called "modulus switching chain", which is
+            a chain of other encryption parameters derived from the original set.
+            The parameters in the modulus switching chain are the same as the original 
+            parameters with the exception that size of the coefficient modulus is
+            decreasing going down the chain. More precisely, each parameter set in the
+            chain attempts to remove one of the coefficient modulus primes from the
+            previous set; this continues until the parameter set is no longer valid
+            (e.g. PlainModulus is larger than the remaining CoeffModulus). It is easy
+            to walk through the chain and access all the parameter sets. Additionally,
+            each parameter set in the chain has a `chain_index' that indicates its
+            position in the chain so that the last set has index 0. We say that a set
+            of encryption parameters, or an object carrying those encryption parameters,
+            is at a higher level in the chain than another set of parameters if its the
+            chain index is bigger, i.e. it is earlier in the chain. 
+            */
+            SEALContext.ContextData contextData;
+            for (contextData = context.FirstContextData; null != contextData; contextData = contextData.NextContextData)
+            {
+                Console.WriteLine($"Chain index: {contextData.ChainIndex}");
+                Console.WriteLine($"ParmsId: {contextData.Parms.ParmsId}");
+                Console.Write("Coeff Modulus primes: ");
+                //for (const auto &prime : context_data->parms().CoeffModulus())
+                //{
+                //cout << prime.value() << " ";
+                //}
 
-            //            /*
-            //            When SEALContext is created from a given EncryptionParameters instance,
-            //            SEAL automatically creates a so-called "modulus switching chain", which is
-            //            a chain of other encryption parameters derived from the original set.
-            //            The parameters in the modulus switching chain are the same as the original 
-            //            parameters with the exception that size of the coefficient modulus is
-            //            decreasing going down the chain. More precisely, each parameter set in the
-            //            chain attempts to remove one of the coefficient modulus primes from the
-            //            previous set; this continues until the parameter set is no longer valid
-            //            (e.g. plain_modulus is larger than the remaining coeff_modulus). It is easy
-            //            to walk through the chain and access all the parameter sets. Additionally,
-            //            each parameter set in the chain has a `chain_index' that indicates its
-            //            position in the chain so that the last set has index 0. We say that a set
-            //            of encryption parameters, or an object carrying those encryption parameters,
-            //            is at a higher level in the chain than another set of parameters if its the
-            //            chain index is bigger, i.e. it is earlier in the chain. 
-            //            */
-            //            for (auto context_data = context->context_data(); context_data;
-            //                context_data = context_data->next_context_data())
-            //            {
-            //                cout << "Chain index: " << context_data->chain_index() << endl;
-            //                cout << "parms_id: " << context_data->parms().parms_id() << endl;
-            //                cout << "coeff_modulus primes: ";
-            //                cout << hex;
-            //                for (const auto &prime : context_data->parms().coeff_modulus())
-            //        {
-            //                cout << prime.value() << " ";
-            //            }
-            //            cout << dec << endl;
-            //            cout << "\\" << endl;
-            //            cout << " \\-->" << endl;
-            //        }
-            //        cout << "End of chain reached" << endl << endl;
+                foreach (var prime in contextData.Parms.CoeffModulus)
+                {
+                    Console.Write($"{Utilities.ULongToString(prime.Value)} ");
+                }
+                Console.WriteLine();
+                Console.WriteLine("\\");
+                Console.WriteLine(" \\-->");
+            }
+            Console.WriteLine("End of chain reached");
+            Console.WriteLine();
 
-            //    /*
-            //    Modulus switching changes the ciphertext parameters to any set down the
-            //    chain from the current one. The function mod_switch_to_next(...) always
-            //    switches to the next set down the chain, whereas mod_switch_to(...) switches
-            //    to a parameter set down the chain corresponding to a given parms_id.
-            //    */
-            //    auto context_data = context->context_data();
-            //    while(context_data->next_context_data()) 
-            //    {
-            //        cout << "Chain index: " << context_data->chain_index() << endl;
-            //        cout << "parms_id of encrypted: " << encrypted.parms_id() << endl;
-            //        cout << "Noise budget at this level: "
-            //            << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-            //        cout << "\\" << endl;
-            //        cout << " \\-->" << endl;
-            //        evaluator.mod_switch_to_next_inplace(encrypted);
-            //        context_data = context_data->next_context_data();
-            //    }
-            //    cout << "Chain index: " << context_data->chain_index() << endl;
-            //    cout << "parms_id of encrypted: " << encrypted.parms_id() << endl;
-            //    cout << "Noise budget at this level: "
-            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-            //    cout << "\\" << endl;
-            //    cout << " \\-->" << endl;
-            //    cout << "End of chain reached" << endl << endl;
+            /*
+            Modulus switching changes the ciphertext parameters to any set down the
+            chain from the current one. The function mod_switch_to_next(...) always
+            switches to the next set down the chain, whereas mod_switch_to(...) switches
+            to a parameter set down the chain corresponding to a given parms_id.
+            */
+            contextData = context.FirstContextData;
+            while (null != contextData.NextContextData)
+            {
+                Console.WriteLine($"Chain index: {contextData.ChainIndex}");
+                Console.WriteLine($"ParmsId of encrypted: {encrypted.ParmsId}");
+                Console.WriteLine($"Noise budget at this level: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+                Console.WriteLine("\\");
+                Console.WriteLine(" \\-->");
+                evaluator.ModSwitchToNextInplace(encrypted);
+                contextData = contextData.NextContextData;
+            }
 
-            //    /*
-            //    At this point it is hard to see any benefit in doing this: we lost a huge 
-            //    amount of noise budget (i.e. computational power) at each switch and seemed
-            //    to get nothing in return. The ciphertext still decrypts to the exact same
-            //    value.
-            //    */
-            //    decryptor.decrypt(encrypted, plain);
-            //    cout << "Decryption: " << plain.to_string() << endl << endl;
+            Console.WriteLine($"Chain index: {contextData.ChainIndex}");
+            Console.WriteLine($"ParmsId of encrypted: {encrypted.ParmsId}");
+            Console.WriteLine($"Noise budget at this level: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+            Console.WriteLine("\\");
+            Console.WriteLine(" \\-->");
+            Console.WriteLine("End of chain reached");
+            Console.WriteLine();
 
-            //    /*
-            //    However, there is a hidden benefit: the size of the ciphertext depends
-            //    linearly on the number of primes in the coefficient modulus. Thus, if there 
-            //    is no need or intention to perform any more computations on a given 
-            //    ciphertext, we might as well switch it down to the smallest (last) set of 
-            //    parameters in the chain before sending it back to the secret key holder for 
-            //    decryption.
+            /*
+            At this point it is hard to see any benefit in doing this: we lost a huge 
+            amount of noise budget (i.e. computational power) at each switch and seemed
+            to get nothing in return. The ciphertext still decrypts to the exact same
+            value.
+            */
+            decryptor.Decrypt(encrypted, plain);
+            Console.WriteLine($"Decryption: {plain.ToString()}");
+            Console.WriteLine();
 
-            //    Also the lost noise budget is actually not as issue at all, if we do things
-            //    right, as we will see below. First we recreate the original ciphertext (with 
-            //    largest parameters) and perform some simple computations on it.
-            //    */
-            //    encryptor.encrypt(plain, encrypted);
-            //    auto relin_keys = keygen.relin_keys(60);
-            //    cout << "Noise budget before squaring: "
-            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-            //    evaluator.square_inplace(encrypted);
-            //    evaluator.relinearize_inplace(encrypted, relin_keys);
-            //    cout << "Noise budget after squaring: "
-            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+            /*
+            However, there is a hidden benefit: the size of the ciphertext depends
+            linearly on the number of primes in the coefficient modulus. Thus, if there 
+            is no need or intention to perform any more computations on a given 
+            ciphertext, we might as well switch it down to the smallest (last) set of 
+            parameters in the chain before sending it back to the secret key holder for 
+            decryption.
 
-            //    /*
-            //    From the print-out we see that the noise budget after these computations is 
-            //    just slightly below the level we would have in a fresh ciphertext after one 
-            //    modulus switch (135 bits). Surprisingly, in this case modulus switching has 
-            //    no effect at all on the modulus.
-            //    */ 
-            //    evaluator.mod_switch_to_next_inplace(encrypted);
-            //    cout << "Noise budget after modulus switching: "
-            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+            Also the lost noise budget is actually not as issue at all, if we do things
+            right, as we will see below. First we recreate the original ciphertext (with 
+            largest parameters) and perform some simple computations on it.
+            */
+            encryptor.Encrypt(plain, encrypted);
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60);
+            Console.WriteLine($"Noise budget before squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+            evaluator.SquareInplace(encrypted);
+            evaluator.RelinearizeInplace(encrypted, relinKeys);
+            Console.WriteLine($"Noise budget after squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
 
-            //    /*
-            //    This means that there is no harm at all in dropping some of the coefficient
-            //    modulus after doing enough computations. In some cases one might want to
-            //    switch to a lower level slightly earlier, actually sacrificing some of the 
-            //    noise budget in the process, to gain computational performance from having
-            //    a smaller coefficient modulus. We see from the print-out that that the next 
-            //    modulus switch should be done ideally when the noise budget reaches 81 bits. 
-            //    */
-            //    evaluator.square_inplace(encrypted);
-            //    evaluator.relinearize_inplace(encrypted, relin_keys);
-            //    cout << "Noise budget after squaring: "
-            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-            //    evaluator.mod_switch_to_next_inplace(encrypted);
-            //    cout << "Noise budget after modulus switching: "
-            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-            //    evaluator.square_inplace(encrypted);
-            //    evaluator.relinearize_inplace(encrypted, relin_keys);
-            //    cout << "Noise budget after squaring: "
-            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-            //    evaluator.mod_switch_to_next_inplace(encrypted);
-            //    cout << "Noise budget after modulus switching: "
-            //        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl << endl;
+            /*
+            From the print-out we see that the noise budget after these computations is 
+            just slightly below the level we would have in a fresh ciphertext after one 
+            modulus switch (135 bits). Surprisingly, in this case modulus switching has 
+            no effect at all on the modulus.
+            */
+            evaluator.ModSwitchToNextInplace(encrypted);
+            Console.WriteLine($"Noise budget after modulus switching: {decryptor.InvariantNoiseBudget(encrypted)} bits");
 
-            //    /*
-            //    At this point the ciphertext still decrypts correctly, has very small size,
-            //    and the computation was as efficient as possible. Note that the decryptor
-            //    can be used to decrypt a ciphertext at any level in the modulus switching
-            //    chain as long as the secret key is at a higher level in the same chain.
-            //    */
-            //    decryptor.decrypt(encrypted, plain);
-            //    cout << "Decryption of eighth power: " << plain.to_string() << endl << endl;
+            /*
+            This means that there is no harm at all in dropping some of the coefficient
+            modulus after doing enough computations. In some cases one might want to
+            switch to a lower level slightly earlier, actually sacrificing some of the 
+            noise budget in the process, to gain computational performance from having
+            a smaller coefficient modulus. We see from the print-out that that the next 
+            modulus switch should be done ideally when the noise budget reaches 81 bits. 
+            */
+            evaluator.SquareInplace(encrypted);
+            evaluator.RelinearizeInplace(encrypted, relinKeys);
+            Console.WriteLine($"Noise budget after squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+            evaluator.ModSwitchToNextInplace(encrypted);
+            Console.WriteLine($"Noise budget after modulus switching: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+            evaluator.SquareInplace(encrypted);
+            evaluator.RelinearizeInplace(encrypted, relinKeys);
+            Console.WriteLine($"Noise budget after squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+            evaluator.ModSwitchToNextInplace(encrypted);
+            Console.WriteLine($"Noise budget after modulus switching: {decryptor.InvariantNoiseBudget(encrypted)} bits");
+            Console.WriteLine();
 
-            //    /*
-            //    In BFV modulus switching is not necessary and in some cases the user might
-            //    not want to create the modulus switching chain. This can be done by passing
-            //    a bool `false' to the SEALContext::Create(...) function as follows.
-            //    */
-            //    context = SEALContext::Create(parms, false);
+            /*
+            At this point the ciphertext still decrypts correctly, has very small size,
+            and the computation was as efficient as possible. Note that the decryptor
+            can be used to decrypt a ciphertext at any level in the modulus switching
+            chain as long as the secret key is at a higher level in the same chain.
+            */
+            decryptor.Decrypt(encrypted, plain);
+            Console.WriteLine($"Decryption of eighth power: {plain.ToString()}");
+            Console.WriteLine();
 
-            //    /*
-            //    We can check that indeed the modulus switching chain has not been created.
-            //    The following loop should execute only once.
-            //    */
-            //    for (context_data = context->context_data(); context_data;
-            //        context_data = context_data->next_context_data())
-            //    {
-            //        cout << "Chain index: " << context_data->chain_index() << endl;
-            //        cout << "parms_id: " << context_data->parms().parms_id() << endl;
-            //        cout << "coeff_modulus primes: ";
-            //        cout << hex;
-            //        for (const auto &prime : context_data->parms().coeff_modulus())
-            //        {
-            //            cout << prime.value() << " ";
-            //        }
-            //cout << dec << endl;
-            //        cout << "\\" << endl;
-            //        cout << " \\-->" << endl;
-            //    }
-            //    cout << "End of chain reached" << endl << endl;
+            /*
+            In BFV modulus switching is not necessary and in some cases the user might
+            not want to create the modulus switching chain. This can be done by passing
+            a bool `false' to the SEALContext::Create(...) function as follows.
+            */
+            context = SEALContext.Create(parms, expandModChain: false);
+
+            /*
+            We can check that indeed the modulus switching chain has not been created.
+            The following loop should execute only once.
+            */
+            for (contextData = context.FirstContextData; null != contextData; contextData = contextData.NextContextData)
+            {
+                Console.WriteLine($"Chain index: {contextData.ChainIndex}");
+                Console.WriteLine($"ParmsId: {contextData.Parms.ParmsId}");
+                Console.Write("CoeffModulus primes: ");
+
+                foreach (SmallModulus prime in contextData.Parms.CoeffModulus)
+                {
+                    Console.Write($"{Utilities.ULongToString(prime.Value)} ");
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("\\");
+                Console.WriteLine(" \\-->");
+            }
+
+            Console.WriteLine("End of chain reached");
 
             /*
             It is very important to understand how this example works since in the CKKS 
@@ -1396,7 +1402,7 @@ namespace SEALNetExamples
             /*
             We start by creating encryption parameters for the CKKS scheme. One major
             difference to the BFV scheme is that the CKKS scheme does not use the
-            plain_modulus parameter.
+            PlainModulus parameter.
             */
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
             parms.PolyModulusDegree = 8192;
@@ -1435,17 +1441,17 @@ namespace SEALNetExamples
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             /*
-            In CKKS the number of slots is poly_modulus_degree / 2 and each slot encodes 
+            In CKKS the number of slots is PolyModulusDegree / 2 and each slot encodes 
             one complex (or real) number. This should be contrasted with BatchEncoder in
-            the BFV scheme, where the number of slots is equal to poly_modulus_degree 
-            and they are arranged into a 2-by-(poly_modulus_degree / 2) matrix. 
+            the BFV scheme, where the number of slots is equal to PolyModulusDegree 
+            and they are arranged into a 2-by-(PolyModulusDegree / 2) matrix. 
             */
             ulong slotCount = encoder.SlotCount;
             Console.WriteLine($"Number of slots: {slotCount}");
 
             /*
             We create a small vector to encode; the CKKSEncoder will implicitly pad it 
-            with zeros to full size (poly_modulus_degree / 2) when encoding. 
+            with zeros to full size (PolyModulusDegree / 2) when encoding. 
             */
             List<double> input = new List<double> { 0.0, 1.1, 2.2, 3.3 };
             Console.WriteLine("Input vector: ");
@@ -1458,9 +1464,9 @@ namespace SEALNetExamples
             It is instructive to think of the scale as determining the bit-precision of 
             the encoding; naturally it will also affect the precision of the result. 
 
-            In CKKS the message is stored modulo coeff_modulus (in BFV it is stored 
-            modulo plain_modulus), so the scale must not get too close to the total size 
-            of coeff_modulus. In this case our coeff_modulus is quite large (218 bits) 
+            In CKKS the message is stored modulo CoeffModulus (in BFV it is stored 
+            modulo PlainModulus), so the scale must not get too close to the total size 
+            of CoeffModulus. In this case our CoeffModulus is quite large (218 bits) 
             so we have little to worry about in this regard. For this example a 60-bit 
             scale is more than enough.
             */
@@ -1496,7 +1502,7 @@ namespace SEALNetExamples
             /*
             Basic operations on the ciphertexts are still easy to do. Here we square 
             the ciphertext, decrypt, decode, and print the result. We note also that 
-            decoding returns a vector of full size (poly_modulus_degree / 2); this is 
+            decoding returns a vector of full size (PolyModulusDegree / 2); this is 
             because of the implicit zero-padding mentioned above. 
             */
             evaluator.SquareInplace(encrypted);
@@ -1517,16 +1523,16 @@ namespace SEALNetExamples
             CKKS supports modulus switching just like the BFV scheme. We can switch
             away parts of the coefficient modulus.
             */
-            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine("Modulus switching...");
             evaluator.ModSwitchToNextInplace(encrypted);
-            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
             /*
             At this point if we tried switching further SEAL would throw an exception.
             This is because the scale is 120 bits and after modulus switching we would
-            be down to a total coeff_modulus smaller than that, which is not enough to
+            be down to a total CoeffModulus smaller than that, which is not enough to
             contain the plaintext. We decrypt and decode, and observe that the result 
             is the same as before. 
             */
@@ -1651,7 +1657,7 @@ namespace SEALNetExamples
             evaluator.SquareInplace(encrypted);
             evaluator.RelinearizeInplace(encrypted, relinKeys);
             Console.WriteLine($"Scale in encrypted after squaring: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
-            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
             /*
@@ -1676,11 +1682,11 @@ namespace SEALNetExamples
             precisely 54 bits. Finer granularity rescaling would require smaller primes
             to be used, but this might lead to performance problems as the computational 
             cost of homomorphic operations and the size of ciphertexts depends linearly 
-            on the number of primes in coeff_modulus.
+            on the number of primes in CoeffModulus.
             */
             Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
             Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
-            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
             /*
@@ -1696,7 +1702,7 @@ namespace SEALNetExamples
 
             Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
             Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
-            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
             /*
@@ -1714,7 +1720,7 @@ namespace SEALNetExamples
 
             Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
             Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
-            Console.WriteLine($"Current coeff_modulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
             /*
@@ -1808,7 +1814,7 @@ namespace SEALNetExamples
             Console.WriteLine();
 
             /*
-            Now encode and encrypt the input using the last of the coeff_modulus primes 
+            Now encode and encrypt the input using the last of the CoeffModulus primes 
             as the scale for a reason that will become clear soon.
             */
             double scale = parms.CoeffModulus.Last().Value;
@@ -1882,7 +1888,7 @@ namespace SEALNetExamples
 
             /*
             Let us carefully consider what the scales are at this point. If we denote 
-            the primes in coeff_modulus as q1, q2, q3, q4 (order matters here), then all
+            the primes in CoeffModulus as q1, q2, q3, q4 (order matters here), then all
             fresh encodings start with a scale equal to q4 (this was a choice we made 
             above). After the computations above the scale in encrypted_x3 is q4^2/q3:
 
@@ -1957,9 +1963,9 @@ namespace SEALNetExamples
             /*
             At this point if we wanted to multiply encrypted_result one more time, the 
             other multiplicand would have to have scale less than 40 bits, otherwise 
-            the scale would become larger than the coeff_modulus itself. 
+            the scale would become larger than the CoeffModulus itself. 
             */
-            Console.WriteLine($"Current coeff_modulus size for encrypted_result: {context.GetContextData(encryptedResult.ParmsId).TotalCoeffModulusBitCount} bits");
+            Console.WriteLine($"Current CoeffModulus size for encrypted_result: {context.GetContextData(encryptedResult.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
             /*
