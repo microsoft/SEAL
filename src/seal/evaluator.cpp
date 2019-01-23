@@ -1857,6 +1857,11 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
+        // Resize destination
+        destination.resize(context_, next_parms.parms_id(), encrypted_size);
+        destination.is_ntt_form() = true;
+        destination.scale() = encrypted.scale();
+
         size_t rns_poly_total_count = next_coeff_mod_count * coeff_count;
 
         for (size_t i = 0; i < encrypted_size; i++)
@@ -1867,11 +1872,6 @@ namespace seal
                     destination.data() + (i * rns_poly_total_count) + (j * coeff_count));
             }
         }
-
-        // Resize destination
-        destination.resize(context_, next_parms.parms_id(), encrypted_size);
-        destination.is_ntt_form() = true;
-        destination.scale() = encrypted.scale();
     }
 
     void Evaluator::mod_switch_drop_to_next(Plaintext &plain)
