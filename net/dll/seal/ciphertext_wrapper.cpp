@@ -269,7 +269,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_ParmsId(void* thisptr, uint64_t* parms_id)
     IfNullRet(cipher, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    for (int i = 0; i < cipher->parms_id().size(); i++)
+    for (size_t i = 0; i < cipher->parms_id().size(); i++)
     {
         parms_id[i] = cipher->parms_id()[i];
     }
@@ -387,7 +387,7 @@ SEALDLL HRESULT SEALCALL Ciphertext_GetDataAt2(void* thisptr, uint64_t poly_inde
         cipher->poly_modulus_degree(), cipher->coeff_mod_count());
 
     // poly_index is verified by the data method, we need to verify coeff_index ourselves.
-    if (coeff_index < 0 || coeff_index >= poly_uint64_count)
+    if (coeff_index >= poly_uint64_count)
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
 
     try

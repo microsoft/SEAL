@@ -142,7 +142,7 @@ SEALDLL HRESULT SEALCALL EncParams_GetParmsId(void* thisptr, uint64_t* parms_id)
 
     // We will assume the array is always size sha3_block_uint64_count
     const auto& parmsid = params->parms_id();
-    for (int i = 0; static_cast<size_t>(i) < util::HashFunction::sha3_block_uint64_count; i++)
+    for (size_t i = 0; i < util::HashFunction::sha3_block_uint64_count; i++)
     {
         parms_id[i] = parmsid[i];
     }

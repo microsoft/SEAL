@@ -212,7 +212,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Set1(void* thispt, int index, uint8_t value)
     BigUInt* biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
 
-    if (index < 0 || index >= biguint->byte_count())
+    if (index < 0 || static_cast<size_t>(index) >= biguint->byte_count())
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }

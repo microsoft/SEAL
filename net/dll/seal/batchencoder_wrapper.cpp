@@ -53,7 +53,7 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Encode1(void* thisptr, uint64_t count, uin
     IfNullRet(plain, E_POINTER);
 
     vector<uint64_t> valvec(count);
-    for (int i = 0; i < count; i++)
+    for (uint64_t i = 0; i < count; i++)
     {
         valvec[i] = values[i];
     }
@@ -78,7 +78,7 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Encode2(void* thisptr, uint64_t count, int
     IfNullRet(plain, E_POINTER);
 
     vector<int64_t> valvec(count);
-    for (int i = 0; i < count; i++)
+    for (uint64_t i = 0; i < count; i++)
     {
         valvec[i] = values[i];
     }
@@ -135,7 +135,7 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode1(void* thisptr, void* plain, uint64
             return S_OK;
         }
 
-        for (int i = 0; i < *count; i++)
+        for (uint64_t i = 0; i < *count; i++)
         {
             destination[i] = result[i];
         }
@@ -170,7 +170,7 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode2(void* thisptr, void* plain, uint64
             return S_OK;
         }
 
-        for (int i = 0; i < *count; i++)
+        for (uint64_t i = 0; i < *count; i++)
         {
             destination[i] = result[i];
         }

@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(SEALExamples VERSION 3.1.0 LANGUAGES CXX)
+project(SEALDLL VERSION 3.1.0 LANGUAGES CXX)
 
 # Library will be in ../../lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../../lib)
@@ -17,8 +17,8 @@ find_package(SEAL 3.1.0 EXACT REQUIRED)
 # Link SEAL
 target_link_libraries(sealdll SEAL::seal)
 
-# Shared library needs to be relocatable
-#target_compile_options(sealdll PUBLIC "-fPIC")
+# Turn on warnings
+target_compile_options(sealdll PUBLIC "-Wall" "-Wextra" "-Wconversion" "-Wshadow")
 
 # Add source files to library
 add_subdirectory(seal)

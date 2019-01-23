@@ -266,7 +266,7 @@ SEALDLL HRESULT SEALCALL Plaintext_GetParmsId(void* thisptr, uint64_t* parms_id)
     IfNullRet(plain, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    for (int i = 0; i < plain->parms_id().size(); i++)
+    for (size_t i = 0; i < plain->parms_id().size(); i++)
     {
         parms_id[i] = plain->parms_id()[i];
     }
@@ -454,7 +454,7 @@ SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, uint64_t count, uint6
 
     IntArray<uint64_t> new_array(plain->pool());
     new_array.resize(count);
-    for (int i = 0; i < count; i++)
+    for (uint64_t i = 0; i < count; i++)
     {
         new_array[i] = new_data[i];
     }

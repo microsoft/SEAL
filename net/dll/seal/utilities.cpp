@@ -77,7 +77,7 @@ void seal::dll::CopyParmsId(const uint64_t* src, parms_id_type& dest)
 {
     if (nullptr != src)
     {
-        for (int i = 0; i < dest.size(); i++)
+        for (size_t i = 0; i < dest.size(); i++)
         {
             dest[i] = src[i];
         }
@@ -88,7 +88,7 @@ void seal::dll::CopyParmsId(const parms_id_type& src, uint64_t* dest)
 {
     if (nullptr != dest)
     {
-        for (int i = 0; i < src.size(); i++)
+        for (size_t i = 0; i < src.size(); i++)
         {
             dest[i] = src[i];
         }
@@ -106,7 +106,7 @@ HRESULT seal::dll::ToStringHelper(const string& str, char* outstr, int* length)
     }
 
     // Verify the string fits
-    if (*length < (str.length() + 1))
+    if (*length < static_cast<int>(str.length() + 1))
     {
         *length = static_cast<int>(str.length() + 1);
         return HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);

@@ -36,7 +36,7 @@ namespace {
         }
 
         auto ciphertexts = reinterpret_cast<Ciphertext**>(ciphers);
-        for (int i = 0; static_cast<size_t>(i) < key.size(); i++)
+        for (size_t i = 0; i < key.size(); i++)
         {
             ciphertexts[i] = new Ciphertext(key[i]);
         }
@@ -170,7 +170,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_AddKeyList(void* thisptr, uint64_t count, vo
     keys->data().emplace_back();
     keys->data().back().reserve(count);
 
-    for (int i = 0; i < count; i++)
+    for (uint64_t i = 0; i < count; i++)
     {
         Ciphertext* cipher = ciphertexts[i];
         Ciphertext new_key(keys->pool());
@@ -205,7 +205,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_GetParmsId(void* thisptr, uint64_t* parms_id
     IfNullRet(keys, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    for (int i = 0; i < keys->parms_id().size(); i++)
+    for (size_t i = 0; i < keys->parms_id().size(); i++)
     {
         parms_id[i] = keys->parms_id()[i];
     }

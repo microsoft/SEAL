@@ -100,7 +100,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void* thisptr, uint64_t index, uin
     IfNullRet(keys, E_POINTER);
     IfNullRet(count, E_POINTER);
 
-    if (index < 0 || index >= keys->data().size())
+    if (index >= keys->data().size())
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -184,7 +184,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetParmsId(void* thisptr, uint64_t* parms_id)
     IfNullRet(keys, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    for (int i = 0; i < keys->parms_id().size(); i++)
+    for (size_t i = 0; i < keys->parms_id().size(); i++)
     {
         parms_id[i] = keys->parms_id()[i];
     }
