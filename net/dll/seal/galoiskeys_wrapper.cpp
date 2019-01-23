@@ -36,7 +36,7 @@ namespace {
         }
 
         auto ciphertexts = reinterpret_cast<Ciphertext**>(ciphers);
-        for (int i = 0; i < key.size(); i++)
+        for (int i = 0; static_cast<size_t>(i) < key.size(); i++)
         {
             ciphertexts[i] = new Ciphertext(key[i]);
         }

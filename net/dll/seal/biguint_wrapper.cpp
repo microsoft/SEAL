@@ -182,10 +182,10 @@ SEALDLL HRESULT SEALCALL BigUInt_Get(void* thispt, int index, uint8_t* value)
     IfNullRet(biguint, E_POINTER);
     IfNullRet(value, E_POINTER)
 
-        if (index < 0 || index >= biguint->byte_count())
-        {
-            return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-        }
+    if (index < 0 || static_cast<size_t>(index) >= biguint->byte_count())
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
+    }
 
     auto result = (*biguint)[index];
     *value = static_cast<uint8_t>(result);
@@ -198,7 +198,7 @@ SEALDLL HRESULT SEALCALL BigUInt_GetU64(void* thispt, int index, uint64_t* value
     IfNullRet(biguint, E_POINTER);
     IfNullRet(value, E_POINTER);
 
-    if (index < 0 || index >= biguint->uint64_count())
+    if (index < 0 || static_cast<size_t>(index) >= biguint->uint64_count())
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
