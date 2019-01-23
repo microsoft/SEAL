@@ -759,6 +759,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void GaloisKeys_IsValidFor(IntPtr thisptr, IntPtr context, out bool result);
 
         [DllImport(SEALdll, PreserveSig = false)]
+        internal static extern void GaloisKeys_IsMetadataValidFor(IntPtr thisptr, IntPtr context, out bool result);
+
+        [DllImport(SEALdll, PreserveSig = false)]
         internal static extern void GaloisKeys_Pool(IntPtr thisptr, out IntPtr pool);
 
         #endregion

@@ -235,6 +235,18 @@ SEALDLL HRESULT SEALCALL GaloisKeys_IsValidFor(void* thisptr, void* contextptr, 
     return S_OK;
 }
 
+SEALDLL HRESULT SEALCALL GaloisKeys_IsMetadataValidFor(void* thisptr, void* contextptr, bool* result)
+{
+    GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
+    IfNullRet(keys, E_POINTER);
+    const auto& sharedctx = SharedContextFromVoid(contextptr);
+    IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    *result = keys->is_metadata_valid_for(sharedctx);
+    return S_OK;
+}
+
 SEALDLL HRESULT SEALCALL GaloisKeys_Pool(void* thisptr, void** pool)
 {
     GaloisKeys* keys = FromVoid<GaloisKeys>(thisptr);
