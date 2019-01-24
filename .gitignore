@@ -1,8 +1,8 @@
 # Other stuff
-src/cmake/SEALConfig.cmake
-src/cmake/SEALConfigVersion.cmake
-src/cmake/SEALTargets.cmake
-src/seal/util/config.h
+native/src/cmake/SEALConfig.cmake
+native/src/cmake/SEALConfigVersion.cmake
+native/src/cmake/SEALTargets.cmake
+native/src/seal/util/config.h
 **/CMakeCache.txt
 **/CMakeFiles
 **/Makefile
