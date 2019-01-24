@@ -94,9 +94,9 @@ set(SEAL_ENFORCE_HE_STD_SECURITY_STR "Enforce at least 128-bit security level fr
 option(SEAL_ENFORCE_HE_STD_SECURITY ${SEAL_ENFORCE_HE_STD_SECURITY_STR} OFF)
 
 # Throw on multiply_plain by a zero plaintext
-set(SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO_STR "Throw an exception when calling Evaluator::multiply_plain by a zero plaintext")
-option(SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO ${SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO_STR} ON)
-mark_as_advanced(FORCE SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO)
+set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member of Evaluator outputs a transparent ciphertext")
+option(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR} ON)
+mark_as_advanced(FORCE SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT)
 
 # Use intrinsics if available
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
