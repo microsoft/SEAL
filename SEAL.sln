@@ -14,22 +14,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SEALExamples", "native\exam
 		{7EA96C25-FC0D-485A-BB71-32B6DA55652A} = {7EA96C25-FC0D-485A-BB71-32B6DA55652A}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SEALdll", "net\dll\SEALdll.vcxproj", "{70BBB2AA-FA77-40C1-890F-7AA7DBB3AD3D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SEALdll", "dotnet\dll\SEALdll.vcxproj", "{70BBB2AA-FA77-40C1-890F-7AA7DBB3AD3D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7EA96C25-FC0D-485A-BB71-32B6DA55652A} = {7EA96C25-FC0D-485A-BB71-32B6DA55652A}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNet", "net\net\SEALNet.csproj", "{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNet", "dotnet\net\SEALNet.csproj", "{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{70BBB2AA-FA77-40C1-890F-7AA7DBB3AD3D} = {70BBB2AA-FA77-40C1-890F-7AA7DBB3AD3D}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetTest", "net\tests\SEALNetTest.csproj", "{D0FCCA29-F0F8-49A3-9615-24FF899F1909}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetTest", "dotnet\tests\SEALNetTest.csproj", "{D0FCCA29-F0F8-49A3-9615-24FF899F1909}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E} = {D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetExamples", "net\examples\SEALNetExamples.csproj", "{18DA9F90-3131-461A-A3E8-40AC0B1D7632}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetExamples", "dotnet\examples\SEALNetExamples.csproj", "{18DA9F90-3131-461A-A3E8-40AC0B1D7632}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
