@@ -1203,7 +1203,7 @@ namespace seal
         encrypted.resize(context_, parms.parms_id(), destination_size);
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Does not allow transparent ciphertext output.
-        if (encrypted1.is_transparent())
+        if (encrypted.is_transparent())
         {
             throw invalid_argument("ciphertext cannot be transparent");
         }
@@ -1911,7 +1911,7 @@ namespace seal
         }
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Does not allow transparent ciphertext output.
-        if (encrypted1.is_transparent())
+        if (encrypted.is_transparent())
         {
             throw invalid_argument("ciphertext cannot be transparent");
         }
@@ -2723,7 +2723,7 @@ namespace seal
         encrypted_ntt.is_ntt_form() = false;
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Does not allow transparent ciphertext output.
-        if (encrypted.is_transparent())
+        if (encrypted_ntt.is_transparent())
         {
             throw invalid_argument("ciphertext cannot be transparent");
         }
