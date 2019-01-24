@@ -2376,6 +2376,11 @@ namespace SEALNetExamples
                         Console.WriteLine("Invalid option.");
                         break;
                 }
+
+                /*
+                Force a garbage collection after each example to accurately show memory pool use.
+                */
+                GC.Collect();
             }
         }
     }
