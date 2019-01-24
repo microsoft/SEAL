@@ -3,14 +3,18 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Authors>Microsoft Research</Authors>
+    <Company>Microsoft Corporation</Company>
+    <Description>.NET wrapper examples for Microsoft SEAL</Description>
+    <Copyright>Microsoft Corporation 2019</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\net\SEALNet.csproj" />
+    <ProjectReference Include="../net/SEALNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <SEALDllBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../../bin/x64/$(Configuration)/SEALdll.*" />
+    <SEALDllBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../../bin/$(Platform)/$(Configuration)/sealdll.*" />
     <SEALDllBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../../lib/libsealdll.*" />
   </ItemGroup>
 

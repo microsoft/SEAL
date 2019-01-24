@@ -25,6 +25,8 @@ SEALDLL HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_id);
 
 SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void *thisptr, void *context, bool *result);
 
+SEALDLL HRESULT SEALCALL PublicKey_IsMetadataValidFor(void *thisptr, void *context, bool *result);
+
 SEALDLL HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool);
 
 SEALDLL HRESULT SEALCALL PublicKey_Destroy(void *thisptr);

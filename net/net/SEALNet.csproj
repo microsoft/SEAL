@@ -4,8 +4,8 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Microsoft Research</Authors>
     <Company>Microsoft Corporation</Company>
-    <Description>.Net wrapper for SEAL library</Description>
-    <Copyright>Microsoft Corporation 2018</Copyright>
+    <Description>.NET wrapper library for Microsoft SEAL</Description>
+    <Copyright>Microsoft Corporation 2019</Copyright>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin/Release/SEALNet.xml</DocumentationFile>

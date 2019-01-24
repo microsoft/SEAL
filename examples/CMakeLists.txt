@@ -10,8 +10,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 
 add_executable(sealexamples examples.cpp)
 
-# Import SEAL
+# Import Microsoft SEAL
 find_package(SEAL 3.1.0 EXACT REQUIRED)
 
-# Link SEAL
+# Link Microsoft SEAL
 target_link_libraries(sealexamples SEAL::seal)

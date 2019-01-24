@@ -2,8 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-
     <IsPackable>false</IsPackable>
+    <Authors>Microsoft Research</Authors>
+    <Company>Microsoft Corporation</Company>
+    <Description>.NET wrapper unit tests for Microsoft SEAL</Description>
+    <Copyright>Microsoft Corporation 2019</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,11 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\net\SEALNet.csproj" />
+    <ProjectReference Include="../net/SEALNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <SEALDllBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../../bin/x64/$(Configuration)/SEALdll.*" />
+    <SEALDllBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../../bin/$(Platform)/$(Configuration)/sealdll.*" />
     <SEALDllBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../../lib/libsealdll.*" />
   </ItemGroup>
 

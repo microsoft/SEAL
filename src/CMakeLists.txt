@@ -9,7 +9,7 @@ if(DEFINED MSVC)
     if(DEFINED ALLOW_COMMAND_LINE_BUILD)
         message(STATUS "Configuring for Visual Studio")
     else()
-        message(FATAL_ERROR "Please build SEAL using the attached Visual Studio solution/project files")
+        message(FATAL_ERROR "Please build Microsoft SEAL using the attached Visual Studio solution/project files")
     endif()
 endif()
 
@@ -52,7 +52,7 @@ include(CheckTypeSize)
 
 # Are we using SEAL_DEBUG?
 set(SEAL_DEBUG ${SEAL_DEBUG_DEFAULT})
-message(STATUS "SEAL debug mode: ${SEAL_DEBUG}")
+message(STATUS "Microsoft SEAL debug mode: ${SEAL_DEBUG}")
 
 # Should we use C++14 or C++17?
 set(SEAL_USE_CXX17_OPTION_STR "Use C++17")

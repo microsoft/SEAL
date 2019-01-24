@@ -101,6 +101,24 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Check whether the current SecretKey is valid for a given SEALContext. If 
+        /// the given SEALContext is not set, the encryption parameters are invalid, 
+        /// or the SecretKey data does not match the SEALContext, this function returns
+        /// false. Otherwise, returns true. This function only checks the metadata
+        /// and not the secret key data itself.
+        /// </summary>
+        /// <param name="context">The SEALContext</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        public bool IsMetadataValidFor(SEALContext context)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            NativeMethods.SecretKey_IsMetadataValidFor(NativePtr, context.NativePtr, out bool result);
+            return result;
+        }
+
+        /// <summary>
         /// Saves the SecretKey to an output stream.
         /// </summary>
         /// 

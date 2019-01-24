@@ -164,7 +164,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_AddKeyList(void *thisptr, uint64_t count, vo
     IfNullRet(keys, E_POINTER);
     IfNullRet(ciphers, E_POINTER);
 
-    Ciphertext* *ciphertexts = reinterpret_cast<Ciphertext**>(ciphers);
+    Ciphertext **ciphertexts = reinterpret_cast<Ciphertext**>(ciphers);
 
     // Don't resize, only reserve
     keys->data().emplace_back();

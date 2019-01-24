@@ -10,16 +10,16 @@
     <title>Simple Encrypted Arithmetic Library</title>
     <authors>Microsoft Research</authors>
     <owners>Microsoft Corporation</owners>
-    <projectUrl>http://www.sealcrypto.org</projectUrl>
+    <projectUrl>http://sealcrypto.org</projectUrl>
     <license type="file">LICENSE</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The Simple Encrypted Arithmetic Library (SEAL) is an easy-to-use but powerful open-source homomorphic encryption library, developed by researchers in the Cryptography Research Group at Microsoft Research. SEAL is licensed under the MIT license.</description>
-    <releaseNotes>http://www.sealcrypto.org/#!news</releaseNotes>
-    <copyright>Copyright 2018</copyright>
-    <tags>c# crypto cryptography encryption homomorphic-encryption</tags>
+    <description>The Simple Encrypted Arithmetic Library (Microsoft SEAL) is an easy-to-use and powerful open source homomorphic encryption library, developed by researchers in the Cryptography Research Group at Microsoft Research. SEAL is licensed under the MIT license.</description>
+    <releaseNotes>http://sealcrypto.org/#!news</releaseNotes>
+    <copyright>Copyright 2019</copyright>
+    <tags>c# crypto cryptography encryption homomorphicencryption</tags>
   </metadata>
   <files>
-    <file src="..\..\bin\x64\$Configuration$\SEALdll.dll" target="build\x64\SEALdll.dll" />
+    <file src="..\..\bin\x64\$Configuration$\sealdll.dll" target="build\x64\sealdll.dll" />
     <file src="SEALNet.targets" target="build\Microsoft.Research.SEALNet.targets" />
     <file src="bin\$Configuration$\netstandard2.0\SEALNet.*" target="lib\netstandard2.0\" exclude="**\*.pdb" />
     <file src="..\..\LICENSE" target="LICENSE" />
