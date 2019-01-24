@@ -1312,7 +1312,8 @@ namespace seal
         void mod_switch_scale_to_next(const Ciphertext &encrypted, Ciphertext &destination,
             MemoryPoolHandle pool);
 
-        void mod_switch_drop_to_next(const Ciphertext &encrypted, Ciphertext &destination);
+        void mod_switch_drop_to_next(const Ciphertext &encrypted, Ciphertext &destination, 
+            MemoryPoolHandle pool);
 
         void mod_switch_drop_to_next(Plaintext &plain);
 

@@ -1631,7 +1631,7 @@ namespace seal
     }
 
     void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted, 
-        Ciphertext &destination)
+        Ciphertext &destination, MemoryPoolHandle pool)
     {
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
         if (context_data_ptr->parms().scheme() == scheme_type::CKKS && 
@@ -1664,19 +1664,47 @@ namespace seal
 
         size_t rns_poly_total_count = next_coeff_mod_count * coeff_count;
 
-        for (size_t i = 0; i < encrypted_size; i++)
+        if (&encrypted == &destination)
         {
-            for (size_t j = 0; j < next_coeff_mod_count; j++)
+            // Switching in-place so need temporary space
+            auto temp(allocate_uint(rns_poly_total_count * encrypted_size, pool));
+
+            // Copy data over to temp
+            for (size_t i = 0; i < encrypted_size; i++)
             {
-                set_uint_uint(encrypted.data(i) + (j * coeff_count), coeff_count,
-                    destination.data() + (i * rns_poly_total_count) + (j * coeff_count));
+                for (size_t j = 0; j < next_coeff_mod_count; j++)
+                {
+                    set_uint_uint(encrypted.data(i) + (j * coeff_count), coeff_count,
+                        temp.get() + (i * rns_poly_total_count) + (j * coeff_count));
+                }
+            }
+
+            // Resize destination before writing
+            destination.resize(context_, next_parms.parms_id(), encrypted_size);
+            destination.is_ntt_form() = true;
+            destination.scale() = encrypted.scale();
+
+            // Copy data to destination
+            set_uint_uint(temp.get(), rns_poly_total_count * encrypted_size, 
+                destination.data());
+        }
+        else
+        {
+            // Resize destination before writing
+            destination.resize(context_, next_parms.parms_id(), encrypted_size);
+            destination.is_ntt_form() = true;
+            destination.scale() = encrypted.scale();
+
+            // Copy data directly to new destination
+            for (size_t i = 0; i < encrypted_size; i++)
+            {
+                for (size_t j = 0; j < next_coeff_mod_count; j++)
+                {
+                    set_uint_uint(encrypted.data(i) + (j * coeff_count), coeff_count,
+                        destination.data() + (i * rns_poly_total_count) + (j * coeff_count));
+                }
             }
         }
-
-        // Resize destination
-        destination.resize(context_, next_parms.parms_id(), encrypted_size);
-        destination.is_ntt_form() = true;
-        destination.scale() = encrypted.scale();
     }
 
     void Evaluator::mod_switch_drop_to_next(Plaintext &plain)
@@ -1747,7 +1775,7 @@ namespace seal
 
         case scheme_type::CKKS:
             // Modulus switching without scaling
-            mod_switch_drop_to_next(encrypted, destination);
+            mod_switch_drop_to_next(encrypted, destination, move(pool));
             return;
 
         default:
