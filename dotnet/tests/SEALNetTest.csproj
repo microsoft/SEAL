@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../net/SEALNet.csproj" />
+    <ProjectReference Include="../src/SEALNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>
