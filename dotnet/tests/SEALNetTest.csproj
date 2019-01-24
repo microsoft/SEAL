@@ -20,12 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SEALDllBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../../bin/$(Platform)/$(Configuration)/sealdll.*" />
-    <SEALDllBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../../lib/libsealdll.*" />
+    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../lib/$(Platform)/$(Configuration)/sealnetnative.*" />
+    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../lib/libsealnetnative.*" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="@(SEALDllBinaryFiles)" DestinationFolder="$(TargetDir)" />
+    <Copy SourceFiles="@(SEALNetNativeBinaryFiles)" DestinationFolder="$(TargetDir)" />
   </Target>
 
 </Project>
