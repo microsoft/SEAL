@@ -84,6 +84,13 @@ namespace seal
                     coeff_count, coeff_modulus[i], encrypted.data(j) + (i * coeff_count));
             }
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
@@ -148,6 +155,14 @@ namespace seal
                 coeff_count * (encrypted2_size - encrypted1_size),
                 coeff_mod_count, encrypted1.data(encrypted1_size));
         }
+
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted1.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::add_many(const vector<Ciphertext> &encrypteds, Ciphertext &destination)
@@ -235,6 +250,14 @@ namespace seal
                     encrypted1.data(encrypted1_size) + (i * coeff_count));
             }
         }
+
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted1.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::multiply_inplace(Ciphertext &encrypted1, 
@@ -268,6 +291,13 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted1.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::bfv_multiply(Ciphertext &encrypted1, 
@@ -688,6 +718,13 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool)
@@ -1164,6 +1201,13 @@ namespace seal
         // Put the output of final relinearization into destination.
         // Prepare destination only at this point because we are resizing down
         encrypted.resize(context_, parms.parms_id(), destination_size);
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted1.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::bfv_relinearize_one_step(uint64_t *encrypted, 
@@ -1709,6 +1753,13 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (destination.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::mod_switch_to_inplace(Ciphertext &encrypted, 
@@ -1804,6 +1855,14 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
+
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (destination.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::rescale_to_inplace(Ciphertext &encrypted, parms_id_type parms_id,
@@ -1850,6 +1909,13 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted1.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::multiply_many(vector<Ciphertext> &encrypteds,
@@ -2057,6 +2123,13 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
@@ -2162,6 +2235,13 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::multiply_plain_inplace(Ciphertext &encrypted, 
@@ -2197,6 +2277,13 @@ namespace seal
         {
             multiply_plain_normal(encrypted, plain, move(pool));
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::multiply_plain_normal(Ciphertext &encrypted, 
@@ -2231,13 +2318,6 @@ namespace seal
             throw invalid_argument("scale out of bounds");
         }
 
-#ifdef SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO
-        // Don't allow multiplication by identically zero plaintext.
-        if (plain.is_zero())
-        {
-            throw invalid_argument("plain cannot be zero");
-        }
-#endif
         // Set the scale
         encrypted.scale() = new_scale;
 
@@ -2427,13 +2507,6 @@ namespace seal
             throw invalid_argument("scale out of bounds");
         }
 
-#ifdef SEAL_THROW_ON_MULTIPLY_PLAIN_BY_ZERO
-        // Don't allow multiplication by identically zero plaintext.
-        if (plain_ntt.is_zero())
-        {
-            throw invalid_argument("plain_ntt cannot be zero");
-        }
-#endif
         for (size_t i = 0; i < encrypted_ntt_size; i++)
         {
             for (size_t j = 0; j < coeff_mod_count; j++)
@@ -2594,6 +2667,13 @@ namespace seal
 
         // Finally change the is_ntt_transformed flag
         encrypted.is_ntt_form() = true;
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::transform_from_ntt_inplace(Ciphertext &encrypted_ntt)
@@ -2641,6 +2721,13 @@ namespace seal
 
         // Finally change the is_ntt_transformed flag
         encrypted_ntt.is_ntt_form() = false;
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::apply_galois_inplace(Ciphertext &encrypted, uint64_t galois_elt,
@@ -2934,6 +3021,13 @@ namespace seal
         {
             encrypted.is_ntt_form() = true;
         }
+#ifdef SEAL_THROW_ON_ZERO_CIPHERTEXT
+        // Does not allow transparent ciphertext output.
+        if (encrypted.is_transparent())
+        {
+            throw invalid_argument("ciphertext cannot be transparent");
+        }
+#endif
     }
 
     void Evaluator::rotate_internal(Ciphertext &encrypted, int steps,

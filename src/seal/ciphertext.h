@@ -523,7 +523,21 @@ namespace seal
         bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
 
         /**
-        Saves the ciphertext to an output stream. The output is in binary format 
+        Check whether the current ciphertext is transparent,
+        i.e. does not require a secretkey to decrypt.
+        Starting from the second polynomials in the current ciphertext, if all
+        coefficients equal to zero, this function returns true.
+        Otherwise, returns false.
+        */
+        inline bool is_transparent() const
+        {
+            return (size_capacity() == 1) ||
+                std::all_of(data(1), data_.cend(),
+                    util::is_zero<ct_coeff_type>);
+        }
+
+        /**
+        Saves the ciphertext to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
         @param[in] stream The stream to save the ciphertext to
