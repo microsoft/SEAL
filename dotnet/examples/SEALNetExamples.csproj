@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../lib/$(Platform)/$(Configuration)/sealnetnative.*" />
+    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../lib/x64/$(Configuration)/sealnetnative.*" />
     <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../lib/libsealnetnative.*" />
   </ItemGroup>
 
