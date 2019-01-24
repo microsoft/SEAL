@@ -24,12 +24,12 @@ namespace seal
     */
     struct Plaintext::PlaintextPrivateHelper
     {
-        static void set_scale(seal::Plaintext* plain, double new_scale)
+        static void set_scale(seal::Plaintext *plain, double new_scale)
         {
             plain->scale_ = new_scale;
         }
 
-        static void swap_data(seal::Plaintext* plain, seal::IntArray<uint64_t>& new_data)
+        static void swap_data(seal::Plaintext *plain, seal::IntArray<uint64_t> &new_data)
         {
             plain->data_.swap_with(new_data);
         }
@@ -37,11 +37,11 @@ namespace seal
 }
 
 
-SEALDLL HRESULT SEALCALL Plaintext_Create1(void* memoryPoolHandle, void** plaintext)
+SEALDLL HRESULT SEALCALL Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
-    Plaintext* plain = nullptr;
+    Plaintext *plain = nullptr;
 
     try
     {
@@ -57,11 +57,11 @@ SEALDLL HRESULT SEALCALL Plaintext_Create1(void* memoryPoolHandle, void** plaint
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void* memoryPoolHandle, void** plaintext)
+SEALDLL HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
-    Plaintext* plain = nullptr;
+    Plaintext *plain = nullptr;
 
     try
     {
@@ -77,11 +77,11 @@ SEALDLL HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void* memoryPool
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void* memoryPoolHandle, void** plaintext)
+SEALDLL HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
-    Plaintext* plain = nullptr;
+    Plaintext *plain = nullptr;
 
     try
     {
@@ -97,7 +97,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coeffCoun
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Create4(char* hexPoly, void* memoryPoolHandle, void** plaintext)
+SEALDLL HRESULT SEALCALL Plaintext_Create4(char *hexPoly, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     IfNullRet(hexPoly, E_POINTER);
@@ -106,7 +106,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Create4(char* hexPoly, void* memoryPoolHandle
 
     try
     {
-        Plaintext* plain = new Plaintext(hexPolyStr, *handle);
+        Plaintext *plain = new Plaintext(hexPolyStr, *handle);
         *plaintext = plain;
         return S_OK;
     }
@@ -118,20 +118,20 @@ SEALDLL HRESULT SEALCALL Plaintext_Create4(char* hexPoly, void* memoryPoolHandle
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Set1(void* thisptr, void* assign)
+SEALDLL HRESULT SEALCALL Plaintext_Set1(void *thisptr, void *assign)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
-    Plaintext* assignptr = FromVoid<Plaintext>(assign);
+    Plaintext *assignptr = FromVoid<Plaintext>(assign);
     IfNullRet(assignptr, E_POINTER);
 
     *plain = *assignptr;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Set2(void *thisptr, char* hex_poly)
+SEALDLL HRESULT SEALCALL Plaintext_Set2(void *thisptr, char *hex_poly)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(hex_poly, E_POINTER);
 
@@ -151,7 +151,7 @@ SEALDLL HRESULT SEALCALL Plaintext_Set2(void *thisptr, char* hex_poly)
 
 SEALDLL HRESULT SEALCALL Plaintext_Set3(void *thisptr, uint64_t const_coeff)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     try
@@ -165,18 +165,18 @@ SEALDLL HRESULT SEALCALL Plaintext_Set3(void *thisptr, uint64_t const_coeff)
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL Plaintext_Destroy(void *thisptr)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     delete plain;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_CoeffCount(void* thisptr, uint64_t* coeff_count)
+SEALDLL HRESULT SEALCALL Plaintext_CoeffCount(void *thisptr, uint64_t *coeff_count)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(coeff_count, E_POINTER);
 
@@ -184,9 +184,9 @@ SEALDLL HRESULT SEALCALL Plaintext_CoeffCount(void* thisptr, uint64_t* coeff_cou
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_CoeffAt(void* thisptr, uint64_t index, uint64_t* coeff)
+SEALDLL HRESULT SEALCALL Plaintext_CoeffAt(void *thisptr, uint64_t index, uint64_t *coeff)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(coeff, E_POINTER);
 
@@ -205,9 +205,9 @@ SEALDLL HRESULT SEALCALL Plaintext_CoeffAt(void* thisptr, uint64_t index, uint64
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_SetCoeffAt(void* thisptr, uint64_t index, uint64_t value)
+SEALDLL HRESULT SEALCALL Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     try
@@ -221,9 +221,9 @@ SEALDLL HRESULT SEALCALL Plaintext_SetCoeffAt(void* thisptr, uint64_t index, uin
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_ToString(void* thispt, int* length, char* outstr)
+SEALDLL HRESULT SEALCALL Plaintext_ToString(void *thispt, int *length, char *outstr)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thispt);
+    Plaintext *plain = FromVoid<Plaintext>(thispt);
     IfNullRet(plain, E_POINTER);
     IfNullRet(length, E_POINTER);
 
@@ -240,9 +240,9 @@ SEALDLL HRESULT SEALCALL Plaintext_ToString(void* thispt, int* length, char* out
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_IsNTTForm(void* thisptr, bool* is_ntt_form)
+SEALDLL HRESULT SEALCALL Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(is_ntt_form, E_POINTER);
 
@@ -250,9 +250,9 @@ SEALDLL HRESULT SEALCALL Plaintext_IsNTTForm(void* thisptr, bool* is_ntt_form)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_IsZero(void* thisptr, bool* is_zero)
+SEALDLL HRESULT SEALCALL Plaintext_IsZero(void *thisptr, bool *is_zero)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(is_zero, E_POINTER);
 
@@ -260,9 +260,9 @@ SEALDLL HRESULT SEALCALL Plaintext_IsZero(void* thisptr, bool* is_zero)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_GetParmsId(void* thisptr, uint64_t* parms_id)
+SEALDLL HRESULT SEALCALL Plaintext_GetParmsId(void *thisptr, uint64_t *parms_id)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
@@ -274,9 +274,9 @@ SEALDLL HRESULT SEALCALL Plaintext_GetParmsId(void* thisptr, uint64_t* parms_id)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_SetParmsId(void* thisptr, uint64_t* parms_id)
+SEALDLL HRESULT SEALCALL Plaintext_SetParmsId(void *thisptr, uint64_t *parms_id)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
@@ -286,7 +286,7 @@ SEALDLL HRESULT SEALCALL Plaintext_SetParmsId(void* thisptr, uint64_t* parms_id)
 
 SEALDLL HRESULT SEALCALL Plaintext_SetZero1(void *thisptr)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     plain->set_zero();
@@ -295,7 +295,7 @@ SEALDLL HRESULT SEALCALL Plaintext_SetZero1(void *thisptr)
 
 SEALDLL HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, int start_coeff)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     try
@@ -311,7 +311,7 @@ SEALDLL HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, int start_coeff)
 
 SEALDLL HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, int start_coeff, int length)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     try
@@ -325,9 +325,9 @@ SEALDLL HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, int start_coeff, int 
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Reserve(void* thisptr, uint64_t capacity)
+SEALDLL HRESULT SEALCALL Plaintext_Reserve(void *thisptr, uint64_t capacity)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     try
@@ -345,9 +345,9 @@ SEALDLL HRESULT SEALCALL Plaintext_Reserve(void* thisptr, uint64_t capacity)
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Resize(void* thisptr, uint64_t coeff_count)
+SEALDLL HRESULT SEALCALL Plaintext_Resize(void *thisptr, uint64_t coeff_count)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     try
@@ -365,27 +365,27 @@ SEALDLL HRESULT SEALCALL Plaintext_Resize(void* thisptr, uint64_t coeff_count)
     }
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_ShrinkToFit(void* thisptr)
+SEALDLL HRESULT SEALCALL Plaintext_ShrinkToFit(void *thisptr)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     plain->shrink_to_fit();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Release(void* thisptr)
+SEALDLL HRESULT SEALCALL Plaintext_Release(void *thisptr)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     plain->release();
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Capacity(void* thisptr, uint64_t* capacity)
+SEALDLL HRESULT SEALCALL Plaintext_Capacity(void *thisptr, uint64_t *capacity)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(capacity, E_POINTER);
 
@@ -393,9 +393,9 @@ SEALDLL HRESULT SEALCALL Plaintext_Capacity(void* thisptr, uint64_t* capacity)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_SignificantCoeffCount(void* thisptr, uint64_t* significant_coeff_count)
+SEALDLL HRESULT SEALCALL Plaintext_SignificantCoeffCount(void *thisptr, uint64_t *significant_coeff_count)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(significant_coeff_count, E_POINTER);
 
@@ -403,9 +403,9 @@ SEALDLL HRESULT SEALCALL Plaintext_SignificantCoeffCount(void* thisptr, uint64_t
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Scale(void* thisptr, double* scale)
+SEALDLL HRESULT SEALCALL Plaintext_Scale(void *thisptr, double *scale)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(scale, E_POINTER);
 
@@ -413,20 +413,20 @@ SEALDLL HRESULT SEALCALL Plaintext_Scale(void* thisptr, double* scale)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_SetScale(void* thisptr, double scale)
+SEALDLL HRESULT SEALCALL Plaintext_SetScale(void *thisptr, double scale)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     Plaintext::PlaintextPrivateHelper::set_scale(plain, scale);
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Equals(void *thisptr, void* other, bool* result)
+SEALDLL HRESULT SEALCALL Plaintext_Equals(void *thisptr, void *other, bool *result)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
-    Plaintext* otherptr = FromVoid<Plaintext>(other);
+    Plaintext *otherptr = FromVoid<Plaintext>(other);
     IfNullRet(otherptr, E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -434,11 +434,11 @@ SEALDLL HRESULT SEALCALL Plaintext_Equals(void *thisptr, void* other, bool* resu
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void* contextptr, bool* result)
+SEALDLL HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void *contextptr, bool *result)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
-    const auto& sharedctx = SharedContextFromVoid(contextptr);
+    const auto &sharedctx = SharedContextFromVoid(contextptr);
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -446,11 +446,11 @@ SEALDLL HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void* contextptr, b
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_IsMetadataValidFor(void *thisptr, void* contextptr, bool* result)
+SEALDLL HRESULT SEALCALL Plaintext_IsMetadataValidFor(void *thisptr, void *contextptr, bool *result)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
-    const auto& sharedctx = SharedContextFromVoid(contextptr);
+    const auto &sharedctx = SharedContextFromVoid(contextptr);
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -458,9 +458,9 @@ SEALDLL HRESULT SEALCALL Plaintext_IsMetadataValidFor(void *thisptr, void* conte
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, uint64_t count, uint64_t* new_data)
+SEALDLL HRESULT SEALCALL Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(new_data, E_POINTER);
 
@@ -475,13 +475,13 @@ SEALDLL HRESULT SEALCALL Plaintext_SwapData(void* thisptr, uint64_t count, uint6
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Plaintext_Pool(void* thisptr, void** pool)
+SEALDLL HRESULT SEALCALL Plaintext_Pool(void *thisptr, void **pool)
 {
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(pool, E_POINTER);
 
-    MemoryPoolHandle* handleptr = new MemoryPoolHandle(plain->pool());
+    MemoryPoolHandle *handleptr = new MemoryPoolHandle(plain->pool());
     *pool = handleptr;
     return S_OK;
 }

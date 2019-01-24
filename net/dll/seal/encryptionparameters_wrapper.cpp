@@ -15,14 +15,14 @@ using namespace std;
 using namespace seal;
 using namespace seal::dll;
 
-SEALDLL HRESULT SEALCALL EncParams_Create1(int scheme, void** enc_params)
+SEALDLL HRESULT SEALCALL EncParams_Create1(int scheme, void **enc_params)
 {
     IfNullRet(enc_params, E_POINTER);
 
     try
     {
         scheme_type schemetype = static_cast<scheme_type>(scheme);
-        EncryptionParameters* params = new EncryptionParameters(schemetype);
+        EncryptionParameters *params = new EncryptionParameters(schemetype);
         *enc_params = params;
         return S_OK;
     }
@@ -32,40 +32,40 @@ SEALDLL HRESULT SEALCALL EncParams_Create1(int scheme, void** enc_params)
     }
 }
 
-SEALDLL HRESULT SEALCALL EncParams_Create2(void* copy, void** enc_params)
+SEALDLL HRESULT SEALCALL EncParams_Create2(void *copy, void **enc_params)
 {
-    EncryptionParameters* copypt = FromVoid<EncryptionParameters>(copy);
+    EncryptionParameters *copypt = FromVoid<EncryptionParameters>(copy);
     IfNullRet(copypt, E_POINTER);
     IfNullRet(enc_params, E_POINTER);
 
-    EncryptionParameters* params = new EncryptionParameters(*copypt);
+    EncryptionParameters *params = new EncryptionParameters(*copypt);
     *enc_params = params;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL EncParams_Destroy(void *thisptr)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
 
     delete params;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_Set(void* thisptr, void* assign)
+SEALDLL HRESULT SEALCALL EncParams_Set(void *thisptr, void *assign)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
-    EncryptionParameters* assignpt = FromVoid<EncryptionParameters>(assign);
+    EncryptionParameters *assignpt = FromVoid<EncryptionParameters>(assign);
     IfNullRet(assignpt, E_POINTER);
 
     *params = *assignpt;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_GetPolyModulusDegree(void* thisptr, uint64_t* degree)
+SEALDLL HRESULT SEALCALL EncParams_GetPolyModulusDegree(void *thisptr, uint64_t *degree)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(degree, E_POINTER);
 
@@ -73,9 +73,9 @@ SEALDLL HRESULT SEALCALL EncParams_GetPolyModulusDegree(void* thisptr, uint64_t*
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void* thisptr, uint64_t degree)
+SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void *thisptr, uint64_t degree)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
 
     try
@@ -89,9 +89,9 @@ SEALDLL HRESULT SEALCALL EncParams_SetPolyModulusDegree(void* thisptr, uint64_t 
     }
 }
 
-SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void* thisptr, uint64_t* length, void** coeffs)
+SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void *thisptr, uint64_t *length, void **coeffs)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(length, E_POINTER);
 
@@ -99,13 +99,13 @@ SEALDLL HRESULT SEALCALL EncParams_GetCoeffModulus(void* thisptr, uint64_t* leng
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_SetCoeffModulus(void* thisptr, uint64_t length, void** coeffs)
+SEALDLL HRESULT SEALCALL EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coeffs)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(coeffs, E_POINTER);
 
-    SmallModulus** coeff_array = reinterpret_cast<SmallModulus**>(coeffs);
+    SmallModulus* *coeff_array = reinterpret_cast<SmallModulus**>(coeffs);
     vector<SmallModulus> coefficients(length);
 
     for (uint64_t i = 0; i < length; i++)
@@ -124,9 +124,9 @@ SEALDLL HRESULT SEALCALL EncParams_SetCoeffModulus(void* thisptr, uint64_t lengt
     }
 }
 
-SEALDLL HRESULT SEALCALL EncParams_GetScheme(void* thisptr, int* scheme)
+SEALDLL HRESULT SEALCALL EncParams_GetScheme(void *thisptr, int *scheme)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(scheme, E_POINTER);
 
@@ -134,14 +134,14 @@ SEALDLL HRESULT SEALCALL EncParams_GetScheme(void* thisptr, int* scheme)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_GetParmsId(void* thisptr, uint64_t* parms_id)
+SEALDLL HRESULT SEALCALL EncParams_GetParmsId(void *thisptr, uint64_t *parms_id)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
     // We will assume the array is always size sha3_block_uint64_count
-    const auto& parmsid = params->parms_id();
+    const auto &parmsid = params->parms_id();
     for (size_t i = 0; i < util::HashFunction::sha3_block_uint64_count; i++)
     {
         parms_id[i] = parmsid[i];
@@ -150,9 +150,9 @@ SEALDLL HRESULT SEALCALL EncParams_GetParmsId(void* thisptr, uint64_t* parms_id)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_GetPlainModulus(void* thisptr, void** plain_modulus)
+SEALDLL HRESULT SEALCALL EncParams_GetPlainModulus(void *thisptr, void **plain_modulus)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(plain_modulus, E_POINTER);
 
@@ -161,11 +161,11 @@ SEALDLL HRESULT SEALCALL EncParams_GetPlainModulus(void* thisptr, void** plain_m
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_SetPlainModulus1(void* thisptr, void* modulus)
+SEALDLL HRESULT SEALCALL EncParams_SetPlainModulus1(void *thisptr, void *modulus)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
-    SmallModulus* smallmodulus = FromVoid<SmallModulus>(modulus);
+    SmallModulus *smallmodulus = FromVoid<SmallModulus>(modulus);
     IfNullRet(smallmodulus, E_POINTER);
 
     try
@@ -179,9 +179,9 @@ SEALDLL HRESULT SEALCALL EncParams_SetPlainModulus1(void* thisptr, void* modulus
     }
 }
 
-SEALDLL HRESULT SEALCALL EncParams_SetPlainModulus2(void* thisptr, uint64_t plainModulus)
+SEALDLL HRESULT SEALCALL EncParams_SetPlainModulus2(void *thisptr, uint64_t plainModulus)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
 
     try
@@ -195,9 +195,9 @@ SEALDLL HRESULT SEALCALL EncParams_SetPlainModulus2(void* thisptr, uint64_t plai
     }
 }
 
-SEALDLL HRESULT SEALCALL EncParams_NoiseStandardDeviation(void* thisptr, double* nsd)
+SEALDLL HRESULT SEALCALL EncParams_NoiseStandardDeviation(void *thisptr, double *nsd)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(nsd, E_POINTER);
 
@@ -205,9 +205,9 @@ SEALDLL HRESULT SEALCALL EncParams_NoiseStandardDeviation(void* thisptr, double*
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_SetNoiseStandardDeviation(void* thisptr, double nsd)
+SEALDLL HRESULT SEALCALL EncParams_SetNoiseStandardDeviation(void *thisptr, double nsd)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
 
     try
@@ -221,9 +221,9 @@ SEALDLL HRESULT SEALCALL EncParams_SetNoiseStandardDeviation(void* thisptr, doub
     }
 }
 
-SEALDLL HRESULT SEALCALL EncParams_NoiseMaxDeviation(void* thisptr, double* nmd)
+SEALDLL HRESULT SEALCALL EncParams_NoiseMaxDeviation(void *thisptr, double *nmd)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(nmd, E_POINTER);
 
@@ -231,11 +231,11 @@ SEALDLL HRESULT SEALCALL EncParams_NoiseMaxDeviation(void* thisptr, double* nmd)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EncParams_Equals(void* thisptr, void* otherptr, bool* result)
+SEALDLL HRESULT SEALCALL EncParams_Equals(void *thisptr, void *otherptr, bool *result)
 {
-    EncryptionParameters* params = FromVoid<EncryptionParameters>(thisptr);
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
-    EncryptionParameters* other = FromVoid<EncryptionParameters>(otherptr);
+    EncryptionParameters *other = FromVoid<EncryptionParameters>(otherptr);
     IfNullRet(other, E_POINTER);
     IfNullRet(result, E_POINTER);
 

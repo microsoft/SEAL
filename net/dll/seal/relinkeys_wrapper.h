@@ -13,36 +13,36 @@
 #include "defines.h"
 #include <stdint.h>
 
-SEALDLL HRESULT SEALCALL RelinKeys_Create1(void** relin_keys);
+SEALDLL HRESULT SEALCALL RelinKeys_Create1(void **relin_keys);
 
-SEALDLL HRESULT SEALCALL RelinKeys_Create2(void* copy, void** relin_keys);
+SEALDLL HRESULT SEALCALL RelinKeys_Create2(void *copy, void **relin_keys);
 
-SEALDLL HRESULT SEALCALL RelinKeys_Destroy(void* thisptr);
+SEALDLL HRESULT SEALCALL RelinKeys_Destroy(void *thisptr);
 
-SEALDLL HRESULT SEALCALL RelinKeys_Set(void* thisptr, void* copy);
+SEALDLL HRESULT SEALCALL RelinKeys_Set(void *thisptr, void *copy);
 
-SEALDLL HRESULT SEALCALL RelinKeys_Size(void* thisptr, uint64_t* size);
+SEALDLL HRESULT SEALCALL RelinKeys_Size(void *thisptr, uint64_t *size);
 
-SEALDLL HRESULT SEALCALL RelinKeys_DBC(void* thisptr, int* dbc);
+SEALDLL HRESULT SEALCALL RelinKeys_DBC(void *thisptr, int *dbc);
 
-SEALDLL HRESULT SEALCALL RelinKeys_SetDBC(void* thisptr, int dbc);
+SEALDLL HRESULT SEALCALL RelinKeys_SetDBC(void *thisptr, int dbc);
 
-SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void* thisptr, uint64_t index, uint64_t* count, void** ciphers);
+SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **ciphers);
 
-SEALDLL HRESULT SEALCALL RelinKeys_HasKey(void* thisptr, uint64_t key_power, bool* has_key);
+SEALDLL HRESULT SEALCALL RelinKeys_HasKey(void *thisptr, uint64_t key_power, bool *has_key);
 
-SEALDLL HRESULT SEALCALL RelinKeys_GetKey(void* thisptr, uint64_t key_power, uint64_t* count, void** ciphers);
+SEALDLL HRESULT SEALCALL RelinKeys_GetKey(void *thisptr, uint64_t key_power, uint64_t *count, void **ciphers);
 
-SEALDLL HRESULT SEALCALL RelinKeys_ClearDataAndReserve(void* thisptr, uint64_t size);
+SEALDLL HRESULT SEALCALL RelinKeys_ClearDataAndReserve(void *thisptr, uint64_t size);
 
-SEALDLL HRESULT SEALCALL RelinKeys_AddKeyList(void* thisptr, uint64_t count, void** ciphers);
+SEALDLL HRESULT SEALCALL RelinKeys_AddKeyList(void *thisptr, uint64_t count, void **ciphers);
 
-SEALDLL HRESULT SEALCALL RelinKeys_GetParmsId(void* thisptr, uint64_t* parms_id);
+SEALDLL HRESULT SEALCALL RelinKeys_GetParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALDLL HRESULT SEALCALL RelinKeys_SetParmsId(void* thisptr, uint64_t* parms_id);
+SEALDLL HRESULT SEALCALL RelinKeys_SetParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALDLL HRESULT SEALCALL RelinKeys_IsValidFor(void* thisptr, void* context, bool* result);
+SEALDLL HRESULT SEALCALL RelinKeys_IsValidFor(void *thisptr, void *context, bool *result);
 
-SEALDLL HRESULT SEALCALL RelinKeys_IsMetadataValidFor(void* thisptr, void* context, bool* result);
+SEALDLL HRESULT SEALCALL RelinKeys_IsMetadataValidFor(void *thisptr, void *context, bool *result);
 
-SEALDLL HRESULT SEALCALL RelinKeys_Pool(void* thisptr, void** pool);
+SEALDLL HRESULT SEALCALL RelinKeys_Pool(void *thisptr, void **pool);

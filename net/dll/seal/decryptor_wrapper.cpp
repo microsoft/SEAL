@@ -14,19 +14,19 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL Decryptor_Create(void* context, void* secret_key, void** decryptor)
+SEALDLL HRESULT SEALCALL Decryptor_Create(void *context, void *secret_key, void **decryptor)
 {
-    SEALContext* contextptr = FromVoid<SEALContext>(context);
+    SEALContext *contextptr = FromVoid<SEALContext>(context);
     IfNullRet(contextptr, E_POINTER);
-    SecretKey* secretKey = FromVoid<SecretKey>(secret_key);
+    SecretKey *secretKey = FromVoid<SecretKey>(secret_key);
     IfNullRet(secretKey, E_POINTER);
-    const auto& sharedctx = SharedContextFromVoid(context);
+    const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(decryptor, E_POINTER);
 
     try
     {
-        Decryptor* decr = new Decryptor(sharedctx, *secretKey);
+        Decryptor *decr = new Decryptor(sharedctx, *secretKey);
         *decryptor = decr;
         return S_OK;
     }
@@ -36,22 +36,22 @@ SEALDLL HRESULT SEALCALL Decryptor_Create(void* context, void* secret_key, void*
     }
 }
 
-SEALDLL HRESULT SEALCALL Decryptor_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL Decryptor_Destroy(void *thisptr)
 {
-    Decryptor* decryptor = FromVoid<Decryptor>(thisptr);
+    Decryptor *decryptor = FromVoid<Decryptor>(thisptr);
     IfNullRet(decryptor, E_POINTER);
 
     delete decryptor;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void* destination)
+SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination)
 {
-    Decryptor* decryptor = FromVoid<Decryptor>(thisptr);
+    Decryptor *decryptor = FromVoid<Decryptor>(thisptr);
     IfNullRet(decryptor, E_POINTER);
-    Ciphertext* encryptedptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encryptedptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encryptedptr, E_POINTER);
-    Plaintext* destinationptr = FromVoid<Plaintext>(destination);
+    Plaintext *destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
 
     try
@@ -65,11 +65,11 @@ SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void*
     }
 }
 
-SEALDLL HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void* thisptr, void* encrypted, int* invariant_noise_budget)
+SEALDLL HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget)
 {
-    Decryptor* decryptor = FromVoid<Decryptor>(thisptr);
+    Decryptor *decryptor = FromVoid<Decryptor>(thisptr);
     IfNullRet(decryptor, E_POINTER);
-    Ciphertext* encryptedptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encryptedptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encryptedptr, E_POINTER);
     IfNullRet(invariant_noise_budget, E_POINTER);
 

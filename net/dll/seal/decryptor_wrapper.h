@@ -13,10 +13,10 @@
 #include "defines.h"
 #include <stdint.h>
 
-SEALDLL HRESULT SEALCALL Decryptor_Create(void* context, void* secret_key, void** decryptor);
+SEALDLL HRESULT SEALCALL Decryptor_Create(void *context, void *secret_key, void **decryptor);
 
-SEALDLL HRESULT SEALCALL Decryptor_Destroy(void* thisptr);
+SEALDLL HRESULT SEALCALL Decryptor_Destroy(void *thisptr);
 
-SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void* thisptr, void* encrypted, void* destination);
+SEALDLL HRESULT SEALCALL Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination);
 
-SEALDLL HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void* thisptr, void* encrypted, int* invariant_noise_budget);
+SEALDLL HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget);

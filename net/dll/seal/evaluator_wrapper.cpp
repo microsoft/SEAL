@@ -15,17 +15,17 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL Evaluator_Create(void* sealContext, void** evaluator)
+SEALDLL HRESULT SEALCALL Evaluator_Create(void *sealContext, void **evaluator)
 {
-    SEALContext* context = FromVoid<SEALContext>(sealContext);
+    SEALContext *context = FromVoid<SEALContext>(sealContext);
     IfNullRet(context, E_POINTER);
-    const auto& sharedctx = SharedContextFromVoid(sealContext);
+    const auto &sharedctx = SharedContextFromVoid(sealContext);
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(evaluator, E_POINTER);
 
     try
     {
-        Evaluator* eval = new Evaluator(sharedctx);
+        Evaluator *eval = new Evaluator(sharedctx);
         *evaluator = eval;
         return S_OK;
     }
@@ -35,22 +35,22 @@ SEALDLL HRESULT SEALCALL Evaluator_Create(void* sealContext, void** evaluator)
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL Evaluator_Destroy(void *thisptr)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
 
     delete eval;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_Negate(void* thisptr, void* encrypted, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_Negate(void *thisptr, void *encrypted, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
     try
@@ -64,15 +64,15 @@ SEALDLL HRESULT SEALCALL Evaluator_Negate(void* thisptr, void* encrypted, void* 
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_Add(void* thisptr, void* encrypted1, void* encrypted2, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_Add(void *thisptr, void *encrypted1, void *encrypted2, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted1_ptr = FromVoid<Ciphertext>(encrypted1);
+    Ciphertext *encrypted1_ptr = FromVoid<Ciphertext>(encrypted1);
     IfNullRet(encrypted1_ptr, E_POINTER);
-    Ciphertext* encrypted2_ptr = FromVoid<Ciphertext>(encrypted2);
+    Ciphertext *encrypted2_ptr = FromVoid<Ciphertext>(encrypted2);
     IfNullRet(encrypted2_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
     try
@@ -86,15 +86,15 @@ SEALDLL HRESULT SEALCALL Evaluator_Add(void* thisptr, void* encrypted1, void* en
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_AddMany(void* thisptr, int count, void** encrypteds, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_AddMany(void *thisptr, int count, void **encrypteds, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
     IfNullRet(encrypteds, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
-    Ciphertext** encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
+    Ciphertext* *encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
     vector<Ciphertext> encrypteds_vec(count);
 
     for (int i = 0; i < count; i++)
@@ -113,15 +113,15 @@ SEALDLL HRESULT SEALCALL Evaluator_AddMany(void* thisptr, int count, void** encr
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_AddPlain(void* thisptr, void* encrypted, void* plain, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Plaintext* plain_ptr = FromVoid<Plaintext>(plain);
+    Plaintext *plain_ptr = FromVoid<Plaintext>(plain);
     IfNullRet(plain_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
     try
@@ -135,15 +135,15 @@ SEALDLL HRESULT SEALCALL Evaluator_AddPlain(void* thisptr, void* encrypted, void
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_Sub(void* thisptr, void* encrypted1, void* encrypted2, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted1_ptr = FromVoid<Ciphertext>(encrypted1);
+    Ciphertext *encrypted1_ptr = FromVoid<Ciphertext>(encrypted1);
     IfNullRet(encrypted1_ptr, E_POINTER);
-    Ciphertext* encrypted2_ptr = FromVoid<Ciphertext>(encrypted2);
+    Ciphertext *encrypted2_ptr = FromVoid<Ciphertext>(encrypted2);
     IfNullRet(encrypted2_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
     try
@@ -157,15 +157,15 @@ SEALDLL HRESULT SEALCALL Evaluator_Sub(void* thisptr, void* encrypted1, void* en
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_SubPlain(void* thisptr, void* encrypted, void* plain, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Plaintext* plain_ptr = FromVoid<Plaintext>(plain);
+    Plaintext *plain_ptr = FromVoid<Plaintext>(plain);
     IfNullRet(plain_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
     try
@@ -179,15 +179,15 @@ SEALDLL HRESULT SEALCALL Evaluator_SubPlain(void* thisptr, void* encrypted, void
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_Multiply(void* thisptr, void* encrypted1, void* encrypted2, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted1_ptr = FromVoid<Ciphertext>(encrypted1);
+    Ciphertext *encrypted1_ptr = FromVoid<Ciphertext>(encrypted1);
     IfNullRet(encrypted1_ptr, E_POINTER);
-    Ciphertext* encrypted2_ptr = FromVoid<Ciphertext>(encrypted2);
+    Ciphertext *encrypted2_ptr = FromVoid<Ciphertext>(encrypted2);
     IfNullRet(encrypted2_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -202,18 +202,18 @@ SEALDLL HRESULT SEALCALL Evaluator_Multiply(void* thisptr, void* encrypted1, voi
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_MultiplyMany(void* thisptr, int count, void** encrypteds, void* relin_keys, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, int count, void **encrypteds, void *relin_keys, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
     IfNullRet(encrypteds, E_POINTER);
-    RelinKeys* relin_keys_ptr = FromVoid<RelinKeys>(relin_keys);
+    RelinKeys *relin_keys_ptr = FromVoid<RelinKeys>(relin_keys);
     IfNullRet(relin_keys_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
-    Ciphertext** encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
+    Ciphertext* *encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
     vector<Ciphertext> encrypteds_vec(count);
 
     for (int i = 0; i < count; i++)
@@ -232,15 +232,15 @@ SEALDLL HRESULT SEALCALL Evaluator_MultiplyMany(void* thisptr, int count, void**
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_MultiplyPlain(void* thisptr, void* encrypted, void* plain, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Plaintext* plain_ptr = FromVoid<Plaintext>(plain);
+    Plaintext *plain_ptr = FromVoid<Plaintext>(plain);
     IfNullRet(plain_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -255,13 +255,13 @@ SEALDLL HRESULT SEALCALL Evaluator_MultiplyPlain(void* thisptr, void* encrypted,
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_Square(void* thisptr, void* encrypted, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_Square(void *thisptr, void *encrypted, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -276,15 +276,15 @@ SEALDLL HRESULT SEALCALL Evaluator_Square(void* thisptr, void* encrypted, void* 
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_Relinearize(void* thisptr, void* encrypted, void* relin_keys, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_Relinearize(void *thisptr, void *encrypted, void *relin_keys, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    RelinKeys* relin_keys_ptr = FromVoid<RelinKeys>(relin_keys);
+    RelinKeys *relin_keys_ptr = FromVoid<RelinKeys>(relin_keys);
     IfNullRet(relin_keys_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -299,13 +299,13 @@ SEALDLL HRESULT SEALCALL Evaluator_Relinearize(void* thisptr, void* encrypted, v
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_ModSwitchToNext1(void* thisptr, void* encrypted, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -320,13 +320,13 @@ SEALDLL HRESULT SEALCALL Evaluator_ModSwitchToNext1(void* thisptr, void* encrypt
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_ModSwitchToNext2(void* thisptr, void* plain, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Plaintext* plain_ptr = FromVoid<Plaintext>(plain);
+    Plaintext *plain_ptr = FromVoid<Plaintext>(plain);
     IfNullRet(plain_ptr, E_POINTER);
-    Plaintext* destination_ptr = FromVoid<Plaintext>(destination);
+    Plaintext *destination_ptr = FromVoid<Plaintext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
     try
@@ -340,14 +340,14 @@ SEALDLL HRESULT SEALCALL Evaluator_ModSwitchToNext2(void* thisptr, void* plain, 
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_ModSwitchTo1(void* thisptr, void* encrypted, uint64_t* parms_id, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -365,14 +365,14 @@ SEALDLL HRESULT SEALCALL Evaluator_ModSwitchTo1(void* thisptr, void* encrypted, 
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_ModSwitchTo2(void* thisptr, void* plain, uint64_t* parms_id, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_ModSwitchTo2(void *thisptr, void *plain, uint64_t *parms_id, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Plaintext* plain_ptr = FromVoid<Plaintext>(plain);
+    Plaintext *plain_ptr = FromVoid<Plaintext>(plain);
     IfNullRet(plain_ptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    Plaintext* destination_ptr = FromVoid<Plaintext>(destination);
+    Plaintext *destination_ptr = FromVoid<Plaintext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
     parms_id_type parms;
@@ -389,13 +389,13 @@ SEALDLL HRESULT SEALCALL Evaluator_ModSwitchTo2(void* thisptr, void* plain, uint
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_RescaleToNext(void* thisptr, void* encrypted, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -410,14 +410,14 @@ SEALDLL HRESULT SEALCALL Evaluator_RescaleToNext(void* thisptr, void* encrypted,
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_RescaleTo(void* thisptr, void* encrypted, uint64_t* parms_id, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -435,15 +435,15 @@ SEALDLL HRESULT SEALCALL Evaluator_RescaleTo(void* thisptr, void* encrypted, uin
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_Exponentiate(void* thisptr, void* encrypted, uint64_t exponent, void* relin_keys, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    RelinKeys* relin_keys_ptr = FromVoid<RelinKeys>(relin_keys);
+    RelinKeys *relin_keys_ptr = FromVoid<RelinKeys>(relin_keys);
     IfNullRet(relin_keys_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -458,14 +458,14 @@ SEALDLL HRESULT SEALCALL Evaluator_Exponentiate(void* thisptr, void* encrypted, 
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_TransformToNTT1(void* thisptr, void* plain, uint64_t* parms_id, void* destination_ntt, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parms_id, void *destination_ntt, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Plaintext* plain_ptr = FromVoid<Plaintext>(plain);
+    Plaintext *plain_ptr = FromVoid<Plaintext>(plain);
     IfNullRet(plain_ptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    Plaintext* destination_ptr = FromVoid<Plaintext>(destination_ntt);
+    Plaintext *destination_ptr = FromVoid<Plaintext>(destination_ntt);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -483,13 +483,13 @@ SEALDLL HRESULT SEALCALL Evaluator_TransformToNTT1(void* thisptr, void* plain, u
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_TransformToNTT2(void* thisptr, void* encrypted, void* destination_ntt)
+SEALDLL HRESULT SEALCALL Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *destination_ntt)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination_ntt);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination_ntt);
     IfNullRet(destination_ptr, E_POINTER);
 
     try
@@ -503,13 +503,13 @@ SEALDLL HRESULT SEALCALL Evaluator_TransformToNTT2(void* thisptr, void* encrypte
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_TransformFromNTT(void* thisptr, void* encrypted_ntt, void* destination)
+SEALDLL HRESULT SEALCALL Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *destination)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted_ntt);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted_ntt);
     IfNullRet(encrypted_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
     try
@@ -523,15 +523,15 @@ SEALDLL HRESULT SEALCALL Evaluator_TransformFromNTT(void* thisptr, void* encrypt
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_ApplyGalois(void* thisptr, void* encrypted, uint64_t galois_elt, void* galois_keys, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_ApplyGalois(void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    GaloisKeys* galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
+    GaloisKeys *galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
     IfNullRet(galois_keys_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -546,15 +546,15 @@ SEALDLL HRESULT SEALCALL Evaluator_ApplyGalois(void* thisptr, void* encrypted, u
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_RotateRows(void* thisptr, void* encrypted, int steps, void* galoisKeys, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    GaloisKeys* galois_keys_ptr = FromVoid<GaloisKeys>(galoisKeys);
+    GaloisKeys *galois_keys_ptr = FromVoid<GaloisKeys>(galoisKeys);
     IfNullRet(galois_keys_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -569,15 +569,15 @@ SEALDLL HRESULT SEALCALL Evaluator_RotateRows(void* thisptr, void* encrypted, in
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_RotateColumns(void* thisptr, void* encrypted, void* galois_keys, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    GaloisKeys* galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
+    GaloisKeys *galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
     IfNullRet(galois_keys_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -592,15 +592,15 @@ SEALDLL HRESULT SEALCALL Evaluator_RotateColumns(void* thisptr, void* encrypted,
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_RotateVector(void* thisptr, void* encrypted, int steps, void* galois_keys, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    GaloisKeys* galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
+    GaloisKeys *galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
     IfNullRet(galois_keys_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
@@ -615,15 +615,15 @@ SEALDLL HRESULT SEALCALL Evaluator_RotateVector(void* thisptr, void* encrypted, 
     }
 }
 
-SEALDLL HRESULT SEALCALL Evaluator_ComplexConjugate(void* thisptr, void* encrypted, void* galois_keys, void* destination, void* pool)
+SEALDLL HRESULT SEALCALL Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool)
 {
-    Evaluator* eval = FromVoid<Evaluator>(thisptr);
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
-    Ciphertext* encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
     IfNullRet(encrypted_ptr, E_POINTER);
-    GaloisKeys* galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
+    GaloisKeys *galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
     IfNullRet(galois_keys_ptr, E_POINTER);
-    Ciphertext* destination_ptr = FromVoid<Ciphertext>(destination);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 

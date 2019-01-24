@@ -26,18 +26,18 @@ namespace seal
     }
 }
 
-unique_ptr<MemoryPoolHandle> seal::dll::MemHandleFromVoid(void* voidptr)
+unique_ptr<MemoryPoolHandle> seal::dll::MemHandleFromVoid(void *voidptr)
 {
     if (nullptr == voidptr)
     {
         return make_unique<MemoryPoolHandle>(MemoryManager::GetPool());
     }
 
-    MemoryPoolHandle* handle = reinterpret_cast<MemoryPoolHandle*>(voidptr);
+    MemoryPoolHandle *handle = reinterpret_cast<MemoryPoolHandle*>(voidptr);
     return make_unique<MemoryPoolHandle>(*handle);
 }
 
-void seal::dll::BuildCoeffPointers(const vector<SmallModulus>& coefficients, uint64_t* length, void** coeffs)
+void seal::dll::BuildCoeffPointers(const vector<SmallModulus> &coefficients, uint64_t *length, void **coeffs)
 {
     *length = coefficients.size();
 
@@ -48,23 +48,23 @@ void seal::dll::BuildCoeffPointers(const vector<SmallModulus>& coefficients, uin
     }
 
     uint64_t count = 0;
-    SmallModulus** coeff_array = reinterpret_cast<SmallModulus**>(coeffs);
+    SmallModulus* *coeff_array = reinterpret_cast<SmallModulus**>(coeffs);
 
-    for (const auto& coeff : coefficients)
+    for (const auto &coeff : coefficients)
     {
         coeff_array[count++] = new SmallModulus(coeff);
     }
 }
 
-const shared_ptr<SEALContext>& seal::dll::SharedContextFromVoid(void* context)
+const shared_ptr<SEALContext> &seal::dll::SharedContextFromVoid(void *context)
 {
-    SEALContext* contextptr = FromVoid<SEALContext>(context);
+    SEALContext *contextptr = FromVoid<SEALContext>(context);
     if (nullptr == contextptr)
     {
         return null_context_;
     }
 
-    const auto& ctxiter = pointer_store_.find(contextptr);
+    const auto &ctxiter = pointer_store_.find(contextptr);
     if (ctxiter == pointer_store_.end())
     {
         return null_context_;
@@ -73,7 +73,7 @@ const shared_ptr<SEALContext>& seal::dll::SharedContextFromVoid(void* context)
     return ctxiter->second;
 }
 
-void seal::dll::CopyParmsId(const uint64_t* src, parms_id_type& dest)
+void seal::dll::CopyParmsId(const uint64_t *src, parms_id_type &dest)
 {
     if (nullptr != src)
     {
@@ -84,7 +84,7 @@ void seal::dll::CopyParmsId(const uint64_t* src, parms_id_type& dest)
     }
 }
 
-void seal::dll::CopyParmsId(const parms_id_type& src, uint64_t* dest)
+void seal::dll::CopyParmsId(const parms_id_type &src, uint64_t *dest)
 {
     if (nullptr != dest)
     {
@@ -95,7 +95,7 @@ void seal::dll::CopyParmsId(const parms_id_type& src, uint64_t* dest)
     }
 }
 
-HRESULT seal::dll::ToStringHelper(const string& str, char* outstr, int* length)
+HRESULT seal::dll::ToStringHelper(const string &str, char *outstr, int *length)
 {
     if (nullptr == outstr)
     {

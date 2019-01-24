@@ -13,29 +13,29 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL EPQ_Create(void* copy, void** epq)
+SEALDLL HRESULT SEALCALL EPQ_Create(void *copy, void **epq)
 {
-    EncryptionParameterQualifiers* copyptr = FromVoid<EncryptionParameterQualifiers>(copy);
+    EncryptionParameterQualifiers *copyptr = FromVoid<EncryptionParameterQualifiers>(copy);
     IfNullRet(copyptr, E_POINTER);
     IfNullRet(epq, E_POINTER);
 
-    EncryptionParameterQualifiers* result = new EncryptionParameterQualifiers(*copyptr);
+    EncryptionParameterQualifiers *result = new EncryptionParameterQualifiers(*copyptr);
     *epq = result;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL EPQ_Destroy(void *thisptr)
 {
-    EncryptionParameterQualifiers* epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
 
     delete epq;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_ParametersSet(void* thisptr, bool* parameters_set)
+SEALDLL HRESULT SEALCALL EPQ_ParametersSet(void *thisptr, bool *parameters_set)
 {
-    EncryptionParameterQualifiers* epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
     IfNullRet(parameters_set, E_POINTER);
 
@@ -43,9 +43,9 @@ SEALDLL HRESULT SEALCALL EPQ_ParametersSet(void* thisptr, bool* parameters_set)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingFFT(void* thisptr, bool* using_fft)
+SEALDLL HRESULT SEALCALL EPQ_UsingFFT(void *thisptr, bool *using_fft)
 {
-    EncryptionParameterQualifiers* epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
     IfNullRet(using_fft, E_POINTER);
 
@@ -53,9 +53,9 @@ SEALDLL HRESULT SEALCALL EPQ_UsingFFT(void* thisptr, bool* using_fft)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingNTT(void* thisptr, bool* using_ntt)
+SEALDLL HRESULT SEALCALL EPQ_UsingNTT(void *thisptr, bool *using_ntt)
 {
-    EncryptionParameterQualifiers* epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
     IfNullRet(using_ntt, E_POINTER);
 
@@ -63,9 +63,9 @@ SEALDLL HRESULT SEALCALL EPQ_UsingNTT(void* thisptr, bool* using_ntt)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingBatching(void* thisptr, bool* using_batching)
+SEALDLL HRESULT SEALCALL EPQ_UsingBatching(void *thisptr, bool *using_batching)
 {
-    EncryptionParameterQualifiers* epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
     IfNullRet(using_batching, E_POINTER);
 
@@ -73,9 +73,9 @@ SEALDLL HRESULT SEALCALL EPQ_UsingBatching(void* thisptr, bool* using_batching)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingFastPlainLift(void* thisptr, bool* using_fast_plain_lift)
+SEALDLL HRESULT SEALCALL EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_plain_lift)
 {
-    EncryptionParameterQualifiers* epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
     IfNullRet(using_fast_plain_lift, E_POINTER);
 
@@ -83,9 +83,9 @@ SEALDLL HRESULT SEALCALL EPQ_UsingFastPlainLift(void* thisptr, bool* using_fast_
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingHEStdSecurity(void* thisptr, bool* using_HE_std_security)
+SEALDLL HRESULT SEALCALL EPQ_UsingHEStdSecurity(void *thisptr, bool *using_HE_std_security)
 {
-    EncryptionParameterQualifiers* epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
     IfNullRet(using_HE_std_security, E_POINTER);
 

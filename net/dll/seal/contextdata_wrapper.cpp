@@ -14,18 +14,18 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL ContextData_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL ContextData_Destroy(void *thisptr)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
 
     delete cont_data;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulus(void* thisptr, uint64_t* count, uint64_t* total_coeff_modulus)
+SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulus(void *thisptr, uint64_t *count, uint64_t *total_coeff_modulus)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
@@ -45,9 +45,9 @@ SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulus(void* thisptr, uint64_t* 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulusBitCount(void* thisptr, int* bit_count)
+SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulusBitCount(void *thisptr, int *bit_count)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(bit_count, E_POINTER);
 
@@ -55,30 +55,30 @@ SEALDLL HRESULT SEALCALL ContextData_TotalCoeffModulusBitCount(void* thisptr, in
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_Parms(void* thisptr, void** parms)
+SEALDLL HRESULT SEALCALL ContextData_Parms(void *thisptr, void **parms)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
 
-    EncryptionParameters* enc_params = new EncryptionParameters(cont_data->parms());
+    EncryptionParameters *enc_params = new EncryptionParameters(cont_data->parms());
     *parms = enc_params;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_Qualifiers(void* thisptr, void** epq)
+SEALDLL HRESULT SEALCALL ContextData_Qualifiers(void *thisptr, void **epq)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(epq, E_POINTER);
 
-    EncryptionParameterQualifiers* qualifiers = new EncryptionParameterQualifiers(cont_data->qualifiers());
+    EncryptionParameterQualifiers *qualifiers = new EncryptionParameterQualifiers(cont_data->qualifiers());
     *epq = qualifiers;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_CoeffDivPlainModulus(void* thisptr, uint64_t* count, uint64_t* coeff_div)
+SEALDLL HRESULT SEALCALL ContextData_CoeffDivPlainModulus(void *thisptr, uint64_t *count, uint64_t *coeff_div)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
@@ -98,9 +98,9 @@ SEALDLL HRESULT SEALCALL ContextData_CoeffDivPlainModulus(void* thisptr, uint64_
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfThreshold(void* thisptr, uint64_t* puht)
+SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfThreshold(void *thisptr, uint64_t *puht)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(puht, E_POINTER);
 
@@ -108,9 +108,9 @@ SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfThreshold(void* thisptr, uint
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void* thisptr, uint64_t* count, uint64_t* puhi)
+SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *puhi)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
@@ -130,9 +130,9 @@ SEALDLL HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void* thisptr, uint
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_UpperHalfThreshold(void* thisptr, uint64_t* count, uint64_t* uht)
+SEALDLL HRESULT SEALCALL ContextData_UpperHalfThreshold(void *thisptr, uint64_t *count, uint64_t *uht)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
@@ -159,9 +159,9 @@ SEALDLL HRESULT SEALCALL ContextData_UpperHalfThreshold(void* thisptr, uint64_t*
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_UpperHalfIncrement(void* thisptr, uint64_t* count, uint64_t* uhi)
+SEALDLL HRESULT SEALCALL ContextData_UpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *uhi)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
@@ -187,9 +187,9 @@ SEALDLL HRESULT SEALCALL ContextData_UpperHalfIncrement(void* thisptr, uint64_t*
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_NextContextData(void* thisptr, void** next_data)
+SEALDLL HRESULT SEALCALL ContextData_NextContextData(void *thisptr, void **next_data)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(next_data, E_POINTER);
 
@@ -198,9 +198,9 @@ SEALDLL HRESULT SEALCALL ContextData_NextContextData(void* thisptr, void** next_
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL ContextData_ChainIndex(void* thisptr, uint64_t* index)
+SEALDLL HRESULT SEALCALL ContextData_ChainIndex(void *thisptr, uint64_t *index)
 {
-    SEALContext::ContextData* cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(index, E_POINTER);
 

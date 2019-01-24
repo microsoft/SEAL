@@ -14,53 +14,53 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL PublicKey_Create1(void** public_key)
+SEALDLL HRESULT SEALCALL PublicKey_Create1(void **public_key)
 {
     IfNullRet(public_key, E_POINTER);
 
-    PublicKey* pkey = new PublicKey();
+    PublicKey *pkey = new PublicKey();
     *public_key = pkey;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Create2(void* copy, void** public_key)
+SEALDLL HRESULT SEALCALL PublicKey_Create2(void *copy, void **public_key)
 {
-    PublicKey* copyptr = FromVoid<PublicKey>(copy);
+    PublicKey *copyptr = FromVoid<PublicKey>(copy);
     IfNullRet(copyptr, E_POINTER);
     IfNullRet(public_key, E_POINTER);
 
-    PublicKey* pkey = new PublicKey(*copyptr);
+    PublicKey *pkey = new PublicKey(*copyptr);
     *public_key = pkey;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Set(void* thisptr, void* assign)
+SEALDLL HRESULT SEALCALL PublicKey_Set(void *thisptr, void *assign)
 {
-    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
-    PublicKey* assignptr = FromVoid<PublicKey>(assign);
+    PublicKey *assignptr = FromVoid<PublicKey>(assign);
     IfNullRet(assignptr, E_POINTER);
 
     *pkey = *assignptr;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Data(void* thisptr, void** data)
+SEALDLL HRESULT SEALCALL PublicKey_Data(void *thisptr, void **data)
 {
-    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
     IfNullRet(data, E_POINTER);
 
     // This returns a pointer to an existing object, not a new object.
     // Make sure the managed side does not try to delete it.
-    Ciphertext* cipher = &pkey->data();
+    Ciphertext *cipher = &pkey->data();
     *data = cipher;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_ParmsId(void* thisptr, uint64_t* parms_id)
+SEALDLL HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_id)
 {
-    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
@@ -68,11 +68,11 @@ SEALDLL HRESULT SEALCALL PublicKey_ParmsId(void* thisptr, uint64_t* parms_id)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void* thisptr, void* context, bool* result)
+SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void *thisptr, void *context, bool *result)
 {
-    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
-    const auto& sharedctx = SharedContextFromVoid(context);
+    const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -80,20 +80,20 @@ SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void* thisptr, void* context, bool
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Pool(void* thisptr, void** pool)
+SEALDLL HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool)
 {
-    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
     IfNullRet(pool, E_POINTER);
 
-    MemoryPoolHandle* handleptr = new MemoryPoolHandle(pkey->pool());
+    MemoryPoolHandle *handleptr = new MemoryPoolHandle(pkey->pool());
     *pool = handleptr;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL PublicKey_Destroy(void *thisptr)
 {
-    PublicKey* pkey = FromVoid<PublicKey>(thisptr);
+    PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
 
     delete pkey;

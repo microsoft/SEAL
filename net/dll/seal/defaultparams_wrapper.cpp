@@ -14,7 +14,7 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL DefParams_CoeffModulus128(uint64_t polyModulusDegree, uint64_t* length, void** coeffs)
+SEALDLL HRESULT SEALCALL DefParams_CoeffModulus128(uint64_t polyModulusDegree, uint64_t *length, void **coeffs)
 {
     IfNullRet(length, E_POINTER);
 
@@ -32,7 +32,7 @@ SEALDLL HRESULT SEALCALL DefParams_CoeffModulus128(uint64_t polyModulusDegree, u
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL DefParams_CoeffModulus192(uint64_t polyModulusDegree, uint64_t* length, void** coeffs)
+SEALDLL HRESULT SEALCALL DefParams_CoeffModulus192(uint64_t polyModulusDegree, uint64_t *length, void **coeffs)
 {
     IfNullRet(length, E_POINTER);
 
@@ -50,7 +50,7 @@ SEALDLL HRESULT SEALCALL DefParams_CoeffModulus192(uint64_t polyModulusDegree, u
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL DefParams_CoeffModulus256(uint64_t polyModulusDegree, uint64_t* length, void** coeffs)
+SEALDLL HRESULT SEALCALL DefParams_CoeffModulus256(uint64_t polyModulusDegree, uint64_t *length, void **coeffs)
 {
     IfNullRet(length, E_POINTER);
 
@@ -68,13 +68,13 @@ SEALDLL HRESULT SEALCALL DefParams_CoeffModulus256(uint64_t polyModulusDegree, u
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL DefParams_SmallMods60Bit(uint64_t index, void** small_modulus)
+SEALDLL HRESULT SEALCALL DefParams_SmallMods60Bit(uint64_t index, void **small_modulus)
 {
     IfNullRet(small_modulus, E_POINTER);
 
     try
     {
-        SmallModulus* sm = new SmallModulus(small_mods_60bit(index));
+        SmallModulus *sm = new SmallModulus(small_mods_60bit(index));
         *small_modulus = sm;
         return S_OK;
     }
@@ -84,13 +84,13 @@ SEALDLL HRESULT SEALCALL DefParams_SmallMods60Bit(uint64_t index, void** small_m
     }
 }
 
-SEALDLL HRESULT SEALCALL DefParams_SmallMods50Bit(uint64_t index, void** small_modulus)
+SEALDLL HRESULT SEALCALL DefParams_SmallMods50Bit(uint64_t index, void **small_modulus)
 {
     IfNullRet(small_modulus, E_POINTER);
 
     try
     {
-        SmallModulus* sm = new SmallModulus(small_mods_50bit(index));
+        SmallModulus *sm = new SmallModulus(small_mods_50bit(index));
         *small_modulus = sm;
         return S_OK;
     }
@@ -100,13 +100,13 @@ SEALDLL HRESULT SEALCALL DefParams_SmallMods50Bit(uint64_t index, void** small_m
     }
 }
 
-SEALDLL HRESULT SEALCALL DefParams_SmallMods40Bit(uint64_t index, void** small_modulus)
+SEALDLL HRESULT SEALCALL DefParams_SmallMods40Bit(uint64_t index, void **small_modulus)
 {
     IfNullRet(small_modulus, E_POINTER);
 
     try
     {
-        SmallModulus* sm = new SmallModulus(small_mods_40bit(index));
+        SmallModulus *sm = new SmallModulus(small_mods_40bit(index));
         *small_modulus = sm;
         return S_OK;
     }
@@ -116,13 +116,13 @@ SEALDLL HRESULT SEALCALL DefParams_SmallMods40Bit(uint64_t index, void** small_m
     }
 }
 
-SEALDLL HRESULT SEALCALL DefParams_SmallMods30Bit(uint64_t index, void** small_modulus)
+SEALDLL HRESULT SEALCALL DefParams_SmallMods30Bit(uint64_t index, void **small_modulus)
 {
     IfNullRet(small_modulus, E_POINTER);
 
     try
     {
-        SmallModulus* sm = new SmallModulus(small_mods_30bit(index));
+        SmallModulus *sm = new SmallModulus(small_mods_30bit(index));
         *small_modulus = sm;
         return S_OK;
     }
@@ -132,7 +132,7 @@ SEALDLL HRESULT SEALCALL DefParams_SmallMods30Bit(uint64_t index, void** small_m
     }
 }
 
-SEALDLL HRESULT SEALCALL DefParams_DBCMax(int* dbc_max_value)
+SEALDLL HRESULT SEALCALL DefParams_DBCMax(int *dbc_max_value)
 {
     IfNullRet(dbc_max_value, E_POINTER);
 
@@ -140,7 +140,7 @@ SEALDLL HRESULT SEALCALL DefParams_DBCMax(int* dbc_max_value)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL DefParams_DBCMin(int* dbc_min_value)
+SEALDLL HRESULT SEALCALL DefParams_DBCMin(int *dbc_min_value)
 {
     IfNullRet(dbc_min_value, E_POINTER);
 

@@ -13,15 +13,15 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void* plain_modulus, void** encoder)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void *plain_modulus, void **encoder)
 {
-    SmallModulus* pm = FromVoid<SmallModulus>(plain_modulus);
+    SmallModulus *pm = FromVoid<SmallModulus>(plain_modulus);
     IfNullRet(pm, E_POINTER);
     IfNullRet(encoder, E_POINTER);
 
     try
     {
-        IntegerEncoder* intEncoder = new IntegerEncoder(*pm);
+        IntegerEncoder *intEncoder = new IntegerEncoder(*pm);
         *encoder = intEncoder;
         return S_OK;
     }
@@ -31,88 +31,88 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void* plain_modulus, void** enco
     }
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Create2(void* copy, void** encoder)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Create2(void *copy, void **encoder)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(copy);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(copy);
     IfNullRet(intenc, E_POINTER);
     IfNullRet(encoder, E_POINTER);
 
-    IntegerEncoder* newEnc = new IntegerEncoder(*intenc);
+    IntegerEncoder *newEnc = new IntegerEncoder(*intenc);
     *encoder = newEnc;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Destroy(void *thisptr)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
 
     delete intenc;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Encode1(void* thisptr, int32_t value, void* plain)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Encode1(void *thisptr, int32_t value, void *plain)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* dest = FromVoid<Plaintext>(plain);
+    Plaintext *dest = FromVoid<Plaintext>(plain);
     IfNullRet(dest, E_POINTER);
 
     intenc->encode(value, *dest);
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Encode2(void* thisptr, uint32_t value, void* plain)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Encode2(void *thisptr, uint32_t value, void *plain)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* dest = FromVoid<Plaintext>(plain);
+    Plaintext *dest = FromVoid<Plaintext>(plain);
     IfNullRet(dest, E_POINTER);
 
     intenc->encode(value, *dest);
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Encode3(void* thisptr, uint64_t value, void* plain)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Encode3(void *thisptr, uint64_t value, void *plain)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* dest = FromVoid<Plaintext>(plain);
+    Plaintext *dest = FromVoid<Plaintext>(plain);
     IfNullRet(dest, E_POINTER);
 
     intenc->encode(value, *dest);
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Encode4(void* thisptr, int64_t value, void* plain)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Encode4(void *thisptr, int64_t value, void *plain)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* dest = FromVoid<Plaintext>(plain);
+    Plaintext *dest = FromVoid<Plaintext>(plain);
     IfNullRet(dest, E_POINTER);
 
     intenc->encode(value, *dest);
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Encode5(void* thisptr, void* biguint, void* plain)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Encode5(void *thisptr, void *biguint, void *plain)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    BigUInt* bui = FromVoid<BigUInt>(biguint);
+    BigUInt *bui = FromVoid<BigUInt>(biguint);
     IfNullRet(bui, E_POINTER);
-    Plaintext* dest = FromVoid<Plaintext>(plain);
+    Plaintext *dest = FromVoid<Plaintext>(plain);
     IfNullRet(dest, E_POINTER);
 
     intenc->encode(*bui, *dest);
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt32(void* thisptr, void* plainptr, uint32_t* result)
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt32(void *thisptr, void *plainptr, uint32_t *result)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* plain = FromVoid<Plaintext>(plainptr);
+    Plaintext *plain = FromVoid<Plaintext>(plainptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -127,11 +127,11 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt32(void* thisptr, void* plainp
     }
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt64(void* thisptr, void* plainptr, uint64_t* result)
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt64(void *thisptr, void *plainptr, uint64_t *result)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* plain = FromVoid<Plaintext>(plainptr);
+    Plaintext *plain = FromVoid<Plaintext>(plainptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -146,11 +146,11 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeUInt64(void* thisptr, void* plainp
     }
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt32(void* thisptr, void* plainptr, int32_t* result)
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt32(void *thisptr, void *plainptr, int32_t *result)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* plain = FromVoid<Plaintext>(plainptr);
+    Plaintext *plain = FromVoid<Plaintext>(plainptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -165,11 +165,11 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt32(void* thisptr, void* plainpt
     }
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt64(void* thisptr, void* plainptr, int64_t* result)
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt64(void *thisptr, void *plainptr, int64_t *result)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* plain = FromVoid<Plaintext>(plainptr);
+    Plaintext *plain = FromVoid<Plaintext>(plainptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -184,18 +184,18 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeInt64(void* thisptr, void* plainpt
     }
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void* thisptr, void* plainptr, void** biguint)
+SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void *thisptr, void *plainptr, void **biguint)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
-    Plaintext* plain = FromVoid<Plaintext>(plainptr);
+    Plaintext *plain = FromVoid<Plaintext>(plainptr);
     IfNullRet(plain, E_POINTER);
     IfNullRet(biguint, E_POINTER);
 
     try
     {
         BigUInt result = intenc->decode_biguint(*plain);
-        BigUInt* resultPtr = new BigUInt(result);
+        BigUInt *resultPtr = new BigUInt(result);
         *biguint = resultPtr;
         return S_OK;
     }
@@ -205,13 +205,13 @@ SEALDLL HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void* thisptr, void* plain
     }
 }
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_PlainModulus(void* thisptr, void** smallModPtr)
+SEALDLL HRESULT SEALCALL IntegerEncoder_PlainModulus(void *thisptr, void **smallModPtr)
 {
-    IntegerEncoder* intenc = FromVoid<IntegerEncoder>(thisptr);
+    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
     IfNullRet(smallModPtr, E_POINTER);
 
-    SmallModulus* sm = new SmallModulus(intenc->plain_modulus());
+    SmallModulus *sm = new SmallModulus(intenc->plain_modulus());
     *smallModPtr = sm;
     return S_OK;
 }

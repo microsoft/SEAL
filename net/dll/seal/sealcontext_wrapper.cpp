@@ -30,9 +30,9 @@ namespace seal
 }
 
 
-SEALDLL HRESULT SEALCALL SEALContext_Create(void* encryptionParams, void** context)
+SEALDLL HRESULT SEALCALL SEALContext_Create(void *encryptionParams, bool expand_mod_chain, void **context)
 {
-    EncryptionParameters* encParams = FromVoid<EncryptionParameters>(encryptionParams);
+    EncryptionParameters *encParams = FromVoid<EncryptionParameters>(encryptionParams);
     IfNullRet(encParams, E_POINTER);
     IfNullRet(context, E_POINTER);
 
@@ -43,18 +43,18 @@ SEALDLL HRESULT SEALCALL SEALContext_Create(void* encryptionParams, void** conte
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SEALContext_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL SEALContext_Destroy(void *thisptr)
 {
-    SEALContext* context = FromVoid<SEALContext>(thisptr);
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
 
     pointer_store_.erase(context);
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SEALContext_FirstParmsId(void* thisptr, uint64_t* parms_id)
+SEALDLL HRESULT SEALCALL SEALContext_FirstParmsId(void *thisptr, uint64_t *parms_id)
 {
-    SEALContext* context = FromVoid<SEALContext>(thisptr);
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
@@ -62,9 +62,9 @@ SEALDLL HRESULT SEALCALL SEALContext_FirstParmsId(void* thisptr, uint64_t* parms
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SEALContext_LastParmsId(void* thisptr, uint64_t* parms_id)
+SEALDLL HRESULT SEALCALL SEALContext_LastParmsId(void *thisptr, uint64_t *parms_id)
 {
-    SEALContext* context = FromVoid<SEALContext>(thisptr);
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
@@ -72,9 +72,9 @@ SEALDLL HRESULT SEALCALL SEALContext_LastParmsId(void* thisptr, uint64_t* parms_
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SEALContext_ParametersSet(void* thisptr, bool* params_set)
+SEALDLL HRESULT SEALCALL SEALContext_ParametersSet(void *thisptr, bool *params_set)
 {
-    SEALContext* context = FromVoid<SEALContext>(thisptr);
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(params_set, E_POINTER);
 
@@ -82,9 +82,9 @@ SEALDLL HRESULT SEALCALL SEALContext_ParametersSet(void* thisptr, bool* params_s
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SEALContext_FirstContextData(void* thisptr, void** first_context_data)
+SEALDLL HRESULT SEALCALL SEALContext_FirstContextData(void *thisptr, void **first_context_data)
 {
-    SEALContext* context = FromVoid<SEALContext>(thisptr);
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(first_context_data, E_POINTER);
 
@@ -94,9 +94,9 @@ SEALDLL HRESULT SEALCALL SEALContext_FirstContextData(void* thisptr, void** firs
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SEALContext_GetContextData(void* thisptr, uint64_t* parms_id, void** context_data)
+SEALDLL HRESULT SEALCALL SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void **context_data)
 {
-    SEALContext* context = FromVoid<SEALContext>(thisptr);
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
     IfNullRet(context_data, E_POINTER);

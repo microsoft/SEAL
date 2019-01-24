@@ -17,15 +17,15 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Create(void* context, void** batch_encoder)
+SEALDLL HRESULT SEALCALL BatchEncoder_Create(void *context, void **batch_encoder)
 {
-    const auto& sharedctx = SharedContextFromVoid(context);
+    const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx, E_POINTER);
     IfNullRet(batch_encoder, E_POINTER);
 
     try
     {
-        BatchEncoder* encoder = new BatchEncoder(sharedctx);
+        BatchEncoder *encoder = new BatchEncoder(sharedctx);
         *batch_encoder = encoder;
         return S_OK;
     }
@@ -35,21 +35,21 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Create(void* context, void** batch_encoder
     }
 }
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL BatchEncoder_Destroy(void *thisptr)
 {
-    BatchEncoder* encoder = FromVoid<BatchEncoder>(thisptr);
+    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
 
     delete encoder;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Encode1(void* thisptr, uint64_t count, uint64_t* values, void* destination)
+SEALDLL HRESULT SEALCALL BatchEncoder_Encode1(void *thisptr, uint64_t count, uint64_t *values, void *destination)
 {
-    BatchEncoder* encoder = FromVoid<BatchEncoder>(thisptr);
+    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(values, E_POINTER);
-    Plaintext* plain = FromVoid<Plaintext>(destination);
+    Plaintext *plain = FromVoid<Plaintext>(destination);
     IfNullRet(plain, E_POINTER);
 
     vector<uint64_t> valvec(count);
@@ -69,12 +69,12 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Encode1(void* thisptr, uint64_t count, uin
     }
 }
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Encode2(void* thisptr, uint64_t count, int64_t* values, void* destination)
+SEALDLL HRESULT SEALCALL BatchEncoder_Encode2(void *thisptr, uint64_t count, int64_t *values, void *destination)
 {
-    BatchEncoder* encoder = FromVoid<BatchEncoder>(thisptr);
+    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(values, E_POINTER);
-    Plaintext* plain = FromVoid<Plaintext>(destination);
+    Plaintext *plain = FromVoid<Plaintext>(destination);
     IfNullRet(plain, E_POINTER);
 
     vector<int64_t> valvec(count);
@@ -94,11 +94,11 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Encode2(void* thisptr, uint64_t count, int
     }
 }
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Encode3(void* thisptr, void* plain, void* pool)
+SEALDLL HRESULT SEALCALL BatchEncoder_Encode3(void *thisptr, void *plain, void *pool)
 {
-    BatchEncoder* encoder = FromVoid<BatchEncoder>(thisptr);
+    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
-    Plaintext* plainptr = FromVoid<Plaintext>(plain);
+    Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
@@ -113,12 +113,12 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Encode3(void* thisptr, void* plain, void* 
     }
 }
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Decode1(void* thisptr, void* plain, uint64_t* count, uint64_t* destination, void* pool)
+SEALDLL HRESULT SEALCALL BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, uint64_t *destination, void *pool)
 {
-    BatchEncoder* encoder = FromVoid<BatchEncoder>(thisptr);
+    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(count, E_POINTER);
-    Plaintext* plainptr = FromVoid<Plaintext>(plain);
+    Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
@@ -148,12 +148,12 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode1(void* thisptr, void* plain, uint64
     }
 }
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Decode2(void* thisptr, void* plain, uint64_t* count, int64_t* destination, void* pool)
+SEALDLL HRESULT SEALCALL BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, int64_t *destination, void *pool)
 {
-    BatchEncoder* encoder = FromVoid<BatchEncoder>(thisptr);
+    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(count, E_POINTER);
-    Plaintext* plainptr = FromVoid<Plaintext>(plain);
+    Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
@@ -183,11 +183,11 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode2(void* thisptr, void* plain, uint64
     }
 }
 
-SEALDLL HRESULT SEALCALL BatchEncoder_Decode3(void* thisptr, void* plain, void* pool)
+SEALDLL HRESULT SEALCALL BatchEncoder_Decode3(void *thisptr, void *plain, void *pool)
 {
-    BatchEncoder* encoder = FromVoid<BatchEncoder>(thisptr);
+    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
-    Plaintext* plainptr = FromVoid<Plaintext>(plain);
+    Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
@@ -202,9 +202,9 @@ SEALDLL HRESULT SEALCALL BatchEncoder_Decode3(void* thisptr, void* plain, void* 
     }
 }
 
-SEALDLL HRESULT SEALCALL BatchEncoder_GetSlotCount(void* thisptr, uint64_t* slot_count)
+SEALDLL HRESULT SEALCALL BatchEncoder_GetSlotCount(void *thisptr, uint64_t *slot_count)
 {
-    BatchEncoder* encoder = FromVoid<BatchEncoder>(thisptr);
+    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(slot_count, E_POINTER);
 

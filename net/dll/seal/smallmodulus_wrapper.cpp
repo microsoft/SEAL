@@ -14,13 +14,13 @@ using namespace seal;
 using namespace seal::dll;
 
 
-SEALDLL HRESULT SEALCALL SmallModulus_Create1(uint64_t value, void** small_modulus)
+SEALDLL HRESULT SEALCALL SmallModulus_Create1(uint64_t value, void **small_modulus)
 {
     IfNullRet(small_modulus, E_POINTER);
 
     try
     {
-        SmallModulus* sm = new SmallModulus(value);
+        SmallModulus *sm = new SmallModulus(value);
         *small_modulus = sm;
         return S_OK;
     }
@@ -30,28 +30,28 @@ SEALDLL HRESULT SEALCALL SmallModulus_Create1(uint64_t value, void** small_modul
     }
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_Create2(void* copy, void** small_modulus)
+SEALDLL HRESULT SEALCALL SmallModulus_Create2(void *copy, void **small_modulus)
 {
-    SmallModulus* copypt = FromVoid<SmallModulus>(copy);
+    SmallModulus *copypt = FromVoid<SmallModulus>(copy);
     IfNullRet(copypt, E_POINTER);
 
-    SmallModulus* sm = new SmallModulus(*copypt);
+    SmallModulus *sm = new SmallModulus(*copypt);
     *small_modulus = sm;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_Destroy(void* thisptr)
+SEALDLL HRESULT SEALCALL SmallModulus_Destroy(void *thisptr)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
 
     delete sm;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_IsZero(void* thisptr, bool* is_zero)
+SEALDLL HRESULT SEALCALL SmallModulus_IsZero(void *thisptr, bool *is_zero)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
     IfNullRet(is_zero, E_POINTER);
 
@@ -59,9 +59,9 @@ SEALDLL HRESULT SEALCALL SmallModulus_IsZero(void* thisptr, bool* is_zero)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_Value(void* thisptr, uint64_t* value)
+SEALDLL HRESULT SEALCALL SmallModulus_Value(void *thisptr, uint64_t *value)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
     IfNullRet(value, E_POINTER);
 
@@ -69,9 +69,9 @@ SEALDLL HRESULT SEALCALL SmallModulus_Value(void* thisptr, uint64_t* value)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_BitCount(void* thisptr, int* bit_count)
+SEALDLL HRESULT SEALCALL SmallModulus_BitCount(void *thisptr, int *bit_count)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
     IfNullRet(bit_count, E_POINTER);
 
@@ -79,9 +79,9 @@ SEALDLL HRESULT SEALCALL SmallModulus_BitCount(void* thisptr, int* bit_count)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_UInt64Count(void* thisptr, uint64_t* uint64_count)
+SEALDLL HRESULT SEALCALL SmallModulus_UInt64Count(void *thisptr, uint64_t *uint64_count)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
     IfNullRet(uint64_count, E_POINTER);
 
@@ -89,20 +89,20 @@ SEALDLL HRESULT SEALCALL SmallModulus_UInt64Count(void* thisptr, uint64_t* uint6
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_Set1(void* thisptr, void* assign)
+SEALDLL HRESULT SEALCALL SmallModulus_Set1(void *thisptr, void *assign)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
-    SmallModulus* assignpt = FromVoid<SmallModulus>(assign);
+    SmallModulus *assignpt = FromVoid<SmallModulus>(assign);
     IfNullRet(assignpt, E_POINTER);
 
     *sm = *assignpt;
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_Set2(void* thisptr, uint64_t value)
+SEALDLL HRESULT SEALCALL SmallModulus_Set2(void *thisptr, uint64_t value)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
 
     try
@@ -117,9 +117,9 @@ SEALDLL HRESULT SEALCALL SmallModulus_Set2(void* thisptr, uint64_t value)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_ConstRatio(void* thisptr, int length, uint64_t ratio[])
+SEALDLL HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, int length, uint64_t ratio[])
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
 
     if (length != 3)
@@ -133,11 +133,11 @@ SEALDLL HRESULT SEALCALL SmallModulus_ConstRatio(void* thisptr, int length, uint
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_Equals1(void* thisptr, void* other, bool* result)
+SEALDLL HRESULT SEALCALL SmallModulus_Equals1(void *thisptr, void *other, bool *result)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
-    SmallModulus* otherpt = FromVoid<SmallModulus>(other);
+    SmallModulus *otherpt = FromVoid<SmallModulus>(other);
     IfNullRet(otherpt, E_POINTER);
     IfNullRet(result, E_POINTER);
 
@@ -145,9 +145,9 @@ SEALDLL HRESULT SEALCALL SmallModulus_Equals1(void* thisptr, void* other, bool* 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SmallModulus_Equals2(void* thisptr, uint64_t other, bool* result)
+SEALDLL HRESULT SEALCALL SmallModulus_Equals2(void *thisptr, uint64_t other, bool *result)
 {
-    SmallModulus* sm = FromVoid<SmallModulus>(thisptr);
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
     IfNullRet(result, E_POINTER);
 
