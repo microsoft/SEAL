@@ -14,7 +14,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{70BBB2AA-FA77-40C1-890F-7AA7DBB3AD3D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>SEALdll</RootNamespace>
+    <RootNamespace>SEALNetNative</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
