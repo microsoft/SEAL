@@ -206,16 +206,28 @@ If you only intend to run the examples and unit tests provided with SEAL, you do
 install the shared native library, you only need to compile it. The Examples and Unit Tests projects
 take care of copying the native shared library to the appropriate assembly output directory.
 
-To compile the shared native library, do the following:
+To compile the shared native library you will need to:
+1. Compile SEAL as a static library with Position Independent Code
+2. Compile shared native library
+
+The instructions for compiling SEAL are similar to the instructions described previously for a
+local install of SEAL.
+In the instructions below we additionally speficy that the library is to be compiled as a static
+library with position independent code:
+````
+cd src
+cmake -DCMAKE_INSTALL_PREFIX=~/mylibs -DSEAL_LIB_BUILD_TYPE=Static_PIC .
+make
+make install
+cd ..
+````
+We can now use this library to compile the shared native library required for .Net:
 ````
 cd net/dll
-cmake .
+cmake -DCMAKE_PREFIX_PATH=~/mylibs .
 make
 cd ../..
 ````
-This assumes the SEAL static library is installed globally. If you installed the SEAL static
-library locally you would need to substitute "`cmake .`" with "`cmake -DCMAKE_PREFIX_PATH=~/mylibs .`",
-for example.
 
 #### .Net library
 
@@ -237,7 +249,7 @@ cd net/examples
 dotnet run
 cd ../..
 ````
-As mentioned before, the .Net project will copy the shard native library to the assembly output directory.
+As mentioned before, the .Net project will copy the shared native library to the assembly output directory.
 You can use the dotnet parameter `--configuration-` to run either Debug or Release versions of the examples.
 
 #### Unit tests
