@@ -15,159 +15,159 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="seal\defines.h">
+    <ClInclude Include="sealnet\defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\stdafx.h">
+    <ClInclude Include="sealnet\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\targetver.h">
+    <ClInclude Include="sealnet\targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\utilities.h">
+    <ClInclude Include="sealnet\utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\batchencoder_wrapper.h">
+    <ClInclude Include="sealnet\batchencoder_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\biguint_wrapper.h">
+    <ClInclude Include="sealnet\biguint_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\ciphertext_wrapper.h">
+    <ClInclude Include="sealnet\ciphertext_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\ckksencoder_wrapper.h">
+    <ClInclude Include="sealnet\ckksencoder_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\contextdata_wrapper.h">
+    <ClInclude Include="sealnet\contextdata_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\decryptor_wrapper.h">
+    <ClInclude Include="sealnet\decryptor_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\defaultparams_wrapper.h">
+    <ClInclude Include="sealnet\defaultparams_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\encryptionparameterqualifiers_wrapper.h">
+    <ClInclude Include="sealnet\encryptionparameterqualifiers_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\encryptionparameters_wrapper.h">
+    <ClInclude Include="sealnet\encryptionparameters_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\encryptor_wrapper.h">
+    <ClInclude Include="sealnet\encryptor_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\evaluator_wrapper.h">
+    <ClInclude Include="sealnet\evaluator_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\galoiskeys_wrapper.h">
+    <ClInclude Include="sealnet\galoiskeys_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\keygenerator_wrapper.h">
+    <ClInclude Include="sealnet\keygenerator_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\memorymanager_wrapper.h">
+    <ClInclude Include="sealnet\memorymanager_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\memorypoolhandle_wrapper.h">
+    <ClInclude Include="sealnet\memorypoolhandle_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\plaintext_wrapper.h">
+    <ClInclude Include="sealnet\plaintext_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\publickey_wrapper.h">
+    <ClInclude Include="sealnet\publickey_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\relinkeys_wrapper.h">
+    <ClInclude Include="sealnet\relinkeys_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\sealcontext_wrapper.h">
+    <ClInclude Include="sealnet\sealcontext_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\secretkey_wrapper.h">
+    <ClInclude Include="sealnet\secretkey_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\smallmodulus_wrapper.h">
+    <ClInclude Include="sealnet\smallmodulus_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\encoder_wrapper.h">
+    <ClInclude Include="sealnet\encoder_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="seal\dllmain.cpp">
+    <ClCompile Include="sealnet\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\utilities.cpp">
+    <ClCompile Include="sealnet\utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\stdafx.cpp">
+    <ClCompile Include="sealnet\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\batchencoder_wrapper.cpp">
+    <ClCompile Include="sealnet\batchencoder_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\biguint_wrapper.cpp">
+    <ClCompile Include="sealnet\biguint_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\ciphertext_wrapper.cpp">
+    <ClCompile Include="sealnet\ciphertext_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\ckksencoder_wrapper.cpp">
+    <ClCompile Include="sealnet\ckksencoder_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\contextdata_wrapper.cpp">
+    <ClCompile Include="sealnet\contextdata_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\decryptor_wrapper.cpp">
+    <ClCompile Include="sealnet\decryptor_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\defaultparams_wrapper.cpp">
+    <ClCompile Include="sealnet\defaultparams_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\encryptionparameterqualifiers_wrapper.cpp">
+    <ClCompile Include="sealnet\encryptionparameterqualifiers_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\encryptionparameters_wrapper.cpp">
+    <ClCompile Include="sealnet\encryptionparameters_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\encryptor_wrapper.cpp">
+    <ClCompile Include="sealnet\encryptor_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\evaluator_wrapper.cpp">
+    <ClCompile Include="sealnet\evaluator_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\galoiskeys_wrapper.cpp">
+    <ClCompile Include="sealnet\galoiskeys_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\keygenerator_wrapper.cpp">
+    <ClCompile Include="sealnet\keygenerator_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\memorymanager_wrapper.cpp">
+    <ClCompile Include="sealnet\memorymanager_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\memorypoolhandle_wrapper.cpp">
+    <ClCompile Include="sealnet\memorypoolhandle_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\plaintext_wrapper.cpp">
+    <ClCompile Include="sealnet\plaintext_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\publickey_wrapper.cpp">
+    <ClCompile Include="sealnet\publickey_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\relinkeys_wrapper.cpp">
+    <ClCompile Include="sealnet\relinkeys_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\sealcontext_wrapper.cpp">
+    <ClCompile Include="sealnet\sealcontext_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\secretkey_wrapper.cpp">
+    <ClCompile Include="sealnet\secretkey_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\smallmodulus_wrapper.cpp">
+    <ClCompile Include="sealnet\smallmodulus_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\encoder_wrapper.cpp">
+    <ClCompile Include="sealnet\encoder_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

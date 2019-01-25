@@ -23,7 +23,7 @@ endif()
 target_link_libraries(sealnetnative SEAL::seal)
 
 # Add source files to library
-add_subdirectory(seal)
+add_subdirectory(sealnet)
 
 # Install only the shared library. This library is only meant to be
 # used by the SEALNet .NET library.
