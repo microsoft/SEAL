@@ -26,4 +26,3 @@ target_sources(sealnetnative
 	${CMAKE_CURRENT_LIST_DIR}/smallmodulus_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/utilities.cpp
 )
-

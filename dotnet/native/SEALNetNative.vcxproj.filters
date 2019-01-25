@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Other">
+      <UniqueIdentifier>{1027e253-e357-4456-b08e-f29b7cceb334}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other\sealnet">
+      <UniqueIdentifier>{dc746efc-06e3-4dfc-aaa6-b443ac893283}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sealnet\defines.h">
@@ -170,5 +176,13 @@
     <ClCompile Include="sealnet\encoder_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt">
+      <Filter>Other</Filter>
+    </Text>
+    <Text Include="sealnet\CMakeLists.txt">
+      <Filter>Other\sealnet</Filter>
+    </Text>
   </ItemGroup>
 </Project>
