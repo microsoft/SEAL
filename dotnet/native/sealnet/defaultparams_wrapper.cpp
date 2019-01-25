@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-// SEALDll
-#include "stdafx.h"
-#include "defaultparams_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/defaultparams_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/defaultparams.h"
@@ -12,7 +12,6 @@
 using namespace std;
 using namespace seal;
 using namespace seal::dll;
-
 
 SEALDLL HRESULT SEALCALL DefParams_CoeffModulus128(uint64_t polyModulusDegree, uint64_t *length, void **coeffs)
 {

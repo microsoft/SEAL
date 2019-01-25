@@ -10,7 +10,7 @@
 // 
 ///////////////////////////////////////////////////////////////////////////
 
-#include "defines.h"
+#include "sealnet/defines.h"
 #include <stdint.h>
 
 SEALDLL HRESULT SEALCALL Ciphertext_Create1(void *pool, void **cipher);

@@ -10,7 +10,7 @@
 // 
 ///////////////////////////////////////////////////////////////////////////
 
-#include "defines.h"
+#include "sealnet/defines.h"
 #include <stdint.h>
 
 SEALDLL HRESULT SEALCALL SEALContext_Create(void *encryptionParams, bool expand_mod_chain, void **context);

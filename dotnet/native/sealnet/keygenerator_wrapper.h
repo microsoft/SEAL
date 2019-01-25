@@ -10,7 +10,7 @@
 // 
 ///////////////////////////////////////////////////////////////////////////
 
-#include "defines.h"
+#include "sealnet/defines.h"
 #include <stdint.h>
 
 SEALDLL HRESULT SEALCALL KeyGenerator_Create1(void *sealContext, void **key_generator);

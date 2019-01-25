@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(SEALTest VERSION 3.1.0 LANGUAGES CXX)
+project(SEALTest VERSION 3.2.0 LANGUAGES CXX)
 
 # Executable will be in ../bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
@@ -11,7 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 add_executable(sealtest seal/testrunner.cpp)
 
 # Import Microsoft SEAL
-find_package(SEAL 3.1.0 EXACT REQUIRED)
+find_package(SEAL 3.2.0 EXACT REQUIRED)
 
 if(SEAL_ENFORCE_HE_STD_SECURITY)
     message(FATAL_ERROR "Microsoft SEAL is configured with SEAL_ENFORCE_HE_STD_SECURITY which is incompatible with unit tests")

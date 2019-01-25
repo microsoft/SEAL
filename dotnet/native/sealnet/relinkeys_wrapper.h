@@ -10,7 +10,7 @@
 // 
 ///////////////////////////////////////////////////////////////////////////
 
-#include "defines.h"
+#include "sealnet/defines.h"
 #include <stdint.h>
 
 SEALDLL HRESULT SEALCALL RelinKeys_Create1(void **relin_keys);

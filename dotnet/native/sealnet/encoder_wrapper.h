@@ -10,7 +10,7 @@
 // 
 ///////////////////////////////////////////////////////////////////////////
 
-#include "defines.h"
+#include "sealnet/defines.h"
 #include <stdint.h>
 
 SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void *plain_modulus, void **encoder);

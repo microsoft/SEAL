@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(SEALNetNative VERSION 3.1.0 LANGUAGES CXX)
+project(SEALNetNative VERSION 3.2.0 LANGUAGES CXX)
 
 # Library will be in ../../lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../lib)
@@ -12,7 +12,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../lib)
 add_library(sealnetnative SHARED "")
 
 # Import Microsoft SEAL
-find_package(SEAL 3.1.0 EXACT REQUIRED)
+find_package(SEAL 3.2.0 EXACT REQUIRED)
 
 # Check that Microsoft SEAL is build as position-independent code
 if (SEAL_LIB_BUILD_TYPE STREQUAL "Static")
@@ -25,6 +25,9 @@ target_link_libraries(sealnetnative SEAL::seal)
 # Add source files to library
 add_subdirectory(sealnet)
 
-# Install only the shared library. This library is only meant to be
-# used by the SEALNet .NET library.
+# Add local include directories for build
+target_include_directories(sealnetnative 
+    PRIVATE $<BUILD_INTERFACE:${SEALNetNative_SOURCE_DIR}>)
+
+# Install the native component of the .NET wrapper library.
 install(TARGETS sealnetnative LIBRARY DESTINATION lib)

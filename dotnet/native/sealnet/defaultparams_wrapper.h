@@ -10,7 +10,7 @@
 // 
 ///////////////////////////////////////////////////////////////////////////
 
-#include "defines.h"
+#include "sealnet/defines.h"
 #include <stdint.h>
 
 SEALDLL HRESULT SEALCALL DefParams_CoeffModulus128(uint64_t polyModulusDegree, uint64_t *length, void **coeffs);

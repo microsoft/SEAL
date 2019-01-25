@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 // dllmain.cpp : Defines the entry point for the DLL application.
-#include "stdafx.h"
+#include "sealnet/stdafx.h"
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

@@ -291,5 +291,8 @@
     <None Include="cmake\Findmsgsl.cmake">
       <Filter>Other\cmake</Filter>
     </None>
+    <None Include="CMakeConfig.cmd">
+      <Filter>Other</Filter>
+    </None>
   </ItemGroup>
 </Project>

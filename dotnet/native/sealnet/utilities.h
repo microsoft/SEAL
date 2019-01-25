@@ -9,8 +9,8 @@
 #include <unordered_map>
 #include <string>
 
-// SEALDLL
-#include "defines.h"
+// SEALNet
+#include "sealnet/defines.h"
 
 // SEAL
 #include "seal/encryptionparams.h"

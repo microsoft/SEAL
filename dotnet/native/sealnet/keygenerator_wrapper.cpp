@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-// SEALDll
-#include "stdafx.h"
-#include "keygenerator_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/keygenerator_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/keygenerator.h"
@@ -12,7 +12,6 @@
 using namespace std;
 using namespace seal;
 using namespace seal::dll;
-
 
 SEALDLL HRESULT SEALCALL KeyGenerator_Create1(void *sealContext, void **key_generator)
 {

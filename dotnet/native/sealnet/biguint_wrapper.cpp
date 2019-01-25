@@ -4,10 +4,10 @@
 // STD
 #include <string>
 
-// SEALDLL
-#include "stdafx.h"
-#include "biguint_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/biguint_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/biguint.h"
@@ -15,7 +15,6 @@
 using namespace std;
 using namespace seal;
 using namespace seal::dll;
-
 
 SEALDLL HRESULT SEALCALL BigUInt_Create1(void **bui)
 {

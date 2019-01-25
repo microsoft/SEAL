@@ -4,10 +4,10 @@
 // STD
 #include <vector>
 
-// SEALDll
-#include "stdafx.h"
-#include "ckksencoder_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/ckksencoder_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/ckks.h"
@@ -15,7 +15,6 @@
 using namespace std;
 using namespace seal;
 using namespace seal::dll;
-
 
 SEALDLL HRESULT SEALCALL CKKSEncoder_Create(void *context, void **ckks_encoder)
 {

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-// SEALDll
-#include "stdafx.h"
-#include "encryptionparameters_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/encryptionparameters_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/encryptionparams.h"

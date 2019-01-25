@@ -4,10 +4,10 @@
 // STD
 #include <unordered_map>
 
-// SEALDll
-#include "stdafx.h"
-#include "sealcontext_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/sealcontext_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/context.h"
@@ -15,7 +15,6 @@
 using namespace std;
 using namespace seal;
 using namespace seal::dll;
-
 
 namespace seal
 {

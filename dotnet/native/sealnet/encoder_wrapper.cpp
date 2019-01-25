@@ -1,17 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-// SEALDLL
-#include "stdafx.h"
-#include "encoder_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/encoder_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/intencoder.h"
 
 using namespace seal;
 using namespace seal::dll;
-
 
 SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void *plain_modulus, void **encoder)
 {

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-// SEALDll
-#include "stdafx.h"
-#include "galoiskeys_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/galoiskeys_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/galoiskeys.h"

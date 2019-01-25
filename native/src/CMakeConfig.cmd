@@ -14,7 +14,6 @@ set VSDEVENVDIR=%~2
 set INCLUDEPATH=%~3
 
 echo Configuring SEAL through CMake
-echo Looking for CMake
 
 if not exist "%VSDEVENVDIR%" (
     rem We may be running in the CI server. Try a standard VS path.

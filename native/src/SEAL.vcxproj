@@ -101,6 +101,7 @@
     <None Include="cmake\Findmsgsl.cmake" />
     <None Include="cmake\SEALConfig.cmake.in" />
     <None Include="seal\util\config.h.in" />
+    <None Include="CMakeConfig.cmd" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7EA96C25-FC0D-485A-BB71-32B6DA55652A}</ProjectGuid>
@@ -163,7 +164,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>"$(SolutionDir)tools\scripts\cmake_config.cmd" $(Configuration) "$(DevEnvDir)" "$(IncludePath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" $(Configuration) "$(DevEnvDir)" "$(IncludePath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure SEAL through CMake</Message>
@@ -189,7 +190,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>"$(SolutionDir)tools\scripts\cmake_config.cmd" $(Configuration) "$(DevEnvDir)" "$(IncludePath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" $(Configuration) "$(DevEnvDir)" "$(IncludePath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure SEAL through CMake</Message>

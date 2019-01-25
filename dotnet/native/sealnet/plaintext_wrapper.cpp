@@ -4,10 +4,10 @@
 // STD
 #include <string>
 
-// SEALDll
-#include "stdafx.h"
-#include "plaintext_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/plaintext_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/plaintext.h"
@@ -15,7 +15,6 @@
 using namespace std;
 using namespace seal;
 using namespace seal::dll;
-
 
 namespace seal
 {

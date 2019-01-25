@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-// SEALDll
-#include "stdafx.h"
-#include "encryptor_wrapper.h"
-#include "utilities.h"
+// SEALNet
+#include "sealnet/stdafx.h"
+#include "sealnet/encryptor_wrapper.h"
+#include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/encryptor.h"
@@ -12,7 +12,6 @@
 using namespace std;
 using namespace seal;
 using namespace seal::dll;
-
 
 SEALDLL HRESULT SEALCALL Encryptor_Create(void *context, void *public_key, void **encryptor)
 {
