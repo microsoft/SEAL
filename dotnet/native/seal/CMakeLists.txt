@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-target_sources(sealdll
+target_sources(sealnetnative
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/batchencoder_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/biguint_wrapper.cpp
