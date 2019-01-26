@@ -16,7 +16,10 @@ namespace SEALTest
     TEST(Encoder, IntEncodeDecodeBigUInt)
     {
         SmallModulus modulus(0xFFFFFFFFFFFFFFF);
-        IntegerEncoder encoder(modulus);
+        EncryptionParameters parms(scheme_type::BFV);
+        parms.set_plain_modulus(modulus);
+        auto context = SEALContext::Create(parms);
+        IntegerEncoder encoder(context);
 
         BigUInt value(64);
         value = "0";
@@ -76,7 +79,9 @@ namespace SEALTest
         ASSERT_TRUE(value == encoder.decode_biguint(poly6));
 
         modulus = 1024;
-        IntegerEncoder encoder2(modulus);
+        parms.set_plain_modulus(modulus);
+        auto context2 = SEALContext::Create(parms);
+        IntegerEncoder encoder2(context2);
         Plaintext poly7(4);
         poly7[0] = 1023; // -1   (*1)
         poly7[1] = 512;  // -512 (*2)
@@ -89,7 +94,10 @@ namespace SEALTest
     TEST(Encoder, IntEncodeDecodeUInt64)
     {
         SmallModulus modulus(0xFFFFFFFFFFFFFFF);
-        IntegerEncoder encoder(modulus);
+        EncryptionParameters parms(scheme_type::BFV);
+        parms.set_plain_modulus(modulus);
+        auto context = SEALContext::Create(parms);
+        IntegerEncoder encoder(context);
 
         Plaintext poly = encoder.encode(static_cast<uint64_t>(0));
         ASSERT_EQ(0ULL, poly.significant_coeff_count());
@@ -141,7 +149,9 @@ namespace SEALTest
         ASSERT_EQ(static_cast<uint64_t>(1 + 500 * 2 + 1023 * 4), encoder.decode_uint64(poly6));
 
         modulus = 1024;
-        IntegerEncoder encoder2(modulus);
+        parms.set_plain_modulus(modulus);
+        auto context2 = SEALContext::Create(parms);
+        IntegerEncoder encoder2(context2);
         Plaintext poly7(4);
         poly7[0] = 1023; // -1   (*1)
         poly7[1] = 512;  // -512 (*2)
@@ -153,7 +163,10 @@ namespace SEALTest
     TEST(Encoder, IntEncodeDecodeUInt32)
     {
         SmallModulus modulus(0xFFFFFFFFFFFFFFF);
-        IntegerEncoder encoder(modulus);
+        EncryptionParameters parms(scheme_type::BFV);
+        parms.set_plain_modulus(modulus);
+        auto context = SEALContext::Create(parms);
+        IntegerEncoder encoder(context);
 
         Plaintext poly = encoder.encode(static_cast<uint32_t>(0));
         ASSERT_EQ(0ULL, poly.significant_coeff_count());
@@ -205,7 +218,9 @@ namespace SEALTest
         ASSERT_EQ(static_cast<uint32_t>(1 + 500 * 2 + 1023 * 4), encoder.decode_uint32(poly6));
 
         modulus = 1024;
-        IntegerEncoder encoder2(modulus);
+        parms.set_plain_modulus(modulus);
+        auto context2 = SEALContext::Create(parms);
+        IntegerEncoder encoder2(context2);
         Plaintext poly7(4);
         poly7[0] = 1023; // -1   (*1)
         poly7[1] = 512;  // -512 (*2)
@@ -217,7 +232,10 @@ namespace SEALTest
     TEST(Encoder, IntEncodeDecodeInt64)
     {
         SmallModulus modulus(0x7FFFFFFFFFFFF);
-        IntegerEncoder encoder(modulus);
+        EncryptionParameters parms(scheme_type::BFV);
+        parms.set_plain_modulus(modulus);
+        auto context = SEALContext::Create(parms);
+        IntegerEncoder encoder(context);
 
         Plaintext poly = encoder.encode(static_cast<int64_t>(0));
         ASSERT_EQ(0ULL, poly.significant_coeff_count());
@@ -302,7 +320,9 @@ namespace SEALTest
         ASSERT_EQ(static_cast<uint64_t>(-1073), static_cast<uint64_t>(encoder.decode_int64(poly10)));
 
         modulus = 0xFFFF;
-        IntegerEncoder encoder2(modulus);
+        parms.set_plain_modulus(modulus);
+        auto context2 = SEALContext::Create(parms);
+        IntegerEncoder encoder2(context2);
         Plaintext poly11(6);
         poly11[0] = 1;
         poly11[1] = 0xFFFE; // -1
@@ -316,7 +336,10 @@ namespace SEALTest
     TEST(Encoder, IntEncodeDecodeInt32)
     {
         SmallModulus modulus(0x7FFFFFFFFFFFFF);
-        IntegerEncoder encoder(modulus);
+        EncryptionParameters parms(scheme_type::BFV);
+        parms.set_plain_modulus(modulus);
+        auto context = SEALContext::Create(parms);
+        IntegerEncoder encoder(context);
 
         Plaintext poly = encoder.encode(static_cast<int32_t>(0));
         ASSERT_EQ(0ULL, poly.significant_coeff_count());
@@ -401,7 +424,9 @@ namespace SEALTest
         ASSERT_EQ(static_cast<int32_t>(-1073), encoder.decode_int32(poly10));
 
         modulus = 0xFFFF;
-        IntegerEncoder encoder2(modulus);
+        parms.set_plain_modulus(modulus);
+        auto context2 = SEALContext::Create(parms);
+        IntegerEncoder encoder2(context2);
         Plaintext poly11(6);
         poly11[0] = 1;
         poly11[1] = 0xFFFE; // -1

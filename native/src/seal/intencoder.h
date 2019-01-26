@@ -34,13 +34,14 @@ namespace seal
     {
     public:
         /**
-        Creates a IntegerEncoder object. The constructor takes as input a reference
-        to the plaintext modulus (represented by SmallModulus). 
+        Creates a IntegerEncoder object. The constructor takes as input a pointer to
+        a SEALContext object which contains the plaintext modulus. 
 
-        @param[in] plain_modulus The plaintext modulus (represented by SmallModulus)
-        @throws std::invalid_argument if plain_modulus is not at least 2
+        @param[in] context The SEALContext
+        @throws std::invalid_argument if the plain_modulus contained in context 
+        is not at least 2
         */
-        IntegerEncoder(const SmallModulus &plain_modulus);
+        IntegerEncoder(std::shared_ptr<SEALContext> context);
 
         /**
         Creates a copy of a IntegerEncoder.
@@ -225,7 +226,8 @@ namespace seal
         */
         const SmallModulus &plain_modulus() const 
         {
-            return plain_modulus_;
+            auto &context_data = *context_->context_data();
+            return context_data.parms().plain_modulus();
         }
 
     private:
@@ -233,7 +235,7 @@ namespace seal
 
         IntegerEncoder &operator =(IntegerEncoder &&assign) = delete;
 
-        SmallModulus plain_modulus_;
+        std::shared_ptr<SEALContext> context_{ nullptr };
 
         std::uint64_t coeff_neg_threshold_;
 

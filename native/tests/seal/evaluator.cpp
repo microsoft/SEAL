@@ -31,7 +31,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -91,7 +91,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -725,7 +725,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -784,7 +784,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -838,7 +838,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -892,7 +892,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            IntegerEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -946,7 +946,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            IntegerEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -978,7 +978,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            IntegerEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -1011,7 +1011,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            IntegerEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -1079,7 +1079,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            IntegerEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -1144,7 +1144,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            IntegerEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -1209,7 +1209,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
-            IntegerEncoder encoder(plain_modulus);
+            IntegerEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -3074,7 +3074,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -3135,7 +3135,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -3216,7 +3216,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -3263,7 +3263,7 @@ namespace SEALTest
         auto context = SEALContext::Create(parms);
         KeyGenerator keygen(context);
 
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());

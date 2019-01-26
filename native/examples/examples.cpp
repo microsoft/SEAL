@@ -473,7 +473,7 @@ void example_bfv_basics_i()
 
     In this example we use the IntegerEncoder due to its simplicity. 
     */
-    IntegerEncoder encoder(parms.plain_modulus());
+    IntegerEncoder encoder(context);
 
     /*
     We are now ready to generate the secret and public keys. For this purpose 
@@ -2120,7 +2120,7 @@ void example_bfv_performance()
         Decryptor decryptor(context, secret_key);
         Evaluator evaluator(context);
         BatchEncoder batch_encoder(context);
-        IntegerEncoder encoder(plain_modulus);
+        IntegerEncoder encoder(context);
 
         /*
         These will hold the total times used by each operation.

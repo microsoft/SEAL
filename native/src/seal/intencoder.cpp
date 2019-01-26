@@ -16,15 +16,30 @@ using namespace seal::util;
 
 namespace seal
 {
-    IntegerEncoder::IntegerEncoder(const SmallModulus &plain_modulus) :
-        plain_modulus_(plain_modulus),
-        coeff_neg_threshold_((plain_modulus.value() + 1) >> 1),
-        neg_one_(plain_modulus_.value() - 1)
+    IntegerEncoder::IntegerEncoder(std::shared_ptr<SEALContext> context) : 
+        context_(std::move(context))
     {
-        if (plain_modulus.bit_count() <= 1)
+        // Verify parameters
+        if (!context_)
+        {
+            throw invalid_argument("invalid context");
+        }
+        // Do not check "context_->parameters_set()"!
+        // Otherwise, tests/intencoder.cpp requires major/irrelavent changes.
+        // Integer encoder should function without valid encryption parameters.
+        // Except that, BFV is required.
+        auto &context_data = *context_->context_data();
+        if (context_data.parms().scheme() != scheme_type::BFV)
+        {
+            throw invalid_argument("unsupported scheme");
+        }
+
+        if (plain_modulus().bit_count() <= 1)
         {
             throw invalid_argument("plain_modulus must be at least 2");
         }
+        coeff_neg_threshold_ = (plain_modulus().value() + 1) >> 1;
+        neg_one_ = plain_modulus().value() - 1;
     }
 
     Plaintext IntegerEncoder::encode(uint64_t value)
@@ -160,7 +175,7 @@ namespace seal
 
             // Get sign/magnitude of coefficient.
             int coeff_bit_count = get_significant_bit_count(coeff);
-            if (coeff >= plain_modulus_.value())
+            if (coeff >= plain_modulus().value())
             {
                 // Coefficient is bigger than plaintext modulus
                 throw invalid_argument("plain does not represent a valid plaintext polynomial");
@@ -169,7 +184,7 @@ namespace seal
             unsigned long long pos_value = coeff;
             if (coeff_is_negative)
             {
-                pos_value = plain_modulus_.value() - pos_value;
+                pos_value = plain_modulus().value() - pos_value;
                 coeff_bit_count = get_significant_bit_count(pos_value);
             }
 
@@ -223,7 +238,7 @@ namespace seal
             left_shift_uint(result, 1, result_uint64_count, result);
 
             // Get sign/magnitude of coefficient.
-            if (coeff >= plain_modulus_.value())
+            if (coeff >= plain_modulus().value())
             {
                 // Coefficient is bigger than plaintext modulus
                 throw invalid_argument("plain does not represent a valid plaintext polynomial");
@@ -232,7 +247,7 @@ namespace seal
             unsigned long long pos_value = coeff;
             if (coeff_is_negative)
             {
-                pos_value = plain_modulus_.value() - pos_value;
+                pos_value = plain_modulus().value() - pos_value;
             }
 
             // Add or subtract-in coefficient.
