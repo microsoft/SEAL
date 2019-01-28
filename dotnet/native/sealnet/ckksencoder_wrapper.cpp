@@ -14,9 +14,9 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
-SEALDLL HRESULT SEALCALL CKKSEncoder_Create(void *context, void **ckks_encoder)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Create(void *context, void **ckks_encoder)
 {
     const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -34,7 +34,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Create(void *context, void **ckks_encoder)
     }
 }
 
-SEALDLL HRESULT SEALCALL CKKSEncoder_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Destroy(void *thisptr)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -44,7 +44,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Destroy(void *thisptr)
 }
 
 // Array of doubles
-SEALDLL HRESULT SEALCALL CKKSEncoder_Encode1(void *thisptr, uint64_t value_count, double *values, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode1(void *thisptr, uint64_t value_count, double *values, uint64_t *parms_id, double scale, void *destination, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -74,7 +74,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode1(void *thisptr, uint64_t value_count
 }
 
 // Array of complex numbers (two doubles per value)
-SEALDLL HRESULT SEALCALL CKKSEncoder_Encode2(void *thisptr, uint64_t value_count, double *complex_values, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode2(void *thisptr, uint64_t value_count, double *complex_values, uint64_t *parms_id, double scale, void *destination, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -105,7 +105,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode2(void *thisptr, uint64_t value_count
 }
 
 // Single double value
-SEALDLL HRESULT SEALCALL CKKSEncoder_Encode3(void *thisptr, double value, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode3(void *thisptr, double value, uint64_t *parms_id, double scale, void *destination, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -129,7 +129,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode3(void *thisptr, double value, uint64
 }
 
 // Single complex value
-SEALDLL HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double real, double imaginary, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double real, double imaginary, uint64_t *parms_id, double scale, void *destination, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -155,7 +155,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double real, double 
 }
 
 // Single UInt64 value
-SEALDLL HRESULT SEALCALL CKKSEncoder_Encode5(void *thisptr, uint64_t value, uint64_t *parms_id, void *destination)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode5(void *thisptr, uint64_t value, uint64_t *parms_id, void *destination)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -178,7 +178,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Encode5(void *thisptr, uint64_t value, uint
 }
 
 // Array of doubles
-SEALDLL HRESULT SEALCALL CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_count, double *values, void *pool)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_count, double *values, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -216,7 +216,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_
 }
 
 // Array of complex numbers
-SEALDLL HRESULT SEALCALL CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_count, double *values, void *pool)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_count, double *values, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -254,7 +254,7 @@ SEALDLL HRESULT SEALCALL CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL CKKSEncoder_SlotCount(void *thisptr, uint64_t *slot_count)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_SlotCount(void *thisptr, uint64_t *slot_count)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);

@@ -14,9 +14,9 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
-SEALDLL HRESULT SEALCALL BigUInt_Create1(void **bui)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Create1(void **bui)
 {
     IfNullRet(bui, E_POINTER);
 
@@ -25,7 +25,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Create1(void **bui)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Create2(int bitCount, void **bui)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Create2(int bitCount, void **bui)
 {
     IfNullRet(bui, E_POINTER);
 
@@ -43,7 +43,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Create2(int bitCount, void **bui)
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Create3(int bitCount, char *hex_string, void **bui)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Create3(int bitCount, char *hex_string, void **bui)
 {
     IfNullRet(hex_string, E_POINTER);
     IfNullRet(bui, E_POINTER);
@@ -65,7 +65,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Create3(int bitCount, char *hex_string, void **
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Create4(int bitCount, uint64_t value, void **bui)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Create4(int bitCount, uint64_t value, void **bui)
 {
     IfNullRet(bui, E_POINTER);
 
@@ -83,7 +83,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Create4(int bitCount, uint64_t value, void **bu
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Create5(char *hex_string, void **bui)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Create5(char *hex_string, void **bui)
 {
     IfNullRet(hex_string, E_POINTER);
     IfNullRet(bui, E_POINTER);
@@ -105,7 +105,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Create5(char *hex_string, void **bui)
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Create6(void *copy, void **bui)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Create6(void *copy, void **bui)
 {
     BigUInt *other = FromVoid<BigUInt>(copy);
     IfNullRet(other, E_POINTER);
@@ -116,7 +116,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Create6(void *copy, void **bui)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Destroy(void *thisptr)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thisptr);
     IfNullRet(thisptr, E_POINTER);
@@ -125,7 +125,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_IsAlias(void *thispt, bool *is_alias)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_IsAlias(void *thispt, bool *is_alias)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -135,7 +135,7 @@ SEALDLL HRESULT SEALCALL BigUInt_IsAlias(void *thispt, bool *is_alias)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_BitCount(void *thispt, int *bit_count)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_BitCount(void *thispt, int *bit_count)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -145,7 +145,7 @@ SEALDLL HRESULT SEALCALL BigUInt_BitCount(void *thispt, int *bit_count)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_ByteCount(void *thispt, uint64_t *byte_count)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ByteCount(void *thispt, uint64_t *byte_count)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -155,7 +155,7 @@ SEALDLL HRESULT SEALCALL BigUInt_ByteCount(void *thispt, uint64_t *byte_count)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_UInt64Count(void *thispt, uint64_t *uint64_count)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_UInt64Count(void *thispt, uint64_t *uint64_count)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -165,7 +165,7 @@ SEALDLL HRESULT SEALCALL BigUInt_UInt64Count(void *thispt, uint64_t *uint64_coun
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_IsZero(void *thispt, bool *is_zero)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_IsZero(void *thispt, bool *is_zero)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -175,7 +175,7 @@ SEALDLL HRESULT SEALCALL BigUInt_IsZero(void *thispt, bool *is_zero)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Get(void *thispt, int index, uint8_t *value)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Get(void *thispt, int index, uint8_t *value)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -191,7 +191,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Get(void *thispt, int index, uint8_t *value)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_GetU64(void *thispt, int index, uint64_t *value)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_GetU64(void *thispt, int index, uint64_t *value)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -206,7 +206,7 @@ SEALDLL HRESULT SEALCALL BigUInt_GetU64(void *thispt, int index, uint64_t *value
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Set1(void *thispt, int index, uint8_t value)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Set1(void *thispt, int index, uint8_t value)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -220,7 +220,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Set1(void *thispt, int index, uint8_t value)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_GetSignificantBitCount(void *thispt, int *significant_bit_count)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_GetSignificantBitCount(void *thispt, int *significant_bit_count)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -230,7 +230,7 @@ SEALDLL HRESULT SEALCALL BigUInt_GetSignificantBitCount(void *thispt, int *signi
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Set2(void *thispt, void *assign)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Set2(void *thispt, void *assign)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -241,7 +241,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Set2(void *thispt, void *assign)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Set3(void *thispt, uint64_t value)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Set3(void *thispt, uint64_t value)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -259,7 +259,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Set3(void *thispt, uint64_t value)
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Set4(void *thispt, char *assign)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Set4(void *thispt, char *assign)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -284,7 +284,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Set4(void *thispt, char *assign)
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_SetZero(void *thispt)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_SetZero(void *thispt)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -293,7 +293,7 @@ SEALDLL HRESULT SEALCALL BigUInt_SetZero(void *thispt)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Resize(void *thispt, int bitCount)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Resize(void *thispt, int bitCount)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -302,7 +302,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Resize(void *thispt, int bitCount)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_Equals(void *thispt, void *compare, bool *result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Equals(void *thispt, void *compare, bool *result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -314,7 +314,7 @@ SEALDLL HRESULT SEALCALL BigUInt_Equals(void *thispt, void *compare, bool *resul
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_CompareTo1(void *thispt, void *compare, int *result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_CompareTo1(void *thispt, void *compare, int *result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -326,7 +326,7 @@ SEALDLL HRESULT SEALCALL BigUInt_CompareTo1(void *thispt, void *compare, int *re
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_CompareTo2(void *thispt, uint64_t compare, int *result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_CompareTo2(void *thispt, uint64_t compare, int *result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -335,7 +335,7 @@ SEALDLL HRESULT SEALCALL BigUInt_CompareTo2(void *thispt, uint64_t compare, int 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_DivideRemainder1(void *thispt, void *operand2, void *remainder, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_DivideRemainder1(void *thispt, void *operand2, void *remainder, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -350,7 +350,7 @@ SEALDLL HRESULT SEALCALL BigUInt_DivideRemainder1(void *thispt, void *operand2, 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_DivideRemainder2(void *thispt, uint64_t operand2, void *remainder, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_DivideRemainder2(void *thispt, uint64_t operand2, void *remainder, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -363,7 +363,7 @@ SEALDLL HRESULT SEALCALL BigUInt_DivideRemainder2(void *thispt, uint64_t operand
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_ToString(void *thispt, char *outstr, int *length)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ToString(void *thispt, char *outstr, int *length)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -373,7 +373,7 @@ SEALDLL HRESULT SEALCALL BigUInt_ToString(void *thispt, char *outstr, int *lengt
     return ToStringHelper(str, outstr, length);
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_ToDecimalString(void *thispt, char *outstr, int *length)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ToDecimalString(void *thispt, char *outstr, int *length)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -383,7 +383,7 @@ SEALDLL HRESULT SEALCALL BigUInt_ToDecimalString(void *thispt, char *outstr, int
     return ToStringHelper(str, outstr, length);
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_DuplicateTo(void *thispt, void *destination)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_DuplicateTo(void *thispt, void *destination)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -394,7 +394,7 @@ SEALDLL HRESULT SEALCALL BigUInt_DuplicateTo(void *thispt, void *destination)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_DuplicateFrom(void *thispt, void *value)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_DuplicateFrom(void *thispt, void *value)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -405,7 +405,7 @@ SEALDLL HRESULT SEALCALL BigUInt_DuplicateFrom(void *thispt, void *value)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_ModuloInvert1(void *thispt, void *modulus, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ModuloInvert1(void *thispt, void *modulus, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -429,7 +429,7 @@ SEALDLL HRESULT SEALCALL BigUInt_ModuloInvert1(void *thispt, void *modulus, void
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_ModuloInvert2(void *thispt, uint64_t modulus, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ModuloInvert2(void *thispt, uint64_t modulus, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -449,7 +449,7 @@ SEALDLL HRESULT SEALCALL BigUInt_ModuloInvert2(void *thispt, uint64_t modulus, v
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_TryModuloInvert1(void *thispt, void *modulus, void *inverse, bool *result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_TryModuloInvert1(void *thispt, void *modulus, void *inverse, bool *result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -472,7 +472,7 @@ SEALDLL HRESULT SEALCALL BigUInt_TryModuloInvert1(void *thispt, void *modulus, v
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_TryModuloInvert2(void *thispt, uint64_t modulus, void *inverse, bool *result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_TryModuloInvert2(void *thispt, uint64_t modulus, void *inverse, bool *result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -493,7 +493,7 @@ SEALDLL HRESULT SEALCALL BigUInt_TryModuloInvert2(void *thispt, uint64_t modulus
     return E_UNEXPECTED;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorNeg(void *thispt, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorNeg(void *thispt, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -504,7 +504,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorNeg(void *thispt, void **result)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorTilde(void *thispt, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorTilde(void *thispt, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -515,7 +515,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorTilde(void *thispt, void **result)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorPlus1(void *thispt, void *operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorPlus1(void *thispt, void *operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -528,7 +528,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorPlus1(void *thispt, void *operand, void
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorPlus2(void *thispt, uint64_t operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorPlus2(void *thispt, uint64_t operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -539,7 +539,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorPlus2(void *thispt, uint64_t operand, v
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorMinus1(void *thispt, void *operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorMinus1(void *thispt, void *operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -552,7 +552,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorMinus1(void *thispt, void *operand, voi
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorMinus2(void *thispt, uint64_t operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorMinus2(void *thispt, uint64_t operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -563,7 +563,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorMinus2(void *thispt, uint64_t operand, 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorMult1(void *thispt, void *operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorMult1(void *thispt, void *operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -576,7 +576,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorMult1(void *thispt, void *operand, void
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorMult2(void *thispt, uint64_t operand, void * *result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorMult2(void *thispt, uint64_t operand, void * *result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -587,7 +587,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorMult2(void *thispt, uint64_t operand, v
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorDiv1(void *thispt, void *operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorDiv1(void *thispt, void *operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -600,7 +600,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorDiv1(void *thispt, void *operand, void 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorDiv2(void *thispt, uint64_t operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorDiv2(void *thispt, uint64_t operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -611,7 +611,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorDiv2(void *thispt, uint64_t operand, vo
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorXor1(void *thispt, void *operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorXor1(void *thispt, void *operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -624,7 +624,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorXor1(void *thispt, void *operand, void 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorXor2(void *thispt, uint64_t operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorXor2(void *thispt, uint64_t operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -635,7 +635,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorXor2(void *thispt, uint64_t operand, vo
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorAnd1(void *thispt, void *operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorAnd1(void *thispt, void *operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -648,7 +648,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorAnd1(void *thispt, void *operand, void 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorAnd2(void *thispt, uint64_t operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorAnd2(void *thispt, uint64_t operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -659,7 +659,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorAnd2(void *thispt, uint64_t operand, vo
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorOr1(void *thispt, void *operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorOr1(void *thispt, void *operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -672,7 +672,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorOr1(void *thispt, void *operand, void *
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorOr2(void *thispt, uint64_t operand, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorOr2(void *thispt, uint64_t operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -683,7 +683,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorOr2(void *thispt, uint64_t operand, voi
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorShiftLeft(void *thispt, int shift, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorShiftLeft(void *thispt, int shift, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -694,7 +694,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorShiftLeft(void *thispt, int shift, void
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_OperatorShiftRight(void *thispt, int shift, void **result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorShiftRight(void *thispt, int shift, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -705,7 +705,7 @@ SEALDLL HRESULT SEALCALL BigUInt_OperatorShiftRight(void *thispt, int shift, voi
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL BigUInt_ToDouble(void *thispt, double *result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ToDouble(void *thispt, double *result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);

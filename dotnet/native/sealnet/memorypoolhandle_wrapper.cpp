@@ -11,9 +11,9 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_Create1(void **handle)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_Create1(void **handle)
 {
     IfNullRet(handle, E_POINTER);
 
@@ -22,7 +22,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_Create1(void **handle)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_Create2(void *otherptr, void **handle)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_Create2(void *otherptr, void **handle)
 {
     MemoryPoolHandle *other = FromVoid<MemoryPoolHandle>(otherptr);
     IfNullRet(other, E_POINTER);
@@ -33,7 +33,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_Create2(void *otherptr, void **handle)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_Destroy(void *thisptr)
 {
     MemoryPoolHandle *handle = FromVoid<MemoryPoolHandle>(thisptr);
     IfNullRet(handle, E_POINTER);
@@ -42,7 +42,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_Set(void *thisptr, void *assignptr)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_Set(void *thisptr, void *assignptr)
 {
     MemoryPoolHandle *handle = FromVoid<MemoryPoolHandle>(thisptr);
     IfNullRet(handle, E_POINTER);
@@ -53,7 +53,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_Set(void *thisptr, void *assignptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_Global(void **handle)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_Global(void **handle)
 {
     IfNullRet(handle, E_POINTER);
 
@@ -63,7 +63,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_Global(void **handle)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_ThreadLocal(void **handle)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_ThreadLocal(void **handle)
 {
     IfNullRet(handle, E_POINTER);
 
@@ -73,7 +73,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_ThreadLocal(void **handle)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_New(bool clear_on_destruction, void **handle)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_New(bool clear_on_destruction, void **handle)
 {
     IfNullRet(handle, E_POINTER);
 
@@ -83,7 +83,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_New(bool clear_on_destruction, void **
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_PoolCount(void *thisptr, uint64_t *count)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_PoolCount(void *thisptr, uint64_t *count)
 {
     MemoryPoolHandle *pool = FromVoid<MemoryPoolHandle>(thisptr);
     IfNullRet(pool, E_POINTER);
@@ -100,7 +100,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_PoolCount(void *thisptr, uint64_t *cou
     }
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_AllocByteCount(void *thisptr, uint64_t *count)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_AllocByteCount(void *thisptr, uint64_t *count)
 {
     MemoryPoolHandle *pool = FromVoid<MemoryPoolHandle>(thisptr);
     IfNullRet(pool, E_POINTER);
@@ -117,7 +117,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_AllocByteCount(void *thisptr, uint64_t
     }
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_IsInitialized(void *thisptr, bool *result)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_IsInitialized(void *thisptr, bool *result)
 {
     MemoryPoolHandle *pool = FromVoid<MemoryPoolHandle>(thisptr);
     IfNullRet(pool, E_POINTER);
@@ -127,7 +127,7 @@ SEALDLL HRESULT SEALCALL MemoryPoolHandle_IsInitialized(void *thisptr, bool *res
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL MemoryPoolHandle_Equals(void *thisptr, void *otherptr, bool *result)
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_Equals(void *thisptr, void *otherptr, bool *result)
 {
     MemoryPoolHandle *pool = FromVoid<MemoryPoolHandle>(thisptr);
     IfNullRet(pool, E_POINTER);

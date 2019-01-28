@@ -11,7 +11,7 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
 namespace seal
 {
@@ -45,7 +45,7 @@ namespace {
     }
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_Create1(void **galois_keys)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Create1(void **galois_keys)
 {
     IfNullRet(galois_keys, E_POINTER);
     GaloisKeys *keys = new GaloisKeys();
@@ -53,7 +53,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_Create1(void **galois_keys)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_Create2(void *copy, void **galois_keys)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Create2(void *copy, void **galois_keys)
 {
     GaloisKeys *copyptr = FromVoid<GaloisKeys>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -64,7 +64,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_Create2(void *copy, void **galois_keys)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Destroy(void *thisptr)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -73,7 +73,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_Set(void *thisptr, void *assign)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Set(void *thisptr, void *assign)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -84,7 +84,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_Set(void *thisptr, void *assign)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_Size(void *thisptr, uint64_t *size)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Size(void *thisptr, uint64_t *size)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -94,7 +94,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_Size(void *thisptr, uint64_t *size)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_DBC(void *thisptr, int *dbc)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_DBC(void *thisptr, int *dbc)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -104,7 +104,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_DBC(void *thisptr, int *dbc)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_SetDBC(void *thisptr, int dbc)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_SetDBC(void *thisptr, int dbc)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -113,7 +113,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_SetDBC(void *thisptr, int dbc)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyCount(void *thisptr, uint64_t *key_count)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetKeyCount(void *thisptr, uint64_t *key_count)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -123,7 +123,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyCount(void *thisptr, uint64_t *key_cou
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **ciphers)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **ciphers)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -133,7 +133,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_GetKeyList(void *thisptr, uint64_t index, ui
     return GetKeyFromVector(list, count, ciphers);
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetKey(void *thisptr, uint64_t galois_elt, uint64_t *count, void **ciphers)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetKey(void *thisptr, uint64_t galois_elt, uint64_t *count, void **ciphers)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -148,7 +148,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_GetKey(void *thisptr, uint64_t galois_elt, u
     return GetKeyFromVector(key, count, ciphers);
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_ClearDataAndReserve(void *thisptr, uint64_t size)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_ClearDataAndReserve(void *thisptr, uint64_t size)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -158,7 +158,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_ClearDataAndReserve(void *thisptr, uint64_t 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_AddKeyList(void *thisptr, uint64_t count, void **ciphers)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_AddKeyList(void *thisptr, uint64_t count, void **ciphers)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -182,7 +182,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_AddKeyList(void *thisptr, uint64_t count, vo
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_HasKey(void *thisptr, uint64_t galois_elt, bool *has_key)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_HasKey(void *thisptr, uint64_t galois_elt, bool *has_key)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -199,7 +199,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_HasKey(void *thisptr, uint64_t galois_elt, b
     }
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_GetParmsId(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetParmsId(void *thisptr, uint64_t *parms_id)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -213,7 +213,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_GetParmsId(void *thisptr, uint64_t *parms_id
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_SetParmsId(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_SetParmsId(void *thisptr, uint64_t *parms_id)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -223,7 +223,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_SetParmsId(void *thisptr, uint64_t *parms_id
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_IsValidFor(void *thisptr, void *contextptr, bool *result)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_IsValidFor(void *thisptr, void *contextptr, bool *result)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -235,7 +235,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_IsValidFor(void *thisptr, void *contextptr, 
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_IsMetadataValidFor(void *thisptr, void *contextptr, bool *result)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_IsMetadataValidFor(void *thisptr, void *contextptr, bool *result)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -247,7 +247,7 @@ SEALDLL HRESULT SEALCALL GaloisKeys_IsMetadataValidFor(void *thisptr, void *cont
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL GaloisKeys_Pool(void *thisptr, void **pool)
+SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Pool(void *thisptr, void **pool)
 {
     GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
     IfNullRet(keys, E_POINTER);

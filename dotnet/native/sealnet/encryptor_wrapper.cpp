@@ -11,9 +11,9 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
-SEALDLL HRESULT SEALCALL Encryptor_Create(void *context, void *public_key, void **encryptor)
+SEALNETNATIVE HRESULT SEALCALL Encryptor_Create(void *context, void *public_key, void **encryptor)
 {
     SEALContext *contextptr = FromVoid<SEALContext>(context);
     IfNullRet(contextptr, E_POINTER);
@@ -34,7 +34,7 @@ SEALDLL HRESULT SEALCALL Encryptor_Create(void *context, void *public_key, void 
     }
 }
 
-SEALDLL HRESULT SEALCALL Encryptor_Encrypt(void *thisptr, void *plaintext, void *destination, void *pool_handle)
+SEALNETNATIVE HRESULT SEALCALL Encryptor_Encrypt(void *thisptr, void *plaintext, void *destination, void *pool_handle)
 {
     Encryptor *encryptor = FromVoid<Encryptor>(thisptr);
     IfNullRet(encryptor, E_POINTER);
@@ -55,7 +55,7 @@ SEALDLL HRESULT SEALCALL Encryptor_Encrypt(void *thisptr, void *plaintext, void 
     }
 }
 
-SEALDLL HRESULT SEALCALL Encryptor_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL Encryptor_Destroy(void *thisptr)
 {
     Encryptor *encryptor = FromVoid<Encryptor>(thisptr);
     IfNullRet(encryptor, E_POINTER);

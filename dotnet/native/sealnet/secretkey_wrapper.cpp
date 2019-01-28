@@ -11,9 +11,9 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
-SEALDLL HRESULT SEALCALL SecretKey_Create1(void **secret_key)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_Create1(void **secret_key)
 {
     IfNullRet(secret_key, E_POINTER);
 
@@ -22,7 +22,7 @@ SEALDLL HRESULT SEALCALL SecretKey_Create1(void **secret_key)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SecretKey_Create2(void *copy, void **secret_key)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_Create2(void *copy, void **secret_key)
 {
     SecretKey *copyptr = FromVoid<SecretKey>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -33,7 +33,7 @@ SEALDLL HRESULT SEALCALL SecretKey_Create2(void *copy, void **secret_key)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SecretKey_Set(void *thisptr, void *assign)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_Set(void *thisptr, void *assign)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -44,7 +44,7 @@ SEALDLL HRESULT SEALCALL SecretKey_Set(void *thisptr, void *assign)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SecretKey_Data(void *thisptr, void **data)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_Data(void *thisptr, void **data)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -57,7 +57,7 @@ SEALDLL HRESULT SEALCALL SecretKey_Data(void *thisptr, void **data)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SecretKey_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_Destroy(void *thisptr)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -66,7 +66,7 @@ SEALDLL HRESULT SEALCALL SecretKey_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SecretKey_IsValidFor(void *thisptr, void *contextptr, bool *result)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_IsValidFor(void *thisptr, void *contextptr, bool *result)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -78,7 +78,7 @@ SEALDLL HRESULT SEALCALL SecretKey_IsValidFor(void *thisptr, void *contextptr, b
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SecretKey_IsMetadataValidFor(void *thisptr, void *contextptr, bool *result)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_IsMetadataValidFor(void *thisptr, void *contextptr, bool *result)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -90,7 +90,7 @@ SEALDLL HRESULT SEALCALL SecretKey_IsMetadataValidFor(void *thisptr, void *conte
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SecretKey_ParmsId(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_ParmsId(void *thisptr, uint64_t *parms_id)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -100,7 +100,7 @@ SEALDLL HRESULT SEALCALL SecretKey_ParmsId(void *thisptr, uint64_t *parms_id)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL SecretKey_Pool(void *thisptr, void **pool)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_Pool(void *thisptr, void **pool)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);

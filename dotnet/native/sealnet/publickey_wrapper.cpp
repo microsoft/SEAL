@@ -11,9 +11,9 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
-SEALDLL HRESULT SEALCALL PublicKey_Create1(void **public_key)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_Create1(void **public_key)
 {
     IfNullRet(public_key, E_POINTER);
 
@@ -22,7 +22,7 @@ SEALDLL HRESULT SEALCALL PublicKey_Create1(void **public_key)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Create2(void *copy, void **public_key)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_Create2(void *copy, void **public_key)
 {
     PublicKey *copyptr = FromVoid<PublicKey>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -33,7 +33,7 @@ SEALDLL HRESULT SEALCALL PublicKey_Create2(void *copy, void **public_key)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Set(void *thisptr, void *assign)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_Set(void *thisptr, void *assign)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
@@ -44,7 +44,7 @@ SEALDLL HRESULT SEALCALL PublicKey_Set(void *thisptr, void *assign)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Data(void *thisptr, void **data)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_Data(void *thisptr, void **data)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
@@ -57,7 +57,7 @@ SEALDLL HRESULT SEALCALL PublicKey_Data(void *thisptr, void **data)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_id)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
@@ -67,7 +67,7 @@ SEALDLL HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_id)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void *thisptr, void *context, bool *result)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_IsValidFor(void *thisptr, void *context, bool *result)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
@@ -79,7 +79,7 @@ SEALDLL HRESULT SEALCALL PublicKey_IsValidFor(void *thisptr, void *context, bool
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_IsMetadataValidFor(void *thisptr, void *context, bool *result)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_IsMetadataValidFor(void *thisptr, void *context, bool *result)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
@@ -91,7 +91,7 @@ SEALDLL HRESULT SEALCALL PublicKey_IsMetadataValidFor(void *thisptr, void *conte
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
@@ -102,7 +102,7 @@ SEALDLL HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL PublicKey_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_Destroy(void *thisptr)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);

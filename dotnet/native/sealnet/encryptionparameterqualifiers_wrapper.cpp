@@ -10,9 +10,9 @@
 #include "seal/context.h"
 
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
-SEALDLL HRESULT SEALCALL EPQ_Create(void *copy, void **epq)
+SEALNETNATIVE HRESULT SEALCALL EPQ_Create(void *copy, void **epq)
 {
     EncryptionParameterQualifiers *copyptr = FromVoid<EncryptionParameterQualifiers>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -23,7 +23,7 @@ SEALDLL HRESULT SEALCALL EPQ_Create(void *copy, void **epq)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL EPQ_Destroy(void *thisptr)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -32,7 +32,7 @@ SEALDLL HRESULT SEALCALL EPQ_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_ParametersSet(void *thisptr, bool *parameters_set)
+SEALNETNATIVE HRESULT SEALCALL EPQ_ParametersSet(void *thisptr, bool *parameters_set)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -42,7 +42,7 @@ SEALDLL HRESULT SEALCALL EPQ_ParametersSet(void *thisptr, bool *parameters_set)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingFFT(void *thisptr, bool *using_fft)
+SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFFT(void *thisptr, bool *using_fft)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -52,7 +52,7 @@ SEALDLL HRESULT SEALCALL EPQ_UsingFFT(void *thisptr, bool *using_fft)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingNTT(void *thisptr, bool *using_ntt)
+SEALNETNATIVE HRESULT SEALCALL EPQ_UsingNTT(void *thisptr, bool *using_ntt)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -62,7 +62,7 @@ SEALDLL HRESULT SEALCALL EPQ_UsingNTT(void *thisptr, bool *using_ntt)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingBatching(void *thisptr, bool *using_batching)
+SEALNETNATIVE HRESULT SEALCALL EPQ_UsingBatching(void *thisptr, bool *using_batching)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -72,7 +72,7 @@ SEALDLL HRESULT SEALCALL EPQ_UsingBatching(void *thisptr, bool *using_batching)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_plain_lift)
+SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_plain_lift)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -82,7 +82,7 @@ SEALDLL HRESULT SEALCALL EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL EPQ_UsingHEStdSecurity(void *thisptr, bool *using_HE_std_security)
+SEALNETNATIVE HRESULT SEALCALL EPQ_UsingHEStdSecurity(void *thisptr, bool *using_HE_std_security)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);

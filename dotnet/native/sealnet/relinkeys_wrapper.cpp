@@ -11,7 +11,7 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
 namespace seal
 {
@@ -24,7 +24,7 @@ namespace seal
     };
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_Create1(void **relin_keys)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_Create1(void **relin_keys)
 {
     IfNullRet(relin_keys, E_POINTER);
 
@@ -33,7 +33,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_Create1(void **relin_keys)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_Create2(void *copy, void **relin_keys)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_Create2(void *copy, void **relin_keys)
 {
     RelinKeys *copyptr = FromVoid<RelinKeys>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -44,7 +44,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_Create2(void *copy, void **relin_keys)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_Set(void *thisptr, void *copy)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_Set(void *thisptr, void *copy)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -55,7 +55,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_Set(void *thisptr, void *copy)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_Destroy(void *thisptr)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_Destroy(void *thisptr)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -64,7 +64,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_Size(void *thisptr, uint64_t *size)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_Size(void *thisptr, uint64_t *size)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -74,7 +74,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_Size(void *thisptr, uint64_t *size)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_DBC(void *thisptr, int *dbc)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_DBC(void *thisptr, int *dbc)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -84,7 +84,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_DBC(void *thisptr, int *dbc)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_SetDBC(void *thisptr, int dbc)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_SetDBC(void *thisptr, int dbc)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -93,7 +93,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_SetDBC(void *thisptr, int dbc)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **ciphers)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **ciphers)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -123,7 +123,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetKeyList(void *thisptr, uint64_t index, uin
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_HasKey(void *thisptr, uint64_t key_power, bool *has_key)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_HasKey(void *thisptr, uint64_t key_power, bool *has_key)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -133,7 +133,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_HasKey(void *thisptr, uint64_t key_power, boo
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_GetKey(void *thisptr, uint64_t key_power, uint64_t *count, void **ciphers)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_GetKey(void *thisptr, uint64_t key_power, uint64_t *count, void **ciphers)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -143,7 +143,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetKey(void *thisptr, uint64_t key_power, uin
 }
 
 
-SEALDLL HRESULT SEALCALL RelinKeys_ClearDataAndReserve(void *thisptr, uint64_t size)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_ClearDataAndReserve(void *thisptr, uint64_t size)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -153,7 +153,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_ClearDataAndReserve(void *thisptr, uint64_t s
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_AddKeyList(void *thisptr, uint64_t count, void **ciphers)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_AddKeyList(void *thisptr, uint64_t count, void **ciphers)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -177,7 +177,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_AddKeyList(void *thisptr, uint64_t count, voi
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_GetParmsId(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_GetParmsId(void *thisptr, uint64_t *parms_id)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -191,7 +191,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_GetParmsId(void *thisptr, uint64_t *parms_id)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_SetParmsId(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_SetParmsId(void *thisptr, uint64_t *parms_id)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -201,7 +201,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_SetParmsId(void *thisptr, uint64_t *parms_id)
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_IsValidFor(void *thisptr, void *context, bool *result)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_IsValidFor(void *thisptr, void *context, bool *result)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -213,7 +213,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_IsValidFor(void *thisptr, void *context, bool
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_IsMetadataValidFor(void *thisptr, void *context, bool *result)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_IsMetadataValidFor(void *thisptr, void *context, bool *result)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -225,7 +225,7 @@ SEALDLL HRESULT SEALCALL RelinKeys_IsMetadataValidFor(void *thisptr, void *conte
     return S_OK;
 }
 
-SEALDLL HRESULT SEALCALL RelinKeys_Pool(void *thisptr, void **pool)
+SEALNETNATIVE HRESULT SEALCALL RelinKeys_Pool(void *thisptr, void **pool)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
     IfNullRet(keys, E_POINTER);

@@ -13,20 +13,20 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALDLL HRESULT SEALCALL MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void **pool_handle);
+SEALNETNATIVE HRESULT SEALCALL MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void **pool_handle);
 
-SEALDLL HRESULT SEALCALL MemoryManager_GetPool2(void **pool_handle);
+SEALNETNATIVE HRESULT SEALCALL MemoryManager_GetPool2(void **pool_handle);
 
-SEALDLL HRESULT SEALCALL MemoryManager_SwitchProfile(void *new_profile);
+SEALNETNATIVE HRESULT SEALCALL MemoryManager_SwitchProfile(void *new_profile);
 
-SEALDLL HRESULT SEALCALL MMProf_CreateGlobal(void **profile);
+SEALNETNATIVE HRESULT SEALCALL MMProf_CreateGlobal(void **profile);
 
-SEALDLL HRESULT SEALCALL MMProf_CreateFixed(void *pool, void **profile);
+SEALNETNATIVE HRESULT SEALCALL MMProf_CreateFixed(void *pool, void **profile);
 
-SEALDLL HRESULT SEALCALL MMProf_CreateNew(void **profile);
+SEALNETNATIVE HRESULT SEALCALL MMProf_CreateNew(void **profile);
 
-SEALDLL HRESULT SEALCALL MMProf_CreateThreadLocal(void **profile);
+SEALNETNATIVE HRESULT SEALCALL MMProf_CreateThreadLocal(void **profile);
 
-SEALDLL HRESULT SEALCALL MMProf_GetPool(void *thisptr, void **pool_handle);
+SEALNETNATIVE HRESULT SEALCALL MMProf_GetPool(void *thisptr, void **pool_handle);
 
-SEALDLL HRESULT SEALCALL MMProf_Destroy(void *thisptr);
+SEALNETNATIVE HRESULT SEALCALL MMProf_Destroy(void *thisptr);

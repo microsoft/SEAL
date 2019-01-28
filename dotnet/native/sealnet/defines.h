@@ -5,17 +5,17 @@
 
 #ifdef _MSC_VER
 
-#ifdef SEALDLL_EXPORTS
-#define SEALDLL extern "C" __declspec(dllexport)
+#ifdef SEALNETNATIVE_EXPORTS
+#define SEALNETNATIVE extern "C" __declspec(dllexport)
 #else
-#define SEALDLL extern "C" __declspec(dllimport)
+#define SEALNETNATIVE extern "C" __declspec(dllimport)
 #endif
 
 #define SEALCALL __cdecl
 
 #else // _MSC_VER
 
-#define SEALDLL extern "C"
+#define SEALNETNATIVE extern "C"
 #define SEALCALL
 
 #define HRESULT long

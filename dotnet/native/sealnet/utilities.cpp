@@ -12,20 +12,17 @@
 
 using namespace std;
 using namespace seal;
-using namespace seal::dll;
+using namespace sealnet;
 
-namespace seal
+namespace sealnet
 {
-    namespace dll
-    {
-        extern unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
+    extern unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
 
-        // This is here only so we have a null shared pointer to return.
-        shared_ptr<SEALContext> null_context_;
-    }
+    // This is here only so we have a null shared pointer to return.
+    shared_ptr<SEALContext> null_context_;
 }
 
-unique_ptr<MemoryPoolHandle> seal::dll::MemHandleFromVoid(void *voidptr)
+unique_ptr<MemoryPoolHandle> sealnet::MemHandleFromVoid(void *voidptr)
 {
     if (nullptr == voidptr)
     {
@@ -36,7 +33,7 @@ unique_ptr<MemoryPoolHandle> seal::dll::MemHandleFromVoid(void *voidptr)
     return make_unique<MemoryPoolHandle>(*handle);
 }
 
-void seal::dll::BuildCoeffPointers(const vector<SmallModulus> &coefficients, uint64_t *length, void **coeffs)
+void sealnet::BuildCoeffPointers(const vector<SmallModulus> &coefficients, uint64_t *length, void **coeffs)
 {
     *length = coefficients.size();
 
@@ -55,7 +52,7 @@ void seal::dll::BuildCoeffPointers(const vector<SmallModulus> &coefficients, uin
     }
 }
 
-const shared_ptr<SEALContext> &seal::dll::SharedContextFromVoid(void *context)
+const shared_ptr<SEALContext> &sealnet::SharedContextFromVoid(void *context)
 {
     SEALContext *contextptr = FromVoid<SEALContext>(context);
     if (nullptr == contextptr)
@@ -72,7 +69,7 @@ const shared_ptr<SEALContext> &seal::dll::SharedContextFromVoid(void *context)
     return ctxiter->second;
 }
 
-void seal::dll::CopyParmsId(const uint64_t *src, parms_id_type &dest)
+void sealnet::CopyParmsId(const uint64_t *src, parms_id_type &dest)
 {
     if (nullptr != src)
     {
@@ -83,7 +80,7 @@ void seal::dll::CopyParmsId(const uint64_t *src, parms_id_type &dest)
     }
 }
 
-void seal::dll::CopyParmsId(const parms_id_type &src, uint64_t *dest)
+void sealnet::CopyParmsId(const parms_id_type &src, uint64_t *dest)
 {
     if (nullptr != dest)
     {
@@ -94,7 +91,7 @@ void seal::dll::CopyParmsId(const parms_id_type &src, uint64_t *dest)
     }
 }
 
-HRESULT seal::dll::ToStringHelper(const string &str, char *outstr, int *length)
+HRESULT sealnet::ToStringHelper(const string &str, char *outstr, int *length)
 {
     if (nullptr == outstr)
     {
