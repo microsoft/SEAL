@@ -10,11 +10,21 @@ namespace SEALNetTest
         [TestMethod]
         public void CreateTest()
         {
-            IntegerEncoder encoder = new IntegerEncoder(new SmallModulus(8192));
+            EncryptionParameters parms1 = new EncryptionParameters(SchemeType.BFV)
+            {
+                PlainModulus = new SmallModulus(8192)
+            };
+            SEALContext context1 = SEALContext.Create(parms1);
+            IntegerEncoder encoder = new IntegerEncoder(context1);
             Assert.IsNotNull(encoder);
             Assert.AreEqual(8192ul, encoder.PlainModulus.Value);
 
-            IntegerEncoder encoder2 = new IntegerEncoder(new SmallModulus(4096));
+            EncryptionParameters parms2 = new EncryptionParameters(SchemeType.BFV)
+            {
+                PlainModulus = new SmallModulus(4096)
+            };
+            SEALContext context2 = SEALContext.Create(parms2);
+            IntegerEncoder encoder2 = new IntegerEncoder(context2);
             Assert.IsNotNull(encoder2);
             Assert.AreEqual(4096ul, encoder2.PlainModulus.Value);
 
@@ -26,7 +36,12 @@ namespace SEALNetTest
         [TestMethod]
         public void EncodeTest()
         {
-            IntegerEncoder encoder = new IntegerEncoder(new SmallModulus(1024));
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PlainModulus = new SmallModulus(1024)
+            };
+            SEALContext context = SEALContext.Create(parms);
+            IntegerEncoder encoder = new IntegerEncoder(context);
 
             Plaintext plain = encoder.Encode(10);
             Assert.IsNotNull(plain);
@@ -116,7 +131,12 @@ namespace SEALNetTest
         [TestMethod]
         public void DecodeTest()
         {
-            IntegerEncoder encoder = new IntegerEncoder(new SmallModulus(1024));
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PlainModulus = new SmallModulus(1024)
+            };
+            SEALContext context = SEALContext.Create(parms);
+            IntegerEncoder encoder = new IntegerEncoder(context);
 
             Plaintext plain = new Plaintext("0x^5 + 1x^4 + 1x^3 + 1x^1 + 0");
             Assert.AreEqual(6ul, plain.CoeffCount);
@@ -141,15 +161,19 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
-            IntegerEncoder enc = new IntegerEncoder(new SmallModulus(4ul));
-            SmallModulus sm_null = null;
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PlainModulus = new SmallModulus(4ul)
+            };
+            SEALContext context = SEALContext.Create(parms);
+            SEALContext context_null = null;
+            IntegerEncoder enc = new IntegerEncoder(context);
             IntegerEncoder copy_null = null;
             BigUInt bui_null = null;
             BigUInt bui = new BigUInt(5ul);
             Plaintext plain = new Plaintext();
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc = new IntegerEncoder(sm_null));
+            Assert.ThrowsException<ArgumentNullException>(() => enc = new IntegerEncoder(context_null));
             Assert.ThrowsException<ArgumentNullException>(() => enc = new IntegerEncoder(copy_null));
 
             Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1ul, null));

@@ -30,18 +30,19 @@ namespace Microsoft.Research.SEAL
     public class IntegerEncoder : NativeObject
     {
         /// <summary>
-        /// Creates an IntegerEncoder object. The constructor takes as input a reference
-        /// to the plaintext modulus (represented by SmallModulus).
+        /// Creates a IntegerEncoder object. The constructor takes as input a pointer to
+        /// a SEALContext object which contains the plaintext modulus.
         /// </summary>
-        /// <param name="plainModulus">The plaintext modulus (represented by SmallModulus)</param>
-        /// <exception cref="ArgumentNullException">if plainModulus is null</exception>
-        /// <exception cref="ArgumentException">if PlainModulus is not at least 2</exception>
-        public IntegerEncoder(SmallModulus plainModulus)
+        /// <param name="context">The SEALContext</param>
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        /// <exception cref="ArgumentException">if the PlainModulus contained in context
+        /// is not at least 2</exception>
+        public IntegerEncoder(SEALContext context)
         {
-            if (null == plainModulus)
-                throw new ArgumentNullException(nameof(plainModulus));
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
 
-            NativeMethods.IntegerEncoder_Create1(plainModulus.NativePtr, out IntPtr encoderPtr);
+            NativeMethods.IntegerEncoder_Create1(context.NativePtr, out IntPtr encoderPtr);
             NativePtr = encoderPtr;
         }
 

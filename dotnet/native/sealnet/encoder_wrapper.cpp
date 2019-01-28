@@ -12,15 +12,15 @@
 using namespace seal;
 using namespace seal::dll;
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void *plain_modulus, void **encoder)
+SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void *context, void **encoder)
 {
-    SmallModulus *pm = FromVoid<SmallModulus>(plain_modulus);
-    IfNullRet(pm, E_POINTER);
+    const auto& sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(encoder, E_POINTER);
 
     try
     {
-        IntegerEncoder *intEncoder = new IntegerEncoder(*pm);
+        IntegerEncoder *intEncoder = new IntegerEncoder(sharedctx);
         *encoder = intEncoder;
         return S_OK;
     }

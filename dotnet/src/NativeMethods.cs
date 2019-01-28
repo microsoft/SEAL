@@ -1092,7 +1092,7 @@ namespace Microsoft.Research.SEAL
         #region IntegerEncoder methods
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void IntegerEncoder_Create1(IntPtr plainModulus, out IntPtr encoder);
+        internal static extern void IntegerEncoder_Create1(IntPtr context, out IntPtr encoder);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void IntegerEncoder_Create2(IntPtr copy, out IntPtr encoder);

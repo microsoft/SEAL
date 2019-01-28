@@ -231,7 +231,7 @@ namespace SEALNetExamples
 
             In this example we use the IntegerEncoder due to its simplicity. 
             */
-            IntegerEncoder encoder = new IntegerEncoder(parms.PlainModulus);
+            IntegerEncoder encoder = new IntegerEncoder(context);
 
             /*
             We are now ready to generate the secret and public keys. For this purpose 
@@ -1154,7 +1154,7 @@ namespace SEALNetExamples
                 Decryptor decryptor = new Decryptor(context, secretKey);
                 Evaluator evaluator = new Evaluator(context);
                 BatchEncoder batchEncoder = new BatchEncoder(context);
-                IntegerEncoder encoder = new IntegerEncoder(plainModulus);
+                IntegerEncoder encoder = new IntegerEncoder(context);
 
                 /*
                 These will hold the total times used by each operation.

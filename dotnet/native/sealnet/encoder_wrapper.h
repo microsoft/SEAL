@@ -13,7 +13,7 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void *plain_modulus, void **encoder);
+SEALDLL HRESULT SEALCALL IntegerEncoder_Create1(void *context, void **encoder);
 
 SEALDLL HRESULT SEALCALL IntegerEncoder_Create2(void *copy, void **encoder);
 
