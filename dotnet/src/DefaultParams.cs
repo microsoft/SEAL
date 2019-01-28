@@ -25,7 +25,7 @@ namespace Microsoft.Research.SEAL
         /// value.
         /// </remarks>
         /// <param name="polyModulusDegree">The degree of the polynomial modulus</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">if poly_modulus_degree is
+        /// <exception cref="System.ArgumentOutOfRangeException">if polyModulusDegree is
         /// not 1024, 2048, 4096, 8192, 16384, or 32768</exception>
         public static IEnumerable<SmallModulus> CoeffModulus128(ulong polyModulusDegree)
         {
@@ -36,11 +36,11 @@ namespace Microsoft.Research.SEAL
                 ulong length = 0;
                 NativeMethods.DefParams_CoeffModulus128(polyModulusDegree, ref length, null);
 
-                IntPtr[] coeff_array = new IntPtr[length];
-                NativeMethods.DefParams_CoeffModulus128(polyModulusDegree, ref length, coeff_array);
+                IntPtr[] coeffArray = new IntPtr[length];
+                NativeMethods.DefParams_CoeffModulus128(polyModulusDegree, ref length, coeffArray);
 
                 result = new List<SmallModulus>((int)length);
-                foreach (IntPtr sm in coeff_array)
+                foreach (IntPtr sm in coeffArray)
                 {
                     result.Add(new SmallModulus(sm));
                 }
@@ -68,7 +68,7 @@ namespace Microsoft.Research.SEAL
         /// value.
         /// </remarks>
         /// <param name="polyModulusDegree">The degree of the polynomial modulus</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">if poly_modulus_degree is
+        /// <exception cref="System.ArgumentOutOfRangeException">if polyModulusDegree is
         /// not 1024, 2048, 4096, 8192, 16384, or 32768</exception>
         public static IEnumerable<SmallModulus> CoeffModulus192(ulong polyModulusDegree)
         {
@@ -79,11 +79,11 @@ namespace Microsoft.Research.SEAL
                 ulong length = 0;
                 NativeMethods.DefParams_CoeffModulus192(polyModulusDegree, ref length, null);
 
-                IntPtr[] coeff_array = new IntPtr[length];
-                NativeMethods.DefParams_CoeffModulus192(polyModulusDegree, ref length, coeff_array);
+                IntPtr[] coeffArray = new IntPtr[length];
+                NativeMethods.DefParams_CoeffModulus192(polyModulusDegree, ref length, coeffArray);
 
                 result = new List<SmallModulus>((int)length);
-                foreach (IntPtr sm in coeff_array)
+                foreach (IntPtr sm in coeffArray)
                 {
                     result.Add(new SmallModulus(sm));
                 }
@@ -111,7 +111,7 @@ namespace Microsoft.Research.SEAL
         /// value.
         /// </remarks>
         /// <param name="polyModulusDegree">The degree of the polynomial modulus</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">if poly_modulus_degree is
+        /// <exception cref="System.ArgumentOutOfRangeException">if polyModulusDegree is
         /// not 1024, 2048, 4096, 8192, 16384, or 32768</exception>
         public static IEnumerable<SmallModulus> CoeffModulus256(ulong polyModulusDegree)
         {
@@ -122,11 +122,11 @@ namespace Microsoft.Research.SEAL
                 ulong length = 0;
                 NativeMethods.DefParams_CoeffModulus256(polyModulusDegree, ref length, null);
 
-                IntPtr[] coeff_array = new IntPtr[length];
-                NativeMethods.DefParams_CoeffModulus256(polyModulusDegree, ref length, coeff_array);
+                IntPtr[] coeffArray = new IntPtr[length];
+                NativeMethods.DefParams_CoeffModulus256(polyModulusDegree, ref length, coeffArray);
 
                 result = new List<SmallModulus>((int)length);
-                foreach (IntPtr sm in coeff_array)
+                foreach (IntPtr sm in coeffArray)
                 {
                     result.Add(new SmallModulus(sm));
                 }

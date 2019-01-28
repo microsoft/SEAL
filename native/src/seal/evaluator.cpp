@@ -280,11 +280,11 @@ namespace seal
         {
         case scheme_type::BFV:
             bfv_multiply(encrypted1, encrypted2, pool);
-            return;
+            break;
 
         case scheme_type::CKKS:
             ckks_multiply(encrypted1, encrypted2, pool);
-            return;
+            break;
 
         default:
             throw invalid_argument("unsupported scheme");
@@ -707,11 +707,11 @@ namespace seal
         {
         case scheme_type::BFV:
             bfv_square(encrypted, move(pool));
-            return;
+            break;
 
         case scheme_type::CKKS:
             ckks_square(encrypted, move(pool));
-            return;
+            break;
 
         default:
             throw invalid_argument("unsupported scheme");
@@ -1769,12 +1769,12 @@ namespace seal
         case scheme_type::BFV:
             // Modulus switching with scaling
             mod_switch_scale_to_next(encrypted, destination, move(pool));
-            return;
+            break;
 
         case scheme_type::CKKS:
             // Modulus switching without scaling
             mod_switch_drop_to_next(encrypted, destination, move(pool));
-            return;
+            break;
 
         default:
             throw invalid_argument("unsupported scheme");
@@ -1876,7 +1876,7 @@ namespace seal
         case scheme_type::CKKS:
             // Modulus switching with scaling
             mod_switch_scale_to_next(encrypted, destination, move(pool));
-            return;
+            break;
 
         default:
             throw invalid_argument("unsupported scheme");
@@ -1929,7 +1929,7 @@ namespace seal
                 // Modulus switching with scaling
                 mod_switch_scale_to_next(encrypted, encrypted, pool);
             }
-            return;
+            break;
 
         default:
             throw invalid_argument("unsupported scheme");
@@ -2131,7 +2131,7 @@ namespace seal
                     }
                 }
             }
-            return;
+            break;
         }
 
         case scheme_type::CKKS:
@@ -2142,7 +2142,7 @@ namespace seal
                     plain.data() + (j*coeff_count), coeff_count, 
                     coeff_modulus[j], encrypted.data() + (j * coeff_count));
             }
-            return;
+            break;
         }
 
         default:
@@ -2243,7 +2243,7 @@ namespace seal
                     }
                 }
             }
-            return;
+            break;
         }
 
         case scheme_type::CKKS:
@@ -2254,7 +2254,7 @@ namespace seal
                     plain.data() + (j * coeff_count), coeff_count, 
                     coeff_modulus[j], encrypted.data() + (j * coeff_count));
             }
-            return;
+            break;
         }
 
         default:

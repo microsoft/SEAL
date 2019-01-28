@@ -21,7 +21,7 @@ namespace Microsoft.Research.SEAL
     /// <para>
     /// Mathematical Background
     /// Mathematically speaking, if the polynomial modulus is X^N+1, N is a power of two, and 
-    /// plain_modulus is a prime number T such that 2N divides T-1, then integers modulo T 
+    /// PlainModulus is a prime number T such that 2N divides T-1, then integers modulo T 
     /// contain a primitive 2N-th root of unity and the polynomial X^N+1 splits into n distinct 
     /// linear factors as X^N+1 = (X-a_1)*...*(X-a_N) mod T, where the constants a_1, ..., a_n 
     /// are all the distinct primitive 2N-th roots of unity in integers modulo T. The Chinese 
@@ -40,7 +40,7 @@ namespace Microsoft.Research.SEAL
     /// Whether batching can be used depends on whether the plaintext modulus has been chosen
     /// appropriately. Thus, to construct a BatchEncoder the user must provide an instance 
     /// of SEALContext such that its associated EncryptionParameterQualifiers object has the 
-    /// flags parameters_set and enable_batching set to true.
+    /// flags ParametersSet and EnableBatching set to true.
     /// </para>
     /// </remarks>
     /// <see cref="EncryptionParameters">see EncryptionParameters for more information about encryption parameters.</see>

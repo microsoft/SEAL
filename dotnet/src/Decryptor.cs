@@ -45,7 +45,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either context or secretKey are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if secret_key is not valid</exception>
+        /// <exception cref="ArgumentException">if secretKey is not valid</exception>
         public Decryptor(SEALContext context, SecretKey secretKey)
         {
             if (null == context)

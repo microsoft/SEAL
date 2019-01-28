@@ -25,7 +25,7 @@ namespace Microsoft.Research.SEAL
     /// CKKSEncoder implements an approximation of the canonical embedding of the ring of
     /// integers Z[X]/(X^N+1) into C^(N/2), where C denotes the complex numbers. The Galois
     /// group of the extension is (Z/2NZ)* ~= Z/2Z x Z/(N/2) whose action on the primitive roots
-    /// of unity modulo coeff_modulus is easy to describe. Since the batching slots correspond
+    /// of unity modulo CoeffModulus is easy to describe. Since the batching slots correspond
     /// 1-to-1 to the primitive roots of unity, applying Galois automorphisms on the plaintext
     /// acts by permuting the slots. By applying generators of the two cyclic subgroups of the
     /// Galois group, we can effectively enable cyclic rotations and complex conjugations of
@@ -67,7 +67,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either values, parmsId or destionation are null.</exception>
         /// <exception cref="ArgumentException">if values has invalid size</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption 
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
         /// parameters </exception>
         /// <exception cref="ArgumentException">if scale is not strictly positive</exception>
         /// <exception cref="ArgumentException">if encoding is too large for the encryption 
@@ -103,7 +103,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either values, parmsId or destionation are null.</exception>
         /// <exception cref="ArgumentException">if values has invalid size</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption 
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
         /// parameters </exception>
         /// <exception cref="ArgumentException">if scale is not strictly positive</exception>
         /// <exception cref="ArgumentException">if encoding is too large for the encryption 
@@ -202,7 +202,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either parmsId or destination are null</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption 
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
         /// parameters </exception>
         /// <exception cref="ArgumentException">if scale is not strictly positive</exception>
         /// <exception cref="ArgumentException">if encoding is too large for the encryption 

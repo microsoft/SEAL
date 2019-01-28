@@ -73,7 +73,7 @@ namespace Microsoft.Research.SEAL
     /// "default NTT form". Some functions, such as add, work even if the inputs are not in 
     /// the default state, but others, such as multiply, will throw an exception. The output 
     /// of all evaluation functions will be in the same state as the input(s), with the 
-    /// exception of the transform_to_ntt and transform_from_ntt functions, which change the 
+    /// exception of the TransformToNTT and TransformFromNTT functions, which change the 
     /// state. Ideally, unless these two functions are called, all other functions should 
     /// "just work".
     /// </para>
@@ -108,6 +108,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="encrypted">The ciphertext to negate</param>
         /// <exception cref="ArgumentNullException">if encrypted is null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void NegateInplace(Ciphertext encrypted)
         {
             if (null == encrypted)
@@ -123,6 +124,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The ciphertext to overwrite with the negated result</param>
         /// <exception cref="ArgumentNullException">if either encrypted or destionation are null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Negate(Ciphertext encrypted, Ciphertext destination)
         {
             if (null == encrypted)
@@ -145,6 +147,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 are in different
         /// NTT forms</exception>
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 have different scale</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void AddInplace(Ciphertext encrypted1, Ciphertext encrypted2)
         {
             if (null == encrypted1)
@@ -168,6 +171,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 are in different
         /// NTT forms</exception>
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 have different scale</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Add(Ciphertext encrypted1, Ciphertext encrypted2,
                     Ciphertext destination)
         {
@@ -193,6 +197,7 @@ namespace Microsoft.Research.SEAL
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypteds are in different NTT forms</exception>
         /// <exception cref="ArgumentException">if encrypteds have different scale</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void AddMany(IEnumerable<Ciphertext> encrypteds, Ciphertext destination)
         {
             if (null == encrypteds)
@@ -216,6 +221,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 are in different
         /// NTT forms</exception>
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 have different scale</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void SubInplace(Ciphertext encrypted1, Ciphertext encrypted2)
         {
             if (null == encrypted1)
@@ -239,6 +245,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 are in different
         /// NTT forms</exception>
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 have different scale</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Sub(Ciphertext encrypted1, Ciphertext encrypted2,
                     Ciphertext destination)
         {
@@ -268,6 +275,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void MultiplyInplace(Ciphertext encrypted1, Ciphertext encrypted2,
             MemoryPoolHandle pool = null)
         {
@@ -297,6 +305,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Multiply(Ciphertext encrypted1, 
                     Ciphertext encrypted2, Ciphertext destination, 
                     MemoryPoolHandle pool = null)
@@ -327,6 +336,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void SquareInplace(Ciphertext encrypted,
                     MemoryPoolHandle pool = null)
         {
@@ -351,6 +361,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Square(Ciphertext encrypted, Ciphertext destination,
                     MemoryPoolHandle pool = null)
         {
@@ -373,13 +384,14 @@ namespace Microsoft.Research.SEAL
         /// <param name="relinKeys">The relinearization keys</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted, relinKeys are null</exception>
-        /// <exception cref="ArgumentException">if encrypted or relin_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or relinKeys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if relinKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RelinearizeInplace(Ciphertext encrypted, RelinKeys relinKeys,
                     MemoryPoolHandle pool = null)
         {
@@ -403,13 +415,14 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The ciphertext to overwrite with the relinearized result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted, relinKeys or destination are null</exception>
-        /// <exception cref="ArgumentException">if encrypted or relin_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or relinKeys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if relinKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Relinearize(Ciphertext encrypted,
                     RelinKeys relinKeys, Ciphertext destination,
                     MemoryPoolHandle pool = null)
@@ -442,6 +455,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too 
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ModSwitchToNext(Ciphertext encrypted, Ciphertext destination,
                     MemoryPoolHandle pool = null)
         {
@@ -469,6 +483,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too 
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ModSwitchToNextInplace(Ciphertext encrypted,
                     MemoryPoolHandle pool = null)
         {
@@ -522,7 +537,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus
-        /// down until the parameters reach the given parms_id. Dynamic memory allocations in
+        /// down until the parameters reach the given parmsId. Dynamic memory allocations in
         /// the process are allocated from the memory pool pointed to by the given
         /// MemoryPoolHandle.
         /// </summary>
@@ -532,13 +547,14 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted or parmsId are null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
-        /// than the parameters corresponding to parms_id</exception>
+        /// than the parameters corresponding to parmsId</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ModSwitchToInplace(Ciphertext encrypted, ParmsId parmsId,
                     MemoryPoolHandle pool = null)
         {
@@ -552,7 +568,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus
-        /// down until the parameters reach the given parms_id and stores the result in the
+        /// down until the parameters reach the given parmsId and stores the result in the
         /// destination parameter. Dynamic memory allocations in the process are allocated
         /// from the memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
@@ -563,12 +579,13 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted, parmsId or destination are null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
-        /// than the parameters corresponding to parms_id</exception>
+        /// than the parameters corresponding to parmsId</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ModSwitchTo(Ciphertext encrypted, 
                     ParmsId parmsId, Ciphertext destination, 
                     MemoryPoolHandle pool = null)
@@ -593,9 +610,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either plain or parmsId is null</exception>
         /// <exception cref="ArgumentException">if plain is not in NTT form</exception>
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is already at lower level in modulus chain
-        /// than the parameters corresponding to parms_id</exception>
+        /// than the parameters corresponding to parmsId</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         public void ModSwitchToInplace(Plaintext plain, ParmsId parmsId)
@@ -610,7 +627,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Given an NTT transformed plaintext modulo q_1...q_k, this function switches the
-        /// modulus down until the parameters reach the given parms_id and stores the result in
+        /// modulus down until the parameters reach the given parmsId and stores the result in
         /// the destination parameter.
         /// </summary>
         /// <param name="plain">The plaintext to be switched to a smaller modulus</param>
@@ -619,9 +636,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either plain, parmsId or destination are null</exception>
         /// <exception cref="ArgumentException">if plain is not in NTT form</exception>
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is already at lower level in modulus chain
-        /// than the parameters corresponding to parms_id</exception>
+        /// than the parameters corresponding to parmsId</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         public void ModSwitchTo(Plaintext plain, ParmsId parmsId,
@@ -653,6 +670,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RescaleToNext(Ciphertext encrypted, Ciphertext destination,
                     MemoryPoolHandle pool = null)
         {
@@ -681,6 +699,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RescaleToNextInplace(Ciphertext encrypted,
                     MemoryPoolHandle pool = null)
         {
@@ -692,7 +711,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus
-        /// down until the parameters reach the given parms_id and scales the message down
+        /// down until the parameters reach the given parmsId and scales the message down
         /// accordingly. Dynamic memory allocations in the process are allocated from the
         /// memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
@@ -703,11 +722,12 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if the scheme is invalid for rescaling</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
-        /// than the parameters corresponding to parms_id</exception>
+        /// than the parameters corresponding to parmsId</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RescaleToInplace(Ciphertext encrypted, ParmsId parmsId,
                     MemoryPoolHandle pool = null)
         {
@@ -721,7 +741,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus
-        /// down until the parameters reach the given parms_id, scales the message down
+        /// down until the parameters reach the given parmsId, scales the message down
         /// accordingly, and stores the result in the destination parameter. Dynamic memory
         /// allocations in the process are allocated from the memory pool pointed to by the
         /// given MemoryPoolHandle.
@@ -734,11 +754,12 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if the scheme is invalid for rescaling</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if parms_id is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
         /// than the parameters corresponding to parmsId</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RescaleTo(Ciphertext encrypted, 
                     ParmsId parmsId, Ciphertext destination, 
                     MemoryPoolHandle pool = null)
@@ -769,13 +790,14 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypteds, relinKeys or destination are null</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if encrypteds is empty</exception>
-        /// <exception cref="ArgumentException">if the ciphertexts or relin_keys are not valid for
+        /// <exception cref="ArgumentException">if the ciphertexts or relinKeys are not valid for
         /// the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypteds are not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if the size of relin_keys is too small</exception>
+        /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void MultiplyMany(IEnumerable<Ciphertext> encrypteds,
                     RelinKeys relinKeys, Ciphertext destination,
                     MemoryPoolHandle pool = null)
@@ -805,14 +827,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted or relinKeys are null</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if encrypted or relin_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or relinKeys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if exponent is zero</exception>
-        /// <exception cref="ArgumentException">if the size of relin_keys is too small</exception>
+        /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ExponentiateInplace(Ciphertext encrypted,
                     ulong exponent, RelinKeys relinKeys, 
                     MemoryPoolHandle pool = null)
@@ -839,14 +862,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The ciphertext to overwrite with the power</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if encrypted or relin_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or relinKeys is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if exponent is zero</exception>
-        /// <exception cref="ArgumentException">if the size of relin_keys is too small</exception>
+        /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Exponentiate(Ciphertext encrypted, ulong exponent,
                     RelinKeys relinKeys, Ciphertext destination,
                     MemoryPoolHandle pool = null)
@@ -863,11 +887,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Adds a ciphertext and a plaintext. This function adds a plaintext to a ciphertext.
-        /// For the operation to be valid, the plaintext must have less than degree(poly_modulus)
-        /// many non-zero coefficients, and each coefficient must be less than the plaintext
-        /// modulus, i.e. the plaintext must be a valid plaintext under the current encryption
-        /// parameters.
+        /// Adds a ciphertext and a plaintext. The plaintext must be valid for the current 
+        /// encryption parameters.
         /// </summary>
         /// <param name="encrypted">The ciphertext to add</param>
         /// <param name="plain">The plaintext to add</param>
@@ -875,6 +896,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted or plain is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted or plain is in NTT form</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void AddPlainInplace(Ciphertext encrypted, Plaintext plain)
         {
             if (null == encrypted)
@@ -886,11 +908,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Adds a ciphertext and a plaintext. This function adds a plaintext to a ciphertext
-        /// and stores the result in the destination parameter. For the operation to be valid,
-        /// the plaintext must have less than degree(poly_modulus) many non-zero coefficients,
-        /// and each coefficient must be less than the plaintext modulus, i.e. the plaintext
-        /// must be a valid plaintext under the current encryption parameters.
+        /// Adds a ciphertext and a plaintext. This function adds a ciphertext and a plaintext 
+        /// and stores the result in the destination parameter. The plaintext must be valid for 
+        /// the current encryption parameters. 
         /// </summary>
         /// <param name="encrypted">The ciphertext to add</param>
         /// <param name="plain">The plaintext to add</param>
@@ -899,6 +919,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted or plain is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted or plain is in NTT form</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void AddPlain(Ciphertext encrypted, Plaintext plain,
                     Ciphertext destination)
         {
@@ -913,11 +934,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Subtracts a plaintext from a ciphertext. This function subtracts a plaintext from
-        /// a ciphertext. For the operation to be valid, the plaintext must have less than
-        /// degree(poly_modulus) many non-zero coefficients, and each coefficient must be less
-        /// than the plaintext modulus, i.e. the plaintext must be a valid plaintext under the
-        /// current encryption parameters.
+        /// Subtracts a plaintext from a ciphertext. The plaintext must be valid for the current 
+        /// encryption parameters.
         /// </summary>
         /// <param name="encrypted">The ciphertext to subtract from</param>
         /// <param name="plain">The plaintext to subtract</param>
@@ -925,6 +943,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted or plain is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted or plain is in NTT form</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void SubPlainInplace(Ciphertext encrypted, Plaintext plain)
         {
             if (null == encrypted)
@@ -936,11 +955,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Subtracts a plaintext from a ciphertext. This function subtracts a plaintext from
-        /// a ciphertext and stores the result in the destination parameter. For the operation
-        /// to be valid, the plaintext must have less than degree(poly_modulus) many non-zero
-        /// coefficients, and each coefficient must be less than the plaintext modulus, i.e.
-        /// the plaintext must be a valid plaintext under the current encryption parameters.
+        /// Subtracts a plaintext from a ciphertext. This function subtracts a plaintext from 
+        /// a ciphertext and stores the result in the destination parameter. The plaintext must 
+        /// be valid for the current encryption parameters. 
         /// </summary>
         /// <param name="encrypted">The ciphertext to subtract from</param>
         /// <param name="plain">The plaintext to subtract</param>
@@ -949,6 +966,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted or plain is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted or plain is in NTT form</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void SubPlain(Ciphertext encrypted, Plaintext plain,
                     Ciphertext destination)
         {
@@ -963,13 +981,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Multiplies a ciphertext with a plaintext. This function multiplies a ciphertext with
-        /// a plaintext. For the operation to be valid, the plaintext must have less than
-        /// degree(poly_modulus) many non-zero coefficients, and each coefficient must be less
-        /// than the plaintext modulus, i.e. the plaintext must be a valid plaintext under the
-        /// current encryption parameters. Moreover, the plaintext cannot be identially 0.
-        /// Dynamic memory allocations in the process are allocated from the memory pool pointed
-        /// to by the given MemoryPoolHandle.
+        /// Multiplies a ciphertext with a plaintext. The plaintext must be valid for the current 
+        /// encryption parameters, and cannot be identially 0. Dynamic memory allocations in the 
+        /// process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to multiply</param>
         /// <param name="plain">The plaintext to multiply</param>
@@ -982,6 +996,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void MultiplyPlainInplace(Ciphertext encrypted, Plaintext plain,
                     MemoryPoolHandle pool = null)
         {
@@ -994,13 +1009,11 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Multiplies a ciphertext with a plaintext. This function multiplies a ciphertext with
-        /// a plaintext and stores the result in the destination parameter. For the operation
-        /// to be valid, the plaintext must have less than degree(poly_modulus) many non-zero
-        /// coefficients, and each coefficient must be less than the plaintext modulus, i.e.
-        /// the plaintext must be a valid plaintext under the current encryption parameters.
-        /// Moreover, the plaintext cannot be identially 0. Dynamic memory allocations in the
-        /// process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// Multiplies a ciphertext with a plaintext. This function multiplies a ciphertext 
+        /// with a plaintext and stores the result in the destination parameter. The plaintext 
+        /// must be valid for the current encryption parameters, and cannot be identially 0. 
+        /// Dynamic memory allocations in the process are allocated from the memory pool pointed 
+        /// to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to multiply</param>
         /// <param name="plain">The plaintext to multiply</param>
@@ -1014,6 +1027,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the output scale
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void MultiplyPlain(Ciphertext encrypted, 
                     Plaintext plain, Ciphertext destination, 
                     MemoryPoolHandle pool = null)
@@ -1034,8 +1048,8 @@ namespace Microsoft.Research.SEAL
         /// Transform to a plaintext by first embedding integers modulo the plaintext modulus
         /// to integers modulo the coefficient modulus and then performing David Harvey's NTT
         /// on the resulting polynomial. The transformation is done with respect to encryption
-        /// parameters corresponding to a given parms_id. For the operation to be valid, the
-        /// plaintext must have degree less than poly_modulus_degree and each coefficient must
+        /// parameters corresponding to a given parmsId. For the operation to be valid, the
+        /// plaintext must have degree less than PolyModulusDegree and each coefficient must
         /// be less than the plaintext modulus, i.e. the plaintext must be a valid plaintext
         /// under the current encryption parameters. Dynamic memory allocations in the process
         /// are allocated from the memory pool pointed to by the given MemoryPoolHandle.
@@ -1045,7 +1059,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either plain or parmsId are null</exception>
         /// <exception cref="ArgumentException">if plain is already in NTT form</exception>
-        /// <exception cref="ArgumentException">if plain or parms_id is not valid for the encryption
+        /// <exception cref="ArgumentException">if plain or parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void TransformToNTTInplace(Plaintext plain, ParmsId parmsId,
@@ -1064,9 +1078,9 @@ namespace Microsoft.Research.SEAL
         /// Transform to a plaintext by first embedding integers modulo the plaintext modulus
         /// to integers modulo the coefficient modulus and then performing David Harvey's NTT
         /// on the resulting polynomial. The transformation is done with respect to encryption
-        /// parameters corresponding to a given parms_id. The result is stored in the
-        /// destination_ntt parameter. For the operation to be valid, the plaintext must have
-        /// degree less than poly_modulus_degree and each coefficient must be less than the
+        /// parameters corresponding to a given parmsId. The result is stored in the
+        /// destinationNTT parameter. For the operation to be valid, the plaintext must have
+        /// degree less than PolyModulusDegree and each coefficient must be less than the
         /// plaintext modulus, i.e. the plaintext must be a valid plaintext under the current
         /// encryption parameters. Dynamic memory allocations in the process are allocated from
         /// the memory pool pointed to by the given MemoryPoolHandle.
@@ -1077,7 +1091,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either plain, parmsId or destinationNTT are null</exception>
         /// <exception cref="ArgumentException">if plain is already in NTT form</exception>
-        /// <exception cref="ArgumentException">if plain or parms_id is not valid for the encryption
+        /// <exception cref="ArgumentException">if plain or parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void TransformToNTT(Plaintext plain, 
@@ -1103,6 +1117,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if encrypted is null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already in NTT form</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void TransformToNTTInplace(Ciphertext encrypted)
         {
             if (null == encrypted)
@@ -1114,13 +1129,14 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Transforms a ciphertext to NTT domain. This functions applies David Harvey's Number
         /// Theoretic Transform separately to each polynomial of a ciphertext. The result is
-        /// stored in the destination_ntt parameter.
+        /// stored in the DestinationNTT parameter.
         /// </summary>
         /// <param name="encrypted">The ciphertext to transform</param>
         /// <param name="destinationNTT">The ciphertext to overwrite with the transformed result</param>
         /// <exception cref="ArgumentNullException">if either encrypted or destinationNTT are null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already in NTT form</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void TransformToNTT(Ciphertext encrypted, 
                     Ciphertext destinationNTT)
         {
@@ -1138,8 +1154,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="encryptedNTT">The ciphertext to transform</param>
         /// <exception cref="ArgumentNullException">if encryptedNTT is null</exception>
-        /// <exception cref="ArgumentException">if encrypted_ntt is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if encrypted_ntt is not in NTT form</exception>
+        /// <exception cref="ArgumentException">if encryptedNTT is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if encryptedNTT is not in NTT form</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void TransformFromNTTInplace(Ciphertext encryptedNTT)
         {
             if (null == encryptedNTT)
@@ -1158,6 +1175,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encryptedNTT or destination are null</exception>
         /// <exception cref="ArgumentException">if encryptedNTT is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encryptedNTT is not in NTT form</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void TransformFromNTT(Ciphertext encryptedNTT, 
                     Ciphertext destination)
         {
@@ -1176,7 +1194,7 @@ namespace Microsoft.Research.SEAL
         /// MemoryPoolHandle.
         /// 
         /// The desired Galois automorphism is given as a Galois element, and must be an odd
-        /// integer in the interval [1, M-1], where M = 2*N, and N = degree(poly_modulus). Used
+        /// integer in the interval [1, M-1], where M = 2*N, and N = degree(PolyModulus). Used
         /// with batching, a Galois element 3^i % M corresponds to a cyclic row rotation i steps
         /// to the left, and a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation
         /// i steps to the right. The Galois element M-1 corresponds to a column rotation (row
@@ -1188,15 +1206,16 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisKeys">The Galois keys</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if the Galois element is not valid</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ApplyGaloisInplace(Ciphertext encrypted,
                     ulong galoisElt, GaloisKeys galoisKeys, 
                     MemoryPoolHandle pool = null)
@@ -1214,7 +1233,7 @@ namespace Microsoft.Research.SEAL
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
         /// 
         /// The desired Galois automorphism is given as a Galois element, and must be an odd
-        /// integer in the interval [1, M-1], where M = 2*N, and N = degree(poly_modulus). Used
+        /// integer in the interval [1, M-1], where M = 2*N, and N = degree(PolyModulus). Used
         /// with batching, a Galois element 3^i % M corresponds to a cyclic row rotation i steps
         /// to the left, and a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation
         /// i steps to the right. The Galois element M-1 corresponds to a column rotation (row
@@ -1227,15 +1246,16 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The ciphertext to overwrite with the result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either encrypted, galoisKeys or destination are null</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if the Galois element is not valid</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ApplyGalois(Ciphertext encrypted, 
                     ulong galoisElt, GaloisKeys galoisKeys, 
                     Ciphertext destination, 
@@ -1268,15 +1288,16 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if steps has too big absolute value</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateRowsInplace(Ciphertext encrypted, 
             int steps, GaloisKeys galoisKeys, 
             MemoryPoolHandle pool = null)
@@ -1306,15 +1327,16 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted, galoisKeys or destination are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if steps has too big absolute value</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateRows(Ciphertext encrypted, int steps,
                     GaloisKeys galoisKeys, Ciphertext destination,
                     MemoryPoolHandle pool = null)
@@ -1344,14 +1366,15 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateColumnsInplace(Ciphertext encrypted,
                     GaloisKeys galoisKeys, 
                     MemoryPoolHandle pool = null)
@@ -1379,14 +1402,15 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted, galoisKeys or destination are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateColumns(Ciphertext encrypted,
                     GaloisKeys galoisKeys, Ciphertext destination,
                     MemoryPoolHandle pool = null)
@@ -1417,15 +1441,16 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if steps has too big absolute value</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateVectorInplace(Ciphertext encrypted,
             int steps, GaloisKeys galoisKeys,
                 MemoryPoolHandle pool = null)
@@ -1455,15 +1480,16 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted, galoisKeys or destination are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if steps has too big absolute value</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateVector(Ciphertext encrypted, int steps,
                     GaloisKeys galoisKeys, Ciphertext destination,
                     MemoryPoolHandle pool = null)
@@ -1491,14 +1517,15 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either encrypted or galoisKeys are null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ComplexConjugateInplace(Ciphertext encrypted,
                     GaloisKeys galoisKeys, 
                     MemoryPoolHandle pool = null)
@@ -1524,14 +1551,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
-        /// <exception cref="ArgumentException">if encrypted or galois_keys is not valid for the
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the
         /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if galois_keys do not correspond to the top level
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ComplexConjugate(Ciphertext encrypted,
                     GaloisKeys galoisKeys, Ciphertext destination,
                     MemoryPoolHandle pool = null)

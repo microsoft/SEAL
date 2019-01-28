@@ -14,9 +14,9 @@ namespace Microsoft.Research.SEAL
     /// 
     /// Addition and multiplication on the integer side translate into addition and multiplication
     /// on the encoded plaintext polynomial side, provided that the length of the polynomial
-    /// never grows to be of the size of the polynomial modulus (poly_modulus), and that the
+    /// never grows to be of the size of the polynomial modulus (PolyModulus), and that the
     /// coefficients of the plaintext polynomials appearing throughout the computations never
-    /// experience coefficients larger than the plaintext modulus (plain_modulus).
+    /// experience coefficients larger than the plaintext modulus (PlainModulus).
     /// </summary>
     /// <remarks>
     /// <para>
@@ -24,7 +24,7 @@ namespace Microsoft.Research.SEAL
     /// Negative integers are represented by using -1 instead of 1 in the binary representation,
     /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
     /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
-    /// would be stored as a polynomial coefficient plain_modulus-1.
+    /// would be stored as a polynomial coefficient PlainModulus-1.
     /// </para>
     /// </remarks>
     public class IntegerEncoder : NativeObject
@@ -35,7 +35,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="plainModulus">The plaintext modulus (represented by SmallModulus)</param>
         /// <exception cref="ArgumentNullException">if plainModulus is null</exception>
-        /// <exception cref="ArgumentException">if plain_modulus is not at least 2</exception>
+        /// <exception cref="ArgumentException">if PlainModulus is not at least 2</exception>
         public IntegerEncoder(SmallModulus plainModulus)
         {
             if (null == plainModulus)
@@ -85,8 +85,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial and returns the result as uint.
-        /// Mathematically this amounts to evaluating the input polynomial at X = 2.
+        /// Decodes a plaintext polynomial and returns the result as uint. Mathematically 
+        /// this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -102,8 +102,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial and returns the result as std::uint64_t.
-        /// Mathematically this amounts to evaluating the input polynomial at X=2.
+        /// Decodes a plaintext polynomial and returns the result as ulong. Mathematically 
+        /// this amounts to evaluating the input polynomial at X=2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -127,7 +127,7 @@ namespace Microsoft.Research.SEAL
         /// Negative integers are represented by using -1 instead of 1 in the binary representation,
         /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
         /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
-        /// would be stored as a polynomial coefficient plain_modulus-1.
+        /// would be stored as a polynomial coefficient PlainModulus-1.
         /// </para>
         /// </remarks>
         /// <param name="value">The signed integer to encode</param>
@@ -147,7 +147,7 @@ namespace Microsoft.Research.SEAL
         /// Negative integers are represented by using -1 instead of 1 in the binary representation,
         /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
         /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
-        /// would be stored as a polynomial coefficient plain_modulus-1.
+        /// would be stored as a polynomial coefficient PlainModulus-1.
         /// </para>
         /// </remarks>
         /// <param name="value">The signed integer to encode</param>
@@ -192,8 +192,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial and returns the result as std::int32_t.
-        /// Mathematically this amounts to evaluating the input polynomial at X = 2.
+        /// Decodes a plaintext polynomial and returns the result as int. Mathematically 
+        /// this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -209,8 +209,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial and returns the result as std::int64_t.
-        /// Mathematically this amounts to evaluating the input polynomial at X = 2.
+        /// Decodes a plaintext polynomial and returns the result as long. Mathematically 
+        /// this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
         /// <exception cref="ArgumentNullException">if plain is null</exception>
@@ -252,7 +252,7 @@ namespace Microsoft.Research.SEAL
         /// Negative integers are represented by using -1 instead of 1 in the binary representation,
         /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
         /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
-        /// would be stored as a polynomial coefficient plain_modulus-1.
+        /// would be stored as a polynomial coefficient PlainModulus-1.
         /// </para>
         /// </remarks>
         /// <param name="value">The signed integer to encode</param>
@@ -283,7 +283,7 @@ namespace Microsoft.Research.SEAL
         /// Negative integers are represented by using -1 instead of 1 in the binary representation,
         /// and the negative coefficients are stored in the plaintext polynomials as unsigned integers
         /// that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
-        /// would be stored as a polynomial coefficient plain_modulus-1.
+        /// would be stored as a polynomial coefficient PlainModulus-1.
         /// </para>
         /// </remarks>
         /// <param name="value">The signed integer to encode</param>

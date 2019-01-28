@@ -403,7 +403,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the parms_id of the current parameters. This function is intended
+        /// Returns the parmsId of the current parameters. This function is intended
         /// mainly for internal use.
         /// </summary>
         public ParmsId ParmsId

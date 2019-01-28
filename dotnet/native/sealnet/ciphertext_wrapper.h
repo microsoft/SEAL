@@ -77,4 +77,6 @@ SEALDLL HRESULT SEALCALL Ciphertext_IsValidFor(void *thisptr, void *context, boo
 
 SEALDLL HRESULT SEALCALL Ciphertext_IsMetadataValidFor(void *thisptr, void *context, bool *result);
 
+SEALDLL HRESULT SEALCALL Ciphertext_IsTransparent(void *thisptr, bool *result);
+
 SEALDLL HRESULT SEALCALL Ciphertext_Pool(void *thisptr, void **pool);

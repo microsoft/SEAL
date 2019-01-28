@@ -14,7 +14,7 @@ namespace Microsoft.Research.SEAL
     /// <para>
     /// Represent an integer modulus of up to 62 bits. An instance of the SmallModulus
     /// class represents a non-negative integer modulus up to 62 bits. In particular,
-    /// the encryption parameter plain_modulus, and the primes in coeff_modulus, are
+    /// the encryption parameter PlainModulus, and the primes in CoeffModulus, are
     /// represented by instances of SmallModulus. The purpose of this class is to
     /// perform and store the pre-computation required by Barrett reduction.
     /// </para>

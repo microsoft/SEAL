@@ -488,6 +488,16 @@ SEALDLL HRESULT SEALCALL Ciphertext_IsMetadataValidFor(void *thisptr, void *cont
     return S_OK;
 }
 
+SEALDLL HRESULT SEALCALL Ciphertext_IsTransparent(void *thisptr, bool *result)
+{
+    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    *result = cipher->is_transparent();
+    return S_OK;
+}
+
 SEALDLL HRESULT SEALCALL Ciphertext_Pool(void *thisptr, void **pool)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);

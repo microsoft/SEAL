@@ -14,15 +14,15 @@ namespace Microsoft.Research.SEAL
     /// for correctness, evaluates their properties, and performs and stores the results of
     /// several costly pre-computations.
     /// 
-    /// After the user has set at least the poly_modulus, coeff_modulus, and plain_modulus
+    /// After the user has set at least the PolyModulus, CoeffModulus, and PlainModulus
     /// parameters in a given EncryptionParameters instance, the parameters can be validated
     /// for correctness and functionality by constructing an instance of SEALContext. The
     /// constructor of SEALContext does all of its work automatically, and concludes by
     /// constructing and storing an instance of the EncryptionParameterQualifiers class, with
     /// its flags set according to the properties of the given parameters. If the created
-    /// instance of EncryptionParameterQualifiers has the parameters_set flag set to true, the
+    /// instance of EncryptionParameterQualifiers has the ParametersSet flag set to true, the
     /// given parameter set has been deemed valid and is ready to be used. If the parameters
-    /// were for some reason not appropriately set, the parameters_set flag will be false,
+    /// were for some reason not appropriately set, the ParametersSet flag will be false,
     /// and a new SEALContext will have to be created after the parameters are corrected.
     /// </summary>
     /// <see cref="EncryptionParameters">see EncryptionParameters for more details on the parameters.</see>
@@ -70,11 +70,11 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Returns an optional ContextData object class corresponding to
-        /// the parameters with a given parms_id. If parameters with the given parms_id
+        /// the parameters with a given parmsId. If parameters with the given parmsId
         /// are not found then the function returns null.
         /// </summary>
         /// 
-        /// <param name="parmsId">The parms_id of the encryption parameters</param>
+        /// <param name="parmsId">The parmsId of the encryption parameters</param>
         /// <exception cref="ArgumentNullException">if parmsId is null</exception>
         public ContextData GetContextData(ParmsId parmsId)
         {
@@ -102,8 +102,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a parms_id_type corresponding to the first set
-        /// of encryption parameters.
+        /// Returns a ParmsId corresponding to the first set of encryption parameters.
         /// </summary>
         public ParmsId FirstParmsId
         {
@@ -116,8 +115,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a parms_id_type corresponding to the last set
-        /// of encryption parameters.
+        /// Returns a ParmsId corresponding to the last set of encryption parameters.
         /// </summary>
         public ParmsId LastParmsId
         {
@@ -243,10 +241,10 @@ namespace Microsoft.Research.SEAL
             }
 
             /// <summary>
-            /// Return a copy of the plaintext upper half increment, i.e. coeff_modulus
-            /// minus plain_modulus. The upper half increment is represented as an integer
-            /// for the full product coeff_modulus if using_fast_plain_lift is false and is
-            /// otherwise represented modulo each of the coeff_modulus primes in order.
+            /// Return a copy of the plaintext upper half increment, i.e. coeffModulus
+            /// minus plainModulus. The upper half increment is represented as an integer
+            /// for the full product coeffModulus if UsingFastPlainLift is false and is
+            /// otherwise represented modulo each of the CoeffModulus primes in order.
             /// </summary>
             public ulong[] PlainUpperHalfIncrement
             {
@@ -285,12 +283,12 @@ namespace Microsoft.Research.SEAL
 
             /// <summary>
             /// Return a copy of the upper half increment used for computing Delta*m
-            /// and converting the coefficients to modulo coeff_modulus. For example,
+            /// and converting the coefficients to modulo CoeffModulus. For example,
             /// t-1 in plaintext should change into
             /// q - Delta = Delta*t + r_t(q) - Delta
             /// = Delta*(t-1) + r_t(q)
             /// so multiplying the message by Delta is not enough and requires also an
-            /// addition of r_t(q). This is precisely the upper_half_increment. Note that
+            /// addition of r_t(q). This is precisely the UpperHalfIncrement. Note that
             /// this operation is only done for negative message coefficients, i.e. those
             /// that exceed PlainUpperHalfThreshold.
             /// </summary>
@@ -312,9 +310,9 @@ namespace Microsoft.Research.SEAL
             }
 
             /// <summary>
-            /// Returns a shared_ptr to the context data corresponding to the next parameters
-            /// in the modulus switching chain. If the current data is the last one in the
-            /// chain, then the result is nullptr.
+            /// Returns the context data corresponding to the next parameters in the modulus 
+            /// switching chain. If the current data is the last one in the chain, then the 
+            /// result is nullptr.
             /// </summary>
             public ContextData NextContextData
             {

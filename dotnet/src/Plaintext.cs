@@ -33,7 +33,7 @@ namespace Microsoft.Research.SEAL
     /// primes in the coefficient modulus. Thus, the size of the allocation that
     /// is needed is the size of the coefficient modulus (number of primes) times
     /// the degree of the polynomial modulus. In addition, a valid CKKS plaintext
-    /// will also store the parms_id for the corresponding encryption parameters.
+    /// will also store the ParmsId for the corresponding encryption parameters.
     /// </para>
     /// <para>
     /// Thread Safety
@@ -66,7 +66,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="coeffCount">The number of (zeroed) coefficients in the
         /// plaintext polynomial</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentException">if coeff_count is negative</exception>
+        /// <exception cref="ArgumentException">if coeffCount is negative</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public Plaintext(ulong coeffCount, MemoryPoolHandle pool = null)
         {
@@ -85,8 +85,8 @@ namespace Microsoft.Research.SEAL
         /// <param name="coeffCount">The number of (zeroed) coefficients in the
         /// plaintext polynomial</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentException">if capacity is less than coeff_count</exception>
-        /// <exception cref="ArgumentException">if coeff_count is negative</exception>
+        /// <exception cref="ArgumentException">if capacity is less than coeffCount</exception>
+        /// <exception cref="ArgumentException">if coeffCount is negative</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public Plaintext(ulong capacity, ulong coeffCount,
                     MemoryPoolHandle pool = null)
@@ -103,8 +103,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <remarks>
         /// The string description of the polynomial must adhere to the format
-        /// returned by to_string(),
-        /// which is of the form "7FFx^3 + 1x^1 + 3" and summarized by the following
+        /// returned by ToString(), which is of the form "7FFx^3 + 1x^1 + 3" 
+        /// and summarized by the following
         /// rules:
         /// 1. Terms are listed in order of strictly decreasing exponent
         /// 2. Coefficient values are non-negative and in hexadecimal format (upper
@@ -123,7 +123,7 @@ namespace Microsoft.Research.SEAL
         /// polynomial</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if hexPoly is null</exception>
-        /// <exception cref="ArgumentException">if hex_poly does not adhere to the expected
+        /// <exception cref="ArgumentException">if hexPoly does not adhere to the expected
         /// format</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public Plaintext(string hexPoly, MemoryPoolHandle pool = null)
@@ -270,8 +270,8 @@ namespace Microsoft.Research.SEAL
         /// 
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
         /// <param name="length">The number of coefficients to set to zero</param>
-        /// <exception cref="ArgumentOutOfRangeException">if start_coeff is not within [0, CoeffCount)</exception>
-        /// <exception cref="ArgumentOutOfRangeException">if length is negative or start_coeff + length is not within [0, CoeffCount)</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if length is negative or startCoeff + length is not within [0, CoeffCount)</exception>
         /// */
         public void SetZero(int startCoeff, int length)
         {
@@ -297,7 +297,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// 
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
-        /// <exception cref="ArgumentOutOfRangeException">if start_coeff is not within [0, CoeffCount)</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
         public void SetZero(int startCoeff)
         {
             if (startCoeff < 0)
@@ -595,7 +595,8 @@ namespace Microsoft.Research.SEAL
         /// Returns a copy of parmsId. The parmsId must remain zero
         /// unless the plaintext polynomial is in NTT form.
         /// </summary>
-        /// <seealso cref="EncryptionParameters">see EncryptionParameters for more information about parms_id.</seealso>
+        /// <seealso cref="EncryptionParameters">see EncryptionParameters for more 
+        /// information about parmsId.</seealso>
         public ParmsId ParmsId
         {
             get

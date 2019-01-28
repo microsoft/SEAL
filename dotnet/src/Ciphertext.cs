@@ -16,8 +16,8 @@ namespace Microsoft.Research.SEAL
     /// not meant to be modified directly by the user, but is instead operated 
     /// on by functions in the Evaluator class. The size of the backing array of 
     /// a ciphertext depends on the encryption parameters and the size of the 
-    /// ciphertext (at least 2). If the degree of the poly_modulus encryption 
-    /// parameter is N, and the number of primes in the coeff_modulus encryption 
+    /// ciphertext (at least 2). If the degree of the PolyModulus encryption 
+    /// parameter is N, and the number of primes in the CoeffModulus encryption 
     /// parameter is K, then the ciphertext backing array requires precisely 
     /// 8*N*K*size bytes of memory. A ciphertext also carries with it the 
     /// parmsId of its associated encryption parameters, which is used to check 
@@ -122,7 +122,7 @@ namespace Microsoft.Research.SEAL
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
         /// parameters</exception>
-        /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
+        /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public Ciphertext(SEALContext context, 
                     ParmsId parmsId, ulong sizeCapacity,
@@ -178,7 +178,7 @@ namespace Microsoft.Research.SEAL
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
         /// parameters</exception>
-        /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
+        /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
         public void Reserve(SEALContext context,
                     ParmsId parmsId, ulong sizeCapacity)
         {
@@ -201,7 +201,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if context is null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
+        /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
         public void Reserve(SEALContext context,
                     ulong sizeCapacity)
         {
@@ -217,7 +217,7 @@ namespace Microsoft.Research.SEAL
         /// determined by the current encryption parameters.
         /// </summary>
         /// <param name="sizeCapacity">The capacity</param>
-        /// <exception cref="ArgumentException">if size_capacity is less than 2 or too large</exception>
+        /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
         public void Reserve(ulong sizeCapacity)
         {
             NativeMethods.Ciphertext_Reserve(NativePtr, sizeCapacity);
@@ -338,7 +338,7 @@ namespace Microsoft.Research.SEAL
         /// the ciphertext contains size*N*K coefficients. Thus, the index has a range of [0, size*N*K).
         /// </summary>
         /// <param name="coeffIndex">The index of the coefficient</param>
-        /// <exception cref="IndexOutOfRangeException">if coeff_index is out of range</exception>
+        /// <exception cref="IndexOutOfRangeException">if coeffIndex is out of range</exception>
         public ulong this[ulong coeffIndex]
         {
             get
@@ -514,6 +514,19 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(context));
 
             NativeMethods.Ciphertext_IsMetadataValidFor(NativePtr, context.NativePtr, out bool result);
+            return result;
+        }
+
+        /// <summary>
+        /// Check whether the current ciphertext is transparent, i.e. does not require 
+        /// a secret key to decrypt. In typical security models such transparent 
+        /// ciphertexts would not be considered to be valid. Starting from the second 
+        /// polynomial in the current ciphertext, this function returns true if all 
+        /// following coefficients are identically zero. Otherwise, returns false.
+        /// </summary>
+        public bool IsTransparent()
+        {
+            NativeMethods.Ciphertext_IsTransparent(NativePtr, out bool result);
             return result;
         }
 

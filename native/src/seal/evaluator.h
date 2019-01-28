@@ -731,11 +731,8 @@ namespace seal
         }
 
         /**
-        Adds a ciphertext and a plaintext. This function adds a plaintext to 
-        a ciphertext. For the operation to be valid, the plaintext must have less 
-        than degree(poly_modulus) many non-zero coefficients, and each coefficient 
-        must be less than the plaintext modulus, i.e. the plaintext must be a valid 
-        plaintext under the current encryption parameters.
+        Adds a ciphertext and a plaintext. The plaintext must be valid for the current 
+        encryption parameters.
 
         @param[in] encrypted The ciphertext to add
         @param[in] plain The plaintext to add
@@ -747,12 +744,9 @@ namespace seal
         void add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain);
 
         /**
-        Adds a ciphertext and a plaintext. This function adds a plaintext to 
-        a ciphertext and stores the result in the destination parameter. For the 
-        operation to be valid, the plaintext must have less than degree(poly_modulus) 
-        many non-zero coefficients, and each coefficient must be less than the 
-        plaintext modulus, i.e. the plaintext must be a valid plaintext under the 
-        current encryption parameters.
+        Adds a ciphertext and a plaintext. This function adds a ciphertext and 
+        a plaintext and stores the result in the destination parameter. The plaintext 
+        must be valid for the current encryption parameters. 
 
         @param[in] encrypted The ciphertext to add
         @param[in] plain The plaintext to add
@@ -770,11 +764,8 @@ namespace seal
         }
 
         /**
-        Subtracts a plaintext from a ciphertext. This function subtracts a plaintext 
-        from a ciphertext. For the operation to be valid, the plaintext must have 
-        less than degree(poly_modulus) many non-zero coefficients, and each coefficient 
-        must be less than the plaintext modulus, i.e. the plaintext must be a valid 
-        plaintext under the current encryption parameters.
+        Subtracts a plaintext from a ciphertext. The plaintext must be valid for the 
+        current encryption parameters.
 
         @param[in] encrypted The ciphertext to subtract from
         @param[in] plain The plaintext to subtract
@@ -787,11 +778,8 @@ namespace seal
 
         /**
         Subtracts a plaintext from a ciphertext. This function subtracts a plaintext 
-        from a ciphertext and stores the result in the destination parameter. For 
-        the operation to be valid, the plaintext must have less than degree(poly_modulus) 
-        many non-zero coefficients, and each coefficient must be less than the plaintext 
-        modulus, i.e. the plaintext must be a valid plaintext under the current 
-        encryption parameters.
+        from a ciphertext and stores the result in the destination parameter. The 
+        plaintext must be valid for the current encryption parameters. 
 
         @param[in] encrypted The ciphertext to subtract from
         @param[in] plain The plaintext to subtract

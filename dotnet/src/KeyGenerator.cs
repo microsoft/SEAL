@@ -53,7 +53,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="secretKey">A previously generated secret key</param>
         /// <exception cref="ArgumentNullException">if either context or secretKey are null</exception>
         /// <exception cref="ArgumentException">if encryption parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if secret_key or public_key is not valid
+        /// <exception cref="ArgumentException">if secretKey or publicKey is not valid
         /// for encryption parameters</exception>
         public KeyGenerator(SEALContext context, SecretKey secretKey)
         {
@@ -78,7 +78,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="publicKey">A previously generated public key</param>
         /// <exception cref="ArgumentNullException">if either context, secretKey or publicKey are null</exception>
         /// <exception cref="ArgumentException">if encryption parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if secret_key or public_key is not valid 
+        /// <exception cref="ArgumentException">if secretKey or publicKey is not valid 
         /// for encryption parameters</exception>
         public KeyGenerator(SEALContext context, SecretKey secretKey, PublicKey publicKey)
         {

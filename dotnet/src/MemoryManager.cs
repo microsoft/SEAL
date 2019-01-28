@@ -69,7 +69,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Returns a MemoryPoolHandle according to the currently set memory manager 
-        /// profile and prof_opt. The following values for prof_opt have an effect 
+        /// profile and profOpt. The following values for profOpt have an effect 
         /// independent of the current profile:
         /// 
         /// 
@@ -77,8 +77,8 @@ namespace Microsoft.Research.SEAL
         ///     MMProfOpt.ForceGlobal: return MemoryPoolHandle.Global()
         ///     MMProfOpt.ForceThreadLocal: return MemoryPoolHandle.ThreadLocal()
         /// 
-        /// Other values for prof_opt are forwarded to the current profile and, depending 
-        /// on the profile, may or may not have an effect. The value mm_prof_opt::DEFAULT
+        /// Other values for profOpt are forwarded to the current profile and, depending 
+        /// on the profile, may or may not have an effect. The value MMProfOpt.Default
         /// will always invoke a default behavior for the current profile.
         /// </summary>
         /// <param name="profOpt">A MMProfOpt parameter used to provide additional
