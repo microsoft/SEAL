@@ -333,8 +333,7 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                ulong result;
-                NativeMethods.Plaintext_CoeffAt(NativePtr, coeffIndex, out result);
+                NativeMethods.Plaintext_CoeffAt(NativePtr, coeffIndex, out ulong result);
                 return result;
             }
             set

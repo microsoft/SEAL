@@ -84,8 +84,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="System.ArgumentException">if given scheme is not available</exception>
         public EncryptionParameters(SchemeType scheme)
         {
-            IntPtr ptr;
-            NativeMethods.EncParams_Create((int)scheme, out ptr);
+            NativeMethods.EncParams_Create((int)scheme, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -100,8 +99,7 @@ namespace Microsoft.Research.SEAL
             if (null == copy)
                 throw new ArgumentNullException(nameof(copy));
 
-            IntPtr ptr;
-            NativeMethods.EncParams_Create(copy.NativePtr, out ptr);
+            NativeMethods.EncParams_Create(copy.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -112,7 +110,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="ptr">Native encryption parameters</param>
         /// <param name="owned">Whether this instance owns the native pointer</param>
         internal EncryptionParameters(IntPtr ptr, bool owned = true)
-            :base(ptr, owned)
+            : base(ptr, owned)
         {
         }
 
@@ -219,8 +217,7 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                IntPtr ptr;
-                NativeMethods.EncParams_GetPlainModulus(NativePtr, out ptr);
+                NativeMethods.EncParams_GetPlainModulus(NativePtr, out IntPtr ptr);
                 SmallModulus sm = new SmallModulus(ptr, owned: false);
                 return sm;
             }
@@ -311,8 +308,7 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                int scheme;
-                NativeMethods.EncParams_GetScheme(NativePtr, out scheme);
+                NativeMethods.EncParams_GetScheme(NativePtr, out int scheme);
                 return (SchemeType)scheme;
             }
         }

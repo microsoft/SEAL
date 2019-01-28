@@ -97,8 +97,7 @@ namespace Microsoft.Research.SEAL
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
 
-            IntPtr ptr;
-            NativeMethods.Evaluator_Create(context.NativePtr, out ptr);
+            NativeMethods.Evaluator_Create(context.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 

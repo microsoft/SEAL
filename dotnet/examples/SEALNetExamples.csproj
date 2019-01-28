@@ -9,6 +9,14 @@
     <Copyright>Microsoft Corporation 2019</Copyright>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="../src/SEALNet.csproj" />
   </ItemGroup>

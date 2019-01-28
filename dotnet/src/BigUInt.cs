@@ -208,8 +208,7 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                bool isAlias;
-                NativeMethods.BigUInt_IsAlias(NativePtr, out isAlias);
+                NativeMethods.BigUInt_IsAlias(NativePtr, out bool isAlias);
                 return isAlias;
             }
         }
@@ -221,8 +220,7 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                int bitCount;
-                NativeMethods.BigUInt_BitCount(NativePtr, out bitCount);
+                NativeMethods.BigUInt_BitCount(NativePtr, out int bitCount);
                 return bitCount;
             }
         }
@@ -267,8 +265,7 @@ namespace Microsoft.Research.SEAL
                 if (index < 0 || index >= (int)ByteCount)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
-                byte result;
-                NativeMethods.BigUInt_Get(NativePtr, index, out result);
+                NativeMethods.BigUInt_Get(NativePtr, index, out byte result);
                 return result;
             }
             set
@@ -297,8 +294,7 @@ namespace Microsoft.Research.SEAL
             if (index < 0 || index >= (int)UInt64Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
-            ulong result;
-            NativeMethods.BigUInt_GetU64(NativePtr, index, out result);
+            NativeMethods.BigUInt_GetU64(NativePtr, index, out ulong result);
             return result;
         }
 
@@ -309,8 +305,7 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                bool isZero;
-                NativeMethods.BigUInt_IsZero(NativePtr, out isZero);
+                NativeMethods.BigUInt_IsZero(NativePtr, out bool isZero);
                 return isZero;
             }
         }
@@ -322,8 +317,7 @@ namespace Microsoft.Research.SEAL
         /// <returns>Number of significant bits for the BigUInt.</returns>
         public int GetSignificantBitCount()
         {
-            int result;
-            NativeMethods.BigUInt_GetSignificantBitCount(NativePtr, out result);
+            NativeMethods.BigUInt_GetSignificantBitCount(NativePtr, out int result);
             return result;
         }
 
@@ -509,8 +503,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="compare">The value to compare against</param>
         public int CompareTo(ulong compare)
         {
-            int result;
-            NativeMethods.BigUInt_CompareTo(NativePtr, compare, out result);
+            NativeMethods.BigUInt_CompareTo(NativePtr, compare, out int result);
             return result;
         }
 
@@ -538,8 +531,7 @@ namespace Microsoft.Research.SEAL
             if (remainder.IsAlias)
                 throw new InvalidOperationException("remainder is an alias");
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_DivideRemainder(NativePtr, operand2.NativePtr, remainder.NativePtr, out resultptr);
+            NativeMethods.BigUInt_DivideRemainder(NativePtr, operand2.NativePtr, remainder.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -567,8 +559,7 @@ namespace Microsoft.Research.SEAL
             if (remainder.IsAlias)
                 throw new InvalidOperationException("remainder is an alias");
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_DivideRemainder(NativePtr, operand2, remainder.NativePtr, out resultptr);
+            NativeMethods.BigUInt_DivideRemainder(NativePtr, operand2, remainder.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -589,8 +580,7 @@ namespace Microsoft.Research.SEAL
             if (null == modulus)
                 throw new ArgumentNullException(nameof(modulus));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus.NativePtr, out resultptr);
+            NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus.NativePtr, out IntPtr resultptr);
 
             BigUInt result = new BigUInt(resultptr);
             return result;
@@ -608,8 +598,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="System.ArgumentException">If the BigUInt value and modulus are not co-prime</exception>
         public BigUInt ModuloInvert(ulong modulus)
         {
-            IntPtr resultptr;
-            NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus, out resultptr);
+            NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus, out IntPtr resultptr);
 
             BigUInt result = new BigUInt(resultptr);
             return result;
@@ -639,8 +628,7 @@ namespace Microsoft.Research.SEAL
             if (inverse.IsAlias)
                 throw new InvalidOperationException("inverse is an alias");
 
-            bool result;
-            NativeMethods.BigUInt_TryModuloInvert(NativePtr, modulus.NativePtr, inverse.NativePtr, out result);
+            NativeMethods.BigUInt_TryModuloInvert(NativePtr, modulus.NativePtr, inverse.NativePtr, out bool result);
             return result;
         }
 
@@ -666,8 +654,7 @@ namespace Microsoft.Research.SEAL
             if (inverse.IsAlias)
                 throw new InvalidOperationException("inverse is an alias");
 
-            bool result;
-            NativeMethods.BigUInt_TryModuloInvert(NativePtr, modulus, inverse.NativePtr, out result);
+            NativeMethods.BigUInt_TryModuloInvert(NativePtr, modulus, inverse.NativePtr, out bool result);
             return result;
         }
 
@@ -731,8 +718,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand)
                 throw new ArgumentNullException(nameof(operand));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorNeg(operand.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorNeg(operand.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -749,8 +735,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand)
                 throw new ArgumentNullException(nameof(operand));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorTilde(operand.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorTilde(operand.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -770,8 +755,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand)
                 throw new ArgumentNullException(nameof(operand));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorPlus(operand.NativePtr, operand: 1ul, result: out resultptr);
+            NativeMethods.BigUInt_OperatorPlus(operand.NativePtr, operand: 1ul, result: out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -788,8 +772,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand)
                 throw new ArgumentNullException(nameof(operand));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorMinus(operand.NativePtr, operand: 1ul, result: out resultptr);
+            NativeMethods.BigUInt_OperatorMinus(operand.NativePtr, operand: 1ul, result: out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -810,8 +793,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand2)
                 throw new ArgumentNullException(nameof(operand2));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorPlus(operand1.NativePtr, operand2.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorPlus(operand1.NativePtr, operand2.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -830,8 +812,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand1)
                 throw new ArgumentNullException(nameof(operand1));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorPlus(operand1.NativePtr, operand2, out resultptr);
+            NativeMethods.BigUInt_OperatorPlus(operand1.NativePtr, operand2, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -852,8 +833,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand2)
                 throw new ArgumentNullException(nameof(operand2));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorMinus(operand1.NativePtr, operand2.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorMinus(operand1.NativePtr, operand2.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -872,8 +852,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand1)
                 throw new ArgumentNullException(nameof(operand1));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorMinus(operand1.NativePtr, operand2, out resultptr);
+            NativeMethods.BigUInt_OperatorMinus(operand1.NativePtr, operand2, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -894,8 +873,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand2)
                 throw new ArgumentNullException(nameof(operand2));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorMult(operand1.NativePtr, operand2.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorMult(operand1.NativePtr, operand2.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -914,8 +892,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand1)
                 throw new ArgumentNullException(nameof(operand1));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorMult(operand1.NativePtr, operand2, out resultptr);
+            NativeMethods.BigUInt_OperatorMult(operand1.NativePtr, operand2, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -939,8 +916,7 @@ namespace Microsoft.Research.SEAL
             if (operand2.IsZero)
                 throw new ArgumentException("operand2 is zero");
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorDiv(operand1.NativePtr, operand2.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorDiv(operand1.NativePtr, operand2.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -962,8 +938,7 @@ namespace Microsoft.Research.SEAL
             if (0 == operand2)
                 throw new ArgumentException("operand2 is zero");
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorDiv(operand1.NativePtr, operand2, out resultptr);
+            NativeMethods.BigUInt_OperatorDiv(operand1.NativePtr, operand2, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -984,8 +959,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand2)
                 throw new ArgumentNullException(nameof(operand2));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorXor(operand1.NativePtr, operand2.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorXor(operand1.NativePtr, operand2.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -1004,8 +978,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand1)
                 throw new ArgumentNullException(nameof(operand1));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorXor(operand1.NativePtr, operand2, out resultptr);
+            NativeMethods.BigUInt_OperatorXor(operand1.NativePtr, operand2, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -1026,8 +999,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand2)
                 throw new ArgumentNullException(nameof(operand2));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorAnd(operand1.NativePtr, operand2.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorAnd(operand1.NativePtr, operand2.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -1046,8 +1018,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand1)
                 throw new ArgumentNullException(nameof(operand1));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorAnd(operand1.NativePtr, operand2, out resultptr);
+            NativeMethods.BigUInt_OperatorAnd(operand1.NativePtr, operand2, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -1068,8 +1039,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand2)
                 throw new ArgumentNullException(nameof(operand2));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorOr(operand1.NativePtr, operand2.NativePtr, out resultptr);
+            NativeMethods.BigUInt_OperatorOr(operand1.NativePtr, operand2.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -1088,8 +1058,7 @@ namespace Microsoft.Research.SEAL
             if (null == operand1)
                 throw new ArgumentNullException(nameof(operand1));
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorOr(operand1.NativePtr, operand2, out resultptr);
+            NativeMethods.BigUInt_OperatorOr(operand1.NativePtr, operand2, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -1111,8 +1080,7 @@ namespace Microsoft.Research.SEAL
             if (shift < 0)
                 throw new ArgumentException("shift is negative");
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorShiftLeft(operand1.NativePtr, shift, out resultptr);
+            NativeMethods.BigUInt_OperatorShiftLeft(operand1.NativePtr, shift, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -1134,8 +1102,7 @@ namespace Microsoft.Research.SEAL
             if (shift < 0)
                 throw new ArgumentException("shift is negative");
 
-            IntPtr resultptr;
-            NativeMethods.BigUInt_OperatorShiftRight(operand1.NativePtr, shift, out resultptr);
+            NativeMethods.BigUInt_OperatorShiftRight(operand1.NativePtr, shift, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
@@ -1151,8 +1118,7 @@ namespace Microsoft.Research.SEAL
             if (null == value)
                 throw new ArgumentNullException(nameof(value));
 
-            double result;
-            NativeMethods.BigUInt_ToDouble(value.NativePtr, out result);
+            NativeMethods.BigUInt_ToDouble(value.NativePtr, out double result);
             return result;
         }
 
@@ -1254,8 +1220,7 @@ namespace Microsoft.Research.SEAL
             if (null == compare)
                 return 1;
 
-            int result;
-            NativeMethods.BigUInt_CompareTo(NativePtr, compare.NativePtr, out result);
+            NativeMethods.BigUInt_CompareTo(NativePtr, compare.NativePtr, out int result);
             return result;
         }
 
@@ -1274,8 +1239,7 @@ namespace Microsoft.Research.SEAL
             if (null == compare)
                 return false;
 
-            bool result;
-            NativeMethods.BigUInt_Equals(NativePtr, compare.NativePtr, out result);
+            NativeMethods.BigUInt_Equals(NativePtr, compare.NativePtr, out bool result);
             return result;
         }
 

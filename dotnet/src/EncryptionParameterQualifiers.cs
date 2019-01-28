@@ -55,8 +55,7 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                bool result;
-                NativeMethods.EPQ_ParametersSet(NativePtr, out result);
+                NativeMethods.EPQ_ParametersSet(NativePtr, out bool result);
                 return result;
             }
         }

@@ -16,31 +16,36 @@ set INCLUDEPATH=%~3
 echo Configuring SEAL through CMake
 
 if not exist "%VSDEVENVDIR%" (
-    rem We may be running in the CI server. Try a standard VS path.
-    echo Did not find VS at provided location: "%VSDEVENVDIR%".
-    echo Trying standard location.
-    set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE"
+	rem We may be running in the CI server. Try a standard VS path.
+	echo Did not find VS at provided location: "%VSDEVENVDIR%".
+	echo Trying standard location.
+	set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE"
 )
 
 set VSDEVENVDIR=%VSDEVENVDIR:"=%
 set CMAKEPATH=%VSDEVENVDIR%\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe
 
 if not exist "%CMAKEPATH%" (
-    echo **************************************************************************************************************
-    echo Did not find CMake at "%CMAKEPATH%"
-    echo Please make sure "Visual C++ Tools for CMake" are enabled in the "Desktop development with C++" workload.
-    echo **************************************************************************************************************
-    exit 1
+	echo **************************************************************************************************************
+	echo Did not find CMake at "%CMAKEPATH%"
+	echo Please make sure "Visual C++ Tools for CMake" are enabled in the "Desktop development with C++" workload.
+	echo **************************************************************************************************************
+	exit 1
 )
 
 echo Found CMake at %CMAKEPATH%
 
 cd %~dp0\..\..\src
 if not exist ".config" (
-    mkdir .config
+	mkdir .config
 )
 cd .config
 
 echo Running CMake configuration in %cd%
 
-"%CMAKEPATH%" .. -G "Visual Studio 15 2017" -A x64 -DALLOW_COMMAND_LINE_BUILD=1 -DCMAKE_BUILD_TYPE=%PROJECTCONFIGURATION% -DMSGSL_INCLUDE_DIR="%INCLUDEPATH%"
+"%CMAKEPATH%" .. -G "Visual Studio 15 2017"		^
+	-A x64										^
+	-DALLOW_COMMAND_LINE_BUILD=1				^
+	-DCMAKE_BUILD_TYPE=%PROJECTCONFIGURATION%	^
+	-DSEAL_LIB_BUILD_TYPE="Static_PIC"			^
+	-DMSGSL_INCLUDE_DIR="%INCLUDEPATH%"
