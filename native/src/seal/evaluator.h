@@ -114,6 +114,7 @@ namespace seal
         @param[out] destination The ciphertext to overwrite with the negated result
         @throws std::invalid_argument if encrypted is not valid for the encryption 
         parameters
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void negate(const Ciphertext &encrypted, Ciphertext &destination)
         {
@@ -132,6 +133,7 @@ namespace seal
         @throws std::invalid_argument if encrypted1 and encrypted2 are in different
         NTT forms
         @throws std::invalid_argument if encrypted1 and encrypted2 have different scale
+        @throws std::logic_error if result ciphertext is transparent
         */
         void add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2);
 
@@ -147,6 +149,7 @@ namespace seal
         @throws std::invalid_argument if encrypted1 and encrypted2 are in different
         NTT forms
         @throws std::invalid_argument if encrypted1 and encrypted2 have different scale
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void add(const Ciphertext &encrypted1, const Ciphertext &encrypted2,
             Ciphertext &destination)
@@ -174,6 +177,7 @@ namespace seal
         @throws std::invalid_argument if encrypteds are in different NTT forms
         @throws std::invalid_argument if encrypteds have different scale
         @throws std::invalid_argument if destination is one of encrypteds 
+        @throws std::logic_error if result ciphertext is transparent
         */
         void add_many(const std::vector<Ciphertext> &encrypteds, Ciphertext &destination);
 
@@ -188,6 +192,7 @@ namespace seal
         @throws std::invalid_argument if encrypted1 and encrypted2 are in different
         NTT forms
         @throws std::invalid_argument if encrypted1 and encrypted2 have different scale
+        @throws std::logic_error if result ciphertext is transparent
         */
         void sub_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2);
 
@@ -203,6 +208,7 @@ namespace seal
         @throws std::invalid_argument if encrypted1 and encrypted2 are in different
         NTT forms
         @throws std::invalid_argument if encrypted1 and encrypted2 have different scale
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void sub(const Ciphertext &encrypted1, const Ciphertext &encrypted2,
             Ciphertext &destination)
@@ -235,6 +241,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the output scale
         is too large for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void multiply_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2,
             MemoryPoolHandle pool = MemoryManager::GetPool());
@@ -256,6 +263,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the output scale
         is too large for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void multiply(const Ciphertext &encrypted1, 
             const Ciphertext &encrypted2, Ciphertext &destination, 
@@ -285,6 +293,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the output scale
         is too large for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void square_inplace(Ciphertext &encrypted, 
             MemoryPoolHandle pool = MemoryManager::GetPool());
@@ -304,6 +313,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the output scale
         is too large for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void square(const Ciphertext &encrypted, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
@@ -329,6 +339,7 @@ namespace seal
         parameters in the current context
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void relinearize_inplace(Ciphertext &encrypted, const RelinKeys &relin_keys,
             MemoryPoolHandle pool = MemoryManager::GetPool())
@@ -354,6 +365,7 @@ namespace seal
         parameters in the current context
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void relinearize(const Ciphertext &encrypted,
             const RelinKeys &relin_keys, Ciphertext &destination,
@@ -379,6 +391,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the scale is too 
         large for the new encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void mod_switch_to_next(const Ciphertext &encrypted, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
@@ -397,6 +410,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the scale is too
         large for the new encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void mod_switch_to_next_inplace(Ciphertext &encrypted, 
             MemoryPoolHandle pool = MemoryManager::GetPool())
@@ -463,6 +477,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the scale is too
         large for the new encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void mod_switch_to_inplace(Ciphertext &encrypted, parms_id_type parms_id,
             MemoryPoolHandle pool = MemoryManager::GetPool());
@@ -485,6 +500,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the scale is too
         large for the new encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void mod_switch_to(const Ciphertext &encrypted, 
             parms_id_type parms_id, Ciphertext &destination, 
@@ -549,6 +565,7 @@ namespace seal
         @throws std::invalid_argument if encrypted is already at lowest level
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void rescale_to_next(const Ciphertext &encrypted, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
@@ -567,6 +584,7 @@ namespace seal
         @throws std::invalid_argument if encrypted is already at lowest level
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void rescale_to_next_inplace(Ciphertext &encrypted, 
             MemoryPoolHandle pool = MemoryManager::GetPool())
@@ -591,6 +609,7 @@ namespace seal
         than the parameters corresponding to parms_id
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void rescale_to_inplace(Ciphertext &encrypted, parms_id_type parms_id,
             MemoryPoolHandle pool = MemoryManager::GetPool());
@@ -614,6 +633,7 @@ namespace seal
         than the parameters corresponding to parms_id
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void rescale_to(const Ciphertext &encrypted, 
             parms_id_type parms_id, Ciphertext &destination, 
@@ -645,6 +665,7 @@ namespace seal
         is too large for the encryption parameters
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void multiply_many(std::vector<Ciphertext> &encrypteds,
             const RelinKeys &relin_keys, Ciphertext &destination,
@@ -671,6 +692,7 @@ namespace seal
         @throws std::invalid_argument if exponent is zero
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void exponentiate_inplace(Ciphertext &encrypted, 
             std::uint64_t exponent, const RelinKeys &relin_keys, 
@@ -698,6 +720,7 @@ namespace seal
         @throws std::invalid_argument if exponent is zero
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void exponentiate(const Ciphertext &encrypted, std::uint64_t exponent,
             const RelinKeys &relin_keys, Ciphertext &destination,
@@ -719,6 +742,7 @@ namespace seal
         @throws std::invalid_argument if encrypted or plain is not valid for the 
         encryption parameters
         @throws std::invalid_argument if encrypted or plain is in NTT form
+        @throws std::logic_error if result ciphertext is transparent
         */
         void add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain);
 
@@ -736,6 +760,7 @@ namespace seal
         @throws std::invalid_argument if encrypted or plain is not valid for the 
         encryption parameters
         @throws std::invalid_argument if encrypted or plain is in NTT form
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void add_plain(const Ciphertext &encrypted, const Plaintext &plain,
             Ciphertext &destination)
@@ -756,6 +781,7 @@ namespace seal
         @throws std::invalid_argument if encrypted or plain is not valid for the 
         encryption parameters
         @throws std::invalid_argument if encrypted or plain is in NTT form
+        @throws std::logic_error if result ciphertext is transparent
         */
         void sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain);
 
@@ -773,6 +799,7 @@ namespace seal
         @throws std::invalid_argument if encrypted or plain is not valid for the 
         encryption parameters
         @throws std::invalid_argument if encrypted or plain is in NTT form
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void sub_plain(const Ciphertext &encrypted, const Plaintext &plain,
             Ciphertext &destination)
@@ -782,13 +809,10 @@ namespace seal
         }
 
         /**
-        Multiplies a ciphertext with a plaintext. This function multiplies a ciphertext 
-        with a plaintext. For the operation to be valid, the plaintext must have 
-        less than degree(poly_modulus) many non-zero coefficients, and each coefficient 
-        must be less than the plaintext modulus, i.e. the plaintext must be a valid 
-        plaintext under the current encryption parameters. Moreover, the plaintext 
-        cannot be identially 0. Dynamic memory allocations in the process are allocated 
-        from the memory pool pointed to by the given MemoryPoolHandle.
+        Multiplies a ciphertext with a plaintext. The plaintext must be valid for the 
+        current encryption parameters, and cannot be identially 0. Dynamic memory 
+        allocations in the process are allocated from the memory pool pointed to by 
+        the given MemoryPoolHandle.
 
         @param[in] encrypted The ciphertext to multiply
         @param[in] plain The plaintext to multiply
@@ -796,10 +820,10 @@ namespace seal
         @throws std::invalid_argument if the encrypted or plain is not valid for 
         the encryption parameters
         @throws std::invalid_argument if encrypted and plain are in different NTT forms
-        @throws std::invalid_argument if plain is zero
         @throws std::invalid_argument if, when using scheme_type::CKKS, the output 
         scale is too large for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void multiply_plain_inplace(Ciphertext &encrypted, const Plaintext &plain,
             MemoryPoolHandle pool = MemoryManager::GetPool());
@@ -807,12 +831,9 @@ namespace seal
         /**
         Multiplies a ciphertext with a plaintext. This function multiplies 
         a ciphertext with a plaintext and stores the result in the destination 
-        parameter. For the operation to be valid, the plaintext must have less 
-        than degree (poly_modulus) many non-zero coefficients, and each coefficient 
-        must be less than the plaintext modulus, i.e. the plaintext must be a valid 
-        plaintext under the current encryption parameters. Moreover, the plaintext 
-        cannot be identially 0. Dynamic memory allocations in the process are allocated 
-        from the memory pool pointed to by the given MemoryPoolHandle.
+        parameter. The plaintext must be a valid for the current encryption parameters, 
+        and cannot be identially 0. Dynamic memory allocations in the process are 
+        allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] encrypted The ciphertext to multiply
         @param[in] plain The plaintext to multiply
@@ -825,6 +846,7 @@ namespace seal
         @throws std::invalid_argument if, when using scheme_type::CKKS, the output 
         scale is too large for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void multiply_plain(const Ciphertext &encrypted, 
             const Plaintext &plain, Ciphertext &destination, 
@@ -895,6 +917,7 @@ namespace seal
         @throws std::invalid_argument if encrypted is not valid for the encryption 
         parameters
         @throws std::invalid_argument if encrypted is already in NTT form
+        @throws std::logic_error if result ciphertext is transparent
         */
         void transform_to_ntt_inplace(Ciphertext &encrypted);
 
@@ -908,6 +931,7 @@ namespace seal
         @throws std::invalid_argument if encrypted is not valid for the encryption 
         parameters
         @throws std::invalid_argument if encrypted is already in NTT form
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void transform_to_ntt(const Ciphertext &encrypted, 
             Ciphertext &destination_ntt)
@@ -925,6 +949,7 @@ namespace seal
         @throws std::invalid_argument if encrypted_ntt is not valid for the encryption 
         parameters
         @throws std::invalid_argument if encrypted_ntt is not in NTT form
+        @throws std::logic_error if result ciphertext is transparent
         */
         void transform_from_ntt_inplace(Ciphertext &encrypted_ntt);
 
@@ -938,6 +963,7 @@ namespace seal
         @throws std::invalid_argument if encrypted_ntt is not valid for the encryption 
         parameters
         @throws std::invalid_argument if encrypted_ntt is not in NTT form
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void transform_from_ntt(const Ciphertext &encrypted_ntt, 
             Ciphertext &destination)
@@ -975,6 +1001,7 @@ namespace seal
         @throws std::invalid_argument if the Galois element is not valid
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         void apply_galois_inplace(Ciphertext &encrypted, 
             std::uint64_t galois_elt, const GaloisKeys &galois_keys, 
@@ -1010,6 +1037,7 @@ namespace seal
         @throws std::invalid_argument if the Galois element is not valid
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void apply_galois(const Ciphertext &encrypted, 
             std::uint64_t galois_elt, const GaloisKeys &galois_keys, 
@@ -1045,6 +1073,7 @@ namespace seal
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_rows_inplace(Ciphertext &encrypted, 
             int steps, const GaloisKeys &galois_keys, 
@@ -1083,6 +1112,7 @@ namespace seal
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_rows(const Ciphertext &encrypted, int steps,
             const GaloisKeys &galois_keys, Ciphertext &destination,
@@ -1115,6 +1145,7 @@ namespace seal
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_columns_inplace(Ciphertext &encrypted, 
             const GaloisKeys &galois_keys, 
@@ -1150,6 +1181,7 @@ namespace seal
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_columns(const Ciphertext &encrypted,
             const GaloisKeys &galois_keys, Ciphertext &destination,
@@ -1182,6 +1214,7 @@ namespace seal
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_vector_inplace(Ciphertext &encrypted, 
             int steps, const GaloisKeys &galois_keys,
@@ -1218,6 +1251,7 @@ namespace seal
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_vector(const Ciphertext &encrypted, int steps,
             const GaloisKeys &galois_keys, Ciphertext &destination,
@@ -1246,6 +1280,7 @@ namespace seal
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void complex_conjugate_inplace(Ciphertext &encrypted, 
             const GaloisKeys &galois_keys, 
@@ -1278,6 +1313,7 @@ namespace seal
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
         inline void complex_conjugate(const Ciphertext &encrypted,
             const GaloisKeys &galois_keys, Ciphertext &destination,

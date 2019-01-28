@@ -523,17 +523,17 @@ namespace seal
         bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
 
         /**
-        Check whether the current ciphertext is transparent,
-        i.e. does not require a secretkey to decrypt.
-        Starting from the second polynomials in the current ciphertext, if all
-        coefficients equal to zero, this function returns true.
-        Otherwise, returns false.
+        Check whether the current ciphertext is transparent, i.e. does not require 
+        a secret key to decrypt. In typical security models such transparent 
+        ciphertexts would not be considered to be valid. Starting from the second 
+        polynomial in the current ciphertext, this function returns true if all 
+        following coefficients are identically zero. Otherwise, returns false.
         */
         inline bool is_transparent() const
         {
-            return (size_capacity() == 1) ||
-                std::all_of(data(1), data_.cend(),
-                    util::is_zero<ct_coeff_type>);
+            return (!uint64_count() ||
+                (size_ < SEAL_CIPHERTEXT_SIZE_MIN) || 
+                std::all_of(data(1), data_.cend(), util::is_zero<ct_coeff_type>));
         }
 
         /**

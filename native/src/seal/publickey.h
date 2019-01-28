@@ -87,14 +87,14 @@ namespace seal
         */
         inline bool is_valid_for(std::shared_ptr<const SEALContext> context) const noexcept
         {
-            // Verify parameters
-            if (!context || !context->parameters_set())
+            // Check metadata
+            if (!is_metadata_valid_for(context))
             {
                 return false;
             }
-            auto parms_id = context->first_parms_id();
-            return pk_.is_valid_for(std::move(context)) && 
-                pk_.is_ntt_form() && pk_.parms_id() == parms_id;
+
+            // Check the data
+            return pk_.is_valid_for(std::move(context));
         }
 
         /**

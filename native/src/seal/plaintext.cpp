@@ -205,28 +205,20 @@ namespace seal
 
     bool Plaintext::is_valid_for(shared_ptr<const SEALContext> context) const
     {
-        // Verify parameters
-        if (!context || !context->parameters_set())
+        // Check metadata
+        if (!is_metadata_valid_for(context))
         {
             return false;
         }
 
+        // Check the data
         if (is_ntt_form())
         {
             auto context_data_ptr = context->context_data(parms_id_);
-            if (!context_data_ptr)
-            {
-                return false;
-            }
-
             auto &parms = context_data_ptr->parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
             size_t poly_modulus_degree = parms.poly_modulus_degree();
-            if (mul_safe(coeff_modulus.size(), poly_modulus_degree) != data_.size())
-            {
-                return false;
-            }
 
             const pt_coeff_type *ptr = data();
             for (size_t j = 0; j < coeff_mod_count; j++)
@@ -244,17 +236,7 @@ namespace seal
         else
         {
             auto &parms = context->context_data()->parms();
-            if (parms.scheme() != scheme_type::BFV)
-            {
-                return false;
-            }
-
             size_t poly_modulus_degree = parms.poly_modulus_degree();
-            if (data_.size() > poly_modulus_degree)
-            {
-                return false;
-            }
-
             uint64_t modulus = parms.plain_modulus().value(); 
             const pt_coeff_type *ptr = data();
             for (size_t k = 0; k < data_.size(); k++, ptr++)

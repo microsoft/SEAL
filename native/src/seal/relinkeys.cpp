@@ -43,16 +43,13 @@ namespace seal
 
     bool RelinKeys::is_valid_for(shared_ptr<const SEALContext> context) const noexcept
     {
-        // Verify parameters
-        if (!context || !context->parameters_set())
-        {
-            return false;
-        }
-        if (parms_id_ != context->first_parms_id())
+        // Check metadata
+        if (!is_metadata_valid_for(context))
         {
             return false;
         }
 
+        // Check the data
         for (auto &a : keys_)
         {
             for (auto &b : a)

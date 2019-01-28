@@ -132,26 +132,15 @@ namespace seal
 
     bool Ciphertext::is_valid_for(shared_ptr<const SEALContext> context) const noexcept
     {
-        // Verify parameters
-        if (!context || !context->parameters_set())
+        // Check metadata
+        if (!is_metadata_valid_for(context))
         {
             return false;
         }
 
+        // Check the data
         auto context_data_ptr = context->context_data(parms_id_);
-        if (!context_data_ptr)
-        {
-            return false;
-        }
-
         auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
-        size_t poly_modulus_degree = context_data_ptr->parms().poly_modulus_degree();
-        if ((coeff_modulus.size() != coeff_mod_count_) ||
-            (poly_modulus_degree != poly_modulus_degree_))
-        {
-            return false;
-        }
-
         const ct_coeff_type *ptr = data();
         for (size_t i = 0; i < size_; i++)
         {
@@ -171,7 +160,8 @@ namespace seal
         return true;
     }
 
-    bool Ciphertext::is_metadata_valid_for(shared_ptr<const SEALContext> context) const noexcept
+    bool Ciphertext::is_metadata_valid_for(
+        shared_ptr<const SEALContext> context) const noexcept
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -179,16 +169,25 @@ namespace seal
             return false;
         }
 
+        // Are the parameters valid for this ciphertext?
         auto context_data_ptr = context->context_data(parms_id_);
         if (!context_data_ptr)
         {
             return false;
         }
 
+        // Check that the metadata matches
         auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
         size_t poly_modulus_degree = context_data_ptr->parms().poly_modulus_degree();
         if ((coeff_modulus.size() != coeff_mod_count_) ||
             (poly_modulus_degree != poly_modulus_degree_))
+        {
+            return false;
+        }
+
+        // Check that size is either 0 or within right bounds 
+        if ((size_ < SEAL_CIPHERTEXT_SIZE_MIN && size_ != 0) ||
+            size_ > SEAL_CIPHERTEXT_SIZE_MAX)
         {
             return false;
         }
