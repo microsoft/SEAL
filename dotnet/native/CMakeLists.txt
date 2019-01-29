@@ -22,6 +22,27 @@ endif()
 # Link Microsoft SEAL
 target_link_libraries(sealnetnative SEAL::seal)
 
+# For Easier Adding CXX Compiler Flags
+include(CheckCXXCompilerFlag)
+
+function(enable_cxx_compiler_flag_if_supported flag)
+    string(FIND "${CMAKE_CXX_FLAGS}" "${flag}" flag_already_set)
+    if(flag_already_set EQUAL -1)
+        message(STATUS "Adding CXX compiler flag: ${flag} ...")
+        check_cxx_compiler_flag("${flag}" flag_supported)
+        if(flag_supported)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}" PARENT_SCOPE)
+        endif()
+        unset(flag_supported CACHE)
+    endif()
+endfunction()
+
+# enable_cxx_compiler_flag_if_supported("-Wall")
+# enable_cxx_compiler_flag_if_supported("-Wextra")
+# enable_cxx_compiler_flag_if_supported("-Wconversion")
+# enable_cxx_compiler_flag_if_supported("-Wshadow")
+# enable_cxx_compiler_flag_if_supported("-pedantic")
+
 # Add source files to library
 add_subdirectory(sealnet)
 
