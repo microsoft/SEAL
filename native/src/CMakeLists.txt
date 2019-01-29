@@ -73,7 +73,7 @@ if(SEAL_USE_CXX17)
 endif()
 
 # Should we build a shared library?
-set(SEAL_DEFAULT_LIB_BUILD_TYPE "Static")
+set(SEAL_DEFAULT_LIB_BUILD_TYPE "Static_PIC")
 if(NOT SEAL_LIB_BUILD_TYPE)
     set(SEAL_LIB_BUILD_TYPE ${SEAL_DEFAULT_LIB_BUILD_TYPE} CACHE
         STRING "Library build type" FORCE)
