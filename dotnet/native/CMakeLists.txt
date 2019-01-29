@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(SEALNetNative VERSION 3.2.0 LANGUAGES CXX C)
 
-# Library will be in ../../lib
+# Library will be in ../lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../lib)
 
 # Create library but add no source files yet
