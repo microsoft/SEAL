@@ -129,7 +129,7 @@ SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode3(void *thisptr, double value, 
 }
 
 // Single complex value
-SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double real, double imaginary, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double value_re, double value_im, uint64_t *parms_id, double scale, void *destination, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -141,7 +141,7 @@ SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double real, d
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
-    complex<double> input(real, imaginary);
+    complex<double> input(value_re, value_im);
 
     try
     {
@@ -154,8 +154,8 @@ SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double real, d
     }
 }
 
-// Single UInt64 value
-SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode5(void *thisptr, uint64_t value, uint64_t *parms_id, void *destination)
+// Single Int64 value
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode5(void *thisptr, int64_t value, uint64_t *parms_id, void *destination)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);

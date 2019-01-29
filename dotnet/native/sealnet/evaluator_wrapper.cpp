@@ -1,18 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+// STD
+#include <algorithm>
+#include <iterator>
+
 // SEALNet
 #include "sealnet/stdafx.h"
 #include "sealnet/evaluator_wrapper.h"
 #include "sealnet/utilities.h"
 
 // SEAL
+#include "seal/util/common.h"
 #include "seal/evaluator.h"
 #include "seal/context.h"
 
 using namespace std;
 using namespace seal;
 using namespace sealnet;
+using namespace seal::util;
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_Create(void *sealContext, void **evaluator)
 {
@@ -85,7 +91,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Add(void *thisptr, void *encrypted1, vo
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, int count, void **encrypteds, void *destination)
+SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -94,12 +100,8 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, int count, void 
     IfNullRet(destination_ptr, E_POINTER);
 
     Ciphertext* *encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
-    vector<Ciphertext> encrypteds_vec(count);
-
-    for (int i = 0; i < count; i++)
-    {
-        encrypteds_vec[i] = *encrypteds_pp[i];
-    }
+    vector<Ciphertext> encrypteds_vec;
+    copy_n(encrypteds_pp, safe_cast<size_t>(count), back_inserter(encrypteds_vec));
 
     try
     {
@@ -201,7 +203,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Multiply(void *thisptr, void *encrypted
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, int count, void **encrypteds, void *relin_keys, void *destination, void *pool)
+SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -213,12 +215,8 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, int count, 
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     Ciphertext* *encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
-    vector<Ciphertext> encrypteds_vec(count);
-
-    for (int i = 0; i < count; i++)
-    {
-        encrypteds_vec[i] = *encrypteds_pp[i];
-    }
+    vector<Ciphertext> encrypteds_vec;
+    copy_n(encrypteds_pp, safe_cast<size_t>(count), back_inserter(encrypteds_vec));
 
     try
     {

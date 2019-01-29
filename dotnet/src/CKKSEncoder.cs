@@ -311,7 +311,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either parmsId or destionation are null</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
         /// parameters </exception>
-        public void Encode(ulong value, ParmsId parmsId, Plaintext destination)
+        public void Encode(long value, ParmsId parmsId, Plaintext destination)
         {
             if (null == parmsId)
                 throw new ArgumentNullException(nameof(parmsId));
@@ -328,7 +328,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="value">The integer number to encode</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <exception cref="ArgumentNullException">if destination is null</exception>
-        public void Encode(ulong value, Plaintext destination)
+        public void Encode(long value, Plaintext destination)
         {
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));

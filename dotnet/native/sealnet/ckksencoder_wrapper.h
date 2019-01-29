@@ -27,10 +27,10 @@ SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode2(void *thisptr, uint64_t value
 SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode3(void *thisptr, double value, uint64_t *parms_id, double scale, void *destination, void *pool);
 
 // Single complex value
-SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double real, double imaginary, uint64_t *parms_id, double scale, void *destination, void *pool);
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode4(void *thisptr, double value_re, double value_im, uint64_t *parms_id, double scale, void *destination, void *pool);
 
-// Single UInt64 value
-SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode5(void *thisptr, uint64_t value, uint64_t *parms_id, void *destination);
+// Single Int64 value
+SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Encode5(void *thisptr, int64_t value, uint64_t *parms_id, void *destination);
 
 // Array of doubles
 SEALNETNATIVE HRESULT SEALCALL CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_count, double *values, void *pool);

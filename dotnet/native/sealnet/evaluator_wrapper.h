@@ -21,7 +21,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Negate(void *thisptr, void *encrypted, 
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_Add(void *thisptr, void *encrypted1, void *encrypted2, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, int count, void **encrypteds, void *destination);
+SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, void *destination);
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void *destination);
 
@@ -31,7 +31,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_SubPlain(void *thisptr, void *encrypted
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, int count, void **encrypteds, void *relin_keys, void *destination, void *pool);
+SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool);
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool);
 

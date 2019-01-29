@@ -37,11 +37,11 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_UInt64Count(void *thispt, uint64_t *uint6
 
 SEALNETNATIVE HRESULT SEALCALL BigUInt_IsZero(void *thispt, bool *is_zero);
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_Get(void *thispt, int index, uint8_t *value);
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Get(void *thispt, uint64_t index, uint8_t *value);
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_GetU64(void *thispt, int index, uint64_t *value);
+SEALNETNATIVE HRESULT SEALCALL BigUInt_GetU64(void *thispt, uint64_t index, uint64_t *value);
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_Set1(void *thispt, int index, uint8_t value);
+SEALNETNATIVE HRESULT SEALCALL BigUInt_Set1(void *thispt, uint64_t index, uint8_t value);
 
 SEALNETNATIVE HRESULT SEALCALL BigUInt_GetSignificantBitCount(void *thispt, int *significant_bit_count);
 

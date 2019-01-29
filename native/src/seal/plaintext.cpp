@@ -236,7 +236,6 @@ namespace seal
         else
         {
             auto &parms = context->context_data()->parms();
-            size_t poly_modulus_degree = parms.poly_modulus_degree();
             uint64_t modulus = parms.plain_modulus().value(); 
             const pt_coeff_type *ptr = data();
             for (size_t k = 0; k < data_.size(); k++, ptr++)
