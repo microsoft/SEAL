@@ -3,6 +3,7 @@
 
 // STD
 #include <string>
+#include <algorithm>
 
 // SEALNet
 #include "sealnet/stdafx.h"
@@ -281,7 +282,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetParmsId(void *thisptr, uint64_t *par
     IfNullRet(plain, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    memcpy(plain->parms_id().data(), parms_id, sizeof(uint64_t) * plain->parms_id().size());
+    CopyParmsId(parms_id, plain->parms_id());
     return S_OK;
 }
 

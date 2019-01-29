@@ -96,7 +96,7 @@
     <ClInclude Include="sealnet\smallmodulus_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sealnet\encoder_wrapper.h">
+    <ClInclude Include="sealnet\intencoder_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -173,7 +173,7 @@
     <ClCompile Include="sealnet\smallmodulus_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sealnet\encoder_wrapper.cpp">
+    <ClCompile Include="sealnet\intencoder_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

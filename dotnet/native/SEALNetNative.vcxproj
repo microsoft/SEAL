@@ -106,7 +106,7 @@
     <ClInclude Include="sealnet\decryptor_wrapper.h" />
     <ClInclude Include="sealnet\defaultparams_wrapper.h" />
     <ClInclude Include="sealnet\defines.h" />
-    <ClInclude Include="sealnet\encoder_wrapper.h" />
+    <ClInclude Include="sealnet\intencoder_wrapper.h" />
     <ClInclude Include="sealnet\encryptionparameterqualifiers_wrapper.h" />
     <ClInclude Include="sealnet\encryptionparameters_wrapper.h" />
     <ClInclude Include="sealnet\encryptor_wrapper.h" />
@@ -134,7 +134,7 @@
     <ClCompile Include="sealnet\defaultparams_wrapper.cpp" />
     <ClCompile Include="sealnet\dllmain.cpp" />
     <ClCompile Include="sealnet\biguint_wrapper.cpp" />
-    <ClCompile Include="sealnet\encoder_wrapper.cpp" />
+    <ClCompile Include="sealnet\intencoder_wrapper.cpp" />
     <ClCompile Include="sealnet\encryptionparameterqualifiers_wrapper.cpp" />
     <ClCompile Include="sealnet\encryptor_wrapper.cpp" />
     <ClCompile Include="sealnet\evaluator_wrapper.cpp" />

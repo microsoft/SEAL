@@ -3,7 +3,7 @@
 
 // SEALNet
 #include "sealnet/stdafx.h"
-#include "sealnet/encoder_wrapper.h"
+#include "sealnet/intencoder_wrapper.h"
 #include "sealnet/utilities.h"
 
 // SEAL

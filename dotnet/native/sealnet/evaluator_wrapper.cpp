@@ -101,7 +101,12 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, uint64_t count, 
 
     Ciphertext* *encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
     vector<Ciphertext> encrypteds_vec;
-    transform(encrypteds_pp, encrypteds_pp + safe_cast<size_t>(count), back_inserter(encrypteds_vec), [](auto elt){ return *elt; });
+
+    encrypteds_vec.reserve(count);
+    for (uint64_t i = 0; i < count; i++)
+    {
+        encrypteds_vec.emplace_back(*encrypteds_pp[i]);
+    }
 
     try
     {
@@ -216,7 +221,12 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, uint64_t co
 
     Ciphertext* *encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
     vector<Ciphertext> encrypteds_vec;
-    transform(encrypteds_pp, encrypteds_pp + safe_cast<size_t>(count), back_inserter(encrypteds_vec), [](auto elt){ return *elt; });
+
+    encrypteds_vec.reserve(count);
+    for (uint64_t i = 0; i < count; i++)
+    {
+        encrypteds_vec.emplace_back(*encrypteds_pp[i]);
+    }
 
     try
     {

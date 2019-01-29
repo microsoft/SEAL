@@ -269,11 +269,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_ParmsId(void *thisptr, uint64_t *parms
     IfNullRet(cipher, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    for (size_t i = 0; i < cipher->parms_id().size(); i++)
-    {
-        parms_id[i] = cipher->parms_id()[i];
-    }
-
+    CopyParmsId(cipher->parms_id(), parms_id);
     return S_OK;
 }
 
@@ -283,7 +279,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetParmsId(void *thisptr, uint64_t *pa
     IfNullRet(cipher, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    memcpy(cipher->parms_id().data(), parms_id, sizeof(uint64_t) * cipher->parms_id().size());
+    CopyParmsId(parms_id, cipher->parms_id());
     return S_OK;
 }
 
@@ -296,7 +292,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize1(void *thisptr, void *context, 
     IfNullRet(sharedctx.get(), E_POINTER);
 
     parms_id_type parms;
-    memcpy(parms.data(), parms_id, sizeof(uint64_t) * parms.size());
+    CopyParmsId(parms_id, parms);
 
     try
     {
