@@ -1521,7 +1521,7 @@ namespace SEALNetExamples
             result and observe that it has increased. In fact, it is now the square of 
             the original scale (2^60). 
             */
-            Console.WriteLine($"Scale in the square: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Scale in the square: {encrypted.Scale} ({Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
 
             /*
             CKKS supports modulus switching just like the BFV scheme. We can switch
@@ -1660,7 +1660,7 @@ namespace SEALNetExamples
             */
             evaluator.SquareInplace(encrypted);
             evaluator.RelinearizeInplace(encrypted, relinKeys);
-            Console.WriteLine($"Scale in encrypted after squaring: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Scale in encrypted after squaring: {encrypted.Scale} ({Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
             Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
@@ -1689,7 +1689,7 @@ namespace SEALNetExamples
             on the number of primes in CoeffModulus.
             */
             Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
-            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
             Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
@@ -1705,7 +1705,7 @@ namespace SEALNetExamples
             evaluator.RescaleToNextInplace(encrypted);
 
             Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
-            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
             Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
@@ -1723,7 +1723,7 @@ namespace SEALNetExamples
             evaluator.SquareInplace(encrypted);
 
             Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
-            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Log(encrypted.Scale, newBase: 2)} bits)");
+            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
             Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
             Console.WriteLine();
 
@@ -1952,7 +1952,7 @@ namespace SEALNetExamples
             Console.WriteLine($"Modulus chain index for encrypted_result: {context.GetContextData(encryptedResult.ParmsId).ChainIndex}");
             Console.WriteLine("Scale in encryptedResult: {0:0.0000000000} ({1} bits)",
                 encryptedResult.Scale,
-                Math.Log(encryptedResult.Scale, newBase: 2));
+                Math.Ceiling(Math.Log(encryptedResult.Scale, newBase: 2)));
 
             /*
             We decrypt, decode, and print the result.
