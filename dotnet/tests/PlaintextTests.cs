@@ -280,10 +280,7 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => plain.Set((Plaintext)null));
             Assert.ThrowsException<ArgumentNullException>(() => plain.Set((string)null));
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(-1));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(100000));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(-1, 1));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(1, -1));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(1, 100000));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
 

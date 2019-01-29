@@ -2160,10 +2160,10 @@ namespace SEALNetExamples
                     [Add]
                     */
                     Ciphertext encrypted1 = new Ciphertext(context);
-                    ckksEncoder.Encode((ulong)i + 1, plain);
+                    ckksEncoder.Encode(i + 1, plain);
                     encryptor.Encrypt(plain, encrypted1);
                     Ciphertext encrypted2 = new Ciphertext(context);
-                    ckksEncoder.Encode((ulong)i + 1, plain2);
+                    ckksEncoder.Encode(i + 1, plain2);
                     encryptor.Encrypt(plain2, encrypted2);
                     timeAddSum.Start();
                     evaluator.AddInplace(encrypted1, encrypted2);

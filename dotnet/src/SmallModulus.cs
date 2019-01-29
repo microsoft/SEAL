@@ -149,7 +149,7 @@ namespace Microsoft.Research.SEAL
             get
             {
                 ulong[] ratio = new ulong[3];
-                NativeMethods.SmallModulus_ConstRatio(NativePtr, length: 3, ratio: ratio);
+                NativeMethods.SmallModulus_ConstRatio(NativePtr, length: (ulong)3, ratio: ratio);
                 return new Tuple<ulong, ulong, ulong>(ratio[0], ratio[1], ratio[2]);
             }
         }

@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+// STD
+#include <algorithm>
+
 // SEALNet
 #include "sealnet/stdafx.h"
 #include "sealnet/smallmodulus_wrapper.h"
@@ -116,7 +119,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Set2(void *thisptr, uint64_t value)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, int length, uint64_t ratio[])
+SEALNETNATIVE HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, uint64_t length, uint64_t ratio[])
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -127,7 +130,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, int length
     }
 
     auto ratio_array = sm->const_ratio();
-    std::copy(ratio_array.begin(), ratio_array.end(), ratio);
+    copy(ratio_array.begin(), ratio_array.end(), ratio);
 
     return S_OK;
 }

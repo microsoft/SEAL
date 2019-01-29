@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+// STD
+#include <algorithm>
+#include <iterator>
+
 // SEALNet
 #include "sealnet/stdafx.h"
 #include "sealnet/keygenerator_wrapper.h"
@@ -8,10 +12,12 @@
 
 // SEAL
 #include "seal/keygenerator.h"
+#include "seal/util/common.h"
 
 using namespace std;
 using namespace seal;
 using namespace sealnet;
+using namespace seal::util;
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create1(void *sealContext, void **key_generator)
 {
@@ -83,7 +89,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, int decompositionBitCount, int count, void **relin_keys)
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, int decompositionBitCount, uint64_t count, void **relin_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -91,7 +97,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, int decompo
 
     try
     {
-        RelinKeys *relinKeys = new RelinKeys(keygen->relin_keys(decompositionBitCount, count));
+        RelinKeys *relinKeys = new RelinKeys(keygen->relin_keys(decompositionBitCount, safe_cast<size_t>(count)));
         *relin_keys = relinKeys;
         return S_OK;
     }
@@ -119,18 +125,15 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys1(void *thisptr, int decom
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys2(void *thisptr, int decomposition_bit_count, int count, uint64_t *galois_elts, void **galois_keys)
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys2(void *thisptr, int decomposition_bit_count, uint64_t count, uint64_t *galois_elts, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
     IfNullRet(galois_elts, E_POINTER);
     IfNullRet(galois_keys, E_POINTER);
 
-    vector<uint64_t> galois_elts_vec(count);
-    for (int i = 0; i < count; i++)
-    {
-        galois_elts_vec[i] = galois_elts[i];
-    }
+    vector<uint64_t> galois_elts_vec;
+    copy_n(galois_elts, count, back_inserter(galois_elts_vec));
 
     try
     {
@@ -144,18 +147,15 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys2(void *thisptr, int decom
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys3(void *thisptr, int decomposition_bit_count, int count, int *steps, void **galois_keys)
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys3(void *thisptr, int decomposition_bit_count, uint64_t count, int *steps, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
     IfNullRet(steps, E_POINTER);
     IfNullRet(galois_keys, E_POINTER);
 
-    vector<int> steps_vec(count);
-    for (int i = 0; i < count; i++)
-    {
-        steps_vec[i] = steps[i];
-    }
+    vector<int> steps_vec;
+    copy_n(steps, count, back_inserter(steps_vec));
 
     try
     {

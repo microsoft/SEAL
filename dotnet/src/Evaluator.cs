@@ -206,7 +206,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr[] encarray = encrypteds.Select(c => c.NativePtr).ToArray();
-            NativeMethods.Evaluator_AddMany(NativePtr, encarray.Length, encarray, destination.NativePtr);
+            NativeMethods.Evaluator_AddMany(NativePtr, (ulong)encarray.Length, encarray, destination.NativePtr);
         }
 
         /// <summary>
@@ -811,7 +811,7 @@ namespace Microsoft.Research.SEAL
 
             IntPtr[] encarray = encrypteds.Select(c => c.NativePtr).ToArray();
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Evaluator_MultiplyMany(NativePtr, encarray.Length, encarray, relinKeys.NativePtr, destination.NativePtr, poolPtr);
+            NativeMethods.Evaluator_MultiplyMany(NativePtr, (ulong)encarray.Length, encarray, relinKeys.NativePtr, destination.NativePtr, poolPtr);
         }
 
         /// <summary>

@@ -35,7 +35,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_CoeffAt(void *thisptr, uint64_t index, 
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value);
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_ToString(void *thispt, int *length, char *outstr);
+SEALNETNATIVE HRESULT SEALCALL Plaintext_ToString(void *thispt, uint64_t *length, char *outstr);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form);
 
@@ -43,9 +43,9 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_IsZero(void *thisptr, bool *is_zero);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero1(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, int start_coeff);
+SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, uint64_t start_coeff);
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, int start_coeff, int length);
+SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, uint64_t start_coeff, uint64_t length);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_GetParmsId(void *thisptr, uint64_t *parms_id);
 

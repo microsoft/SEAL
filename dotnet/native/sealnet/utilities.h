@@ -63,5 +63,5 @@ namespace sealnet
     /**
     Convert std::string to char*
     */
-    HRESULT ToStringHelper(const std::string &str, char *outstr, int *length);
+    HRESULT ToStringHelper(const std::string &str, char *outstr, uint64_t *length);
 }

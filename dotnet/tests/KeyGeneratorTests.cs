@@ -106,7 +106,6 @@ namespace SEALNetTest
 
             Assert.ThrowsException<ArgumentException>(() => keygen.RelinKeys(0, 1));
             Assert.ThrowsException<ArgumentException>(() => keygen.RelinKeys(DefaultParams.DBCmax + 1, 1));
-            Assert.ThrowsException<ArgumentException>(() => keygen.RelinKeys(DefaultParams.DBCmax, -1));
 
             Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(0));
             Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(DefaultParams.DBCmax + 1));

@@ -63,7 +63,7 @@ namespace SEALNetTest
             Plaintext plain = new Plaintext();
             List<Complex> result = new List<Complex>();
 
-            ulong value = 15ul;
+            long value = 15;
             encoder.Encode(value, plain);
             encoder.Decode(plain, result);
 
@@ -230,11 +230,11 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(complex, 10.0, plain_null));
             Assert.ThrowsException<ArgumentException>(() => encoder.Encode(complex, -10.0, plain, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10ul, ParmsId.Zero, plain_null));
-            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10ul, null, plain));
-            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(10ul, ParmsId.Zero, plain));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10, ParmsId.Zero, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10, null, plain));
+            Assert.ThrowsException<ArgumentException>(() => encoder.Encode(10, ParmsId.Zero, plain));
 
-            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10ul, plain_null));
+            Assert.ThrowsException<ArgumentNullException>(() => encoder.Encode(10, plain_null));
 
             Assert.ThrowsException<ArgumentNullException>(() => encoder.Decode(plain, vald_null));
             Assert.ThrowsException<ArgumentNullException>(() => encoder.Decode(plain_null, vald));

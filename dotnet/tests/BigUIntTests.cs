@@ -905,12 +905,9 @@ namespace SEALNetTest
             bui1 = new BigUInt();
             BigUInt bui2 = new BigUInt();
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui.Data(-1));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui.Data(1));
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui[-1]);
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui[5]);
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui[-1] = 1);
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui[5] = 2);
 
             Assert.ThrowsException<ArgumentNullException>(() => bui.DivideRemainder(bui1, null));

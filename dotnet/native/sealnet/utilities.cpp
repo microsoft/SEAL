@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+// STD
+#include <algorithm>
+#include <iterator>
+
 // SEALNet
 #include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
@@ -9,10 +13,12 @@
 #include "seal/smallmodulus.h"
 #include "seal/encryptionparams.h"
 #include "seal/context.h"
+#include "seal/util/common.h"
 
 using namespace std;
 using namespace seal;
 using namespace sealnet;
+using namespace seal::util;
 
 namespace sealnet
 {
@@ -35,7 +41,7 @@ unique_ptr<MemoryPoolHandle> sealnet::MemHandleFromVoid(void *voidptr)
 
 void sealnet::BuildCoeffPointers(const vector<SmallModulus> &coefficients, uint64_t *length, void **coeffs)
 {
-    *length = coefficients.size();
+    *length = safe_cast<uint64_t>(coefficients.size());
 
     if (coeffs == nullptr)
     {
@@ -73,10 +79,7 @@ void sealnet::CopyParmsId(const uint64_t *src, parms_id_type &dest)
 {
     if (nullptr != src)
     {
-        for (size_t i = 0; i < dest.size(); i++)
-        {
-            dest[i] = src[i];
-        }
+        copy_n(src, dest.size(), begin(dest));
     }
 }
 
@@ -84,32 +87,31 @@ void sealnet::CopyParmsId(const parms_id_type &src, uint64_t *dest)
 {
     if (nullptr != dest)
     {
-        for (size_t i = 0; i < src.size(); i++)
-        {
-            dest[i] = src[i];
-        }
+        copy_n(cbegin(src), src.size(), dest);
     }
 }
 
-HRESULT sealnet::ToStringHelper(const string &str, char *outstr, int *length)
+HRESULT seal::dll::ToStringHelper(const string &str, char *outstr, uint64_t *length)
 {
+    uint64_t result_length = add_safe(static_cast<uint64_t>(str.length()), uint64_t(1));
     if (nullptr == outstr)
     {
         // We need to return the string length.
         // The string length will include the terminating character.
-        *length = static_cast<int>(str.length() + 1);
+        *length = result_length;
         return S_OK;
     }
 
     // Verify the string fits
-    if (*length < static_cast<int>(str.length() + 1))
+    if (*length < result_length)
     {
-        *length = static_cast<int>(str.length() + 1);
+        *length = result_length;
         return HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
     }
 
-    memset(outstr, 0, *length);
+    fill_n(outstr, *length, char(0));
     str.copy(outstr, str.length());
+
     return S_OK;
 }
 

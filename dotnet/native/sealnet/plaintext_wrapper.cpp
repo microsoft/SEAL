@@ -11,10 +11,12 @@
 
 // SEAL
 #include "seal/plaintext.h"
+#include "seal/util/common.h"
 
 using namespace std;
 using namespace seal;
 using namespace sealnet;
+using namespace seal::util;
 
 namespace seal
 {
@@ -220,7 +222,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetCoeffAt(void *thisptr, uint64_t inde
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_ToString(void *thispt, int *length, char *outstr)
+SEALNETNATIVE HRESULT SEALCALL Plaintext_ToString(void *thispt, uint64_t *length, char *outstr)
 {
     Plaintext *plain = FromVoid<Plaintext>(thispt);
     IfNullRet(plain, E_POINTER);
@@ -292,14 +294,15 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero1(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, int start_coeff)
+SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, uint64_t start_coeff)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     try
     {
-        plain->set_zero(start_coeff);
+        using size_type = Plaintext::size_type;
+        plain->set_zero(safe_cast<size_type>(start_coeff));
         return S_OK;
     }
     catch (const out_of_range&)
@@ -308,14 +311,15 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, int start_coeff
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, int start_coeff, int length)
+SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, uint64_t start_coeff, uint64_t length)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
     try
     {
-        plain->set_zero(start_coeff, length);
+        using size_type = Plaintext::size_type;
+        plain->set_zero(safe_cast<size_type>(start_coeff), safe_cast<size_type>(length));
         return S_OK;
     }
     catch (const out_of_range&)

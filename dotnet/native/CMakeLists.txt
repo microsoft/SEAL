@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(SEALNetNative VERSION 3.2.0 LANGUAGES CXX)
+project(SEALNetNative VERSION 3.2.0 LANGUAGES CXX C)
 
 # Library will be in ../../lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../lib)
@@ -17,6 +17,13 @@ find_package(SEAL 3.2.0 EXACT REQUIRED)
 # Check that Microsoft SEAL is build as position-independent code
 if (SEAL_LIB_BUILD_TYPE STREQUAL "Static")
     message(FATAL_ERROR "Microsoft SEAL is not built as position-independent code; please set SEAL_LIB_BUILD_TYPE to either \"Static_PIC\" or \"Shared\" and rebuild.")
+endif()
+
+# Check that size_t is 64 bits
+include(CheckTypeSize)
+check_type_size("size_t" SIZET LANGUAGE C)
+if(NOT SIZET EQUAL 8)
+    message(FATAL_ERROR "Detected sizeof(size_t) == ${SIZET} but SEALNet requires sizeof(size_t) == 8.")
 endif()
 
 # Link Microsoft SEAL

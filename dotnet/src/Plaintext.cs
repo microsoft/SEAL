@@ -271,15 +271,10 @@ namespace Microsoft.Research.SEAL
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
         /// <param name="length">The number of coefficients to set to zero</param>
         /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
-        /// <exception cref="ArgumentOutOfRangeException">if length is negative or startCoeff + length is not within [0, CoeffCount)</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if startCoeff + length is not within [0, CoeffCount)</exception>
         /// */
-        public void SetZero(int startCoeff, int length)
+        public void SetZero(ulong startCoeff, ulong length)
         {
-            if (startCoeff < 0)
-                throw new ArgumentOutOfRangeException($"{nameof(startCoeff)} is negative");
-            if (length < 0)
-                throw new ArgumentOutOfRangeException($"{nameof(length)} is negative");
-
             try
             {
                 NativeMethods.Plaintext_SetZero(NativePtr, startCoeff, length);
@@ -298,11 +293,8 @@ namespace Microsoft.Research.SEAL
         /// 
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
         /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
-        public void SetZero(int startCoeff)
+        public void SetZero(ulong startCoeff)
         {
-            if (startCoeff < 0)
-                throw new ArgumentOutOfRangeException($"{nameof(startCoeff)} is negative");
-
             try
             {
                 NativeMethods.Plaintext_SetZero(NativePtr, startCoeff);
@@ -415,10 +407,10 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the plaintext is in NTT transformed form</exception>
         public override string ToString()
         {
-            int length = 0;
+            ulong length = 0;
             NativeMethods.Plaintext_ToString(NativePtr, ref length, outstr: null);
 
-            StringBuilder buffer = new StringBuilder(length);
+            StringBuilder buffer = new StringBuilder(checked((int)length));
             NativeMethods.Plaintext_ToString(NativePtr, ref length, buffer);
 
             return buffer.ToString();
@@ -431,6 +423,7 @@ namespace Microsoft.Research.SEAL
         {
             ulong coeffCount = CoeffCount;
             ulong[] coeffs = new ulong[coeffCount];
+
             for (ulong i = 0; i < coeffCount; i++)
             {
                 coeffs[i] = this[i];

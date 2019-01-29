@@ -363,7 +363,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_DivideRemainder2(void *thispt, uint64_t o
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_ToString(void *thispt, char *outstr, int *length)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ToString(void *thispt, char *outstr, uint64_t *length)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);
@@ -373,7 +373,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_ToString(void *thispt, char *outstr, int 
     return ToStringHelper(str, outstr, length);
 }
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_ToDecimalString(void *thispt, char *outstr, int *length)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ToDecimalString(void *thispt, char *outstr, uint64_t *length)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thispt);
     IfNullRet(biguint, E_POINTER);

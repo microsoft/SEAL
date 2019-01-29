@@ -92,16 +92,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void BigUInt_DivideRemainder(IntPtr thisptr, ulong operand2, IntPtr remainder, out IntPtr result);
 
         [DllImport(sealnetnative, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void BigUInt_ToString(
-            IntPtr thisptr,
-            StringBuilder outstr,
-            ref int length);
+        internal static extern void BigUInt_ToString(IntPtr thisptr, StringBuilder outstr, ref ulong length);
 
         [DllImport(sealnetnative, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void BigUInt_ToDecimalString(
-            IntPtr thisptr,
-            StringBuilder outstr,
-            ref int length);
+        internal static extern void BigUInt_ToDecimalString(IntPtr thisptr, StringBuilder outstr, ref ulong length);
 
         [DllImport(sealnetnative, PreserveSig = false, CharSet = CharSet.Ansi)]
         internal static extern void BigUInt_DuplicateTo(IntPtr thisptr, IntPtr destination);
@@ -239,8 +233,8 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SmallModulus_ConstRatio(
-            IntPtr thisptr,
-            int length,
+            IntPtr thisptr, 
+            ulong length, 
             [MarshalAs(UnmanagedType.LPArray)] ulong[] ratio);
 
         [DllImport(sealnetnative, EntryPoint = "SmallModulus_Equals1", PreserveSig = false)]
@@ -273,14 +267,14 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EncParams_GetCoeffModulus(
-            IntPtr thisptr,
-            ref ulong length,
+            IntPtr thisptr, 
+            ref ulong length, 
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EncParams_SetCoeffModulus(
-            IntPtr thisptr,
-            ulong length,
+            IntPtr thisptr, 
+            ulong length, 
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(sealnetnative, PreserveSig = false)]
@@ -647,10 +641,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_SetCoeffAt(IntPtr thisptr, ulong index, ulong value);
 
         [DllImport(sealnetnative, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void Plaintext_ToString(
-            IntPtr thisptr,
-            ref int length,
-            StringBuilder outstr);
+        internal static extern void Plaintext_ToString(IntPtr thisptr, ref ulong length, StringBuilder outstr);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Plaintext_IsNTTForm(IntPtr thisptr, out bool isNTTForm);

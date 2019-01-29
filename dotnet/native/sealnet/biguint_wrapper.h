@@ -65,9 +65,9 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_DivideRemainder1(void *thispt, void *oper
 
 SEALNETNATIVE HRESULT SEALCALL BigUInt_DivideRemainder2(void *thispt, uint64_t operand2, void *remainder, void **result);
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_ToString(void *thispt, char *outstr, int *length);
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ToString(void *thispt, char *outstr, uint64_t *length);
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_ToDecimalString(void *thispt, char *outstr, int *length);
+SEALNETNATIVE HRESULT SEALCALL BigUInt_ToDecimalString(void *thispt, char *outstr, uint64_t *length);
 
 SEALNETNATIVE HRESULT SEALCALL BigUInt_DuplicateTo(void *thispt, void *destination);
 

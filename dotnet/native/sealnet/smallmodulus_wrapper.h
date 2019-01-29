@@ -31,7 +31,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Set1(void *thisptr, void *assign);
 
 SEALNETNATIVE HRESULT SEALCALL SmallModulus_Set2(void *thisptr, uint64_t value);
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, int length, uint64_t ratio[]);
+SEALNETNATIVE HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, uint64_t length, uint64_t ratio[]);
 
 SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals1(void *thisptr, void *other, bool *result);
 

@@ -125,13 +125,10 @@ namespace Microsoft.Research.SEAL
         /// <param name="decompositionBitCount">The decomposition bit count</param>
         /// <param name="count">The number of relinearization keys to generate</param>
         /// <exception cref="ArgumentException">if decompositionBitCount is not within [1, 60]</exception>
-        /// <exception cref="ArgumentException">if count is negative</exception>
-        public RelinKeys RelinKeys(int decompositionBitCount, int count = 1)
+        public RelinKeys RelinKeys(int decompositionBitCount, ulong count = 1)
         {
             if (decompositionBitCount < 1 || decompositionBitCount > 60)
                 throw new ArgumentException("decompositionBitCount should be within [1, 60]");
-            if (count < 0)
-                throw new ArgumentException("count is negative");
 
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, decompositionBitCount, count, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr);
@@ -188,7 +185,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(galoisElts));
 
             ulong[] galoisEltsArr = galoisElts.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
+            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, (ulong)galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
             return new GaloisKeys(galoisKeysPtr);
         }
 
@@ -217,7 +214,7 @@ namespace Microsoft.Research.SEAL
             try
             {
                 int[] stepsArr = steps.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, stepsArr.Length, stepsArr, out IntPtr galoisKeys);
+                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, (ulong)stepsArr.Length, stepsArr, out IntPtr galoisKeys);
                 return new GaloisKeys(galoisKeys);
             }
             catch (COMException ex)
