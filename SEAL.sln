@@ -37,7 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet", "dotnet", "{0786F2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{33C15AAC-6E56-477E-A118-3451FD21AC49}"
 	ProjectSection(SolutionItems) = preProject
-		dotnet\nuget\README.txt = dotnet\nuget\README.txt
+		dotnet\nuget\NUGET.md = dotnet\nuget\NUGET.md
 		dotnet\nuget\SEALNet.nuspec = dotnet\nuget\SEALNet.nuspec
 		dotnet\nuget\SEALNet.targets = dotnet\nuget\SEALNet.targets
 	EndProjectSection
