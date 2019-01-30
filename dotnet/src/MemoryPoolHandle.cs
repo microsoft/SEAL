@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
-    /// Manages a shared pointer to a memory pool. SEAL uses memory pools for 
+    /// Manages a shared pointer to a memory pool. Microsoft SEAL uses memory pools for 
     /// improved performance due to the large number of memory allocations needed
     /// by the homomorphic encryption operations, and the underlying polynomial 
     /// arithmetic. The library automatically creates a shared global memory pool
@@ -22,7 +22,7 @@ namespace Microsoft.Research.SEAL
     /// allocations in certain functions. For example, in heavily multi-threaded
     /// applications allocating concurrently from a shared memory pool might lead 
     /// to significant performance issues due to thread contention. For these cases
-    /// SEAL provides overloads of the functions that take a MemoryPoolHandle as an
+    /// Microsoft SEAL provides overloads of the functions that take a MemoryPoolHandle as an
     /// additional argument, and uses the associated memory pool for all dynamic
     /// allocations inside the function. Whenever this functions is called, the 
     /// user can then simply pass a thread-local MemoryPoolHandle to be used.
@@ -43,8 +43,8 @@ namespace Microsoft.Research.SEAL
     /// </para>
     /// <para>
     /// Managing Lifetime
-    /// Internally, the MemoryPoolHandle wraps an std::shared_ptr pointing to
-    /// a SEAL memory pool class. Thus, as long as a MemoryPoolHandle pointing to
+    /// Internally, the MemoryPoolHandle wraps a shared pointer pointing to
+    /// a memory pool class. Thus, as long as a MemoryPoolHandle pointing to
     /// a particular memory pool exists, the pool stays alive. Classes such as
     /// Evaluator and Ciphertext store their own local copies of a MemoryPoolHandle
     /// to guarantee that the pool stays alive as long as the managing object 

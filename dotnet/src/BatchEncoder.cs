@@ -11,7 +11,7 @@ namespace Microsoft.Research.SEAL
     /// <summary>
     /// Provides functionality for CRT batching. If the polynomial modulus degree is N, and
     /// the plaintext modulus is a prime number T such that T is congruent to 1 modulo 2N, 
-    /// then BatchEncoder allows the SEAL plaintext elements to be viewed as 2-by-(N/2) 
+    /// then BatchEncoder allows the plaintext elements to be viewed as 2-by-(N/2) 
     /// matrices of integers modulo T. Homomorphic operations performed on such encrypted 
     /// matrices are applied coefficient (slot) wise, enabling powerful SIMD functionality 
     /// for computations that are vectorizable. This functionality is often called "batching" 
@@ -68,13 +68,13 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a SEAL plaintext from a given matrix. This function "batches" a given matrix
-        /// of integers modulo the plaintext modulus into a SEAL plaintext element, and stores
+        /// Creates a plaintext from a given matrix. This function "batches" a given matrix
+        /// of integers modulo the plaintext modulus into a plaintext element, and stores
         /// the result in the destination parameter. The input vector must have size at most equal
         /// to the degree of the polynomial modulus. The first half of the elements represent the
         /// first row of the matrix, and the second half represent the second row. The numbers
         /// in the matrix can be at most equal to the plaintext modulus for it to represent
-        /// a valid SEAL plaintext.
+        /// a valid plaintext.
         /// 
         /// If the destination plaintext overlaps the input values in memory, the behavior of
         /// this function is undefined.
@@ -95,13 +95,13 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a SEAL plaintext from a given matrix. This function "batches" a given matrix
-        /// of integers modulo the plaintext modulus into a SEAL plaintext element, and stores
+        /// Creates a plaintext from a given matrix. This function "batches" a given matrix
+        /// of integers modulo the plaintext modulus into a plaintext element, and stores
         /// the result in the destination parameter. The input vector must have size at most equal
         /// to the degree of the polynomial modulus. The first half of the elements represent the
         /// first row of the matrix, and the second half represent the second row. The numbers
         /// in the matrix can be at most equal to the plaintext modulus for it to represent
-        /// a valid SEAL plaintext.
+        /// a valid plaintext.
         /// 
         /// If the destination plaintext overlaps the input values in memory, the behavior of
         /// this function is undefined.
@@ -122,8 +122,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a SEAL plaintext from a given matrix. This function "batches" a given matrix
-        /// of integers modulo the plaintext modulus in-place into a SEAL plaintext ready to be
+        /// Creates a plaintext from a given matrix. This function "batches" a given matrix
+        /// of integers modulo the plaintext modulus in-place into a plaintext ready to be
         /// encrypted. The matrix is given as a plaintext element whose first N/2 coefficients
         /// represent the first row of the matrix, and the second N/2 coefficients represent the
         /// second row, where N denotes the degree of the polynomial modulus. The input plaintext
@@ -148,7 +148,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Inverse of encode. This function "unbatches" a given SEAL plaintext into a matrix
+        /// Inverse of encode. This function "unbatches" a given plaintext into a matrix
         /// of integers modulo the plaintext modulus, and stores the result in the destination 
         /// parameter. The input plaintext must have degress less than the polynomial modulus, 
         /// and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
@@ -185,7 +185,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Inverse of encode. This function "unbatches" a given SEAL plaintext into a matrix
+        /// Inverse of encode. This function "unbatches" a given plaintext into a matrix
         /// of integers modulo the plaintext modulus, and stores the result in the destination
         /// parameter. The input plaintext must have degress less than the polynomial modulus,
         /// and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
@@ -222,7 +222,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Inverse of encode. This function "unbatches" a given SEAL plaintext in-place into 
+        /// Inverse of encode. This function "unbatches" a given plaintext in-place into 
         /// a matrix of integers modulo the plaintext modulus. The input plaintext must have 
         /// degress less than the polynomial modulus, and coefficients less than the plaintext 
         /// modulus, i.e. it must be a valid plaintext for the encryption parameters. Dynamic 

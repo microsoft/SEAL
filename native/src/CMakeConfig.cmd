@@ -5,7 +5,7 @@ rem Licensed under the MIT license.
 
 setlocal
 
-rem The purpose of this script is to have CMake generate config.h for use by SEAL.
+rem The purpose of this script is to have CMake generate config.h for use by Microsoft SEAL.
 rem We assume that CMake was installed with Visual Studio, which should be the default
 rem when the user installs the "Desktop Development with C++" workload.
 
@@ -13,7 +13,7 @@ set PROJECTCONFIGURATION=%1
 set VSDEVENVDIR=%~2
 set INCLUDEPATH=%~3
 
-echo Configuring SEAL through CMake
+echo Configuring Microsoft SEAL through CMake
 
 if not exist "%VSDEVENVDIR%" (
 	rem We may be running in the CI server. Try a standard VS path.

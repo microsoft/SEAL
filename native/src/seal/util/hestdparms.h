@@ -5,7 +5,7 @@
 
 /**
 Largest allowed bit counts for coeff_modulus based on the security estimates from 
-HomomorphicEncryption.org security standard. SEAL always samples the secret key 
+HomomorphicEncryption.org security standard. Microsoft SEAL always samples the secret key 
 from a ternary {-1, 0, 1} distribution. These tables are used to enforce a minimum 
 security level when constructing a SEALContext. SEAL_HE_STD_PARMS_128_TC (below) 
 is used for this purpose by default, but this can easily be changed by editing 

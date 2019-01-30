@@ -30,7 +30,7 @@ namespace seal
     struct EncryptionParameterQualifiers
     {
         /**
-        If the encryption parameters are set in a way that is considered valid by SEAL, the
+        If the encryption parameters are set in a way that is considered valid by Microsoft SEAL, the
         variable parameters_set is set to true.
         */
         bool parameters_set;
@@ -39,7 +39,7 @@ namespace seal
         Tells whether FFT can be used for polynomial multiplication. If the polynomial modulus
         is of the form X^N+1, where N is a power of two, then FFT can be used for fast
         multiplication of polynomials modulo the polynomial modulus. In this case the
-        variable using_fft will be set to true. However, currently SEAL requires this
+        variable using_fft will be set to true. However, currently Microsoft SEAL requires this
         to be the case for the parameters to be valid. Therefore, parameters_set can only
         be true if using_fft is true.
         */
@@ -51,7 +51,7 @@ namespace seal
         modulus and N is a power of two, then the number-theoretic transform (NTT) can be
         used for fast multiplications of polynomials modulo the polynomial modulus and
         coefficient modulus. In this case the variable using_ntt will be set to true. However,
-        currently SEAL requires this to be the case for the parameters to be valid. Therefore,
+        currently Microsoft SEAL requires this to be the case for the parameters to be valid. Therefore,
         parameters_set can only be true if using_ntt is true.
         */
         bool using_ntt;

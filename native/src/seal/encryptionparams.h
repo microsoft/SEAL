@@ -128,7 +128,7 @@ namespace seal
         The polynomial modulus directly affects the number of coefficients in 
         plaintext polynomials, the size of ciphertext elements, the computational 
         performance of the scheme (bigger is worse), and the security level (bigger 
-        is better). In SEAL the degree of the polynomial modulus must be a power 
+        is better). In Microsoft SEAL the degree of the polynomial modulus must be a power 
         of 2 (e.g.  1024, 2048, 4096, 8192, 16384, or 32768).
 
         @param[in] poly_modulus_degree The new polynomial modulus degree
@@ -147,7 +147,7 @@ namespace seal
         of a list of distinct prime numbers, and is represented by a vector of 
         SmallModulus objects. The coefficient modulus directly affects the size 
         of ciphertext elements, the amount of computation that the scheme can perform 
-        (bigger is better), and the security level (bigger is worse). In SEAL each 
+        (bigger is better), and the security level (bigger is worse). In Microsoft SEAL each 
         of the prime numbers in the coefficient modulus must be at most 60 bits, 
         and must be congruent to 1 modulo 2*degree(poly_modulus).
 
@@ -174,7 +174,7 @@ namespace seal
         modulus represented by the SmallModulus class. The plaintext modulus 
         determines the largest coefficient that plaintext polynomials can represent. 
         It also affects the amount of computation that the scheme can perform 
-        (bigger is worse). In SEAL the plaintext modulus can be at most 60 bits 
+        (bigger is worse). In Microsoft SEAL the plaintext modulus can be at most 60 bits 
         long, but can otherwise be any integer. Note, however, that some features 
         (e.g. batching) require the plaintext modulus to be of a particular form.
 
@@ -201,7 +201,7 @@ namespace seal
         takes a std::uint64_t and automatically creates the SmallModulus object. 
         The plaintext modulus determines the largest coefficient that plaintext 
         polynomials can represent. It also affects the amount of computation that 
-        the scheme can perform (bigger is worse). In SEAL the plaintext modulus 
+        the scheme can perform (bigger is worse). In Microsoft SEAL the plaintext modulus 
         can be at most 60 bits long, but can otherwise be any integer. Note, 
         however, that some features (e.g. batching) require the plaintext modulus 
         to be of a particular form.

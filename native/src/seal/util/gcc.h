@@ -14,7 +14,7 @@
 #include "seal/util/config.h"
 
 #if (__GNUC__ == 6) && defined(SEAL_USE_IF_CONSTEXPR)
-#pragma GCC error "g++-6 cannot compile SEAL as C++17; set CMake build option `SEAL_USE_CXX17' to OFF"
+#pragma GCC error "g++-6 cannot compile Microsoft SEAL as C++17; set CMake build option `SEAL_USE_CXX17' to OFF"
 #endif
 
 // Are we using MSGSL?

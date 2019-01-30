@@ -64,7 +64,7 @@ namespace Microsoft.Research.SEAL
         /// Tells whether FFT can be used for polynomial multiplication.If the polynomial modulus
         /// is of the form X^N+1, where N is a power of two, then FFT can be used for fast
         /// multiplication of polynomials modulo the polynomial modulus. In this case the
-        /// variable UsingFFT will be set to true. However, currently SEAL requires this
+        /// variable UsingFFT will be set to true. However, currently Microsoft SEAL requires this
         /// to be the case for the parameters to be valid. Therefore, ParametersSet can only
         /// be true if UsingFFT is true.
         /// </summary>
@@ -83,7 +83,7 @@ namespace Microsoft.Research.SEAL
         /// modulus and N is a power of two, then the number-theoretic transform (NTT) can be
         /// used for fast multiplications of polynomials modulo the polynomial modulus and
         /// coefficient modulus.In this case the variable UsingNTT will be set to true. However,
-        /// currently SEAL requires this to be the case for the parameters to be valid.Therefore,
+        /// currently Microsoft SEAL requires this to be the case for the parameters to be valid.Therefore,
         /// ParametersSet can only be true if UsingNTT is true.
         /// </summary>
         public bool UsingNTT

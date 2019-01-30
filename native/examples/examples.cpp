@@ -169,7 +169,7 @@ void example_ckks_performance();
 int main()
 {
 #ifdef SEAL_VERSION
-    cout << "SEAL version: " << SEAL_VERSION << endl;
+    cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
 #endif
     while (true)
     {
@@ -262,12 +262,12 @@ void example_bfv_basics_i()
     In this example we demonstrate setting up encryption parameters and other 
     relevant objects for performing simple computations on encrypted integers.
 
-    SEAL implements two encryption schemes: the Brakerski/Fan-Vercauteren (BFV) 
+    Microsoft SEAL implements two encryption schemes: the Brakerski/Fan-Vercauteren (BFV) 
     scheme and the Cheon-Kim-Kim-Song (CKKS) scheme. In the first examples we 
     use the BFV scheme as it is far easier to understand and use than CKKS. For 
     more details on the basics of the BFV scheme, we refer the reader to the
     original paper https://eprint.iacr.org/2012/144. In truth, to achieve good 
-    performance SEAL implements the "FullRNS" optimization as described in 
+    performance Microsoft SEAL implements the "FullRNS" optimization as described in 
     https://eprint.iacr.org/2016/510, but this optimization is invisible to 
     the user and has no security implications. We will discuss the CKKS scheme
     in later examples.
@@ -286,7 +286,7 @@ void example_bfv_basics_i()
     to do so and has an in-depth understanding of the security implications.
 
     A fifth parameter -- random_generator -- can be set to use customized random
-    number generators. By default, SEAL uses hardware-based AES in counter mode
+    number generators. By default, Microsoft SEAL uses hardware-based AES in counter mode
     for pseudo-randomness with key generated using std::random_device. If the 
     AES-NI instruction set is not available, all randomness is generated from 
     std::random_device. Most academic users in particular should have little 
@@ -352,13 +352,13 @@ void example_bfv_basics_i()
     for 128-bit, 192-bit, and 256-bit security levels. The integer parameter is 
     the degree of the polynomial modulus used.
     
-    In SEAL the coefficient modulus is a positive composite number -- a product
+    In Microsoft SEAL the coefficient modulus is a positive composite number -- a product
     of distinct primes of size up to 60 bits. When we talk about the size of the 
     coefficient modulus we mean the bit length of the product of the primes. The 
     small primes are represented by instances of the SmallModulus class so for
     example coeff_modulus_128bit(int) returns a vector of SmallModulus instances. 
     
-    It is possible for the user to select their own small primes. Since SEAL uses
+    It is possible for the user to select their own small primes. Since Microsoft SEAL uses
     the Number Theoretic Transform (NTT) for polynomial multiplications modulo the
     factors of the coefficient modulus, the factors need to be prime numbers
     congruent to 1 modulo 2*poly_modulus_degree. We have generated a list of such
@@ -421,7 +421,7 @@ void example_bfv_basics_i()
     more useful would be encrypting integers or floating point numbers. For this
     we need an `encoding scheme' to convert data from integer representation to
     an appropriate plaintext polynomial representation than can subsequently be 
-    encrypted. SEAL comes with a few basic encoders for the BFV scheme:
+    encrypted. Microsoft SEAL comes with a few basic encoders for the BFV scheme:
 
     [IntegerEncoder]
     The IntegerEncoder encodes integers to plaintext polynomials as follows. 
@@ -457,7 +457,7 @@ void example_bfv_basics_i()
     the numbers it can encode. 
 
     The IntegerEncoder is easy to understand and use for simple computations, 
-    and can be a good starting point to learning SEAL. However, advanced users 
+    and can be a good starting point to learning Microsoft SEAL. However, advanced users 
     will probably prefer more efficient approaches, such as the BatchEncoder or 
     the CKKSEncoder (discussed later).
 
@@ -636,7 +636,7 @@ void example_bfv_basics_ii()
     /*
     We generate the public and secret keys as before. 
 
-    There are actually two more types of keys in SEAL: `relinearization keys' 
+    There are actually two more types of keys in Microsoft SEAL: `relinearization keys' 
     and `Galois keys'. In this example we will discuss relinearization keys, and 
     Galois keys will be discussed later in example_bfv_basics_iii().
     */
@@ -665,7 +665,7 @@ void example_bfv_basics_ii()
     cout << "Done" << endl;
 
     /*
-    In SEAL, a valid ciphertext consists of two or more polynomials whose 
+    In Microsoft SEAL, a valid ciphertext consists of two or more polynomials whose 
     coefficients are integers modulo the product of the primes in coeff_modulus. 
     The current size of a ciphertext can be found using Ciphertext::size().
     A freshly encrypted ciphertext always has size 2.
@@ -1175,7 +1175,7 @@ void example_bfv_basics_iv()
     parms.set_plain_modulus(1 << 20);
 
     /*
-    In SEAL a particular set of encryption parameters (excluding the random
+    In Microsoft SEAL a particular set of encryption parameters (excluding the random
     number generator) is identified uniquely by a SHA-3 hash of the parameters.
     This hash is called the `parms_id' and can be easily accessed and printed
     at any time. The hash will change as soon as any of the relevant parameters
@@ -1194,9 +1194,9 @@ void example_bfv_basics_iv()
 
     /*
     All keys and ciphertext, and in the CKKS also plaintexts, carry the parms_id
-    for the encryption parameters they are created with, allowing SEAL to very 
+    for the encryption parameters they are created with, allowing Microsoft SEAL to very 
     quickly determine whether the objects are valid for use and compatible for 
-    homomorphic computations. SEAL takes care of managing, and verifying the 
+    homomorphic computations. Microsoft SEAL takes care of managing, and verifying the 
     parms_id for all objects so the user should have no reason to change it by 
     hand. 
     */
@@ -1222,7 +1222,7 @@ void example_bfv_basics_iv()
 
     /*
     When SEALContext is created from a given EncryptionParameters instance,
-    SEAL automatically creates a so-called "modulus switching chain", which is
+    Microsoft SEAL automatically creates a so-called "modulus switching chain", which is
     a chain of other encryption parameters derived from the original set.
     The parameters in the modulus switching chain are the same as the original 
     parameters with the exception that size of the coefficient modulus is
@@ -1396,7 +1396,7 @@ void example_ckks_basics_i()
     In this example we demonstrate using the Cheon-Kim-Kim-Song (CKKS) scheme
     for encrypting and computing on floating point numbers. For full details on 
     the CKKS scheme, we refer the reader to https://eprint.iacr.org/2016/421.
-    For better performance, SEAL implements the "FullRNS" optimization for CKKS 
+    For better performance, Microsoft SEAL implements the "FullRNS" optimization for CKKS 
     described in https://eprint.iacr.org/2018/931.
     */
 
@@ -1536,7 +1536,7 @@ void example_ckks_basics_i()
     cout << endl;
 
     /*
-    At this point if we tried switching further SEAL would throw an exception.
+    At this point if we tried switching further Microsoft SEAL would throw an exception.
     This is because the scale is 120 bits and after modulus switching we would
     be down to a total coeff_modulus smaller than that, which is not enough to
     contain the plaintext. We decrypt and decode, and observe that the result 
@@ -1705,7 +1705,7 @@ void example_ckks_basics_ii()
     /*
     We can even compute the fourth power of the input. Note that it is very
     important to first relinearize and then rescale. Trying to do these two
-    operations in the opposite order will make SEAL throw and exception.
+    operations in the opposite order will make Microsoft SEAL throw and exception.
     */
     cout << "Squaring and rescaling ..." << endl << endl;
     evaluator.square_inplace(encrypted);
@@ -1922,7 +1922,7 @@ void example_ckks_basics_iii()
 
     /*
     There are a couple of ways to fix this this problem. Since q4 and q3 are 
-    really close to each other, we could simply "lie" to SEAL and set the scales 
+    really close to each other, we could simply "lie" to Microsoft SEAL and set the scales 
     to be the same. For example, changing the scale of encrypted_x3 to be q4
     simply means that we scale the value of encrypted_x3 by q4/q3 which is very
     close to 1; this should not result in any noticeable error. 

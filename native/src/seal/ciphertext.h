@@ -17,7 +17,7 @@ namespace seal
 {
     /**
     Class to store a ciphertext element. The data for a ciphertext consists 
-    of two or more polynomials, which are in SEAL stored in a CRT form with 
+    of two or more polynomials, which are in Microsoft SEAL stored in a CRT form with 
     respect to the factors of the coefficient modulus. This data itself is 
     not meant to be modified directly by the user, but is instead operated 
     on by functions in the Evaluator class. The size of the backing array of 
@@ -366,7 +366,7 @@ namespace seal
 #endif
         /**
         Returns a pointer to a particular polynomial in the ciphertext 
-        data. Note that SEAL stores each polynomial in the ciphertext 
+        data. Note that Microsoft SEAL stores each polynomial in the ciphertext 
         modulo all of the K primes in the coefficient modulus. The pointer 
         returned by this function is to the beginning (constant coefficient)
         of the first one of these K polynomials.
@@ -393,7 +393,7 @@ namespace seal
 
         /**
         Returns a const pointer to a particular polynomial in the 
-        ciphertext data. Note that SEAL stores each polynomial in the 
+        ciphertext data. Note that Microsoft SEAL stores each polynomial in the 
         ciphertext modulo all of the K primes in the coefficient modulus. 
         The pointer returned by this function is to the beginning 
         (constant coefficient) of the first one of these K polynomials.

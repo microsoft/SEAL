@@ -37,7 +37,7 @@ namespace Microsoft.Research.SEAL
 
     /// <summary>
     /// A memory manager profile that always returns a MemoryPoolHandle pointing to
-    /// the global memory pool. SEAL uses this memory manager profile by default.
+    /// the global memory pool. Microsoft SEAL uses this memory manager profile by default.
     /// </summary>
     public class MMProfGlobal : MMProf
     {

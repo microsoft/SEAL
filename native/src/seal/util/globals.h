@@ -75,7 +75,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             extern const std::map<std::size_t, std::vector<SmallModulus>> default_coeff_modulus_256;
 
             /**
-            In SEAL the encryption parameter coeff_modulus is a vector of prime numbers
+            In Microsoft SEAL the encryption parameter coeff_modulus is a vector of prime numbers
             represented by instances of the SmallModulus class. We present here vectors
             of pre-selected primes that the user can choose from. These are the largest
             60-bit, 50-bit, 40-bit, 30-bit primes that are congruent to 1 modulo 2^18.
