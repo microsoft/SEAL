@@ -199,7 +199,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
    this is to copy `sealnetnative.dll` to the same directory where your application's executable
    is located.
 
-Alternatively, you can use a NuGet package, see intructions in (NUGET.md)[dotnet/nuget/NUGET.md].
+Alternatively, you can use a NuGet package, see intructions in [NUGET.md](dotnet/nuget/NUGET.md).
 
 ## Linux and macOS
 
@@ -290,3 +290,5 @@ cd ../..
 The code-base contains extensive and thoroughly commented examples that should 
 serve as a self-contained introduction to using Microsoft SEAL (see `native/examples/examples.cpp` or `dotnet/examples/Examples.cs`). In 
 addition, the header files contain detailed comments for the public API.
+
+For requests, bug reports and technical questions, please see [Issues.md](Issues.md).
