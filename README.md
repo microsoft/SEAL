@@ -1,6 +1,6 @@
-# Introduction
+# Microsoft SEAL
 
-Microsoft Simple Encrypted Arithmetic Library (Microsoft SEAL) is an easy-to-use 
+The Microsoft Simple Encrypted Arithmetic Library (**Microsoft SEAL**) is an easy-to-use 
 homomorphic encryption library developed by researchers in the Cryptography 
 Research group at Microsoft Research. Microsoft SEAL is written in modern standard C++ and 
 has no external dependencies, making it easy to compile and run in many different 
@@ -13,15 +13,15 @@ For more information about the Microsoft SEAL project, see [http://sealcrypto.or
 Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
 
 # Contents
-- [Building and using Microsoft SEAL](#building-and-using-microsoft-seal)
+- [Building and Using Microsoft SEAL](#building-and-using-microsoft-seal)
   - [Windows](#windows)
   - [Linux and macOS](#linux-and-os-x)
-- [Building and using Microsoft SEAL for .NET](#building-and-using-microsoft-seal-for-.net)
+- [Building and Using Microsoft SEAL for .NET](#building-and-using-microsoft-seal-for-.net)
   - [Windows](#windows-1)
   - [Linux and macOS](#linux-and-os-x-1)
 - [Documentation](#documentation)
 
-# Building and using Microsoft SEAL 
+# Building and Using Microsoft SEAL 
 
 ## Windows
 
@@ -154,7 +154,7 @@ cd ../..
 After completing these steps the `sealtest` executable can be found in `native/bin/`. All unit 
 tests should pass successfully.
 
-# Building and using Microsoft SEAL for .NET
+# Building and Using Microsoft SEAL for .NET
 
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL
 for use in .NET development.
