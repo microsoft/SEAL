@@ -12,7 +12,16 @@ For more information about the Microsoft SEAL project, see [http://sealcrypto.or
 
 Microsoft SEAL is licensed under the MIT license; see LICENSE.
 
-# Building and using SEAL 
+# Contents
+- [Building and using Microsoft SEAL](#building-and-using-microsoft-seal)
+  - [Windows](#windows)
+  - [Linux and OS X](#linux-and-os-x)
+- [Building and using Microsoft SEAL for .NET](#building-and-using-microsoft-seal-for-.net)
+  - [Windows](#windows-1)
+  - [Linux and OS X](#linux-and-os-x-1)
+- [Documentation](#documentation)
+
+# Building and using Microsoft SEAL 
 
 ## Windows
 
