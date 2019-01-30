@@ -3,7 +3,7 @@
 ## Technical questions
 
 The best way to get help with technical questions is on 
-[StackOverflow](https://stackoverflow.com/questions/tagged/seal) using the [seal] 
+[StackOverflow](https://stackoverflow.com/questions/tagged/seal) using the `[seal]` 
 tag. To contact the Microsoft SEAL team directly, please email
 [sealcrypto@microsoft.com](mailto:sealcrypto@microsoft.com).
 
@@ -18,10 +18,12 @@ relevant system information that you can submit with the bug report (see below).
 ### System information
 
 To collect system information for an improved bug report, please run
-    make -C tools system_info
-This will result in a file system\_info.tar.gz to be generated, which you can 
+```
+make -C tools system_info
+```
+This will result in a file `system\_info.tar.gz` to be generated, which you can 
 optionally attach with your bug report.
 
 ## Critical security issues
 
-For reporting critical security issues, see Security.md.
+For reporting critical security issues, see [Security.md](Security.md).
