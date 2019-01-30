@@ -25,7 +25,6 @@ namespace SEALTest
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
             SmallNTTTables tables;
             int coeff_count_power = 1;
-            int coeff_count = 1 << coeff_count_power;
             SmallModulus modulus(small_mods_60bit(0));
             tables.generate(coeff_count_power, modulus);
             ASSERT_EQ(2ULL, tables.coeff_count());
@@ -33,7 +32,6 @@ namespace SEALTest
             ASSERT_EQ(1, tables.coeff_count_power());
 
             coeff_count_power = 2;
-            coeff_count = 1 << coeff_count_power;
             modulus = small_mods_50bit(0);
             tables.generate(coeff_count_power, modulus);
             ASSERT_EQ(4ULL, tables.coeff_count());
@@ -41,7 +39,6 @@ namespace SEALTest
             ASSERT_EQ(2, tables.coeff_count_power());
 
             coeff_count_power = 10;
-            coeff_count = 1 << coeff_count_power;
             modulus = small_mods_40bit(0);
             tables.generate(coeff_count_power, modulus);
             ASSERT_EQ(1024ULL, tables.coeff_count());

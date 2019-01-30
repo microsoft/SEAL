@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include <cstddef>
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -352,18 +353,18 @@ void example_bfv_basics_i()
     for 128-bit, 192-bit, and 256-bit security levels. The integer parameter is 
     the degree of the polynomial modulus used.
     
-    In Microsoft SEAL the coefficient modulus is a positive composite number -- a product
-    of distinct primes of size up to 60 bits. When we talk about the size of the 
-    coefficient modulus we mean the bit length of the product of the primes. The 
-    small primes are represented by instances of the SmallModulus class so for
+    In Microsoft SEAL the coefficient modulus is a positive composite number -- 
+    a product of distinct primes of size up to 60 bits. When we talk about the size 
+    of the coefficient modulus we mean the bit length of the product of the primes. 
+    The small primes are represented by instances of the SmallModulus class so for
     example coeff_modulus_128bit(int) returns a vector of SmallModulus instances. 
     
-    It is possible for the user to select their own small primes. Since Microsoft SEAL uses
-    the Number Theoretic Transform (NTT) for polynomial multiplications modulo the
-    factors of the coefficient modulus, the factors need to be prime numbers
-    congruent to 1 modulo 2*poly_modulus_degree. We have generated a list of such
-    prime numbers of various sizes that the user can easily access through the
-    functions 
+    It is possible for the user to select their own small primes. Since Microsoft 
+    SEAL uses the Number Theoretic Transform (NTT) for polynomial multiplications 
+    modulo the factors of the coefficient modulus, the factors need to be prime 
+    numbers congruent to 1 modulo 2*poly_modulus_degree. We have generated a list 
+    of such prime numbers of various sizes that the user can easily access through 
+    the functions 
     
         small_mods_60bit(int)
         small_mods_50bit(int)
@@ -457,9 +458,9 @@ void example_bfv_basics_i()
     the numbers it can encode. 
 
     The IntegerEncoder is easy to understand and use for simple computations, 
-    and can be a good starting point to learning Microsoft SEAL. However, advanced users 
-    will probably prefer more efficient approaches, such as the BatchEncoder or 
-    the CKKSEncoder (discussed later).
+    and can be a good starting point to learning Microsoft SEAL. However, 
+    advanced users will probably prefer more efficient approaches, such as the 
+    BatchEncoder or the CKKSEncoder (discussed later).
 
     [BatchEncoder]
     If plain_modulus is a prime congruent to 1 modulo 2*poly_modulus_degree, the 
@@ -1222,8 +1223,8 @@ void example_bfv_basics_iv()
 
     /*
     When SEALContext is created from a given EncryptionParameters instance,
-    Microsoft SEAL automatically creates a so-called "modulus switching chain", which is
-    a chain of other encryption parameters derived from the original set.
+    Microsoft SEAL automatically creates a so-called "modulus switching chain", 
+    which is a chain of other encryption parameters derived from the original set.
     The parameters in the modulus switching chain are the same as the original 
     parameters with the exception that size of the coefficient modulus is
     decreasing going down the chain. More precisely, each parameter set in the
@@ -1536,11 +1537,11 @@ void example_ckks_basics_i()
     cout << endl;
 
     /*
-    At this point if we tried switching further Microsoft SEAL would throw an exception.
-    This is because the scale is 120 bits and after modulus switching we would
-    be down to a total coeff_modulus smaller than that, which is not enough to
-    contain the plaintext. We decrypt and decode, and observe that the result 
-    is the same as before. 
+    At this point if we tried switching further Microsoft SEAL would throw an 
+    exception. This is because the scale is 120 bits and after modulus switching 
+    we would be down to a total coeff_modulus smaller than that, which is not 
+    enough to contain the plaintext. We decrypt and decode, and observe that the 
+    result is the same as before. 
     */
     decryptor.decrypt(encrypted, plain);
     encoder.decode(plain, input);
@@ -1922,10 +1923,10 @@ void example_ckks_basics_iii()
 
     /*
     There are a couple of ways to fix this this problem. Since q4 and q3 are 
-    really close to each other, we could simply "lie" to Microsoft SEAL and set the scales 
-    to be the same. For example, changing the scale of encrypted_x3 to be q4
-    simply means that we scale the value of encrypted_x3 by q4/q3 which is very
-    close to 1; this should not result in any noticeable error. 
+    really close to each other, we could simply "lie" to Microsoft SEAL and set 
+    the scales to be the same. For example, changing the scale of encrypted_x3 to 
+    be q4 simply means that we scale the value of encrypted_x3 by q4/q3 which is 
+    very close to 1; this should not result in any noticeable error. 
     
     Another option would be to encode 1 with scale q4, perform a multiply_plain 
     with encrypted_x1, and finally rescale. In this case we would additionally 
@@ -2070,9 +2071,9 @@ void example_bfv_performance()
         chrono::high_resolution_clock::time_point time_start, time_end;
 
         print_parameters(context);
-        auto &parms = context->context_data()->parms();
-        auto &plain_modulus = parms.plain_modulus();
-        size_t poly_modulus_degree = parms.poly_modulus_degree();
+        auto &curr_parms = context->context_data()->parms();
+        auto &plain_modulus = curr_parms.plain_modulus();
+        size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
 
         /*
         Set up keys. For both relinearization and rotations we use a large 
@@ -2164,7 +2165,7 @@ void example_bfv_performance()
             we create is of the exactly right size so unnecessary reallocations 
             are avoided.
             */
-            Plaintext plain(parms.poly_modulus_degree(), 0);
+            Plaintext plain(curr_parms.poly_modulus_degree(), 0);
             time_start = chrono::high_resolution_clock::now();
             batch_encoder.encode(pod_vector, plain);
             time_end = chrono::high_resolution_clock::now();
@@ -2394,8 +2395,8 @@ void example_ckks_performance()
         chrono::high_resolution_clock::time_point time_start, time_end;
 
         print_parameters(context);
-        auto &parms = context->context_data()->parms();
-        size_t poly_modulus_degree = parms.poly_modulus_degree();
+        auto &curr_parms = context->context_data()->parms();
+        size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
 
         cout << "Generating secret/public keys: ";
         KeyGenerator keygen(context);
@@ -2464,11 +2465,11 @@ void example_ckks_performance()
             /*
             [Encoding]
             */
-            Plaintext plain(parms.poly_modulus_degree() * 
-                parms.coeff_modulus().size(), 0);
+            Plaintext plain(curr_parms.poly_modulus_degree() * 
+                curr_parms.coeff_modulus().size(), 0);
             time_start = chrono::high_resolution_clock::now();
             ckks_encoder.encode(pod_vector, 
-                static_cast<double>(parms.coeff_modulus().back().value()), plain);
+                static_cast<double>(curr_parms.coeff_modulus().back().value()), plain);
             time_end = chrono::high_resolution_clock::now();
             time_encode_sum += chrono::duration_cast<
                 chrono::microseconds>(time_end - time_start);

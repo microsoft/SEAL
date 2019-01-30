@@ -32,8 +32,8 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams, bool e
     IfNullRet(encParams, E_POINTER);
     IfNullRet(context, E_POINTER);
 
-    auto result = SEALContext::Create(*encParams);
-    pointer_store_.insert_or_assign(result.get(), result);
+    auto result = SEALContext::Create(*encParams, expand_mod_chain);
+    pointer_store_[result.get()] = result;
 
     *context = result.get();
     return S_OK;

@@ -50,7 +50,7 @@ include(CheckIncludeFiles)
 include(CheckCXXSourceRuns)
 include(CheckTypeSize)
 
-# For Easier Adding CXX Compiler Flags
+# For easier adding of CXX compiler flags
 include(CheckCXXCompilerFlag)
 
 function(enable_cxx_compiler_flag_if_supported flag)

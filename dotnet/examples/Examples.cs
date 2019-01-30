@@ -1911,10 +1911,10 @@ namespace SEALNetExamples
 
             /*
             There are a couple of ways to fix this this problem. Since q4 and q3 are 
-            really close to each other, we could simply "lie" to Microsoft SEAL and set the scales 
-            to be the same. For example, changing the scale of encryptedX3 to be q4
-            simply means that we scale the value of encryptedX3 by q4/q3 which is very
-            close to 1; this should not result in any noticeable error. 
+            really close to each other, we could simply "lie" to Microsoft SEAL and set 
+            the scales to be the same. For example, changing the scale of encryptedX3 to 
+            be q4 simply means that we scale the value of encryptedX3 by q4/q3 which is 
+            very close to 1; this should not result in any noticeable error. 
 
             Another option would be to encode 1 with scale q4, perform a MultiplyPlain 
             with encryptedX1, and finally rescale. In this case we would additionally 
