@@ -15,10 +15,10 @@ Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
 # Contents
 - [Building and Using Microsoft SEAL](#building-and-using-microsoft-seal)
   - [Windows](#windows)
-  - [Linux and macOS](#linux-and-os-x)
+  - [Linux and macOS](#linux-and-macos)
 - [Building and Using Microsoft SEAL for .NET](#building-and-using-microsoft-seal-for-.net)
   - [Windows](#windows-1)
-  - [Linux and macOS](#linux-and-os-x-1)
+  - [Linux and macOS](#linux-and-macos-1)
 - [Documentation](#documentation)
 
 # Building and Using Microsoft SEAL 
@@ -286,5 +286,5 @@ cd ../..
 # Documentation
 
 The code-base contains extensive and thoroughly commented examples that should 
-serve as a self-contained introduction to using SEAL (see `native/examples/examples.cpp` or `dotnet/examples/Examples.cs`). In 
+serve as a self-contained introduction to using Microsoft SEAL (see `native/examples/examples.cpp` or `dotnet/examples/Examples.cs`). In 
 addition, the header files contain detailed comments for the public API.
