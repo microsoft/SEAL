@@ -35,6 +35,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{A5BADD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet", "dotnet", "{0786F255-C3A7-4912-A669-12273E7AE013}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{33C15AAC-6E56-477E-A118-3451FD21AC49}"
+	ProjectSection(SolutionItems) = preProject
+		dotnet\nuget\README.txt = dotnet\nuget\README.txt
+		dotnet\nuget\SEALNet.nuspec = dotnet\nuget\SEALNet.nuspec
+		dotnet\nuget\SEALNet.targets = dotnet\nuget\SEALNet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -81,6 +88,7 @@ Global
 		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E} = {0786F255-C3A7-4912-A669-12273E7AE013}
 		{D0FCCA29-F0F8-49A3-9615-24FF899F1909} = {0786F255-C3A7-4912-A669-12273E7AE013}
 		{18DA9F90-3131-461A-A3E8-40AC0B1D7632} = {0786F255-C3A7-4912-A669-12273E7AE013}
+		{33C15AAC-6E56-477E-A118-3451FD21AC49} = {0786F255-C3A7-4912-A669-12273E7AE013}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15A17F22-F747-4B82-BF5F-E0224AF4B3ED}
