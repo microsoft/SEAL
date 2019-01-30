@@ -29,20 +29,20 @@ orders of magnitude worse than in Release mode.
 #### Library
 
 Build the Microsoft SEAL project (native/src/SEAL.vcxproj) from SEAL.sln. Building Microsoft SEAL results
-in the static library seal.lib to be created in native/lib/$(Platform)/$(Configuration). When
-linking with applications, you need to add native/src/ (full path) as an include directory
+in the static library seal.lib to be created in `native/lib/$(Platform)/$(Configuration)`. When
+linking with applications, you need to add `native/src/` (full path) as an include directory
 for SEAL header files.
 
 #### Examples
 
-Build the SEALExamples project (native/examples/SEALExamples.vcxproj) from SEAL.sln.
-This results in an executable sealexamples.exe to be created in native/bin/$(Platform)/$(Configuration).
+Build the SEALExamples project (`native/examples/SEALExamples.vcxproj`) from SEAL.sln.
+This results in an executable sealexamples.exe to be created in `native/bin/$(Platform)/$(Configuration)`.
 
 #### Unit tests
 
 The unit tests require the Google Test framework to be installed. The appropriate 
-NuGet package is already listed in native/tests/packages.config, so once you attempt to build 
-the SEALTest project (native/tests/SEALTest.vcxproj) from SEAL.sln Visual Studio will 
+NuGet package is already listed in `native/tests/packages.config`, so once you attempt to build 
+the SEALTest project (`native/tests/SEALTest.vcxproj`) from SEAL.sln Visual Studio will 
 automatically download and install it for you.
 
 ## Linux and OS X
@@ -88,8 +88,8 @@ make
 cd ../..
 ````
 
-After completing the above steps the sealexamples executable can be found in native/bin/. 
-See native/examples/CMakeLists.txt for how to link SEAL with your own project using cmake.
+After completing the above steps the sealexamples executable can be found in `native/bin/`. 
+See `native/examples/CMakeLists.txt` for how to link Microsoft SEAL with your own project using cmake.
 
 #### Unit tests
 
@@ -102,7 +102,7 @@ make
 cd ../..
 ````
 
-After completing these steps the sealtest executable can be found in native/bin/. All unit 
+After completing these steps the sealtest executable can be found in `native/bin/`. All unit 
 tests should pass successfully.
 
 ### Local install
@@ -128,8 +128,8 @@ make
 cd ../..
 ````
 
-After completing the above steps the sealexamples executable can be found in native/bin/. 
-See native/examples/CMakeLists.txt for how to link Microsoft SEAL with your own project using cmake.
+After completing the above steps the sealexamples executable can be found in `native/bin/`. 
+See `native/examples/CMakeLists.txt` for how to link Microsoft SEAL with your own project using cmake.
 
 #### Unit tests
 
@@ -142,7 +142,7 @@ make
 cd ../..
 ````
 
-After completing these steps the sealtest executable can be found in native/bin/. All unit 
+After completing these steps the sealtest executable can be found in `native/bin/`. All unit 
 tests should pass successfully.
 
 # Building and using Microsoft SEAL for .NET
@@ -158,28 +158,28 @@ to build the .NET assembly, a backing native shared library, .NET examples and u
 #### Native library
 
 Microsoft SEAL for .NET requires a native library that is invoked by the managed .NET library.
-Build the SEALNetNative project (dotnet/native/SEALNetNative.vcxproj) from SEAL.sln. Building SEALNetNative results
-in the dynamic library sealnetnative.dll being created in dotnet/lib/$(Platform)/$(Configuration). This library is
+Build the SEALNetNative project (`dotnet/native/SEALNetNative.vcxproj`) from SEAL.sln. Building SEALNetNative results
+in the dynamic library sealnetnative.dll being created in `dotnet/lib/$(Platform)/$(Configuration)`. This library is
 meant to be used only by the .NET library, not by end users. The library needs to be
 present in the same directory as your executable when developing a .NET application.
 
 #### .NET library
 
-Once you have built the shared native library (see above), build the SEALNet project (dotnet/src/SEALNet.csproj) from SEAL.sln. Building SEALNet results
-in the assembly SEALNet.dll being created in dotnet/src/bin/$(Configuration)/netstandard2.0. This
+Once you have built the shared native library (see above), build the SEALNet project (`dotnet/src/SEALNet.csproj`) from SEAL.sln. Building SEALNet results
+in the assembly SEALNet.dll being created in `dotnet/lib/$(Configuration)/netstandard2.0`. This
 is the assembly you can reference in your application.
 
 #### .NET examples
 
-Build the SEALNetExamples project (dotnet/examples/SEALNetExamples.csproj) from SEAL.sln.
+Build the SEALNetExamples project (`dotnet/examples/SEALNetExamples.csproj`) from SEAL.sln.
 This results in the assembly SEALNetExamples.dll being created in
-dotnet/examples/bin/$(Configuration)/netcoreapp2.1. The project takes care of copying the
+`dotnet/bin/$(Configuration)/netcoreapp2.1`. The project takes care of copying the
 native SEALNetNative library to the output directory.
 
 #### .NET unit tests
 
-Build the SEALNet Test project (dotnet/tests/SEALNetTest.csproj) from SEAL.sln. This results
-in the SEALNetTest.dll assembly being created in dotnet/tests/bin/$(Configuration)/netcoreapp2.1.
+Build the SEALNet Test project (`dotnet/tests/SEALNetTest.csproj`) from SEAL.sln. This results
+in the SEALNetTest.dll assembly being created in `dotnet/lib/$(Configuration)/netcoreapp2.1`.
 The project takes care of copying the native SEALNetNative library to the output directory.
 
 ### Using Microsoft SEAL for .NET in your own application
@@ -222,14 +222,14 @@ cd ../..
 
 #### .NET library
 
-To build the .NET standard library, do the following:
+To build the .NET Standard library, do the following:
 ````
 cd dotnet/src
 dotnet build
 cd ../..
 ````
 You can use the dotnet parameter `--configuration` to build either a Debug or Release version of the assembly.
-This will result in a SEALNet.dll assembly being created in dotnet/src/bin/$(Configuration)/netstandard2.0. This
+This will result in a SEALNet.dll assembly being created in `dotnet/lib/$(Configuration)/netstandard2.0`. This
 assembly is the one you will want to reference in your own projects.
 
 #### Examples
@@ -254,7 +254,7 @@ cd ../..
 All unit tests should pass. You can use the dotnet parameter `--configuration` to run Debug or Relase unit tests,
 and you can use `--verbosity detailed` to print the list of unit tests that are being run.
 
-### Using SEAL for .NET in your own application
+### Using Microsoft SEAL for .NET in your own application
 
 To use Microsoft SEAL for .NET in your own application you need to:
 1. Add a reference in your project to SEALNet.dll
@@ -277,5 +277,5 @@ cd ../..
 # Documentation
 
 The code-base contains extensive and thoroughly commented examples that should 
-serve as a self-contained introduction to using SEAL (see native/examples/examples.cpp). In 
+serve as a self-contained introduction to using SEAL (see `native/examples/examples.cpp` or `dotnet/examples/Examples.cs`). In 
 addition, the header files contain detailed comments for the public API.

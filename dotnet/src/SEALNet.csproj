@@ -10,9 +10,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin/Release/SEALNet.xml</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>$(ProjectDir)../lib/$(Configuration)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin/Debug/SEALNet.xml</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>$(ProjectDir)../lib/$(Configuration)</OutputPath>
   </PropertyGroup>
 </Project>
