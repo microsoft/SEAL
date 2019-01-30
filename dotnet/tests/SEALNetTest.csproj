@@ -11,7 +11,7 @@
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>../bin/$(Configuration)</OutputPath>
+    <OutputPath>../lib/$(Configuration)</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
