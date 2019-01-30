@@ -24,10 +24,10 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        // Do not check "context_->parameters_set()"!
-        // Otherwise, tests/intencoder.cpp requires major/irrelavent changes.
-        // Integer encoder should function without valid encryption parameters.
-        // Except that, BFV is required.
+
+        // Unlike in other classes, we do not check "context_->parameters_set()".
+        // The IntegerEncoder should function without valid encryption parameters
+        // as long as the scheme is BFV and the plaintext modulus is at least 2.
         auto &context_data = *context_->context_data();
         if (context_data.parms().scheme() != scheme_type::BFV)
         {
