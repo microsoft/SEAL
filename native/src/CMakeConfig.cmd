@@ -48,5 +48,5 @@ echo Running CMake configuration in %cd%
 	-DALLOW_COMMAND_LINE_BUILD=1				^
 	-DCMAKE_BUILD_TYPE=%PROJECTCONFIGURATION%	^
 	-DSEAL_LIB_BUILD_TYPE="Static_PIC"			^
-	-DMSGSL_INCLUDE_DIR="%INCLUDEPATH%"         ^
+	-DMSGSL_INCLUDE_DIR="%INCLUDEPATH%"			^
 	--no-warn-unused-cli
