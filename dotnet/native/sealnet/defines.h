@@ -3,10 +3,13 @@
 
 #pragma once
 
+// STD
+#include <cstddef>
+
 #ifdef _MSC_VER
 
 // Check that size_t is 64 bits
-static_assert(sizeof(size_t) == 8, "Require sizeof(size_t) == 8");
+static_assert(sizeof(std::size_t) == 8, "Require sizeof(std::size_t) == 8");
 
 #ifdef SEALNETNATIVE_EXPORTS
 #define SEALNETNATIVE extern "C" __declspec(dllexport)
