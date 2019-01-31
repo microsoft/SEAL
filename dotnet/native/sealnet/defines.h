@@ -11,6 +11,11 @@
 // Check that size_t is 64 bits
 static_assert(sizeof(std::size_t) == 8, "Require sizeof(std::size_t) == 8");
 
+// Check that architecture (platform) is x64
+#ifndef _WIN64
+static_assert(false, "Require architecture == x64");
+#endif
+
 #ifdef SEALNETNATIVE_EXPORTS
 #define SEALNETNATIVE extern "C" __declspec(dllexport)
 #else
