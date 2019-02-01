@@ -108,7 +108,7 @@ namespace seal
 
         /*
         Ciphertext (c_0,c_1)
-        c_0 = Delta * m + public_key_[0] * u + e_1 where u sampled from R_2 and e_1 sampled from chi.
+        c_0 = Delta * m + public_key_[0] * u + e_1 where u sampled from R_3 and e_1 sampled from chi.
         c_1 = public_key_[1] * u + e_2 where e_2 sampled from chi.
         */
 
@@ -189,7 +189,7 @@ namespace seal
 
         /*
             Ciphertext (c_0,c_1)
-            c_0 = m + public_key_[0] * u + e_1 where u sampled from R_2 and e_1 sampled from chi.
+            c_0 = m + public_key_[0] * u + e_1 where u sampled from R_3 and e_1 sampled from chi.
             c_1 = public_key_[1] * u + e_2 where e_2 sampled from chi.
         */
 
@@ -261,7 +261,7 @@ namespace seal
         auto upper_half_increment = context_data.upper_half_increment();
 
         // Multiply plain by scalar coeff_div_plain_modulus_ and reposition if in upper-half.
-        for (size_t i = 0; i < plain_coeff_count; i++)
+        for (size_t i = 0; i < plain_coeff_count; i++, destination++)
         {
             if (plain[i] >= plain_upper_half_threshold)
             {
@@ -286,7 +286,6 @@ namespace seal
                         destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
                 }
             }
-            destination++;
         }
     }
 
