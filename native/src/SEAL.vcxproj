@@ -167,7 +167,7 @@
       <Command>"$(ProjectDir)CMakeConfig.cmd" $(Configuration) "$(DevEnvDir)" "$(IncludePath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
-      <Message>Configure SEAL through CMake</Message>
+      <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -190,7 +190,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" $(Configuration) "$(DevEnvDir)" "$(IncludePath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>

@@ -35,7 +35,7 @@ if not exist "%CMAKEPATH%" (
 
 echo Found CMake at %CMAKEPATH%
 
-cd %~dp0\..\..\src
+cd %~dp0
 if not exist ".config" (
 	mkdir .config
 )
