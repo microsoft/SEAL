@@ -91,7 +91,7 @@ void sealnet::CopyParmsId(const parms_id_type &src, uint64_t *dest)
     }
 }
 
-HRESULT seal::dll::ToStringHelper(const string &str, char *outstr, uint64_t *length)
+HRESULT sealnet::ToStringHelper(const string &str, char *outstr, uint64_t *length)
 {
     uint64_t result_length = add_safe(static_cast<uint64_t>(str.length()), uint64_t(1));
     if (nullptr == outstr)

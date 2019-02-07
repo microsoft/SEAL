@@ -12,9 +12,7 @@ using System.Text;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
-    /// Class to store relinearization keys. An relinearization key has type std::vector<Ciphertext>.
-    /// An instance of the RelinKeys class stores internally an std::vector of relinearization
-    /// keys.
+    /// Class to store relinearization keys.
     /// </summary>
     /// <remarks>
     /// <para>

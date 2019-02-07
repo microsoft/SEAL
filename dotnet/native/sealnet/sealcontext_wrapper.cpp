@@ -25,7 +25,6 @@ namespace sealnet
     unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
 }
 
-
 SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams, bool expand_mod_chain, void **context)
 {
     EncryptionParameters *encParams = FromVoid<EncryptionParameters>(encryptionParams);

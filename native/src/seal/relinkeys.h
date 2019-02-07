@@ -13,11 +13,8 @@
 namespace seal
 {
     /**
-    Class to store relinearization keys. An relinearization key has type 
-    std::vector<Ciphertext>.
-    An instance of the RelinKeys class stores internally an std::vector of 
-    relinearization keys.
-    
+    Class to store relinearization keys.
+
     @par Relinearization
     Concretely, an relinearization key corresponding to a power K of the secret 
     key can be used in the relinearization operation to change a ciphertext of size 

@@ -34,13 +34,15 @@ namespace Microsoft.Research.SEAL
         /// on the given EncryptionParameters. 
         /// </summary>
         /// <param name="parms">The encryption parameters.</param>
+        /// <param name="expandModChain">Determines whether the modulus switching chain
+        /// should be created</param>
         /// <exception cref="ArgumentNullException">if parms is null</exception>
-        public static SEALContext Create(EncryptionParameters parms)
+        public static SEALContext Create(EncryptionParameters parms, bool expandModChain = true)
         {
             if (null == parms)
                 throw new ArgumentNullException(nameof(parms));
 
-            NativeMethods.SEALContext_Create(parms.NativePtr, out IntPtr contextPtr);
+            NativeMethods.SEALContext_Create(parms.NativePtr, expandModChain, out IntPtr contextPtr);
             SEALContext context = new SEALContext(contextPtr);
             return context;
         }
