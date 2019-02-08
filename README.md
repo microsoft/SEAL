@@ -20,6 +20,7 @@ Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
   - [Windows](#windows-1)
   - [Linux and macOS](#linux-and-macos-1)
 - [Documentation](#documentation)
+- [Contributing](#contributing)
 
 # Building and Using Microsoft SEAL 
 
@@ -304,3 +305,9 @@ serve as a self-contained introduction to using Microsoft SEAL (see `native/exam
 In addition, the header files contain detailed comments for the public API.
 
 For requests, bug reports and technical questions, please see [Issues.md](Issues.md).
+
+# Contributing
+
+As Microsoft SEAL is open source and licensed under the MIT license, we are happy to review
+and accept pull requests and other contributions to the code. For more instructions on how to
+contribute to Microsoft SEAL, please see [Contrib.md](Contrib.md).
