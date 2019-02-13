@@ -81,6 +81,9 @@
     <ClInclude Include="seal\randomgen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="seal\randomtostd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="seal\seal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -121,9 +124,6 @@
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\util\polycore.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\util\randomtostd.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\util\smallntt.h">

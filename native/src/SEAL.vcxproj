@@ -29,6 +29,7 @@
     <ClInclude Include="seal\plaintext.h" />
     <ClInclude Include="seal\publickey.h" />
     <ClInclude Include="seal\randomgen.h" />
+    <ClInclude Include="seal\randomtostd.h" />
     <ClInclude Include="seal\relinkeys.h" />
     <ClInclude Include="seal\seal.h" />
     <ClInclude Include="seal\secretkey.h" />
@@ -51,7 +52,6 @@
     <ClInclude Include="seal\util\polyarithmod.h" />
     <ClInclude Include="seal\util\polyarithsmallmod.h" />
     <ClInclude Include="seal\util\polycore.h" />
-    <ClInclude Include="seal\util\randomtostd.h" />
     <ClInclude Include="seal\util\smallntt.h" />
     <ClInclude Include="seal\util\uintarith.h" />
     <ClInclude Include="seal\util\uintarithmod.h" />

@@ -51,6 +51,7 @@
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\publickey.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
+    <ClCompile Include="seal\randomtostd.cpp" />
     <ClCompile Include="seal\relinkeys.cpp" />
     <ClCompile Include="seal\secretkey.cpp" />
     <ClCompile Include="seal\smallmodulus.cpp" />
@@ -65,7 +66,6 @@
     <ClCompile Include="seal\util\polyarithmod.cpp" />
     <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
     <ClCompile Include="seal\util\polycore.cpp" />
-    <ClCompile Include="seal\util\randomtostd.cpp" />
     <ClCompile Include="seal\util\smallntt.cpp" />
     <ClCompile Include="seal\util\stringtouint64.cpp" />
     <ClCompile Include="seal\util\uint64tostring.cpp" />

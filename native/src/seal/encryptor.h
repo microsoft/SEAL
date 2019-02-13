@@ -10,8 +10,8 @@
 #include "seal/ciphertext.h"
 #include "seal/memorymanager.h"
 #include "seal/context.h"
-#include "seal/util/smallntt.h"
 #include "seal/publickey.h"
+#include "seal/util/smallntt.h"
 
 namespace seal
 {

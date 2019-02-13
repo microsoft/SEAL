@@ -19,6 +19,7 @@ target_sources(sealtest
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/publickey.cpp
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/randomtostd.cpp
         ${CMAKE_CURRENT_LIST_DIR}/relinkeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp

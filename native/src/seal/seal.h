@@ -20,6 +20,7 @@
 #include "seal/batchencoder.h"
 #include "seal/publickey.h"
 #include "seal/randomgen.h"
+#include "seal/randomtostd.h"
 #include "seal/relinkeys.h"
 #include "seal/secretkey.h"
 #include "seal/smallmodulus.h"

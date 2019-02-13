@@ -13,7 +13,6 @@ target_sources(sealtest
         ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/polycore.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/randomtostd.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallntt.cpp
         ${CMAKE_CURRENT_LIST_DIR}/stringtouint64.cpp
         ${CMAKE_CURRENT_LIST_DIR}/uint64tostring.cpp

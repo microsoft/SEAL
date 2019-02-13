@@ -45,7 +45,6 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.h
         ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.h
         ${CMAKE_CURRENT_LIST_DIR}/polycore.h
-        ${CMAKE_CURRENT_LIST_DIR}/randomtostd.h
         ${CMAKE_CURRENT_LIST_DIR}/smallntt.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarith.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.h

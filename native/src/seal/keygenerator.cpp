@@ -3,12 +3,12 @@
 
 #include <algorithm>
 #include "seal/keygenerator.h"
+#include "seal/randomtostd.h"
 #include "seal/util/common.h"
 #include "seal/util/uintcore.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/polyarithsmallmod.h"
-#include "seal/util/randomtostd.h"
 #include "seal/util/clipnormal.h"
 #include "seal/util/polycore.h"
 #include "seal/util/smallntt.h"

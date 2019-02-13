@@ -4,13 +4,14 @@
 #include <algorithm>
 #include <stdexcept>
 #include "seal/encryptor.h"
+#include "seal/randomgen.h"
+#include "seal/randomtostd.h"
+#include "seal/smallmodulus.h"
 #include "seal/util/common.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/clipnormal.h"
-#include "seal/util/randomtostd.h"
 #include "seal/util/smallntt.h"
-#include "seal/smallmodulus.h"
 
 using namespace std;
 using namespace seal::util;

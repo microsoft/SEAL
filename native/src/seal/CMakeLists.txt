@@ -42,6 +42,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.h
         ${CMAKE_CURRENT_LIST_DIR}/publickey.h
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.h
+        ${CMAKE_CURRENT_LIST_DIR}/randomtostd.h
         ${CMAKE_CURRENT_LIST_DIR}/relinkeys.h
         ${CMAKE_CURRENT_LIST_DIR}/seal.h
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.h
