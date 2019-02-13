@@ -346,9 +346,9 @@ void example_bfv_basics_i()
     Our recommended values for the coefficient modulus can be easily accessed 
     through the functions 
         
-        coeff_modulus_128bit(int)
-        coeff_modulus_192bit(int)
-        coeff_modulus_256bit(int)
+        default_params::coeff_modulus_128(int)
+        default_params::coeff_modulus_192(int)
+        default_params::coeff_modulus_256(int)
 
     for 128-bit, 192-bit, and 256-bit security levels. The integer parameter is 
     the degree of the polynomial modulus used.
@@ -357,7 +357,8 @@ void example_bfv_basics_i()
     a product of distinct primes of size up to 60 bits. When we talk about the size 
     of the coefficient modulus we mean the bit length of the product of the primes. 
     The small primes are represented by instances of the SmallModulus class so for
-    example coeff_modulus_128bit(int) returns a vector of SmallModulus instances. 
+    example default_params::coeff_modulus_128(int) returns a vector of SmallModulus 
+    instances. 
     
     It is possible for the user to select their own small primes. Since Microsoft 
     SEAL uses the Number Theoretic Transform (NTT) for polynomial multiplications 
@@ -366,10 +367,10 @@ void example_bfv_basics_i()
     of such prime numbers of various sizes that the user can easily access through 
     the functions 
     
-        small_mods_60bit(int)
-        small_mods_50bit(int)
-        small_mods_40bit(int)
-        small_mods_30bit(int)
+        default_params::small_mods_60bit(int)
+        default_params::small_mods_50bit(int)
+        default_params::small_mods_40bit(int)
+        default_params::small_mods_30bit(int)
     
     each of which gives access to an array of primes of the denoted size. These 
     primes are located in the source file util/globals.cpp. Again, please keep 
@@ -385,7 +386,7 @@ void example_bfv_basics_i()
     level. Concretely, this coefficient modulus consists of only one 54-bit prime 
     factor: 0x3fffffff000001.
     */
-    parms.set_coeff_modulus(coeff_modulus_128(2048));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(2048));
 
     /*
     The plaintext modulus can be any positive integer, even though here we take 
@@ -628,7 +629,7 @@ void example_bfv_basics_ii()
 
     The total size is 218 bits.
     */
-    parms.set_coeff_modulus(coeff_modulus_128(8192));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(8192));
     parms.set_plain_modulus(1 << 10);
 
     auto context = SEALContext::Create(parms);
@@ -800,7 +801,7 @@ void example_bfv_basics_ii()
     running time here, but relinearization with relin_keys60 (below) is much 
     faster than with relin_keys16.
     */
-    auto relin_keys60 = keygen.relin_keys(dbc_max());
+    auto relin_keys60 = keygen.relin_keys(default_params::dbc_max());
 
     cout << "Encrypting " << plain1.to_string() << ": ";
     encryptor.encrypt(plain1, encrypted);
@@ -911,7 +912,7 @@ void example_bfv_basics_iii()
     EncryptionParameters parms(scheme_type::BFV);
 
     parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(coeff_modulus_128(4096));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(4096));
 
     /*
     Note that 40961 is a prime number and 2*4096 divides 40960, so batching will
@@ -1172,7 +1173,7 @@ void example_bfv_basics_iv()
     EncryptionParameters parms(scheme_type::BFV);
 
     parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(coeff_modulus_128(8192));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(8192));
     parms.set_plain_modulus(1 << 20);
 
     /*
@@ -1303,7 +1304,7 @@ void example_bfv_basics_iv()
     largest parameters) and perform some simple computations on it.
     */
     encryptor.encrypt(plain, encrypted);
-    auto relin_keys = keygen.relin_keys(60); 
+    auto relin_keys = keygen.relin_keys(default_params::dbc_max()); 
     cout << "Noise budget before squaring: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
     evaluator.square_inplace(encrypted);
@@ -1408,7 +1409,7 @@ void example_ckks_basics_i()
     */
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(coeff_modulus_128(8192));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(8192));
 
     /*
     We create the SEALContext as usual and print the parameters.
@@ -1422,7 +1423,7 @@ void example_ckks_basics_i()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys(60);
+    auto relin_keys = keygen.relin_keys(default_params::dbc_max());
 
     /*
     We also set up an Encryptor, Evaluator, and Decryptor as usual.
@@ -1618,7 +1619,7 @@ void example_ckks_basics_ii()
     */
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(coeff_modulus_128(8192));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(8192));
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -1626,7 +1627,7 @@ void example_ckks_basics_ii()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys(60);
+    auto relin_keys = keygen.relin_keys(default_params::dbc_max());
 
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
@@ -1786,13 +1787,15 @@ void example_ckks_basics_iii()
     coefficient modulus achieves already a 128-bit security level, this 160-bit 
     modulus must be much more secure.
 
-    We use the small_mods_40bit(int) function to get primes from a hard-coded 
-    list of 40-bit prime numbers; it is important that all primes used for the
-    coefficient modulus are distinct.
+    We use the default_params::small_mods_40bit(int) function to get primes from 
+    a hard-coded list of 40-bit prime numbers; it is important that all primes 
+    used for the coefficient modulus are distinct.
     */
     parms.set_coeff_modulus({
-        small_mods_40bit(0), small_mods_40bit(1),
-        small_mods_40bit(2), small_mods_40bit(3) });
+        default_params::small_mods_40bit(0), 
+        default_params::small_mods_40bit(1),
+        default_params::small_mods_40bit(2), 
+        default_params::small_mods_40bit(3) });
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -1800,7 +1803,7 @@ void example_ckks_basics_iii()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys(60);
+    auto relin_keys = keygen.relin_keys(default_params::dbc_max());
 
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
@@ -2089,7 +2092,7 @@ void example_bfv_performance()
         /*
         Generate relinearization keys.
         */
-        int dbc = dbc_max();
+        int dbc = default_params::dbc_max();
         cout << "Generating relinearization keys (dbc = " << dbc << "): ";
         time_start = chrono::high_resolution_clock::now();
         auto relin_keys = keygen.relin_keys(dbc);
@@ -2355,19 +2358,19 @@ void example_bfv_performance()
 
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(coeff_modulus_128(4096));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(4096));
     parms.set_plain_modulus(786433);
     performance_test(SEALContext::Create(parms));
 
     cout << endl;
     parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(coeff_modulus_128(8192));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(8192));
     parms.set_plain_modulus(786433);
     performance_test(SEALContext::Create(parms));
 
     cout << endl;
     parms.set_poly_modulus_degree(16384);
-    parms.set_coeff_modulus(coeff_modulus_128(16384));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(16384));
     parms.set_plain_modulus(786433);
     performance_test(SEALContext::Create(parms));
 
@@ -2376,7 +2379,7 @@ void example_bfv_performance()
     */
     // cout << endl;
     // parms.set_poly_modulus_degree(32768);
-    // parms.set_coeff_modulus(coeff_modulus_128(32768));
+    // parms.set_coeff_modulus(default_params::coeff_modulus_128(32768));
     // parms.set_plain_modulus(786433);
     // performance_test(SEALContext::Create(parms));
 }
@@ -2405,7 +2408,7 @@ void example_ckks_performance()
         auto secret_key = keygen.secret_key();
         auto public_key = keygen.public_key();
 
-        int dbc = dbc_max();
+        int dbc = default_params::dbc_max();
         cout << "Generating relinearization keys (dbc = " << dbc << "): ";
         time_start = chrono::high_resolution_clock::now();
         auto relin_keys = keygen.relin_keys(dbc);
@@ -2638,17 +2641,17 @@ void example_ckks_performance()
 
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(coeff_modulus_128(4096));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(4096));
     performance_test(SEALContext::Create(parms));
 
     cout << endl;
     parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(coeff_modulus_128(8192));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(8192));
     performance_test(SEALContext::Create(parms));
 
     cout << endl;
     parms.set_poly_modulus_degree(16384);
-    parms.set_coeff_modulus(coeff_modulus_128(16384));
+    parms.set_coeff_modulus(default_params::coeff_modulus_128(16384));
     performance_test(SEALContext::Create(parms));
 
     /*
@@ -2656,6 +2659,6 @@ void example_ckks_performance()
     */
     // cout << endl;
     // parms.set_poly_modulus_degree(32768);
-    // parms.set_coeff_modulus(coeff_modulus_128(32768));
+    // parms.set_coeff_modulus(default_params::coeff_modulus_128(32768));
     // performance_test(SEALContext::Create(parms));
 }

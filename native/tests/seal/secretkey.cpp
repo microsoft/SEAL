@@ -8,6 +8,7 @@
 #include "seal/defaultparams.h"
 
 using namespace seal;
+using namespace seal::default_params;
 using namespace std;
 
 namespace SEALTest

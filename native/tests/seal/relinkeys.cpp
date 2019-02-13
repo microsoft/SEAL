@@ -10,6 +10,7 @@
 
 using namespace seal;
 using namespace seal::util;
+using namespace seal::default_params;
 using namespace std;
 
 namespace SEALTest

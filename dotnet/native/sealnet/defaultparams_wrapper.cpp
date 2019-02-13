@@ -20,7 +20,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_CoeffModulus128(uint64_t polyModulusDeg
     vector<SmallModulus> coeffs128;
     try
     {
-        coeffs128 = coeff_modulus_128(polyModulusDegree);
+        coeffs128 = default_params::coeff_modulus_128(polyModulusDegree);
     }
     catch (const out_of_range&)
     {
@@ -38,7 +38,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_CoeffModulus192(uint64_t polyModulusDeg
     vector<SmallModulus> coeffs192;
     try
     {
-        coeffs192 = coeff_modulus_192(polyModulusDegree);
+        coeffs192 = default_params::coeff_modulus_192(polyModulusDegree);
     }
     catch (const out_of_range&)
     {
@@ -56,7 +56,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_CoeffModulus256(uint64_t polyModulusDeg
     vector<SmallModulus> coeffs256;
     try
     {
-        coeffs256 = coeff_modulus_256(polyModulusDegree);
+        coeffs256 = default_params::coeff_modulus_256(polyModulusDegree);
     }
     catch (const out_of_range&)
     {
@@ -73,7 +73,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_SmallMods60Bit(uint64_t index, void **s
 
     try
     {
-        SmallModulus *sm = new SmallModulus(small_mods_60bit(index));
+        SmallModulus *sm = new SmallModulus(default_params::small_mods_60bit(index));
         *small_modulus = sm;
         return S_OK;
     }
@@ -89,7 +89,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_SmallMods50Bit(uint64_t index, void **s
 
     try
     {
-        SmallModulus *sm = new SmallModulus(small_mods_50bit(index));
+        SmallModulus *sm = new SmallModulus(default_params::small_mods_50bit(index));
         *small_modulus = sm;
         return S_OK;
     }
@@ -105,7 +105,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_SmallMods40Bit(uint64_t index, void **s
 
     try
     {
-        SmallModulus *sm = new SmallModulus(small_mods_40bit(index));
+        SmallModulus *sm = new SmallModulus(default_params::small_mods_40bit(index));
         *small_modulus = sm;
         return S_OK;
     }
@@ -121,7 +121,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_SmallMods30Bit(uint64_t index, void **s
 
     try
     {
-        SmallModulus *sm = new SmallModulus(small_mods_30bit(index));
+        SmallModulus *sm = new SmallModulus(default_params::small_mods_30bit(index));
         *small_modulus = sm;
         return S_OK;
     }
@@ -135,7 +135,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_DBCMax(int *dbc_max_value)
 {
     IfNullRet(dbc_max_value, E_POINTER);
 
-    *dbc_max_value = dbc_max();
+    *dbc_max_value = default_params::dbc_max();
     return S_OK;
 }
 
@@ -143,6 +143,6 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_DBCMin(int *dbc_min_value)
 {
     IfNullRet(dbc_min_value, E_POINTER);
 
-    *dbc_min_value = dbc_min();
+    *dbc_min_value = default_params::dbc_min();
     return S_OK;
 }

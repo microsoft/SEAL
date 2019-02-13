@@ -1004,7 +1004,7 @@ namespace SEALNetExamples
             largest parameters) and perform some simple computations on it.
             */
             encryptor.Encrypt(plain, encrypted);
-            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60);
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
             Console.WriteLine($"Noise budget before squaring: {decryptor.InvariantNoiseBudget(encrypted)} bits");
             evaluator.SquareInplace(encrypted);
             evaluator.RelinearizeInplace(encrypted, relinKeys);
@@ -1424,7 +1424,7 @@ namespace SEALNetExamples
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60);
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
 
             /*
             We also set up an Encryptor, Evaluator, and Decryptor as usual.
@@ -1623,7 +1623,7 @@ namespace SEALNetExamples
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60);
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
 
             Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
@@ -1790,7 +1790,7 @@ namespace SEALNetExamples
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60);
+            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
 
             Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
