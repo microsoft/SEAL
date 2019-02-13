@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "seal/randomgen.h"
-#include "seal/util/randomtostd.h"
+#include "seal/randomtostd.h"
 #include "seal/util/clipnormal.h"
 #include <memory>
 #include <cmath>

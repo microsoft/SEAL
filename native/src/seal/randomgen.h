@@ -14,7 +14,7 @@
 namespace seal
 {
     /**
-    Provides the base-class for a uniform random number generator. Instances of 
+    Provides the base class for a uniform random number generator. Instances of 
     this class are typically returned from the UniformRandomGeneratorFactory class. 
     This class is meant for users to sub-class to implement their own random number 
     generators. The implementation should provide a uniform random unsigned 32-bit
@@ -23,10 +23,8 @@ namespace seal
     of the same class may have concurrent calls). The uniformity and unpredictability
     of the numbers generated is essential for making a secure cryptographic system.
 
-    @see UniformRandomGeneratorFactory for the base-class of a factory class that
+    @see UniformRandomGeneratorFactory for the base class of a factory class that
     generates UniformRandomGenerator instances.
-    @see StandardRandomAdapter for an implementation of UniformRandomGenerator to 
-    support the C++ standard library's random number generators.
     */
     class UniformRandomGenerator
     {
@@ -44,7 +42,7 @@ namespace seal
     };
 
     /**
-    Provides the base-class for a factory instance that creates instances of
+    Provides the base class for a factory instance that creates instances of
     UniformRandomGenerator. This class is meant for users to sub-class to implement 
     their own random number generators. Note that each instance returned may be 
     used concurrently across separate threads, but each individual instance does 
