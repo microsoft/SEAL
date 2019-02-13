@@ -14,7 +14,6 @@
 
 using namespace seal;
 using namespace seal::util;
-using namespace seal::default_params;
 using namespace std;
 
 namespace SEALTest
@@ -26,21 +25,21 @@ namespace SEALTest
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
             SmallNTTTables tables;
             int coeff_count_power = 1;
-            SmallModulus modulus(small_mods_60bit(0));
+            SmallModulus modulus(DefaultParams::small_mods_60bit(0));
             tables.generate(coeff_count_power, modulus);
             ASSERT_EQ(2ULL, tables.coeff_count());
             ASSERT_TRUE(tables.is_generated());
             ASSERT_EQ(1, tables.coeff_count_power());
 
             coeff_count_power = 2;
-            modulus = small_mods_50bit(0);
+            modulus = DefaultParams::small_mods_50bit(0);
             tables.generate(coeff_count_power, modulus);
             ASSERT_EQ(4ULL, tables.coeff_count());
             ASSERT_TRUE(tables.is_generated());
             ASSERT_EQ(2, tables.coeff_count_power());
 
             coeff_count_power = 10;
-            modulus = small_mods_40bit(0);
+            modulus = DefaultParams::small_mods_40bit(0);
             tables.generate(coeff_count_power, modulus);
             ASSERT_EQ(1024ULL, tables.coeff_count());
             ASSERT_TRUE(tables.is_generated());

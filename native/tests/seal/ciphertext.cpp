@@ -11,7 +11,6 @@
 
 using namespace seal;
 using namespace seal::util;
-using namespace seal::default_params;
 using namespace std;
 
 namespace SEALTest
@@ -21,7 +20,7 @@ namespace SEALTest
         EncryptionParameters parms(scheme_type::BFV);
 
         parms.set_poly_modulus_degree(2);
-        parms.set_coeff_modulus({ small_mods_30bit(0) });
+        parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0) });
         parms.set_plain_modulus(2);
         parms.set_noise_standard_deviation(1.0);
         auto context = SEALContext::Create(parms);
@@ -97,7 +96,7 @@ namespace SEALTest
         stringstream stream;
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(2);
-        parms.set_coeff_modulus({ small_mods_30bit(0) });
+        parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0) });
         parms.set_plain_modulus(2);
         parms.set_noise_standard_deviation(1.0);
 
@@ -112,7 +111,7 @@ namespace SEALTest
         ASSERT_FALSE(ctxt2.is_ntt_form());
 
         parms.set_poly_modulus_degree(1024);
-        parms.set_coeff_modulus(coeff_modulus_128(1024));
+        parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(1024));
         parms.set_plain_modulus(0xF0F0);
         parms.set_noise_standard_deviation(3.14159);
         context = SEALContext::Create(parms);

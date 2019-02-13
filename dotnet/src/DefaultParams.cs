@@ -8,13 +8,12 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
-    /// Static methods for creating encryption parameters
+    /// Static methods for accessing default parameters.
     /// </summary>
     public static class DefaultParams
     {
         /// <summary>
-        /// Returns the default coefficients modulus for a given polynomial modulus 
-        /// degree.
+        /// Returns the default coefficients modulus for a given polynomial modulus degree.
         /// </summary>
         /// 
         /// <remarks>

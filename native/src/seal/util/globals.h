@@ -85,13 +85,13 @@ For .NET Framework wrapper support (C++/CLI) we need to
             must be at most 60 bits in length, and need to be congruent to 1 modulo
             2 * poly_modulus_degree.
             */
-            extern const std::vector<SmallModulus> small_mods_60bit;
+            extern const std::vector<SmallModulus> default_small_mods_60bit;
 
-            extern const std::vector<SmallModulus> small_mods_50bit;
+            extern const std::vector<SmallModulus> default_small_mods_50bit;
 
-            extern const std::vector<SmallModulus> small_mods_40bit;
+            extern const std::vector<SmallModulus> default_small_mods_40bit;
 
-            extern const std::vector<SmallModulus> small_mods_30bit;
+            extern const std::vector<SmallModulus> default_small_mods_30bit;
 
             // For internal use only, do not modify
             namespace internal_mods

@@ -209,7 +209,7 @@ namespace seal
                 } }
             };
 
-            const vector<SmallModulus> small_mods_60bit{
+            const vector<SmallModulus> default_small_mods_60bit{
                 0xffffffffffc0001,  0xfffffffff840001,  0xfffffffff240001,  0xffffffffe7c0001,
                 0xffffffffe740001,  0xffffffffe4c0001,  0xffffffffe440001,  0xffffffffe400001,
                 0xffffffffdbc0001,  0xffffffffd840001,  0xffffffffd680001,  0xffffffffd000001,
@@ -228,7 +228,7 @@ namespace seal
                 0xfffffffeb200001,  0xfffffffeaf40001,  0xfffffffea700001,  0xfffffffea400001
             };
 
-            const vector<SmallModulus> small_mods_50bit{
+            const vector<SmallModulus> default_small_mods_50bit{
                 0x3ffffffb80001,  0x3fffffec80001,  0x3fffffea40001,  0x3fffffe940001,
                 0x3fffffdd40001,  0x3fffffd900001,  0x3fffffd540001,  0x3fffffd500001,
                 0x3fffffcc40001,  0x3fffffcb40001,  0x3fffffc600001,  0x3fffffc4c0001,
@@ -247,7 +247,7 @@ namespace seal
                 0x3fffff0540001,  0x3fffff00c0001,  0x3fffff0040001,  0x3ffffefd00001
             };
 
-            const vector<SmallModulus> small_mods_40bit{
+            const vector<SmallModulus> default_small_mods_40bit{
                 0xffffe80001,  0xffffc40001,  0xffff940001,  0xffff780001,
                 0xffff580001,  0xffff480001,  0xffff340001,  0xfffeb00001,
                 0xfffe680001,  0xfffe2c0001,  0xfffe100001,  0xfffd800001,
@@ -266,7 +266,7 @@ namespace seal
                 0xfff2680001,  0xfff2440001,  0xfff1e00001,  0xfff1b40001
             };
 
-            const vector<SmallModulus> small_mods_30bit{
+            const vector<SmallModulus> default_small_mods_30bit{
                 0x3ffc0001,  0x3fac0001,  0x3f540001,  0x3ef80001,
                 0x3ef40001,  0x3ed00001,  0x3ebc0001,  0x3eb00001,
                 0x3e880001,  0x3e500001,  0x3dd40001,  0x3dcc0001,

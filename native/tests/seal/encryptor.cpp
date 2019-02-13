@@ -15,7 +15,6 @@
 #include <ctime>
 
 using namespace seal;
-using namespace seal::default_params;
 using namespace std;
 
 namespace SEALTest
@@ -28,7 +27,7 @@ namespace SEALTest
         parms.set_plain_modulus(plain_modulus);
         {
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus({ small_mods_40bit(0) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -81,7 +80,7 @@ namespace SEALTest
         }
         {
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus({ small_mods_40bit(0), small_mods_40bit(1) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -135,7 +134,7 @@ namespace SEALTest
 
         {
             parms.set_poly_modulus_degree(256);
-            parms.set_coeff_modulus({ small_mods_40bit(0), small_mods_40bit(1), small_mods_40bit(2) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -196,7 +195,7 @@ namespace SEALTest
             //input consists of ones
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ small_mods_40bit(0), small_mods_40bit(1), small_mods_40bit(2), small_mods_40bit(3) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -231,7 +230,7 @@ namespace SEALTest
             //input consists of zeros
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ small_mods_40bit(0), small_mods_40bit(1), small_mods_40bit(2), small_mods_40bit(3) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -266,7 +265,7 @@ namespace SEALTest
             // Input is a random mix of positive and negative integers
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ small_mods_60bit(0), small_mods_60bit(1), small_mods_60bit(2) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1), DefaultParams::small_mods_60bit(2) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -312,7 +311,7 @@ namespace SEALTest
             // Input is a random mix of positive and negative integers
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus({ small_mods_60bit(0), small_mods_60bit(1), small_mods_60bit(2) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1), DefaultParams::small_mods_60bit(2) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -358,9 +357,9 @@ namespace SEALTest
             // Encrypt at lower level
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ small_mods_40bit(0),
-                small_mods_40bit(1), small_mods_40bit(2),
-                small_mods_40bit(3) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0),
+                DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2),
+                DefaultParams::small_mods_40bit(3) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 

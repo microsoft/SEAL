@@ -12,8 +12,14 @@
 
 namespace seal
 {
-	namespace default_params
+	/**
+	Static methods for accessing default parameters.
+	*/
+	class DefaultParams
 	{
+	public:
+		DefaultParams() = delete;
+
 		/**
 		Returns the default coefficients modulus for a given polynomial modulus degree.
 		The polynomial modulus and the coefficient modulus obtained in this way should
@@ -24,7 +30,7 @@ namespace seal
 		@param[in] poly_modulus_degree The degree of the polynomial modulus
 		@throws std::out_of_range if poly_modulus_degree is not 1024, 2048, 4096, 8192, 16384, or 32768
 		*/
-		inline std::vector<SmallModulus> coeff_modulus_128(std::size_t poly_modulus_degree)
+		inline static std::vector<SmallModulus> coeff_modulus_128(std::size_t poly_modulus_degree)
 		{
 			try
 			{
@@ -47,7 +53,7 @@ namespace seal
 		@param[in] poly_modulus_degree The degree of the polynomial modulus
 		@throws std::out_of_range if poly_modulus_degree is not 1024, 2048, 4096, 8192, 16384, or 32768
 		*/
-		inline std::vector<SmallModulus> coeff_modulus_192(std::size_t poly_modulus_degree)
+		inline static std::vector<SmallModulus> coeff_modulus_192(std::size_t poly_modulus_degree)
 		{
 			try
 			{
@@ -70,7 +76,7 @@ namespace seal
 		@param[in] poly_modulus_degree The degree of the polynomial modulus
 		@throws std::out_of_range if poly_modulus_degree is not 1024, 2048, 4096, 8192, 16384, or 32768
 		*/
-		inline std::vector<SmallModulus> coeff_modulus_256(std::size_t poly_modulus_degree)
+		inline static std::vector<SmallModulus> coeff_modulus_256(std::size_t poly_modulus_degree)
 		{
 			try
 			{
@@ -89,11 +95,11 @@ namespace seal
 		@param[in] index The list index of the prime
 		@throws std::out_of_range if index is not within [0, 64)
 		*/
-		inline SmallModulus small_mods_60bit(std::size_t index)
+		inline static SmallModulus small_mods_60bit(std::size_t index)
 		{
 			try
 			{
-				return util::global_variables::small_mods_60bit.at(index);
+				return util::global_variables::default_small_mods_60bit.at(index);
 			}
 			catch (const std::exception &)
 			{
@@ -108,11 +114,11 @@ namespace seal
 		@param[in] index The list index of the prime
 		@throws std::out_of_range if index is not within [0, 64)
 		*/
-		inline SmallModulus small_mods_50bit(std::size_t index)
+		inline static SmallModulus small_mods_50bit(std::size_t index)
 		{
 			try
 			{
-				return util::global_variables::small_mods_50bit.at(index);
+				return util::global_variables::default_small_mods_50bit.at(index);
 			}
 			catch (const std::exception &)
 			{
@@ -127,11 +133,11 @@ namespace seal
 		@param[in] index The list index of the prime
 		@throws std::out_of_range if index is not within [0, 64)
 		*/
-		inline SmallModulus small_mods_40bit(std::size_t index)
+		inline static SmallModulus small_mods_40bit(std::size_t index)
 		{
 			try
 			{
-				return util::global_variables::small_mods_40bit.at(index);
+				return util::global_variables::default_small_mods_40bit.at(index);
 			}
 			catch (const std::exception &)
 			{
@@ -146,11 +152,11 @@ namespace seal
 		@param[in] index The list index of the prime
 		@throws std::out_of_range if index is not within [0, 64)
 		*/
-		inline SmallModulus small_mods_30bit(std::size_t index)
+		inline static SmallModulus small_mods_30bit(std::size_t index)
 		{
 			try
 			{
-				return util::global_variables::small_mods_30bit.at(index);
+				return util::global_variables::default_small_mods_30bit.at(index);
 			}
 			catch (const std::exception &)
 			{
@@ -162,7 +168,7 @@ namespace seal
 		/**
 		Returns the largest allowed decomposition bit count (60).
 		*/
-		constexpr int dbc_max()
+		static constexpr int dbc_max()
 		{
 			return SEAL_DBC_MAX;
 		}
@@ -170,9 +176,9 @@ namespace seal
 		/**
 		Returns the smallest allowed decomposition bit count (1).
 		*/
-		constexpr int dbc_min()
+		static constexpr int dbc_min()
 		{
 			return SEAL_DBC_MIN;
 		}
-	}
+	};
 }

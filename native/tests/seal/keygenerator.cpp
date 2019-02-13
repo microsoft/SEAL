@@ -11,7 +11,6 @@
 
 using namespace seal;
 using namespace seal::util;
-using namespace seal::default_params;
 using namespace std;
 
 namespace SEALTest
@@ -23,7 +22,7 @@ namespace SEALTest
             parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(1 << 6);
-            parms.set_coeff_modulus({ small_mods_60bit(0) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -145,7 +144,7 @@ namespace SEALTest
             parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(1 << 6);
-            parms.set_coeff_modulus({ small_mods_60bit(0), small_mods_30bit(0), small_mods_30bit(1) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -271,7 +270,7 @@ namespace SEALTest
         {
             parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus({ small_mods_60bit(0) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -392,7 +391,7 @@ namespace SEALTest
         {
             parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(256);
-            parms.set_coeff_modulus({ small_mods_60bit(0), small_mods_30bit(0), small_mods_30bit(1) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -518,7 +517,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(1 << 6);
-        parms.set_coeff_modulus({ small_mods_60bit(0) });
+        parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
         auto context = SEALContext::Create(parms);
         {
             KeyGenerator keygen(context);

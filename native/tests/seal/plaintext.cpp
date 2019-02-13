@@ -12,7 +12,6 @@
 
 using namespace seal;
 using namespace seal::util;
-using namespace seal::default_params;
 using namespace std;
 
 namespace SEALTest
@@ -116,7 +115,7 @@ namespace SEALTest
         {
             EncryptionParameters parms(scheme_type::BFV);
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus({ small_mods_30bit(0), small_mods_30bit(1) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1) });
             parms.set_plain_modulus(65537);
             auto context = SEALContext::Create(parms, false); 
             
@@ -137,7 +136,7 @@ namespace SEALTest
         {
             EncryptionParameters parms(scheme_type::CKKS);
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus({ small_mods_30bit(0), small_mods_30bit(1) });
+            parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1) });
             auto context = SEALContext::Create(parms, false); 
             CKKSEncoder encoder(context);
            

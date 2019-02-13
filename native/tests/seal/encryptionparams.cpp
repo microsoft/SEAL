@@ -6,7 +6,6 @@
 #include "seal/defaultparams.h"
 
 using namespace seal;
-using namespace seal::default_params;
 using namespace std;
 
 namespace SEALTest
@@ -32,7 +31,7 @@ namespace SEALTest
 
         parms.set_noise_standard_deviation(3.20);
         parms.set_coeff_modulus({
-            small_mods_30bit(0), small_mods_40bit(0), small_mods_50bit(0)
+            DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_50bit(0)
             });
         parms.set_plain_modulus(2);
         parms.set_poly_modulus_degree(128);
@@ -40,9 +39,9 @@ namespace SEALTest
 
         ASSERT_EQ(3.20, parms.noise_standard_deviation());
         ASSERT_EQ(3.20 * 6, parms.noise_max_deviation());
-        ASSERT_TRUE(parms.coeff_modulus()[0] == small_mods_30bit(0));
-        ASSERT_TRUE(parms.coeff_modulus()[1] == small_mods_40bit(0));
-        ASSERT_TRUE(parms.coeff_modulus()[2] == small_mods_50bit(0));
+        ASSERT_TRUE(parms.coeff_modulus()[0] == DefaultParams::small_mods_30bit(0));
+        ASSERT_TRUE(parms.coeff_modulus()[1] == DefaultParams::small_mods_40bit(0));
+        ASSERT_TRUE(parms.coeff_modulus()[2] == DefaultParams::small_mods_50bit(0));
         ASSERT_TRUE(parms.plain_modulus() == 2);
         ASSERT_TRUE(parms.poly_modulus_degree() == 128);
         ASSERT_TRUE(parms.random_generator() == UniformRandomGeneratorFactory::default_factory());
@@ -53,7 +52,7 @@ namespace SEALTest
         auto scheme = scheme_type::BFV;
         EncryptionParameters parms1(scheme);
         parms1.set_noise_standard_deviation(3.20);
-        parms1.set_coeff_modulus({ small_mods_30bit(0) });
+        parms1.set_coeff_modulus({ DefaultParams::small_mods_30bit(0) });
         parms1.set_plain_modulus(1 << 6);
         parms1.set_poly_modulus_degree(64);
         parms1.set_random_generator(UniformRandomGeneratorFactory::default_factory());
@@ -64,13 +63,13 @@ namespace SEALTest
         EncryptionParameters parms3(scheme);
         parms3 = parms2;
         ASSERT_TRUE(parms3 == parms2);
-        parms3.set_coeff_modulus({ small_mods_30bit(1) });
+        parms3.set_coeff_modulus({ DefaultParams::small_mods_30bit(1) });
         ASSERT_FALSE(parms3 == parms2);
 
         parms3 = parms2;
         ASSERT_TRUE(parms3 == parms2);
         parms3.set_coeff_modulus({
-            small_mods_30bit(0), small_mods_30bit(1)
+            DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1)
             });
         ASSERT_FALSE(parms3 == parms2);
 
@@ -97,7 +96,7 @@ namespace SEALTest
 
         parms3 = parms2;
         parms3.set_coeff_modulus({ 2 });
-        parms3.set_coeff_modulus({ small_mods_50bit(0) });
+        parms3.set_coeff_modulus({ DefaultParams::small_mods_50bit(0) });
         parms3.set_coeff_modulus(parms2.coeff_modulus());
         ASSERT_TRUE(parms3 == parms2);
     }
@@ -110,7 +109,7 @@ namespace SEALTest
         EncryptionParameters parms(scheme);
         EncryptionParameters parms2(scheme);
         parms.set_noise_standard_deviation(3.20);
-        parms.set_coeff_modulus({ small_mods_30bit(0) });
+        parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0) });
         parms.set_plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         EncryptionParameters::Save(parms, stream);
@@ -125,7 +124,7 @@ namespace SEALTest
 
         parms.set_noise_standard_deviation(3.20);
         parms.set_coeff_modulus({
-            small_mods_30bit(0), small_mods_60bit(0), small_mods_60bit(1)
+            DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1)
             });
         parms.set_plain_modulus(1 << 30);
         parms.set_poly_modulus_degree(256);
