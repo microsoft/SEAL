@@ -342,7 +342,10 @@ namespace Microsoft.Research.SEAL
                     mod.Save(writer.BaseStream);
                 }
 
-                parms.PlainModulus.Save(writer.BaseStream);
+                if (parms.Scheme == SchemeType.BFV)
+                {
+                    parms.PlainModulus.Save(writer.BaseStream);
+                }
                 writer.Write(parms.NoiseStandardDeviation);
             }
         }
@@ -383,9 +386,12 @@ namespace Microsoft.Research.SEAL
 
                     parms.CoeffModulus = coeffModulus;
 
-                    SmallModulus plainModulus = new SmallModulus();
-                    plainModulus.Load(reader.BaseStream);
-                    parms.PlainModulus = plainModulus;
+                    if (scheme == SchemeType.BFV)
+                    {
+                        SmallModulus plainModulus = new SmallModulus();
+                        plainModulus.Load(reader.BaseStream);
+                        parms.PlainModulus = plainModulus;
+                    }
 
                     parms.NoiseStandardDeviation = reader.ReadDouble();
                 }

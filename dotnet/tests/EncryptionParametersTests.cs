@@ -9,6 +9,8 @@ using System.IO;
 
 namespace SEALNetTest
 {
+    public delegate void TestDelegate(SchemeType scheme);
+
     [TestClass]
     public class EncryptionParametersTests
     {
@@ -89,41 +91,50 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
+            TestDelegate save_load_test = delegate(SchemeType scheme)
             {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
+                List<SmallModulus> coeffModulus = new List<SmallModulus>
+                {
+                    DefaultParams.SmallMods40Bit(0),
+                    DefaultParams.SmallMods40Bit(1)
+                };
+                EncryptionParameters parms = new EncryptionParameters(scheme)
+                {
+                    PolyModulusDegree = 8,
+                    CoeffModulus = coeffModulus
+                };
+                if (scheme == SchemeType.BFV)
+                    parms.SetPlainModulus(257);
+
+                EncryptionParameters loaded = null;
+
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    EncryptionParameters.Save(parms, stream);
+
+                    stream.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+                    loaded = EncryptionParameters.Load(stream);
+                }
+
+                Assert.AreEqual(scheme, loaded.Scheme);
+                Assert.AreEqual(8ul, loaded.PolyModulusDegree);
+                if (scheme == SchemeType.BFV)
+                    Assert.AreEqual(257ul, loaded.PlainModulus.Value);
+                else if (scheme == SchemeType.CKKS)
+                    Assert.AreEqual(0ul, loaded.PlainModulus.Value);
+
+                List<SmallModulus> loadedCoeffModulus = new List<SmallModulus>(loaded.CoeffModulus);
+                Assert.AreEqual(2, loadedCoeffModulus.Count);
+                Assert.AreNotSame(coeffModulus[0], loadedCoeffModulus[0]);
+                Assert.AreNotSame(coeffModulus[1], loadedCoeffModulus[1]);
+                Assert.AreEqual(coeffModulus[0], loadedCoeffModulus[0]);
+                Assert.AreEqual(coeffModulus[1], loadedCoeffModulus[1]);
+                Assert.AreEqual(parms.NoiseMaxDeviation, loaded.NoiseMaxDeviation, delta: 0.001);
+                Assert.AreEqual(parms.NoiseStandardDeviation, loaded.NoiseStandardDeviation, delta: 0.001);
             };
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
-            {
-                PolyModulusDegree = 8,
-                PlainModulus = new SmallModulus(257),
-                CoeffModulus = coeffModulus
-            };
-
-            EncryptionParameters loaded = null;
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                EncryptionParameters.Save(parms, stream);
-
-                stream.Seek(offset: 0, loc: SeekOrigin.Begin);
-
-                loaded = EncryptionParameters.Load(stream);
-            }
-
-            Assert.AreEqual(SchemeType.BFV, loaded.Scheme);
-            Assert.AreEqual(8ul, loaded.PolyModulusDegree);
-            Assert.AreEqual(257ul, loaded.PlainModulus.Value);
-
-            List<SmallModulus> loadedCoeffModulus = new List<SmallModulus>(loaded.CoeffModulus);
-            Assert.AreEqual(2, loadedCoeffModulus.Count);
-            Assert.AreNotSame(coeffModulus[0], loadedCoeffModulus[0]);
-            Assert.AreNotSame(coeffModulus[1], loadedCoeffModulus[1]);
-            Assert.AreEqual(coeffModulus[0], loadedCoeffModulus[0]);
-            Assert.AreEqual(coeffModulus[1], loadedCoeffModulus[1]);
-            Assert.AreEqual(parms.NoiseMaxDeviation, loaded.NoiseMaxDeviation, delta: 0.001);
-            Assert.AreEqual(parms.NoiseStandardDeviation, loaded.NoiseStandardDeviation, delta: 0.001);
+            save_load_test(SchemeType.BFV);
+            save_load_test(SchemeType.CKKS);
         }
 
         [TestMethod]
