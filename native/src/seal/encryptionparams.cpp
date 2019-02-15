@@ -85,7 +85,11 @@ namespace seal
 
             // Read the plain_modulus
             SmallModulus plain_modulus;
-            plain_modulus.load(stream);
+            // CKKS does not use plain_modulus
+            if (scheme == scheme_type::BFV)
+            {
+                plain_modulus.load(stream);
+            }
 
             // Read noise_standard_deviation
             double noise_standard_deviation;
