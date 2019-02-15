@@ -28,7 +28,11 @@ namespace seal
             {
                 mod.save(stream);
             }
-            parms.plain_modulus().save(stream);
+            // CKKS does not use plain_modulus
+            if (scheme == scheme_type::BFV)
+            {
+                parms.plain_modulus().save(stream);
+            }
             double noise_standard_deviation = parms.noise_standard_deviation();
             stream.write(reinterpret_cast<const char*>(&noise_standard_deviation), sizeof(double));
         }
@@ -90,7 +94,11 @@ namespace seal
             // Supposedly everything worked so set the values of member variables
             parms.set_poly_modulus_degree(safe_cast<size_t>(poly_modulus_degree64));
             parms.set_coeff_modulus(coeff_modulus);
-            parms.set_plain_modulus(plain_modulus);
+            // CKKS does not use plain_modulus
+            if (scheme == scheme_type::BFV)
+            {
+                parms.set_plain_modulus(plain_modulus);
+            }
             parms.set_noise_standard_deviation(noise_standard_deviation);
 
             stream.exceptions(old_except_mask);
