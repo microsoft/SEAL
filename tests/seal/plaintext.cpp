@@ -22,6 +22,7 @@ namespace SEALTest
         ASSERT_EQ(2ULL, plain.capacity());
         ASSERT_EQ(2ULL, plain.coeff_count());
         ASSERT_EQ(0ULL, plain.significant_coeff_count());
+        ASSERT_EQ(0ULL, plain.nonzero_coeff_count());
         ASSERT_FALSE(plain.is_ntt_form());
 
         plain[0] = 1;
@@ -31,6 +32,7 @@ namespace SEALTest
         ASSERT_EQ(10ULL, plain.capacity());
         ASSERT_EQ(2ULL, plain.coeff_count());
         ASSERT_EQ(2ULL, plain.significant_coeff_count());
+        ASSERT_EQ(2ULL, plain.nonzero_coeff_count());
         ASSERT_EQ(1ULL, plain[0]);
         ASSERT_EQ(2ULL, plain[1]);
         ASSERT_FALSE(plain.is_ntt_form());
@@ -39,6 +41,7 @@ namespace SEALTest
         ASSERT_EQ(10ULL, plain.capacity());
         ASSERT_EQ(5ULL, plain.coeff_count());
         ASSERT_EQ(2ULL, plain.significant_coeff_count());
+        ASSERT_EQ(2ULL, plain.nonzero_coeff_count());
         ASSERT_EQ(1ULL, plain[0]);
         ASSERT_EQ(2ULL, plain[1]);
         ASSERT_EQ(0ULL, plain[2]);
@@ -51,12 +54,14 @@ namespace SEALTest
         ASSERT_EQ(15ULL, plain2.capacity());
         ASSERT_EQ(15ULL, plain2.coeff_count());
         ASSERT_EQ(0ULL, plain2.significant_coeff_count());
+        ASSERT_EQ(0ULL, plain2.nonzero_coeff_count());
         ASSERT_FALSE(plain.is_ntt_form());
 
         plain2 = plain;
         ASSERT_EQ(15ULL, plain2.capacity());
         ASSERT_EQ(5ULL, plain2.coeff_count());
         ASSERT_EQ(2ULL, plain2.significant_coeff_count());
+        ASSERT_EQ(2ULL, plain2.nonzero_coeff_count());
         ASSERT_EQ(1ULL, plain2[0]);
         ASSERT_EQ(2ULL, plain2[1]);
         ASSERT_EQ(0ULL, plain2[2]);

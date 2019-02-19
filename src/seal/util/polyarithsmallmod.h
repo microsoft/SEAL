@@ -162,6 +162,11 @@ namespace seal
             std::size_t coeff_count, std::uint64_t scalar, const SmallModulus &modulus, 
             std::uint64_t *result);
 
+        void multiply_poly_mono_coeffmod(uint64_t *poly, 
+            size_t coeff_count, uint64_t mono_coeff, size_t mono_exponent,
+            const SmallModulus &modulus, uint64_t *result, 
+            std::size_t result_coeff_count, MemoryPool &pool);
+
         void multiply_poly_poly_coeffmod(const std::uint64_t *operand1, 
             std::size_t operand1_coeff_count, const std::uint64_t *operand2, 
             std::size_t operand2_coeff_count, const SmallModulus &modulus, 

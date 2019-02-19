@@ -142,6 +142,80 @@ namespace seal
             }
         }
 
+        void multiply_poly_mono_coeffmod(uint64_t *poly, 
+            size_t poly_coeff_count, uint64_t mono_coeff, size_t mono_exponent, 
+            const SmallModulus &modulus, uint64_t *result, 
+            size_t result_coeff_count, MemoryPool &pool)
+        {
+#ifdef SEAL_DEBUG
+            if (poly == nullptr && poly_coeff_count > 0)
+            {
+                throw std::invalid_argument("poly");
+            }
+            if (mono_coeff == 0 && mono_exponent > 0)
+            {
+                throw std::invalid_argument("mono");
+            }
+            if (result == nullptr && result_coeff_count > 0)
+            {
+                throw std::invalid_argument("result");
+            }
+            if (modulus.is_zero())
+            {
+                throw std::invalid_argument("modulus");
+            }
+#endif
+            // Create poly to store intermediate result.
+            auto intermediate(allocate_uint(result_coeff_count, pool));
+            set_zero_uint(result_coeff_count, intermediate.get());
+
+            uint64_t modulus_value = modulus.value();
+            if (mono_coeff == 1) {
+                for (size_t poly_exponent = 0; poly_exponent < poly_coeff_count; poly_exponent++)
+                {
+                    uint64_t result_exponent = (poly_exponent + mono_exponent) % result_coeff_count;
+                    uint64_t result_value = *poly++;
+
+                    if (result_exponent < poly_exponent) {
+                        int64_t non_zero = (result_value != 0);
+                        intermediate[result_exponent] = (modulus_value - result_value) & static_cast<uint64_t>(-non_zero);
+                    } else {
+                        intermediate[result_exponent] = result_value;
+
+                    }
+                }
+            } else if (mono_coeff == modulus_value - 1) {
+                for (size_t poly_exponent = 0; poly_exponent < poly_coeff_count; poly_exponent++)
+                {
+                    uint64_t result_exponent = (poly_exponent + mono_exponent) % result_coeff_count;
+                    uint64_t result_value = *poly++;
+
+                    if (result_exponent < poly_exponent) {
+                        intermediate[result_exponent] = result_value;
+                    } else {
+                        int64_t non_zero = (result_value != 0);
+                        intermediate[result_exponent] = (modulus_value - result_value) & static_cast<uint64_t>(-non_zero);
+                    }
+                }
+            } else {
+                for (size_t poly_exponent = 0; poly_exponent < poly_coeff_count; poly_exponent++)
+                {
+                    uint64_t result_exponent = (poly_exponent + mono_exponent) % result_coeff_count;
+                    uint64_t result_value = *poly++;
+
+                    if (result_exponent < poly_exponent) {
+                        intermediate[result_exponent] = multiply_uint_uint_mod(result_value, modulus_value - mono_coeff, modulus);
+                    } else {
+                        intermediate[result_exponent] = multiply_uint_uint_mod(result_value, mono_coeff, modulus);
+
+                    }
+                }
+            }
+
+            // Copy to result.
+            set_uint_uint(intermediate.get(), result_coeff_count, result);
+        }
+
         void multiply_poly_poly_coeffmod(const uint64_t *operand1, 
             const uint64_t *operand2, size_t coeff_count, 
             const SmallModulus &modulus, uint64_t *result)

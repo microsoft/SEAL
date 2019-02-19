@@ -264,7 +264,7 @@ namespace seal
                 throw std::invalid_argument("poly");
             }
 #endif
-            if(coeff_count == 0)
+            if (coeff_count == 0)
             {
                 return 0;
             }

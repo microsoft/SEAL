@@ -105,6 +105,50 @@ namespace SEALTest
             ASSERT_EQ(2ULL, poly[2]);
         }
 
+        TEST(PolyArithSmallMod, MultiplyPolyMonoCoeffSmallMod)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            auto poly1(allocate_zero_poly(3, 1, pool));
+            poly1[0] = 1;
+            poly1[1] = 3;
+            poly1[2] = 4;
+            uint64_t mono_coeff = 3;
+            size_t mono_exponent = 2;
+            auto result(allocate_zero_poly(5, 1, pool));
+            SmallModulus mod(5);
+            multiply_poly_mono_coeffmod(poly1.get(), 3, mono_coeff, mono_exponent, mod, result.get(), 5, pool);
+            ASSERT_EQ(0ULL, result[0]);
+            ASSERT_EQ(0ULL, result[1]);
+            ASSERT_EQ(3ULL, result[2]);
+            ASSERT_EQ(4ULL, result[3]);
+            ASSERT_EQ(2ULL, result[4]);
+
+            mono_coeff = 1;
+            multiply_poly_mono_coeffmod(poly1.get(), 3, mono_coeff, mono_exponent, mod, result.get(), 5, pool);
+            ASSERT_EQ(0ULL, result[0]);
+            ASSERT_EQ(0ULL, result[1]);
+            ASSERT_EQ(1ULL, result[2]);
+            ASSERT_EQ(3ULL, result[3]);
+            ASSERT_EQ(4ULL, result[4]);
+
+            mono_coeff = 4;
+            multiply_poly_mono_coeffmod(poly1.get(), 3, mono_coeff, mono_exponent, mod, result.get(), 5, pool);
+            ASSERT_EQ(0ULL, result[0]);
+            ASSERT_EQ(0ULL, result[1]);
+            ASSERT_EQ(4ULL, result[2]);
+            ASSERT_EQ(2ULL, result[3]);
+            ASSERT_EQ(1ULL, result[4]);
+
+            mono_coeff = 1;
+            mono_exponent = 0;
+            multiply_poly_mono_coeffmod(poly1.get(), 3, mono_coeff, mono_exponent, mod, result.get(), 5, pool);
+            ASSERT_EQ(1ULL, result[0]);
+            ASSERT_EQ(3ULL, result[1]);
+            ASSERT_EQ(4ULL, result[2]);
+            ASSERT_EQ(0ULL, result[3]);
+            ASSERT_EQ(0ULL, result[4]);
+        }
+
         TEST(PolyArithSmallMod, MultiplyPolyPolyCoeffSmallMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
