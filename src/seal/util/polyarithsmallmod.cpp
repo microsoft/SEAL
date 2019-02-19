@@ -170,44 +170,29 @@ namespace seal
             set_zero_uint(result_coeff_count, intermediate.get());
 
             uint64_t modulus_value = modulus.value();
-            if (mono_coeff == 1) {
-                for (size_t poly_exponent = 0; poly_exponent < poly_coeff_count; poly_exponent++)
-                {
-                    uint64_t result_exponent = (poly_exponent + mono_exponent) % result_coeff_count;
-                    uint64_t result_value = *poly++;
 
-                    if (result_exponent < poly_exponent) {
+            for (size_t poly_exponent = 0; poly_exponent < poly_coeff_count; poly_exponent++)
+            {
+                uint64_t result_exponent = (poly_exponent + mono_exponent) % result_coeff_count;
+                uint64_t result_value = *poly++;
+
+                if (result_exponent < poly_exponent) {
+                    if (mono_coeff == 1) {
                         int64_t non_zero = (result_value != 0);
                         intermediate[result_exponent] = (modulus_value - result_value) & static_cast<uint64_t>(-non_zero);
-                    } else {
-                        intermediate[result_exponent] = result_value;
-
-                    }
-                }
-            } else if (mono_coeff == modulus_value - 1) {
-                for (size_t poly_exponent = 0; poly_exponent < poly_coeff_count; poly_exponent++)
-                {
-                    uint64_t result_exponent = (poly_exponent + mono_exponent) % result_coeff_count;
-                    uint64_t result_value = *poly++;
-
-                    if (result_exponent < poly_exponent) {
+                    } else if (mono_coeff == modulus_value - 1) {
                         intermediate[result_exponent] = result_value;
                     } else {
-                        int64_t non_zero = (result_value != 0);
-                        intermediate[result_exponent] = (modulus_value - result_value) & static_cast<uint64_t>(-non_zero);
-                    }
-                }
-            } else {
-                for (size_t poly_exponent = 0; poly_exponent < poly_coeff_count; poly_exponent++)
-                {
-                    uint64_t result_exponent = (poly_exponent + mono_exponent) % result_coeff_count;
-                    uint64_t result_value = *poly++;
-
-                    if (result_exponent < poly_exponent) {
                         intermediate[result_exponent] = multiply_uint_uint_mod(result_value, modulus_value - mono_coeff, modulus);
+                    }
+                } else {
+                    if (mono_coeff == 1) {
+                        intermediate[result_exponent] = result_value;
+                    } else if (mono_coeff == modulus_value - 1) {
+                        int64_t non_zero = (result_value != 0);
+                        intermediate[result_exponent] = (modulus_value - result_value) & static_cast<uint64_t>(-non_zero);
                     } else {
                         intermediate[result_exponent] = multiply_uint_uint_mod(result_value, mono_coeff, modulus);
-
                     }
                 }
             }
