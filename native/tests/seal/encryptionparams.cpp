@@ -28,9 +28,9 @@ namespace SEALTest
             ASSERT_TRUE(parms.coeff_modulus()[0] == 2);
             ASSERT_TRUE(parms.coeff_modulus()[1] == 3);
             if (scheme == scheme_type::BFV)
-                ASSERT_TRUE(parms.plain_modulus() == 2);
+                ASSERT_TRUE(parms.plain_modulus().value() == 2);
             else if (scheme == scheme_type::CKKS)
-                ASSERT_TRUE(parms.plain_modulus() == NULL);
+                ASSERT_TRUE(parms.plain_modulus().value() == 0);
             ASSERT_TRUE(parms.poly_modulus_degree() == 2);
             ASSERT_TRUE(parms.random_generator() == UniformRandomGeneratorFactory::default_factory());
 
@@ -49,9 +49,9 @@ namespace SEALTest
             ASSERT_TRUE(parms.coeff_modulus()[1] == DefaultParams::small_mods_40bit(0));
             ASSERT_TRUE(parms.coeff_modulus()[2] == DefaultParams::small_mods_50bit(0));
             if (scheme == scheme_type::BFV)
-                ASSERT_TRUE(parms.plain_modulus() == 2);
+                ASSERT_TRUE(parms.plain_modulus().value() == 2);
             else if (scheme == scheme_type::CKKS)
-                ASSERT_TRUE(parms.plain_modulus() == NULL);
+                ASSERT_TRUE(parms.plain_modulus().value() == 0);
             ASSERT_TRUE(parms.poly_modulus_degree() == 128);
             ASSERT_TRUE(parms.random_generator() == UniformRandomGeneratorFactory::default_factory());
         };
