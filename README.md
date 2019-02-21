@@ -1,12 +1,11 @@
 # Microsoft SEAL
 
-The Microsoft Simple Encrypted Arithmetic Library (**Microsoft SEAL**) is an easy-to-use 
-homomorphic encryption library developed by researchers in the Cryptography 
-Research group at Microsoft Research. Microsoft SEAL is written in modern standard C++ and 
-has no external dependencies, making it easy to compile and run in many different 
-environments.
+Microsoft SEAL is an easy-to-use homomorphic encryption library developed by researchers in 
+the Cryptography Research group at Microsoft Research. Microsoft SEAL is written in modern 
+standard C++ and has no external dependencies, making it easy to compile and run in many 
+different environments.
 
-For more information about the Microsoft SEAL project, see [http://sealcrypto.org](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/).
+For more information about the Microsoft SEAL project, see [http://sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
 # License
 
