@@ -7,13 +7,13 @@
   <metadata>
     <id>Microsoft.Research.SEALNet</id>
     <version>3.2.0</version>
-    <title>Simple Encrypted Arithmetic Library</title>
+    <title>Microsoft SEAL</title>
     <authors>Microsoft Research</authors>
     <owners>Microsoft Corporation</owners>
     <projectUrl>http://sealcrypto.org</projectUrl>
     <license type="file">LICENSE</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The Simple Encrypted Arithmetic Library (Microsoft SEAL) is an easy-to-use and powerful open source homomorphic encryption library, developed by researchers in the Cryptography Research Group at Microsoft Research. Microsoft SEAL is licensed under the MIT license.</description>
+    <description>Microsoft SEAL is an easy-to-use and powerful open source homomorphic encryption library, developed by researchers in the Cryptography Research Group at Microsoft Research. Microsoft SEAL is licensed under the MIT license.</description>
     <releaseNotes>http://sealcrypto.org/#!news</releaseNotes>
     <copyright>Copyright 2019</copyright>
     <tags>c# crypto cryptography homomorphic encryption</tags>
