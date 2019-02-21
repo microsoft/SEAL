@@ -21,6 +21,7 @@ Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
   - [Linux and macOS](#linux-and-macos-1)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
+- [Citing Microsoft SEAL](#citing-microsoft-seal)
 
 # Building and Using Microsoft SEAL 
 
@@ -326,3 +327,39 @@ For more information see the
 [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) 
 or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional 
 questions or comments.
+
+# Citing Microsoft SEAL
+
+To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
+
+### Version 3.2
+
+	@misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 3.2)},
+	    howpublished = {\url{https://github.com/Microsoft/SEAL}},
+	    month = feb,
+	    year = 2019,
+	    note = {Microsoft Research, Redmond, WA.},
+	    key = {SEAL}
+	}
+
+### Version 3.1
+
+	@misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 3.1)},
+	    howpublished = {\url{https://github.com/Microsoft/SEAL}},
+	    month = dec,
+	    year = 2018,
+	    note = {Microsoft Research, Redmond, WA.},
+	    key = {SEAL}
+	}
+
+### Version 3.0
+    @misc{sealcrypto,
+	    title = {{M}icrosoft {SEAL} (release 3.0)},
+	    howpublished = {\url{http://sealcrypto.org}},
+	    month = oct,
+	    year = 2018,
+	    note = {Microsoft Research, Redmond, WA.},
+	    key = {SEAL}
+    }
