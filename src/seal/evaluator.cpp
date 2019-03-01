@@ -2503,6 +2503,12 @@ namespace seal
         // Set the scale
         encrypted.scale() = new_scale;
 
+        /*
+        Optimizations for constant / monomial multiplication can lead to the  
+        presence of a timing side-channel in use-cases where the plaintext 
+        data should also be kept private.
+        */
+
         // Multiplying just by a constant?
         if (plain_coeff_count == 1)
         {
