@@ -404,6 +404,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void ContextData_UpperHalfIncrement(IntPtr thisptr, ref ulong count, ulong[] uhi);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void ContextData_PrevContextData(IntPtr thisptr, out IntPtr prevContextData);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void ContextData_NextContextData(IntPtr thisptr, out IntPtr nextContextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]

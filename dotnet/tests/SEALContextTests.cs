@@ -92,14 +92,16 @@ namespace SEALNetTest
             Assert.AreEqual(3, data.UpperHalfIncrement.Length);
             Assert.AreEqual(2ul, data.ChainIndex);
 
+            Assert.IsNull(data.PrevContextData);
             SEALContext.ContextData data2 = data.NextContextData;
             Assert.IsNotNull(data2);
             Assert.AreEqual(1ul, data2.ChainIndex);
+            Assert.AreEqual(2ul, data2.PrevContextData.ChainIndex);
 
             SEALContext.ContextData data3 = data2.NextContextData;
             Assert.IsNotNull(data3);
             Assert.AreEqual(0ul, data3.ChainIndex);
-
+            Assert.AreEqual(1ul, data3.PrevContextData.ChainIndex);
             Assert.IsNull(data3.NextContextData);
         }
 
@@ -130,17 +132,21 @@ namespace SEALNetTest
             Assert.IsNull(data.UpperHalfIncrement);
             Assert.AreEqual(3ul, data.ChainIndex);
 
+            Assert.IsNull(data.PrevContextData);
             SEALContext.ContextData data2 = data.NextContextData;
             Assert.IsNotNull(data2);
             Assert.AreEqual(2ul, data2.ChainIndex);
+            Assert.AreEqual(3ul, data2.PrevContextData.ChainIndex);
 
             SEALContext.ContextData data3 = data2.NextContextData;
             Assert.IsNotNull(data3);
             Assert.AreEqual(1ul, data3.ChainIndex);
+            Assert.AreEqual(2ul, data3.PrevContextData.ChainIndex);
 
             SEALContext.ContextData data4 = data3.NextContextData;
             Assert.IsNotNull(data4);
             Assert.AreEqual(0ul, data4.ChainIndex);
+            Assert.AreEqual(1ul, data4.PrevContextData.ChainIndex);
 
             Assert.IsNull(data4.NextContextData);
         }
@@ -160,12 +166,14 @@ namespace SEALNetTest
             // By default there is a chain
             SEALContext.ContextData contextData = context1.FirstContextData;
             Assert.IsNotNull(contextData);
+            Assert.IsNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
 
             // This should not create a chain
             SEALContext context2 = SEALContext.Create(parms, expandModChain: false);
             contextData = context2.FirstContextData;
             Assert.IsNotNull(contextData);
+            Assert.IsNull(contextData.PrevContextData);
             Assert.IsNull(contextData.NextContextData);
         }
     }

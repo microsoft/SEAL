@@ -252,6 +252,16 @@ namespace seal
             }
 
             /**
+            Returns a shared_ptr to the context data corresponding to the previous parameters
+            in the modulus switching chain. If the current data is the first one in the
+            chain, then the result is nullptr.
+            */
+            inline auto prev_context_data() const
+            {
+                return prev_context_data_;
+            }
+
+            /**
             Returns a shared_ptr to the context data corresponding to the next parameters
             in the modulus switching chain. If the current data is the last one in the
             chain, then the result is nullptr.
@@ -305,6 +315,8 @@ namespace seal
             util::Pointer<std::uint64_t> upper_half_threshold_;
 
             util::Pointer<std::uint64_t> upper_half_increment_;
+
+            std::shared_ptr<const ContextData> prev_context_data_{ nullptr };
 
             std::shared_ptr<const ContextData> next_context_data_{ nullptr };
 

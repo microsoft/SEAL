@@ -312,6 +312,25 @@ namespace Microsoft.Research.SEAL
             }
 
             /// <summary>
+            /// Returns the context data corresponding to the previous parameters in the modulus 
+            /// switching chain. If the current data is the first one in the chain, then the 
+            /// result is nullptr.
+            /// </summary>
+            public ContextData PrevContextData
+            {
+                get
+                {
+                    NativeMethods.ContextData_PrevContextData(NativePtr, out IntPtr prev);
+
+                    if (IntPtr.Zero.Equals(prev))
+                        return null;
+
+                    ContextData data = new ContextData(prev, owned: false);
+                    return data;
+                }
+            }
+
+            /// <summary>
             /// Returns the context data corresponding to the next parameters in the modulus 
             /// switching chain. If the current data is the last one in the chain, then the 
             /// result is nullptr.

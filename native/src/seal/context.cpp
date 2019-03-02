@@ -358,10 +358,14 @@ namespace seal
                     make_shared<const ContextData>(move(next_context_data))));
                 
                 // Add pointer to next context_data to the previous one (linked list)
+                // Add pointer to prevoius context_data to the next one (double linked list)
                 // We need to remove constness first to modify this
                 const_pointer_cast<ContextData>(
                     context_data_map_.at(prev_parms_id))->next_context_data_ = 
                     context_data_map_.at(next_parms_id);
+                const_pointer_cast<ContextData>(
+                    context_data_map_.at(next_parms_id))->prev_context_data_ = 
+                    context_data_map_.at(prev_parms_id);
                 prev_parms_id = next_parms_id;
                 last_parms_id_ = prev_parms_id;
             }

@@ -34,6 +34,8 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_UpperHalfThreshold(void *thisptr, uin
 
 SEALNETNATIVE HRESULT SEALCALL ContextData_UpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *uhi);
 
+SEALNETNATIVE HRESULT SEALCALL ContextData_PrevContextData(void *thisptr, void **prev_data);
+
 SEALNETNATIVE HRESULT SEALCALL ContextData_NextContextData(void *thisptr, void **next_data);
 
 SEALNETNATIVE HRESULT SEALCALL ContextData_ChainIndex(void *thisptr, uint64_t *index);

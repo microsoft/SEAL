@@ -186,6 +186,17 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_UpperHalfIncrement(void *thisptr, uin
     return S_OK;
 }
 
+SEALNETNATIVE HRESULT SEALCALL ContextData_PrevContextData(void *thisptr, void **prev_data)
+{
+    SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
+    IfNullRet(cont_data, E_POINTER);
+    IfNullRet(prev_data, E_POINTER);
+
+    // The caller should not try to delete the returned pointer
+    *prev_data = const_cast<SEALContext::ContextData*>(cont_data->prev_context_data().get());
+    return S_OK;
+}
+
 SEALNETNATIVE HRESULT SEALCALL ContextData_NextContextData(void *thisptr, void **next_data)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
