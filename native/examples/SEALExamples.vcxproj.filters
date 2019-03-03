@@ -23,6 +23,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt" />
+    <Text Include="CMakeLists.txt">
+      <Filter>Other</Filter>
+    </Text>
   </ItemGroup>
 </Project>
