@@ -33,12 +33,21 @@ namespace seal
         {
             throw invalid_argument("unsupported scheme");
         }
-
         if (plain_modulus().bit_count() <= 1)
         {
             throw invalid_argument("plain_modulus must be at least 2");
         }
-        coeff_neg_threshold_ = (plain_modulus().value() + 1) >> 1;
+
+        if (plain_modulus().value() == 2)
+        {
+            // In this case we don't allow any negative numbers
+            coeff_neg_threshold_ = 2;
+        }
+        else
+        {
+            // Normal negative threshold case
+            coeff_neg_threshold_ = (plain_modulus().value() + 1) >> 1;
+        }
         neg_one_ = plain_modulus().value() - 1;
     }
 
