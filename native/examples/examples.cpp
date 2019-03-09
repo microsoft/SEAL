@@ -1316,7 +1316,7 @@ void example_bfv_basics_iv()
     From the print-out we see that the noise budget after these computations is 
     just slightly below the level we would have in a fresh ciphertext after one 
     modulus switch (135 bits). Surprisingly, in this case modulus switching has 
-    no effect at all on the modulus.
+    no effect at all on the noise budget.
     */ 
     evaluator.mod_switch_to_next_inplace(encrypted);
     cout << "Noise budget after modulus switching: "
