@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright (c) Microsoft Corporation. All rights reserved.
+     Licensed under the MIT license. -->
+       
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.Research.SEALNet</id>
+    <version>3.2.0</version>
+    <title>Microsoft SEAL</title>
+    <authors>Microsoft Research</authors>
+    <owners>Microsoft Corporation</owners>
+    <projectUrl>http://sealcrypto.org</projectUrl>
+    <license type="file">LICENSE</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Microsoft SEAL is an easy-to-use and powerful open source homomorphic encryption library, developed by researchers in the Cryptography Research Group at Microsoft Research. Microsoft SEAL is licensed under the MIT license.</description>
+    <releaseNotes>http://sealcrypto.org/#!news</releaseNotes>
+    <copyright>Copyright 2019</copyright>
+    <tags>c# crypto cryptography homomorphic encryption</tags>
+  </metadata>
+  <files>
+    <file src="SEALNet.targets" target="build\Microsoft.Research.SEALNet.targets" />
+    <file src="..\lib\x64\$Configuration$\sealnetnative.dll" target="lib\x64\" />
+    <file src="..\lib\$Configuration$\netstandard2.0\SEALNet.*" target="lib\netstandard2.0\" exclude="**\*.pdb" />
+    <file src="..\..\LICENSE" target="LICENSE" />
+  </files>
+</package>

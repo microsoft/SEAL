@@ -10,6 +10,8 @@ to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simpl
 the instructions provided by the bot. You will only need to do this once across all 
 repos using our CLA.
 
+Pull requests must be submitted to the branch called `contrib`.
+
 This project has adopted the 
 [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the 

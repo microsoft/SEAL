@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Authors>Microsoft Research</Authors>
+    <Company>Microsoft Corporation</Company>
+    <Description>.NET wrapper examples for Microsoft SEAL</Description>
+    <Copyright>Microsoft Corporation 2019</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>../bin/$(Configuration)</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../src/SEALNet.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../lib/x64/$(Configuration)/sealnetnative.*" />
+    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../lib/libsealnetnative.*" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="@(SEALNetNativeBinaryFiles)" DestinationFolder="$(TargetDir)" />
+  </Target>
+
+</Project>

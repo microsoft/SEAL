@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{a119ce23-aae9-4b06-be2c-1c8aada4ab20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{8740bd83-253c-49f3-8f9a-3b9c526f67c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other">
+      <UniqueIdentifier>{8585bc5e-eaa9-481a-a6ee-c38be1319a32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other\cmake">
+      <UniqueIdentifier>{aaf838b1-cab2-4ccc-a016-a81c7edf506e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other\seal">
+      <UniqueIdentifier>{31fb1149-1a6f-438b-a86a-744384986d21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other\seal\util">
+      <UniqueIdentifier>{497d5f96-98a3-44e9-8b38-a2ea4bbea366}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="seal\biguint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\ciphertext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\decryptor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\intencoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\encryptionparams.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\encryptor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\evaluator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\keygenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\galoiskeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\baseconverter.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\numth.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\memorymanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\plaintext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\publickey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\randomgen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\randomtostd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\seal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\secretkey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\smallmodulus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\hash.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\clipnormal.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\common.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\defines.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\locks.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\mempool.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\pointer.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\polyarith.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\polyarithmod.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\polyarithsmallmod.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\polycore.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\smallntt.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\uintarith.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\uintarithmod.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\uintarithsmallmod.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\uintcore.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\globals.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\defaultparams.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\msvc.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\gcc.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\clang.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\batchencoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\relinkeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\intarray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\ckks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\aes.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="seal\biguint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\context.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\decryptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\encryptionparams.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\encryptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\evaluator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\keygenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\randomgen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\galoiskeys.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\baseconverter.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\numth.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\smallmodulus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\hash.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\clipnormal.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\mempool.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\polyarith.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\polyarithmod.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\polyarithsmallmod.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\smallntt.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\uintarith.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\uintarithmod.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\uintarithsmallmod.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\uintcore.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\globals.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\plaintext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\ciphertext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\intencoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\batchencoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\relinkeys.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\memorymanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\ckks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\aes.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt">
+      <Filter>Other</Filter>
+    </Text>
+    <Text Include="seal\CMakeLists.txt">
+      <Filter>Other\seal</Filter>
+    </Text>
+    <Text Include="seal\util\CMakeLists.txt">
+      <Filter>Other\seal\util</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cmake\SEALConfig.cmake.in">
+      <Filter>Other\cmake</Filter>
+    </None>
+    <None Include="seal\util\config.h.in">
+      <Filter>Other\seal\util</Filter>
+    </None>
+    <None Include="cmake\Findmsgsl.cmake">
+      <Filter>Other\cmake</Filter>
+    </None>
+    <None Include="CMakeConfig.cmd">
+      <Filter>Other</Filter>
+    </None>
+  </ItemGroup>
+</Project>

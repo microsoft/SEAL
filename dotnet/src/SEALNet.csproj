@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>Microsoft Research</Authors>
+    <Company>Microsoft Corporation</Company>
+    <Description>.NET wrapper library for Microsoft SEAL</Description>
+    <Copyright>Microsoft Corporation 2019</Copyright>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+    <DocumentationFile>../lib/$(Configuration)/SEALNet.xml</DocumentationFile>
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>../lib/$(Configuration)</OutputPath>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,22 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
+#define SEAL_VERSION "@SEAL_VERSION@"
+#cmakedefine SEAL_DEBUG
+#cmakedefine SEAL_USE_IF_CONSTEXPR
+#cmakedefine SEAL_USE_MAYBE_UNUSED
+#cmakedefine SEAL_USE_STD_BYTE
+#cmakedefine SEAL_USE_SHARED_MUTEX
+#cmakedefine SEAL_ENFORCE_HE_STD_SECURITY
+#cmakedefine SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#cmakedefine SEAL_USE_INTRIN
+#cmakedefine SEAL_USE__UMUL128
+#cmakedefine SEAL_USE__BITSCANREVERSE64
+#cmakedefine SEAL_USE___BUILTIN_CLZLL
+#cmakedefine SEAL_USE___INT128
+#cmakedefine SEAL_USE__ADDCARRY_U64
+#cmakedefine SEAL_USE__SUBBORROW_U64
+#cmakedefine SEAL_USE_AES_NI_PRNG
+#cmakedefine SEAL_USE_MSGSL
+#cmakedefine SEAL_USE_MSGSL_SPAN
+#cmakedefine SEAL_USE_MSGSL_MULTISPAN
