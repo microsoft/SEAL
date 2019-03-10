@@ -683,6 +683,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_SignificantCoeffCount(IntPtr thisptr, out ulong significantCoeffCount);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_NonZeroCoeffCount(IntPtr thisptr, out ulong nonZeroCoeffCount);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Plaintext_Scale(IntPtr thisptr, out double scale);
 
         [DllImport(sealnetnative, PreserveSig = false)]

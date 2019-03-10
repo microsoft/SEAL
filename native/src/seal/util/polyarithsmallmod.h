@@ -162,11 +162,6 @@ namespace seal
             std::size_t coeff_count, std::uint64_t scalar, const SmallModulus &modulus, 
             std::uint64_t *result);
 
-        void multiply_poly_mono_coeffmod(uint64_t *poly, 
-            size_t coeff_count, uint64_t mono_coeff, size_t mono_exponent,
-            const SmallModulus &modulus, uint64_t *result, 
-            std::size_t result_coeff_count, MemoryPool &pool);
-
         void multiply_poly_poly_coeffmod(const std::uint64_t *operand1, 
             std::size_t operand1_coeff_count, const std::uint64_t *operand2, 
             std::size_t operand2_coeff_count, const SmallModulus &modulus, 
@@ -216,7 +211,19 @@ namespace seal
             const SmallModulus &modulus, std::uint64_t *result, MemoryPool &pool);
 
         void negacyclic_shift_poly_coeffmod(const std::uint64_t *operand, 
-            std::size_t coeff_count, std::size_t shift, const SmallModulus &modulus, 
+            std::size_t coeff_count, std::size_t shift, const SmallModulus &modulus,
             std::uint64_t *result);
+
+        inline void negacyclic_multiply_poly_mono_coeffmod(
+            const std::uint64_t *operand, std::size_t coeff_count, 
+            std::uint64_t mono_coeff, std::size_t mono_exponent, 
+            const SmallModulus &modulus, std::uint64_t *result, MemoryPool &pool)
+        {
+            auto temp(util::allocate_uint(coeff_count, pool));
+            multiply_poly_scalar_coeffmod(
+                operand, coeff_count, mono_coeff, modulus, temp.get());
+            negacyclic_shift_poly_coeffmod(temp.get(), coeff_count, mono_exponent, 
+                modulus, result);
+        }
     }
 }

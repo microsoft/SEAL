@@ -477,7 +477,7 @@ namespace seal
         }
 
         /**
-        Returns the nonzero coefficient count of the current plaintext polynomial.
+        Returns the non-zero coefficient count of the current plaintext polynomial.
         */
         inline size_type nonzero_coeff_count() const
         {

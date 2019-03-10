@@ -383,6 +383,18 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Returns the non-zero coefficient count of the current plaintext polynomial.
+        /// </summary>
+        public ulong NonZeroCoeffCount
+        {
+            get
+            {
+                NativeMethods.Plaintext_NonZeroCoeffCount(NativePtr, out ulong result);
+                return result;
+            }
+        }
+
+        /// <summary>
         /// Returns a human-readable string description of the plaintext polynomial.
         /// </summary>
         /// <remarks>

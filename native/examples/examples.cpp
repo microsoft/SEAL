@@ -2159,10 +2159,11 @@ void example_bfv_performance()
         }
 
         /*
-        Select a random monomial plaintext.
+        Select a random monomial plaintext: 1x^mono_exponent.
         */
-        uint64_t mono_exponent = rd() % (poly_modulus_degree - 1);
-        Plaintext plain_mono = encoder.encode(BigUInt("2") << mono_exponent);
+        uint64_t mono_exponent = rd() % poly_modulus_degree;
+        Plaintext plain_mono(mono_exponent + 1);
+        plain_mono[mono_exponent] = 1; 
 
         cout << "Running tests ";
         for (int i = 0; i < count; i++)

@@ -288,14 +288,14 @@ namespace seal
                 throw std::invalid_argument("uint64_count");
             }
 #endif
-            std::size_t nonzero_count = 0;
+            std::size_t nonzero_count = uint64_count;
 
             value += uint64_count - 1;
-
             for (; uint64_count; uint64_count--)
             {
-                if (*value-- != 0) {
-                    nonzero_count++;
+                if (*value-- == 0)
+                {
+                    nonzero_count--;
                 }
             }
 

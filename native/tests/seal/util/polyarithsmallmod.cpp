@@ -108,45 +108,63 @@ namespace SEALTest
         TEST(PolyArithSmallMod, MultiplyPolyMonoCoeffSmallMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
-            auto poly1(allocate_zero_poly(3, 1, pool));
+            auto poly1(allocate_zero_poly(4, 1, pool));
             poly1[0] = 1;
             poly1[1] = 3;
             poly1[2] = 4;
+            poly1[3] = 2;
             uint64_t mono_coeff = 3;
-            size_t mono_exponent = 2;
-            auto result(allocate_zero_poly(5, 1, pool));
+            auto result(allocate_zero_poly(4, 1, pool));
             SmallModulus mod(5);
-            multiply_poly_mono_coeffmod(poly1.get(), 3, mono_coeff, mono_exponent, mod, result.get(), 5, pool);
-            ASSERT_EQ(0ULL, result[0]);
-            ASSERT_EQ(0ULL, result[1]);
-            ASSERT_EQ(3ULL, result[2]);
-            ASSERT_EQ(4ULL, result[3]);
-            ASSERT_EQ(2ULL, result[4]);
 
-            mono_coeff = 1;
-            multiply_poly_mono_coeffmod(poly1.get(), 3, mono_coeff, mono_exponent, mod, result.get(), 5, pool);
-            ASSERT_EQ(0ULL, result[0]);
+            size_t mono_exponent = 0;
+            negacyclic_multiply_poly_mono_coeffmod(poly1.get(), 1, mono_coeff, mono_exponent, mod, result.get(), pool);
+            ASSERT_EQ(3ULL, result[0]);
             ASSERT_EQ(0ULL, result[1]);
-            ASSERT_EQ(1ULL, result[2]);
-            ASSERT_EQ(3ULL, result[3]);
-            ASSERT_EQ(4ULL, result[4]);
+            ASSERT_EQ(0ULL, result[2]);
+            ASSERT_EQ(0ULL, result[3]);
 
-            mono_coeff = 4;
-            multiply_poly_mono_coeffmod(poly1.get(), 3, mono_coeff, mono_exponent, mod, result.get(), 5, pool);
-            ASSERT_EQ(0ULL, result[0]);
-            ASSERT_EQ(0ULL, result[1]);
+            negacyclic_multiply_poly_mono_coeffmod(poly1.get(), 2, mono_coeff, mono_exponent, mod, result.get(), pool);
+            ASSERT_EQ(3ULL, result[0]);
+            ASSERT_EQ(4ULL, result[1]);
+            ASSERT_EQ(0ULL, result[2]);
+            ASSERT_EQ(0ULL, result[3]);
+
+            mono_exponent = 1;
+            negacyclic_multiply_poly_mono_coeffmod(poly1.get(), 2, mono_coeff, mono_exponent, mod, result.get(), pool);
+            ASSERT_EQ(1ULL, result[0]);
+            ASSERT_EQ(3ULL, result[1]);
+            ASSERT_EQ(0ULL, result[2]);
+            ASSERT_EQ(0ULL, result[3]);
+
+            negacyclic_multiply_poly_mono_coeffmod(poly1.get(), 4, mono_coeff, mono_exponent, mod, result.get(), pool);
+            ASSERT_EQ(4ULL, result[0]);
+            ASSERT_EQ(3ULL, result[1]);
             ASSERT_EQ(4ULL, result[2]);
             ASSERT_EQ(2ULL, result[3]);
-            ASSERT_EQ(1ULL, result[4]);
+
+            mono_coeff = 1;
+            negacyclic_multiply_poly_mono_coeffmod(poly1.get(), 4, mono_coeff, mono_exponent, mod, result.get(), pool);
+            ASSERT_EQ(3ULL, result[0]);
+            ASSERT_EQ(1ULL, result[1]);
+            ASSERT_EQ(3ULL, result[2]);
+            ASSERT_EQ(4ULL, result[3]);
+
+            mono_coeff = 4;
+            mono_exponent = 3;
+            negacyclic_multiply_poly_mono_coeffmod(poly1.get(), 4, mono_coeff, mono_exponent, mod, result.get(), pool);
+            ASSERT_EQ(3ULL, result[0]);
+            ASSERT_EQ(4ULL, result[1]);
+            ASSERT_EQ(2ULL, result[2]);
+            ASSERT_EQ(4ULL, result[3]);
 
             mono_coeff = 1;
             mono_exponent = 0;
-            multiply_poly_mono_coeffmod(poly1.get(), 3, mono_coeff, mono_exponent, mod, result.get(), 5, pool);
+            negacyclic_multiply_poly_mono_coeffmod(poly1.get(), 4, mono_coeff, mono_exponent, mod, result.get(), pool);
             ASSERT_EQ(1ULL, result[0]);
             ASSERT_EQ(3ULL, result[1]);
             ASSERT_EQ(4ULL, result[2]);
-            ASSERT_EQ(0ULL, result[3]);
-            ASSERT_EQ(0ULL, result[4]);
+            ASSERT_EQ(2ULL, result[3]);
         }
 
         TEST(PolyArithSmallMod, MultiplyPolyPolyCoeffSmallMod)
@@ -343,17 +361,12 @@ namespace SEALTest
             ASSERT_EQ(0ULL, result[1]);
             ASSERT_EQ(0ULL, result[2]);
             ASSERT_EQ(0ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 4, mod, result.get());
+            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 2, mod, result.get());
             ASSERT_EQ(0ULL, result[0]);
             ASSERT_EQ(0ULL, result[1]);
             ASSERT_EQ(0ULL, result[2]);
             ASSERT_EQ(0ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 5, mod, result.get());
-            ASSERT_EQ(0ULL, result[0]);
-            ASSERT_EQ(0ULL, result[1]);
-            ASSERT_EQ(0ULL, result[2]);
-            ASSERT_EQ(0ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 8, mod, result.get());
+            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 3, mod, result.get());
             ASSERT_EQ(0ULL, result[0]);
             ASSERT_EQ(0ULL, result[1]);
             ASSERT_EQ(0ULL, result[2]);
@@ -373,51 +386,16 @@ namespace SEALTest
             ASSERT_EQ(1ULL, result[1]);
             ASSERT_EQ(2ULL, result[2]);
             ASSERT_EQ(3ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 4, mod, result.get());
-            ASSERT_EQ(9ULL, result[0]);
-            ASSERT_EQ(8ULL, result[1]);
-            ASSERT_EQ(7ULL, result[2]);
-            ASSERT_EQ(6ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 5, mod, result.get());
-            ASSERT_EQ(4ULL, result[0]);
-            ASSERT_EQ(9ULL, result[1]);
-            ASSERT_EQ(8ULL, result[2]);
-            ASSERT_EQ(7ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 8, mod, result.get());
-            ASSERT_EQ(1ULL, result[0]);
-            ASSERT_EQ(2ULL, result[1]);
-            ASSERT_EQ(3ULL, result[2]);
-            ASSERT_EQ(4ULL, result[3]);
-
-            poly[0] = 1;
-            poly[1] = 2;
-            poly[2] = 0;
-            poly[3] = 4;
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 0, mod, result.get());
-            ASSERT_EQ(1ULL, result[0]);
-            ASSERT_EQ(2ULL, result[1]);
-            ASSERT_EQ(0ULL, result[2]);
-            ASSERT_EQ(4ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 1, mod, result.get());
-            ASSERT_EQ(6ULL, result[0]);
-            ASSERT_EQ(1ULL, result[1]);
-            ASSERT_EQ(2ULL, result[2]);
-            ASSERT_EQ(0ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 4, mod, result.get());
-            ASSERT_EQ(9ULL, result[0]);
-            ASSERT_EQ(8ULL, result[1]);
-            ASSERT_EQ(0ULL, result[2]);
-            ASSERT_EQ(6ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 5, mod, result.get());
-            ASSERT_EQ(4ULL, result[0]);
-            ASSERT_EQ(9ULL, result[1]);
-            ASSERT_EQ(8ULL, result[2]);
-            ASSERT_EQ(0ULL, result[3]);
-            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 8, mod, result.get());
-            ASSERT_EQ(1ULL, result[0]);
-            ASSERT_EQ(2ULL, result[1]);
-            ASSERT_EQ(0ULL, result[2]);
-            ASSERT_EQ(4ULL, result[3]);
+            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 2, mod, result.get());
+            ASSERT_EQ(7ULL, result[0]);
+            ASSERT_EQ(6ULL, result[1]);
+            ASSERT_EQ(1ULL, result[2]);
+            ASSERT_EQ(2ULL, result[3]);
+            negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 3, mod, result.get());
+            ASSERT_EQ(8ULL, result[0]);
+            ASSERT_EQ(7ULL, result[1]);
+            ASSERT_EQ(6ULL, result[2]);
+            ASSERT_EQ(1ULL, result[3]);
 
             poly[0] = 1;
             poly[1] = 2;

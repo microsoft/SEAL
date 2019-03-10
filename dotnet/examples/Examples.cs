@@ -1165,7 +1165,8 @@ namespace SEALNetExamples
                 Stopwatch timeDecryptSum = new Stopwatch();
                 Stopwatch timeAddSum = new Stopwatch();
                 Stopwatch timeMultiplySum = new Stopwatch();
-                Stopwatch timeMultiplyPlainSum = new Stopwatch();
+                Stopwatch timeMultiplyPlainGenericSum = new Stopwatch();
+                Stopwatch timeMultiplyPlainMonoSum = new Stopwatch();
                 Stopwatch timeSquareSum = new Stopwatch();
                 Stopwatch timeRelinearizeSum = new Stopwatch();
                 Stopwatch timeRotateRowsOneStepSum = new Stopwatch();
@@ -1187,6 +1188,10 @@ namespace SEALNetExamples
                 {
                     podList.Add((ulong)rnd.Next() % plainModulus.Value);
                 }
+
+                ulong monoExponent = (ulong)rnd.Next() % polyModulusDegree;
+                Plaintext plainMono = new Plaintext(monoExponent + 1);
+                plainMono[monoExponent] = 1;
 
                 Console.Write("Running tests ");
                 for (int i = 0; i < count; i++)
@@ -1265,14 +1270,24 @@ namespace SEALNetExamples
                     timeMultiplySum.Stop();
 
                     /*
-                    [Multiply Plain]
+                    [Multiply Plain Generic]
                     We multiply a ciphertext of size 2 with a random plaintext. Recall
                     that MultiplyPlain does not change the size of the ciphertext so we 
                     use encrypted2 here, which still has size 2.
                     */
-                    timeMultiplyPlainSum.Start();
+                    timeMultiplyPlainGenericSum.Start();
                     evaluator.MultiplyPlainInplace(encrypted2, plain);
-                    timeMultiplyPlainSum.Stop();
+                    timeMultiplyPlainGenericSum.Stop();
+
+                    /*
+                    [Multiply Plain Monomial]
+                    We multiply a ciphertext of size 2 with a random monomial plaintext. 
+                    Recall that MultiplyPlain does not change the size of the ciphertext 
+                    so we use encrypted2 here, which still has size 2.
+                    */
+                    timeMultiplyPlainMonoSum.Start();
+                    evaluator.MultiplyPlainInplace(encrypted2, plainMono);
+                    timeMultiplyPlainMonoSum.Stop();
 
                     /*
                     [Square]
@@ -1340,7 +1355,8 @@ namespace SEALNetExamples
                 double avgDecrypt = timeDecryptSum.Elapsed.TotalMilliseconds * 1000 / count;
                 double avgAdd = timeAddSum.Elapsed.TotalMilliseconds * 1000 / count;
                 double avgMultiply = timeMultiplySum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgMultiplyPlain = timeMultiplyPlainSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgMultiplyPlainGeneric = timeMultiplyPlainGenericSum.Elapsed.TotalMilliseconds * 1000 / count;
+                double avgMultiplyPlainMono = timeMultiplyPlainMonoSum.Elapsed.TotalMilliseconds * 1000 / count;
                 double avgSquare = timeSquareSum.Elapsed.TotalMilliseconds * 1000 / count;
                 double avgRelinearize = timeRelinearizeSum.Elapsed.TotalMilliseconds * 1000 / count;
                 double avgRotateRowsOneStep = timeRotateRowsOneStepSum.Elapsed.TotalMilliseconds * 1000 / count;
@@ -1353,7 +1369,8 @@ namespace SEALNetExamples
                 Console.WriteLine($"Average decrypt: {avgDecrypt} microseconds");
                 Console.WriteLine($"Average add: {avgAdd} microseconds");
                 Console.WriteLine($"Average multiply: {avgMultiply} microseconds");
-                Console.WriteLine($"Average multiply plain: {avgMultiplyPlain} microseconds");
+                Console.WriteLine($"Average multiply plain generic: {avgMultiplyPlainGeneric} microseconds");
+                Console.WriteLine($"Average multiply plain monomial: {avgMultiplyPlainMono} microseconds");
                 Console.WriteLine($"Average square: {avgSquare} microseconds");
                 Console.WriteLine($"Average relinearize: {avgRelinearize} microseconds");
                 Console.WriteLine($"Average rotate rows one step: {avgRotateRowsOneStep} microseconds");
