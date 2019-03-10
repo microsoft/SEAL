@@ -2241,7 +2241,7 @@ void example_bfv_performance()
             evaluator.add_inplace(encrypted1, encrypted2);
             time_end = chrono::high_resolution_clock::now();
             time_add_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start) / 3;
+                chrono::microseconds>(time_end - time_start);
 
             /*
             [Multiply]
@@ -2313,7 +2313,7 @@ void example_bfv_performance()
             evaluator.rotate_rows_inplace(encrypted, -1, gal_keys);
             time_end = chrono::high_resolution_clock::now();
             time_rotate_rows_one_step_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start) / 2;
+                chrono::microseconds>(time_end - time_start);;
 
             /*
             [Rotate Rows Random]
@@ -2352,13 +2352,13 @@ void example_bfv_performance()
         auto avg_unbatch = time_unbatch_sum.count() / count;
         auto avg_encrypt = time_encrypt_sum.count() / count;
         auto avg_decrypt = time_decrypt_sum.count() / count;
-        auto avg_add = time_add_sum.count() / count;
+        auto avg_add = time_add_sum.count() / (3 * count);
         auto avg_multiply = time_multiply_sum.count() / count;
         auto avg_multiply_plain_generic = time_multiply_plain_generic_sum.count() / count;
         auto avg_multiply_plain_mono = time_multiply_plain_mono_sum.count() / count;
         auto avg_square = time_square_sum.count() / count;
         auto avg_relinearize = time_relinearize_sum.count() / count;
-        auto avg_rotate_rows_one_step = time_rotate_rows_one_step_sum.count() / count;
+        auto avg_rotate_rows_one_step = time_rotate_rows_one_step_sum.count() / (2 * count);
         auto avg_rotate_rows_random = time_rotate_rows_random_sum.count() / count;
         auto avg_rotate_columns = time_rotate_columns_sum.count() / count;
 
@@ -2544,7 +2544,7 @@ void example_ckks_performance()
             evaluator.add_inplace(encrypted1, encrypted2);
             time_end = chrono::high_resolution_clock::now();
             time_add_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start) / 3;
+                chrono::microseconds>(time_end - time_start);
 
             /*
             [Multiply]
@@ -2600,7 +2600,7 @@ void example_ckks_performance()
             evaluator.rotate_vector_inplace(encrypted, -1, gal_keys);
             time_end = chrono::high_resolution_clock::now();
             time_rotate_one_step_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start) / 2;
+                chrono::microseconds>(time_end - time_start);
 
             /*
             [Rotate Vector Random]
@@ -2635,13 +2635,13 @@ void example_ckks_performance()
         auto avg_decode = time_decode_sum.count() / count;
         auto avg_encrypt = time_encrypt_sum.count() / count;
         auto avg_decrypt = time_decrypt_sum.count() / count;
-        auto avg_add = time_add_sum.count() / count;
+        auto avg_add = time_add_sum.count() / (3 * count);
         auto avg_multiply = time_multiply_sum.count() / count;
         auto avg_multiply_plain = time_multiply_plain_sum.count() / count;
         auto avg_square = time_square_sum.count() / count;
         auto avg_relinearize = time_relinearize_sum.count() / count;
         auto avg_rescale = time_rescale_sum.count() / count;
-        auto avg_rotate_one_step = time_rotate_one_step_sum.count() / count;
+        auto avg_rotate_one_step = time_rotate_one_step_sum.count() / (2 * count);
         auto avg_rotate_random = time_rotate_random_sum.count() / count;
         auto avg_conjugate = time_conjugate_sum.count() / count;
 

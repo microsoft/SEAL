@@ -1349,19 +1349,19 @@ namespace SEALNetExamples
                 Console.WriteLine();
                 Console.Out.Flush();
 
-                double avgBatch = timeBatchSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgUnbatch = timeUnbatchSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgEncrypt = timeEncryptSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgDecrypt = timeDecryptSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgAdd = timeAddSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgMultiply = timeMultiplySum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgMultiplyPlainGeneric = timeMultiplyPlainGenericSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgMultiplyPlainMono = timeMultiplyPlainMonoSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgSquare = timeSquareSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgRelinearize = timeRelinearizeSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgRotateRowsOneStep = timeRotateRowsOneStepSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgRotateRowsRandom = timeRotateRowsRandomSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgRotateColumns = timeRotateColumnsSum.Elapsed.TotalMilliseconds * 1000 / count;
+                int avgBatch = (int)(timeBatchSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgUnbatch = (int)(timeUnbatchSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgEncrypt = (int)(timeEncryptSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgDecrypt = (int)(timeDecryptSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgAdd = (int)(timeAddSum.Elapsed.TotalMilliseconds * 1000 / (3 * count));
+                int avgMultiply = (int)(timeMultiplySum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgMultiplyPlainGeneric = (int)(timeMultiplyPlainGenericSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgMultiplyPlainMono = (int)(timeMultiplyPlainMonoSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgSquare = (int)(timeSquareSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgRelinearize = (int)(timeRelinearizeSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgRotateRowsOneStep = (int)(timeRotateRowsOneStepSum.Elapsed.TotalMilliseconds * 1000 / (2 * count));
+                int avgRotateRowsRandom = (int)(timeRotateRowsRandomSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgRotateColumns = (int)(timeRotateColumnsSum.Elapsed.TotalMilliseconds * 1000 / count);
 
                 Console.WriteLine($"Average batch: {avgBatch} microseconds");
                 Console.WriteLine($"Average unbatch: {avgUnbatch} microseconds");
@@ -2258,19 +2258,19 @@ namespace SEALNetExamples
                 Console.WriteLine();
                 Console.Out.Flush();
 
-                double avgEncode = timeEncodeSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgDecode = timeDecodeSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgEncrypt = timeEncryptSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgDecrypt = timeDecryptSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgAdd = timeAddSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgMultiply = timeMultiplySum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgMultiplyPlain = timeMultiplyPlainSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgSquare = timeSquareSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgRelinearize = timeRelinearizeSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgRescale = timeRescaleSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgRotateOneStep = timeRotateOneStepSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgRotateRandom = timeRotateRandomSum.Elapsed.TotalMilliseconds * 1000 / count;
-                double avgConjugate = timeConjugateSum.Elapsed.TotalMilliseconds * 1000 / count;
+                int avgEncode = (int)(timeEncodeSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgDecode = (int)(timeDecodeSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgEncrypt = (int)(timeEncryptSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgDecrypt = (int)(timeDecryptSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgAdd = (int)(timeAddSum.Elapsed.TotalMilliseconds * 1000 / (3 * count));
+                int avgMultiply = (int)(timeMultiplySum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgMultiplyPlain = (int)(timeMultiplyPlainSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgSquare = (int)(timeSquareSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgRelinearize = (int)(timeRelinearizeSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgRescale = (int)(timeRescaleSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgRotateOneStep = (int)(timeRotateOneStepSum.Elapsed.TotalMilliseconds * 1000 / (2 * count));
+                int avgRotateRandom = (int)(timeRotateRandomSum.Elapsed.TotalMilliseconds * 1000 / count);
+                int avgConjugate = (int)(timeConjugateSum.Elapsed.TotalMilliseconds * 1000 / count);
 
                 Console.WriteLine($"Average encode: {avgEncode} microseconds");
                 Console.WriteLine($"Average decode: {avgDecode} microseconds");
