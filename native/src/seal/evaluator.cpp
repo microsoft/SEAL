@@ -2327,6 +2327,7 @@ namespace seal
 
         size_t encrypted_size = encrypted.size();
         size_t plain_coeff_count = plain.coeff_count();
+        size_t plain_nonzero_coeff_count = plain.nonzero_coeff_count();
 
         // Size check
         if (!product_fits_in(encrypted_size, coeff_count, coeff_mod_count))
@@ -2346,16 +2347,23 @@ namespace seal
         // Set the scale
         encrypted.scale() = new_scale;
 
-        // Multiplying just by a constant?
-        if (plain_coeff_count == 1)
+        /*
+        Optimizations for constant / monomial multiplication can lead to the  
+        presence of a timing side-channel in use-cases where the plaintext 
+        data should also be kept private.
+        */
+        if (plain_nonzero_coeff_count == 1)
         {
-            if (!context_data.qualifiers().using_fast_plain_lift)
+            // Multiplying by a monomial?
+            size_t mono_exponent = plain.significant_coeff_count() - 1;
+
+            if (plain[mono_exponent] >= plain_upper_half_threshold)
             {
-                auto adjusted_coeff(allocate_uint(coeff_mod_count, pool));
-                if (plain[0] >= plain_upper_half_threshold)
+                if (!context_data.qualifiers().using_fast_plain_lift)
                 {
+                    auto adjusted_coeff(allocate_uint(coeff_mod_count, pool));
                     auto decomposed_coeff(allocate_uint(coeff_mod_count, pool));
-                    add_uint_uint64(plain_upper_half_increment, plain[0],
+                    add_uint_uint64(plain_upper_half_increment, plain[mono_exponent],
                         coeff_mod_count, adjusted_coeff.get());
                     decompose_single_coeff(context_data, adjusted_coeff.get(), 
                         decomposed_coeff.get(), pool);
@@ -2364,10 +2372,10 @@ namespace seal
                     {
                         for (size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            multiply_poly_scalar_coeffmod(
+                            negacyclic_multiply_poly_mono_coeffmod(
                                 encrypted.data(i) + (j * coeff_count), coeff_count,
-                                decomposed_coeff[j], coeff_modulus[j],
-                                encrypted.data(i) + (j * coeff_count));
+                                decomposed_coeff[j], mono_exponent, coeff_modulus[j],
+                                encrypted.data(i) + (j * coeff_count), pool);
                         }
                     }
                 }
@@ -2377,47 +2385,30 @@ namespace seal
                     {
                         for (size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            multiply_poly_scalar_coeffmod(
+                            negacyclic_multiply_poly_mono_coeffmod(
                                 encrypted.data(i) + (j * coeff_count), coeff_count,
-                                plain[0], coeff_modulus[j],
-                                encrypted.data(i) + (j * coeff_count));
+                                plain[mono_exponent] + plain_upper_half_increment[j], 
+                                mono_exponent, coeff_modulus[j], 
+                                encrypted.data(i) + (j * coeff_count), pool);
                         }
                     }
                 }
-                return;
             }
             else
             {
-                // Need for lift plain coefficient in RNS form regarding to each qi
-                if (plain[0] >= plain_upper_half_threshold)
+                for (size_t i = 0; i < encrypted_size; i++)
                 {
-                    for (size_t i = 0; i < encrypted_size; i++)
+                    for (size_t j = 0; j < coeff_mod_count; j++)
                     {
-                        for (size_t j = 0; j < coeff_mod_count; j++)
-                        {
-                            multiply_poly_scalar_coeffmod(
-                                encrypted.data(i) + (j * coeff_count), coeff_count,
-                                plain[0] + plain_upper_half_increment[j],
-                                coeff_modulus[j], encrypted.data(i) + (j * coeff_count));
-                        }
+                        negacyclic_multiply_poly_mono_coeffmod(
+                            encrypted.data(i) + (j * coeff_count), coeff_count,
+                            plain[mono_exponent], mono_exponent, coeff_modulus[j],
+                            encrypted.data(i) + (j * coeff_count), pool);
                     }
                 }
-                // No need for lifting
-                else
-                {
-                    for (size_t i = 0; i < encrypted_size; i++)
-                    {
-                        for (size_t j = 0; j < coeff_mod_count; j++)
-                        {
-                            multiply_poly_scalar_coeffmod(
-                                encrypted.data(i) + (j * coeff_count), coeff_count,
-                                plain[0], coeff_modulus[j],
-                                encrypted.data(i) + (j * coeff_count));
-                        }
-                    }
-                }
-                return;
             }
+            
+            return;
         }
 
         // Generic plain case

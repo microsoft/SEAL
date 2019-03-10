@@ -452,6 +452,22 @@ namespace SEALNetTest
             Assert.AreEqual(6ul, plaindest[2]);
             Assert.AreEqual(8ul, plaindest[3]);
 
+            encryptor.Encrypt(new Plaintext("4x^1 + 3"), encrypted);
+            plain.Set("3x^5");
+            evaluator.MultiplyPlainInplace(encrypted, plain);
+            decryptor.Decrypt(encrypted, plaindest);
+
+            // {Cx^6 + 9x^5}
+            Assert.AreEqual(7ul, plaindest.CoeffCount);
+            Assert.AreEqual(2ul, plaindest.NonZeroCoeffCount);
+            Assert.AreEqual(0ul, plaindest[0]);
+            Assert.AreEqual(0ul, plaindest[1]);
+            Assert.AreEqual(0ul, plaindest[2]);
+            Assert.AreEqual(0ul, plaindest[3]);
+            Assert.AreEqual(0ul, plaindest[4]);
+            Assert.AreEqual(9ul, plaindest[5]);
+            Assert.AreEqual(12ul, plaindest[6]);
+
             Assert.ThrowsException<ArgumentException>(() =>
             {
                 // Uninitialized pool

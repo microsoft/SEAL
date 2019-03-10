@@ -389,6 +389,43 @@ namespace SEALTest
             ASSERT_EQ(2ULL, get_significant_uint64_count_uint(ptr.get(), 2));
         }
 
+        TEST(UIntCore, GetNonzeroUInt64CountUInt)
+        {   
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            auto ptr(allocate_uint(2, pool));
+            ptr[0] = 0;
+            ptr[1] = 0;
+            ASSERT_EQ(0ULL, get_nonzero_uint64_count_uint(ptr.get(), 2));
+
+            ptr[0] = 1;
+            ptr[1] = 0;
+            ASSERT_EQ(1ULL, get_nonzero_uint64_count_uint(ptr.get(), 2));
+
+            ptr[0] = 2;
+            ptr[1] = 0;
+            ASSERT_EQ(1ULL, get_nonzero_uint64_count_uint(ptr.get(), 2));
+
+            ptr[0] = 0xFFFFFFFFFFFFFFFF;
+            ptr[1] = 0;
+            ASSERT_EQ(1ULL, get_nonzero_uint64_count_uint(ptr.get(), 2));
+
+            ptr[0] = 0;
+            ptr[1] = 1;
+            ASSERT_EQ(1ULL, get_nonzero_uint64_count_uint(ptr.get(), 2));
+
+            ptr[0] = 0xFFFFFFFFFFFFFFFF;
+            ptr[1] = 1;
+            ASSERT_EQ(2ULL, get_nonzero_uint64_count_uint(ptr.get(), 2));
+
+            ptr[0] = 0xFFFFFFFFFFFFFFFF;
+            ptr[1] = 0x8000000000000000;
+            ASSERT_EQ(2ULL, get_nonzero_uint64_count_uint(ptr.get(), 2));
+
+            ptr[0] = 0xFFFFFFFFFFFFFFFF;
+            ptr[1] = 0xFFFFFFFFFFFFFFFF;
+            ASSERT_EQ(2ULL, get_nonzero_uint64_count_uint(ptr.get(), 2));
+        }
+
         TEST(UIntCore, GetPowerOfTwoUInt)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;

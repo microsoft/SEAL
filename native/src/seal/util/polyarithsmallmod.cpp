@@ -674,17 +674,17 @@ namespace seal
             uint64_t *result)
         {
 #ifdef SEAL_DEBUG
-            if (operand == nullptr && coeff_count > 0)
+            if (operand == nullptr)
             {
                 throw invalid_argument("operand");
             }
-            if (result == nullptr && coeff_count > 0)
+            if (result == nullptr)
             {
                 throw invalid_argument("result");
             }
-            if (operand == result && coeff_count > 0)
+            if (operand == result)
             {
-                throw invalid_argument("operand cannot point to the same location as result");
+                throw invalid_argument("result cannot point to the same value as operand");
             }
             if (modulus.is_zero())
             {
@@ -694,7 +694,18 @@ namespace seal
             {
                 throw invalid_argument("coeff_count");
             }
+            if (shift >= coeff_count)
+            {
+                throw invalid_argument("shift");
+            }
 #endif
+            // Nothing to do
+            if (shift == 0)
+            {
+                set_uint_uint(operand, coeff_count, result);
+                return;
+            }
+
             uint64_t index_raw = shift;
             uint64_t coeff_count_mod_mask = static_cast<uint64_t>(coeff_count) - 1;
             for (size_t i = 0; i < coeff_count; i++, operand++, index_raw++)
