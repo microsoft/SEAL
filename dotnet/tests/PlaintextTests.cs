@@ -34,15 +34,27 @@ namespace SEALNetTest
         [TestMethod]
         public void CreateWithHexTest()
         {
-            Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 1");
+            Plaintext plain = new Plaintext("6x^5 + 5x^4 + 3x^2 + 2x^1 + 1");
             Assert.IsNotNull(plain);
             Assert.AreEqual(6ul, plain.CoeffCount);
+            Assert.AreEqual(5ul, plain.NonZeroCoeffCount);
             Assert.AreEqual(1ul, plain[0]);
             Assert.AreEqual(2ul, plain[1]);
             Assert.AreEqual(3ul, plain[2]);
-            Assert.AreEqual(4ul, plain[3]);
+            Assert.AreEqual(0ul, plain[3]);
             Assert.AreEqual(5ul, plain[4]);
             Assert.AreEqual(6ul, plain[5]);
+
+            Plaintext plain2 = new Plaintext("6x^5 + 5x^4 + 3x^2 + 2x^1");
+            Assert.IsNotNull(plain);
+            Assert.AreEqual(6ul, plain2.CoeffCount);
+            Assert.AreEqual(4ul, plain2.NonZeroCoeffCount);
+            Assert.AreEqual(0ul, plain2[0]);
+            Assert.AreEqual(2ul, plain2[1]);
+            Assert.AreEqual(3ul, plain2[2]);
+            Assert.AreEqual(0ul, plain2[3]);
+            Assert.AreEqual(5ul, plain2[4]);
+            Assert.AreEqual(6ul, plain2[5]);
         }
 
         [TestMethod]
@@ -52,14 +64,15 @@ namespace SEALNetTest
             plain[0] = 1;
             plain[1] = 2;
             plain[2] = 3;
-            plain[3] = 4;
+            plain[3] = 0;
             plain[4] = 5;
             plain[5] = 6;
 
             Assert.AreEqual(6ul, plain.CoeffCount);
+            Assert.AreEqual(5ul, plain.NonZeroCoeffCount);
 
             string str = plain.ToString();
-            Assert.AreEqual("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 1", str);
+            Assert.AreEqual("6x^5 + 5x^4 + 3x^2 + 2x^1 + 1", str);
         }
 
         [TestMethod]
@@ -146,6 +159,7 @@ namespace SEALNetTest
             MemoryPoolHandle handle = plain.Pool;
 
             Assert.AreEqual(0ul, plain.CoeffCount);
+            Assert.AreEqual(0ul, plain.NonZeroCoeffCount);
             Assert.AreEqual(0ul, plain.Capacity);
 
             plain.Reserve(capacity: 10);
@@ -154,6 +168,7 @@ namespace SEALNetTest
             Assert.IsTrue(alloced > 0ul);
 
             Assert.AreEqual(0ul, plain.CoeffCount);
+            Assert.AreEqual(0ul, plain.NonZeroCoeffCount);
             Assert.AreEqual(10ul, plain.Capacity);
 
             plain.Resize(coeffCount: 11);
@@ -161,6 +176,7 @@ namespace SEALNetTest
             Assert.AreEqual(11ul, plain.CoeffCount);
             Assert.AreEqual(11ul, plain.Capacity);
             Assert.AreEqual(0ul, plain.SignificantCoeffCount);
+            Assert.AreEqual(0ul, plain.NonZeroCoeffCount);
             Assert.IsTrue(handle.AllocByteCount > 0ul);
         }
 
@@ -173,11 +189,13 @@ namespace SEALNetTest
 
             Assert.AreEqual(10000ul, plain.Capacity);
             Assert.AreEqual(0ul, plain.CoeffCount);
+            Assert.AreEqual(0ul, plain.NonZeroCoeffCount);
 
             plain.Set("1");
 
             Assert.AreEqual(10000ul, plain.Capacity);
             Assert.AreEqual(1ul, plain.CoeffCount);
+            Assert.AreEqual(1ul, plain.NonZeroCoeffCount);
             Assert.AreEqual(1ul, plain.SignificantCoeffCount);
 
             plain.ShrinkToFit();
@@ -193,15 +211,17 @@ namespace SEALNetTest
             Plaintext plain = new Plaintext();
             plain.Reserve(10000);
 
-            plain.Set("3x^2 + 4x^1 + 5");
+            plain.Set("3x^2 + 4x^1");
 
             Assert.AreEqual(10000ul, plain.Capacity);
             Assert.AreEqual(3ul, plain.CoeffCount);
+            Assert.AreEqual(2ul, plain.NonZeroCoeffCount);
 
             plain.Release();
 
             Assert.AreEqual(0ul, plain.Capacity);
             Assert.AreEqual(0ul, plain.CoeffCount);
+            Assert.AreEqual(0ul, plain.NonZeroCoeffCount);
         }
 
         [TestMethod]

@@ -914,6 +914,20 @@ namespace SEALTest
             ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
 
             encryptor.encrypt(encoder.encode(7), encrypted);
+            plain = encoder.encode(4);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(static_cast<uint64_t>(28), encoder.decode_uint64(plain));
+            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+
+            encryptor.encrypt(encoder.encode(7), encrypted);
+            plain = encoder.encode(2);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(static_cast<uint64_t>(14), encoder.decode_uint64(plain));
+            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+
+            encryptor.encrypt(encoder.encode(7), encrypted);
             plain = encoder.encode(1);
             evaluator.multiply_plain_inplace(encrypted, plain);
             decryptor.decrypt(encrypted, plain);

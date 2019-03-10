@@ -2135,7 +2135,8 @@ void example_bfv_performance()
         chrono::microseconds time_decrypt_sum(0);
         chrono::microseconds time_add_sum(0);
         chrono::microseconds time_multiply_sum(0);
-        chrono::microseconds time_multiply_plain_sum(0);
+        chrono::microseconds time_multiply_plain_generic_sum(0);
+        chrono::microseconds time_multiply_plain_mono_sum(0);
         chrono::microseconds time_square_sum(0);
         chrono::microseconds time_relinearize_sum(0);
         chrono::microseconds time_rotate_rows_one_step_sum(0);
@@ -2156,6 +2157,13 @@ void example_bfv_performance()
         {
             pod_vector.push_back(rd() % plain_modulus.value());
         }
+
+        /*
+        Select a random monomial plaintext: 1x^mono_exponent.
+        */
+        uint64_t mono_exponent = rd() % poly_modulus_degree;
+        Plaintext plain_mono(mono_exponent + 1);
+        plain_mono[mono_exponent] = 1; 
 
         cout << "Running tests ";
         for (int i = 0; i < count; i++)
@@ -2249,7 +2257,7 @@ void example_bfv_performance()
                 chrono::microseconds>(time_end - time_start);
 
             /*
-            [Multiply Plain]
+            [Multiply Plain Generic]
             We multiply a ciphertext of size 2 with a random plaintext. Recall
             that multiply_plain does not change the size of the ciphertext so we 
             use encrypted2 here, which still has size 2.
@@ -2257,7 +2265,19 @@ void example_bfv_performance()
             time_start = chrono::high_resolution_clock::now();
             evaluator.multiply_plain_inplace(encrypted2, plain);
             time_end = chrono::high_resolution_clock::now();
-            time_multiply_plain_sum += chrono::duration_cast<
+            time_multiply_plain_generic_sum += chrono::duration_cast<
+                chrono::microseconds>(time_end - time_start);
+
+            /*
+            [Multiply Plain Monomial]
+            We multiply a ciphertext of size 2 with a random monomial 
+            plaintext. Recall that multiply_plain does not change the size of 
+            the ciphertext so we use encrypted2 here, which still has size 2.
+            */
+            time_start = chrono::high_resolution_clock::now();
+            evaluator.multiply_plain_inplace(encrypted2, plain_mono);
+            time_end = chrono::high_resolution_clock::now();
+            time_multiply_plain_mono_sum += chrono::duration_cast<
                 chrono::microseconds>(time_end - time_start);
 
             /*
@@ -2334,7 +2354,8 @@ void example_bfv_performance()
         auto avg_decrypt = time_decrypt_sum.count() / count;
         auto avg_add = time_add_sum.count() / count;
         auto avg_multiply = time_multiply_sum.count() / count;
-        auto avg_multiply_plain = time_multiply_plain_sum.count() / count;
+        auto avg_multiply_plain_generic = time_multiply_plain_generic_sum.count() / count;
+        auto avg_multiply_plain_mono = time_multiply_plain_mono_sum.count() / count;
         auto avg_square = time_square_sum.count() / count;
         auto avg_relinearize = time_relinearize_sum.count() / count;
         auto avg_rotate_rows_one_step = time_rotate_rows_one_step_sum.count() / count;
@@ -2347,7 +2368,8 @@ void example_bfv_performance()
         cout << "Average decrypt: " << avg_decrypt << " microseconds" << endl;
         cout << "Average add: " << avg_add << " microseconds" << endl;
         cout << "Average multiply: " << avg_multiply << " microseconds" << endl;
-        cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << endl;
+        cout << "Average multiply plain generic: " << avg_multiply_plain_generic << " microseconds" << endl;
+        cout << "Average multiply plain monomial: " << avg_multiply_plain_mono << " microseconds" << endl;
         cout << "Average square: " << avg_square << " microseconds" << endl;
         cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
         cout << "Average rotate rows one step: " << avg_rotate_rows_one_step << " microseconds" << endl;

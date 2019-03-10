@@ -407,6 +407,16 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SignificantCoeffCount(void *thisptr, ui
     return S_OK;
 }
 
+SEALNETNATIVE HRESULT SEALCALL Plaintext_NonZeroCoeffCount(void *thisptr, uint64_t *nonzero_coeff_count)
+{
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+    IfNullRet(nonzero_coeff_count, E_POINTER);
+
+    *nonzero_coeff_count = plain->nonzero_coeff_count();
+    return S_OK;
+}
+
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Scale(void *thisptr, double *scale)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);

@@ -275,6 +275,33 @@ namespace seal
             return uint64_count;
         }
 
+        inline std::size_t get_nonzero_uint64_count_uint(
+            const std::uint64_t *value, std::size_t uint64_count)
+        {
+#ifdef SEAL_DEBUG
+            if (!value && uint64_count)
+            {
+                throw std::invalid_argument("value");
+            }
+            if (!uint64_count)
+            {
+                throw std::invalid_argument("uint64_count");
+            }
+#endif
+            std::size_t nonzero_count = uint64_count;
+
+            value += uint64_count - 1;
+            for (; uint64_count; uint64_count--)
+            {
+                if (*value-- == 0)
+                {
+                    nonzero_count--;
+                }
+            }
+
+            return nonzero_count;
+        }
+
         inline void set_uint_uint(const std::uint64_t *value, 
             std::size_t value_uint64_count, 
             std::size_t result_uint64_count, std::uint64_t *result)
