@@ -154,18 +154,6 @@ namespace seal
 
         KeyGenerator &operator =(KeyGenerator &&assign) = delete;
 
-        void set_poly_coeffs_zero_one_negone(
-            const SEALContext::ContextData &context_data, std::uint64_t *poly, 
-            std::shared_ptr<UniformRandomGenerator> random) const;
-
-        void set_poly_coeffs_normal(
-            const SEALContext::ContextData &context_data, std::uint64_t *poly, 
-            std::shared_ptr<UniformRandomGenerator> random) const;
-
-        void set_poly_coeffs_uniform(
-            const SEALContext::ContextData &context_data, std::uint64_t *poly,
-            std::shared_ptr<UniformRandomGenerator> random) const;
-
         void compute_secret_key_array(
             const SEALContext::ContextData &context_data,
             std::size_t max_power);

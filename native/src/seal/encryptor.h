@@ -69,6 +69,38 @@ namespace seal
         void encrypt(const Plaintext &plain, Ciphertext &destination, 
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
+        /**
+        Encrypts a zero Plaintext and stores the result in the destination parameter. 
+        Dynamic memory allocations in the process are allocated from the memory 
+        pool pointed to by the given MemoryPoolHandle.
+
+        @param[out] destination The ciphertext to overwrite with the encrypted plaintext 
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is not in default NTT form
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        void encrypt_zero(Ciphertext &destination, 
+                parms_id_type parms_id,
+                MemoryPoolHandle pool = MemoryManager::GetPool());
+
+        /**
+        Encrypts a zero Plaintext and stores the result in the destination parameter. 
+        Dynamic memory allocations in the process are allocated from the memory 
+        pool pointed to by the given MemoryPoolHandle.
+
+        @param[out] destination The ciphertext to overwrite with the encrypted plaintext 
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is not in default NTT form
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        void encrypt_zero(Ciphertext &destination,
+                MemoryPoolHandle pool = MemoryManager::GetPool())
+        {
+            encrypt_zero(destination, context_->data_parms_id_head());
+        }
+
     private:
         Encryptor(const Encryptor &copy) = delete;
 
@@ -78,20 +110,12 @@ namespace seal
 
         Encryptor &operator =(Encryptor &&assign) = delete;
 
+        void encrypt_zero_internal(Ciphertext &destination,
+                parms_id_type parms_id,
+                MemoryPoolHandle pool = MemoryManager::GetPool());
+
         void preencrypt(const std::uint64_t *plain, std::size_t plain_coeff_count, 
             const SEALContext::ContextData &context_data, std::uint64_t *destination);
-
-        void set_poly_coeffs_normal(std::uint64_t *poly, 
-            std::shared_ptr<UniformRandomGenerator> random,
-            const SEALContext::ContextData &context_data) const;
-
-        void set_poly_coeffs_zero_one_negone(uint64_t *poly,
-            std::shared_ptr<UniformRandomGenerator> random,
-            const SEALContext::ContextData &context_data) const;
-
-        void set_poly_coeffs_zero_one(uint64_t *poly, 
-            std::shared_ptr<UniformRandomGenerator> random,
-            const SEALContext::ContextData &context_data) const;
 
         void bfv_encrypt(const Plaintext &plain, Ciphertext &destination,
             MemoryPoolHandle pool);

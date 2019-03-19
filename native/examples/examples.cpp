@@ -911,14 +911,14 @@ void example_bfv_basics_iii()
     */
     EncryptionParameters parms(scheme_type::BFV);
 
-    parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
+    parms.set_poly_modulus_degree(8192);
+    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(8192));
 
     /*
     Note that 40961 is a prime number and 2*4096 divides 40960, so batching will
     automatically be enabled for these parameters.
     */
-    parms.set_plain_modulus(40961);
+    parms.set_plain_modulus(65537);
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -1337,13 +1337,6 @@ void example_bfv_basics_iv()
     evaluator.mod_switch_to_next_inplace(encrypted);
     cout << "Noise budget after modulus switching: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-    evaluator.square_inplace(encrypted);
-    evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "Noise budget after squaring: "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-    evaluator.mod_switch_to_next_inplace(encrypted);
-    cout << "Noise budget after modulus switching: "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl << endl;
 
     /*
     At this point the ciphertext still decrypts correctly, has very small size,
@@ -1352,7 +1345,7 @@ void example_bfv_basics_iv()
     chain as long as the secret key is at a higher level in the same chain.
     */
     decryptor.decrypt(encrypted, plain);
-    cout << "Decryption of eighth power: " << plain.to_string() << endl << endl;
+    cout << "Decryption of fourth power: " << plain.to_string() << endl << endl;
 
     /*
     In BFV modulus switching is not necessary and in some cases the user might
@@ -1832,7 +1825,8 @@ void example_ckks_basics_iii()
     Now encode and encrypt the input using the last of the coeff_modulus primes 
     as the scale for a reason that will become clear soon.
     */
-    auto scale = static_cast<double>(parms.coeff_modulus().back().value());
+    // \todo This is definitely going to change before release.
+    auto scale = static_cast<double>(context->data_context_data_head()->parms().coeff_modulus().back().value());
     Plaintext plain_x;
     encoder.encode(input, scale, plain_x);
     Ciphertext encrypted_x1;

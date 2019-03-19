@@ -18,6 +18,7 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/uintcore.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/polyrandom.cpp
 )
 
 # Create the config file
@@ -50,6 +51,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.h
         ${CMAKE_CURRENT_LIST_DIR}/uintcore.h
+        ${CMAKE_CURRENT_LIST_DIR}/polyrandom.h
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal/util
 )

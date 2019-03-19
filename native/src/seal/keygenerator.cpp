@@ -12,6 +12,7 @@
 #include "seal/util/clipnormal.h"
 #include "seal/util/polycore.h"
 #include "seal/util/smallntt.h"
+#include "seal/util/polyrandom.h"
 
 using namespace std;
 using namespace seal::util;
@@ -130,7 +131,7 @@ namespace seal
 
         // Generate secret key
         uint64_t *secret_key = secret_key_.data().data();
-        set_poly_coeffs_zero_one_negone(context_data, secret_key, random);
+        sample_poly_ternary(secret_key, random, parms);
 
         auto &small_ntt_tables = context_data.small_ntt_tables();
         for (size_t i = 0; i < coeff_mod_count; i++)
@@ -188,13 +189,13 @@ namespace seal
         // Sample a uniformly at random
         // Set pk[1] = a (we sample the NTT form directly)
         uint64_t *public_key_1 = public_key_.data().data(1);
-        set_poly_coeffs_uniform(context_data, public_key_1, random);
+        sample_poly_uniform(public_key_1, random, parms);
 
         // calculate a*s + e (mod q) and store in pk[0]
         auto &small_ntt_tables = context_data.small_ntt_tables();
 
         auto noise(allocate_poly(coeff_count, coeff_mod_count, pool_));
-        set_poly_coeffs_normal(context_data, noise.get(), random);
+        sample_poly_normal(noise.get(), random, parms);
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
             // Transform the noise e into NTT representation.
@@ -320,7 +321,7 @@ namespace seal
                     uint64_t *eval_keys_second = relin_keys.data()[k][l].data(2 * i + 1);
 
                     // We sample a_i directly in NTT form
-                    set_poly_coeffs_uniform(context_data, eval_keys_second, random);
+                    sample_poly_uniform(eval_keys_second, random, parms);
 
                     for (size_t j = 0; j < coeff_mod_count; j++)
                     {
@@ -331,7 +332,7 @@ namespace seal
                     }
 
                     // generate NTT(e_i) 
-                    set_poly_coeffs_normal(context_data, noise.get(), random);
+                    sample_poly_normal(noise.get(), random, parms);
                     for (size_t j = 0; j < coeff_mod_count; j++)
                     {
                         ntt_negacyclic_harvey(noise.get() + (j * coeff_count), small_ntt_tables[j]);
@@ -472,7 +473,7 @@ namespace seal
                     uint64_t *eval_keys_second = galois_keys.data()[index][l].data(2 * i + 1);
 
                     // We sample a_i in NTT form directly
-                    set_poly_coeffs_uniform(context_data, eval_keys_second, random);
+                    sample_poly_uniform(eval_keys_second, random, parms);
                     for (size_t j = 0; j < coeff_mod_count; j++)
                     {
                         // calculate a_i*s and store in galois_keys_[k].first[i]
@@ -483,7 +484,7 @@ namespace seal
                     }
 
                     // generate NTT(e_i) 
-                    set_poly_coeffs_normal(context_data, noise.get(), random);
+                    sample_poly_normal(noise.get(), random, parms);
                     for (size_t j = 0; j < coeff_mod_count; j++)
                     {
                         ntt_negacyclic_harvey(
@@ -598,119 +599,6 @@ namespace seal
         }
 
         return galois_keys(decomposition_bit_count, logn_galois_keys);
-    }
-
-    void KeyGenerator::set_poly_coeffs_zero_one_negone(
-        const SEALContext::ContextData &context_data, 
-        uint64_t *poly, shared_ptr<UniformRandomGenerator> random) const
-    {
-        // Extract encryption parameters.
-        auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
-
-        RandomToStandardAdapter engine(random);
-        uniform_int_distribution<int> dist(-1, 1);
-
-        for (size_t i = 0; i < coeff_count; i++)
-        {
-            int rand_index = dist(engine);
-            if (rand_index == 1)
-            {
-                for (size_t j = 0; j < coeff_mod_count; j++)
-                {
-                    poly[i + (j * coeff_count)] = 1;
-                }
-            }
-            else if (rand_index == -1)
-            {
-                for (size_t j = 0; j < coeff_mod_count; j++)
-                {
-                    poly[i + (j * coeff_count)] = coeff_modulus[j].value() - 1;
-                }
-            }
-            else
-            {
-                for (size_t j = 0; j < coeff_mod_count; j++)
-                {
-                    poly[i + (j * coeff_count)] = 0;
-                }
-            }
-        }
-    }
-
-    void KeyGenerator::set_poly_coeffs_normal(
-        const SEALContext::ContextData &context_data, uint64_t *poly, 
-        shared_ptr<UniformRandomGenerator> random) const
-    {
-        // Extract encryption parameters.
-        auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
-
-        if (parms.noise_standard_deviation() == 0 || 
-            parms.noise_max_deviation() == 0)
-        {
-            set_zero_poly(coeff_count, coeff_mod_count, poly);
-            return;
-        }
-        RandomToStandardAdapter engine(random);
-        ClippedNormalDistribution dist(0, parms.noise_standard_deviation(), 
-            parms.noise_max_deviation());
-        for (size_t i = 0; i < coeff_count; i++)
-        {
-            int64_t noise = static_cast<int64_t>(dist(engine));
-            if (noise > 0)
-            {
-                for (size_t j = 0; j < coeff_mod_count; j++)
-                {
-                    poly[i + (j * coeff_count)] = static_cast<uint64_t>(noise);
-                }
-            }
-            else if (noise < 0)
-            {
-                noise = -noise;
-                for (size_t j = 0; j < coeff_mod_count; j++)
-                {
-                    poly[i + (j * coeff_count)] = 
-                        coeff_modulus[j].value() - static_cast<uint64_t>(noise);
-                }
-            }
-            else
-            {
-                for (size_t j = 0; j < coeff_mod_count; j++)
-                {
-                    poly[i + (j * coeff_count)] = 0;
-                }
-            }
-        }
-    }
-
-    void KeyGenerator::set_poly_coeffs_uniform(
-        const SEALContext::ContextData &context_data,
-        uint64_t *poly, shared_ptr<UniformRandomGenerator> random) const
-    {
-        // Extract encryption parameters.
-        auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
-
-        // Set up source of randomness which produces random things of size 32 bit
-        RandomToStandardAdapter engine(random);
-
-        for (size_t j = 0; j < coeff_mod_count; j++)
-        {
-            uint64_t current_modulus = coeff_modulus[j].value();
-            for (size_t i = 0; i < coeff_count; i++, poly++)
-            {
-                uint64_t new_coeff = (static_cast<uint64_t>(engine()) << 32) + 
-                    static_cast<uint64_t>(engine());
-                *poly = new_coeff % current_modulus; 
-            }
-        }
     }
 
     const SecretKey &KeyGenerator::secret_key() const

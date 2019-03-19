@@ -37,6 +37,15 @@ namespace seal
             void generate(const std::vector<SmallModulus> &coeff_base, 
                 std::size_t coeff_count, const SmallModulus &small_plain_mod);
 
+            void floor_last_coeff_modulus_inplace(
+                    std::uint64_t *rns_poly,
+                    MemoryPoolHandle pool) const;
+
+            void floor_last_coeff_modulus_ntt_inplace(
+                    std::uint64_t *rns_poly,
+                    const Pointer<SmallNTTTables> &rns_ntt_tables,
+                    MemoryPoolHandle pool) const;
+
             /**
             Fast base converter from q to Bsk
             */

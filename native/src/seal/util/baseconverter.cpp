@@ -7,10 +7,12 @@
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintcore.h"
+#include "seal/util/polycore.h"
 #include "seal/util/baseconverter.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintarithmod.h"
+#include "seal/util/polyarithsmallmod.h"
 #include "seal/util/smallntt.h"
 #include "seal/util/globals.h"
 #include "seal/smallmodulus.h"
@@ -564,6 +566,85 @@ namespace seal
                     }
                     *destination = barrett_reduce_128(aux_transition, bsk_base_array_elt);
                 }
+            }
+        }
+
+        void BaseConverter::floor_last_coeff_modulus_inplace(
+                std::uint64_t *rns_poly,
+                MemoryPoolHandle pool) const
+        {
+            auto temp(allocate_uint(coeff_count_, pool));
+            for (size_t i = 0; i < coeff_base_mod_count_; i ++)
+            {
+                // (ct mod qk) mod qi
+                modulo_poly_coeffs(
+                        rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
+                        coeff_count_,
+                        coeff_base_array_[i],
+                        temp.get());
+                // (-(ct mod qk)) mod qi
+                negate_poly_coeffmod(
+                        temp.get(),
+                        coeff_count_,
+                        coeff_base_array_[i],
+                        temp.get());
+                // ((ct mod qi) - (ct mod qk)) mod qi
+                add_poly_poly_coeffmod(
+                        rns_poly + i * coeff_count_,
+                        temp.get(),
+                        coeff_count_,
+                        coeff_base_array_[i],
+                        rns_poly + i * coeff_count_);
+                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
+                multiply_poly_scalar_coeffmod(
+                        rns_poly + i * coeff_count_,
+                        coeff_count_,
+                        inv_last_coeff_mod_array_[i],
+                        coeff_base_array_[i],
+                        rns_poly + i * coeff_count_);
+            }
+        }
+
+        void BaseConverter::floor_last_coeff_modulus_ntt_inplace(
+                std::uint64_t *rns_poly,
+                const Pointer<SmallNTTTables> &rns_ntt_tables,
+                MemoryPoolHandle pool) const
+        {
+            auto temp(allocate_uint(coeff_count_, pool));
+            // convert to non-NTT form
+            inverse_ntt_negacyclic_harvey(
+                    rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
+                    rns_ntt_tables[coeff_base_mod_count_ - 1]);
+            for (size_t i = 0; i < coeff_base_mod_count_; i ++)
+            {
+                // (ct mod qk) mod qi
+                modulo_poly_coeffs(
+                        rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
+                        coeff_count_,
+                        coeff_base_array_[i],
+                        temp.get());
+                // convert to NTT form
+                ntt_negacyclic_harvey(temp.get(), rns_ntt_tables[i]);
+                // (-(ct mod qk)) mod qi
+                negate_poly_coeffmod(
+                        temp.get(),
+                        coeff_count_,
+                        coeff_base_array_[i],
+                        temp.get());
+                // ((ct mod qi) - (ct mod qk)) mod qi
+                add_poly_poly_coeffmod(
+                        rns_poly + i * coeff_count_,
+                        temp.get(),
+                        coeff_count_,
+                        coeff_base_array_[i],
+                        rns_poly + i * coeff_count_);
+                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
+                multiply_poly_scalar_coeffmod(
+                        rns_poly + i * coeff_count_,
+                        coeff_count_,
+                        inv_last_coeff_mod_array_[i],
+                        coeff_base_array_[i],
+                        rns_poly + i * coeff_count_);
             }
         }
 
