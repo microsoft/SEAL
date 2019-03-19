@@ -117,6 +117,12 @@ namespace seal
     were for some reason not appropriately set, the parameters_set flag will be false,
     and a new SEALContext will have to be created after the parameters are corrected.
 
+    By default, SEALContext creates a chain of SEALContext::ContextData 
+    instances. The first one in chain has EncryptionParameters reserved for 
+    keys which can be accessed with key_parms_id_. Starting from the second one,
+    their EncryptionParameters are used for ciphertexts, plaintexts, evaluation,
+    hence is called data_parms_id_. ContextData chain is doubly linked.
+
     @see EncryptionParameters for more details on the parameters.
     @see EncryptionParameterQualifiers for more details on the qualifiers.
     */
@@ -342,16 +348,6 @@ namespace seal
         }
 
         /**
-        Returns a const reference to ContextData class corresponding to the
-        encryption parameters. This is the first set of parameters in a chain
-        of parameters when modulus switching is used.
-        */
-        inline auto context_data() const
-        {
-            return context_data_map_.at(first_parms_id_);
-        }
-
-        /**
         Returns an optional const reference to ContextData class corresponding to
         the parameters with a given parms_id. If parameters with the given parms_id
         are not found then the function returns nullptr.
@@ -365,30 +361,76 @@ namespace seal
                 data->second : std::shared_ptr<ContextData>{ nullptr };
         }
 
+
+        /**
+        Returns an optional const reference to ContextData class corresponding to
+        the parameters of keys. If parameters with the given parms_id
+        are not found then the function returns nullptr.
+        */
+        inline auto key_context_data() const
+        {
+            auto data = context_data_map_.find(key_parms_id_);
+            return (data != context_data_map_.end()) ?
+                data->second : std::shared_ptr<ContextData>{ nullptr };
+        }
+
+        /**
+        Returns an optional const reference to ContextData class corresponding to
+        the heading parameters of data. If parameters with the given parms_id
+        are not found then the function returns nullptr.
+        */
+        inline auto data_context_data_head() const
+        {
+            auto data = context_data_map_.find(data_parms_id_head_);
+            return (data != context_data_map_.end()) ?
+                data->second : std::shared_ptr<ContextData>{ nullptr };
+        }
+
+        /**
+        Returns an optional const reference to ContextData class corresponding to
+        the tailing parameters of data. If parameters with the given parms_id
+        are not found then the function returns nullptr.
+        */
+        inline auto data_context_data_tail() const
+        {
+            auto data = context_data_map_.find(data_parms_id_tail_);
+            return (data != context_data_map_.end()) ?
+                data->second : std::shared_ptr<ContextData>{ nullptr };
+        }
+
         /**
         Returns whether the encryption parameters are valid.
         */
-        inline auto parameters_set() const
+/*        inline auto parameters_set() const
         {
             return context_data()->qualifiers_.parameters_set;
         }
-
+*/
         /**
-        Returns a parms_id_type corresponding to the first set
-        of encryption parameters.
+        Returns a parms_id_type corresponding to the set
+        of encryption parameters for keys.
         */
-        inline auto &first_parms_id() const
+        inline auto &key_parms_id() const
         {
-            return first_parms_id_;
+            return key_parms_id_;
         }
 
         /**
-        Returns a parms_id_type corresponding to the last set
-        of encryption parameters.
+        Returns a parms_id_type corresponding to the head set
+        of encryption parameters for ciphertext and plaintext.
         */
-        inline auto &last_parms_id() const
+        inline auto &data_parms_id_head() const
         {
-            return last_parms_id_;
+            return data_parms_id_head_;
+        }
+
+        /**
+        Returns a parms_id_type corresponding to the tail set
+        of encryption parameters for ciphertext and plaintext.
+        */
+        inline auto &data_parms_id_tail() const
+        {
+            return data_parms_id_tail_;
         }
 
     private:
@@ -415,11 +457,22 @@ namespace seal
 
         ContextData validate(EncryptionParameters parms);
 
+        /**
+        Create the next context_data by dropping the last element from
+        coeff_modulus. If the new encryption parameters are not qualified,
+        returns parms_id_zero. Otherwise, returns the parms_id of the next
+        parameter, also append the next context_data to chain.
+        */
+        parms_id_type create_next_context_data(
+                const parms_id_type &prev_parms);
+
         MemoryPoolHandle pool_;
 
-        parms_id_type first_parms_id_;
+        parms_id_type key_parms_id_;
 
-        parms_id_type last_parms_id_;
+        parms_id_type data_parms_id_head_;
+
+        parms_id_type data_parms_id_tail_;
 
         std::unordered_map<
             parms_id_type, std::shared_ptr<const ContextData>> context_data_map_{};

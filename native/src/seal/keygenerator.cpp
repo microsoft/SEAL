@@ -26,7 +26,7 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context_->parameters_set())
+        if (!context_->key_context_data()->qualifiers().parameters_set)
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -48,12 +48,12 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context_->parameters_set())
+        if (!context_->key_context_data()->qualifiers().parameters_set)
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
         if (!secret_key.is_valid_for(context_) ||
-            secret_key.parms_id() != context_->first_parms_id())
+            secret_key.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("secret_key is not valid for encryption parameters");
         }
@@ -75,23 +75,23 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context_->parameters_set())
+        if (!context_->key_context_data()->qualifiers().parameters_set)
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
         if (!secret_key.is_valid_for(context_) ||
-            secret_key.parms_id() != context_->first_parms_id())
+            secret_key.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("secret_key is not valid for encryption parameters");
         }
         if (!public_key.is_valid_for(context_) ||
-            public_key.parms_id() != context_->first_parms_id())
+            public_key.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("public_key is not valid for encryption parameters");
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -115,7 +115,7 @@ namespace seal
     void KeyGenerator::generate_sk()
     {
         // Extract encryption parameters.
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -160,7 +160,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -254,7 +254,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -387,7 +387,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -541,7 +541,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         if (!context_data.qualifiers().using_batching)
         {
             throw logic_error("encryption parameters do not support batching");
@@ -572,7 +572,7 @@ namespace seal
             throw invalid_argument("decomposition_bit_count is not in the valid range");
         }
 
-        size_t coeff_count = context_->context_data()->parms().poly_modulus_degree();
+        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         uint64_t m = coeff_count << 1;
         int logn = get_power_of_two(static_cast<uint64_t>(coeff_count));
         

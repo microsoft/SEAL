@@ -33,7 +33,7 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context_->parameters_set())
+        if (!context_->data_context_data_head()->qualifiers().parameters_set)
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -45,7 +45,7 @@ namespace seal
     void Evaluator::populate_Zmstar_to_generator()
     {
         uint64_t n = static_cast<uint64_t>(
-            context_->context_data()->parms().poly_modulus_degree());
+            context_->data_context_data_head()->parms().poly_modulus_degree());
         uint64_t m = n << 1;
 
         for (uint64_t i = 0; i < n / 2; i++)
@@ -1126,7 +1126,7 @@ namespace seal
         {
             throw invalid_argument("relin_keys is not valid for encryption parameters");
         }
-        if (relin_keys.parms_id() != context_->first_parms_id())
+        if (relin_keys.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("parameter mismatch");
         }
@@ -1246,8 +1246,8 @@ namespace seal
         }
 #endif
         // q/qi mod qi
-        auto &first_context_data = *context_->context_data();
-        auto &coeff_small_ntt_tables = first_context_data.small_ntt_tables();
+        auto &key_context_data = *context_->key_context_data();
+        auto &coeff_small_ntt_tables = key_context_data.small_ntt_tables();
 
         // Decompose encrypted_array[count-1] into base w
         // Want to create an array of polys, each of whose components i is
@@ -1408,8 +1408,8 @@ namespace seal
         }
 #endif
         // q/qi mod qi
-        auto &first_context_data = *context_->context_data();
-        auto &coeff_small_ntt_tables = first_context_data.small_ntt_tables();
+        auto &key_context_data = *context_->key_context_data();
+        auto &coeff_small_ntt_tables = key_context_data.small_ntt_tables();
 
         // Decompose encrypted_array[count-1] into base w
         // Want to create an array of polys, each of whose components i is
@@ -1751,7 +1751,7 @@ namespace seal
         }
 
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (context_->last_parms_id() == encrypted.parms_id())
+        if (context_->data_parms_id_tail() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
         }
@@ -1764,7 +1764,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        switch (context_->context_data()->parms().scheme())
+        switch (context_->data_context_data_head()->parms().scheme())
         {
         case scheme_type::BFV:
             // Modulus switching with scaling
@@ -1855,7 +1855,7 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (context_->last_parms_id() == encrypted.parms_id())
+        if (context_->data_parms_id_tail() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
         }
@@ -1868,7 +1868,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        switch (context_->context_data()->parms().scheme())
+        switch (context_->data_context_data_head()->parms().scheme())
         {
         case scheme_type::BFV:
             throw invalid_argument("unsupported operation for scheme type");
@@ -2760,7 +2760,7 @@ namespace seal
 
         auto &context_data = *context_->context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
-        if (galois_keys.parms_id() != context_->first_parms_id())
+        if (galois_keys.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("parameter mismatch");
         }
@@ -2803,8 +2803,8 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        auto &first_context_data = *context_->context_data();
-        auto &coeff_small_ntt_tables = first_context_data.small_ntt_tables();
+        auto &key_context_data = *context_->key_context_data();
+        auto &coeff_small_ntt_tables = key_context_data.small_ntt_tables();
 
         // Check if Galois key is generated or not.
         // If not, attempt a bit decomposition; maybe we have log(n) many keys

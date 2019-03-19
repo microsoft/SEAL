@@ -26,16 +26,16 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context_->parameters_set())
+        if (!context_->key_context_data()->qualifiers().parameters_set)
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (public_key.parms_id() != context_->first_parms_id())
+        if (public_key.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("public key is not valid for encryption parameters");
         }
 
-        auto &parms = context_->context_data()->parms();
+        auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
@@ -67,7 +67,7 @@ namespace seal
             throw invalid_argument("plain is not valid for encryption parameters");
         }
 
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
 
         switch (parms.scheme())
@@ -93,12 +93,12 @@ namespace seal
             throw invalid_argument("plain cannot be in NTT form");
         }
 
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t first_coeff_mod_count = 
-            context_->context_data()->parms().coeff_modulus().size();
+        size_t key_coeff_mod_count = 
+            context_->key_context_data()->parms().coeff_modulus().size();
         size_t coeff_mod_count = coeff_modulus.size();
 
         auto &small_ntt_tables = context_data.small_ntt_tables();
@@ -131,7 +131,7 @@ namespace seal
                 small_ntt_tables[i]);
 
             dyadic_product_coeffmod(u.get() + (i * coeff_count), 
-                public_key_.get() + (coeff_count * first_coeff_mod_count) + (i * coeff_count), 
+                public_key_.get() + (coeff_count * key_coeff_mod_count) + (i * coeff_count), 
                 coeff_count, coeff_modulus[i], destination.data(1) + (i * coeff_count));
             inverse_ntt_negacyclic_harvey(destination.data(1) + (i * coeff_count), 
                 small_ntt_tables[i]);
@@ -177,8 +177,8 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t first_coeff_mod_count = 
-            context_->context_data()->parms().coeff_modulus().size();
+        size_t key_coeff_mod_count = 
+            context_->key_context_data()->parms().coeff_modulus().size();
         size_t coeff_mod_count = coeff_modulus.size();
 
         auto &small_ntt_tables = context_data.small_ntt_tables();
@@ -212,7 +212,7 @@ namespace seal
                 destination.data() + (i * coeff_count));
             dyadic_product_coeffmod(
                 u.get() + (i * coeff_count), 
-                public_key_.get() + (coeff_count * first_coeff_mod_count) + (i * coeff_count),
+                public_key_.get() + (coeff_count * key_coeff_mod_count) + (i * coeff_count),
                 coeff_count,
                 coeff_modulus[i], 
                 destination.data(1) + (i * coeff_count));

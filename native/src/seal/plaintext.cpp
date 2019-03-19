@@ -235,7 +235,7 @@ namespace seal
         }
         else
         {
-            auto &parms = context->context_data()->parms();
+            auto &parms = context->data_context_data_head()->parms();
             uint64_t modulus = parms.plain_modulus().value(); 
             const pt_coeff_type *ptr = data();
             for (size_t k = 0; k < data_.size(); k++, ptr++)
@@ -253,7 +253,7 @@ namespace seal
     bool Plaintext::is_metadata_valid_for(shared_ptr<const SEALContext> context) const
     {
         // Verify parameters
-        if (!context || !context->parameters_set())
+        if (!context || !context->data_context_data_head()->qualifiers().parameters_set)
         {
             return false;
         }
@@ -276,7 +276,7 @@ namespace seal
         }
         else
         {
-            auto &parms = context->context_data()->parms();
+            auto &parms = context->data_context_data_head()->parms();
             if (parms.scheme() != scheme_type::BFV)
             {
                 return false;

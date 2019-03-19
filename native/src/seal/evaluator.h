@@ -1067,7 +1067,7 @@ namespace seal
             int steps, const GaloisKeys &galois_keys, 
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_->context_data()->parms().scheme() != scheme_type::BFV)
+            if (context_->key_context_data()->parms().scheme() != scheme_type::BFV)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1139,7 +1139,7 @@ namespace seal
             const GaloisKeys &galois_keys, 
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_->context_data()->parms().scheme() != scheme_type::BFV)
+            if (context_->key_context_data()->parms().scheme() != scheme_type::BFV)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1208,7 +1208,7 @@ namespace seal
             int steps, const GaloisKeys &galois_keys,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_->context_data()->parms().scheme() != scheme_type::CKKS)
+            if (context_->key_context_data()->parms().scheme() != scheme_type::CKKS)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1274,7 +1274,7 @@ namespace seal
             const GaloisKeys &galois_keys, 
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_->context_data()->parms().scheme() != scheme_type::CKKS)
+            if (context_->key_context_data()->parms().scheme() != scheme_type::CKKS)
             {
                 throw std::logic_error("unsupported scheme");
             }

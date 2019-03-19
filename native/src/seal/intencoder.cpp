@@ -28,7 +28,7 @@ namespace seal
         // Unlike in other classes, we do not check "context_->parameters_set()".
         // The IntegerEncoder should function without valid encryption parameters
         // as long as the scheme is BFV and the plaintext modulus is at least 2.
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->data_context_data_head();
         if (context_data.parms().scheme() != scheme_type::BFV)
         {
             throw invalid_argument("unsupported scheme");

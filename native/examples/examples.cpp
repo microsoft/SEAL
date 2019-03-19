@@ -48,7 +48,7 @@ void print_parameters(shared_ptr<SEALContext> context)
     {
         throw invalid_argument("context is not set");
     }
-    auto &context_data = *context->context_data();
+    auto &context_data = *context->key_context_data();
 
     /*
     Which scheme are we using?
@@ -927,7 +927,7 @@ void example_bfv_basics_iii()
     We can verify that batching is indeed enabled by looking at the encryption
     parameter qualifiers created by SEALContext.
     */
-    auto qualifiers = context->context_data()->qualifiers();
+    auto qualifiers = context->data_context_data_head()->qualifiers();
     cout << "Batching enabled: " << boolalpha << qualifiers.using_batching << endl;
 
     KeyGenerator keygen(context);
@@ -1239,7 +1239,7 @@ void example_bfv_basics_iv()
     is at a higher level in the chain than another set of parameters if its the
     chain index is bigger, i.e. it is earlier in the chain. 
     */
-    for(auto context_data = context->context_data(); context_data;
+    for(auto context_data = context->data_context_data_head(); context_data;
         context_data = context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1262,7 +1262,7 @@ void example_bfv_basics_iv()
     switches to the next set down the chain, whereas mod_switch_to(...) switches
     to a parameter set down the chain corresponding to a given parms_id.
     */
-    auto context_data = context->context_data();
+    auto context_data = context->data_context_data_head();
     while(context_data->next_context_data()) 
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1365,7 +1365,7 @@ void example_bfv_basics_iv()
     We can check that indeed the modulus switching chain has not been created.
     The following loop should execute only once.
     */
-    for (context_data = context->context_data(); context_data;
+    for (context_data = context->data_context_data_head(); context_data;
         context_data = context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1470,11 +1470,11 @@ void example_ckks_basics_i()
     In CKKS the message is stored modulo coeff_modulus (in BFV it is stored 
     modulo plain_modulus), so the scale must not get too close to the total size 
     of coeff_modulus. In this case our coeff_modulus is quite large (218 bits) 
-    so we have little to worry about in this regard. For this example a 60-bit 
+    so we have little to worry about in this regard. For this example a 50-bit 
     scale is more than enough.
     */
     Plaintext plain;
-    double scale = pow(2.0, 60);
+    double scale = pow(2.0, 50);
     encoder.encode(input, scale, plain);
 
     /*
@@ -1618,8 +1618,8 @@ void example_ckks_basics_ii()
     the previous example.
     */
     EncryptionParameters parms(scheme_type::CKKS);
-    parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(8192));
+    parms.set_poly_modulus_degree(16384);
+    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(16384));
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -1643,10 +1643,10 @@ void example_ckks_basics_ii()
     print_vector(input);
 
     /*
-    We use a slightly smaller scale in this example.
+    We use a slightly larger scale in this example.
     */
     Plaintext plain;
-    double scale = pow(2.0, 60);
+    double scale = pow(2.0, 80);
     encoder.encode(input, scale, plain);
 
     Ciphertext encrypted;
@@ -1734,7 +1734,6 @@ void example_ckks_basics_ii()
     cout << "Rescaling and squaring (no relinearization) ..." << endl << endl;
     evaluator.rescale_to_next_inplace(encrypted);
     evaluator.square_inplace(encrypted);
-
     cout << "Chain index of (encryption parameters of) encrypted: " 
         << context->context_data(encrypted.parms_id())->chain_index() << endl;
     cout << "Scale in encrypted: " << encrypted.scale() 
@@ -1795,7 +1794,8 @@ void example_ckks_basics_iii()
         DefaultParams::small_mods_40bit(0), 
         DefaultParams::small_mods_40bit(1),
         DefaultParams::small_mods_40bit(2), 
-        DefaultParams::small_mods_40bit(3) });
+        DefaultParams::small_mods_40bit(3),
+        DefaultParams::small_mods_40bit(4) });
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -1923,7 +1923,6 @@ void example_ckks_basics_iii()
     cout << "Scale in plain_coeff0: " << plain_coeff0.scale() << endl;
     cout << endl;
     cout.copyfmt(old_fmt);
-
     /*
     There are a couple of ways to fix this this problem. Since q4 and q3 are 
     really close to each other, we could simply "lie" to Microsoft SEAL and set 
@@ -1953,7 +1952,6 @@ void example_ckks_basics_iii()
     */
     evaluator.mod_switch_to_inplace(encrypted_x1, encrypted_x3.parms_id());
     evaluator.mod_switch_to_inplace(plain_coeff0, encrypted_x3.parms_id());
-
     /*
     All three ciphertexts are now compatible and can be added.
     */
@@ -2074,7 +2072,7 @@ void example_bfv_performance()
         chrono::high_resolution_clock::time_point time_start, time_end;
 
         print_parameters(context);
-        auto &curr_parms = context->context_data()->parms();
+        auto &curr_parms = context->data_context_data_head()->parms();
         auto &plain_modulus = curr_parms.plain_modulus();
         size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
 
@@ -2108,7 +2106,7 @@ void example_bfv_performance()
         allocation size. The key generation can also take a significant amount 
         of time, as can be observed from the print-out.
         */
-        if (!context->context_data()->qualifiers().using_batching)
+        if (!context->key_context_data()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;
@@ -2398,7 +2396,7 @@ void example_ckks_performance()
         chrono::high_resolution_clock::time_point time_start, time_end;
 
         print_parameters(context);
-        auto &curr_parms = context->context_data()->parms();
+        auto &curr_parms = context->data_context_data_head()->parms();
         size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
 
         cout << "Generating secret/public keys: ";
@@ -2416,7 +2414,7 @@ void example_ckks_performance()
         auto time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
 
-        if (!context->context_data()->qualifiers().using_batching)
+        if (!context->data_context_data_head()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;

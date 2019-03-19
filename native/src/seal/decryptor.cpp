@@ -26,16 +26,16 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context_->parameters_set())
+        if (!context_->data_context_data_head()->qualifiers().parameters_set)
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (secret_key.parms_id() != context_->first_parms_id())
+        if (secret_key.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("secret key is not valid for encryption parameters");
         }
 
-        auto &parms = context_->context_data()->parms();
+        auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
@@ -60,7 +60,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->data_context_data_head();
         auto &parms = context_data.parms();
 
         switch (parms.scheme())
@@ -92,8 +92,8 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
         size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
-        size_t first_rns_poly_uint64_count = mul_safe(coeff_count,
-            context_->context_data()->parms().coeff_modulus().size());
+        size_t key_rns_poly_uint64_count = mul_safe(coeff_count,
+            context_->key_context_data()->parms().coeff_modulus().size());
         size_t encrypted_size = encrypted.size();
 
         auto &small_ntt_tables = context_data.small_ntt_tables();
@@ -148,7 +148,7 @@ namespace seal
                     tmp_dest_modq.get() + (i * coeff_count));
 
                 current_array1 += rns_poly_uint64_count;
-                current_array2 += first_rns_poly_uint64_count;
+                current_array2 += key_rns_poly_uint64_count;
             }
 
             // Perform inverse NTT
@@ -243,8 +243,8 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
         size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
-        size_t first_rns_poly_uint64_count = mul_safe(coeff_count,
-            context_->context_data()->parms().coeff_modulus().size());
+        size_t key_rns_poly_uint64_count = mul_safe(coeff_count,
+            context_->key_context_data()->parms().coeff_modulus().size());
         size_t encrypted_size = encrypted.size();
 
         // Make sure we have enough secret key powers computed
@@ -297,7 +297,7 @@ namespace seal
 
                 // go to c_{1+j+1} and s^{1+j+1} mod qi
                 current_array1 += rns_poly_uint64_count;
-                current_array2 += first_rns_poly_uint64_count;
+                current_array2 += key_rns_poly_uint64_count;
             }
 
             // add c_0 into destination
@@ -321,12 +321,12 @@ namespace seal
         }
 #endif
         // WARNING: This function must be called with the original context_data
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
-        size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
+        size_t key_rns_poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
 
         ReaderLock reader_lock(secret_key_array_locker_.acquire_read());
 
@@ -348,8 +348,8 @@ namespace seal
             coeff_mod_count, new_secret_key_array.get());
 
         uint64_t *prev_poly_ptr = new_secret_key_array.get() +
-            mul_safe(old_size - 1, rns_poly_uint64_count);
-        uint64_t *next_poly_ptr = prev_poly_ptr + rns_poly_uint64_count;
+            mul_safe(old_size - 1, key_rns_poly_uint64_count);
+        uint64_t *next_poly_ptr = prev_poly_ptr + key_rns_poly_uint64_count;
 
         // Since all of the key powers in secret_key_array_ are already NTT transformed,
         // to get the next one we simply need to compute a dyadic product of the last
@@ -364,7 +364,7 @@ namespace seal
                     next_poly_ptr + (j * coeff_count));
             }
             prev_poly_ptr = next_poly_ptr;
-            next_poly_ptr += rns_poly_uint64_count;
+            next_poly_ptr += key_rns_poly_uint64_count;
         }
 
 
@@ -446,7 +446,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        if (context_->context_data()->parms().scheme() != scheme_type::BFV)
+        if (context_->data_context_data_head()->parms().scheme() != scheme_type::BFV)
         {
             throw logic_error("unsupported scheme");
         }

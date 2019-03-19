@@ -109,11 +109,11 @@ namespace seal
         inline bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept
         {
             // Verify parameters
-            if (!context || !context->parameters_set())
+            if (!context || !context->key_context_data()->qualifiers().parameters_set)
             {
                 return false;
             }
-            auto parms_id = context->first_parms_id();
+            auto parms_id = context->key_parms_id();
             return pk_.is_metadata_valid_for(std::move(context)) && 
                 pk_.is_ntt_form() && pk_.parms_id() == parms_id;
         }

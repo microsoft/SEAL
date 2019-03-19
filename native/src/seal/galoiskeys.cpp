@@ -68,11 +68,11 @@ namespace seal
     bool GaloisKeys::is_metadata_valid_for(shared_ptr<const SEALContext> context) const noexcept
     {
         // Verify parameters
-        if (!context || !context->parameters_set())
+        if (!context || !context->key_context_data()->qualifiers().parameters_set)
         {
             return false;
         }
-        if (parms_id_ != context->first_parms_id())
+        if (parms_id_ != context->key_parms_id())
         {
             return false;
         }

@@ -306,6 +306,41 @@ namespace seal
         return context_data;
     }
 
+    parms_id_type SEALContext::create_next_context_data(
+            const parms_id_type &prev_parms_id)
+    {
+        // Create the next set of parameters by removing last modulus
+        auto next_parms = context_data_map_.at(prev_parms_id)->parms_;
+        auto next_coeff_modulus = next_parms.coeff_modulus();
+        next_coeff_modulus.pop_back();
+        next_parms.set_coeff_modulus(next_coeff_modulus);
+        auto next_parms_id = next_parms.parms_id();
+
+        // Validate next parameters and create next context_data
+        auto next_context_data = validate(next_parms);
+
+        // If not valid then return zero parms_id
+        if (!next_context_data.qualifiers_.parameters_set)
+        {
+            return parms_id_zero;
+        }
+
+        // Add them to the context_data_map_
+        context_data_map_.emplace(make_pair(next_parms_id,
+            make_shared<const ContextData>(move(next_context_data))));
+        
+        // Add pointer to next context_data to the previous one (linked list)
+        // Add pointer to prevoius context_data to the next one (double linked list)
+        // We need to remove constness first to modify this
+        const_pointer_cast<ContextData>(
+            context_data_map_.at(prev_parms_id))->next_context_data_ = 
+            context_data_map_.at(next_parms_id);
+        const_pointer_cast<ContextData>(
+            context_data_map_.at(next_parms_id))->prev_context_data_ = 
+            context_data_map_.at(prev_parms_id);
+        return next_parms_id;
+    }
+
     SEALContext::SEALContext(EncryptionParameters parms, bool expand_mod_chain,
         MemoryPoolHandle pool) : pool_(move(pool))
     {
@@ -323,57 +358,46 @@ namespace seal
 
         // Validate parameters and add new ContextData to the map 
         // Note that this happens even if parameters are not valid
+
+        // First create key_parms_id_.
         context_data_map_.emplace(make_pair(parms.parms_id(), 
             make_shared<const ContextData>(validate(parms))));
-
-        first_parms_id_ = parms.parms_id();
-        last_parms_id_ = first_parms_id_;
-
-        // If modulus switching is to be created then compute the remaining parameter 
-        // sets as long as they are valid to use (parameters_set == true)
-        if (expand_mod_chain &&
-            context_data_map_.at(first_parms_id_)->qualifiers_.parameters_set)
+        key_parms_id_ = parms.parms_id();
+        // Then create data_parms_id_head_ if there are more than one moduli in
+        // coeff_modulus. This is done by expanding chain.
+        // Otherwise, set data_parms_id_head_ as key_parms_id_.
+        if (parms.coeff_modulus().size() == 1)
         {
-            auto prev_parms_id = first_parms_id_;
+            data_parms_id_head_ = key_parms_id_;
+            data_parms_id_tail_ = key_parms_id_;
+        }
+        else
+        {
+            data_parms_id_head_ = create_next_context_data(key_parms_id_);
+        }
+
+        // If modulus switching is to be created,
+        // then compute the remaining parameter sets as long as they are valid
+        // to use (parameters_set == true)
+        if (expand_mod_chain &&
+            context_data_map_.at(data_parms_id_head_)->qualifiers_.parameters_set)
+        {
+            auto prev_parms_id = data_parms_id_head_;
             while (context_data_map_.at(prev_parms_id)->parms().coeff_modulus().size() > 1)
             {
-                // Create the next set of parameters by removing last modulus
-                auto next_parms = context_data_map_.at(prev_parms_id)->parms_;
-                auto next_coeff_modulus = next_parms.coeff_modulus();
-                next_coeff_modulus.pop_back();
-                next_parms.set_coeff_modulus(next_coeff_modulus);
-                auto next_parms_id = next_parms.parms_id();
-
-                // Validate next parameters
-                auto next_context_data = validate(next_parms);
-
-                // If not valid then break
-                if (!next_context_data.qualifiers_.parameters_set)
+                auto next_parms_id = create_next_context_data(prev_parms_id);
+                if (next_parms_id == parms_id_zero)
                 {
                     break;
                 }
-
-                // Add them to the context_data_map_
-                context_data_map_.emplace(make_pair(next_parms_id,
-                    make_shared<const ContextData>(move(next_context_data))));
-                
-                // Add pointer to next context_data to the previous one (linked list)
-                // Add pointer to prevoius context_data to the next one (double linked list)
-                // We need to remove constness first to modify this
-                const_pointer_cast<ContextData>(
-                    context_data_map_.at(prev_parms_id))->next_context_data_ = 
-                    context_data_map_.at(next_parms_id);
-                const_pointer_cast<ContextData>(
-                    context_data_map_.at(next_parms_id))->prev_context_data_ = 
-                    context_data_map_.at(prev_parms_id);
                 prev_parms_id = next_parms_id;
-                last_parms_id_ = prev_parms_id;
+                data_parms_id_tail_ = next_parms_id;                
             }
         }
 
         // Set the chain_index for each context_data
         size_t parms_count = context_data_map_.size();
-        auto context_data_ptr = context_data_map_.at(first_parms_id_);
+        auto context_data_ptr = context_data_map_.at(key_parms_id_);
         while (context_data_ptr)
         {
             // We need to remove constness first to modify this

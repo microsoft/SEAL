@@ -227,7 +227,7 @@ namespace seal
         */
         const SmallModulus &plain_modulus() const 
         {
-            auto &context_data = *context_->context_data();
+            auto &context_data = *context_->data_context_data_head();
             return context_data.parms().plain_modulus();
         }
 

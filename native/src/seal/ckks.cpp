@@ -24,12 +24,12 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context_->parameters_set())
+        if (!context_->data_context_data_head()->qualifiers().parameters_set)
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->data_context_data_head();
         if (context_data.parms().scheme() != scheme_type::CKKS)
         {
             throw invalid_argument("unsupported scheme");
