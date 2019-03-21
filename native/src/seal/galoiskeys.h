@@ -48,6 +48,14 @@ namespace seal
         {
             return (galois_elt - 1) >> 1;
         }
+
+        /**
+        Returns a const reference to a Galois key. The returned Galois key corresponds
+        to the given Galois element.
+
+        @param[in] galois_elt The Galois element
+        @throw std::invalid_argument if the key corresponding to galois_elt does not exist
+        */
         inline auto &key(std::uint64_t galois_elt) const
         {            
             if (!has_key(galois_elt))
@@ -70,6 +78,7 @@ namespace seal
             {
                 throw std::invalid_argument("galois element is not valid");
             }
+
             auto index = get_index(galois_elt);
             return index < keys_.size() && !keys_[index].empty();
         }

@@ -76,7 +76,7 @@ namespace seal
         }
 
         shared_ptr<UniformRandomGenerator> random(
-                parms.random_generator()->create());
+            parms.random_generator()->create());
 
         // Resize destination and save results
         destination.resize(context_, parms_id, 2);
@@ -91,14 +91,14 @@ namespace seal
             // Zero encryption without modulus switching
             Ciphertext temp;
             encrypt_zero_asymmetric(public_key_, temp, context_, prev_parms_id,
-                    random, is_ntt_form, pool);
+                random, is_ntt_form, pool);
             if (temp.is_ntt_form() != is_ntt_form)
             {
                 throw invalid_argument("NTT form mismatch");
             }
 
             // Modulus switching
-            for (size_t j = 0; j < 2; j ++)
+            for (size_t j = 0; j < 2; j++)
             {
                 if (is_ntt_form)
                 {

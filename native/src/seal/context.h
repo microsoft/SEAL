@@ -409,16 +409,17 @@ namespace seal
         /**
         Returns whether the encryption parameters are valid.
         */
-/*        inline auto parameters_set() const
+        inline auto parameters_set() const
         {
-            return context_data()->qualifiers_.parameters_set;
+            return data_context_data_head() ? 
+                data_context_data_head()->qualifiers_.parameters_set : false;
         }
-*/
+
         /**
         Returns a parms_id_type corresponding to the set of encryption 
         parameters that are used for keys.
         */
-        inline auto &key_parms_id() const
+        inline auto &key_parms_id() const noexcept
         {
             return key_parms_id_;
         }
@@ -427,7 +428,7 @@ namespace seal
         Returns a parms_id_type corresponding to the first encryption parameters
         that are used for data.
         */
-        inline auto &data_parms_id_head() const
+        inline auto &data_parms_id_head() const noexcept
         {
             return data_parms_id_head_;
         }
@@ -436,7 +437,7 @@ namespace seal
         Returns a parms_id_type corresponding to the last encryption parameters
         that are used for data.
         */
-        inline auto &data_parms_id_tail() const
+        inline auto &data_parms_id_tail() const noexcept
         {
             return data_parms_id_tail_;
         }

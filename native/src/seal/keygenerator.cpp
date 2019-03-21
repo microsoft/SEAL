@@ -178,9 +178,9 @@ namespace seal
         pk_generated_ = false;
 
         shared_ptr<UniformRandomGenerator> random(
-                parms.random_generator()->create());
+            parms.random_generator()->create());
         encrypt_zero_symmetric(secret_key_, public_key_.data(), context_,
-                parms.parms_id(), random, true, pool_);
+            parms.parms_id(), random, true, pool_);
 
         // Set the parms_id for public key
         public_key_.parms_id() = parms.parms_id();
@@ -197,13 +197,6 @@ namespace seal
             throw logic_error("cannot generate relinearization keys for unspecified secret key");
         }
 
-        // Check that count is in correct interval
-        if (count < SEAL_RELIN_KEY_COUNT_MIN || 
-            count > SEAL_RELIN_KEY_COUNT_MAX)
-        {
-            throw invalid_argument("count out of bounds");
-        }
-
         // Extract encryption parameters.
         auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
@@ -217,11 +210,12 @@ namespace seal
 
         // Create the RelinKeys object to return
         RelinKeys relin_keys;
+
         // assume the secret key is already transformed into NTT form. 
         generate_kswitch_keys(
-                secret_key_array_.get() + coeff_mod_count * coeff_count,
-                count,
-                dynamic_cast<KSwitchKeys &>(relin_keys));
+            secret_key_array_.get() + coeff_mod_count * coeff_count,
+            count,
+            static_cast<KSwitchKeys &>(relin_keys));
 
         // Set the parms_id
         relin_keys.parms_id() = parms.parms_id();
@@ -277,10 +271,10 @@ namespace seal
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 apply_galois_ntt(
-                        secret_key_.data().data() + i * coeff_count,
-                        coeff_count_power,
-                        galois_elt,
-                        rotated_secret_key.get() + i * coeff_count);
+                    secret_key_.data().data() + i * coeff_count,
+                    coeff_count_power,
+                    galois_elt,
+                    rotated_secret_key.get() + i * coeff_count);
             }
 
             // Initialize galois key
@@ -290,8 +284,8 @@ namespace seal
 
             // Create Galois keys.
             generate_one_kswitch_key(
-                    rotated_secret_key.get(),
-                    galois_keys.data()[index]);
+                rotated_secret_key.get(),
+                galois_keys.data()[index]);
         }
 
         // Set the parms_id
@@ -455,8 +449,8 @@ namespace seal
     }
 
     void KeyGenerator::generate_one_kswitch_key(
-            const uint64_t *new_key,
-            std::vector<Ciphertext> &destination)
+        const uint64_t *new_key,
+        std::vector<Ciphertext> &destination)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         size_t decomp_mod_count = context_->data_context_data_head()->parms().coeff_modulus().size();
@@ -464,7 +458,6 @@ namespace seal
         auto &key_parms = key_context_data.parms();
         auto &key_modulus = key_parms.coeff_modulus();
         size_t rns_mod_count = key_parms.coeff_modulus().size();
-        auto &small_ntt_tables = key_context_data.small_ntt_tables();
         shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
@@ -476,39 +469,36 @@ namespace seal
         auto temp(allocate_uint(coeff_count, pool_));
         uint64_t factor = 0;
         destination.resize(decomp_mod_count);
-        for (size_t j = 0; j < decomp_mod_count; j ++)
+        for (size_t j = 0; j < decomp_mod_count; j++)
         {
             encrypt_zero_symmetric(secret_key_, destination[j], context_,
-                    key_parms.parms_id(), random, true, pool_);
+                key_parms.parms_id(), random, true, pool_);
 
             factor = key_modulus.back().value() % key_modulus[j].value();
             multiply_poly_scalar_coeffmod(
-                    new_key + j * coeff_count,
-                    coeff_count,
-                    factor, 
-                    key_modulus[j],
-                    temp.get());
+                new_key + j * coeff_count,
+                coeff_count,
+                factor,
+                key_modulus[j],
+                temp.get());
             add_poly_poly_coeffmod(
-                    destination[j].data(0) + j * coeff_count,
-                    temp.get(), 
-                    coeff_count,
-                    key_modulus[j],
-                    destination[j].data(0) + j * coeff_count);
+                destination[j].data(0) + j * coeff_count,
+                temp.get(),
+                coeff_count,
+                key_modulus[j],
+                destination[j].data(0) + j * coeff_count);
         }
     }
 
     void KeyGenerator::generate_kswitch_keys(
-            const uint64_t *new_keys,
-            size_t num_keys,
-            KSwitchKeys &destination)
+        const uint64_t *new_keys,
+        size_t num_keys,
+        KSwitchKeys &destination)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-        size_t decomp_mod_count = context_->data_context_data_head()->parms().coeff_modulus().size();
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
-        auto &key_modulus = key_parms.coeff_modulus();
         size_t rns_mod_count = key_parms.coeff_modulus().size();
-        auto &small_ntt_tables = key_context_data.small_ntt_tables();
         shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
@@ -519,33 +509,10 @@ namespace seal
 
         destination.data().resize(num_keys);
         auto temp(allocate_uint(coeff_count, pool_));
-        uint64_t factor = 0;
-        const uint64_t *new_key_ptr = nullptr;
-        for (size_t l = 0; l < num_keys; l ++)
+        for (size_t l = 0; l < num_keys; l++)
         {
-            new_key_ptr = new_keys + l * rns_mod_count * coeff_count;
+            const uint64_t *new_key_ptr = new_keys + l * rns_mod_count * coeff_count;
             generate_one_kswitch_key(new_key_ptr, destination.data()[l]);
-/*            destination.data()[l].resize(decomp_mod_count);
-            for (size_t j = 0; j < decomp_mod_count; j ++)
-            {
-                encrypt_zero_symmetric(secret_key_, destination.data()[l][j],
-                        context_, key_parms.parms_id(), 
-                        random, true, pool_);
-
-                factor = key_modulus.back().value() % key_modulus[j].value();
-                multiply_poly_scalar_coeffmod(
-                        new_key_ptr + j * coeff_count,
-                        coeff_count,
-                        factor, 
-                        key_modulus[j],
-                        temp.get());
-                add_poly_poly_coeffmod(
-                        destination.data()[l][j].data(0) + j * coeff_count,
-                        temp.get(), 
-                        coeff_count,
-                        key_modulus[j],
-                        destination.data()[l][j].data(0) + j * coeff_count);
-            }
-*/        }
+        }
     }
 }

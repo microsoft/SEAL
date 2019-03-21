@@ -70,14 +70,12 @@
     <ClCompile Include="seal\encryptionparams.cpp" />
     <ClCompile Include="seal\encryptor.cpp" />
     <ClCompile Include="seal\evaluator.cpp" />
-    <ClCompile Include="seal\galoiskeys.cpp" />
     <ClCompile Include="seal\intencoder.cpp" />
     <ClCompile Include="seal\keygenerator.cpp" />
     <ClInclude Include="seal\kswitchkeys.cpp" />
     <ClCompile Include="seal\memorymanager.cpp" />
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
-    <ClCompile Include="seal\relinkeys.cpp" />
     <ClCompile Include="seal\smallmodulus.cpp" />
     <ClCompile Include="seal\util\aes.cpp" />
     <ClCompile Include="seal\util\baseconverter.cpp" />

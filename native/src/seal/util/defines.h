@@ -40,14 +40,6 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #define SEAL_CIPHERTEXT_SIZE_MIN 2
 #define SEAL_CIPHERTEXT_SIZE_MAX 32768
 
-// Bounds for decomposition bit count
-#define SEAL_DBC_MAX 60
-#define SEAL_DBC_MIN 1
-
-// Bounds for number of relinearization keys
-#define SEAL_RELIN_KEY_COUNT_MAX 8
-#define SEAL_RELIN_KEY_COUNT_MIN 1
-
 // Use std::byte as byte type
 #if defined(SEAL_USE_STD_BYTE)
 #include <cstddef>

@@ -54,9 +54,9 @@ namespace seal
         }
 
         void sample_poly_normal(
-                uint64_t *poly, 
-                shared_ptr<UniformRandomGenerator> random,
-                const EncryptionParameters &parms)
+            uint64_t *poly,
+            shared_ptr<UniformRandomGenerator> random,
+            const EncryptionParameters &parms)
         {
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
@@ -87,8 +87,8 @@ namespace seal
                     noise = -noise;
                     for (size_t j = 0; j < coeff_mod_count; j++)
                     {
-                        poly[i + j * coeff_count] = coeff_modulus[j].value() - 
-                                static_cast<uint64_t>(noise);
+                        poly[i + j * coeff_count] = coeff_modulus[j].value() -
+                            static_cast<uint64_t>(noise);
                     }
                 }
                 else
@@ -102,9 +102,9 @@ namespace seal
         }
 
         void sample_poly_uniform(
-                uint64_t *poly,
-                shared_ptr<UniformRandomGenerator> random,
-                const EncryptionParameters &parms)
+            uint64_t *poly,
+            shared_ptr<UniformRandomGenerator> random,
+            const EncryptionParameters &parms)
         {
             // Extract encryption parameters.
             auto coeff_modulus = parms.coeff_modulus();
@@ -138,13 +138,13 @@ namespace seal
         }
 
         void encrypt_zero_asymmetric(
-                const PublicKey &public_key,
-                Ciphertext &destination,
-                shared_ptr<SEALContext> context,
-                parms_id_type parms_id,
-                shared_ptr<UniformRandomGenerator> random,
-                bool is_ntt_form,
-                MemoryPoolHandle pool)
+            const PublicKey &public_key,
+            Ciphertext &destination,
+            shared_ptr<SEALContext> context,
+            parms_id_type parms_id,
+            shared_ptr<UniformRandomGenerator> random,
+            bool is_ntt_form,
+            MemoryPoolHandle pool)
         {
             if (!pool)
             {
@@ -183,29 +183,30 @@ namespace seal
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 ntt_negacyclic_harvey(
-                        u.get() + i * coeff_count,
-                        small_ntt_tables[i]);
-                for (size_t j = 0; j < encrypted_size; j ++)
+                    u.get() + i * coeff_count,
+                    small_ntt_tables[i]);
+                for (size_t j = 0; j < encrypted_size; j++)
                 {
                     dyadic_product_coeffmod(
-                            u.get() + i * coeff_count,
-                            public_key.data().data(j) + i * coeff_count,
-                            coeff_count,
-                            coeff_modulus[i],
-                            destination.data(j) + i * coeff_count);
+                        u.get() + i * coeff_count,
+                        public_key.data().data(j) + i * coeff_count,
+                        coeff_count,
+                        coeff_modulus[i],
+                        destination.data(j) + i * coeff_count);
+
                     // addition with e_0, e_1 is in non-NTT form.
                     if (!is_ntt_form)
                     {
                         inverse_ntt_negacyclic_harvey(
-                                destination.data(j) + i * coeff_count,
-                                small_ntt_tables[i]);
+                            destination.data(j) + i * coeff_count,
+                            small_ntt_tables[i]);
                     }
                 }
             }
 
             // Generate e_j <-- chi.
             // c[j] = public_key[j] * u + e[j]
-            for (size_t j = 0; j < 2; j ++)
+            for (size_t j = 0; j < 2; j++)
             {
                 sample_poly_normal(u.get(), random, parms);
                 for (size_t i = 0; i < coeff_mod_count; i++)
@@ -214,27 +215,27 @@ namespace seal
                     if (is_ntt_form)
                     {
                         ntt_negacyclic_harvey(
-                                u.get() + i * coeff_count,
-                                small_ntt_tables[i]);
+                            u.get() + i * coeff_count,
+                            small_ntt_tables[i]);
                     }
                     add_poly_poly_coeffmod(
-                            u.get() + i * coeff_count, 
-                            destination.data(j) + i * coeff_count,
-                            coeff_count,
-                            coeff_modulus[i],
-                            destination.data(j) + i * coeff_count);
+                        u.get() + i * coeff_count,
+                        destination.data(j) + i * coeff_count,
+                        coeff_count,
+                        coeff_modulus[i],
+                        destination.data(j) + i * coeff_count);
                 }
             }         
         }
 
         void encrypt_zero_symmetric(
-                const SecretKey &secret_key,
-                Ciphertext &destination,
-                shared_ptr<SEALContext> context,
-                parms_id_type parms_id,
-                shared_ptr<UniformRandomGenerator> random,
-                bool is_ntt_form,
-                MemoryPoolHandle pool)
+            const SecretKey &secret_key,
+            Ciphertext &destination,
+            shared_ptr<SEALContext> context,
+            parms_id_type parms_id,
+            shared_ptr<UniformRandomGenerator> random,
+            bool is_ntt_form,
+            MemoryPoolHandle pool)
         {
             if (!pool)
             {
@@ -270,25 +271,25 @@ namespace seal
             {
                 // Transform the noise e into NTT representation.
                 ntt_negacyclic_harvey(
-                        noise.get() + i * coeff_count,
-                        small_ntt_tables[i]);
+                    noise.get() + i * coeff_count,
+                    small_ntt_tables[i]);
                 dyadic_product_coeffmod(
-                        secret_key.data().data() + i * coeff_count,
-                        destination.data(1) + i * coeff_count,
-                        coeff_count, 
-                        coeff_modulus[i],
-                        destination.data(0) + i * coeff_count);
+                    secret_key.data().data() + i * coeff_count,
+                    destination.data(1) + i * coeff_count,
+                    coeff_count,
+                    coeff_modulus[i],
+                    destination.data(0) + i * coeff_count);
                 add_poly_poly_coeffmod(
-                        noise.get() + i * coeff_count,
-                        destination.data(0) + i * coeff_count,
-                        coeff_count,
-                        coeff_modulus[i],
-                        destination.data(0) + i * coeff_count);
+                    noise.get() + i * coeff_count,
+                    destination.data(0) + i * coeff_count,
+                    coeff_count,
+                    coeff_modulus[i],
+                    destination.data(0) + i * coeff_count);
                 negate_poly_coeffmod(
-                        destination.data(0) + i * coeff_count,
-                        coeff_count,
-                        coeff_modulus[i],
-                        destination.data(0) + i * coeff_count);
+                    destination.data(0) + i * coeff_count,
+                    coeff_count,
+                    coeff_modulus[i],
+                    destination.data(0) + i * coeff_count);
             }
         }
     }

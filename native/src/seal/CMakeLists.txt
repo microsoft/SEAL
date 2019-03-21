@@ -13,13 +13,11 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/evaluator.cpp
-#        ${CMAKE_CURRENT_LIST_DIR}/galoiskeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator.cpp
         ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/relinkeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
 )
 

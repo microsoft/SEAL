@@ -33,7 +33,6 @@ namespace seal
     is concurrently mutating it. This is due to the underlying data structure 
     storing the relinearization keys not being thread-safe.
 
-
     @see SecretKey for the class that stores the secret key.
     @see PublicKey for the class that stores the public key.
     @see GaloisKeys for the class that stores the Galois keys.
@@ -46,7 +45,6 @@ namespace seal
         Returns a const reference to an relinearization key. The returned 
         relinearization key corresponds to the given power of the secret key.
 
-
         @param[in] key_power The power of the secret key
         @throw std::invalid_argument if the key corresponding to key_power does 
         not exist
@@ -56,6 +54,13 @@ namespace seal
             return key_power - 2;
         }
 
+        /**
+        Returns a const reference to an relinearization key. The returned
+        relinearization key corresponds to the given power of the secret key.
+
+        @param[in] key_power The power of the secret key
+        @throw std::invalid_argument if the key corresponding to key_power does not exist
+        */
         inline auto &key(std::size_t key_power) const
         {
             if (!has_key(key_power))
@@ -75,28 +80,5 @@ namespace seal
         {
             return (key_power >= 2) && (keys_.size() >= key_power - 1);
         }
-    
-        /**
-        Saves the RelinKeys instance to an output stream. The output is
-        in binary format and not human-readable. The output stream must have
-        the "binary" flag set.
-        Size of RelinKeys is bounded by [1, 8].
-
-        @param[in] stream The stream to save the RelinKeys to
-        @throws std::exception if the RelinKeys could not be written to stream
-        */
-        void save(std::ostream &stream) const;
-
-        /**
-        Loads a RelinKeys from an input stream overwriting the current RelinKeys.
-        No checking of the validity of the RelinKeys data against encryption
-        parameters is performed. This function should not be used unless the 
-        RelinKeys comes from a fully trusted source.
-        Size of RelinKeys is bounded by [1, 8].
-
-        @param[in] stream The stream to load the RelinKeys from
-        @throws std::exception if a valid RelinKeys could not be read from stream
-        */
-        void unsafe_load(std::istream &stream);
     };
 }

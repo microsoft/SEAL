@@ -17,26 +17,26 @@ namespace seal
 {
     /**
     Encrypts Plaintext objects into Ciphertext objects. Constructing an Encryptor 
-    requires a SEALContext with valid encryption parameters, and the public key. 
+    requires a SEALContext with valid encryption parameters, and the public key.
 
     @par Overloads
-    For the encrypt function we provide two overloads concerning the memory pool 
-    used in allocations needed during the operation. In one overload the global 
-    memory pool is used for this purpose, and in another overload the user can 
-    supply a MemoryPoolHandle to to be used instead. This is to allow one single 
-    Encryptor to be used concurrently by several threads without running into thread 
-    contention in allocations taking place during operations. For example, one can 
-    share one single Encryptor across any number of threads, but in each thread 
-    call the encrypt function by giving it a thread-local MemoryPoolHandle to use. 
-    It is important for a developer to understand how this works to avoid unnecessary 
-    performance bottlenecks. 
+    For the encrypt function we provide two overloads concerning the memory pool
+    used in allocations needed during the operation. In one overload the global
+    memory pool is used for this purpose, and in another overload the user can
+    supply a MemoryPoolHandle to to be used instead. This is to allow one single
+    Encryptor to be used concurrently by several threads without running into thread
+    contention in allocations taking place during operations. For example, one can
+    share one single Encryptor across any number of threads, but in each thread
+    call the encrypt function by giving it a thread-local MemoryPoolHandle to use.
+    It is important for a developer to understand how this works to avoid unnecessary
+    performance bottlenecks.
 
     @par NTT form
-    When using the BFV scheme (scheme_type::BFV), all plaintext and ciphertexts should 
-    remain by default in the usual coefficient representation, i.e. not in NTT form. 
-    When using the CKKS scheme (scheme_type::CKKS), all plaintexts and ciphertexts 
-    should remain by default in NTT form. We call these scheme-specific NTT states 
-    the "default NTT form". Decryption requires the input ciphertexts to be in 
+    When using the BFV scheme (scheme_type::BFV), all plaintext and ciphertexts should
+    remain by default in the usual coefficient representation, i.e. not in NTT form.
+    When using the CKKS scheme (scheme_type::CKKS), all plaintexts and ciphertexts
+    should remain by default in NTT form. We call these scheme-specific NTT states
+    the "default NTT form". Decryption requires the input ciphertexts to be in
     the default NTT form, and will throw an exception if this is not the case.
     */
     class Encryptor
@@ -100,7 +100,7 @@ namespace seal
         inline void encrypt_zero(Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encrypt_zero(context_->data_parms_id_head(), destination);
+            encrypt_zero(context_->data_parms_id_head(), destination, pool);
         }
 
     private:
