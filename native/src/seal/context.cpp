@@ -328,9 +328,9 @@ namespace seal
         // Add them to the context_data_map_
         context_data_map_.emplace(make_pair(next_parms_id,
             make_shared<const ContextData>(move(next_context_data))));
-        
+
         // Add pointer to next context_data to the previous one (linked list)
-        // Add pointer to prevoius context_data to the next one (double linked list)
+        // Add pointer to previous context_data to the next one (doubly linked list)
         // We need to remove constness first to modify this
         const_pointer_cast<ContextData>(
             context_data_map_.at(prev_parms_id))->next_context_data_ = 
@@ -338,6 +338,7 @@ namespace seal
         const_pointer_cast<ContextData>(
             context_data_map_.at(next_parms_id))->prev_context_data_ = 
             context_data_map_.at(prev_parms_id);
+
         return next_parms_id;
     }
 
@@ -363,10 +364,13 @@ namespace seal
         context_data_map_.emplace(make_pair(parms.parms_id(), 
             make_shared<const ContextData>(validate(parms))));
         key_parms_id_ = parms.parms_id();
-        // Then create data_parms_id_head_ if there are more than one moduli in
-        // coeff_modulus. This is done by expanding chain.
-        // Otherwise, set data_parms_id_head_ as key_parms_id_.
-        if (parms.coeff_modulus().size() == 1)
+
+        // Then create data_parms_id_head_ if the parameters are valid and there is
+        // more than one modulus in coeff_modulus. This is equivalent to expanding
+        // the chain by one step. Otherwise, set data_parms_id_head_ to equal
+        // key_parms_id_.
+        if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set
+            || parms.coeff_modulus().size() == 1)
         {
             data_parms_id_head_ = key_parms_id_;
             data_parms_id_tail_ = key_parms_id_;
@@ -376,9 +380,8 @@ namespace seal
             data_parms_id_head_ = create_next_context_data(key_parms_id_);
         }
 
-        // If modulus switching is to be created,
-        // then compute the remaining parameter sets as long as they are valid
-        // to use (parameters_set == true)
+        // If modulus switching chain is to be created, compute the remaining
+        // parameter sets as long as they are valid to use (parameters_set == true)
         if (expand_mod_chain &&
             context_data_map_.at(data_parms_id_head_)->qualifiers_.parameters_set)
         {
@@ -391,7 +394,7 @@ namespace seal
                     break;
                 }
                 prev_parms_id = next_parms_id;
-                data_parms_id_tail_ = next_parms_id;                
+                data_parms_id_tail_ = next_parms_id;
             }
         }
 

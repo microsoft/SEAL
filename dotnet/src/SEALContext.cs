@@ -24,6 +24,23 @@ namespace Microsoft.Research.SEAL
     /// given parameter set has been deemed valid and is ready to be used. If the parameters
     /// were for some reason not appropriately set, the ParametersSet flag will be false,
     /// and a new SEALContext will have to be created after the parameters are corrected.
+    ///
+    /// By default, SEALContext creates a chain of SEALContext.ContextData instances. The
+    /// first one in the chain corresponds to special encryption parametersthat are reserved
+    /// to be used by the various key classes (SecretKey, PublicKey, etc.). These are the
+    /// exact same encryption parameters that are created by the user and passed to the
+    /// constructor of SEALContext. The properties KeyContextData and KeyParmsId return the
+    /// ContextData and the ParmsId corresponding to these special parameters. The rest of the
+    /// ContextData instances in the chain correspond to encryption parameters that are derived
+    /// from the first encryption parameters by always removing the last one of the moduli in
+    /// the CoeffModulus, until the resulting parameters are no longer valid, e.g., there are
+    /// no more primes left. These derived encryption parameters are used by ciphertexts and
+    /// plaintexts and their respective ContextData can be accessed through the
+    /// GetDataContextData(ParmsId) function. The properties DataContextDataHead and
+    /// DataContextDataTail return the ContextData corresponding to the first and the last
+    /// set of parameters in the "data" part of the chain, i.e., the second and the last
+    /// element in the full chain. The chain is a doubly linked list and is referred to as
+    /// the modulus switching chain.
     /// </summary>
     /// <see cref="EncryptionParameters">see EncryptionParameters for more details on the parameters.</see>
     /// <see cref="EncryptionParameterQualifiers">see EncryptionParameterQualifiers for more details on the qualifiers.</see>
@@ -56,9 +73,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a ContextData class instance corresponding to the
-        /// encryption parameters. This is the first set of parameters in a chain
-        /// of parameters when modulus switching is used.
+        /// Returns a ContextData class instance corresponding to the encryption
+        /// parameters. This is the first set of parameters in a chain of parameters
+        /// when modulus switching is used.
         /// </summary>
         public ContextData FirstContextData
         {
@@ -312,9 +329,9 @@ namespace Microsoft.Research.SEAL
             }
 
             /// <summary>
-            /// Returns the context data corresponding to the previous parameters in the modulus 
-            /// switching chain. If the current data is the first one in the chain, then the 
-            /// result is nullptr.
+            /// Returns the context data corresponding to the previous parameters in the
+            /// modulus switching chain. If the current data is the first one in the chain,
+            /// then the result is nullptr.
             /// </summary>
             public ContextData PrevContextData
             {
@@ -331,8 +348,8 @@ namespace Microsoft.Research.SEAL
             }
 
             /// <summary>
-            /// Returns the context data corresponding to the next parameters in the modulus 
-            /// switching chain. If the current data is the last one in the chain, then the 
+            /// Returns the context data corresponding to the next parameters in the modulus
+            /// switching chain. If the current data is the last one in the chain, then the
             /// result is nullptr.
             /// </summary>
             public ContextData NextContextData

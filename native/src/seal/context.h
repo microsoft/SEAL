@@ -51,8 +51,8 @@ namespace seal
         modulus and N is a power of two, then the number-theoretic transform (NTT) can be
         used for fast multiplications of polynomials modulo the polynomial modulus and
         coefficient modulus. In this case the variable using_ntt will be set to true. However,
-        currently Microsoft SEAL requires this to be the case for the parameters to be valid. Therefore,
-        parameters_set can only be true if using_ntt is true.
+        currently Microsoft SEAL requires this to be the case for the parameters to be valid.
+        Therefore, parameters_set can only be true if using_ntt is true.
         */
         bool using_ntt;
 
@@ -117,11 +117,22 @@ namespace seal
     were for some reason not appropriately set, the parameters_set flag will be false,
     and a new SEALContext will have to be created after the parameters are corrected.
 
-    By default, SEALContext creates a chain of SEALContext::ContextData 
-    instances. The first one in chain has EncryptionParameters reserved for 
-    keys which can be accessed with key_parms_id_. Starting from the second one,
-    their EncryptionParameters are used for ciphertexts, plaintexts, evaluation,
-    hence is called data_parms_id_. ContextData chain is doubly linked.
+    By default, SEALContext creates a chain of SEALContext::ContextData instances. The
+    first one in the chain corresponds to special encryption parametersthat are reserved
+    to be used by the various key classes (SecretKey, PublicKey, etc.). These are the
+    exact same encryption parameters that are created by the user and passed to the
+    constructor of SEALContext. The functions key_context_data() and key_parms_id()
+    return the ContextData and the parms_id corresponding to these special parameters.
+    The rest of the ContextData instances in the chain correspond to encryption parameters
+    that are derived from the first encryption parameters by always removing the last one
+    of the moduli in the coeff_modulus, until the resulting parameters are no longer valid,
+    e.g., there are no more primes left. These derived encryption parameters are used by
+    ciphertexts and plaintexts and their respective ContextData can be accessed through the
+    data_context_data(parms_id_type) function. The functions data_context_data_head() and
+    data_context_data_tail() return the ContextData corresponding to the first and the las
+    set of parameters in the "data" part of the chain, i.e., the second and the last
+    element in the full chain. The chain itself is a doubly linked list, and is referred to
+    as the modulus switching chain.
 
     @see EncryptionParameters for more details on the parameters.
     @see EncryptionParameterQualifiers for more details on the qualifiers.
@@ -348,9 +359,9 @@ namespace seal
         }
 
         /**
-        Returns an optional const reference to ContextData class corresponding to
-        the parameters with a given parms_id. If parameters with the given parms_id
-        are not found then the function returns nullptr.
+        Returns the ContextData corresponding to encryption parameters with a given
+        parms_id. If parameters with the given parms_id are not found then the
+        function returns nullptr.
 
         @param[in] parms_id The parms_id of the encryption parameters
         */
@@ -363,9 +374,8 @@ namespace seal
 
 
         /**
-        Returns an optional const reference to ContextData class corresponding to
-        the parameters of keys. If parameters with the given parms_id
-        are not found then the function returns nullptr.
+        Returns the ContextData corresponding to encryption parameters that are
+        used for keys.
         */
         inline auto key_context_data() const
         {
@@ -375,9 +385,8 @@ namespace seal
         }
 
         /**
-        Returns an optional const reference to ContextData class corresponding to
-        the heading parameters of data. If parameters with the given parms_id
-        are not found then the function returns nullptr.
+        Returns the ContextData corresponding to the first encryption parameters
+        that are used for data.
         */
         inline auto data_context_data_head() const
         {
@@ -387,9 +396,8 @@ namespace seal
         }
 
         /**
-        Returns an optional const reference to ContextData class corresponding to
-        the tailing parameters of data. If parameters with the given parms_id
-        are not found then the function returns nullptr.
+        Returns the ContextData corresponding to the last encryption parameters
+        that are used for data.
         */
         inline auto data_context_data_tail() const
         {
@@ -407,8 +415,8 @@ namespace seal
         }
 */
         /**
-        Returns a parms_id_type corresponding to the set
-        of encryption parameters for keys.
+        Returns a parms_id_type corresponding to the set of encryption 
+        parameters that are used for keys.
         */
         inline auto &key_parms_id() const
         {
@@ -416,8 +424,8 @@ namespace seal
         }
 
         /**
-        Returns a parms_id_type corresponding to the head set
-        of encryption parameters for ciphertext and plaintext.
+        Returns a parms_id_type corresponding to the first encryption parameters
+        that are used for data.
         */
         inline auto &data_parms_id_head() const
         {
@@ -425,8 +433,8 @@ namespace seal
         }
 
         /**
-        Returns a parms_id_type corresponding to the tail set
-        of encryption parameters for ciphertext and plaintext.
+        Returns a parms_id_type corresponding to the last encryption parameters
+        that are used for data.
         */
         inline auto &data_parms_id_tail() const
         {
@@ -458,10 +466,10 @@ namespace seal
         ContextData validate(EncryptionParameters parms);
 
         /**
-        Create the next context_data by dropping the last element from
-        coeff_modulus. If the new encryption parameters are not qualified,
-        returns parms_id_zero. Otherwise, returns the parms_id of the next
-        parameter, also append the next context_data to chain.
+        Create the next context_data by dropping the last element from coeff_modulus.
+        If the new encryption parameters are not valid, returns parms_id_zero.
+        Otherwise, returns the parms_id of the next parameter and appends the next
+        context_data to the chain.
         */
         parms_id_type create_next_context_data(
                 const parms_id_type &prev_parms);

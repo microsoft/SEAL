@@ -83,8 +83,8 @@ namespace Microsoft.Research.SEAL
         /// modulus and N is a power of two, then the number-theoretic transform (NTT) can be
         /// used for fast multiplications of polynomials modulo the polynomial modulus and
         /// coefficient modulus.In this case the variable UsingNTT will be set to true. However,
-        /// currently Microsoft SEAL requires this to be the case for the parameters to be valid.Therefore,
-        /// ParametersSet can only be true if UsingNTT is true.
+        /// currently Microsoft SEAL requires this to be the case for the parameters to be valid.
+        /// Therefore, ParametersSet can only be true if UsingNTT is true.
         /// </summary>
         public bool UsingNTT
         {

@@ -60,6 +60,9 @@
     <ClInclude Include="seal\keygenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="seal\kswitchkeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="seal\galoiskeys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -192,6 +195,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\keygenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\kswitchkeys.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\randomgen.cpp">
