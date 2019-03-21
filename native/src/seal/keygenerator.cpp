@@ -12,7 +12,7 @@
 #include "seal/util/clipnormal.h"
 #include "seal/util/polycore.h"
 #include "seal/util/smallntt.h"
-#include "seal/util/polyrandom.h"
+#include "seal/util/rlwe.h"
 
 using namespace std;
 using namespace seal::util;
@@ -176,54 +176,11 @@ namespace seal
         // Initialize public key.
         public_key_ = PublicKey();
         pk_generated_ = false;
-        public_key_.data().resize(context_, parms.parms_id(), 2);
 
-        // The public key is in NTT form
-        public_key_.data().is_ntt_form() = true;
-
-        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
-
-        // Generate public key: (pk[0],pk[1]) = ([-(as+e)]_q, a)
-        uint64_t *secret_key = secret_key_.data().data();
-
-        // Sample a uniformly at random
-        // Set pk[1] = a (we sample the NTT form directly)
-        uint64_t *public_key_1 = public_key_.data().data(1);
-        sample_poly_uniform(public_key_1, random, parms);
-
-        // calculate a*s + e (mod q) and store in pk[0]
-        auto &small_ntt_tables = context_data.small_ntt_tables();
-
-        auto noise(allocate_poly(coeff_count, coeff_mod_count, pool_));
-        sample_poly_normal(noise.get(), random, parms);
-        for (size_t i = 0; i < coeff_mod_count; i++)
-        {
-            // Transform the noise e into NTT representation.
-            ntt_negacyclic_harvey(
-                noise.get() + (i * coeff_count), small_ntt_tables[i]);
-
-            // The inputs are not reduced but that's OK. We are only at most at 
-            // 122 bits and barrett_reduce_128 can deal with that.
-            dyadic_product_coeffmod(
-                secret_key + (i * coeff_count), 
-                public_key_1 + (i * coeff_count), coeff_count, 
-                coeff_modulus[i],
-                public_key_.data().data(0) + (i * coeff_count));
-            add_poly_poly_coeffmod(
-                noise.get() + (i * coeff_count), 
-                public_key_.data().data(0) + (i * coeff_count),
-                coeff_count, coeff_modulus[i],
-                public_key_.data().data(0) + (i * coeff_count));
-        }
-
-        // Negate and set this value to pk[0]
-        // pk[0] is now -(as+e) mod q
-        for (size_t i = 0; i < coeff_mod_count; i++)
-        {
-            negate_poly_coeffmod(
-                public_key_.data().data(0) + (i * coeff_count), coeff_count, 
-                coeff_modulus[i], public_key_.data().data(0) + (i * coeff_count));
-        }
+        shared_ptr<UniformRandomGenerator> random(
+                parms.random_generator()->create());
+        encrypt_zero_symmetric(secret_key_, public_key_.data(), context_,
+                parms.parms_id(), random, true, pool_);
 
         // Set the parms_id for public key
         public_key_.parms_id() = parms.parms_id();
@@ -232,7 +189,7 @@ namespace seal
         pk_generated_ = true;
     }
 
-    RelinKeys KeyGenerator::relin_keys(int decomposition_bit_count, size_t count)
+    RelinKeys KeyGenerator::relin_keys(size_t count)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
@@ -247,123 +204,24 @@ namespace seal
             throw invalid_argument("count out of bounds");
         }
 
-        // Check that decomposition_bit_count is in correct interval
-        if (decomposition_bit_count < SEAL_DBC_MIN || 
-            decomposition_bit_count > SEAL_DBC_MAX)
-        {
-            throw invalid_argument("decomposition_bit_count is not in the valid range");
-        }
-
         // Extract encryption parameters.
         auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
-        auto &small_ntt_tables = context_data.small_ntt_tables();
-
-        // Size check
-        if (!product_fits_in(coeff_count, coeff_mod_count))
-        {
-            throw logic_error("invalid parameters");
-        }
-
-        // Create the RelinKeys object to return
-        RelinKeys relin_keys;
-
-        // Initialize decomposition_factors
-        vector<vector<uint64_t>> decomposition_factors;
-        populate_decomposition_factors(context_data, decomposition_bit_count,
-            decomposition_factors);
-
-        // Initialize the relinearization keys
-        relin_keys.data().resize(count);
-        for (size_t i = 0; i < count; i++)
-        {
-            relin_keys.data()[i].reserve(coeff_mod_count);
-
-            for (size_t j = 0; j < coeff_mod_count; j++)
-            {
-                relin_keys.data()[i].emplace_back(
-                    context_, parms.parms_id(),
-                    2 * decomposition_factors[j].size(),
-                    relin_keys.pool());
-
-                // Resize to right size too (above only allocated)
-                // This is slightly odd use of Ciphertext as a container
-                relin_keys.data()[i].back().resize(
-                    2 * decomposition_factors[j].size());
-
-                // The keys are in NTT form
-                relin_keys.data()[i].back().is_ntt_form() = true;
-            }
-        }
+        size_t coeff_mod_count = parms.coeff_modulus().size();
 
         shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
-
-        // Create relinearization keys.
-        auto noise(allocate_poly(coeff_count, coeff_mod_count, pool_));
-        auto temp(allocate_uint(coeff_count, pool_));
 
         // Make sure we have enough secret keys computed
         compute_secret_key_array(context_data, count + 1);
 
+        // Create the RelinKeys object to return
+        RelinKeys relin_keys;
         // assume the secret key is already transformed into NTT form. 
-        for (size_t k = 0; k < count; k++)
-        {
-            for (size_t l = 0; l < coeff_mod_count; l++)
-            {
-                // populate evaluate_keys_[k]
-                for (size_t i = 0; i < decomposition_factors[l].size(); i++)
-                {
-                    // generate NTT(a_i) and store in relin_keys_[k][l].second[i]
-                    uint64_t *eval_keys_first = relin_keys.data()[k][l].data(2 * i);
-                    uint64_t *eval_keys_second = relin_keys.data()[k][l].data(2 * i + 1);
-
-                    // We sample a_i directly in NTT form
-                    sample_poly_uniform(eval_keys_second, random, parms);
-
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        // calculate a_i*s and store in relin_keys_[k].first[i]
-                        dyadic_product_coeffmod(eval_keys_second + (j * coeff_count), 
-                            secret_key_.data().data() + (j * coeff_count), 
-                            coeff_count, coeff_modulus[j], eval_keys_first + (j * coeff_count));
-                    }
-
-                    // generate NTT(e_i) 
-                    sample_poly_normal(noise.get(), random, parms);
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        ntt_negacyclic_harvey(noise.get() + (j * coeff_count), small_ntt_tables[j]);
-
-                        // add e_i into relin_keys_[k].first[i]
-                        add_poly_poly_coeffmod(
-                            noise.get() + (j * coeff_count), eval_keys_first + (j * coeff_count), 
-                            coeff_count, coeff_modulus[j], eval_keys_first + (j * coeff_count));
-
-                        // negate value in relin_keys_[k].first[i]
-                        negate_poly_coeffmod(
-                            eval_keys_first + (j * coeff_count), coeff_count, coeff_modulus[j],
-                            eval_keys_first + (j * coeff_count));
-
-                        // multiply w^i * s^(k+2)
-                        uint64_t decomposition_factor_mod = decomposition_factors[l][i] & 
-                            static_cast<uint64_t>(-static_cast<int64_t>(l == j));
-                        multiply_poly_scalar_coeffmod(
-                            secret_key_array_.get() + (k + 1) * coeff_count * coeff_mod_count + (j * coeff_count), 
-                            coeff_count, decomposition_factor_mod, coeff_modulus[j], temp.get());
-
-                        // add w^i . s^(k+2) into relin_keys_[k].first[i]
-                        add_poly_poly_coeffmod(eval_keys_first + (j * coeff_count), temp.get(), coeff_count, 
-                            coeff_modulus[j], eval_keys_first + (j * coeff_count));
-                    }
-                }
-            }
-        }
-
-        // Set decomposition_bit_count
-        relin_keys.decomposition_bit_count_ = decomposition_bit_count;
+        generate_kswitch_keys(
+                secret_key_array_.get() + coeff_mod_count * coeff_count,
+                count,
+                dynamic_cast<KSwitchKeys &>(relin_keys));
 
         // Set the parms_id
         relin_keys.parms_id() = parms.parms_id();
@@ -371,20 +229,12 @@ namespace seal
         return relin_keys;
     }
 
-    GaloisKeys KeyGenerator::galois_keys(int decomposition_bit_count, 
-        const vector<uint64_t> &galois_elts)
+    GaloisKeys KeyGenerator::galois_keys(const vector<uint64_t> &galois_elts)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
         {
             throw logic_error("cannot generate galois keys for unspecified secret key");
-        }
-
-        // Check that decomposition_bit_count is in correct interval
-        if (decomposition_bit_count < SEAL_DBC_MIN || 
-            decomposition_bit_count > SEAL_DBC_MAX)
-        {
-            throw invalid_argument("decomposition_bit_count is not on the valid range");
         }
 
         // Extract encryption parameters.
@@ -394,7 +244,6 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
         int coeff_count_power = get_power_of_two(coeff_count);
-        auto &small_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_mod_count, size_t(2)))
@@ -407,11 +256,6 @@ namespace seal
 
         // The max number of keys is equal to number of coefficients
         galois_keys.data().resize(coeff_count);
-
-        // Initialize decomposition_factors
-        vector<vector<uint64_t>> decomposition_factors;
-        populate_decomposition_factors(context_data, decomposition_bit_count,
-            decomposition_factors);
 
         for (uint64_t galois_elt : galois_elts)
         {
@@ -428,96 +272,27 @@ namespace seal
             }
 
             // Rotate secret key for each coeff_modulus
-            auto rotated_secret_key(allocate_poly(coeff_count, coeff_mod_count, pool_));
+            auto rotated_secret_key(
+                    allocate_poly(coeff_count, coeff_mod_count, pool_));
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                apply_galois_ntt(secret_key_.data().data() + (i * coeff_count),
-                    coeff_count_power, galois_elt,
-                    rotated_secret_key.get() + (i * coeff_count));
+                apply_galois_ntt(
+                        secret_key_.data().data() + i * coeff_count,
+                        coeff_count_power,
+                        galois_elt,
+                        rotated_secret_key.get() + i * coeff_count);
             }
 
             // Initialize galois key
             // This is the location in the galois_keys vector
-            uint64_t index = (galois_elt - 1) >> 1;
-            galois_keys.data()[index].reserve(coeff_mod_count);
-
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                galois_keys.data()[index].emplace_back(
-                    context_, parms.parms_id(),
-                    2 * decomposition_factors[i].size(),
-                    galois_keys.pool());
-
-                // Resize to right size too (above only allocated)
-                // This is slightly odd use of Ciphertext as a container
-                galois_keys.data()[index].back().resize(
-                    2 * decomposition_factors[i].size());
-
-                // The Galois keys are in NTT form
-                galois_keys.data()[index].back().is_ntt_form() = true;
-            }
-
+            uint64_t index = GaloisKeys::get_index(galois_elt);
             shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
             // Create Galois keys.
-            auto noise(allocate_poly(coeff_count, coeff_mod_count, pool_));
-            auto temp(allocate_uint(coeff_count, pool_));
-
-            for (size_t l = 0; l < coeff_mod_count; l++)
-            {
-                // populate galois_keys_[k]
-                for (size_t i = 0; i < decomposition_factors[l].size(); i++)
-                {
-                    // generate NTT(a_i) and store in galois_keys_[k][l].second[i]
-                    uint64_t *eval_keys_first = galois_keys.data()[index][l].data(2 * i);
-                    uint64_t *eval_keys_second = galois_keys.data()[index][l].data(2 * i + 1);
-
-                    // We sample a_i in NTT form directly
-                    sample_poly_uniform(eval_keys_second, random, parms);
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        // calculate a_i*s and store in galois_keys_[k].first[i]
-                        dyadic_product_coeffmod(eval_keys_second + (j * coeff_count), 
-                            secret_key_.data().data() + (j * coeff_count), 
-                            coeff_count, coeff_modulus[j], 
-                            eval_keys_first + (j * coeff_count));
-                    }
-
-                    // generate NTT(e_i) 
-                    sample_poly_normal(noise.get(), random, parms);
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        ntt_negacyclic_harvey(
-                            noise.get() + (j * coeff_count), small_ntt_tables[j]);
-
-                        // add NTT(e_i) into galois_keys_[k].first[i]
-                        add_poly_poly_coeffmod(noise.get() + (j * coeff_count), 
-                            eval_keys_first + (j * coeff_count), 
-                            coeff_count, coeff_modulus[j],
-                            eval_keys_first + (j * coeff_count));
-
-                        // negate value in galois_keys_[k].first[i]
-                        negate_poly_coeffmod(
-                            eval_keys_first + (j * coeff_count), coeff_count, 
-                            coeff_modulus[j], eval_keys_first + (j * coeff_count));
-
-                        // multiply w^i * rotated_secret_key
-                        uint64_t decomposition_factor_mod = decomposition_factors[l][i] & 
-                            static_cast<uint64_t>(-static_cast<int64_t>(l == j));
-                        multiply_poly_scalar_coeffmod(rotated_secret_key.get() + (j * coeff_count), 
-                            coeff_count, decomposition_factor_mod, 
-                            coeff_modulus[j], temp.get());
-
-                        // add w^i * rotated_secret_key into galois_keys_[k].first[i]
-                        add_poly_poly_coeffmod(eval_keys_first + (j * coeff_count), temp.get(), 
-                            coeff_count, coeff_modulus[j], eval_keys_first + (j * coeff_count));
-                    }
-                }
-            }
+            generate_one_kswitch_key(
+                    rotated_secret_key.get(),
+                    galois_keys.data()[index]);
         }
-
-        // Set decomposition_bit_count
-        galois_keys.decomposition_bit_count_ = decomposition_bit_count;
 
         // Set the parms_id
         galois_keys.parms_id_ = parms.parms_id();
@@ -525,20 +300,12 @@ namespace seal
         return galois_keys;
     }
 
-    GaloisKeys KeyGenerator::galois_keys(int decomposition_bit_count, 
-        const vector<int> &steps)
+    GaloisKeys KeyGenerator::galois_keys(const vector<int> &steps)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
         {
             throw logic_error("cannot generate galois keys for unspecified secret key");
-        }
-
-        // Check that decomposition_bit_count is in correct interval
-        if (decomposition_bit_count < SEAL_DBC_MIN || 
-            decomposition_bit_count > SEAL_DBC_MAX)
-        {
-            throw invalid_argument("decomposition_bit_count is not on the valid range");
         }
 
         // Extract encryption parameters.
@@ -555,22 +322,15 @@ namespace seal
         transform(steps.begin(), steps.end(), back_inserter(galois_elts),
             [&](auto s) { return steps_to_galois_elt(s, coeff_count); });
 
-        return galois_keys(decomposition_bit_count, galois_elts);
+        return galois_keys(galois_elts);
     }
 
-    GaloisKeys KeyGenerator::galois_keys(int decomposition_bit_count)
+    GaloisKeys KeyGenerator::galois_keys()
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
         {
             throw logic_error("cannot generate galois keys for unspecified secret key");
-        }
-
-        // Check that decomposition_bit_count is in correct interval
-        if (decomposition_bit_count < SEAL_DBC_MIN || 
-            decomposition_bit_count > SEAL_DBC_MAX)
-        {
-            throw invalid_argument("decomposition_bit_count is not in the valid range");
         }
 
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
@@ -598,7 +358,7 @@ namespace seal
             neg_two_power_of_three &= (m - 1);
         }
 
-        return galois_keys(decomposition_bit_count, logn_galois_keys);
+        return galois_keys(logn_galois_keys);
     }
 
     const SecretKey &KeyGenerator::secret_key() const
@@ -694,52 +454,98 @@ namespace seal
         secret_key_array_.acquire(new_secret_key_array);
     }
 
-    // decomposition_factors[i][j] = 2^(w*j) * hat-q_i * hat-q_i^(-1) mod q_i
-    // This is HPS improvement to Bajard's RNS key switching 
-    void KeyGenerator::populate_decomposition_factors(
-        const SEALContext::ContextData &context_data, 
-        int decomposition_bit_count,
-        vector<vector<uint64_t>> &decomposition_factors) const
+    void KeyGenerator::generate_one_kswitch_key(
+            const uint64_t *new_key,
+            std::vector<Ciphertext> &destination)
     {
-        // Extract encryption parameters.
-        auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
+        size_t decomp_mod_count = context_->data_context_data_head()->parms().coeff_modulus().size();
+        auto &key_context_data = *context_->key_context_data();
+        auto &key_parms = key_context_data.parms();
+        auto &key_modulus = key_parms.coeff_modulus();
+        size_t rns_mod_count = key_parms.coeff_modulus().size();
+        auto &small_ntt_tables = key_context_data.small_ntt_tables();
+        shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
-        decomposition_factors.clear();
-
-        // Initialize decomposition_factors
-        decomposition_factors.resize(coeff_mod_count);
-        uint64_t power_of_w = uint64_t(1) << decomposition_bit_count;
-
-        for (size_t i = 0; i < coeff_mod_count; i++)
+        // Size check
+        if (!product_fits_in(coeff_count, rns_mod_count))
         {
-            // We use HPS improvement to Bajard's RNS key switching 
-            uint64_t current_decomposition_factor = 1;
+            throw logic_error("invalid parameters");
+        }
 
-            uint64_t current_smallmod = coeff_modulus[i].value();
-            while (current_smallmod != 0)
+        auto temp(allocate_uint(coeff_count, pool_));
+        uint64_t factor = 0;
+        destination.resize(decomp_mod_count);
+        for (size_t j = 0; j < decomp_mod_count; j ++)
+        {
+            encrypt_zero_symmetric(secret_key_, destination[j], context_,
+                    key_parms.parms_id(), random, true, pool_);
+
+            factor = key_modulus.back().value() % key_modulus[j].value();
+            multiply_poly_scalar_coeffmod(
+                    new_key + j * coeff_count,
+                    coeff_count,
+                    factor, 
+                    key_modulus[j],
+                    temp.get());
+            add_poly_poly_coeffmod(
+                    destination[j].data(0) + j * coeff_count,
+                    temp.get(), 
+                    coeff_count,
+                    key_modulus[j],
+                    destination[j].data(0) + j * coeff_count);
+        }
+    }
+
+    void KeyGenerator::generate_kswitch_keys(
+            const uint64_t *new_keys,
+            size_t num_keys,
+            KSwitchKeys &destination)
+    {
+        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
+        size_t decomp_mod_count = context_->data_context_data_head()->parms().coeff_modulus().size();
+        auto &key_context_data = *context_->key_context_data();
+        auto &key_parms = key_context_data.parms();
+        auto &key_modulus = key_parms.coeff_modulus();
+        size_t rns_mod_count = key_parms.coeff_modulus().size();
+        auto &small_ntt_tables = key_context_data.small_ntt_tables();
+        shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
+
+        // Size check
+        if (!product_fits_in(coeff_count, rns_mod_count))
+        {
+            throw logic_error("invalid parameters");
+        }
+
+        destination.data().resize(num_keys);
+        auto temp(allocate_uint(coeff_count, pool_));
+        uint64_t factor = 0;
+        const uint64_t *new_key_ptr = nullptr;
+        for (size_t l = 0; l < num_keys; l ++)
+        {
+            new_key_ptr = new_keys + l * rns_mod_count * coeff_count;
+            generate_one_kswitch_key(new_key_ptr, destination.data()[l]);
+/*            destination.data()[l].resize(decomp_mod_count);
+            for (size_t j = 0; j < decomp_mod_count; j ++)
             {
-                decomposition_factors[i].emplace_back(current_decomposition_factor);
+                encrypt_zero_symmetric(secret_key_, destination.data()[l][j],
+                        context_, key_parms.parms_id(), 
+                        random, true, pool_);
 
-                //multiply 2^w mod q_i
-                current_decomposition_factor = multiply_uint_uint_mod(
-                    current_decomposition_factor, power_of_w, coeff_modulus[i]);
-                current_smallmod >>= decomposition_bit_count;
+                factor = key_modulus.back().value() % key_modulus[j].value();
+                multiply_poly_scalar_coeffmod(
+                        new_key_ptr + j * coeff_count,
+                        coeff_count,
+                        factor, 
+                        key_modulus[j],
+                        temp.get());
+                add_poly_poly_coeffmod(
+                        destination.data()[l][j].data(0) + j * coeff_count,
+                        temp.get(), 
+                        coeff_count,
+                        key_modulus[j],
+                        destination.data()[l][j].data(0) + j * coeff_count);
             }
-        }
-
-        // We need to ensure that the total number of decomposition factors does not 
-        // exceed 63 for lazy reduction in relinearization to work
-        size_t total_ev_factor_count = 0;
-        for (size_t i = 0; i < coeff_mod_count; i++)
-        {
-            total_ev_factor_count = 
-                add_safe(total_ev_factor_count, decomposition_factors[i].size());
-        }
-        if (total_ev_factor_count > 63)
-        {
-            throw invalid_argument("decomposition_bit_count is too small");
-        }
+*/        }
     }
 }

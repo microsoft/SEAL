@@ -13,8 +13,9 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/evaluator.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/galoiskeys.cpp
+#        ${CMAKE_CURRENT_LIST_DIR}/galoiskeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager.cpp
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.cpp
@@ -38,6 +39,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/galoiskeys.h
         ${CMAKE_CURRENT_LIST_DIR}/intarray.h
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator.h
+        ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.h
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager.h
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.h
         ${CMAKE_CURRENT_LIST_DIR}/publickey.h

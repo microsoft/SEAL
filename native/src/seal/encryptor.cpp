@@ -12,7 +12,7 @@
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/clipnormal.h"
 #include "seal/util/smallntt.h"
-#include "seal/util/polyrandom.h"
+#include "seal/util/rlwe.h"
 
 using namespace std;
 using namespace seal::util;
@@ -20,7 +20,8 @@ using namespace seal::util;
 namespace seal
 {
     Encryptor::Encryptor(shared_ptr<SEALContext> context, 
-        const PublicKey &public_key) : context_(move(context))
+        const PublicKey &public_key) : context_(move(context)),
+        public_key_(public_key)
     {
         // Verify parameters
         if (!context_)
@@ -46,110 +47,6 @@ namespace seal
         {
             throw logic_error("invalid parameters");
         }
-        
-        // Allocate space and copy over key
-        public_key_ = allocate_poly(2 * coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(public_key.data().data(0), 2 * coeff_count, coeff_mod_count, 
-            public_key_.get());
-    }
-
-    void Encryptor::encrypt_zero_internal(Ciphertext &destination,
-            parms_id_type parms_id,
-            MemoryPoolHandle pool)
-    {
-        // Verify parameters.
-        if (!pool)
-        {
-            throw invalid_argument("pool is uninitialized");
-        }
-
-        auto &context_data = *context_->context_data(parms_id);
-        auto &parms = context_data.parms();
-        if (parms.scheme() != scheme_type::BFV &&
-            parms.scheme() != scheme_type::CKKS)
-        {
-            throw invalid_argument("unsupported scheme");
-        }
-
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_mod_count = coeff_modulus.size();
-        size_t key_rns_mod_count = context_->key_context_data()->parms().coeff_modulus().size();
-        size_t coeff_count = parms.poly_modulus_degree();
-        auto &small_ntt_tables = context_data.small_ntt_tables();
-        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
-
-        // Make destination have right size and parms_id
-        destination.resize(context_, parms_id, 2);
-
-        // Multiply both u * public_key_[0] and u * public_key_[1]
-        uint64_t *public_key[2] = {
-                public_key_.get(),
-                public_key_.get() + coeff_count * key_rns_mod_count };
-
-        // Ciphertext (c_0,c_1)
-        // c_0 = public_key_[0] * u + e_0 where e_0 <-- chi, u <-- R_3.
-        // c_1 = public_key_[1] * u + e_1 where e_1 <-- chi.
-
-        // Generate u <-- R_3
-        auto u(allocate_poly(coeff_count, coeff_mod_count, pool));
-        sample_poly_ternary(u.get(), random, parms);
-        // c_0 = public_key[0] * u
-        // c_1 = public_key[1] * u
-        for (size_t i = 0; i < coeff_mod_count; i++)
-        {
-            ntt_negacyclic_harvey(
-                    u.get() + i * coeff_count,
-                    small_ntt_tables[i]);
-            for (size_t j = 0; j < 2; j ++)
-            {
-                dyadic_product_coeffmod(
-                        u.get() + i * coeff_count,
-                        public_key[j] + i * coeff_count,
-                        coeff_count,
-                        coeff_modulus[i],
-                        destination.data(j) + i * coeff_count);
-                // For BFV, addition with e_0, e_1 is in non-NTT form.
-                if (parms.scheme() == scheme_type::BFV)
-                {
-                    inverse_ntt_negacyclic_harvey(
-                            destination.data(j) + i * coeff_count,
-                            small_ntt_tables[i]);
-                }
-            }
-        }
-
-        // Generate e_0, e_1 <-- chi.
-        // c_0 = public_key[0] * u + e_0
-        // c_1 = public_key[1] * u + e_1
-        for (size_t j = 0; j < 2; j ++)
-        {
-            sample_poly_normal(u.get(), random, parms);
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                // For CKKS, addition with e_0, e_1 is in NTT form.
-                if (parms.scheme() == scheme_type::CKKS)
-                {
-                    ntt_negacyclic_harvey(
-                            u.get() + i * coeff_count,
-                            small_ntt_tables[i]);
-                }
-                add_poly_poly_coeffmod(
-                        u.get() + i * coeff_count, 
-                        destination.data(j) + i * coeff_count,
-                        coeff_count,
-                        coeff_modulus[i],
-                        destination.data(j) + i * coeff_count);
-            }
-        }
-
-        if (parms.scheme() == scheme_type::BFV)
-        {
-            destination.is_ntt_form() = false;
-        }
-        else if (parms.scheme() == scheme_type::CKKS)
-        {
-            destination.is_ntt_form() = true;
-        }
     }
 
     void Encryptor::encrypt_zero(Ciphertext &destination,
@@ -159,8 +56,18 @@ namespace seal
         auto &context_data = *context_->context_data(parms_id);
         auto &parms = context_data.parms();
         size_t coeff_mod_count = parms.coeff_modulus().size();
-
         size_t coeff_count = parms.poly_modulus_degree();
+        bool is_ntt_form = false;
+        if (parms.scheme() == scheme_type::CKKS)
+        {
+            is_ntt_form = true;
+        }
+        else if (parms.scheme() != scheme_type::BFV)
+        {
+            throw invalid_argument("unsupported scheme");
+        }
+        shared_ptr<UniformRandomGenerator> random(
+                parms.random_generator()->create());
         // resize destination and save results
         destination.resize(context_, parms_id, 2);
 
@@ -172,12 +79,18 @@ namespace seal
             auto &base_converter = prev_context_data.base_converter();
             // zero encryption without modulus switching
             Ciphertext temp;
-            encrypt_zero_internal(temp, prev_parms_id);
+            encrypt_zero_asymmetric(public_key_, temp, context_, prev_parms_id,
+                    random, is_ntt_form, pool);
+            if (temp.is_ntt_form() != is_ntt_form)
+            {
+                throw invalid_argument(
+                    "NTT form mismatch");
+            }
 
             // modulus switching
             for (size_t j = 0; j < 2; j ++)
             {
-                if (temp.is_ntt_form())
+                if (is_ntt_form)
                 {
                     base_converter->floor_last_coeff_modulus_ntt_inplace(
                             temp.data(j),
@@ -196,12 +109,13 @@ namespace seal
                         coeff_mod_count,
                         destination.data(j));
             }
-            destination.is_ntt_form() = temp.is_ntt_form();
+            destination.is_ntt_form() = is_ntt_form;
             return;
         }
         else
         {
-            encrypt_zero_internal(destination, parms_id);
+            encrypt_zero_asymmetric(public_key_, destination, context_,
+                    parms_id, random, is_ntt_form, pool);
             return;
         }
     }

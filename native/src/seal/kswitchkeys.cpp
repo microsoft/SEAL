@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/relinkeys.h"
+#include "seal/kswitchkeys.h"
 #include "seal/util/defines.h"
 #include <stdexcept>
 
@@ -10,7 +10,88 @@ using namespace seal::util;
 
 namespace seal
 {
-    void RelinKeys::save(std::ostream &stream) const
+    KSwitchKeys &KSwitchKeys::operator =(const KSwitchKeys &assign)
+    {
+        // Check for self-assignment
+        if (this == &assign)
+        {
+            return *this;
+        }
+
+        // Copy over fields
+        parms_id_ = assign.parms_id_;
+
+        // Then copy over keys
+        keys_.clear();
+        size_t keys_dim1 = assign.keys_.size();
+        keys_.reserve(keys_dim1);
+        for (size_t i = 0; i < keys_dim1; i++)
+        {
+            size_t keys_dim2 = assign.keys_[i].size();
+            keys_.emplace_back();
+            keys_[i].reserve(keys_dim2);
+            for (size_t j = 0; j < keys_dim2; j++)
+            {
+                keys_[i].emplace_back(pool_);
+                keys_[i][j] = assign.keys_[i][j];
+            }
+        }
+
+        return *this;
+    }
+
+    bool KSwitchKeys::is_valid_for(shared_ptr<const SEALContext> context) const noexcept
+    {
+        // Check metadata
+        if (!is_metadata_valid_for(context))
+        {
+            return false;
+        }
+
+        // Check the data
+        for (auto &a : keys_)
+        {
+            for (auto &b : a)
+            {
+                if (!b.is_valid_for(context) || !b.is_ntt_form() || 
+                    b.parms_id() != parms_id_)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    bool KSwitchKeys::is_metadata_valid_for(shared_ptr<const SEALContext> context) const noexcept
+    {
+        // Verify parameters
+        if (!context || !context->key_context_data()->qualifiers().parameters_set)
+        {
+            return false;
+        }
+        if (parms_id_ != context->key_parms_id())
+        {
+            return false;
+        }
+
+        for (auto &a : keys_)
+        {
+            for (auto &b : a)
+            {
+                if (!b.is_metadata_valid_for(context) || !b.is_ntt_form() || 
+                    b.parms_id() != parms_id_)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    void KSwitchKeys::save(std::ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -19,13 +100,6 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             uint64_t keys_dim1 = static_cast<uint64_t>(keys_.size());
-
-            // Validate keys_dim1 (relinearization key count)
-            if (keys_dim1 < SEAL_RELIN_KEY_COUNT_MIN ||
-                keys_dim1 > SEAL_RELIN_KEY_COUNT_MAX)
-            {
-                throw invalid_argument("count out of bounds");
-            }
 
             // Save the parms_id
             stream.write(reinterpret_cast<const char*>(&parms_id_),
@@ -58,7 +132,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void RelinKeys::unsafe_load(std::istream &stream)
+    void KSwitchKeys::unsafe_load(std::istream &stream)
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -76,13 +150,6 @@ namespace seal
             // Read in the size of keys_
             uint64_t keys_dim1 = 0;
             stream.read(reinterpret_cast<char*>(&keys_dim1), sizeof(uint64_t));
-
-            // Validate keys_dim1 (relinearization key count)
-            if (keys_dim1 < SEAL_RELIN_KEY_COUNT_MIN ||
-                keys_dim1 > SEAL_RELIN_KEY_COUNT_MAX)
-            {
-                throw invalid_argument("count out of bounds");
-            }
 
             // Reserve first for dimension of keys_
             keys_.reserve(safe_cast<size_t>(keys_dim1));

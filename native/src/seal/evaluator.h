@@ -17,6 +17,7 @@
 #include "seal/secretkey.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/common.h"
+#include "seal/kswitchkeys.h"
 
 namespace seal
 {
@@ -1469,13 +1470,11 @@ namespace seal
             }
         }
 
-        void bfv_relinearize_one_step(std::uint64_t *encrypted, std::size_t encrypted_size,
-            const SEALContext::ContextData &context_data,
-            const RelinKeys &relin_keys, util::MemoryPool &pool);
-
-        void ckks_relinearize_one_step(std::uint64_t *encrypted, std::size_t encrypted_size,
-            const SEALContext::ContextData &context_data,
-            const RelinKeys &relin_keys, util::MemoryPool &pool);
+        void switch_key_inplace(Ciphertext &encrypted,
+            const size_t encrypted_index,
+            const KSwitchKeys &kswitch_keys,
+            const size_t key_index,
+            MemoryPoolHandle pool = MemoryManager::GetPool());
 
         void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain,
             util::MemoryPool &pool);

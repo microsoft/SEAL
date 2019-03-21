@@ -461,6 +461,8 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
         size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
+        size_t key_rns_poly_uint64_count = mul_safe(coeff_count,
+            context_->key_context_data()->parms().coeff_modulus().size());
         size_t encrypted_size = encrypted.size();
         uint64_t plain_modulus = parms.plain_modulus().value();
 
@@ -515,7 +517,7 @@ namespace seal
                     noise_poly.get() + (i * coeff_count));
 
                 current_array1 += rns_poly_uint64_count;
-                current_array2 += rns_poly_uint64_count;
+                current_array2 += key_rns_poly_uint64_count;
             }
 
             // Perform inverse NTT

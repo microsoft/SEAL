@@ -164,21 +164,5 @@ namespace seal
 			}
 			return 0;
 		}
-
-		/**
-		Returns the largest allowed decomposition bit count (60).
-		*/
-		static constexpr int dbc_max()
-		{
-			return SEAL_DBC_MAX;
-		}
-
-		/**
-		Returns the smallest allowed decomposition bit count (1).
-		*/
-		static constexpr int dbc_min()
-		{
-			return SEAL_DBC_MIN;
-		}
 	};
 }

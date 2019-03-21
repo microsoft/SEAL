@@ -110,23 +110,13 @@ namespace seal
 
         Encryptor &operator =(Encryptor &&assign) = delete;
 
-        void encrypt_zero_internal(Ciphertext &destination,
-                parms_id_type parms_id,
-                MemoryPoolHandle pool = MemoryManager::GetPool());
-
         void preencrypt(const std::uint64_t *plain, std::size_t plain_coeff_count, 
             const SEALContext::ContextData &context_data, std::uint64_t *destination);
-
-        void bfv_encrypt(const Plaintext &plain, Ciphertext &destination,
-            MemoryPoolHandle pool);
-
-        void ckks_encrypt(const Plaintext &plain, Ciphertext &destination,
-            MemoryPoolHandle pool);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
         std::shared_ptr<SEALContext> context_{ nullptr };
 
-        util::Pointer<std::uint64_t> public_key_;
+        PublicKey public_key_;
     };
 }

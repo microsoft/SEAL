@@ -749,40 +749,6 @@ void example_bfv_basics_ii()
     of KeyGenerator::relin_keys takes the number of keys to be generated as an 
     argument, but one is all we need in this example (see above).
     */
-    auto relin_keys16 = keygen.relin_keys(16);
-
-    cout << "Encrypting " << plain1.to_string() << ": ";
-    encryptor.encrypt(plain1, encrypted);
-    cout << "Done" << endl;
-    cout << "Size of a fresh encryption: " << encrypted.size() << endl;
-    cout << "Noise budget in fresh encryption: "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-
-    evaluator.square_inplace(encrypted);
-    cout << "Size after squaring: " << encrypted.size() << endl;
-    cout << "Noise budget after squaring: "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-
-    evaluator.relinearize_inplace(encrypted, relin_keys16);
-    cout << "Size after relinearization: " << encrypted.size() << endl;
-    cout << "Noise budget after relinearizing (dbc = "
-        << relin_keys16.decomposition_bit_count() << "): "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-
-    evaluator.square_inplace(encrypted);
-    cout << "Size after second squaring: " << encrypted.size() << endl;
-    cout << "Noise budget after second squaring: "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-
-    evaluator.relinearize_inplace(encrypted, relin_keys16);
-    cout << "Size after relinearization: " << encrypted.size() << endl;
-    cout << "Noise budget after relinearizing (dbc = "
-        << relin_keys16.decomposition_bit_count() << "): "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-
-    decryptor.decrypt(encrypted, plain2);
-    cout << "Fourth power: " << plain2.to_string() << endl;
-    cout << endl;
 
     /*
     Of course the result is still the same, but this time we actually used less 
@@ -801,7 +767,7 @@ void example_bfv_basics_ii()
     running time here, but relinearization with relin_keys60 (below) is much 
     faster than with relin_keys16.
     */
-    auto relin_keys60 = keygen.relin_keys(DefaultParams::dbc_max());
+    auto relin_keys = keygen.relin_keys();
 
     cout << "Encrypting " << plain1.to_string() << ": ";
     encryptor.encrypt(plain1, encrypted);
@@ -814,20 +780,18 @@ void example_bfv_basics_ii()
     cout << "Size after squaring: " << encrypted.size() << endl;
     cout << "Noise budget after squaring: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-    evaluator.relinearize_inplace(encrypted, relin_keys60);
+    evaluator.relinearize_inplace(encrypted, relin_keys);
     cout << "Size after relinearization: " << encrypted.size() << endl;
-    cout << "Noise budget after relinearizing (dbc = "
-        << relin_keys60.decomposition_bit_count() << "): "
+    cout << "Noise budget after relinearizing: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
     evaluator.square_inplace(encrypted);
     cout << "Size after second squaring: " << encrypted.size() << endl;
     cout << "Noise budget after second squaring: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-    evaluator.relinearize_inplace(encrypted, relin_keys60);
+    evaluator.relinearize_inplace(encrypted, relin_keys);
     cout << "Size after relinearization: " << encrypted.size() << endl;
-    cout << "Noise budget after relinearizing (dbc = "
-        << relin_keys60.decomposition_bit_count() << "): "
+    cout << "Noise budget after relinearizing: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
     decryptor.decrypt(encrypted, plain2);
@@ -860,10 +824,9 @@ void example_bfv_basics_ii()
     cout << "Noise budget after third squaring: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
-    evaluator.relinearize_inplace(encrypted, relin_keys60);
+    evaluator.relinearize_inplace(encrypted, relin_keys);
     cout << "Size after relinearization: " << encrypted.size() << endl;
-    cout << "Noise budget after relinearizing (dbc = "
-        << relin_keys60.decomposition_bit_count() << "): "
+    cout << "Noise budget after relinearizing: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
     decryptor.decrypt(encrypted, plain2);
@@ -943,12 +906,12 @@ void example_bfv_basics_iii()
 
     Here we use a moderate size decomposition bit count.
     */
-    auto gal_keys = keygen.galois_keys(30);
+    auto gal_keys = keygen.galois_keys();
 
     /*
     Since we are going to do some multiplications we will also relinearize.
     */
-    auto relin_keys = keygen.relin_keys(30);
+    auto relin_keys = keygen.relin_keys();
 
     /*
     We also set up an Encryptor, Evaluator, and Decryptor here.
@@ -1304,7 +1267,7 @@ void example_bfv_basics_iv()
     largest parameters) and perform some simple computations on it.
     */
     encryptor.encrypt(plain, encrypted);
-    auto relin_keys = keygen.relin_keys(DefaultParams::dbc_max()); 
+    auto relin_keys = keygen.relin_keys(); 
     cout << "Noise budget before squaring: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
     evaluator.square_inplace(encrypted);
@@ -1416,7 +1379,7 @@ void example_ckks_basics_i()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys(DefaultParams::dbc_max());
+    auto relin_keys = keygen.relin_keys();
 
     /*
     We also set up an Encryptor, Evaluator, and Decryptor as usual.
@@ -1620,7 +1583,7 @@ void example_ckks_basics_ii()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys(DefaultParams::dbc_max());
+    auto relin_keys = keygen.relin_keys();
 
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
@@ -1796,7 +1759,7 @@ void example_ckks_basics_iii()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys(DefaultParams::dbc_max());
+    auto relin_keys = keygen.relin_keys();
 
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
@@ -2018,22 +1981,15 @@ void example_ckks_basics_iii()
     integers specifying the desired rotation step counts. Here we create Galois
     keys that only allow cyclic rotation by a single step (at a time) to the left.
     */
-    auto gal_keys30 = keygen.galois_keys(30, vector<int>{ 1 });
-    auto gal_keys15 = keygen.galois_keys(15, vector<int>{ 1 });
+    auto gal_keys = keygen.galois_keys(vector<int>{ 1 });
 
     Ciphertext rotated_result;
-    evaluator.rotate_vector(encrypted_result, 1, gal_keys15, rotated_result); 
+    evaluator.rotate_vector(encrypted_result, 1, gal_keys, rotated_result); 
     decryptor.decrypt(rotated_result, plain_result);
     encoder.decode(plain_result, result);
-    cout << "Result rotated with dbc 15:" << endl;
+    cout << "Result rotated:" << endl;
     print_vector(result, 3, 7);
-
-    evaluator.rotate_vector(encrypted_result, 1, gal_keys30, rotated_result); 
-    decryptor.decrypt(rotated_result, plain_result);
-    encoder.decode(plain_result, result);
-    cout << "Result rotated with dbc 30:" << endl;
-    print_vector(result, 3, 5);
-
+    
     /*
     We notice that the using the smallest decomposition bit count introduces 
     the least amount of error in the result. The problem is that our scale at 
@@ -2084,10 +2040,9 @@ void example_bfv_performance()
         /*
         Generate relinearization keys.
         */
-        int dbc = DefaultParams::dbc_max();
-        cout << "Generating relinearization keys (dbc = " << dbc << "): ";
+        cout << "Generating relinearization keys: ";
         time_start = chrono::high_resolution_clock::now();
-        auto relin_keys = keygen.relin_keys(dbc);
+        auto relin_keys = keygen.relin_keys();
         time_end = chrono::high_resolution_clock::now();
         auto time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
@@ -2105,9 +2060,9 @@ void example_bfv_performance()
             cout << "Given encryption parameters do not support batching." << endl;
             return;
         }
-        cout << "Generating Galois keys (dbc = " << dbc << "): ";
+        cout << "Generating Galois keys: ";
         time_start = chrono::high_resolution_clock::now();
-        auto gal_keys = keygen.galois_keys(dbc);
+        auto gal_keys = keygen.galois_keys();
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
@@ -2400,10 +2355,9 @@ void example_ckks_performance()
         auto secret_key = keygen.secret_key();
         auto public_key = keygen.public_key();
 
-        int dbc = DefaultParams::dbc_max();
-        cout << "Generating relinearization keys (dbc = " << dbc << "): ";
+        cout << "Generating relinearization keys: ";
         time_start = chrono::high_resolution_clock::now();
-        auto relin_keys = keygen.relin_keys(dbc);
+        auto relin_keys = keygen.relin_keys();
         time_end = chrono::high_resolution_clock::now();
         auto time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
@@ -2413,9 +2367,9 @@ void example_ckks_performance()
             cout << "Given encryption parameters do not support batching." << endl;
             return;
         }
-        cout << "Generating Galois keys (dbc = " << dbc << "): ";
+        cout << "Generating Galois keys: ";
         time_start = chrono::high_resolution_clock::now();
-        auto gal_keys = keygen.galois_keys(dbc);
+        auto gal_keys = keygen.galois_keys();
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;

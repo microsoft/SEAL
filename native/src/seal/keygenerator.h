@@ -85,12 +85,10 @@ namespace seal
         /**
         Generates and returns the specified number of relinearization keys.
 
-        @param[in] decomposition_bit_count The decomposition bit count
         @param[in] count The number of relinearization keys to generate
-        @throws std::invalid_argument if decomposition_bit_count is not within [1, 60]
         @throws std::invalid_argument if count is zero or too large
         */
-        RelinKeys relin_keys(int decomposition_bit_count, std::size_t count = 1);
+        RelinKeys relin_keys(std::size_t count = 1);
 
         /**
         Generates and returns Galois keys. This function creates specific Galois 
@@ -107,13 +105,10 @@ namespace seal
         (not batching), a Galois automorphism by a Galois element p changes Enc(plain(x)) 
         to Enc(plain(x^p)). 
         
-        @param[in] decomposition_bit_count The decomposition bit count
         @param[in] galois_elts The Galois elements for which to generate keys
-        @throws std::invalid_argument if decomposition_bit_count is not within [1, 60]
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        GaloisKeys galois_keys(int decomposition_bit_count,
-            const std::vector<std::uint64_t> &galois_elts);
+        GaloisKeys galois_keys(const std::vector<std::uint64_t> &galois_elts);
 
         /**
         Generates and returns Galois keys. This function creates specific Galois 
@@ -124,26 +119,20 @@ namespace seal
         A step count of zero can be used to indicate a column rotation in the BFV 
         scheme complex conjugation in the CKKS scheme.
 
-        @param[in] decomposition_bit_count The decomposition bit count
         @param[in] galois_elts The rotation step counts for which to generate keys
         @throws std::logic_error if the encryption parameters do not support batching
         and scheme is scheme_type::BFV
-        @throws std::invalid_argument if decomposition_bit_count is not within [1, 60]
         @throws std::invalid_argument if the step counts are not valid
         */
-        GaloisKeys galois_keys(int decomposition_bit_count,
-            const std::vector<int> &steps);
+        GaloisKeys galois_keys(const std::vector<int> &steps);
 
         /**
         Generates and returns Galois keys. This function creates logarithmically 
         many (in degree of the polynomial modulus) Galois keys that is sufficient 
         to apply any Galois automorphism (e.g. rotations) on encrypted data. Most 
         users will want to use this overload of the function. 
-
-        @param[in] decomposition_bit_count The decomposition bit count
-        @throws std::invalid_argument if decomposition_bit_count is not within [1, 60]
         */
-        GaloisKeys galois_keys(int decomposition_bit_count);
+        GaloisKeys galois_keys();
 
     private:
         KeyGenerator(const KeyGenerator &copy) = delete;
@@ -159,9 +148,9 @@ namespace seal
             std::size_t max_power);
 
         void populate_decomposition_factors(
-            const SEALContext::ContextData &context_data,
-            int decomposition_bit_count,
-            std::vector<std::vector<std::uint64_t>> &decomposition_factors) const;
+            std::vector<std::uint64_t> &decomposition_factors) const;
+        
+        void encrypt_zero_mod_switch_ntt(Ciphertext &destination) const;
 
         /**
         Generates new secret key.
@@ -173,6 +162,20 @@ namespace seal
         */
         void generate_pk();
 
+        /**
+        Generates new key switching keys for an array of new keys.
+        */
+        void generate_kswitch_keys(
+                const uint64_t *new_keys,
+                size_t num_keys,
+                KSwitchKeys &destination);
+
+        /**
+        Generates one key switching key for a new key.
+        */
+        void generate_one_kswitch_key(
+                const uint64_t *new_key,
+                std::vector<Ciphertext> &destination);
         /**
         We use a fresh memory pool with `clear_on_destruction' enabled
         */
