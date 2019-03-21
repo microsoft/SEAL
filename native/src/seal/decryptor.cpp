@@ -446,7 +446,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        if (context_->data_context_data_head()->parms().scheme() != scheme_type::BFV)
+        if (context_->key_context_data()->parms().scheme() != scheme_type::BFV)
         {
             throw logic_error("unsupported scheme");
         }

@@ -275,7 +275,7 @@ namespace seal
             throw invalid_argument("encrypted1 and encrypted2 parameter mismatch");
         }
 
-        auto context_data_ptr = context_->context_data(encrypted1.parms_id());
+        auto context_data_ptr = context_->key_context_data();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -702,7 +702,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
+        auto context_data_ptr = context_->key_context_data();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -1394,7 +1394,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        switch (context_->data_context_data_head()->parms().scheme())
+        switch (context_->key_context_data()->parms().scheme())
         {
         case scheme_type::BFV:
             // Modulus switching with scaling
@@ -1498,7 +1498,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        switch (context_->data_context_data_head()->parms().scheme())
+        switch (context_->key_context_data()->parms().scheme())
         {
         case scheme_type::BFV:
             throw invalid_argument("unsupported operation for scheme type");

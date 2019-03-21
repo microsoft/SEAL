@@ -3,6 +3,7 @@
 
 #include "seal/util/rlwe.h"
 #include "seal/randomtostd.h"
+#include "seal/util/common.h"
 #include "seal/util/clipnormal.h"
 #include "seal/util/polycore.h"
 #include "seal/util/smallntt.h"
@@ -16,14 +17,15 @@ namespace seal
     {
         void sample_poly_ternary(
             uint64_t *poly,
-            std::shared_ptr<UniformRandomGenerator> random,
+            shared_ptr<UniformRandomGenerator> random,
             const EncryptionParameters &parms)
         {
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
             RandomToStandardAdapter engine(random);
-            std::uniform_int_distribution<int> dist(-1, 1);
+            uniform_int_distribution<int> dist(-1, 1);
+
             for (size_t i = 0; i < coeff_count; i++)
             {
                 int rand_index = dist(engine);
@@ -38,8 +40,7 @@ namespace seal
                 {
                     for (size_t j = 0; j < coeff_mod_count; j++)
                     {
-                        poly[i + j * coeff_count] =
-                                coeff_modulus[j].value() - 1;
+                        poly[i + j * coeff_count] = coeff_modulus[j].value() - 1;
                     }
                 }
                 else
@@ -54,15 +55,15 @@ namespace seal
 
         void sample_poly_normal(
                 uint64_t *poly, 
-                std::shared_ptr<UniformRandomGenerator> random,
+                shared_ptr<UniformRandomGenerator> random,
                 const EncryptionParameters &parms)
         {
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
 
-            if ((parms.noise_standard_deviation() == 0.0) || 
-                (parms.noise_max_deviation() == 0.0))
+            if (are_close(parms.noise_standard_deviation(), 0.0) || 
+                are_close(parms.noise_max_deviation(), 0.0))
             {
                 set_zero_poly(coeff_count, coeff_mod_count, poly);
                 return;
@@ -78,8 +79,7 @@ namespace seal
                 {
                     for (size_t j = 0; j < coeff_mod_count; j++)
                     {
-                        poly[i + j * coeff_count] = 
-                                static_cast<uint64_t>(noise);
+                        poly[i + j * coeff_count] = static_cast<uint64_t>(noise);
                     }
                 }
                 else if (noise < 0)
@@ -114,10 +114,10 @@ namespace seal
             // Set up source of randomness that produces 32 bit random things.
             RandomToStandardAdapter engine(random);
 
-            uint64_t max_uint64 = std::numeric_limits<uint64_t>::max();
+            uint64_t max_uint64 = numeric_limits<uint64_t>::max();
             uint64_t modulus = 0;
             uint64_t max_multiple = 0;
-            uint64_t rand;
+
             for (size_t j = 0; j < coeff_mod_count; j++)
             {
                 modulus = coeff_modulus[j].value();
@@ -125,6 +125,7 @@ namespace seal
                 for (size_t i = 0; i < coeff_count; i++)
                 {
                     // This ensures uniform distribution.
+                    uint64_t rand;
                     do
                     {
                         rand = (static_cast<uint64_t>(engine()) << 32) + 
@@ -139,9 +140,9 @@ namespace seal
         void encrypt_zero_asymmetric(
                 const PublicKey &public_key,
                 Ciphertext &destination,
-                std::shared_ptr<SEALContext> context,
+                shared_ptr<SEALContext> context,
                 parms_id_type parms_id,
-                std::shared_ptr<UniformRandomGenerator> random,
+                shared_ptr<UniformRandomGenerator> random,
                 bool is_ntt_form,
                 MemoryPoolHandle pool)
         {
@@ -153,6 +154,7 @@ namespace seal
             {
                 throw invalid_argument("key_parms_id mismatch");
             }
+
             auto &context_data = *context->context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
@@ -160,6 +162,7 @@ namespace seal
             size_t coeff_count = parms.poly_modulus_degree();
             auto &small_ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = public_key.data().size();
+
             if (encrypted_size < 2)
             {
                 throw invalid_argument("public_key has less than 2 parts");
@@ -227,9 +230,9 @@ namespace seal
         void encrypt_zero_symmetric(
                 const SecretKey &secret_key,
                 Ciphertext &destination,
-                std::shared_ptr<SEALContext> context,
+                shared_ptr<SEALContext> context,
                 parms_id_type parms_id,
-                std::shared_ptr<UniformRandomGenerator> random,
+                shared_ptr<UniformRandomGenerator> random,
                 bool is_ntt_form,
                 MemoryPoolHandle pool)
         {
@@ -247,8 +250,8 @@ namespace seal
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
             auto &small_ntt_tables = context_data.small_ntt_tables();
-
             size_t encrypted_size = 2;
+
             destination.resize(context, parms_id, encrypted_size);
             destination.is_ntt_form() = is_ntt_form;
 

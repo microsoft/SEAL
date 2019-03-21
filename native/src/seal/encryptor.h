@@ -55,7 +55,7 @@ namespace seal
         Encryptor(std::shared_ptr<SEALContext> context, const PublicKey &public_key);
 
         /**
-        Encrypts a Plaintext and stores the result in the destination parameter. 
+        Encrypts a plaintext and stores the result in the destination parameter. 
         Dynamic memory allocations in the process are allocated from the memory 
         pool pointed to by the given MemoryPoolHandle.
 
@@ -70,35 +70,37 @@ namespace seal
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
-        Encrypts a zero Plaintext and stores the result in the destination parameter. 
-        Dynamic memory allocations in the process are allocated from the memory 
+        Encrypts a zero plaintext and stores the result in the destination parameter. 
+        The encryption parameters for the resulting ciphertext correspond to the given
+        parms_id. Dynamic memory allocations in the process are allocated from the memory 
         pool pointed to by the given MemoryPoolHandle.
 
+        @param[in] parms_id The parms_id for the resulting ciphertext
         @param[out] destination The ciphertext to overwrite with the encrypted plaintext 
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is not in default NTT form
+        @throws std::invalid_argument if parms_id is not valid for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        void encrypt_zero(Ciphertext &destination, 
-                parms_id_type parms_id,
-                MemoryPoolHandle pool = MemoryManager::GetPool());
+        void encrypt_zero( 
+            parms_id_type parms_id,
+            Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
-        Encrypts a zero Plaintext and stores the result in the destination parameter. 
-        Dynamic memory allocations in the process are allocated from the memory 
-        pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext and stores the result in the destination parameter. 
+        The encryption parameters for the resulting ciphertext correspond to the 
+        highest (data) level in the modulus switching chain. Dynamic memory allocations 
+        in the process are allocated from the memory pool pointed to by the given 
+        MemoryPoolHandle.
 
         @param[out] destination The ciphertext to overwrite with the encrypted plaintext 
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        void encrypt_zero(Ciphertext &destination,
-                MemoryPoolHandle pool = MemoryManager::GetPool())
+        inline void encrypt_zero(Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encrypt_zero(destination, context_->data_parms_id_head());
+            encrypt_zero(context_->data_parms_id_head(), destination);
         }
 
     private:

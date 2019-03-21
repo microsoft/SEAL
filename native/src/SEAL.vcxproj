@@ -53,6 +53,7 @@
     <ClInclude Include="seal\util\polyarithmod.h" />
     <ClInclude Include="seal\util\polyarithsmallmod.h" />
     <ClInclude Include="seal\util\polycore.h" />
+    <ClInclude Include="seal\util\rlwe.h" />
     <ClInclude Include="seal\util\smallntt.h" />
     <ClInclude Include="seal\util\uintarith.h" />
     <ClInclude Include="seal\util\uintarithmod.h" />
@@ -88,6 +89,7 @@
     <ClCompile Include="seal\util\polyarith.cpp" />
     <ClCompile Include="seal\util\polyarithmod.cpp" />
     <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
+    <ClInclude Include="seal\util\rlwe.cpp" />
     <ClCompile Include="seal\util\smallntt.cpp" />
     <ClCompile Include="seal\util\uintarith.cpp" />
     <ClCompile Include="seal\util\uintarithmod.cpp" />

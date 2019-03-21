@@ -129,6 +129,9 @@
     <ClInclude Include="seal\util\polycore.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="seal\util\rlwe.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
     <ClInclude Include="seal\util\smallntt.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -231,6 +234,9 @@
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\polyarithsmallmod.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\rlwe.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\smallntt.cpp">

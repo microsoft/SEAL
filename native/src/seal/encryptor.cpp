@@ -49,14 +49,22 @@ namespace seal
         }
     }
 
-    void Encryptor::encrypt_zero(Ciphertext &destination,
-            parms_id_type parms_id,
-            MemoryPoolHandle pool)
+    void Encryptor::encrypt_zero(parms_id_type parms_id,
+        Ciphertext &destination,
+        MemoryPoolHandle pool)
     {
+        // Verify parameters.
+        auto context_data_ptr = context_->context_data(parms_id);
+        if (!context_data_ptr)
+        {
+            throw invalid_argument("parms_id is not valid for encryption parameters");
+        }
+
         auto &context_data = *context_->context_data(parms_id);
         auto &parms = context_data.parms();
         size_t coeff_mod_count = parms.coeff_modulus().size();
         size_t coeff_count = parms.poly_modulus_degree();
+
         bool is_ntt_form = false;
         if (parms.scheme() == scheme_type::CKKS)
         {
@@ -66,9 +74,11 @@ namespace seal
         {
             throw invalid_argument("unsupported scheme");
         }
+
         shared_ptr<UniformRandomGenerator> random(
                 parms.random_generator()->create());
-        // resize destination and save results
+
+        // Resize destination and save results
         destination.resize(context_, parms_id, 2);
 
         auto prev_context_data_ptr = context_data.prev_context_data();
@@ -77,37 +87,37 @@ namespace seal
         {
             auto &prev_parms_id = prev_context_data.parms().parms_id();
             auto &base_converter = prev_context_data.base_converter();
-            // zero encryption without modulus switching
+
+            // Zero encryption without modulus switching
             Ciphertext temp;
             encrypt_zero_asymmetric(public_key_, temp, context_, prev_parms_id,
                     random, is_ntt_form, pool);
             if (temp.is_ntt_form() != is_ntt_form)
             {
-                throw invalid_argument(
-                    "NTT form mismatch");
+                throw invalid_argument("NTT form mismatch");
             }
 
-            // modulus switching
+            // Modulus switching
             for (size_t j = 0; j < 2; j ++)
             {
                 if (is_ntt_form)
                 {
                     base_converter->floor_last_coeff_modulus_ntt_inplace(
-                            temp.data(j),
-                            prev_context_data.small_ntt_tables(),
-                            pool);
+                        temp.data(j),
+                        prev_context_data.small_ntt_tables(),
+                        pool);
                 }
                 else
                 {
                     base_converter->floor_last_coeff_modulus_inplace(
-                            temp.data(j),
-                            pool);
+                        temp.data(j),
+                        pool);
                 }
                 set_poly_poly(
-                        temp.data(j),
-                        coeff_count,
-                        coeff_mod_count,
-                        destination.data(j));
+                    temp.data(j),
+                    coeff_count,
+                    coeff_mod_count,
+                    destination.data(j));
             }
             destination.is_ntt_form() = is_ntt_form;
             return;
@@ -115,14 +125,14 @@ namespace seal
         else
         {
             encrypt_zero_asymmetric(public_key_, destination, context_,
-                    parms_id, random, is_ntt_form, pool);
+                parms_id, random, is_ntt_form, pool);
             return;
         }
     }
 
-    void Encryptor::encrypt(const Plaintext &plain, 
-            Ciphertext &destination,
-            MemoryPoolHandle pool)
+    void Encryptor::encrypt(const Plaintext &plain,
+        Ciphertext &destination,
+        MemoryPoolHandle pool)
     {
         // Verify parameters.
         if (!pool)
@@ -135,8 +145,7 @@ namespace seal
             throw invalid_argument("plain is not valid for encryption parameters");
         }
 
-        auto scheme = context_->data_context_data_head()->parms().scheme();
-
+        auto scheme = context_->key_context_data()->parms().scheme();
         if (scheme == scheme_type::BFV)
         {
             if (plain.is_ntt_form())
@@ -144,13 +153,14 @@ namespace seal
                 throw invalid_argument("plain cannot be in NTT form");
             }
             
-            encrypt_zero(destination, context_->data_parms_id_head());
+            encrypt_zero(context_->data_parms_id_head(), destination);
+
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
             preencrypt(plain.data(),
-                    plain.coeff_count(),
-                    *context_->data_context_data_head(),
-                    destination.data());
+                plain.coeff_count(),
+                *context_->data_context_data_head(),
+                destination.data());
         }
         else if (scheme == scheme_type::CKKS)
         {
@@ -168,19 +178,24 @@ namespace seal
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
-            
-            encrypt_zero(destination, parms.parms_id());
+
+            encrypt_zero(parms.parms_id(), destination);
+
             // The plaintext gets added into the c_0 term of ciphertext (c_0,c_1).
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 add_poly_poly_coeffmod(
-                        destination.data() + (i * coeff_count),
-                        plain.data() + (i * coeff_count),
-                        coeff_count,
-                        coeff_modulus[i],
-                        destination.data() + (i * coeff_count));
+                    destination.data() + (i * coeff_count),
+                    plain.data() + (i * coeff_count),
+                    coeff_count,
+                    coeff_modulus[i],
+                    destination.data() + (i * coeff_count));
             }
             destination.scale() = plain.scale();
+        }
+        else
+        {
+            throw invalid_argument("unsupported scheme");
         }
     }
 
