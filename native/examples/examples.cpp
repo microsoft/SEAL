@@ -2586,9 +2586,10 @@ void example_ckks_performance()
     };
 
     EncryptionParameters parms(scheme_type::CKKS);
-    parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
-    performance_test(SEALContext::Create(parms));
+    // \todo Uncomment once default_params have one more modulus.
+    // parms.set_poly_modulus_degree(4096);
+    // parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
+    // performance_test(SEALContext::Create(parms));
 
     cout << endl;
     parms.set_poly_modulus_degree(8192);
