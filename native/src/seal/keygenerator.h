@@ -150,8 +150,6 @@ namespace seal
         void populate_decomposition_factors(
             std::vector<std::uint64_t> &decomposition_factors) const;
 
-        void encrypt_zero_mod_switch_ntt(Ciphertext &destination) const;
-
         /**
         Generates new secret key.
         */

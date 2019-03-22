@@ -2469,6 +2469,11 @@ namespace seal
 
         encrypted.resize(context_, parms.parms_id(), 3);
 
+        // NOTE: This method extends the allocation size (not data size)
+        // of encrypted, which is not strictly speaking necessary and can
+        // be an issue in some use-cases. This is done to unify apply_galois
+        // and relinearize under the switch_key_inplace API.
+
         // DO NOT CHANGE EXECUTION ORDER OF FOLLOWING SECTION
         // BEGIN: Apply Galois for each ciphertext
         // Execution order is sensitive, since apply_galois is not inplace!
@@ -2526,7 +2531,7 @@ namespace seal
         // END: Apply Galois for each ciphertext
         // REORDERING IS SAFE NOW
 
-        // Calculate (ct[2] * galois_key[0], ct[2] * galois_key[2]) + (ct[0], 0)
+        // Calculate (ct[2] * galois_key[0], ct[2] * galois_key[1]) + (ct[0], 0)
         switch_key_inplace(
             encrypted,
             2,
@@ -2679,7 +2684,7 @@ namespace seal
                     local_small_poly_0.get(),
                     small_ntt_tables[i]);
             }
-            // key RNS representation
+            // Key RNS representation
             for (size_t j = 0; j < rns_mod_count; j++)
             {
                 size_t index = (j == decomp_mod_count ? key_mod_count - 1 : j);
@@ -2694,12 +2699,14 @@ namespace seal
                         coeff_count,
                         key_modulus[index],
                         local_small_poly_1.get());
-                    ntt_negacyclic_harvey(
+
+                    // Lazy reduction
+                    ntt_negacyclic_harvey_lazy(
                         local_small_poly_1.get(),
                         small_ntt_tables[index]);
                     local_encrypted_ptr = local_small_poly_1.get();
                 }
-                // two compoments in key
+                // Two components in key
                 for (size_t k = 0; k < 2; k++)
                 {
                     dyadic_product_coeffmod(
@@ -2717,14 +2724,14 @@ namespace seal
                 }
             }
         }
-        // results are now stored in temp_poly[k]
-        // modulus switching should be performed
+        // Results are now stored in temp_poly[k]
+        // Modulus switching should be performed
         if (use_special_mod)
         {
             auto local_small_poly(allocate_uint(coeff_count, pool));
             for (size_t k = 0; k < 2; k++)
             {
-                // convert to non-NTT form
+                // Convert to non-NTT form
                 inverse_ntt_negacyclic_harvey(
                     temp_poly[k].get() + decomp_mod_count * coeff_count,
                     small_ntt_tables[key_mod_count - 1]);
