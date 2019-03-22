@@ -33,7 +33,7 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context_->data_context_data_head()->qualifiers().parameters_set)
+        if (!context_->parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }

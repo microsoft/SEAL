@@ -67,7 +67,7 @@ namespace seal
     bool KSwitchKeys::is_metadata_valid_for(shared_ptr<const SEALContext> context) const noexcept
     {
         // Verify parameters
-        if (!context || !context->key_context_data()->qualifiers().parameters_set)
+        if (!context || !context->parameters_set())
         {
             return false;
         }
