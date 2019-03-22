@@ -91,12 +91,12 @@ namespace seal
         return true;
     }
 
-    void KSwitchKeys::save(std::ostream &stream) const
+    void KSwitchKeys::save(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
         {
-            // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
+            // Throw exceptions on ios_base::badbit and ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             uint64_t keys_dim1 = static_cast<uint64_t>(keys_.size());
@@ -123,7 +123,7 @@ namespace seal
                 }
             }
         }
-        catch (const std::exception &)
+        catch (const exception &)
         {
             stream.exceptions(old_except_mask);
             throw;
@@ -132,12 +132,12 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void KSwitchKeys::unsafe_load(std::istream &stream)
+    void KSwitchKeys::unsafe_load(istream &stream)
     {
         auto old_except_mask = stream.exceptions();
         try
         {
-            // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
+            // Throw exceptions on ios_base::badbit and ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             // Clear current keys
@@ -172,7 +172,7 @@ namespace seal
                 }
             }
         }
-        catch (const std::exception &)
+        catch (const exception &)
         {
             stream.exceptions(old_except_mask);
             throw;

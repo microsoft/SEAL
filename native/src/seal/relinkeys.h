@@ -42,11 +42,11 @@ namespace seal
     {
     public:
         /**
-        Returns a const reference to an relinearization key. The returned 
+        Returns a const reference to an relinearization key. The returned
         relinearization key corresponds to the given power of the secret key.
 
         @param[in] key_power The power of the secret key
-        @throw std::invalid_argument if the key corresponding to key_power does 
+        @throws std::invalid_argument if the key corresponding to key_power does
         not exist
         */
         inline static std::size_t get_index(std::size_t key_power)
@@ -59,7 +59,7 @@ namespace seal
         relinearization key corresponds to the given power of the secret key.
 
         @param[in] key_power The power of the secret key
-        @throw std::invalid_argument if the key corresponding to key_power does not exist
+        @throws std::invalid_argument if the key corresponding to key_power does not exist
         */
         inline auto &key(std::size_t key_power) const
         {

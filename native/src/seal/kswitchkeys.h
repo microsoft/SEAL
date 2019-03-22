@@ -13,26 +13,28 @@
 namespace seal
 {
     /**
-    Class to store keyswitching keys.
+    Class to store keyswitching keys. It should never be necessary for normal
+    users to create an instance of this class. It is used strictly as a base
+    class for RelinKeys and GaloisKeys classes.
 
     @par Keyswitching
     Concretely, keyswitching is used to change a ciphertext encrypted
     with one key to be encrypted with another key. It is a general technique
-    and is used in relinearization and galois rotation.
-    A keyswitching key can contain a sequence (vector) of keys.
-    In relin_key, each key is an encryption of a power of secret key.
-    In galois_key, each key is responsible for a type of rotation.
+    and is used in relinearization and galois rotation. A keyswitching key 
+    can contain a sequence (vector) of keys. In RelinKeys, each key is an 
+    encryption of a power of secret key. In GaloisKeys, each key corresponds
+    to a type of rotation.
 
     @par Thread Safety
     In general, reading from KSwitchKeys is thread-safe as long as no
     other thread is concurrently mutating it. This is due to the underlying
-    data structure storing the relinearization keys not being thread-safe.
+    data structure storing the keyswitching keys not being thread-safe.
 
     @see SecretKey for the class that stores the secret key.
     @see PublicKey for the class that stores the public key.
     @see RelinKeys for the class that stores the relinearization keys.
     @see GaloisKeys for the class that stores the Galois keys.
-    @see KeyGenerator for the class that generates the relinearization keys.
+    @see KeyGenerator for the class that generates the keyswitching keys.
     */
     class KSwitchKeys
     {
@@ -119,9 +121,9 @@ namespace seal
         }
 
         /**
-        Check whether the current KSwitchKeys is valid for a given 
+        Check whether the current KSwitchKeys is valid for a given
         SEALContext. If the given SEALContext is not set, the encryption
-        parameters are invalid, or the KSwitchKeys data does not match the 
+        parameters are invalid, or the KSwitchKeys data does not match the
         SEALContext, this function returns false. Otherwise, returns true.
 
         @param[in] context The SEALContext
@@ -153,7 +155,7 @@ namespace seal
         /**
         Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
         No checking of the validity of the KSwitchKeys data against encryption
-        parameters is performed. This function should not be used unless the 
+        parameters is performed. This function should not be used unless the
         KSwitchKeys comes from a fully trusted source.
 
         @param[in] stream The stream to load the KSwitchKeys from

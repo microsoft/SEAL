@@ -1446,9 +1446,9 @@ namespace seal
             }
 
             auto value_copy(util::allocate_uint(coeff_mod_count, pool));
-            for (size_t i = 0; i < coeff_count; i++)
+            for (std::size_t i = 0; i < coeff_count; i++)
             {
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (std::size_t j = 0; j < coeff_mod_count; j++)
                 {
                     //destination[i + (j * coeff_count)] = 
                     //    util::modulo_uint(value + (i * coeff_mod_count),
@@ -1471,9 +1471,9 @@ namespace seal
         }
 
         void switch_key_inplace(Ciphertext &encrypted,
-            const size_t encrypted_index,
+            std::size_t encrypted_index,
             const KSwitchKeys &kswitch_keys,
-            const size_t key_index,
+            std::size_t key_index,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain,

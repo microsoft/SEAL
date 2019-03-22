@@ -22,31 +22,31 @@ namespace seal
             const EncryptionParameters &parms);
 
         void sample_poly_normal(
-                std::uint64_t *poly, 
-                std::shared_ptr<UniformRandomGenerator> random,
-                const EncryptionParameters &parms);
+            std::uint64_t *poly,
+            std::shared_ptr<UniformRandomGenerator> random,
+            const EncryptionParameters &parms);
 
         void sample_poly_uniform(
-                std::uint64_t *poly,
-                std::shared_ptr<UniformRandomGenerator> random,
-                const EncryptionParameters &parms);
-        
+            std::uint64_t *poly,
+            std::shared_ptr<UniformRandomGenerator> random,
+            const EncryptionParameters &parms);
+
         void encrypt_zero_asymmetric(
-                const PublicKey &public_key,
-                Ciphertext &destination,
-                std::shared_ptr<SEALContext> context,
-                parms_id_type parms_id,
-                std::shared_ptr<UniformRandomGenerator> random,
-                bool is_ntt_form,
-                MemoryPoolHandle pool);
-        
+            const PublicKey &public_key,
+            Ciphertext &destination,
+            std::shared_ptr<SEALContext> context,
+            parms_id_type parms_id,
+            std::shared_ptr<UniformRandomGenerator> random,
+            bool is_ntt_form,
+            MemoryPoolHandle pool);
+
         void encrypt_zero_symmetric(
-                const SecretKey &secret_key,
-                Ciphertext &destination,
-                std::shared_ptr<SEALContext> context,
-                parms_id_type parms_id,
-                std::shared_ptr<UniformRandomGenerator> random,
-                bool is_ntt_form,
-                MemoryPoolHandle pool);
+            const SecretKey &secret_key,
+            Ciphertext &destination,
+            std::shared_ptr<SEALContext> context,
+            parms_id_type parms_id,
+            std::shared_ptr<UniformRandomGenerator> random,
+            bool is_ntt_form,
+            MemoryPoolHandle pool);
     }
 }

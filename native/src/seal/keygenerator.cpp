@@ -211,7 +211,7 @@ namespace seal
         // Create the RelinKeys object to return
         RelinKeys relin_keys;
 
-        // assume the secret key is already transformed into NTT form. 
+        // Assume the secret key is already transformed into NTT form. 
         generate_kswitch_keys(
             secret_key_array_.get() + coeff_mod_count * coeff_count,
             count,

@@ -149,7 +149,7 @@ namespace seal
 
         void populate_decomposition_factors(
             std::vector<std::uint64_t> &decomposition_factors) const;
-        
+
         void encrypt_zero_mod_switch_ntt(Ciphertext &destination) const;
 
         /**
@@ -166,16 +166,17 @@ namespace seal
         Generates new key switching keys for an array of new keys.
         */
         void generate_kswitch_keys(
-                const uint64_t *new_keys,
-                size_t num_keys,
-                KSwitchKeys &destination);
+            const std::uint64_t *new_keys,
+            std::size_t num_keys,
+            KSwitchKeys &destination);
 
         /**
         Generates one key switching key for a new key.
         */
         void generate_one_kswitch_key(
-                const uint64_t *new_key,
-                std::vector<Ciphertext> &destination);
+            const uint64_t *new_key,
+            std::vector<Ciphertext> &destination);
+
         /**
         We use a fresh memory pool with `clear_on_destruction' enabled
         */

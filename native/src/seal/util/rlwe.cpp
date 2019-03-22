@@ -62,7 +62,7 @@ namespace seal
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
 
-            if (are_close(parms.noise_standard_deviation(), 0.0) || 
+            if (are_close(parms.noise_standard_deviation(), 0.0) ||
                 are_close(parms.noise_max_deviation(), 0.0))
             {
                 set_zero_poly(coeff_count, coeff_mod_count, poly);
@@ -70,7 +70,7 @@ namespace seal
             }
 
             RandomToStandardAdapter engine(random);
-            ClippedNormalDistribution dist(0, parms.noise_standard_deviation(), 
+            ClippedNormalDistribution dist(0, parms.noise_standard_deviation(),
                 parms.noise_max_deviation());
             for (size_t i = 0; i < coeff_count; i++)
             {
@@ -128,7 +128,7 @@ namespace seal
                     uint64_t rand;
                     do
                     {
-                        rand = (static_cast<uint64_t>(engine()) << 32) + 
+                        rand = (static_cast<uint64_t>(engine()) << 32) +
                             static_cast<uint64_t>(engine());
                     }
                     while (rand >= max_multiple);
@@ -178,7 +178,7 @@ namespace seal
             // Generate u <-- R_3
             auto u(allocate_poly(coeff_count, coeff_mod_count, pool));
             sample_poly_ternary(u.get(), random, parms);
-            
+
             // c[j] = u * public_key[j]
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
@@ -225,7 +225,7 @@ namespace seal
                         coeff_modulus[i],
                         destination.data(j) + i * coeff_count);
                 }
-            }         
+            }
         }
 
         void encrypt_zero_symmetric(

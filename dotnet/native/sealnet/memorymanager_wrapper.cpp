@@ -57,7 +57,6 @@ namespace
     }
 }
 
-
 SEALNETNATIVE HRESULT SEALCALL MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void **pool_handle)
 {
     IfNullRet(pool_handle, E_POINTER);

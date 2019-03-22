@@ -80,7 +80,7 @@ namespace seal
         to specify the parameters poly_modulus, coeff_modulus, and plain_modulus 
         for the parameters to be usable.
 
-        @throw std::invalid_argument if scheme is not supported
+        @throws std::invalid_argument if scheme is not supported
         @see scheme_type for the supported schemes
         */
         EncryptionParameters(scheme_type scheme)
@@ -224,7 +224,7 @@ namespace seal
         from its default value. 
 
         @param[in] noise_standard_deviation The new standard deviation
-        @throw std::invalid_argument if noise_standard_deviation is negative or 
+        @throws std::invalid_argument if noise_standard_deviation is negative or 
         too large 
         */
         inline void set_noise_standard_deviation(double noise_standard_deviation)

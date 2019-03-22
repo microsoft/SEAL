@@ -45,7 +45,7 @@ namespace seal
     void Evaluator::populate_Zmstar_to_generator()
     {
         uint64_t n = static_cast<uint64_t>(
-            context_->key_context_data()->parms().poly_modulus_degree());
+            context_->data_context_data_head()->parms().poly_modulus_degree());
         uint64_t m = n << 1;
 
         for (uint64_t i = 0; i < n / 2; i++)
@@ -275,7 +275,7 @@ namespace seal
             throw invalid_argument("encrypted1 and encrypted2 parameter mismatch");
         }
 
-        auto context_data_ptr = context_->key_context_data();
+        auto context_data_ptr = context_->data_context_data_head();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -702,7 +702,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        auto context_data_ptr = context_->key_context_data();
+        auto context_data_ptr = context_->data_context_data_head();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -1092,6 +1092,7 @@ namespace seal
                                 (encrypted_ptr_increment * encrypted2_index),
                                 coeff_count, coeff_modulus[i],
                                 tmp1_poly.get() + (i * coeff_count));
+
                             // Dest[i+j]
                             add_poly_poly_coeffmod(
                                 tmp1_poly.get() + (i * coeff_count),
@@ -1117,9 +1118,15 @@ namespace seal
         const RelinKeys &relin_keys, size_t destination_size, 
         MemoryPoolHandle pool)
     {
+        // Verify parameters.
+        auto context_data_ptr = context_->context_data(encrypted.parms_id());
+        if (!context_data_ptr)
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+
         // Extract encryption parameters.
-        auto &context_data = *context_->context_data(encrypted.parms_id());
-        auto &parms = context_data.parms();
+        auto &parms = context_data_ptr->parms();
         size_t encrypted_size = encrypted.size();
 
         // Verify parameters.
@@ -1145,7 +1152,7 @@ namespace seal
             switch_key_inplace(
                 encrypted,
                 encrypted_size - 1 - i,
-                dynamic_cast<const KSwitchKeys &>(relin_keys),
+                static_cast<const KSwitchKeys &>(relin_keys),
                 RelinKeys::get_index(encrypted_size - 1 - i),
                 pool);
             encrypted_size--;
@@ -1154,7 +1161,6 @@ namespace seal
         // Put the output of final relinearization into destination.
         // Prepare destination only at this point because we are resizing down
         encrypted.resize(context_, parms.parms_id(), destination_size);
-
 #ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
@@ -1261,6 +1267,7 @@ namespace seal
     void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted, 
         Ciphertext &destination, MemoryPoolHandle pool)
     {
+        // Assuming at this point encrypted is already validated.
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
         if (context_data_ptr->parms().scheme() == scheme_type::CKKS && 
             !encrypted.is_ntt_form())
@@ -1337,6 +1344,7 @@ namespace seal
 
     void Evaluator::mod_switch_drop_to_next(Plaintext &plain)
     {
+        // Assuming at this point plain is already validated.
         auto context_data_ptr = context_->context_data(plain.parms_id());
         if (!plain.is_ntt_form())
         {
@@ -1394,7 +1402,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        switch (context_->key_context_data()->parms().scheme())
+        switch (context_->data_context_data_head()->parms().scheme())
         {
         case scheme_type::BFV:
             // Modulus switching with scaling
@@ -1479,12 +1487,6 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-
-        auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (!context_data_ptr)
-        {
-            throw invalid_argument("encrypted is not valid for encryption parameters");
-        }
         if (context_->data_parms_id_tail() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
@@ -1498,7 +1500,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        switch (context_->key_context_data()->parms().scheme())
+        switch (context_->data_context_data_head()->parms().scheme())
         {
         case scheme_type::BFV:
             throw invalid_argument("unsupported operation for scheme type");
@@ -2379,8 +2381,14 @@ namespace seal
     void Evaluator::apply_galois_inplace(Ciphertext &encrypted, uint64_t galois_elt,
         const GaloisKeys &galois_keys, MemoryPoolHandle pool)
     {
-        auto &context_data = *context_->context_data(encrypted.parms_id());
-        auto &parms = context_data.parms();
+        // Verify parameters.
+        auto context_data_ptr = context_->context_data(encrypted.parms_id());
+        if (!context_data_ptr)
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+
+        auto &parms = context_data_ptr->parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
@@ -2470,20 +2478,20 @@ namespace seal
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 util::apply_galois(
-                        encrypted.data(1) + i * coeff_count,
-                        n_power_of_two,
-                        galois_elt,
-                        coeff_modulus[i],
-                        encrypted.data(2) + i * coeff_count);
+                    encrypted.data(1) + i * coeff_count,
+                    n_power_of_two,
+                    galois_elt,
+                    coeff_modulus[i],
+                    encrypted.data(2) + i * coeff_count);
             }
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 util::apply_galois(
-                        encrypted.data(0) + i * coeff_count,
-                        n_power_of_two,
-                        galois_elt,
-                        coeff_modulus[i],
-                        encrypted.data(1) + i * coeff_count);
+                    encrypted.data(0) + i * coeff_count,
+                    n_power_of_two,
+                    galois_elt,
+                    coeff_modulus[i],
+                    encrypted.data(1) + i * coeff_count);
             }
         }
         else if (parms.scheme() == scheme_type::CKKS)
@@ -2492,18 +2500,18 @@ namespace seal
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 util::apply_galois_ntt(
-                        encrypted.data(1) + i * coeff_count,
-                        n_power_of_two,
-                        galois_elt,
-                        encrypted.data(2) + i * coeff_count);
+                    encrypted.data(1) + i * coeff_count,
+                    n_power_of_two,
+                    galois_elt,
+                    encrypted.data(2) + i * coeff_count);
             }
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 util::apply_galois_ntt(
-                        encrypted.data(0) + i * coeff_count,
-                        n_power_of_two,
-                        galois_elt,
-                        encrypted.data(1) + i * coeff_count);
+                    encrypted.data(0) + i * coeff_count,
+                    n_power_of_two,
+                    galois_elt,
+                    encrypted.data(1) + i * coeff_count);
             }
         }
         else
@@ -2512,7 +2520,7 @@ namespace seal
         }
         // copy encrypted.data(1) to encrypted.data(0)
         set_poly_poly(encrypted.data(1), coeff_count, coeff_mod_count,
-                encrypted.data(0));
+            encrypted.data(0));
         // wipe encrypted.data(1)
         set_zero_poly(coeff_count, coeff_mod_count, encrypted.data(1));
         // END: Apply Galois for each ciphertext
@@ -2520,14 +2528,13 @@ namespace seal
 
         // Calculate (ct[2] * galois_key[0], ct[2] * galois_key[2]) + (ct[0], 0)
         switch_key_inplace(
-                encrypted,
-                2,
-                dynamic_cast<const KSwitchKeys &>(galois_keys),
-                GaloisKeys::get_index(galois_elt),
-                pool);
+            encrypted,
+            2,
+            static_cast<const KSwitchKeys &>(galois_keys),
+            GaloisKeys::get_index(galois_elt),
+            pool);
 
         encrypted.resize(context_, parms.parms_id(), 2);
-
 #ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
@@ -2568,9 +2575,9 @@ namespace seal
 
     void Evaluator::switch_key_inplace(
         Ciphertext &encrypted,
-        const size_t encrypted_index,
+        size_t encrypted_index,
         const KSwitchKeys &kswitch_keys,
-        const size_t kswitch_keys_index,
+        size_t kswitch_keys_index,
         MemoryPoolHandle pool)
     {
         auto parms_id = encrypted.parms_id();
@@ -2618,7 +2625,8 @@ namespace seal
         size_t decomp_mod_count = parms.coeff_modulus().size();
         auto &key_modulus = key_parms.coeff_modulus();
         size_t key_mod_count = key_modulus.size();
-        size_t rns_mod_count = decomp_mod_count + (use_special_mod ? 1 : 0);
+        size_t rns_mod_count = add_safe(
+            decomp_mod_count, use_special_mod ? size_t(1) : size_t(0));
         auto &small_ntt_tables = key_context_data.small_ntt_tables();
         auto &modswitch_factors = key_context_data.base_converter()->
             get_inv_last_coeff_mod_array();
@@ -2636,7 +2644,7 @@ namespace seal
         for (auto &each_key : key_vector)
         {
             if (!each_key.is_metadata_valid_for(context_) ||
-                !each_key.is_ntt_form() || 
+                !each_key.is_ntt_form() ||
                  each_key.parms_id() != context_->key_parms_id() ||
                  each_key.size() != 2)
             {
@@ -2752,7 +2760,7 @@ namespace seal
                         modswitch_factors[j],
                         key_modulus[j],
                         temp_poly[k].get() + j * coeff_count);
-                    
+
                     // Now that modswitch is done, add result to encrypted.
                     // For BFV, performs inverse NTT.
                     if (scheme == scheme_type::BFV)

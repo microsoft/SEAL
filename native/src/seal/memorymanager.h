@@ -776,7 +776,7 @@ namespace seal
         Releases the memory manager profile switch lock for MemoryManager, stores 
         the current profile, and resets the profile to the one used before locking.
 
-        @throw std::runtime_error if the lock is not owned
+        @throws std::runtime_error if the lock is not owned
         */
         inline void unlock()
         {
