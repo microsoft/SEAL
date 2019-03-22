@@ -369,16 +369,20 @@ namespace seal
         // more than one modulus in coeff_modulus. This is equivalent to expanding
         // the chain by one step. Otherwise, set data_parms_id_head_ to equal
         // key_parms_id_.
-        if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set
-            || parms.coeff_modulus().size() == 1)
+        if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set ||
+            parms.coeff_modulus().size() == 1)
         {
             data_parms_id_head_ = key_parms_id_;
-            data_parms_id_tail_ = key_parms_id_;
         }
-        else
+        else 
         {
-            data_parms_id_head_ = create_next_context_data(key_parms_id_);
+            auto next_parms_id = create_next_context_data(key_parms_id_);
+            data_parms_id_head_ = (next_parms_id == parms_id_zero) ?
+                key_parms_id_ : next_parms_id;
         }
+
+        // Set the data tail to point to data head
+        data_parms_id_tail_ = data_parms_id_head_;
 
         // If modulus switching chain is to be created, compute the remaining
         // parameter sets as long as they are valid to use (parameters_set == true)
