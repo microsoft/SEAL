@@ -1151,7 +1151,7 @@ namespace seal
         {
             switch_key_inplace(
                 encrypted,
-                encrypted_size - 1 - i,
+                encrypted.data(encrypted_size - 1 - i),
                 static_cast<const KSwitchKeys &>(relin_keys),
                 RelinKeys::get_index(encrypted_size - 1 - i),
                 pool);
@@ -2467,12 +2467,7 @@ namespace seal
             }
         }
 
-        encrypted.resize(context_, parms.parms_id(), 3);
-
-        // NOTE: This method extends the allocation size (not data size)
-        // of encrypted, which is not strictly speaking necessary and can
-        // be an issue in some use-cases. This is done to unify apply_galois
-        // and relinearize under the switch_key_inplace API.
+        auto temp(allocate_poly(coeff_count, coeff_mod_count, pool));
 
         // DO NOT CHANGE EXECUTION ORDER OF FOLLOWING SECTION
         // BEGIN: Apply Galois for each ciphertext
@@ -2483,20 +2478,23 @@ namespace seal
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 util::apply_galois(
-                    encrypted.data(1) + i * coeff_count,
-                    n_power_of_two,
-                    galois_elt,
-                    coeff_modulus[i],
-                    encrypted.data(2) + i * coeff_count);
-            }
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                util::apply_galois(
                     encrypted.data(0) + i * coeff_count,
                     n_power_of_two,
                     galois_elt,
                     coeff_modulus[i],
-                    encrypted.data(1) + i * coeff_count);
+                    temp.get() + i * coeff_count);
+            }
+            // copy result to encrypted.data(0)
+            set_poly_poly(temp.get(), coeff_count, coeff_mod_count,
+                encrypted.data(0));
+            for (size_t i = 0; i < coeff_mod_count; i++)
+            {
+                util::apply_galois(
+                    encrypted.data(1) + i * coeff_count,
+                    n_power_of_two,
+                    galois_elt,
+                    coeff_modulus[i],
+                    temp.get() + i * coeff_count);
             }
         }
         else if (parms.scheme() == scheme_type::CKKS)
@@ -2505,27 +2503,27 @@ namespace seal
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 util::apply_galois_ntt(
-                    encrypted.data(1) + i * coeff_count,
-                    n_power_of_two,
-                    galois_elt,
-                    encrypted.data(2) + i * coeff_count);
-            }
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                util::apply_galois_ntt(
                     encrypted.data(0) + i * coeff_count,
                     n_power_of_two,
                     galois_elt,
-                    encrypted.data(1) + i * coeff_count);
+                    temp.get() + i * coeff_count);
+            }
+            // copy result to encrypted.data(0)
+            set_poly_poly(temp.get(), coeff_count, coeff_mod_count,
+                encrypted.data(0));
+            for (size_t i = 0; i < coeff_mod_count; i++)
+            {
+                util::apply_galois_ntt(
+                    encrypted.data(1) + i * coeff_count,
+                    n_power_of_two,
+                    galois_elt,
+                    temp.get() + i * coeff_count);
             }
         }
         else
         {
             throw logic_error("scheme not implemented");
         }
-        // copy encrypted.data(1) to encrypted.data(0)
-        set_poly_poly(encrypted.data(1), coeff_count, coeff_mod_count,
-            encrypted.data(0));
         // wipe encrypted.data(1)
         set_zero_poly(coeff_count, coeff_mod_count, encrypted.data(1));
         // END: Apply Galois for each ciphertext
@@ -2534,12 +2532,11 @@ namespace seal
         // Calculate (ct[2] * galois_key[0], ct[2] * galois_key[1]) + (ct[0], 0)
         switch_key_inplace(
             encrypted,
-            2,
+            temp.get(),
             static_cast<const KSwitchKeys &>(galois_keys),
             GaloisKeys::get_index(galois_elt),
             pool);
 
-        encrypted.resize(context_, parms.parms_id(), 2);
 #ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
@@ -2580,7 +2577,7 @@ namespace seal
 
     void Evaluator::switch_key_inplace(
         Ciphertext &encrypted,
-        size_t encrypted_index,
+        uint64_t *target,
         const KSwitchKeys &kswitch_keys,
         size_t kswitch_keys_index,
         MemoryPoolHandle pool)
@@ -2612,14 +2609,6 @@ namespace seal
         if (scheme == scheme_type::CKKS && !encrypted.is_ntt_form())
         {
             throw invalid_argument("CKKS encrypted must be in NTT form");
-        }
-        if (encrypted_index < 2 || encrypted_index >= encrypted.size())
-        {
-            throw invalid_argument("invalid encrypted_index");
-        }
-        if (kswitch_keys_index >= kswitch_keys.data().size())
-        {
-            throw invalid_argument("invalid kswitch_keys_index");
         }
 
         // Whether modulus switching will be performed.
@@ -2664,7 +2653,6 @@ namespace seal
             allocate_zero_poly(2 * coeff_count, rns_mod_count, pool)
         };
 
-        auto encrypted_ptr = encrypted.data(encrypted_index);
         // RNS decomposition index = key index
         for (size_t i = 0; i < decomp_mod_count; i++)
         {
@@ -2675,7 +2663,7 @@ namespace seal
 
             uint64_t *local_encrypted_ptr = nullptr;
             set_uint_uint(
-                encrypted_ptr + i * coeff_count,
+                target + i * coeff_count,
                 coeff_count,
                 local_small_poly_0.get());
             if (scheme == scheme_type::CKKS)
@@ -2690,7 +2678,7 @@ namespace seal
                 size_t index = (j == decomp_mod_count ? key_mod_count - 1 : j);
                 if (scheme == scheme_type::CKKS && i == j)
                 {
-                    local_encrypted_ptr = encrypted_ptr + j * coeff_count;
+                    local_encrypted_ptr = target + j * coeff_count;
                 }
                 else
                 {

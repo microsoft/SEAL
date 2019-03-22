@@ -1470,8 +1470,24 @@ namespace seal
             }
         }
 
+        /**
+        Decompose target polynomial in an RNS friendly way.
+        Compute inner product of decomposed polynomial and a key switching key.
+        The 1st polynomial of results is added to the 1st of encrypted.
+        The 2nd polynomial of results is added to the 1st of encrypted.
+        For relinearization, target is usually the last polynomial of encrypted.
+        For galois rotation, target is a intermediate result.
+
+        @param[in] encrypted A ciphertext with at least size two.
+        @param[in] target A polynomial in data RNS representation.
+        @param[in] kswitch_keys Key switching keys in NTT form.
+        @param[in] key_index Indicates the correct key switching key to use.
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool.
+        @throws std::logic_error if scheme is not scheme_type::CKKS
+        @throws std::invalid_argument
+        */
         void switch_key_inplace(Ciphertext &encrypted,
-            std::size_t encrypted_index,
+            std::uint64_t *target,
             const KSwitchKeys &kswitch_keys,
             std::size_t key_index,
             MemoryPoolHandle pool = MemoryManager::GetPool());
