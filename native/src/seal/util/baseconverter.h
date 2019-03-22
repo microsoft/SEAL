@@ -38,13 +38,13 @@ namespace seal
                 std::size_t coeff_count, const SmallModulus &small_plain_mod);
 
             void floor_last_coeff_modulus_inplace(
-                    std::uint64_t *rns_poly,
-                    MemoryPoolHandle pool) const;
+                std::uint64_t *rns_poly,
+                MemoryPoolHandle pool) const;
 
             void floor_last_coeff_modulus_ntt_inplace(
-                    std::uint64_t *rns_poly,
-                    const Pointer<SmallNTTTables> &rns_ntt_tables,
-                    MemoryPoolHandle pool) const;
+                std::uint64_t *rns_poly,
+                const Pointer<SmallNTTTables> &rns_ntt_tables,
+                MemoryPoolHandle pool) const;
 
             /**
             Fast base converter from q to Bsk
@@ -186,14 +186,14 @@ namespace seal
             MemoryPoolHandle pool_;
 
             bool generated_ = false;
+
+            std::size_t coeff_count_ = 0;
             
             std::size_t coeff_base_mod_count_ = 0;
 
             std::size_t aux_base_mod_count_ = 0;
 
             std::size_t bsk_base_mod_count_ = 0;
-
-            std::size_t coeff_count_ = 0;
 
             std::size_t plain_gamma_count_ = 0;
 

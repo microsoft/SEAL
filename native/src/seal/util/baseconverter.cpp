@@ -84,6 +84,20 @@ namespace seal
             bsk_base_mod_count_ = aux_base_mod_count_ + 1;
             plain_gamma_count_ = 2;
 
+            // Size check; should always pass
+            if (!product_fits_in(coeff_count_, coeff_base_mod_count_))
+            {
+                throw logic_error("invalid parameters");
+            }
+            if (!product_fits_in(coeff_count_, aux_base_mod_count_))
+            {
+                throw logic_error("invalid parameters");
+            }
+            if (!product_fits_in(coeff_count_, bsk_base_mod_count_))
+            {
+                throw logic_error("invalid parameters");
+            }
+
             // We use a reversed order here for performance reasons
             coeff_base_products_mod_aux_bsk_array_ = 
                 allocate<Pointer<std::uint64_t>>(bsk_base_mod_count_, pool_);
@@ -134,7 +148,7 @@ namespace seal
             
             // Generate punctured products of coeff moduli
             coeff_products_array_ = allocate_zero_uint(
-                mul_safe(coeff_products_uint64_count, coeff_base_mod_count_), pool_);
+                coeff_products_uint64_count * coeff_base_mod_count_, pool_);
             auto tmp_coeff(allocate_uint(coeff_products_uint64_count, pool_));
             
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
@@ -156,7 +170,7 @@ namespace seal
 
             // Generate punctured products of aux moduli
             auto aux_products_array(allocate_zero_uint(
-                mul_safe(aux_products_uint64_count, aux_base_mod_count_), pool_));
+                aux_products_uint64_count * aux_base_mod_count_, pool_));
             auto tmp_aux(allocate_uint(aux_products_uint64_count, pool_));
 
             for (size_t i = 0; i < aux_base_mod_count_; i++)
@@ -505,7 +519,7 @@ namespace seal
             {
                 throw invalid_argument("input cannot be null");
             }
-            if(destination == nullptr)
+            if (destination == nullptr)
             {
                 throw invalid_argument("destination cannot be null");
             }
@@ -523,7 +537,7 @@ namespace seal
              Ensure: Output in Bsk = {m1,...,ml} U {msk}
             */
             auto temp_coeff_transition(allocate_uint(
-                mul_safe(coeff_count_, coeff_base_mod_count_), pool));
+                coeff_count_ * coeff_base_mod_count_, pool));
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
                 uint64_t inv_coeff_base_products_mod_coeff_elt = 
@@ -551,7 +565,7 @@ namespace seal
                     unsigned long long aux_transition[2]{ 0, 0 };
                     for (size_t i = 0; i < coeff_base_mod_count_; 
                         i++, temp_coeff_transition_ptr++,
-                            coeff_base_products_mod_aux_bsk_array_ptr++)
+                        coeff_base_products_mod_aux_bsk_array_ptr++)
                     {
                         // Lazy reduction
                         unsigned long long temp[2];
@@ -570,8 +584,8 @@ namespace seal
         }
 
         void BaseConverter::floor_last_coeff_modulus_inplace(
-                std::uint64_t *rns_poly,
-                MemoryPoolHandle pool) const
+            uint64_t *rns_poly,
+            MemoryPoolHandle pool) const
         {
             auto temp(allocate_uint(coeff_count_, pool));
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
@@ -611,40 +625,40 @@ namespace seal
                 MemoryPoolHandle pool) const
         {
             auto temp(allocate_uint(coeff_count_, pool));
-            // convert to non-NTT form
+            // Convert to non-NTT form
             inverse_ntt_negacyclic_harvey(
-                    rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
-                    rns_ntt_tables[coeff_base_mod_count_ - 1]);
+                rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
+                rns_ntt_tables[coeff_base_mod_count_ - 1]);
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
                 // (ct mod qk) mod qi
                 modulo_poly_coeffs(
-                        rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
-                        coeff_count_,
-                        coeff_base_array_[i],
-                        temp.get());
-                // convert to NTT form
+                    rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    temp.get());
+                // Convert to NTT form
                 ntt_negacyclic_harvey(temp.get(), rns_ntt_tables[i]);
                 // (-(ct mod qk)) mod qi
                 negate_poly_coeffmod(
-                        temp.get(),
-                        coeff_count_,
-                        coeff_base_array_[i],
-                        temp.get());
+                    temp.get(),
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    temp.get());
                 // ((ct mod qi) - (ct mod qk)) mod qi
                 add_poly_poly_coeffmod(
-                        rns_poly + i * coeff_count_,
-                        temp.get(),
-                        coeff_count_,
-                        coeff_base_array_[i],
-                        rns_poly + i * coeff_count_);
+                    rns_poly + i * coeff_count_,
+                    temp.get(),
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    rns_poly + i * coeff_count_);
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                 multiply_poly_scalar_coeffmod(
-                        rns_poly + i * coeff_count_,
-                        coeff_count_,
-                        inv_last_coeff_mod_array_[i],
-                        coeff_base_array_[i],
-                        rns_poly + i * coeff_count_);
+                    rns_poly + i * coeff_count_,
+                    coeff_count_,
+                    inv_last_coeff_mod_array_[i],
+                    coeff_base_array_[i],
+                    rns_poly + i * coeff_count_);
             }
         }
 
@@ -672,7 +686,7 @@ namespace seal
 
             // Fast convert B -> q
             auto temp_coeff_transition(allocate_uint(
-                mul_safe(coeff_count_, aux_base_mod_count_), pool));
+                coeff_count_ * aux_base_mod_count_, pool));
             const uint64_t *input_ptr = input;
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
@@ -815,7 +829,7 @@ namespace seal
              Ensure: Destination array in Bsk = m U {msk}
             */
             const uint64_t *input_m_tilde_ptr = 
-                input + mul_safe(coeff_count_, bsk_base_mod_count_);
+                input + coeff_count_ * bsk_base_mod_count_;
             for (size_t k = 0; k < bsk_base_mod_count_; k++)
             {
                 uint64_t coeff_products_all_mod_bsk_array_elt = 
@@ -869,7 +883,7 @@ namespace seal
             */
             fastbconv(input, destination, pool); //q -> Bsk
             
-            size_t index_msk = mul_safe(coeff_base_mod_count_, coeff_count_);
+            size_t index_msk = coeff_base_mod_count_ * coeff_count_;
             input += index_msk;
             for (size_t i = 0; i < bsk_base_mod_count_; i++)
             {
@@ -915,7 +929,7 @@ namespace seal
             
             // Compute in Bsk first; we compute |m_tilde*q^-1i| mod qi
             auto temp_coeff_transition(allocate_uint(
-                mul_safe(coeff_count_, coeff_base_mod_count_), pool));
+                coeff_count_ * coeff_base_mod_count_, pool));
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
                 SmallModulus coeff_base_array_elt = coeff_base_array_[i];
@@ -1008,7 +1022,7 @@ namespace seal
              Ensure: Output in t (plain modulus) U gamma 
             */
             auto temp_coeff_transition(allocate_uint(
-                mul_safe(coeff_count_, coeff_base_mod_count_), pool));
+                coeff_count_ * coeff_base_mod_count_, pool));
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
                 uint64_t inv_coeff_base_products_mod_coeff_elt = 
