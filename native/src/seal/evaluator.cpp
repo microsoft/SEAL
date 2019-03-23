@@ -140,11 +140,13 @@ namespace seal
         // Add ciphertexts
         for (size_t j = 0; j < min_count; j++)
         {
+            uint64_t *encrypted1_ptr = encrypted1.data(j);
+            const uint64_t *encrypted2_ptr = encrypted2.data(j);
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                add_poly_poly_coeffmod(encrypted1.data(j) + (i * coeff_count),
-                    encrypted2.data(j) + (i * coeff_count), coeff_count, coeff_modulus[i],
-                    encrypted1.data(j) + (i * coeff_count));
+                add_poly_poly_coeffmod(encrypted1_ptr + (i * coeff_count),
+                    encrypted2_ptr + (i * coeff_count), coeff_count, coeff_modulus[i],
+                    encrypted1_ptr + (i * coeff_count));
             }
         }
 
@@ -231,11 +233,13 @@ namespace seal
         // Subtract polynomials.
         for (size_t j = 0; j < min_count; j++)
         {
+            uint64_t *encrypted1_ptr = encrypted1.data(j);
+            const uint64_t *encrypted2_ptr = encrypted2.data(j);
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                sub_poly_poly_coeffmod(encrypted1.data(j) + (i * coeff_count),
-                    encrypted2.data(j) + (i * coeff_count), coeff_count, coeff_modulus[i],
-                    encrypted1.data(j) + (i * coeff_count));
+                sub_poly_poly_coeffmod(encrypted1_ptr + (i * coeff_count),
+                    encrypted2_ptr + (i * coeff_count), coeff_count, coeff_modulus[i],
+                    encrypted1_ptr + (i * coeff_count));
             }
         }
 
@@ -1307,9 +1311,10 @@ namespace seal
             // Copy data over to temp
             for (size_t i = 0; i < encrypted_size; i++)
             {
+                const uint64_t *encrypted_ptr = encrypted.data(i);
                 for (size_t j = 0; j < next_coeff_mod_count; j++)
                 {
-                    set_uint_uint(encrypted.data(i) + (j * coeff_count), coeff_count,
+                    set_uint_uint(encrypted_ptr + (j * coeff_count), coeff_count,
                         temp.get() + (i * rns_poly_total_count) + (j * coeff_count));
                 }
             }
@@ -1335,7 +1340,8 @@ namespace seal
             {
                 for (size_t j = 0; j < next_coeff_mod_count; j++)
                 {
-                    set_uint_uint(encrypted.data(i) + (j * coeff_count), coeff_count,
+                    const uint64_t *encrypted_ptr = encrypted.data(i);
+                    set_uint_uint(encrypted_ptr + (j * coeff_count), coeff_count,
                         destination.data() + (i * rns_poly_total_count) + (j * coeff_count));
                 }
             }
@@ -2626,7 +2632,7 @@ namespace seal
             get_inv_last_coeff_mod_array();
 
         // Size check
-        if (!product_fits_in(coeff_count, rns_mod_count))
+        if (!product_fits_in(coeff_count, rns_mod_count, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -2714,11 +2720,12 @@ namespace seal
                     //     coeff_count,
                     //     key_modulus[index],
                     //     temp_poly[k].get() + j * coeff_count);
+                    const uint64_t *key_ptr = key_vector[i].data(k);
                     for (size_t l = 0; l < coeff_count; l++)
                     {
                         multiply_uint64(
                             local_encrypted_ptr[l],
-                            key_vector[i].data(k)[index * coeff_count + l],
+                            key_ptr[(index * coeff_count) + l],
                             local_wide_product);
                         local_carry = add_uint64(
                             temp_poly[k].get()[(j * coeff_count + l) * 2],
@@ -2753,6 +2760,7 @@ namespace seal
                     temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
                     small_ntt_tables[key_mod_count - 1]);
 
+                uint64_t *encrypted_ptr = encrypted.data(k);
                 for (size_t j = 0; j < decomp_mod_count; j++)
                 {
                     temp_poly_ptr = temp_poly[k].get() + j * coeff_count * 2;
@@ -2803,10 +2811,10 @@ namespace seal
                         temp_poly_ptr);
                     add_poly_poly_coeffmod(
                         temp_poly_ptr,
-                        encrypted.data(k) + j * coeff_count,
+                        encrypted_ptr + j * coeff_count,
                         coeff_count,
                         key_modulus[j],
-                        encrypted.data(k) + j * coeff_count);
+                        encrypted_ptr + j * coeff_count);
                 }
             }
         }

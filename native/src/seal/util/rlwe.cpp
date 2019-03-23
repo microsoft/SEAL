@@ -278,18 +278,18 @@ namespace seal
                     destination.data(1) + i * coeff_count,
                     coeff_count,
                     coeff_modulus[i],
-                    destination.data(0) + i * coeff_count);
+                    destination.data() + i * coeff_count);
                 add_poly_poly_coeffmod(
                     noise.get() + i * coeff_count,
-                    destination.data(0) + i * coeff_count,
+                    destination.data() + i * coeff_count,
                     coeff_count,
                     coeff_modulus[i],
-                    destination.data(0) + i * coeff_count);
+                    destination.data() + i * coeff_count);
                 negate_poly_coeffmod(
-                    destination.data(0) + i * coeff_count,
+                    destination.data() + i * coeff_count,
                     coeff_count,
                     coeff_modulus[i],
-                    destination.data(0) + i * coeff_count);
+                    destination.data() + i * coeff_count);
             }
         }
     }
