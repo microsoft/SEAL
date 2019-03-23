@@ -2702,18 +2702,18 @@ namespace seal
                 unsigned char local_carry;
                 for (size_t k = 0; k < 2; k++)
                 {
-/*                    dyadic_product_coeffmod(
-                        local_encrypted_ptr,
-                        key_vector[i].data(k) + index * coeff_count,
-                        coeff_count,
-                        key_modulus[index],
-                        local_small_poly_2.get());
-                    add_poly_poly_coeffmod(
-                        local_small_poly_2.get(),
-                        temp_poly[k].get() + j * coeff_count,
-                        coeff_count,
-                        key_modulus[index],
-                        temp_poly[k].get() + j * coeff_count);*/
+                    // dyadic_product_coeffmod(
+                    //     local_encrypted_ptr,
+                    //     key_vector[i].data(k) + index * coeff_count,
+                    //     coeff_count,
+                    //     key_modulus[index],
+                    //     local_small_poly_2.get());
+                    // add_poly_poly_coeffmod(
+                    //     local_small_poly_2.get(),
+                    //     temp_poly[k].get() + j * coeff_count,
+                    //     coeff_count,
+                    //     key_modulus[index],
+                    //     temp_poly[k].get() + j * coeff_count);
                     for (size_t l = 0; l < coeff_count; l++)
                     {
                         multiply_uint64(
@@ -2755,23 +2755,6 @@ namespace seal
 
                 for (size_t j = 0; j < decomp_mod_count; j++)
                 {
-                    // (ct mod 4qk) mod qi
-                    modulo_poly_coeffs(
-                        temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
-                        coeff_count,
-                        key_modulus[j],
-                        local_small_poly.get());
-                    // convert to NTT form
-                    ntt_negacyclic_harvey(
-                        local_small_poly.get(),
-                        small_ntt_tables[j]);
-                    // (-(ct mod 4qk)) mod qi
-                    negate_poly_coeffmod(
-                        local_small_poly.get(),
-                        coeff_count,
-                        key_modulus[j],
-                        local_small_poly.get());
-
                     temp_poly_ptr = temp_poly[k].get() + j * coeff_count * 2;
                     // (ct mod 4qi) mod qi
                     for (size_t l = 0; l < coeff_count; l ++)
@@ -2780,6 +2763,30 @@ namespace seal
                             temp_poly_ptr + l * 2,
                             key_modulus[j]);
                     }
+                    // (ct mod 4qk) mod qi
+                    modulo_poly_coeffs(
+                        temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
+                        coeff_count,
+                        key_modulus[j],
+                        local_small_poly.get());
+                    if (scheme == scheme_type::CKKS)
+                    {
+                        ntt_negacyclic_harvey(
+                            local_small_poly.get(),
+                            small_ntt_tables[j]);
+                    }
+                    else if (scheme == scheme_type::BFV)
+                    {
+                        inverse_ntt_negacyclic_harvey(
+                            temp_poly_ptr,
+                            small_ntt_tables[j]);
+                    }
+                    // (-(ct mod 4qk)) mod qi
+                    negate_poly_coeffmod(
+                        local_small_poly.get(),
+                        coeff_count,
+                        key_modulus[j],
+                        local_small_poly.get());
                     // ((ct mod qi) - (ct mod qk)) mod qi
                     add_poly_poly_coeffmod(
                         temp_poly_ptr,
@@ -2794,15 +2801,6 @@ namespace seal
                         modswitch_factors[j],
                         key_modulus[j],
                         temp_poly_ptr);
-
-                    // Now that modswitch is done, add result to encrypted.
-                    // For BFV, performs inverse NTT.
-                    if (scheme == scheme_type::BFV)
-                    {
-                        inverse_ntt_negacyclic_harvey(
-                            temp_poly_ptr,
-                            small_ntt_tables[j]);
-                    }
                     add_poly_poly_coeffmod(
                         temp_poly_ptr,
                         encrypted.data(k) + j * coeff_count,
