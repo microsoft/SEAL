@@ -2529,7 +2529,7 @@ namespace seal
         // END: Apply Galois for each ciphertext
         // REORDERING IS SAFE NOW
 
-        // Calculate (ct[2] * galois_key[0], ct[2] * galois_key[1]) + (ct[0], 0)
+        // Calculate (temp * galois_key[0], temp * galois_key[1]) + (ct[0], 0)
         switch_key_inplace(
             encrypted,
             temp.get(),
@@ -2682,22 +2682,27 @@ namespace seal
                 }
                 else
                 {
+                    // Note: The consequence of removing this modulo reduction
+                    // is not clear. Keep it here to guarantee correctness.
                     modulo_poly_coeffs(
                         local_small_poly_0.get(),
                         coeff_count,
                         key_modulus[index],
                         local_small_poly_1.get());
 
-                    // Lazy reduction
+                    // Lazy reduction, output in [0, 4q).
                     ntt_negacyclic_harvey_lazy(
                         local_small_poly_1.get(),
                         small_ntt_tables[index]);
                     local_encrypted_ptr = local_small_poly_1.get();
                 }
                 // Two components in key
+                unsigned long long local_wide_product[2];
+                unsigned long long local_low_word;
+                unsigned char local_carry;
                 for (size_t k = 0; k < 2; k++)
                 {
-                    dyadic_product_coeffmod(
+/*                    dyadic_product_coeffmod(
                         local_encrypted_ptr,
                         key_vector[i].data(k) + index * coeff_count,
                         coeff_count,
@@ -2708,7 +2713,22 @@ namespace seal
                         temp_poly[k].get() + j * coeff_count,
                         coeff_count,
                         key_modulus[index],
-                        temp_poly[k].get() + j * coeff_count);
+                        temp_poly[k].get() + j * coeff_count);*/
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        multiply_uint64(
+                            local_encrypted_ptr[l],
+                            key_vector[i].data(k)[index * coeff_count + l],
+                            local_wide_product);
+                        local_carry = add_uint64(
+                            temp_poly[k].get()[(j * coeff_count + l) * 2],
+                            local_wide_product[0],
+                            &local_low_word);
+                        temp_poly[k].get()[(j * coeff_count + l) * 2] = 
+                            local_low_word;
+                        temp_poly[k].get()[(j * coeff_count + l) * 2 + 1] +=
+                            local_wide_product[1] + local_carry;
+                    }
                 }
             }
         }
@@ -2719,15 +2739,25 @@ namespace seal
             auto local_small_poly(allocate_uint(coeff_count, pool));
             for (size_t k = 0; k < 2; k++)
             {
-                // Convert to non-NTT form
-                inverse_ntt_negacyclic_harvey(
-                    temp_poly[k].get() + decomp_mod_count * coeff_count,
+                // Reduce (ct mod 4qk) mod qk
+                uint64_t *temp_poly_ptr = temp_poly[k].get() + 
+                    decomp_mod_count * coeff_count * 2;
+                for (size_t l = 0; l < coeff_count; l ++)
+                {
+                    temp_poly_ptr[l] = barrett_reduce_128(
+                        temp_poly_ptr + l * 2,
+                        key_modulus[key_mod_count - 1]);
+                }
+                // Lazy reduction, they are then reduced mod qi
+                inverse_ntt_negacyclic_harvey_lazy(
+                    temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
                     small_ntt_tables[key_mod_count - 1]);
+
                 for (size_t j = 0; j < decomp_mod_count; j++)
                 {
-                    // (ct mod qk) mod qi
+                    // (ct mod 4qk) mod qi
                     modulo_poly_coeffs(
-                        temp_poly[k].get() + decomp_mod_count * coeff_count,
+                        temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
                         coeff_count,
                         key_modulus[j],
                         local_small_poly.get());
@@ -2735,37 +2765,46 @@ namespace seal
                     ntt_negacyclic_harvey(
                         local_small_poly.get(),
                         small_ntt_tables[j]);
-                    // (-(ct mod qk)) mod qi
+                    // (-(ct mod 4qk)) mod qi
                     negate_poly_coeffmod(
                         local_small_poly.get(),
                         coeff_count,
                         key_modulus[j],
                         local_small_poly.get());
+
+                    temp_poly_ptr = temp_poly[k].get() + j * coeff_count * 2;
+                    // (ct mod 4qi) mod qi
+                    for (size_t l = 0; l < coeff_count; l ++)
+                    {
+                        temp_poly_ptr[l] = barrett_reduce_128(
+                            temp_poly_ptr + l * 2,
+                            key_modulus[j]);
+                    }
                     // ((ct mod qi) - (ct mod qk)) mod qi
                     add_poly_poly_coeffmod(
-                        temp_poly[k].get() + j * coeff_count,
+                        temp_poly_ptr,
                         local_small_poly.get(),
                         coeff_count,
                         key_modulus[j],
-                        temp_poly[k].get() + j * coeff_count);
+                        temp_poly_ptr);
                     // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                     multiply_poly_scalar_coeffmod(
-                        temp_poly[k].get() + j * coeff_count,
+                        temp_poly_ptr,
                         coeff_count,
                         modswitch_factors[j],
                         key_modulus[j],
-                        temp_poly[k].get() + j * coeff_count);
+                        temp_poly_ptr);
 
                     // Now that modswitch is done, add result to encrypted.
                     // For BFV, performs inverse NTT.
                     if (scheme == scheme_type::BFV)
                     {
                         inverse_ntt_negacyclic_harvey(
-                            temp_poly[k].get() + j * coeff_count,
+                            temp_poly_ptr,
                             small_ntt_tables[j]);
                     }
                     add_poly_poly_coeffmod(
-                        temp_poly[k].get() + j * coeff_count,
+                        temp_poly_ptr,
                         encrypted.data(k) + j * coeff_count,
                         coeff_count,
                         key_modulus[j],
