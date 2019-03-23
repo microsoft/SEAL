@@ -72,7 +72,7 @@
     <ClCompile Include="seal\evaluator.cpp" />
     <ClCompile Include="seal\intencoder.cpp" />
     <ClCompile Include="seal\keygenerator.cpp" />
-    <ClInclude Include="seal\kswitchkeys.cpp" />
+    <ClCompile Include="seal\kswitchkeys.cpp" />
     <ClCompile Include="seal\memorymanager.cpp" />
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
@@ -87,7 +87,7 @@
     <ClCompile Include="seal\util\polyarith.cpp" />
     <ClCompile Include="seal\util\polyarithmod.cpp" />
     <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
-    <ClInclude Include="seal\util\rlwe.cpp" />
+    <ClCompile Include="seal\util\rlwe.cpp" />
     <ClCompile Include="seal\util\smallntt.cpp" />
     <ClCompile Include="seal\util\uintarith.cpp" />
     <ClCompile Include="seal\util\uintarithmod.cpp" />
