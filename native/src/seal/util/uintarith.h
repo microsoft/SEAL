@@ -341,14 +341,15 @@ namespace seal
         inline void left_shift_uint(const std::uint64_t *operand, 
             int shift_amount, std::size_t uint64_count, std::uint64_t *result)
         {
-            std::size_t bits_per_uint64_sz = static_cast<std::size_t>(bits_per_uint64);
+            const std::size_t bits_per_uint64_sz =
+                static_cast<std::size_t>(bits_per_uint64);
 #ifdef SEAL_DEBUG
             if (!operand)
             {
                 throw std::invalid_argument("operand");
             }
             if (shift_amount < 0 || 
-                unsigned_gt(shift_amount, 
+                unsigned_geq(shift_amount,
                     mul_safe(uint64_count, bits_per_uint64_sz)))
             {
                 throw std::invalid_argument("shift_amount");
@@ -362,44 +363,47 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
-            std::size_t uint64_shift_amount = 
-                safe_cast<std::size_t>(shift_amount) / bits_per_uint64_sz;
-            int bit_shift_amount = shift_amount - 
-                safe_cast<int>(mul_safe(uint64_shift_amount, bits_per_uint64_sz));
-            int neg_bit_shift_amount = (bits_per_uint64 - bit_shift_amount) & 
-                (static_cast<int>(bit_shift_amount == 0) - 1);
+            // Early return
+            if (shift_amount == 0)
+            {
+                set_uint_uint(operand, uint64_count, result);
+                return;
+            }
 
-            for (std::size_t i = uint64_count - uint64_shift_amount; i--; )
+            // How many words to shift
+            std::size_t uint64_shift_amount =
+                static_cast<std::size_t>(shift_amount) / bits_per_uint64_sz;
+
+            // How many bits to shift in addition
+            std::size_t bit_shift_amount = static_cast<std::size_t>(shift_amount)
+                - (uint64_shift_amount * bits_per_uint64_sz);
+            std::size_t neg_bit_shift_amount = (bits_per_uint64_sz - bit_shift_amount) &
+                (static_cast<std::size_t>(bit_shift_amount == 0) - 1);
+
+            for (std::size_t i = uint64_count - 1; i > uint64_shift_amount; i--)
             {
-                result[i + uint64_shift_amount] = operand[i];
+                result[i] = (operand[i - uint64_shift_amount] << bit_shift_amount) |
+                    (operand[i - uint64_shift_amount - 1] >> neg_bit_shift_amount);
             }
-            for (std::size_t i = uint64_shift_amount; i--; )
+            result[uint64_shift_amount] = operand[0] << bit_shift_amount;
+            while (uint64_shift_amount--)
             {
-                result[i] = 0;
-            }
-            if (neg_bit_shift_amount)
-            {
-                for (std::size_t i = uint64_count - 1; 
-                    i >= uint64_shift_amount + 1; i--)
-                {
-                    result[i] = (result[i] << bit_shift_amount) | 
-                        (result[i - 1] >> neg_bit_shift_amount);
-                }
-                result[uint64_shift_amount] <<= bit_shift_amount;
+                result[uint64_shift_amount] = 0;
             }
         }
 
         inline void right_shift_uint(const std::uint64_t *operand, 
             int shift_amount, std::size_t uint64_count, std::uint64_t *result)
         {
-            std::size_t bits_per_uint64_sz = static_cast<std::size_t>(bits_per_uint64);
+            const std::size_t bits_per_uint64_sz =
+                static_cast<std::size_t>(bits_per_uint64);
 #ifdef SEAL_DEBUG
             if (!operand)
             {
                 throw std::invalid_argument("operand");
             }
             if (shift_amount < 0 || 
-                unsigned_gt(shift_amount, 
+                unsigned_geq(shift_amount,
                     mul_safe(uint64_count, bits_per_uint64_sz)))
             {
                 throw std::invalid_argument("shift_amount");
@@ -413,28 +417,262 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
-            std::size_t uint64_shift_amount = 
-                safe_cast<std::size_t>(shift_amount) / bits_per_uint64_sz;
-            int bit_shift_amount = shift_amount - 
-                safe_cast<int>(mul_safe(uint64_shift_amount, bits_per_uint64_sz));
-            int neg_bit_shift_amount = (bits_per_uint64 - bit_shift_amount) & 
-                (static_cast<int>(bit_shift_amount == 0) - 1);
+            // Early return
+            if (shift_amount == 0)
+            {
+                set_uint_uint(operand, uint64_count, result);
+                return;
+            }
 
-            for (std::size_t i = 0; i < uint64_count - uint64_shift_amount; i++)
+            // How many words to shift
+            std::size_t uint64_shift_amount =
+                static_cast<std::size_t>(shift_amount) / bits_per_uint64_sz;
+
+            // How many bits to shift in addition
+            std::size_t bit_shift_amount = static_cast<std::size_t>(shift_amount)
+                - (uint64_shift_amount * bits_per_uint64_sz);
+            std::size_t neg_bit_shift_amount = (bits_per_uint64_sz - bit_shift_amount) &
+                (static_cast<std::size_t>(bit_shift_amount == 0) - 1);
+
+            for (std::size_t i = 0; i < uint64_count - uint64_shift_amount - 1; i++)
             {
-                result[i] = operand[i + uint64_shift_amount];
+                result[i] = (operand[i + uint64_shift_amount] >> bit_shift_amount) |
+                    (operand[i + uint64_shift_amount + 1] << neg_bit_shift_amount);
             }
-            for (std::size_t i = uint64_count - uint64_shift_amount; i < uint64_count; i++)
+            result[uint64_count - uint64_shift_amount - 1] =
+                operand[uint64_count - 1] >> bit_shift_amount;
+            while (uint64_shift_amount--)
             {
-                result[i] = 0;
+                result[uint64_count - uint64_shift_amount - 1] = 0;
             }
-            if (neg_bit_shift_amount)
+        }
+
+        inline void left_shift_uint128(
+            const std::uint64_t *operand, int shift_amount, std::uint64_t *result)
+        {
+            const std::size_t bits_per_uint64_sz =
+                static_cast<std::size_t>(bits_per_uint64);
+#ifdef SEAL_DEBUG
+            if (!operand)
             {
-                for (std::size_t i = 0; i < (uint64_count - uint64_shift_amount - 1); i++)
-                {
-                    result[i] = (result[i] >> bit_shift_amount) | (result[i + 1] << neg_bit_shift_amount);
-                }
-                result[uint64_count - uint64_shift_amount - 1] >>= bit_shift_amount;
+                throw std::invalid_argument("operand");
+            }
+            if (shift_amount < 0 ||
+                unsigned_geq(shift_amount, 2 * bits_per_uint64_sz))
+            {
+                throw std::invalid_argument("shift_amount");
+            }
+            if (!result)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            // Early return
+            if (shift_amount == 0)
+            {
+                result[1] = operand[1];
+                result[0] = operand[0];
+                return;
+            }
+
+            // How many bits to shift in addition to word shift
+            std::size_t bit_shift_amount =
+                static_cast<std::size_t>(shift_amount) & (bits_per_uint64_sz - 1);
+            std::size_t neg_bit_shift_amount = (bits_per_uint64_sz - bit_shift_amount) &
+                (static_cast<std::size_t>(bit_shift_amount == 0) - 1);
+
+            // Do we have a word shift
+            if (static_cast<std::size_t>(shift_amount) & bits_per_uint64_sz)
+            {
+                result[1] = operand[0] << bit_shift_amount;
+                result[0] = 0;
+            }
+            else
+            {
+                // Warning: if bit_shift_amount == 0 this is incorrect
+                // so the early return for shift_amount == 0 is needed
+                result[1] = (operand[1] << bit_shift_amount) |
+                    (operand[0] >> neg_bit_shift_amount);
+                result[0] = operand[0] << bit_shift_amount;
+            }
+        }
+
+        inline void right_shift_uint128(
+            const std::uint64_t *operand, int shift_amount, std::uint64_t *result)
+        {
+            const std::size_t bits_per_uint64_sz =
+                static_cast<std::size_t>(bits_per_uint64);
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
+            if (shift_amount < 0 ||
+                unsigned_geq(shift_amount, 2 * bits_per_uint64_sz))
+            {
+                throw std::invalid_argument("shift_amount");
+            }
+            if (!result)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            // Early return
+            if (shift_amount == 0)
+            {
+                result[1] = operand[1];
+                result[0] = operand[0];
+                return;
+            }
+
+            // How many bits to shift in addition to word shift
+            std::size_t bit_shift_amount =
+                static_cast<std::size_t>(shift_amount) & (bits_per_uint64_sz - 1);
+            std::size_t neg_bit_shift_amount = (bits_per_uint64_sz - bit_shift_amount) &
+                (static_cast<std::size_t>(bit_shift_amount == 0) - 1);
+
+            // Do we have a word shift
+            if (static_cast<std::size_t>(shift_amount) & bits_per_uint64_sz)
+            {
+                result[0] = operand[1] >> bit_shift_amount;
+                result[1] = 0;
+            }
+            else
+            {
+                // Warning: if bit_shift_amount == 0 this is incorrect
+                // so the early return for shift_amount == 0 is needed
+                result[0] = (operand[0] >> bit_shift_amount) |
+                    (operand[1] << neg_bit_shift_amount);
+                result[1] = operand[1] >> bit_shift_amount;
+            }
+        }
+
+        inline void left_shift_uint192(
+            const std::uint64_t *operand, int shift_amount, std::uint64_t *result)
+        {
+            const std::size_t bits_per_uint64_sz =
+                static_cast<std::size_t>(bits_per_uint64);
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
+            if (shift_amount < 0 ||
+                unsigned_geq(shift_amount, 3 * bits_per_uint64_sz))
+            {
+                throw std::invalid_argument("shift_amount");
+            }
+            if (!result)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            // Early return
+            if (shift_amount == 0)
+            {
+                result[2] = operand[2];
+                result[1] = operand[1];
+                result[0] = operand[0];
+                return;
+            }
+
+            // How many bits to shift in addition to word shift
+            std::size_t bit_shift_amount =
+                static_cast<std::size_t>(shift_amount) & (bits_per_uint64_sz - 1);
+            std::size_t neg_bit_shift_amount = (bits_per_uint64_sz - bit_shift_amount) &
+                (static_cast<std::size_t>(bit_shift_amount == 0) - 1);
+
+            if (static_cast<std::size_t>(shift_amount) & (bits_per_uint64_sz << 1))
+            {
+                // Two-word shift
+                result[2] = operand[0] << bit_shift_amount;
+                result[0] = result[1] = 0;
+            }
+            else if (static_cast<std::size_t>(shift_amount) & bits_per_uint64_sz)
+            {
+                // One-word shift
+                // Warning: if bit_shift_amount == 0 this is incorrect
+                // so the early return for shift_amount == 0 is needed
+                result[2] = (operand[1] << bit_shift_amount) |
+                    (operand[0] >> neg_bit_shift_amount);
+                result[1] = operand[0] << bit_shift_amount;
+                result[0] = 0;
+            }
+            else
+            {
+                // Zero-word shift
+                // Warning: if bit_shift_amount == 0 this is incorrect
+                // so the early return for shift_amount == 0 is needed
+                result[2] = (operand[2] << bit_shift_amount) |
+                    (operand[1] >> neg_bit_shift_amount);
+                result[1] = (operand[1] << bit_shift_amount) |
+                    (operand[0] >> neg_bit_shift_amount);
+                result[0] = operand[0] << bit_shift_amount;
+            }
+        }
+
+        inline void right_shift_uint192(
+            const std::uint64_t *operand, int shift_amount, std::uint64_t *result)
+        {
+            const std::size_t bits_per_uint64_sz =
+                static_cast<std::size_t>(bits_per_uint64);
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
+            if (shift_amount < 0 ||
+                unsigned_geq(shift_amount, 3 * bits_per_uint64_sz))
+            {
+                throw std::invalid_argument("shift_amount");
+            }
+            if (!result)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            // Early return
+            if (shift_amount == 0)
+            {
+                result[2] = operand[2];
+                result[1] = operand[1];
+                result[0] = operand[0];
+                return;
+            }
+
+            // How many bits to shift in addition to word shift
+            std::size_t bit_shift_amount =
+                static_cast<std::size_t>(shift_amount) & (bits_per_uint64_sz - 1);
+            std::size_t neg_bit_shift_amount = (bits_per_uint64_sz - bit_shift_amount) &
+                (static_cast<std::size_t>(bit_shift_amount == 0) - 1);
+
+            if (static_cast<std::size_t>(shift_amount) & (bits_per_uint64_sz << 1))
+            {
+                // Two-word shift
+                result[0] = operand[2] >> bit_shift_amount;
+                result[1] = result[2] = 0;
+            }
+            else if (static_cast<std::size_t>(shift_amount) & bits_per_uint64_sz)
+            {
+                // One-word shift
+                // Warning: if bit_shift_amount == 0 this is incorrect
+                // so the early return for shift_amount == 0 is needed
+                result[0] = (operand[0] >> bit_shift_amount) |
+                    (operand[1] << neg_bit_shift_amount);
+                result[1] = operand[1] >> bit_shift_amount |
+                    (operand[2] << neg_bit_shift_amount);
+                result[2] = 0;
+            }
+            else
+            {
+                // Zero-word shift
+                // Warning: if bit_shift_amount == 0 this is incorrect
+                // so the early return for shift_amount == 0 is needed
+                result[0] = (operand[0] >> bit_shift_amount) |
+                    (operand[1] << neg_bit_shift_amount);
+                result[1] = (operand[1] >> bit_shift_amount) |
+                    (operand[2] << neg_bit_shift_amount);
+                result[2] = operand[2] >> bit_shift_amount;
             }
         }
 

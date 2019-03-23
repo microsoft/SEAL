@@ -367,8 +367,7 @@ namespace seal
             // Shift denominator to bring MSB in alignment with MSB of numerator.
             int denominator_shift = numerator_bits - denominator_bits;
 
-            left_shift_uint(shifted_denominator, denominator_shift, 
-                uint64_count, shifted_denominator);
+            left_shift_uint128(shifted_denominator, denominator_shift, shifted_denominator);
             denominator_bits += denominator_shift;
 
             // Perform bit-wise division algorithm.
@@ -417,7 +416,7 @@ namespace seal
 
                 if (numerator_bits > 0)
                 {
-                    left_shift_uint(difference, numerator_shift, uint64_count, numerator);
+                    left_shift_uint128(difference, numerator_shift, numerator);
                     numerator_bits += numerator_shift;
                 }
 
@@ -425,7 +424,7 @@ namespace seal
                 quotient[0] |= 1;
 
                 // Adjust quotient and remaining shifts as a result of shifting numerator.
-                left_shift_uint(quotient, numerator_shift, uint64_count, quotient);
+                left_shift_uint128(quotient, numerator_shift, quotient);
                 remaining_shifts -= numerator_shift;
             }
 
@@ -433,7 +432,7 @@ namespace seal
             // denominator, unless it is just zero.
             if (numerator_bits > 0)
             {
-                right_shift_uint(numerator, denominator_shift, uint64_count, numerator);
+                right_shift_uint128(numerator, denominator_shift, numerator);
             }
         }
 
@@ -498,8 +497,8 @@ namespace seal
             // Shift denominator to bring MSB in alignment with MSB of numerator.
             int denominator_shift = numerator_bits - denominator_bits;
 
-            left_shift_uint(shifted_denominator.data(), denominator_shift, 
-                uint64_count, shifted_denominator.data());
+            left_shift_uint192(shifted_denominator.data(), denominator_shift,
+                shifted_denominator.data());
             denominator_bits += denominator_shift;
 
             // Perform bit-wise division algorithm.
@@ -526,7 +525,7 @@ namespace seal
                     add_uint_uint(difference.data(), numerator, uint64_count, difference.data());
 
                     // Adjust quotient and remaining shifts as a result of shifting numerator.
-                    left_shift_uint(quotient, 1, uint64_count, quotient);
+                    left_shift_uint192(quotient, 1, quotient);
                     remaining_shifts--;
                 }
                 // Difference is the new numerator with denominator subtracted.
@@ -547,7 +546,7 @@ namespace seal
                 // Shift and update numerator.
                 if (numerator_bits > 0)
                 {
-                    left_shift_uint(difference.data(), numerator_shift, uint64_count, numerator);
+                    left_shift_uint192(difference.data(), numerator_shift, numerator);
                     numerator_bits += numerator_shift;
                 }
                 else
@@ -557,7 +556,7 @@ namespace seal
                 }
 
                 // Adjust quotient and remaining shifts as a result of shifting numerator.
-                left_shift_uint(quotient, numerator_shift, uint64_count, quotient);
+                left_shift_uint192(quotient, numerator_shift, quotient);
                 remaining_shifts -= numerator_shift;
             }
 
@@ -565,7 +564,7 @@ namespace seal
             // denominator, unless it is just zero.
             if (numerator_bits > 0)
             {
-                right_shift_uint(numerator, denominator_shift, uint64_count, numerator);
+                right_shift_uint192(numerator, denominator_shift, numerator);
             }
         }
 
