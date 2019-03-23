@@ -253,7 +253,7 @@ namespace seal
     bool Plaintext::is_metadata_valid_for(shared_ptr<const SEALContext> context) const
     {
         // Verify parameters
-        if (!context || !context->data_context_data_head()->qualifiers().parameters_set)
+        if (!context || !context->parameters_set())
         {
             return false;
         }

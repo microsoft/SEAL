@@ -40,7 +40,7 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context->data_context_data_head()->qualifiers().parameters_set)
+        if (!context->parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -91,7 +91,7 @@ namespace seal
         {
             throw invalid_argument("invalid context");
         }
-        if (!context->data_context_data_head()->qualifiers().parameters_set)
+        if (!context->parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -164,7 +164,7 @@ namespace seal
         shared_ptr<const SEALContext> context) const noexcept
     {
         // Verify parameters
-        if (!context || !context->data_context_data_head()->qualifiers().parameters_set)
+        if (!context || !context->parameters_set())
         {
             return false;
         }
