@@ -34,20 +34,6 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a new SecretKey by copying an old one.
-        /// </summary>
-        /// <param name="copy">The SecretKey to copy from</param>
-        /// <exception cref="ArgumentNullException">if copy is null</exception>
-        public SecretKey(SecretKey copy)
-        {
-            if (null == copy)
-                throw new ArgumentNullException(nameof(copy));
-
-            NativeMethods.SecretKey_Create(copy.NativePtr, out IntPtr ptr);
-            NativePtr = ptr;
-        }
-
-        /// <summary>
         /// Creates a new SecretKey by initializing it with a pointer to a native object.
         /// </summary>
         /// <param name="secretKeyPtr">The native SecretKey pointer</param>

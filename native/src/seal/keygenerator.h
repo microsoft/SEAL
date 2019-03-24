@@ -172,9 +172,7 @@ namespace seal
             const uint64_t *new_key,
             std::vector<Ciphertext> &destination);
 
-        /**
-        We use a fresh memory pool with `clear_on_destruction' enabled
-        */
+        // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
         std::shared_ptr<SEALContext> context_{ nullptr };

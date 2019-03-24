@@ -8,6 +8,7 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+#include <algorithm>
 
 // SEALNet
 #include "sealnet/defines.h"
@@ -28,7 +29,7 @@ namespace sealnet
     Return a pointer of the given type from a void pointer.
     */
     template <class T>
-    T *FromVoid(void *voidptr)
+    inline T *FromVoid(void *voidptr)
     {
         T *result = reinterpret_cast<T*>(voidptr);
         return result;
@@ -53,12 +54,24 @@ namespace sealnet
     /**
     Get a parms_id_type from an uint64_t pointer
     */
-    void CopyParmsId(const uint64_t *src, seal::parms_id_type &dest);
+    inline void CopyParmsId(const uint64_t *src, seal::parms_id_type &dest)
+    {
+        if (nullptr != src)
+        {
+            std::copy_n(src, dest.size(), std::begin(dest));
+        }
+    }
 
     /**
     Copy parms_id_type to a uint64_t pointer
     */
-    void CopyParmsId(const seal::parms_id_type &src, uint64_t *dest);
+    inline void CopyParmsId(const seal::parms_id_type &src, uint64_t *dest)
+    {
+        if (nullptr != dest)
+        {
+            std::copy_n(std::cbegin(src), src.size(), dest);
+        }
+    }
 
     /**
     Convert std::string to char*

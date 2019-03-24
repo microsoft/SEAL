@@ -22,17 +22,6 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Create1(void **secret_key)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Create2(void *copy, void **secret_key)
-{
-    SecretKey *copyptr = FromVoid<SecretKey>(copy);
-    IfNullRet(copyptr, E_POINTER);
-    IfNullRet(secret_key, E_POINTER);
-
-    SecretKey *skey = new SecretKey(*copyptr);
-    *secret_key = skey;
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL SecretKey_Set(void *thisptr, void *assign)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);

@@ -24,9 +24,9 @@ For .NET Framework wrapper support (C++/CLI) we need to
 namespace seal
 {
     /**
-    Manages a shared pointer to a memory pool. Microsoft SEAL uses memory pools 
-    for improved performance due to the large number of memory allocations 
-    needed by the homomorphic encryption operations, and the underlying polynomial 
+    Manages a shared pointer to a memory pool. Microsoft SEAL uses memory pools
+    for improved performance due to the large number of memory allocations
+    needed by the homomorphic encryption operations, and the underlying polynomial
     arithmetic. The library automatically creates a shared global memory pool
     that is used for all dynamic allocations by default, and the user can
     optionally create any number of custom memory pools to be used instead.
@@ -36,7 +36,7 @@ namespace seal
     allocations in certain functions. For example, in heavily multi-threaded
     applications allocating concurrently from a shared memory pool might lead 
     to significant performance issues due to thread contention. For these cases
-    Microsoft SEAL provides overloads of the functions that take a MemoryPoolHandle 
+    Microsoft SEAL provides overloads of the functions that take a MemoryPoolHandle
     as an additional argument, and uses the associated memory pool for all dynamic
     allocations inside the function. Whenever these functions are called, the 
     user can then simply pass a thread-local MemoryPoolHandle to be used.

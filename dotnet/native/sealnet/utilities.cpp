@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 // STD
-#include <algorithm>
 #include <iterator>
 
 // SEALNet
@@ -80,14 +79,6 @@ void sealnet::CopyParmsId(const uint64_t *src, parms_id_type &dest)
     if (nullptr != src)
     {
         copy_n(src, dest.size(), begin(dest));
-    }
-}
-
-void sealnet::CopyParmsId(const parms_id_type &src, uint64_t *dest)
-{
-    if (nullptr != dest)
-    {
-        copy_n(cbegin(src), src.size(), dest);
     }
 }
 

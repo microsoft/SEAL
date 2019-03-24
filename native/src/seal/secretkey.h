@@ -45,13 +45,6 @@ namespace seal
         ~SecretKey() = default;
 
         /**
-        Creates a new SecretKey by copying an old one.
-
-        @param[in] copy The SecretKey to copy from
-        */
-        SecretKey(const SecretKey &copy) = default;
-
-        /**
         Creates a new SecretKey by moving an old one.
 
         @param[in] source The SecretKey to move from
@@ -210,9 +203,10 @@ namespace seal
         }
 
     private:
-        /**
-        We use a fresh memory pool with `clear_on_destruction' enabled
-        */
+        // Should not allow copying of secret key.
+        SecretKey(const SecretKey &copy) = delete;
+
+        // We use a fresh memory pool with `clear_on_destruction' enabled.
         Plaintext sk_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true) };
     };
 }

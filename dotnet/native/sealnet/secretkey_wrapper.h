@@ -15,8 +15,6 @@
 
 SEALNETNATIVE HRESULT SEALCALL SecretKey_Create1(void **secret_key);
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Create2(void *copy, void **secret_key);
-
 SEALNETNATIVE HRESULT SEALCALL SecretKey_Set(void *thisptr, void *assign);
 
 SEALNETNATIVE HRESULT SEALCALL SecretKey_Data(void *thisptr, void **data);
