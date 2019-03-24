@@ -147,9 +147,6 @@ namespace seal
             const SEALContext::ContextData &context_data,
             std::size_t max_power);
 
-        void populate_decomposition_factors(
-            std::vector<std::uint64_t> &decomposition_factors) const;
-
         /**
         Generates new secret key.
         */

@@ -24,36 +24,36 @@ For .NET Framework wrapper support (C++/CLI) we need to
 namespace seal
 {
     /**
-    Manages a shared pointer to a memory pool. Microsoft SEAL uses memory pools for 
-    improved performance due to the large number of memory allocations needed
-    by the homomorphic encryption operations, and the underlying polynomial 
+    Manages a shared pointer to a memory pool. Microsoft SEAL uses memory pools 
+    for improved performance due to the large number of memory allocations 
+    needed by the homomorphic encryption operations, and the underlying polynomial 
     arithmetic. The library automatically creates a shared global memory pool
     that is used for all dynamic allocations by default, and the user can
     optionally create any number of custom memory pools to be used instead.
     
-    @Uses in Multi-Threaded Applications
+    @par Uses in Multi-Threaded Applications
     Sometimes the user might want to use specific memory pools for dynamic
     allocations in certain functions. For example, in heavily multi-threaded
     applications allocating concurrently from a shared memory pool might lead 
     to significant performance issues due to thread contention. For these cases
-    Microsoft SEAL provides overloads of the functions that take a MemoryPoolHandle as an
-    additional argument, and uses the associated memory pool for all dynamic
+    Microsoft SEAL provides overloads of the functions that take a MemoryPoolHandle 
+    as an additional argument, and uses the associated memory pool for all dynamic
     allocations inside the function. Whenever these functions are called, the 
     user can then simply pass a thread-local MemoryPoolHandle to be used.
     
-    @Thread-Unsafe Memory Pools
+    @par Thread-Unsafe Memory Pools
     While memory pools are by default thread-safe, in some cases it suffices
     to have a memory pool be thread-unsafe. To get a little extra performance,
     the user can optionally create such thread-unsafe memory pools and use them
     just as they would use thread-safe memory pools.
 
-    @Initialized and Uninitialized Handles
+    @par Initialized and Uninitialized Handles
     A MemoryPoolHandle has to be set to point either to the global memory pool,
     or to a new memory pool. If this is not done, the MemoryPoolHandle is
     said to be uninitialized, and cannot be used. Initialization simple means
     assigning MemoryPoolHandle::Global() or MemoryPoolHandle::New() to it.
 
-    @Managing Lifetime
+    @par Managing Lifetime
     Internally, the MemoryPoolHandle wraps an std::shared_ptr pointing to
     a memory pool class. Thus, as long as a MemoryPoolHandle pointing to
     a particular memory pool exists, the pool stays alive. Classes such as
@@ -164,11 +164,11 @@ namespace seal
         /**
         Returns a MemoryPoolHandle pointing to a new thread-safe memory pool.
 
-        @param[in] clear_on_destruction Indicates whether the memory pool data 
-        should be cleared when destroyed. This can be important when memory pools 
+        @param[in] clear_on_destruction Indicates whether the memory pool data
+        should be cleared when destroyed. This can be important when memory pools
         are used to store private data.
         */
-        inline static MemoryPoolHandle New(bool clear_on_destruction = false) 
+        inline static MemoryPoolHandle New(bool clear_on_destruction = false)
         {
             return MemoryPoolHandle(
                 std::make_shared<util::MemoryPoolMT>(clear_on_destruction));

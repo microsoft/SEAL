@@ -40,16 +40,9 @@ namespace seal
         SecretKey() = default;
 
         /**
-        Overwrites the key data by random data and destroys the SecretKey object. 
+        Destroys the SecretKey object.
         */
-        ~SecretKey() noexcept
-        {
-            // We use a default factory from std::random_device to make sure
-            // randomize_key does not throw.
-            static std::unique_ptr<UniformRandomGeneratorFactory> random_factory(
-                std::make_unique<StandardRandomAdapterFactory<std::random_device>>());
-            randomize_secret(random_factory->create());
-        }
+        ~SecretKey() = default;
 
         /**
         Creates a new SecretKey by copying an old one.
@@ -217,21 +210,6 @@ namespace seal
         }
 
     private:
-        inline void randomize_secret(
-            std::shared_ptr<UniformRandomGenerator> random) noexcept
-        {
-            std::size_t capacity = sk_.capacity();
-            volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE*>(sk_.data());
-            while (capacity--)
-            {
-                std::size_t pt_coeff_byte_count = sizeof(Plaintext::pt_coeff_type);
-                while (pt_coeff_byte_count--)
-                {
-                    *data_ptr++ = static_cast<SEAL_BYTE>(random->generate());
-                }
-            }
-        }
-
         /**
         We use a fresh memory pool with `clear_on_destruction' enabled
         */
