@@ -121,6 +121,12 @@ namespace seal
 }
 #endif
 
+#ifndef SEAL_DIVIDE_UINT128_UINT64
+#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result) {               \
+    divide_uint128_uint64_inplace_generic(numerator, denominator, result);         \
+}
+#endif
+
 #ifndef SEAL_MULTIPLY_UINT64_HW64
 #define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) {                      \
     multiply_uint64_hw64_generic(operand1, operand2, hw64);                        \

@@ -900,6 +900,33 @@ namespace seal
             divide_uint_uint_inplace(remainder, denominator, uint64_count, quotient, pool);
         }
 
+        void divide_uint128_uint64_inplace_generic(std::uint64_t *numerator,
+            std::uint64_t denominator, std::uint64_t *quotient);
+
+        inline void divide_uint128_uint64_inplace(std::uint64_t *numerator,
+            std::uint64_t denominator, std::uint64_t *quotient)
+        {
+#ifdef SEAL_DEBUG
+            if (!numerator)
+            {
+                throw std::invalid_argument("numerator");
+            }
+            if (denominator == 0)
+            {
+                throw std::invalid_argument("denominator");
+            }
+            if (!quotient)
+            {
+                throw std::invalid_argument("quotient");
+            }
+            if (numerator == quotient)
+            {
+                throw std::invalid_argument("quotient cannot point to same value as numerator");
+            }
+#endif
+            SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, quotient);
+        }
+
         void divide_uint128_uint64_inplace(std::uint64_t *numerator, 
             std::uint64_t denominator, std::uint64_t *quotient);
 

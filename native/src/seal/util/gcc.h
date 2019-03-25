@@ -44,6 +44,18 @@
     result128[0] = static_cast<unsigned long long>(product);                        \
     result128[1] = static_cast<unsigned long long>(product >> 64);                  \
 }
+
+#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result) {                \
+    unsigned __int128 n, q;                                                         \
+    n = (static_cast<unsigned __int128>(numerator[1]) << 64) |                      \
+        (static_cast<unsigned __int128>(numerator[0]));                             \
+    q = n / denominator;                                                            \
+    n -= q * denominator;                                                           \
+    numerator[0] = static_cast<std::uint64_t>(n);                                   \
+    numerator[1] = static_cast<std::uint64_t>(n >> 64);                             \
+    quotient[0] = static_cast<std::uint64_t>(q);                                    \
+    quotient[1] = static_cast<std::uint64_t>(q >> 64);                              \
+}
 #endif
 
 #ifdef SEAL_USE__ADDCARRY_U64

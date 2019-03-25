@@ -320,7 +320,7 @@ namespace seal
             }
         }
 
-        void divide_uint128_uint64_inplace(uint64_t *numerator, 
+        void divide_uint128_uint64_inplace_generic(uint64_t *numerator,
             uint64_t denominator, uint64_t *quotient)
         {
 #ifdef SEAL_DEBUG
