@@ -588,7 +588,7 @@ namespace seal
             MemoryPoolHandle pool) const
         {
             auto temp(allocate_uint(coeff_count_, pool));
-            for (size_t i = 0; i < coeff_base_mod_count_; i++)
+            for (size_t i = 0; i < coeff_base_mod_count_ - 1; i++)
             {
                 // (ct mod qk) mod qi
                 modulo_poly_coeffs(
@@ -629,7 +629,7 @@ namespace seal
             inverse_ntt_negacyclic_harvey(
                 rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
                 rns_ntt_tables[coeff_base_mod_count_ - 1]);
-            for (size_t i = 0; i < coeff_base_mod_count_; i++)
+            for (size_t i = 0; i < coeff_base_mod_count_ - 1; i++)
             {
                 // (ct mod qk) mod qi
                 modulo_poly_coeffs(

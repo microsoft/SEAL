@@ -89,7 +89,7 @@ namespace seal
             auto &base_converter = prev_context_data.base_converter();
 
             // Zero encryption without modulus switching
-            Ciphertext temp;
+            Ciphertext temp(pool);
             encrypt_zero_asymmetric(public_key_, temp, context_, prev_parms_id,
                 random, is_ntt_form, pool);
             if (temp.is_ntt_form() != is_ntt_form)
@@ -120,13 +120,11 @@ namespace seal
                     destination.data(j));
             }
             destination.is_ntt_form() = is_ntt_form;
-            return;
         }
         else
         {
             encrypt_zero_asymmetric(public_key_, destination, context_,
                 parms_id, random, is_ntt_form, pool);
-            return;
         }
     }
 

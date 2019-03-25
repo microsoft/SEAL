@@ -753,7 +753,7 @@ void example_bfv_basics_ii()
     /*
     Of course the result is still the same, but this time we actually used less 
     of our noise budget. This is not surprising for two reasons:
-    
+
         - We used a very small decomposition bit count, which is why
           relinearization itself did not consume the noise budget by any
           observable amount;
@@ -802,7 +802,7 @@ void example_bfv_basics_ii()
     Observe from the print-out that we have now used significantly more of our
     noise budget than in the two previous runs. This is again not surprising, 
     since the first relinearization chops off a huge part of the noise budget.
-    
+
     However, note that the second relinearization does not change the noise
     budget by any observable amount. This is very important to understand when
     optimal performance is desired: relinearization always drops the noise
@@ -813,7 +813,7 @@ void example_bfv_basics_ii()
     does not change the noise budget anymore: it is already consumed past the
     fixed amount determinted by the decomposition bit count and the encryption
     parameters. 
-    
+
     We now perform a third squaring and observe an even further compounded
     decrease in the noise budget. Again, relinearization does not consume the
     noise budget at this point by any observable amount, even with the largest

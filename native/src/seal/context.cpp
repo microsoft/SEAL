@@ -334,10 +334,10 @@ namespace seal
         // We need to remove constness first to modify this
         const_pointer_cast<ContextData>(
             context_data_map_.at(prev_parms_id))->next_context_data_ = 
-            context_data_map_.at(next_parms_id);
+                context_data_map_.at(next_parms_id);
         const_pointer_cast<ContextData>(
             context_data_map_.at(next_parms_id))->prev_context_data_ = 
-            context_data_map_.at(prev_parms_id);
+                context_data_map_.at(prev_parms_id);
 
         return next_parms_id;
     }

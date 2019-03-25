@@ -156,7 +156,7 @@ namespace seal
             /**
             Returns a const reference to the underlying encryption parameters.
             */
-            inline auto &parms() const
+            inline auto &parms() const noexcept
             {
                 return parms_;
             }
@@ -167,7 +167,7 @@ namespace seal
             necessary to create a new instance of SEALContext once appropriate changes
             to the encryption parameters have been made.
             */
-            inline auto qualifiers() const
+            inline auto qualifiers() const noexcept
             {
                 return qualifiers_;
             }
@@ -177,7 +177,7 @@ namespace seal
             modulus. The security of the encryption parameters largely depends on the 
             bit-length of this product, and on the degree of the polynomial modulus.
             */
-            inline const std::uint64_t *total_coeff_modulus() const
+            inline const std::uint64_t *total_coeff_modulus() const noexcept
             {
                 return total_coeff_modulus_.get();
             }
@@ -185,7 +185,7 @@ namespace seal
             /**
             Returns the significant bit count of the total coefficient modulus.
             */
-            inline auto total_coeff_modulus_bit_count() const
+            inline int total_coeff_modulus_bit_count() const noexcept
             {
                 return total_coeff_modulus_bit_count_;
             }
@@ -193,7 +193,7 @@ namespace seal
             /**
             Returns a const reference to the base converter.
             */
-            inline auto &base_converter() const
+            inline auto &base_converter() const noexcept
             {
                 return base_converter_;
             }
@@ -201,7 +201,7 @@ namespace seal
             /**
             Returns a const reference to the NTT tables.
             */
-            inline auto &small_ntt_tables() const
+            inline auto &small_ntt_tables() const noexcept
             {
                 return small_ntt_tables_;
             }
@@ -209,7 +209,7 @@ namespace seal
             /**
             Returns a const reference to the NTT tables.
             */
-            inline auto &plain_ntt_tables() const
+            inline auto &plain_ntt_tables() const noexcept
             {
                 return plain_ntt_tables_;
             }
@@ -218,7 +218,7 @@ namespace seal
             Return a pointer to BFV "Delta", i.e. coefficient modulus divided by
             plaintext modulus.
             */
-            inline const std::uint64_t *coeff_div_plain_modulus() const
+            inline const std::uint64_t *coeff_div_plain_modulus() const noexcept
             {
                 return coeff_div_plain_modulus_.get();
             }
@@ -227,7 +227,7 @@ namespace seal
             Return the threshold for the upper half of integers modulo plain_modulus.
             This is simply (plain_modulus + 1) / 2.
             */
-            inline std::uint64_t plain_upper_half_threshold() const
+            inline std::uint64_t plain_upper_half_threshold() const noexcept
             {
                 return plain_upper_half_threshold_;
             }
@@ -238,7 +238,7 @@ namespace seal
             for the full product coeff_modulus if using_fast_plain_lift is false and is
             otherwise represented modulo each of the coeff_modulus primes in order.
             */
-            inline const std::uint64_t *plain_upper_half_increment() const
+            inline const std::uint64_t *plain_upper_half_increment() const noexcept
             {
                 return plain_upper_half_increment_.get();
             }
@@ -247,7 +247,7 @@ namespace seal
             Return a pointer to the upper half threshold with respect to the total
             coefficient modulus. This is needed in CKKS decryption.
             */
-            inline const std::uint64_t *upper_half_threshold() const
+            inline const std::uint64_t *upper_half_threshold() const noexcept
             {
                 return upper_half_threshold_.get();
             }
@@ -263,7 +263,7 @@ namespace seal
             this operation is only done for negative message coefficients, i.e. those
             that exceed plain_upper_half_threshold.
             */
-            inline const std::uint64_t *upper_half_increment() const
+            inline const std::uint64_t *upper_half_increment() const noexcept
             {
                 return upper_half_increment_.get();
             }
@@ -273,9 +273,9 @@ namespace seal
             in the modulus switching chain. If the current data is the first one in the
             chain, then the result is nullptr.
             */
-            inline auto prev_context_data() const
+            inline auto prev_context_data() const noexcept
             {
-                return prev_context_data_;
+                return prev_context_data_.lock();
             }
 
             /**
@@ -283,7 +283,7 @@ namespace seal
             in the modulus switching chain. If the current data is the last one in the
             chain, then the result is nullptr.
             */
-            inline auto next_context_data() const
+            inline auto next_context_data() const noexcept
             {
                 return next_context_data_;
             }
@@ -292,7 +292,7 @@ namespace seal
             Returns the index of the parameter set in a chain. The initial parameters
             have index 0 and the index increases sequentially in the parameter chain.
             */
-            inline std::size_t chain_index() const
+            inline std::size_t chain_index() const noexcept
             {
                 return chain_index_;
             }
@@ -333,7 +333,7 @@ namespace seal
 
             util::Pointer<std::uint64_t> upper_half_increment_;
 
-            std::shared_ptr<const ContextData> prev_context_data_{ nullptr };
+            std::weak_ptr<const ContextData> prev_context_data_;
 
             std::shared_ptr<const ContextData> next_context_data_{ nullptr };
 
@@ -354,8 +354,7 @@ namespace seal
             bool expand_mod_chain = true)
         {
             return std::shared_ptr<SEALContext>(
-                new SEALContext(parms, expand_mod_chain, 
-                MemoryManager::GetPool()));
+                new SEALContext(parms, expand_mod_chain, MemoryManager::GetPool()));
         }
 
         /**
@@ -472,8 +471,7 @@ namespace seal
         Otherwise, returns the parms_id of the next parameter and appends the next
         context_data to the chain.
         */
-        parms_id_type create_next_context_data(
-                const parms_id_type &prev_parms);
+        parms_id_type create_next_context_data(const parms_id_type &prev_parms);
 
         MemoryPoolHandle pool_;
 
