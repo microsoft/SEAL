@@ -23,7 +23,6 @@ namespace seal
     is concurrently mutating it. This is due to the underlying data structure 
     storing the secret key not being thread-safe.
 
-
     @see KeyGenerator for the class that generates the secret key.
     @see PublicKey for the class that stores the public key.
     @see RelinKeys for the class that stores the relinearization keys.
@@ -39,7 +38,21 @@ namespace seal
         */
         SecretKey() = default;
 
-        SecretKey(const SecretKey &copy) = delete;
+        /**
+        Creates a new SecretKey by copying an old one.
+
+        @param[in] copy The SecretKey to copy from
+        */
+        SecretKey(const SecretKey &copy)
+        {
+            // Note: sk_ is at this point initialized to use a custom (new)
+            // memory pool with the `clear_on_destruction' property. Now use
+            // Plaintext::operator =(const Plaintext &) to copy over the data.
+            // This is very important to do right, otherwise newly created
+            // SecretKey may use a normal memory pool obtained from 
+            // MemoryManager::GetPool() with currently active profile (MMProf).
+            sk_ = copy.sk_;
+        }
 
         /**
         Destroys the SecretKey object.

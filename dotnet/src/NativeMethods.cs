@@ -894,6 +894,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, EntryPoint = "SecretKey_Create1", PreserveSig = false)]
         internal static extern void SecretKey_Create(out IntPtr secretKey);
 
+        [DllImport(sealnetnative, EntryPoint = "SecretKey_Create2", PreserveSig = false)]
+        internal static extern void SecretKey_Create(IntPtr copy, out IntPtr secretKey);
+
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SecretKey_Set(IntPtr thisptr, IntPtr assign);
 
