@@ -60,7 +60,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        auto &context_data = *context_->data_context_data_head();
+        auto &context_data = *context_->data_context_data_first();
         auto &parms = context_data.parms();
 
         switch (parms.scheme())

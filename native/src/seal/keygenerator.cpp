@@ -454,7 +454,7 @@ namespace seal
         std::vector<Ciphertext> &destination)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-        size_t decomp_mod_count = context_->data_context_data_head()->parms().coeff_modulus().size();
+        size_t decomp_mod_count = context_->data_context_data_first()->parms().coeff_modulus().size();
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
         auto &key_modulus = key_parms.coeff_modulus();

@@ -29,7 +29,7 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto &context_data = *context_->data_context_data_head();
+        auto &context_data = *context_->data_context_data_first();
         if (context_data.parms().scheme() != scheme_type::CKKS)
         {
             throw invalid_argument("unsupported scheme");

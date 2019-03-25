@@ -123,7 +123,7 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(values, context_->data_parms_id_head(), scale, 
+            encode(values, context_->data_parms_id_first(), scale, 
                 destination, std::move(pool));
         }
 
@@ -171,7 +171,7 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->data_parms_id_head(), scale, 
+            encode(value, context_->data_parms_id_first(), scale, 
                 destination, std::move(pool));
         }
 
@@ -219,7 +219,7 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->data_parms_id_head(), scale, 
+            encode(value, context_->data_parms_id_first(), scale, 
                 destination, std::move(pool));
         }
 
@@ -248,7 +248,7 @@ namespace seal
         */
         inline void encode(std::int64_t value, Plaintext &destination)
         {
-            encode(value, context_->data_parms_id_head(), destination);
+            encode(value, context_->data_parms_id_first(), destination);
         }
 
         /**

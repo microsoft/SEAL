@@ -151,13 +151,13 @@ namespace seal
                 throw invalid_argument("plain cannot be in NTT form");
             }
             
-            encrypt_zero(context_->data_parms_id_head(), destination);
+            encrypt_zero(context_->data_parms_id_first(), destination);
 
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
             preencrypt(plain.data(),
                 plain.coeff_count(),
-                *context_->data_context_data_head(),
+                *context_->data_context_data_first(),
                 destination.data());
         }
         else if (scheme == scheme_type::CKKS)

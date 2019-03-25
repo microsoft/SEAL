@@ -372,24 +372,24 @@ namespace seal
         if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set ||
             parms.coeff_modulus().size() == 1)
         {
-            data_parms_id_head_ = key_parms_id_;
+            data_parms_id_first_ = key_parms_id_;
         }
         else 
         {
             auto next_parms_id = create_next_context_data(key_parms_id_);
-            data_parms_id_head_ = (next_parms_id == parms_id_zero) ?
+            data_parms_id_first_ = (next_parms_id == parms_id_zero) ?
                 key_parms_id_ : next_parms_id;
         }
 
         // Set the data tail to point to data head
-        data_parms_id_tail_ = data_parms_id_head_;
+        data_parms_id_last_ = data_parms_id_first_;
 
         // If modulus switching chain is to be created, compute the remaining
         // parameter sets as long as they are valid to use (parameters_set == true)
         if (expand_mod_chain &&
-            context_data_map_.at(data_parms_id_head_)->qualifiers_.parameters_set)
+            context_data_map_.at(data_parms_id_first_)->qualifiers_.parameters_set)
         {
-            auto prev_parms_id = data_parms_id_head_;
+            auto prev_parms_id = data_parms_id_first_;
             while (context_data_map_.at(prev_parms_id)->parms().coeff_modulus().size() > 1)
             {
                 auto next_parms_id = create_next_context_data(prev_parms_id);
@@ -398,7 +398,7 @@ namespace seal
                     break;
                 }
                 prev_parms_id = next_parms_id;
-                data_parms_id_tail_ = next_parms_id;
+                data_parms_id_last_ = next_parms_id;
             }
         }
 

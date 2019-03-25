@@ -128,8 +128,8 @@ namespace seal
     of the moduli in the coeff_modulus, until the resulting parameters are no longer valid,
     e.g., there are no more primes left. These derived encryption parameters are used by
     ciphertexts and plaintexts and their respective ContextData can be accessed through the
-    data_context_data(parms_id_type) function. The functions data_context_data_head() and
-    data_context_data_tail() return the ContextData corresponding to the first and the las
+    data_context_data(parms_id_type) function. The functions data_context_data_first() and
+    data_context_data_last() return the ContextData corresponding to the first and the las
     set of parameters in the "data" part of the chain, i.e., the second and the last
     element in the full chain. The chain itself is a doubly linked list, and is referred to
     as the modulus switching chain.
@@ -387,9 +387,9 @@ namespace seal
         Returns the ContextData corresponding to the first encryption parameters
         that are used for data.
         */
-        inline auto data_context_data_head() const
+        inline auto data_context_data_first() const
         {
-            auto data = context_data_map_.find(data_parms_id_head_);
+            auto data = context_data_map_.find(data_parms_id_first_);
             return (data != context_data_map_.end()) ?
                 data->second : std::shared_ptr<ContextData>{ nullptr };
         }
@@ -398,9 +398,9 @@ namespace seal
         Returns the ContextData corresponding to the last encryption parameters
         that are used for data.
         */
-        inline auto data_context_data_tail() const
+        inline auto data_context_data_last() const
         {
-            auto data = context_data_map_.find(data_parms_id_tail_);
+            auto data = context_data_map_.find(data_parms_id_last_);
             return (data != context_data_map_.end()) ?
                 data->second : std::shared_ptr<ContextData>{ nullptr };
         }
@@ -410,8 +410,8 @@ namespace seal
         */
         inline auto parameters_set() const
         {
-            return data_context_data_head() ? 
-                data_context_data_head()->qualifiers_.parameters_set : false;
+            return data_context_data_first() ? 
+                data_context_data_first()->qualifiers_.parameters_set : false;
         }
 
         /**
@@ -427,18 +427,18 @@ namespace seal
         Returns a parms_id_type corresponding to the first encryption parameters
         that are used for data.
         */
-        inline auto &data_parms_id_head() const noexcept
+        inline auto &data_parms_id_first() const noexcept
         {
-            return data_parms_id_head_;
+            return data_parms_id_first_;
         }
 
         /**
         Returns a parms_id_type corresponding to the last encryption parameters
         that are used for data.
         */
-        inline auto &data_parms_id_tail() const noexcept
+        inline auto &data_parms_id_last() const noexcept
         {
-            return data_parms_id_tail_;
+            return data_parms_id_last_;
         }
 
     private:
@@ -477,9 +477,9 @@ namespace seal
 
         parms_id_type key_parms_id_;
 
-        parms_id_type data_parms_id_head_;
+        parms_id_type data_parms_id_first_;
 
-        parms_id_type data_parms_id_tail_;
+        parms_id_type data_parms_id_last_;
 
         std::unordered_map<
             parms_id_type, std::shared_ptr<const ContextData>> context_data_map_{};

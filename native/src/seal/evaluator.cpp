@@ -45,7 +45,7 @@ namespace seal
     void Evaluator::populate_Zmstar_to_generator()
     {
         uint64_t n = static_cast<uint64_t>(
-            context_->data_context_data_head()->parms().poly_modulus_degree());
+            context_->data_context_data_first()->parms().poly_modulus_degree());
         uint64_t m = n << 1;
 
         for (uint64_t i = 0; i < n / 2; i++)
@@ -279,7 +279,7 @@ namespace seal
             throw invalid_argument("encrypted1 and encrypted2 parameter mismatch");
         }
 
-        auto context_data_ptr = context_->data_context_data_head();
+        auto context_data_ptr = context_->data_context_data_first();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -706,7 +706,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        auto context_data_ptr = context_->data_context_data_head();
+        auto context_data_ptr = context_->data_context_data_first();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -1395,7 +1395,7 @@ namespace seal
         }
 
         auto context_data_ptr = context_->context_data(encrypted.parms_id());
-        if (context_->data_parms_id_tail() == encrypted.parms_id())
+        if (context_->data_parms_id_last() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
         }
@@ -1408,7 +1408,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        switch (context_->data_context_data_head()->parms().scheme())
+        switch (context_->data_context_data_first()->parms().scheme())
         {
         case scheme_type::BFV:
             // Modulus switching with scaling
@@ -1493,7 +1493,7 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (context_->data_parms_id_tail() == encrypted.parms_id())
+        if (context_->data_parms_id_last() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
         }
@@ -1506,7 +1506,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        switch (context_->data_context_data_head()->parms().scheme())
+        switch (context_->data_context_data_first()->parms().scheme())
         {
         case scheme_type::BFV:
             throw invalid_argument("unsupported operation for scheme type");
