@@ -39,6 +39,8 @@ namespace seal
         */
         SecretKey() = default;
 
+        SecretKey(const SecretKey &copy) = delete;
+
         /**
         Destroys the SecretKey object.
         */
@@ -203,9 +205,6 @@ namespace seal
         }
 
     private:
-        // Should not allow copying of secret key.
-        SecretKey(const SecretKey &copy) = delete;
-
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         Plaintext sk_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true) };
     };
