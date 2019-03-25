@@ -174,6 +174,7 @@ namespace seal
         }
 
         // Initialize public key.
+        // PublicKey data allocated from pool given by MemoryManager::GetPool.
         public_key_ = PublicKey();
         pk_generated_ = false;
 
@@ -466,9 +467,11 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
+        // KSwitchKeys data allocated from pool given by MemoryManager::GetPool.
+        destination.resize(decomp_mod_count);
+
         auto temp(allocate_uint(coeff_count, pool_));
         uint64_t factor = 0;
-        destination.resize(decomp_mod_count);
         for (size_t j = 0; j < decomp_mod_count; j++)
         {
             encrypt_zero_symmetric(secret_key_, destination[j], context_,

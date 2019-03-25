@@ -19,8 +19,8 @@ namespace seal
     Class to store a secret key.
 
     @par Thread Safety
-    In general, reading from SecretKey is thread-safe as long as no other thread 
-    is concurrently mutating it. This is due to the underlying data structure 
+    In general, reading from SecretKey is thread-safe as long as no other thread
+    is concurrently mutating it. This is due to the underlying data structure
     storing the secret key not being thread-safe.
 
     @see KeyGenerator for the class that generates the secret key.
@@ -49,7 +49,7 @@ namespace seal
             // memory pool with the `clear_on_destruction' property. Now use
             // Plaintext::operator =(const Plaintext &) to copy over the data.
             // This is very important to do right, otherwise newly created
-            // SecretKey may use a normal memory pool obtained from 
+            // SecretKey may use a normal memory pool obtained from
             // MemoryManager::GetPool() with currently active profile (MMProf).
             sk_ = copy.sk_;
         }
