@@ -2542,7 +2542,6 @@ namespace seal
             static_cast<const KSwitchKeys &>(galois_keys),
             GaloisKeys::get_index(galois_elt),
             pool);
-
 #ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
