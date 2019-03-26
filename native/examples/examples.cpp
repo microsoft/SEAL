@@ -890,7 +890,7 @@ void example_bfv_basics_iii()
     We can verify that batching is indeed enabled by looking at the encryption
     parameter qualifiers created by SEALContext.
     */
-    auto qualifiers = context->data_context_data_first()->qualifiers();
+    auto qualifiers = context->context_data_first()->qualifiers();
     cout << "Batching enabled: " << boolalpha << qualifiers.using_batching << endl;
 
     KeyGenerator keygen(context);
@@ -1202,7 +1202,7 @@ void example_bfv_basics_iv()
     is at a higher level in the chain than another set of parameters if its the
     chain index is bigger, i.e. it is earlier in the chain. 
     */
-    for(auto context_data = context->data_context_data_first(); context_data;
+    for(auto context_data = context->context_data_first(); context_data;
         context_data = context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1225,7 +1225,7 @@ void example_bfv_basics_iv()
     switches to the next set down the chain, whereas mod_switch_to(...) switches
     to a parameter set down the chain corresponding to a given parms_id.
     */
-    auto context_data = context->data_context_data_first();
+    auto context_data = context->context_data_first();
     while(context_data->next_context_data()) 
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1321,7 +1321,7 @@ void example_bfv_basics_iv()
     We can check that indeed the modulus switching chain has not been created.
     The following loop should execute only once.
     */
-    for (context_data = context->data_context_data_first(); context_data;
+    for (context_data = context->context_data_first(); context_data;
         context_data = context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1482,14 +1482,14 @@ void example_ckks_basics_i()
     away parts of the coefficient modulus.
     */
     cout << "Current coeff_modulus size: "
-        << context->context_data(encrypted.parms_id())->
+        << context->get_context_data(encrypted.parms_id())->
             total_coeff_modulus_bit_count() << " bits" << endl; 
 
     cout << "Modulus switching ..." << endl;
     evaluator.mod_switch_to_next_inplace(encrypted);
 
     cout << "Current coeff_modulus size: "
-        << context->context_data(encrypted.parms_id())->
+        << context->get_context_data(encrypted.parms_id())->
             total_coeff_modulus_bit_count() << " bits" << endl; 
     cout << endl;
 
@@ -1612,7 +1612,7 @@ void example_ckks_basics_ii()
     Print the scale and the parms_id for encrypted.
     */
     cout << "Chain index of (encryption parameters of) encrypted: " 
-        << context->context_data(encrypted.parms_id())->chain_index() << endl;
+        << context->get_context_data(encrypted.parms_id())->chain_index() << endl;
     cout << "Scale in encrypted before squaring: " << encrypted.scale() << endl;
 
     /*
@@ -1624,7 +1624,7 @@ void example_ckks_basics_ii()
     cout << "Scale in encrypted after squaring: " << encrypted.scale() 
         << " (" << log2(encrypted.scale()) << " bits)" << endl;
     cout << "Current coeff_modulus size: "
-        << context->context_data(encrypted.parms_id())->
+        << context->get_context_data(encrypted.parms_id())->
             total_coeff_modulus_bit_count() << " bits" << endl; 
     cout << endl;
 
@@ -1652,11 +1652,11 @@ void example_ckks_basics_ii()
     on the number of primes in coeff_modulus.
     */
     cout << "Chain index of (encryption parameters of) encrypted: " 
-        << context->context_data(encrypted.parms_id())->chain_index() << endl;
+        << context->get_context_data(encrypted.parms_id())->chain_index() << endl;
     cout << "Scale in encrypted: " << encrypted.scale() 
         << " (" << log2(encrypted.scale()) << " bits)" << endl;
     cout << "Current coeff_modulus size: "
-        << context->context_data(encrypted.parms_id())->
+        << context->get_context_data(encrypted.parms_id())->
             total_coeff_modulus_bit_count() << " bits" << endl; 
     cout << endl;
 
@@ -1671,11 +1671,11 @@ void example_ckks_basics_ii()
     evaluator.rescale_to_next_inplace(encrypted);
 
     cout << "Chain index of (encryption parameters of) encrypted: " 
-        << context->context_data(encrypted.parms_id())->chain_index() << endl;
+        << context->get_context_data(encrypted.parms_id())->chain_index() << endl;
     cout << "Scale in encrypted: " << encrypted.scale() 
         << " (" << log2(encrypted.scale()) << " bits)" << endl;
     cout << "Current coeff_modulus size: "
-        << context->context_data(encrypted.parms_id())->
+        << context->get_context_data(encrypted.parms_id())->
             total_coeff_modulus_bit_count() << " bits" << endl; 
     cout << endl;
 
@@ -1691,11 +1691,11 @@ void example_ckks_basics_ii()
     evaluator.rescale_to_next_inplace(encrypted);
     evaluator.square_inplace(encrypted);
     cout << "Chain index of (encryption parameters of) encrypted: " 
-        << context->context_data(encrypted.parms_id())->chain_index() << endl;
+        << context->get_context_data(encrypted.parms_id())->chain_index() << endl;
     cout << "Scale in encrypted: " << encrypted.scale() 
         << " (" << log2(encrypted.scale()) << " bits)" << endl;
     cout << "Current coeff_modulus size: "
-        << context->context_data(encrypted.parms_id())->
+        << context->get_context_data(encrypted.parms_id())->
             total_coeff_modulus_bit_count() << " bits" << endl; 
     cout << endl;
 
@@ -1789,7 +1789,7 @@ void example_ckks_basics_iii()
     as the scale for a reason that will become clear soon.
     */
     // \todo GET RID OF THIS and use some simpler scale
-    EncryptionParameters current_parms = context->data_context_data_first()->parms();
+    EncryptionParameters current_parms = context->context_data_first()->parms();
     auto scale = static_cast<double>(current_parms.coeff_modulus().back().value());
     Plaintext plain_x;
     encoder.encode(input, scale, plain_x);
@@ -1852,11 +1852,11 @@ void example_ckks_basics_iii()
     */
     cout << "Parameters used by all three terms are different:" << endl;
     cout << "Modulus chain index for encrypted_x3: "
-        << context->context_data(encrypted_x3.parms_id())->chain_index() << endl;
+        << context->get_context_data(encrypted_x3.parms_id())->chain_index() << endl;
     cout << "Modulus chain index for encrypted_x1: "
-        << context->context_data(encrypted_x1.parms_id())->chain_index() << endl;
+        << context->get_context_data(encrypted_x1.parms_id())->chain_index() << endl;
     cout << "Modulus chain index for plain_coeff0: "
-        << context->context_data(plain_coeff0.parms_id())->chain_index() << endl;
+        << context->get_context_data(plain_coeff0.parms_id())->chain_index() << endl;
     cout << endl;
 
     /*
@@ -1921,7 +1921,7 @@ void example_ckks_basics_iii()
     Print the chain index and scale for encrypted_result. 
     */
     cout << "Modulus chain index for encrypted_result: "
-        << context->context_data(encrypted_result.parms_id())
+        << context->get_context_data(encrypted_result.parms_id())
         ->chain_index() << endl;
     old_fmt.copyfmt(cout);
     cout << fixed << setprecision(10);
@@ -1945,7 +1945,7 @@ void example_ckks_basics_iii()
     the scale would become larger than the coeff_modulus itself. 
     */
     cout << "Current coeff_modulus size for encrypted_result: "
-        << context->context_data(encrypted_result.parms_id())->
+        << context->get_context_data(encrypted_result.parms_id())->
             total_coeff_modulus_bit_count() << " bits" << endl << endl; 
     
     /*
@@ -2023,7 +2023,7 @@ void example_bfv_performance()
         chrono::high_resolution_clock::time_point time_start, time_end;
 
         print_parameters(context);
-        auto &curr_parms = context->data_context_data_first()->parms();
+        auto &curr_parms = context->context_data_first()->parms();
         auto &plain_modulus = curr_parms.plain_modulus();
         size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
 
@@ -2346,7 +2346,7 @@ void example_ckks_performance()
         chrono::high_resolution_clock::time_point time_start, time_end;
 
         print_parameters(context);
-        auto &curr_parms = context->data_context_data_first()->parms();
+        auto &curr_parms = context->context_data_first()->parms();
         size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
 
         cout << "Generating secret/public keys: ";
@@ -2363,7 +2363,7 @@ void example_ckks_performance()
         auto time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
 
-        if (!context->data_context_data_first()->qualifiers().using_batching)
+        if (!context->context_data_first()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;

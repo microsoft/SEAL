@@ -26,7 +26,7 @@ namespace Microsoft.Research.SEAL
     /// and a new SEALContext will have to be created after the parameters are corrected.
     ///
     /// By default, SEALContext creates a chain of SEALContext.ContextData instances. The
-    /// first one in the chain corresponds to special encryption parametersthat are reserved
+    /// first one in the chain corresponds to special encryption parameters that are reserved
     /// to be used by the various key classes (SecretKey, PublicKey, etc.). These are the
     /// exact same encryption parameters that are created by the user and passed to the
     /// constructor of SEALContext. The properties KeyContextData and KeyParmsId return the
@@ -36,11 +36,10 @@ namespace Microsoft.Research.SEAL
     /// the CoeffModulus, until the resulting parameters are no longer valid, e.g., there are
     /// no more primes left. These derived encryption parameters are used by ciphertexts and
     /// plaintexts and their respective ContextData can be accessed through the
-    /// GetDataContextData(ParmsId) function. The properties DataContextDataHead and
-    /// DataContextDataTail return the ContextData corresponding to the first and the last
-    /// set of parameters in the "data" part of the chain, i.e., the second and the last
-    /// element in the full chain. The chain is a doubly linked list and is referred to as
-    /// the modulus switching chain.
+    /// GetContextData(ParmsId) function. The properties ContextDataFirst and LastContextData
+    /// return the ContextData corresponding to the first and the last set of parameters in
+    /// the "data" part of the chain, i.e., the second and the last element in the full chain.
+    /// The chain is a doubly linked list and is referred to as the modulus switching chain.
     /// </summary>
     /// <see cref="EncryptionParameters">see EncryptionParameters for more details on the parameters.</see>
     /// <see cref="EncryptionParameterQualifiers">see EncryptionParameterQualifiers for more details on the qualifiers.</see>
@@ -73,24 +72,37 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a ContextData class instance corresponding to the encryption
-        /// parameters. This is the first set of parameters in a chain of parameters
-        /// when modulus switching is used.
+        /// Returns the ContextData corresponding to the first encryption parameters
+        /// that are used for data.
         /// </summary>
-        public ContextData FirstContextData
+        public ContextData ContextDataFirst
         {
             get
             {
-                NativeMethods.SEALContext_FirstContextData(NativePtr, out IntPtr contextData);
+                NativeMethods.SEALContext_ContextDataFirst(NativePtr, out IntPtr contextData);
                 ContextData data = new ContextData(contextData, owned: false);
                 return data;
             }
         }
 
         /// <summary>
-        /// Returns an optional ContextData object class corresponding to
-        /// the parameters with a given parmsId. If parameters with the given parmsId
-        /// are not found then the function returns null.
+        /// Returns the ContextData corresponding to the last encryption parameters
+        /// that are used for data.
+        /// </summary>
+        public ContextData ContextDataLast
+        {
+            get
+            {
+                NativeMethods.SEALContext_ContextDataLast(NativePtr, out IntPtr contextData);
+                ContextData data = new ContextData(contextData, owned: false);
+                return data;
+            }
+        }
+
+        /// <summary>
+        /// Returns the ContextData corresponding to encryption parameters with a given
+        /// parmsId. If parameters with the given parmsId are not found then the function 
+        /// returns null.
         /// </summary>
         /// 
         /// <param name="parmsId">The parmsId of the encryption parameters</param>
@@ -121,27 +133,29 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a ParmsId corresponding to the first set of encryption parameters.
+        /// Returns a ParmsId corresponding to the first encryption parameters that
+        /// are used for data.
         /// </summary>
-        public ParmsId FirstParmsId
+        public ParmsId ParmsIdFirst
         {
             get
             {
                 ParmsId parms = new ParmsId();
-                NativeMethods.SEALContext_FirstParmsId(NativePtr, parms.Block);
+                NativeMethods.SEALContext_ParmsIdFirst(NativePtr, parms.Block);
                 return parms;
             }
         }
 
         /// <summary>
-        /// Returns a ParmsId corresponding to the last set of encryption parameters.
+        /// Returns a ParmsId corresponding to the last encryption parameters that
+        /// are used for data.
         /// </summary>
-        public ParmsId LastParmsId
+        public ParmsId ParmsIdLast
         {
             get
             {
                 ParmsId parms = new ParmsId();
-                NativeMethods.SEALContext_LastParmsId(NativePtr, parms.Block);
+                NativeMethods.SEALContext_ParmsIdLast(NativePtr, parms.Block);
                 return parms;
             }
         }
@@ -155,7 +169,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Provides data for a given set of encryption parameters
+        /// Class to hold precomputation data for a given set of encryption parameters.
         /// </summary>
         public class ContextData : NativeObject
         {

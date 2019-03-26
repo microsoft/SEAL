@@ -25,11 +25,11 @@ namespace SEALNetTest
             Assert.IsFalse(context1.ParametersSet);
             Assert.IsFalse(context2.ParametersSet);
 
-            Assert.AreNotSame(context1.FirstParmsId, context1.LastParmsId);
-            Assert.AreEqual(context1.FirstParmsId, context1.LastParmsId);
+            Assert.AreNotSame(context1.ParmsIdFirst, context1.ParmsIdLast);
+            Assert.AreEqual(context1.ParmsIdFirst, context1.ParmsIdLast);
 
-            SEALContext.ContextData data1 = context2.FirstContextData;
-            SEALContext.ContextData data2 = context2.GetContextData(context2.FirstParmsId);
+            SEALContext.ContextData data1 = context2.ContextDataFirst;
+            SEALContext.ContextData data2 = context2.GetContextData(context2.ParmsIdFirst);
 
             Assert.AreNotSame(data1, data2);
             ulong[] totalCoeffMod1 = data1.TotalCoeffModulus;
@@ -64,7 +64,7 @@ namespace SEALNetTest
             };
             SEALContext context = SEALContext.Create(parms);
 
-            SEALContext.ContextData data = context.FirstContextData;
+            SEALContext.ContextData data = context.ContextDataFirst;
             Assert.IsNotNull(data);
 
             EncryptionParameters parms2 = data.Parms;
@@ -123,7 +123,7 @@ namespace SEALNetTest
             };
             SEALContext context = SEALContext.Create(parms);
 
-            SEALContext.ContextData data = context.FirstContextData;
+            SEALContext.ContextData data = context.ContextDataFirst;
             Assert.IsNotNull(data);
 
             // This should be available in CKKS
@@ -164,14 +164,14 @@ namespace SEALNetTest
             SEALContext context1 = SEALContext.Create(parms);
 
             // By default there is a chain
-            SEALContext.ContextData contextData = context1.FirstContextData;
+            SEALContext.ContextData contextData = context1.ContextDataFirst;
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
 
             // This should not create a chain
             SEALContext context2 = SEALContext.Create(parms, expandModChain: false);
-            contextData = context2.FirstContextData;
+            contextData = context2.ContextDataFirst;
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);
             Assert.IsNull(contextData.NextContextData);

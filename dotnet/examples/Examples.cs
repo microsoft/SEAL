@@ -660,7 +660,7 @@ namespace SEALNetExamples
             We can verify that batching is indeed enabled by looking at the encryption
             parameter qualifiers created by SEALContext.
             */
-            EncryptionParameterQualifiers qualifiers = context.FirstContextData.Qualifiers;
+            EncryptionParameterQualifiers qualifiers = context.ContextDataFirst.Qualifiers;
             Console.WriteLine($"Batching enabled: {qualifiers.UsingBatching.ToString()}");
 
             KeyGenerator keygen = new KeyGenerator(context);
@@ -934,7 +934,7 @@ namespace SEALNetExamples
             chain index is bigger, i.e. it is earlier in the chain. 
             */
             SEALContext.ContextData contextData;
-            for (contextData = context.FirstContextData; null != contextData; contextData = contextData.NextContextData)
+            for (contextData = context.ContextDataFirst; null != contextData; contextData = contextData.NextContextData)
             {
                 Console.WriteLine($"Chain index: {contextData.ChainIndex}");
                 Console.WriteLine($"ParmsId: {contextData.Parms.ParmsId}");
@@ -961,7 +961,7 @@ namespace SEALNetExamples
             switches to the next set down the chain, whereas ModSwitchTo(...) switches
             to a parameter set down the chain corresponding to a given ParmsId.
             */
-            contextData = context.FirstContextData;
+            contextData = context.ContextDataFirst;
             while (null != contextData.NextContextData)
             {
                 Console.WriteLine($"Chain index: {contextData.ChainIndex}");
@@ -1060,7 +1060,7 @@ namespace SEALNetExamples
             We can check that indeed the modulus switching chain has not been created.
             The following loop should execute only once.
             */
-            for (contextData = context.FirstContextData; null != contextData; contextData = contextData.NextContextData)
+            for (contextData = context.ContextDataFirst; null != contextData; contextData = contextData.NextContextData)
             {
                 Console.WriteLine($"Chain index: {contextData.ChainIndex}");
                 Console.WriteLine($"ParmsId: {contextData.Parms.ParmsId}");
@@ -1105,7 +1105,7 @@ namespace SEALNetExamples
                 Stopwatch timer;
                 Utilities.PrintParameters(context);
 
-                EncryptionParameters parameters = context.FirstContextData.Parms;
+                EncryptionParameters parameters = context.ContextDataFirst.Parms;
                 SmallModulus plainModulus = parameters.PlainModulus;
                 ulong polyModulusDegree = parameters.PolyModulusDegree;
 
@@ -1138,7 +1138,7 @@ namespace SEALNetExamples
                 allocation size. The key generation can also take a significant amount 
                 of time, as can be observed from the print-out.
                 */
-                if (!context.FirstContextData.Qualifiers.UsingBatching)
+                if (!context.ContextDataFirst.Qualifiers.UsingBatching)
                 {
                     Console.WriteLine("Given encryption parameters do not support batching.");
                     return;
@@ -2055,7 +2055,7 @@ namespace SEALNetExamples
                 }
 
                 Utilities.PrintParameters(context);
-                EncryptionParameters parms = context.FirstContextData.Parms;
+                EncryptionParameters parms = context.ContextDataFirst.Parms;
                 ulong polyModulusDegree = parms.PolyModulusDegree;
 
                 Console.Write("Generating secret/public keys: ");
@@ -2072,7 +2072,7 @@ namespace SEALNetExamples
                 timer.Stop();
                 Console.WriteLine($"Done [{timer.Elapsed.TotalMilliseconds * 1000} microseconds]");
 
-                if (!context.FirstContextData.Qualifiers.UsingBatching)
+                if (!context.ContextDataFirst.Qualifiers.UsingBatching)
                 {
                     Console.WriteLine("Given encryption parameters do not support batching.");
                     return;

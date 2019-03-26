@@ -155,7 +155,7 @@ namespace seal
                 throw invalid_argument("key_parms_id mismatch");
             }
 
-            auto &context_data = *context->context_data(parms_id);
+            auto &context_data = *context->get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
@@ -245,7 +245,7 @@ namespace seal
             {
                 throw invalid_argument("key_parms_id mismatch");
             }
-            auto &context_data = *context->context_data(parms_id);
+            auto &context_data = *context->get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();

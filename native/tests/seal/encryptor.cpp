@@ -375,7 +375,7 @@ namespace SEALTest
             std::vector<std::complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            auto first_context_data = context->context_data();
+            auto first_context_data = context->context_data_first();
             ASSERT_NE(nullptr, first_context_data.get());
             auto second_context_data = first_context_data->next_context_data();
             ASSERT_NE(nullptr, second_context_data.get());

@@ -33,7 +33,7 @@ namespace SEALNetTest
         public void Create2Test()
         {
             SEALContext context = GlobalContext.Context;
-            ParmsId parms = context.FirstParmsId;
+            ParmsId parms = context.ParmsIdFirst;
 
             Assert.AreNotEqual(0ul, parms.Block[0]);
             Assert.AreNotEqual(0ul, parms.Block[1]);
@@ -49,7 +49,7 @@ namespace SEALNetTest
         public void Create3Test()
         {
             SEALContext context = GlobalContext.Context;
-            ParmsId parms = context.FirstParmsId;
+            ParmsId parms = context.ParmsIdFirst;
 
             Assert.AreNotEqual(0ul, parms.Block[0]);
             Assert.AreNotEqual(0ul, parms.Block[1]);
@@ -65,7 +65,7 @@ namespace SEALNetTest
         public void ResizeTest()
         {
             SEALContext context = GlobalContext.Context;
-            ParmsId parms = context.FirstParmsId;
+            ParmsId parms = context.ParmsIdFirst;
 
             Ciphertext cipher = new Ciphertext(context, parms);
 
@@ -91,7 +91,7 @@ namespace SEALNetTest
             Assert.AreEqual(4ul, cipher3.SizeCapacity);
 
             Ciphertext cipher4 = new Ciphertext(context);
-            cipher4.Resize(context, context.GetContextData(context.FirstParmsId).NextContextData.Parms.ParmsId, 4);
+            cipher4.Resize(context, context.GetContextData(context.ParmsIdFirst).NextContextData.Parms.ParmsId, 4);
             Assert.AreEqual(10ul, cipher.SizeCapacity);
 
             Ciphertext cipher5 = new Ciphertext(context);
@@ -301,14 +301,14 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => copy = new Ciphertext((Ciphertext)null));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(context, null, pool));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, pool));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.ParmsIdFirst, pool));
             Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, pool));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext((SEALContext)null, poolu));
             Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, poolu));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(context, null, 6ul));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, 6ul, poolu));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.ParmsIdFirst, 6ul, poolu));
             Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, 6ul, poolu));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher.Reserve(context, null, 10ul));

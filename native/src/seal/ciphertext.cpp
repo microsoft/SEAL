@@ -45,7 +45,7 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto context_data_ptr = context->context_data(parms_id);
+        auto context_data_ptr = context->get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");
@@ -96,7 +96,7 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto context_data_ptr = context->context_data(parms_id);
+        auto context_data_ptr = context->get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");
@@ -139,7 +139,7 @@ namespace seal
         }
 
         // Check the data
-        auto context_data_ptr = context->context_data(parms_id_);
+        auto context_data_ptr = context->get_context_data(parms_id_);
         auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
         const ct_coeff_type *ptr = data();
         for (size_t i = 0; i < size_; i++)
@@ -170,7 +170,7 @@ namespace seal
         }
 
         // Are the parameters valid for this ciphertext?
-        auto context_data_ptr = context->context_data(parms_id_);
+        auto context_data_ptr = context->get_context_data(parms_id_);
         if (!context_data_ptr)
         {
             return false;

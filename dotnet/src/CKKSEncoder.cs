@@ -159,7 +159,7 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            Encode(values, context_.FirstParmsId, scale, destination, pool);
+            Encode(values, context_.ParmsIdFirst, scale, destination, pool);
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            Encode(values, context_.FirstParmsId, scale, destination, pool);
+            Encode(values, context_.ParmsIdFirst, scale, destination, pool);
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            Encode(value, context_.FirstParmsId, scale, destination, pool);
+            Encode(value, context_.ParmsIdFirst, scale, destination, pool);
         }
 
         /// <summary>
@@ -298,7 +298,7 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            Encode(value, context_.FirstParmsId, scale, destination, pool);
+            Encode(value, context_.ParmsIdFirst, scale, destination, pool);
         }
 
         /// <summary>
@@ -333,7 +333,7 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            Encode(value, context_.FirstParmsId, destination);
+            Encode(value, context_.ParmsIdFirst, destination);
         }
 
         /// <summary>

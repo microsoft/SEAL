@@ -23,7 +23,7 @@ namespace SEALTest
         parms.set_plain_modulus(257);
 
         auto context = SEALContext::Create(parms);
-        ASSERT_TRUE(context->context_data()->qualifiers().using_batching);
+        ASSERT_TRUE(context->context_data_first()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);
         ASSERT_EQ(64ULL, batch_encoder.slot_count());
@@ -76,7 +76,7 @@ namespace SEALTest
         parms.set_plain_modulus(257);
 
         auto context = SEALContext::Create(parms);
-        ASSERT_TRUE(context->context_data()->qualifiers().using_batching);
+        ASSERT_TRUE(context->context_data_first()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);
         ASSERT_EQ(64ULL, batch_encoder.slot_count());
@@ -129,7 +129,7 @@ namespace SEALTest
         parms.set_plain_modulus(257);
 
         auto context = SEALContext::Create(parms);
-        ASSERT_TRUE(context->context_data()->qualifiers().using_batching);
+        ASSERT_TRUE(context->context_data_first()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);
         ASSERT_EQ(64ULL, batch_encoder.slot_count());

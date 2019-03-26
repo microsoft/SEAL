@@ -1349,7 +1349,7 @@ namespace seal
             const GaloisKeys &galois_keys, MemoryPoolHandle pool)
         {
             // Verify parameters.
-            auto context_data_ptr = context_->context_data(encrypted.parms_id());
+            auto context_data_ptr = context_->get_context_data(encrypted.parms_id());
             if (!context_data_ptr)
             {
                 throw std::invalid_argument("encrypted is not valid for encryption parameters");

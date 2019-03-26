@@ -2078,7 +2078,7 @@ namespace SEALTest
                 DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1), 
                 DefaultParams::small_mods_30bit(2), DefaultParams::small_mods_30bit(3) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -2148,7 +2148,7 @@ namespace SEALTest
                 DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1),
                 DefaultParams::small_mods_30bit(2), DefaultParams::small_mods_30bit(3) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -2267,7 +2267,7 @@ namespace SEALTest
                 evaluator.relinearize_inplace(encrypted1, rlk);
 
                 // Scale down by two levels
-                auto target_parms = context->context_data()
+                auto target_parms = context->context_data_first()
                     ->next_context_data()->next_context_data()->parms().parms_id();
                 evaluator.rescale_to_inplace(encrypted1, target_parms);
 
@@ -2296,7 +2296,7 @@ namespace SEALTest
                 DefaultParams::small_mods_50bit(0), DefaultParams::small_mods_50bit(1),
                 DefaultParams::small_mods_50bit(2) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -2357,7 +2357,7 @@ namespace SEALTest
                 DefaultParams::small_mods_50bit(0), DefaultParams::small_mods_50bit(1),
                 DefaultParams::small_mods_50bit(2) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -2422,7 +2422,7 @@ namespace SEALTest
                 DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1),
                 DefaultParams::small_mods_60bit(2), DefaultParams::small_mods_60bit(3), DefaultParams::small_mods_60bit(4) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -2479,7 +2479,7 @@ namespace SEALTest
                 DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2),
                 DefaultParams::small_mods_40bit(3), DefaultParams::small_mods_40bit(4) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -2536,7 +2536,7 @@ namespace SEALTest
                 DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2),
                 DefaultParams::small_mods_40bit(3), DefaultParams::small_mods_40bit(4) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -2597,7 +2597,7 @@ namespace SEALTest
                 DefaultParams::small_mods_50bit(0), DefaultParams::small_mods_50bit(1),
                 DefaultParams::small_mods_50bit(2) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -2682,7 +2682,7 @@ namespace SEALTest
                 DefaultParams::small_mods_50bit(0), DefaultParams::small_mods_50bit(1),
                 DefaultParams::small_mods_50bit(2) });
             auto context = SEALContext::Create(parms);
-            auto next_parms_id = context->context_data()->
+            auto next_parms_id = context->context_data_first()->
                 next_context_data()->parms().parms_id();
             KeyGenerator keygen(context);
 
@@ -3368,7 +3368,7 @@ namespace SEALTest
         plain.release();
         plain = "0";
         ASSERT_FALSE(plain.is_ntt_form());
-        auto next_parms_id = context->context_data()->
+        auto next_parms_id = context->context_data_first()->
             next_context_data()->parms().parms_id();
         evaluator.transform_to_ntt_inplace(plain, next_parms_id);
         ASSERT_TRUE(plain.is_zero());
@@ -3694,14 +3694,14 @@ namespace SEALTest
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_next(encrypted, encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "0");
 
         evaluator.mod_switch_to_next_inplace(encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "0");
@@ -3711,14 +3711,14 @@ namespace SEALTest
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_next(encrypted, encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1");
 
         evaluator.mod_switch_to_next_inplace(encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1");
@@ -3728,14 +3728,14 @@ namespace SEALTest
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_next(encrypted, encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1x^127");
 
         evaluator.mod_switch_to_next_inplace(encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1x^127");
@@ -3745,14 +3745,14 @@ namespace SEALTest
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_next(encrypted, encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
 
         evaluator.mod_switch_to_next_inplace(encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
@@ -3786,7 +3786,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "0");
 
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3794,7 +3794,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "0");
 
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3804,7 +3804,7 @@ namespace SEALTest
 
         parms_id = parms.parms_id();
         encryptor.encrypt(plain, encrypted);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->
             next_context_data()->parms().parms_id();
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3820,7 +3820,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1");
 
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3828,7 +3828,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1");
 
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3838,7 +3838,7 @@ namespace SEALTest
 
         parms_id = parms.parms_id();
         encryptor.encrypt(plain, encrypted);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->
             next_context_data()->parms().parms_id();
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3854,7 +3854,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1x^127");
 
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3862,7 +3862,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1x^127");
 
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3872,7 +3872,7 @@ namespace SEALTest
 
         parms_id = parms.parms_id();
         encryptor.encrypt(plain, encrypted);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->
             next_context_data()->parms().parms_id();
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3888,7 +3888,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
 
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3896,7 +3896,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
 
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->parms().parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
@@ -3906,7 +3906,7 @@ namespace SEALTest
 
         parms_id = parms.parms_id();
         encryptor.encrypt(plain, encrypted);
-        parms_id = context->context_data(parms_id)->
+        parms_id = context->get_context_data(parms_id)->
             next_context_data()->
             next_context_data()->parms().parms_id();
         evaluator.mod_switch_to_inplace(encrypted, parms_id);

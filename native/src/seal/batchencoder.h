@@ -380,7 +380,7 @@ namespace seal
                 throw std::invalid_argument("input cannot be null");
             }
 #endif
-            std::size_t coeff_count = context_->data_context_data_first()->parms().poly_modulus_degree();
+            std::size_t coeff_count = context_->context_data_first()->parms().poly_modulus_degree();
             int logn = util::get_power_of_two(coeff_count);
             for (std::size_t i = 0; i < coeff_count; i++)
             {

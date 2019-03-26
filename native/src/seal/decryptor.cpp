@@ -60,7 +60,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        auto &context_data = *context_->data_context_data_first();
+        auto &context_data = *context_->context_data_first();
         auto &parms = context_data.parms();
 
         switch (parms.scheme())
@@ -86,7 +86,7 @@ namespace seal
             throw invalid_argument("encrypted cannot be in NTT form");
         }
 
-        auto &context_data = *context_->context_data(encrypted.parms_id());
+        auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -237,7 +237,7 @@ namespace seal
         }
 
         // We already know that the parameters are valid
-        auto &context_data = *context_->context_data(encrypted.parms_id());
+        auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -455,7 +455,7 @@ namespace seal
             throw invalid_argument("encrypted cannot be in NTT form");
         }
 
-        auto &context_data = *context_->context_data(encrypted.parms_id());
+        auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();

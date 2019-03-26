@@ -29,7 +29,7 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto &context_data = *context_->data_context_data_first();
+        auto &context_data = *context_->context_data_first();
         if (context_data.parms().scheme() != scheme_type::CKKS)
         {
             throw invalid_argument("unsupported scheme");
@@ -75,7 +75,7 @@ namespace seal
         double scale, Plaintext &destination, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(parms_id);
+        auto context_data_ptr = context_->get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");
@@ -217,7 +217,7 @@ namespace seal
         Plaintext &destination)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(parms_id);
+        auto context_data_ptr = context_->get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");

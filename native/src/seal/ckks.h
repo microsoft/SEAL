@@ -123,7 +123,7 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(values, context_->data_parms_id_first(), scale, 
+            encode(values, context_->parms_id_first(), scale, 
                 destination, std::move(pool));
         }
 
@@ -171,7 +171,7 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->data_parms_id_first(), scale, 
+            encode(value, context_->parms_id_first(), scale, 
                 destination, std::move(pool));
         }
 
@@ -219,7 +219,7 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->data_parms_id_first(), scale, 
+            encode(value, context_->parms_id_first(), scale, 
                 destination, std::move(pool));
         }
 
@@ -248,7 +248,7 @@ namespace seal
         */
         inline void encode(std::int64_t value, Plaintext &destination)
         {
-            encode(value, context_->data_parms_id_first(), destination);
+            encode(value, context_->parms_id_first(), destination);
         }
 
         /**
@@ -338,7 +338,7 @@ namespace seal
                 MemoryPoolHandle pool)
         {
             // Verify parameters.
-            auto context_data_ptr = context_->context_data(parms_id);
+            auto context_data_ptr = context_->get_context_data(parms_id);
             if (!context_data_ptr)
             {
                 throw std::invalid_argument("parms_id is not valid for encryption parameters");
@@ -574,7 +574,7 @@ namespace seal
                 throw std::invalid_argument("pool is uninitialized");
             }
 
-            auto context_data_ptr = context_->context_data(plain.parms_id());
+            auto context_data_ptr = context_->get_context_data(plain.parms_id());
             auto &parms = context_data_ptr->parms();
             auto &coeff_modulus = parms.coeff_modulus();
             std::size_t coeff_mod_count = coeff_modulus.size();

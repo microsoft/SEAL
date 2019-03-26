@@ -54,13 +54,13 @@ namespace seal
         MemoryPoolHandle pool)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->context_data(parms_id);
+        auto context_data_ptr = context_->get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");
         }
 
-        auto &context_data = *context_->context_data(parms_id);
+        auto &context_data = *context_->get_context_data(parms_id);
         auto &parms = context_data.parms();
         size_t coeff_mod_count = parms.coeff_modulus().size();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -151,13 +151,13 @@ namespace seal
                 throw invalid_argument("plain cannot be in NTT form");
             }
             
-            encrypt_zero(context_->data_parms_id_first(), destination);
+            encrypt_zero(context_->parms_id_first(), destination);
 
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
             preencrypt(plain.data(),
                 plain.coeff_count(),
-                *context_->data_context_data_first(),
+                *context_->context_data_first(),
                 destination.data());
         }
         else if (scheme == scheme_type::CKKS)
@@ -166,12 +166,12 @@ namespace seal
             {
                 throw invalid_argument("plain must be in NTT form");
             }
-            auto context_data_ptr = context_->context_data(plain.parms_id());
+            auto context_data_ptr = context_->get_context_data(plain.parms_id());
             if (!context_data_ptr)
             {
                 throw invalid_argument("plain is not valid for encryption parameters");
             }
-            auto &context_data = *context_->context_data(plain.parms_id());
+            auto &context_data = *context_->get_context_data(plain.parms_id());
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();

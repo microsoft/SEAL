@@ -214,7 +214,7 @@ namespace seal
         // Check the data
         if (is_ntt_form())
         {
-            auto context_data_ptr = context->context_data(parms_id_);
+            auto context_data_ptr = context->get_context_data(parms_id_);
             auto &parms = context_data_ptr->parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
@@ -235,7 +235,7 @@ namespace seal
         }
         else
         {
-            auto &parms = context->data_context_data_first()->parms();
+            auto &parms = context->context_data_first()->parms();
             uint64_t modulus = parms.plain_modulus().value(); 
             const pt_coeff_type *ptr = data();
             for (size_t k = 0; k < data_.size(); k++, ptr++)
@@ -260,7 +260,7 @@ namespace seal
 
         if (is_ntt_form())
         {
-            auto context_data_ptr = context->context_data(parms_id_);
+            auto context_data_ptr = context->get_context_data(parms_id_);
             if (!context_data_ptr)
             {
                 return false;
@@ -276,7 +276,7 @@ namespace seal
         }
         else
         {
-            auto &parms = context->data_context_data_first()->parms();
+            auto &parms = context->context_data_first()->parms();
             if (parms.scheme() != scheme_type::BFV)
             {
                 return false;
