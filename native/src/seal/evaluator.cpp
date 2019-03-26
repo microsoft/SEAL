@@ -1403,10 +1403,6 @@ namespace seal
         {
             throw invalid_argument("pool is uninitialized");
         }
-        if (encrypted.size() > 2)
-        {
-            throw invalid_argument("encrypted size must be 2");
-        }
 
         switch (context_->context_data_first()->parms().scheme())
         {
@@ -1500,10 +1496,6 @@ namespace seal
         if (!pool)
         {
             throw invalid_argument("pool is uninitialized");
-        }
-        if (encrypted.size() > 2)
-        {
-            throw invalid_argument("encrypted size must be 2");
         }
 
         switch (context_->context_data_first()->parms().scheme())

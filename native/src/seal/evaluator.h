@@ -388,7 +388,6 @@ namespace seal
         @throws std::invalid_argument if encrypted is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted is already at lowest level
-        @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if, when using scheme_type::CKKS, the scale is too 
         large for the new encryption parameters
         @throws std::invalid_argument if pool is uninitialized
@@ -407,7 +406,6 @@ namespace seal
         @throws std::invalid_argument if encrypted is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted is already at lowest level
-        @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if, when using scheme_type::CKKS, the scale is too
         large for the new encryption parameters
         @throws std::invalid_argument if pool is uninitialized
@@ -474,7 +472,6 @@ namespace seal
         @throws std::invalid_argument if parms_id is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is already at lower level in modulus chain
         than the parameters corresponding to parms_id
-        @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if, when using scheme_type::CKKS, the scale is too
         large for the new encryption parameters
         @throws std::invalid_argument if pool is uninitialized
@@ -564,7 +561,6 @@ namespace seal
         @throws std::invalid_argument if encrypted is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted is already at lowest level
-        @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
@@ -583,7 +579,6 @@ namespace seal
         @throws std::invalid_argument if encrypted is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted is already at lowest level
-        @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
@@ -608,7 +603,6 @@ namespace seal
         @throws std::invalid_argument if parms_id is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is already at lower level in modulus chain
         than the parameters corresponding to parms_id
-        @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
@@ -632,7 +626,6 @@ namespace seal
         @throws std::invalid_argument if parms_id is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is already at lower level in modulus chain
         than the parameters corresponding to parms_id
-        @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */

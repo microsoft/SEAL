@@ -451,7 +451,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too 
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
@@ -479,7 +478,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too 
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
@@ -550,7 +548,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
         /// than the parameters corresponding to parmsId</exception>
-        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
@@ -668,7 +665,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RescaleToNext(Ciphertext encrypted, Ciphertext destination,
@@ -697,7 +693,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form
         /// guaranteed to be</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RescaleToNextInplace(Ciphertext encrypted,
@@ -725,7 +720,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
         /// than the parameters corresponding to parmsId</exception>
-        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RescaleToInplace(Ciphertext encrypted, ParmsId parmsId,
@@ -757,7 +751,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain
         /// than the parameters corresponding to parmsId</exception>
-        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RescaleTo(Ciphertext encrypted, 

@@ -112,7 +112,7 @@ endif()
 
 # Enforce at least 128-bit security level based on HomomorphicEncryption.org estimates
 set(SEAL_ENFORCE_HE_STD_SECURITY_STR "Enforce at least 128-bit security level from HomomorphicEncryption.org security standard")
-option(SEAL_ENFORCE_HE_STD_SECURITY ${SEAL_ENFORCE_HE_STD_SECURITY_STR} OFF)
+option(SEAL_ENFORCE_HE_STD_SECURITY ${SEAL_ENFORCE_HE_STD_SECURITY_STR} ON)
 
 # Throw on multiply_plain by a zero plaintext
 set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member of Evaluator outputs a transparent ciphertext")
