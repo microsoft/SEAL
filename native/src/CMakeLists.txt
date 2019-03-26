@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(SEAL VERSION 3.2.0 LANGUAGES CXX C)
+project(SEAL VERSION 3.3.0 LANGUAGES CXX C)
 
 if(DEFINED MSVC)
     if(DEFINED ALLOW_COMMAND_LINE_BUILD)
@@ -112,7 +112,7 @@ endif()
 
 # Enforce at least 128-bit security level based on HomomorphicEncryption.org estimates
 set(SEAL_ENFORCE_HE_STD_SECURITY_STR "Enforce at least 128-bit security level from HomomorphicEncryption.org security standard")
-option(SEAL_ENFORCE_HE_STD_SECURITY ${SEAL_ENFORCE_HE_STD_SECURITY_STR} ON)
+option(SEAL_ENFORCE_HE_STD_SECURITY ${SEAL_ENFORCE_HE_STD_SECURITY_STR} OFF)
 
 # Throw on multiply_plain by a zero plaintext
 set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member of Evaluator outputs a transparent ciphertext")
