@@ -10,34 +10,34 @@ using System.Text;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
-    /// Class to store a ciphertext element. The data for a ciphertext consists 
-    /// of two or more polynomials, which are in Microsoft SEAL stored in a CRT form with 
-    /// respect to the factors of the coefficient modulus. This data itself is 
-    /// not meant to be modified directly by the user, but is instead operated 
-    /// on by functions in the Evaluator class. The size of the backing array of 
-    /// a ciphertext depends on the encryption parameters and the size of the 
-    /// ciphertext (at least 2). If the degree of the PolyModulus encryption 
-    /// parameter is N, and the number of primes in the CoeffModulus encryption 
-    /// parameter is K, then the ciphertext backing array requires precisely 
-    /// 8*N*K*size bytes of memory. A ciphertext also carries with it the 
-    /// parmsId of its associated encryption parameters, which is used to check 
+    /// Class to store a ciphertext element. The data for a ciphertext consists
+    /// of two or more polynomials, which are in Microsoft SEAL stored in a CRT form with
+    /// respect to the factors of the coefficient modulus. This data itself is
+    /// not meant to be modified directly by the user, but is instead operated
+    /// on by functions in the Evaluator class. The size of the backing array of
+    /// a ciphertext depends on the encryption parameters and the size of the
+    /// ciphertext (at least 2). If the degree of the PolyModulus encryption
+    /// parameter is N, and the number of primes in the CoeffModulus encryption
+    /// parameter is K, then the ciphertext backing array requires precisely
+    /// 8*N*K*size bytes of memory. A ciphertext also carries with it the
+    /// parmsId of its associated encryption parameters, which is used to check
     /// the validity of the ciphertext for homomorphic operations and decryption.
     /// </summary>
     /// <remarks>
     /// <para>
     /// Memory Management
     /// The size of a ciphertext refers to the number of polynomials it contains,
-    /// whereas its capacity refers to the number of polynomials that fit in the 
-    /// current memory allocation. In high-performance applications unnecessary 
-    /// re-allocations should be avoided by reserving enough memory for the 
-    /// ciphertext to begin with either by providing the desired capacity to the 
-    /// constructor as an extra argument, or by calling the reserve function at 
+    /// whereas its capacity refers to the number of polynomials that fit in the
+    /// current memory allocation. In high-performance applications unnecessary
+    /// re-allocations should be avoided by reserving enough memory for the
+    /// ciphertext to begin with either by providing the desired capacity to the
+    /// constructor as an extra argument, or by calling the reserve function at
     /// any time.
     /// </para>
     /// <para>
     /// Thread Safety
-    /// In general, reading from ciphertext is thread-safe as long as no other 
-    /// thread is concurrently mutating it. This is due to the underlying data 
+    /// In general, reading from ciphertext is thread-safe as long as no other
+    /// thread is concurrently mutating it. This is due to the underlying data
     /// structure storing the ciphertext not being thread-safe.
     /// </para>
     /// </remarks>
@@ -57,7 +57,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Constructs an empty ciphertext with capacity 2. In addition to the 
+        /// Constructs an empty ciphertext with capacity 2. In addition to the
         /// capacity, the allocation size is determined by the highest-level
         /// parameters associated to the given SEALContext.
         /// </summary>
@@ -79,8 +79,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Constructs an empty ciphertext with capacity 2. In addition to the 
-        /// capacity, the allocation size is determined by the encryption parameters 
+        /// Constructs an empty ciphertext with capacity 2. In addition to the
+        /// capacity, the allocation size is determined by the encryption parameters
         /// with given parmsId.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -90,10 +90,10 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Ciphertext(SEALContext context, 
+        public Ciphertext(SEALContext context,
                     ParmsId parmsId,
                     MemoryPoolHandle pool = null)
         {
@@ -108,8 +108,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Constructs an empty ciphertext with given capacity. In addition to 
-        /// the capacity, the allocation size is determined by the given 
+        /// Constructs an empty ciphertext with given capacity. In addition to
+        /// the capacity, the allocation size is determined by the given
         /// encryption parameters.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -120,11 +120,11 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Ciphertext(SEALContext context, 
+        public Ciphertext(SEALContext context,
                     ParmsId parmsId, ulong sizeCapacity,
                     MemoryPoolHandle pool = null)
         {
@@ -164,9 +164,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Allocates enough memory to accommodate the backing array of a ciphertext 
-        /// with given capacity. In addition to the capacity, the allocation size is 
-        /// determined by the encryption parameters corresponing to the given 
+        /// Allocates enough memory to accommodate the backing array of a ciphertext
+        /// with given capacity. In addition to the capacity, the allocation size is
+        /// determined by the encryption parameters corresponing to the given
         /// parmsId.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -176,7 +176,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption 
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
         public void Reserve(SEALContext context,
@@ -192,8 +192,8 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Allocates enough memory to accommodate the backing array of a ciphertext
-        /// with given capacity. In addition to the capacity, the allocation size is 
-        /// determined by the highest-level parameters associated to the given 
+        /// with given capacity. In addition to the capacity, the allocation size is
+        /// determined by the highest-level parameters associated to the given
         /// SEALContext.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -212,8 +212,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Allocates enough memory to accommodate the backing array of a ciphertext 
-        /// with given capacity. In addition to the capacity, the allocation size is 
+        /// Allocates enough memory to accommodate the backing array of a ciphertext
+        /// with given capacity. In addition to the capacity, the allocation size is
         /// determined by the current encryption parameters.
         /// </summary>
         /// <param name="sizeCapacity">The capacity</param>
@@ -224,10 +224,10 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Resizes the ciphertext to given size, reallocating if the capacity 
-        /// of the ciphertext is too small. The ciphertext parameters are 
+        /// Resizes the ciphertext to given size, reallocating if the capacity
+        /// of the ciphertext is too small. The ciphertext parameters are
         /// determined by the given SEALContext and parmsId.
-        /// 
+        ///
         /// This function is mainly intended for internal use and is called
         /// automatically by functions such as Evaluator::multiply and
         /// Evaluator::relinearize. A normal user should never have a reason
@@ -257,12 +257,12 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Resizes the ciphertext to given size, reallocating if the capacity
         /// of the ciphertext is too small. The ciphertext parameters are
-        /// determined by the highest-level parameters associated to the given 
-        /// SEALContext. 
-        /// 
-        /// This function is mainly intended for internal use and is called 
-        /// automatically by functions such as Evaluator::multiply and 
-        /// Evaluator::relinearize. A normal user should never have a reason 
+        /// determined by the highest-level parameters associated to the given
+        /// SEALContext.
+        ///
+        /// This function is mainly intended for internal use and is called
+        /// automatically by functions such as Evaluator::multiply and
+        /// Evaluator::relinearize. A normal user should never have a reason
         /// to manually resize a ciphertext.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -282,7 +282,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Resizes the ciphertext to given size, reallocating if the capacity
         /// of the ciphertext is too small.
-        /// 
+        ///
         /// This function is mainly intended for internal use and is called
         /// automatically by functions such as Evaluator::multiply and
         /// Evaluator::relinearize. A normal user should never have a reason
@@ -309,7 +309,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Resets the ciphertext. This function releases any memory allocated 
+        /// Resets the ciphertext. This function releases any memory allocated
         /// by the ciphertext, returning it to the memory pool. It also sets all
         /// encryption parameter specific size information to zero.
         /// </summary>
@@ -321,7 +321,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Copies a given ciphertext to the current one.
         /// </summary>
-        /// 
+        ///
         /// <param name="assign">The ciphertext to copy from</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
         public void Set(Ciphertext assign)
@@ -333,7 +333,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the polynomial coefficient at a particular index in the ciphertext data. If the 
+        /// Returns the polynomial coefficient at a particular index in the ciphertext data. If the
         /// polynomial modulus has degree N, and the number of primes in the coefficient modulus is K, then
         /// the ciphertext contains size*N*K coefficients. Thus, the index has a range of [0, size*N*K).
         /// </summary>
@@ -373,15 +373,15 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Get the value of a coefficient at the given index from
-        /// a particular polynomial in the ciphertext 
-        /// data. Note that Microsoft SEAL stores each polynomial in the ciphertext 
-        /// modulo all of the K primes in the coefficient modulus. The data 
+        /// a particular polynomial in the ciphertext
+        /// data. Note that Microsoft SEAL stores each polynomial in the ciphertext
+        /// modulo all of the K primes in the coefficient modulus. The data
         /// returned by this function is to the beginning (constant coefficient)
         /// of the first one of these K polynomials.
         /// </summary>
         /// <param name="polyIndex">The index of the polynomial in the ciphertext</param>
         /// <param name="coeffIndex">The index of the polynomial data</param>
-        /// <exception cref="IndexOutOfRangeException">if polyIndex is less than 0 or bigger 
+        /// <exception cref="IndexOutOfRangeException">if polyIndex is less than 0 or bigger
         /// than the size of the ciphertext</exception>
         /// <exception cref="IndexOutOfRangeException">if coeffIndex is less than 0 or bigger
         /// than the size of the ciphertext</exception>
@@ -404,8 +404,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the number of primes in the coefficient modulus of the 
-        /// associated encryption parameters. This directly affects the 
+        /// Returns the number of primes in the coefficient modulus of the
+        /// associated encryption parameters. This directly affects the
         /// allocation size of the ciphertext.
         /// </summary>
         public ulong CoeffModCount
@@ -419,7 +419,7 @@ namespace Microsoft.Research.SEAL
 
 
         /// <summary>
-        /// Returns the degree of the polynomial modulus of the associated 
+        /// Returns the degree of the polynomial modulus of the associated
         /// encryption parameters.This directly affects the allocation size
         /// of the ciphertext.
         /// </summary>
@@ -433,8 +433,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the capacity of the allocation. This means the largest size 
-        /// of the ciphertext that can be stored in the current allocation with 
+        /// Returns the capacity of the allocation. This means the largest size
+        /// of the ciphertext that can be stored in the current allocation with
         /// the current encryption parameters.
         /// </summary>
         public ulong SizeCapacity
@@ -484,8 +484,8 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Check whether the current ciphertext is valid for a given SEALContext.
-        /// If the given SEALContext is not set, the encryption parameters are invalid, 
-        /// or the ciphertext data does not match the SEALContext, this function 
+        /// If the given SEALContext is not set, the encryption parameters are invalid,
+        /// or the ciphertext data does not match the SEALContext, this function
         /// returns false. Otherwise, returns true.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -518,10 +518,10 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Check whether the current ciphertext is transparent, i.e. does not require 
-        /// a secret key to decrypt. In typical security models such transparent 
-        /// ciphertexts would not be considered to be valid. Starting from the second 
-        /// polynomial in the current ciphertext, this function returns true if all 
+        /// Check whether the current ciphertext is transparent, i.e. does not require
+        /// a secret key to decrypt. In typical security models such transparent
+        /// ciphertexts would not be considered to be valid. Starting from the second
+        /// polynomial in the current ciphertext, this function returns true if all
         /// following coefficients are identically zero. Otherwise, returns false.
         /// </summary>
         public bool IsTransparent()
@@ -531,8 +531,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Saves the ciphertext to an output stream. The output is in binary 
-        /// format and not human-readable. The output stream must have the 
+        /// Saves the ciphertext to an output stream. The output is in binary
+        /// format and not human-readable. The output stream must have the
         /// "binary" flag set.
         /// </summary>
         /// <param name="stream">The stream to save the ciphertext to</param>
@@ -563,7 +563,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Loads a ciphertext from an input stream overwriting the current ciphertext.
         /// No checking of the validity of the ciphertext data against encryption
-        /// parameters is performed. This function should not be used unless the 
+        /// parameters is performed. This function should not be used unless the
         /// ciphertext comes from a fully trusted source.
         /// </summary>
         /// <param name="stream">The stream to load the ciphertext from</param>

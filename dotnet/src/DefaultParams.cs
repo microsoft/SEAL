@@ -15,7 +15,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the default coefficients modulus for a given polynomial modulus degree.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Returns the default coefficients modulus for a given polynomial modulus degree.
         /// The polynomial modulus and the coefficient modulus obtained in this way should
@@ -58,7 +58,7 @@ namespace Microsoft.Research.SEAL
         /// Returns the default coefficients modulus for a given polynomial modulus
         /// degree.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Returns the default coefficients modulus for a given polynomial modulus degree.
         /// The polynomial modulus and the coefficient modulus obtained in this way should
@@ -101,7 +101,7 @@ namespace Microsoft.Research.SEAL
         /// Returns the default coefficients modulus for a given polynomial modulus
         /// degree.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Returns the default coefficients modulus for a given polynomial modulus degree.
         /// The polynomial modulus and the coefficient modulus obtained in this way should
@@ -143,9 +143,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a 60-bit coefficient modulus prime.
         /// </summary>
-        /// 
+        ///
         /// <param name="index">The list index of the prime</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">if index is not within 
+        /// <exception cref="System.ArgumentOutOfRangeException">if index is not within
         /// [0, 64)</exception>
         public static SmallModulus SmallMods60Bit(ulong index)
         {
@@ -165,7 +165,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a 50-bit coefficient modulus prime.
         /// </summary>
-        /// 
+        ///
         /// <param name="index">The list index of the prime</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if index is not within
         /// [0, 64)</exception>
@@ -187,7 +187,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a 40-bit coefficient modulus prime.
         /// </summary>
-        /// 
+        ///
         /// <param name="index">The list index of the prime</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if index is not within
         /// [0, 64)</exception>
@@ -209,7 +209,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a 30-bit coefficient modulus prime.
         /// </summary>
-        /// 
+        ///
         /// <param name="index">The list index of the prime</param>
         /// <exception cref="System.ArgumentOutOfRangeException">if index is not within
         /// [0, 64)</exception>

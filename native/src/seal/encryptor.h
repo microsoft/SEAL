@@ -16,7 +16,7 @@
 namespace seal
 {
     /**
-    Encrypts Plaintext objects into Ciphertext objects. Constructing an Encryptor 
+    Encrypts Plaintext objects into Ciphertext objects. Constructing an Encryptor
     requires a SEALContext with valid encryption parameters, and the public key.
 
     @par Overloads
@@ -43,7 +43,7 @@ namespace seal
     {
     public:
         /**
-        Creates an Encryptor instance initialized with the specified SEALContext 
+        Creates an Encryptor instance initialized with the specified SEALContext
         and public key.
 
         @param[in] context The SEALContext
@@ -55,45 +55,45 @@ namespace seal
         Encryptor(std::shared_ptr<SEALContext> context, const PublicKey &public_key);
 
         /**
-        Encrypts a plaintext and stores the result in the destination parameter. 
-        Dynamic memory allocations in the process are allocated from the memory 
+        Encrypts a plaintext and stores the result in the destination parameter.
+        Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
 
         @param[in] plain The plaintext to encrypt
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext 
+        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if plain is not valid for the encryption parameters
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        void encrypt(const Plaintext &plain, Ciphertext &destination, 
+        void encrypt(const Plaintext &plain, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
-        Encrypts a zero plaintext and stores the result in the destination parameter. 
+        Encrypts a zero plaintext and stores the result in the destination parameter.
         The encryption parameters for the resulting ciphertext correspond to the given
-        parms_id. Dynamic memory allocations in the process are allocated from the memory 
+        parms_id. Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
 
         @param[in] parms_id The parms_id for the resulting ciphertext
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext 
+        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if parms_id is not valid for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        void encrypt_zero( 
+        void encrypt_zero(
             parms_id_type parms_id,
             Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
-        Encrypts a zero plaintext and stores the result in the destination parameter. 
-        The encryption parameters for the resulting ciphertext correspond to the 
-        highest (data) level in the modulus switching chain. Dynamic memory allocations 
-        in the process are allocated from the memory pool pointed to by the given 
+        Encrypts a zero plaintext and stores the result in the destination parameter.
+        The encryption parameters for the resulting ciphertext correspond to the
+        highest (data) level in the modulus switching chain. Dynamic memory allocations
+        in the process are allocated from the memory pool pointed to by the given
         MemoryPoolHandle.
 
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext 
+        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -112,7 +112,7 @@ namespace seal
 
         Encryptor &operator =(Encryptor &&assign) = delete;
 
-        void preencrypt(const std::uint64_t *plain, std::size_t plain_coeff_count, 
+        void preencrypt(const std::uint64_t *plain, std::size_t plain_coeff_count,
             const SEALContext::ContextData &context_data, std::uint64_t *destination);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();

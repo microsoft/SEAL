@@ -67,7 +67,7 @@ namespace seal
         generate_pk();
     }
 
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context, 
+    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context,
         const SecretKey &secret_key, const PublicKey &public_key) :
         context_(move(context))
     {
@@ -102,7 +102,7 @@ namespace seal
         public_key_ = public_key;
         secret_key_ = secret_key;
 
-        // Set the secret_key_array to have size 1 (first power of secret) 
+        // Set the secret_key_array to have size 1 (first power of secret)
         secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
         set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count,
             secret_key_array_.get());
@@ -136,11 +136,11 @@ namespace seal
         auto &small_ntt_tables = context_data.small_ntt_tables();
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            // Transform the secret s into NTT representation. 
+            // Transform the secret s into NTT representation.
             ntt_negacyclic_harvey(secret_key + (i * coeff_count), small_ntt_tables[i]);
         }
 
-        // Set the secret_key_array to have size 1 (first power of secret) 
+        // Set the secret_key_array to have size 1 (first power of secret)
         secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
         set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count,
             secret_key_array_.get());
@@ -185,7 +185,7 @@ namespace seal
 
         // Set the parms_id for public key
         public_key_.parms_id() = parms.parms_id();
-        
+
         // Public key has been generated
         pk_generated_ = true;
     }
@@ -212,7 +212,7 @@ namespace seal
         // Create the RelinKeys object to return
         RelinKeys relin_keys;
 
-        // Assume the secret key is already transformed into NTT form. 
+        // Assume the secret key is already transformed into NTT form.
         generate_kswitch_keys(
             secret_key_array_.get() + coeff_mod_count * coeff_count,
             count,
@@ -331,14 +331,14 @@ namespace seal
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         uint64_t m = coeff_count << 1;
         int logn = get_power_of_two(static_cast<uint64_t>(coeff_count));
-        
+
         vector<uint64_t> logn_galois_keys{};
 
         // Generate Galois keys for m - 1 (X -> X^{m-1})
         logn_galois_keys.push_back(m - 1);
 
         // Generate Galois key for power of 3 mod m (X -> X^{3^k}) and
-        // for negative power of 3 mod m (X -> X^{-3^k}) 
+        // for negative power of 3 mod m (X -> X^{-3^k})
         uint64_t two_power_of_three = 3;
         uint64_t neg_two_power_of_three = 0;
         try_mod_inverse(3, m, neg_two_power_of_three);
@@ -405,26 +405,26 @@ namespace seal
         // Compute powers of secret key until max_power
         auto new_secret_key_array(allocate_poly(
             new_size * coeff_count, coeff_mod_count, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, 
+        set_poly_poly(secret_key_array_.get(), old_size * coeff_count,
             coeff_mod_count, new_secret_key_array.get());
 
         size_t poly_ptr_increment = coeff_count * coeff_mod_count;
-        uint64_t *prev_poly_ptr = new_secret_key_array.get() + 
+        uint64_t *prev_poly_ptr = new_secret_key_array.get() +
             (old_size - 1) * poly_ptr_increment;
         uint64_t *next_poly_ptr = prev_poly_ptr + poly_ptr_increment;
 
-        // Since all of the key powers in secret_key_array_ are already 
-        // NTT transformed, to get the next one we simply need to compute 
-        // a dyadic product of the last one with the first one 
+        // Since all of the key powers in secret_key_array_ are already
+        // NTT transformed, to get the next one we simply need to compute
+        // a dyadic product of the last one with the first one
         // [which is equal to NTT(secret_key_)].
         for (size_t i = old_size; i < new_size; i++)
         {
             for (size_t j = 0; j < coeff_mod_count; j++)
             {
                 dyadic_product_coeffmod(
-                    prev_poly_ptr + (j * coeff_count), 
+                    prev_poly_ptr + (j * coeff_count),
                     new_secret_key_array.get() + (j * coeff_count),
-                    coeff_count, coeff_modulus[j], 
+                    coeff_count, coeff_modulus[j],
                     next_poly_ptr + (j * coeff_count));
             }
             prev_poly_ptr = next_poly_ptr;

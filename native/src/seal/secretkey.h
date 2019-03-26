@@ -101,14 +101,14 @@ namespace seal
         }
 
         /**
-        Check whether the current SecretKey is valid for a given SEALContext. If 
-        the given SEALContext is not set, the encryption parameters are invalid, 
-        or the SecretKey data does not match the SEALContext, this function returns 
+        Check whether the current SecretKey is valid for a given SEALContext. If
+        the given SEALContext is not set, the encryption parameters are invalid,
+        or the SecretKey data does not match the SEALContext, this function returns
         false. Otherwise, returns true.
 
         @param[in] context The SEALContext
         */
-        inline bool is_valid_for(std::shared_ptr<const SEALContext> context) const 
+        inline bool is_valid_for(std::shared_ptr<const SEALContext> context) const
         {
             // Check metadata
             if (!is_metadata_valid_for(context))
@@ -121,15 +121,15 @@ namespace seal
         }
 
         /**
-        Check whether the current SecretKey is valid for a given SEALContext. If 
-        the given SEALContext is not set, the encryption parameters are invalid, 
-        or the SecretKey data does not match the SEALContext, this function returns 
+        Check whether the current SecretKey is valid for a given SEALContext. If
+        the given SEALContext is not set, the encryption parameters are invalid,
+        or the SecretKey data does not match the SEALContext, this function returns
         false. Otherwise, returns true. This function only checks the metadata
         and not the secret key data itself.
 
         @param[in] context The SEALContext
         */
-        inline bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const 
+        inline bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const
         {
             // Verify parameters
             if (!context || !context->parameters_set())
@@ -137,12 +137,12 @@ namespace seal
                 return false;
             }
             auto parms_id = context->key_parms_id();
-            return sk_.is_metadata_valid_for(std::move(context)) && 
+            return sk_.is_metadata_valid_for(std::move(context)) &&
                 sk_.is_ntt_form() && sk_.parms_id() == parms_id;
         }
 
         /**
-        Saves the SecretKey to an output stream. The output is in binary format 
+        Saves the SecretKey to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
         @param[in] stream The stream to save the SecretKey to
@@ -156,7 +156,7 @@ namespace seal
         /**
         Loads a SecretKey from an input stream overwriting the current SecretKey.
         No checking of the validity of the SecretKey data against encryption
-        parameters is performed. This function should not be used unless the 
+        parameters is performed. This function should not be used unless the
         SecretKey comes from a fully trusted source.
 
         @param[in] stream The stream to load the SecretKey from

@@ -21,11 +21,11 @@ namespace seal
     is a polynomial of degree N, in batching the idea is to view a plaintext polynomial as
     a 2-by-(N/2) matrix of integers modulo plaintext modulus. Normal homomorphic computations
     operate on such encrypted matrices element (slot) wise. However, special rotation
-    operations allow us to also rotate the matrix rows cyclically in either direction, and 
+    operations allow us to also rotate the matrix rows cyclically in either direction, and
     rotate the columns (swap the rows). These operations require the Galois keys.
 
     @par Thread Safety
-    In general, reading from GaloisKeys is thread-safe as long as no other thread is 
+    In general, reading from GaloisKeys is thread-safe as long as no other thread is
     concurrently mutating it. This is due to the underlying data structure storing the
     Galois keys not being thread-safe.
 
@@ -57,7 +57,7 @@ namespace seal
         @throws std::invalid_argument if the key corresponding to galois_elt does not exist
         */
         inline auto &key(std::uint64_t galois_elt) const
-        {            
+        {
             if (!has_key(galois_elt))
             {
                 throw std::invalid_argument("requested key does not exist");

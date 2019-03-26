@@ -29,24 +29,24 @@ namespace Microsoft.Research.SEAL
 
     /// <summary>
     /// Represents the user-customizable encryption scheme settings.
-    /// </summary> 
-    /// 
+    /// </summary>
+    ///
     /// <remarks>
     /// <para>
     /// Represents user-customizable encryption scheme settings. The parameters (most
-    /// importantly PolyModulus, CoeffModulus, PlainModulus) significantly affect the 
-    /// performance, capabilities, and security of the encryption scheme. Once an 
-    /// instance of EncryptionParameters is populated with appropriate parameters, it 
-    /// can be used to create an instance of the <see cref="SEALContext" /> class, 
-    /// which verifies the validity of the parameters, and performs necessary 
+    /// importantly PolyModulus, CoeffModulus, PlainModulus) significantly affect the
+    /// performance, capabilities, and security of the encryption scheme. Once an
+    /// instance of EncryptionParameters is populated with appropriate parameters, it
+    /// can be used to create an instance of the <see cref="SEALContext" /> class,
+    /// which verifies the validity of the parameters, and performs necessary
     /// pre-computations.
     /// </para>
     /// <para>
     /// Picking appropriate encryption parameters is essential to enable a particular
     /// application while balancing performance and security. Some encryption settings
     /// will not allow some inputs (e.g. attempting to encrypt a polynomial with more
-    /// coefficients than PolyModulus or larger coefficients than PlainModulus) or 
-    /// support the desired computations (with noise growing too fast due to too large 
+    /// coefficients than PolyModulus or larger coefficients than PlainModulus) or
+    /// support the desired computations (with noise growing too fast due to too large
     /// PlainModulus and too small CoeffModulus).
     /// </para>
     /// <para>
@@ -54,17 +54,17 @@ namespace Microsoft.Research.SEAL
     /// the currently set encryption parameters. This hash is then stored by all further
     /// objects created for these encryption parameters, e.g. <see cref="SEALContext" />,
     /// <see cref="KeyGenerator" />, <see cref="Encryptor" />, <see cref="Decryptor" />,
-    /// <see cref="Evaluator" />, all secret and public keys, and ciphertexts. The hash 
-    /// block is not intended to be directly modified by the user, and is used internally 
+    /// <see cref="Evaluator" />, all secret and public keys, and ciphertexts. The hash
+    /// block is not intended to be directly modified by the user, and is used internally
     /// to perform quick input compatibility checks.
     /// </para>
     /// <para>
     /// In general, reading from EncryptionParameters is thread-safe, while mutating is not.
     /// </para>
     /// <para>
-    /// Choosing inappropriate encryption parameters may lead to an encryption scheme 
-    /// that is not secure, does not perform well, and/or does not support the input 
-    /// and computation of the desired application. We highly recommend consulting an 
+    /// Choosing inappropriate encryption parameters may lead to an encryption scheme
+    /// that is not secure, does not perform well, and/or does not support the input
+    /// and computation of the desired application. We highly recommend consulting an
     /// expert in RLWE-based encryption when selecting parameters, as this is where
     /// inexperienced users seem to most often make critical mistakes.
     /// </para>
@@ -74,10 +74,10 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Creates an empty encryption parameters.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
-        /// Creates an empty encryption parameters. At a minimum, the user needs to specify 
-        /// the parameters <see cref="PolyModulusDegree"/>, <see cref="CoeffModulus"/>, and 
+        /// Creates an empty encryption parameters. At a minimum, the user needs to specify
+        /// the parameters <see cref="PolyModulusDegree"/>, <see cref="CoeffModulus"/>, and
         /// <see cref="PlainModulus"/> for the parameters to be valid.
         /// </remarks>
         /// <param name="scheme">Scheme for the encryption parameters</param>
@@ -91,7 +91,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Creates a copy of a given instance of EncryptionParameters.
         /// </summary>
-        /// 
+        ///
         /// <param name="copy">The EncryptionParameters to copy from</param>
         /// <exception cref="ArgumentNullException">if copy is null</exception>
         public EncryptionParameters(EncryptionParameters copy)
@@ -115,10 +115,10 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Overwrites the EncryptionParameters instance with a copy of a given 
+        /// Overwrites the EncryptionParameters instance with a copy of a given
         /// instance.
         /// </summary>
-        /// 
+        ///
         /// <param name="assign">The EncryptionParameters to copy from</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
         public void Set(EncryptionParameters assign)
@@ -286,7 +286,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the currently set maximum deviation of the noise distribution.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Returns the currently set maximum deviation of the noise distribution. This value
         /// cannot be directly controlled by the user, and is automatically set to be an
@@ -314,7 +314,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>Saves the EncryptionParameters to an output stream.</summary>
-        /// 
+        ///
         /// <remarks>
         /// Saves the EncryptionParameters to an output stream. The output is in binary format
         /// and is not human-readable. The output stream must have the "Binary" flag set.
@@ -354,7 +354,7 @@ namespace Microsoft.Research.SEAL
         /// Loads the EncryptionParameters from an input stream overwriting the current
         /// EncryptionParameters.
         /// </summary>
-        /// 
+        ///
         /// <param name="stream">The stream to load the EncryptionParameters from</param>
         /// <exception cref="System.ArgumentNullException">if stream is null</exception>
         /// <exception cref="System.ArgumentException">if parameters cannot be read correctly</exception>
@@ -449,10 +449,10 @@ namespace Microsoft.Research.SEAL
         #region IEquatable<EncryptionParameters> methods
 
         /// <summary>
-        /// Compares a given set of encryption parameters to the current set of 
+        /// Compares a given set of encryption parameters to the current set of
         /// encryption parameters.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Compares a given set of encryption parameters to the current set of encryption
         /// parameters. The comparison is performed by comparing hash blocks of the parameter

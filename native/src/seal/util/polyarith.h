@@ -15,8 +15,8 @@ namespace seal
     namespace util
     {
         inline void right_shift_poly_coeffs(
-            const std::uint64_t *poly, std::size_t coeff_count, 
-            std::size_t coeff_uint64_count, int shift_amount, 
+            const std::uint64_t *poly, std::size_t coeff_count,
+            std::size_t coeff_uint64_count, int shift_amount,
             std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -33,8 +33,8 @@ namespace seal
             }
         }
 
-        inline void negate_poly(const std::uint64_t *poly, 
-            std::size_t coeff_count, std::size_t coeff_uint64_count, 
+        inline void negate_poly(const std::uint64_t *poly,
+            std::size_t coeff_count, std::size_t coeff_uint64_count,
             std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -55,8 +55,8 @@ namespace seal
             }
         }
 
-        inline void add_poly_poly(const std::uint64_t *operand1, 
-            const std::uint64_t *operand2, std::size_t coeff_count, 
+        inline void add_poly_poly(const std::uint64_t *operand1,
+            const std::uint64_t *operand2, std::size_t coeff_count,
             std::size_t coeff_uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -82,8 +82,8 @@ namespace seal
             }
         }
 
-        inline void sub_poly_poly(const std::uint64_t *operand1, 
-            const std::uint64_t *operand2, std::size_t coeff_count, 
+        inline void sub_poly_poly(const std::uint64_t *operand1,
+            const std::uint64_t *operand2, std::size_t coeff_count,
             std::size_t coeff_uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -110,14 +110,14 @@ namespace seal
         }
 
         void multiply_poly_poly(
-            const std::uint64_t *operand1, std::size_t operand1_coeff_count, 
-            std::size_t operand1_coeff_uint64_count, const std::uint64_t *operand2, 
-            std::size_t operand2_coeff_count, std::size_t operand2_coeff_uint64_count, 
-            std::size_t result_coeff_count, std::size_t result_coeff_uint64_count, 
+            const std::uint64_t *operand1, std::size_t operand1_coeff_count,
+            std::size_t operand1_coeff_uint64_count, const std::uint64_t *operand2,
+            std::size_t operand2_coeff_count, std::size_t operand2_coeff_uint64_count,
+            std::size_t result_coeff_count, std::size_t result_coeff_uint64_count,
             std::uint64_t *result, MemoryPool &pool);
 
-        inline void poly_infty_norm(const std::uint64_t *poly, 
-            std::size_t coeff_count, std::size_t coeff_uint64_count, 
+        inline void poly_infty_norm(const std::uint64_t *poly,
+            std::size_t coeff_count, std::size_t coeff_uint64_count,
             std::uint64_t *result)
         {
             set_zero_uint(coeff_uint64_count, result);
@@ -132,16 +132,16 @@ namespace seal
             }
         }
 
-        void poly_eval_poly(const std::uint64_t *poly_to_eval, 
-            std::size_t poly_to_eval_coeff_count, 
-            std::size_t poly_to_eval_coeff_uint64_count, const std::uint64_t *value, 
-            std::size_t value_coeff_count, std::size_t value_coeff_uint64_count, 
-            std::size_t result_coeff_count, std::size_t result_coeff_uint64_count, 
+        void poly_eval_poly(const std::uint64_t *poly_to_eval,
+            std::size_t poly_to_eval_coeff_count,
+            std::size_t poly_to_eval_coeff_uint64_count, const std::uint64_t *value,
+            std::size_t value_coeff_count, std::size_t value_coeff_uint64_count,
+            std::size_t result_coeff_count, std::size_t result_coeff_uint64_count,
             std::uint64_t *result, MemoryPool &pool);
 
-        void exponentiate_poly(const std::uint64_t *poly, std::size_t poly_coeff_count, 
-            std::size_t poly_coeff_uint64_count, const std::uint64_t *exponent, 
-            std::size_t exponent_uint64_count, std::size_t result_coeff_count, 
+        void exponentiate_poly(const std::uint64_t *poly, std::size_t poly_coeff_count,
+            std::size_t poly_coeff_uint64_count, const std::uint64_t *exponent,
+            std::size_t exponent_uint64_count, std::size_t result_coeff_count,
             std::size_t result_coeff_uint64_count, std::uint64_t *result, MemoryPool &pool);
     }
 }

@@ -33,7 +33,7 @@ namespace seal
             {
                 return x;
             }
-            else 
+            else
             {
                 std::uint64_t f = x % y;
                 if (f == 0)
@@ -87,7 +87,7 @@ namespace seal
             return std::make_tuple(x, prev_a, prev_b);
         }
 
-        inline bool try_mod_inverse(std::uint64_t value, 
+        inline bool try_mod_inverse(std::uint64_t value,
             std::uint64_t modulus, std::uint64_t &result)
         {
 #ifdef SEAL_DEBUG
@@ -118,20 +118,20 @@ namespace seal
         }
 
         std::vector<std::uint64_t> multiplicative_orders(
-            std::vector<std::uint64_t> conjugate_classes, 
+            std::vector<std::uint64_t> conjugate_classes,
             std::uint64_t modulus);
 
-        std::vector<std::uint64_t> conjugate_classes(std::uint64_t modulus, 
+        std::vector<std::uint64_t> conjugate_classes(std::uint64_t modulus,
             std::uint64_t subgroup_generator);
 
-        void babystep_giantstep(std::uint64_t modulus, 
-            std::vector<std::uint64_t> &baby_steps, 
+        void babystep_giantstep(std::uint64_t modulus,
+            std::vector<std::uint64_t> &baby_steps,
             std::vector<std::uint64_t> &giant_steps);
 
         auto decompose_babystep_giantstep(
-            std::uint64_t modulus, 
-            std::uint64_t input, 
-            const std::vector<std::uint64_t> &baby_steps, 
+            std::uint64_t modulus,
+            std::uint64_t input,
+            const std::vector<std::uint64_t> &baby_steps,
             const std::vector<std::uint64_t> &giant_steps)
             -> std::pair<std::size_t, std::size_t>;
     }

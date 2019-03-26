@@ -98,7 +98,7 @@ namespace SEALNetTest
             cipher5.Resize(context, 6ul);
             Assert.AreEqual(2ul, cipher5.SizeCapacity);
         }
-        
+
         [TestMethod]
         public void ReleaseTest()
         {

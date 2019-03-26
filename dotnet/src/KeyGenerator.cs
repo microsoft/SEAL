@@ -10,8 +10,8 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
-    /// Generates matching secret key and public key. An existing KeyGenerator can 
-    /// also at any time be used to generate relinearization keys and Galois keys. 
+    /// Generates matching secret key and public key. An existing KeyGenerator can
+    /// also at any time be used to generate relinearization keys and Galois keys.
     /// Constructing a KeyGenerator requires only a SEALContext.
     /// </summary>
     /// <see cref="EncryptionParameters">see EncryptionParameters for more details on encryption parameters.</see>
@@ -24,13 +24,13 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Creates a KeyGenerator initialized with the specified SEALContext.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Creates a KeyGenerator initialized with the specified <see cref="SEALContext" />.
         /// Dynamically allocated member variables are allocated from the global memory pool.
         /// </remarks>
         /// <param name="context">The SEALContext</param>
-        /// <exception cref="ArgumentException">if encryption parameters are not 
+        /// <exception cref="ArgumentException">if encryption parameters are not
         /// valid</exception>
         /// <exception cref="ArgumentNullException">if context is null</exception>
         public KeyGenerator(SEALContext context)
@@ -44,9 +44,9 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Creates an KeyGenerator instance initialized with the specified
-        /// SEALContext and specified previously secret key. This can e.g. be used 
-        /// to increase the number of relinearization keys from what had earlier 
-        /// been generated, or to generate Galois keys in case they had not been 
+        /// SEALContext and specified previously secret key. This can e.g. be used
+        /// to increase the number of relinearization keys from what had earlier
+        /// been generated, or to generate Galois keys in case they had not been
         /// generated earlier.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -67,10 +67,10 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates an KeyGenerator instance initialized with the specified 
-        /// SEALContext and specified previously secret and public keys. This can 
-        /// e.g. be used to increase the number of relinearization keys from what 
-        /// had earlier been generated, or to generate Galois keys in case they 
+        /// Creates an KeyGenerator instance initialized with the specified
+        /// SEALContext and specified previously secret and public keys. This can
+        /// e.g. be used to increase the number of relinearization keys from what
+        /// had earlier been generated, or to generate Galois keys in case they
         /// had not been generated earlier.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -78,7 +78,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="publicKey">A previously generated public key</param>
         /// <exception cref="ArgumentNullException">if either context, secretKey or publicKey are null</exception>
         /// <exception cref="ArgumentException">if encryption parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if secretKey or publicKey is not valid 
+        /// <exception cref="ArgumentException">if secretKey or publicKey is not valid
         /// for encryption parameters</exception>
         public KeyGenerator(SEALContext context, SecretKey secretKey, PublicKey publicKey)
         {
@@ -137,7 +137,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Generates Galois keys.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Generates Galois keys. This function creates logarithmically many (in degree of the
         /// polynomial modulus) Galois keys that is sufficient to apply any Galois automorphism
@@ -159,24 +159,24 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Generates Galois keys.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Generates Galois keys. This function creates specific Galois keys that can be used to
         /// apply specific Galois automorphisms on encrypted data. The user needs to give as
         /// input a vector of Galois elements corresponding to the keys that are to be created.
-        /// 
+        ///
         /// The Galois elements are odd integers in the interval [1, M-1], where M = 2*N, and
-        /// N = degree(PolyModulus). Used with batching, a Galois element 3^i % M corresponds 
-        /// to a cyclic row rotation i steps to the left, and a Galois element 3^(N/2-i) % M 
-        /// corresponds to a cyclic row rotation i steps to the right. The Galois element M-1 
-        /// corresponds to a column rotation (row swap). In the polynomial view (not batching), 
+        /// N = degree(PolyModulus). Used with batching, a Galois element 3^i % M corresponds
+        /// to a cyclic row rotation i steps to the left, and a Galois element 3^(N/2-i) % M
+        /// corresponds to a cyclic row rotation i steps to the right. The Galois element M-1
+        /// corresponds to a column rotation (row swap). In the polynomial view (not batching),
         /// a Galois automorphism by a Galois element p changes Enc(plain(x)) to Enc(plain(x^p)).
         /// </remarks>
         /// <param name="decompositionBitCount">The decomposition bit count</param>
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <exception cref="ArgumentException">if decompositionBitCount is not
         /// within [1, 60]</exception>
-        /// <exception cref="ArgumentException">if the Galois elements are not 
+        /// <exception cref="ArgumentException">if the Galois elements are not
         /// valid</exception>
         public GaloisKeys GaloisKeys(int decompositionBitCount,
             IEnumerable<ulong> galoisElts)
@@ -190,12 +190,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Generates and returns Galois keys. This function creates specific Galois 
-        /// keys that can be used to apply specific Galois automorphisms on encrypted 
-        /// data. The user needs to give as input a vector of desired Galois rotation 
-        /// step counts, where negative step counts correspond to rotations to the 
-        /// right and positive step counts correspond to rotations to the left. 
-        /// A step count of zero can be used to indicate a column rotation in the BFV 
+        /// Generates and returns Galois keys. This function creates specific Galois
+        /// keys that can be used to apply specific Galois automorphisms on encrypted
+        /// data. The user needs to give as input a vector of desired Galois rotation
+        /// step counts, where negative step counts correspond to rotations to the
+        /// right and positive step counts correspond to rotations to the left.
+        /// A step count of zero can be used to indicate a column rotation in the BFV
         /// scheme complex conjugation in the CKKS scheme.
         /// </summary>
         /// <param name="decompositionBitCount">The decomposition bit count</param>

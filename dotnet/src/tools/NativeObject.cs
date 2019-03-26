@@ -8,7 +8,7 @@ namespace Microsoft.Research.SEAL.Tools
     /// <summary>
     /// Class that encapsulates the behavior of a class backed by a
     /// pointer to a native object.
-    /// 
+    ///
     /// In particular, this class encapsulates the correct disposal
     /// of the native pointer.
     /// </summary>

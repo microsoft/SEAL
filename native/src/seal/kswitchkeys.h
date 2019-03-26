@@ -20,8 +20,8 @@ namespace seal
     @par Keyswitching
     Concretely, keyswitching is used to change a ciphertext encrypted
     with one key to be encrypted with another key. It is a general technique
-    and is used in relinearization and galois rotation. A keyswitching key 
-    can contain a sequence (vector) of keys. In RelinKeys, each key is an 
+    and is used in relinearization and galois rotation. A keyswitching key
+    can contain a sequence (vector) of keys. In RelinKeys, each key is an
     encryption of a power of secret key. In GaloisKeys, each key corresponds
     to a type of rotation.
 

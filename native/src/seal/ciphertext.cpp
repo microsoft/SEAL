@@ -23,7 +23,7 @@ namespace seal
         scale_ = assign.scale_;
 
         // Then resize
-        resize_internal(assign.size_, assign.poly_modulus_degree_, 
+        resize_internal(assign.size_, assign.poly_modulus_degree_,
             assign.coeff_mod_count_);
 
         // Size is guaranteed to be OK now so copy over
@@ -59,7 +59,7 @@ namespace seal
             safe_cast<size_type>(parms.coeff_modulus().size()));
     }
 
-    void Ciphertext::reserve_internal(size_type size_capacity, 
+    void Ciphertext::reserve_internal(size_type size_capacity,
         size_type poly_modulus_degree, size_type coeff_mod_count)
     {
         if (size_capacity < SEAL_CIPHERTEXT_SIZE_MIN ||
@@ -68,7 +68,7 @@ namespace seal
             throw invalid_argument("invalid size_capacity");
         }
 
-        size_type new_data_capacity = 
+        size_type new_data_capacity =
             mul_safe(size_capacity, poly_modulus_degree, coeff_mod_count);
         size_type new_data_size = min<size_type>(new_data_capacity, data_.size());
 
@@ -110,7 +110,7 @@ namespace seal
             safe_cast<size_type>(parms.coeff_modulus().size()));
     }
 
-    void Ciphertext::resize_internal(size_type size, 
+    void Ciphertext::resize_internal(size_type size,
         size_type poly_modulus_degree, size_type coeff_mod_count)
     {
         if ((size < SEAL_CIPHERTEXT_SIZE_MIN && size != 0) ||
@@ -120,7 +120,7 @@ namespace seal
         }
 
         // Resize the data
-        size_type new_data_size = 
+        size_type new_data_size =
             mul_safe(size, poly_modulus_degree, coeff_mod_count);
         data_.resize(new_data_size);
 
@@ -185,7 +185,7 @@ namespace seal
             return false;
         }
 
-        // Check that size is either 0 or within right bounds 
+        // Check that size is either 0 or within right bounds
         if ((size_ < SEAL_CIPHERTEXT_SIZE_MIN && size_ != 0) ||
             size_ > SEAL_CIPHERTEXT_SIZE_MAX)
         {

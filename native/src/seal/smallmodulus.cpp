@@ -61,7 +61,7 @@ namespace seal
             value_ = 0;
             const_ratio_ = { { 0, 0, 0 } };
         }
-        else if ((value >> 62 != 0) || (value == uint64_t(0x4000000000000000)) || 
+        else if ((value >> 62 != 0) || (value == uint64_t(0x4000000000000000)) ||
             (value == 1))
         {
             throw invalid_argument("value can be at most 62 bits and cannot be 1");

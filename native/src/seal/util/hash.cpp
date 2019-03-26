@@ -80,7 +80,7 @@ namespace seal
             }
         }
 
-        void HashFunction::sha3_hash(const uint64_t *input, size_t uint64_count, 
+        void HashFunction::sha3_hash(const uint64_t *input, size_t uint64_count,
             sha3_block_type &sha3_block)
         {
 #ifdef SEAL_DEBUG

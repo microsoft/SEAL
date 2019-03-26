@@ -122,7 +122,7 @@ namespace SEALNetTest
             Assert.AreEqual(3ul, plaindest[2]);
             Assert.AreEqual(2ul, plaindest[3]);
         }
-        
+
         [TestMethod]
         public void AddPlainTest()
         {

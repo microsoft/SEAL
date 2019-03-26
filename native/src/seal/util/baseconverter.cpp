@@ -65,7 +65,7 @@ namespace seal
             coeff_count_ = coeff_count;
             coeff_base_mod_count_ = coeff_base.size();
             aux_base_mod_count_ = coeff_base.size();
-            
+
             // In some cases we might need to increase the size of the aux base by one, namely
             // we require K * n * t * q^2 < q * prod_i m_i * m_sk, where K takes into account
             // cross terms when larger size ciphertexts are used, and n is the "delta factor"
@@ -74,7 +74,7 @@ namespace seal
             int total_coeff_bit_count = accumulate(coeff_base.cbegin(), coeff_base.cend(), 0,
                 [](int result, auto &mod) { return result + mod.bit_count(); });
 
-            if (32 + small_plain_mod_.bit_count() + total_coeff_bit_count >= 
+            if (32 + small_plain_mod_.bit_count() + total_coeff_bit_count >=
                 61 * safe_cast<int>(coeff_base_mod_count_) + 61)
             {
                 aux_base_mod_count_++;
@@ -99,26 +99,26 @@ namespace seal
             }
 
             // We use a reversed order here for performance reasons
-            coeff_base_products_mod_aux_bsk_array_ = 
+            coeff_base_products_mod_aux_bsk_array_ =
                 allocate<Pointer<std::uint64_t>>(bsk_base_mod_count_, pool_);
             generate_n(
-                coeff_base_products_mod_aux_bsk_array_.get(), 
-                bsk_base_mod_count_, 
+                coeff_base_products_mod_aux_bsk_array_.get(),
+                bsk_base_mod_count_,
                 [&]() { return allocate_uint(coeff_base_mod_count_, pool_); });
 
             // We use a reversed order here for performance reasons
             aux_base_products_mod_coeff_array_ =
                 allocate<Pointer<std::uint64_t>>(coeff_base_mod_count_, pool_);
             generate_n(
-                aux_base_products_mod_coeff_array_.get(), 
-                coeff_base_mod_count_, 
+                aux_base_products_mod_coeff_array_.get(),
+                coeff_base_mod_count_,
                 [&]() { return allocate_uint(aux_base_mod_count_, pool_); });
 
             coeff_products_mod_plain_gamma_array_ =
                 allocate<Pointer<std::uint64_t>>(plain_gamma_count_, pool_);
             generate_n(
-                coeff_products_mod_plain_gamma_array_.get(), 
-                plain_gamma_count_, 
+                coeff_products_mod_plain_gamma_array_.get(),
+                plain_gamma_count_,
                 [&]() { return allocate_uint(coeff_base_mod_count_, pool_); });
 
             // Create moduli arrays
@@ -127,7 +127,7 @@ namespace seal
             bsk_base_array_ = allocate<SmallModulus>(bsk_base_mod_count_, pool_);
 
             copy(coeff_base.cbegin(), coeff_base.cend(), coeff_base_array_.get());
-            copy_n(global_variables::internal_mods::aux_small_mods.cbegin(), 
+            copy_n(global_variables::internal_mods::aux_small_mods.cbegin(),
                 aux_base_mod_count_, aux_base_array_.get());
             copy_n(aux_base_array_.get(), aux_base_mod_count_, bsk_base_array_.get());
             bsk_base_array_[bsk_base_mod_count_ - 1] = m_sk_;
@@ -142,15 +142,15 @@ namespace seal
                     return;
                 }
             }
-            
+
             size_t coeff_products_uint64_count = coeff_base_mod_count_;
             size_t aux_products_uint64_count = aux_base_mod_count_;
-            
+
             // Generate punctured products of coeff moduli
             coeff_products_array_ = allocate_zero_uint(
                 coeff_products_uint64_count * coeff_base_mod_count_, pool_);
             auto tmp_coeff(allocate_uint(coeff_products_uint64_count, pool_));
-            
+
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
                 coeff_products_array_[i * coeff_products_uint64_count] = 1;
@@ -158,11 +158,11 @@ namespace seal
                 {
                     if (i != j)
                     {
-                        multiply_uint_uint64(coeff_products_array_.get() + 
-                            (i * coeff_products_uint64_count), coeff_products_uint64_count, 
-                            coeff_base_array_[j].value(), coeff_products_uint64_count, 
+                        multiply_uint_uint64(coeff_products_array_.get() +
+                            (i * coeff_products_uint64_count), coeff_products_uint64_count,
+                            coeff_base_array_[j].value(), coeff_products_uint64_count,
                             tmp_coeff.get());
-                        set_uint_uint(tmp_coeff.get(), coeff_products_uint64_count, 
+                        set_uint_uint(tmp_coeff.get(), coeff_products_uint64_count,
                             coeff_products_array_.get() + (i * coeff_products_uint64_count));
                     }
                 }
@@ -180,11 +180,11 @@ namespace seal
                 {
                     if (i != j)
                     {
-                        multiply_uint_uint64(aux_products_array.get() + 
-                            (i * aux_products_uint64_count), aux_products_uint64_count, 
-                            aux_base_array_[j].value(), aux_products_uint64_count, 
+                        multiply_uint_uint64(aux_products_array.get() +
+                            (i * aux_products_uint64_count), aux_products_uint64_count,
+                            aux_base_array_[j].value(), aux_products_uint64_count,
                             tmp_aux.get());
-                        set_uint_uint(tmp_aux.get(), aux_products_uint64_count, 
+                        set_uint_uint(tmp_aux.get(), aux_products_uint64_count,
                             aux_products_array.get() + (i * aux_products_uint64_count));
                     }
                 }
@@ -194,54 +194,54 @@ namespace seal
             aux_base_products_mod_msk_array_ = allocate_uint(aux_base_mod_count_, pool_);
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
-                aux_base_products_mod_msk_array_[i] = 
-                    modulo_uint(aux_products_array.get() + (i * aux_products_uint64_count), 
+                aux_base_products_mod_msk_array_[i] =
+                    modulo_uint(aux_products_array.get() + (i * aux_products_uint64_count),
                         aux_products_uint64_count, m_sk_, pool_);
             }
 
-            // Compute inverse coeff base mod coeff base array (qi^(-1)) mod qi and 
+            // Compute inverse coeff base mod coeff base array (qi^(-1)) mod qi and
             // mtilde inv coeff products mod auxiliary moduli  (m_tilda*qi^(-1)) mod qi
-            inv_coeff_base_products_mod_coeff_array_ = 
+            inv_coeff_base_products_mod_coeff_array_ =
                 allocate_uint(coeff_base_mod_count_, pool_);
-            mtilde_inv_coeff_base_products_mod_coeff_array_ = 
+            mtilde_inv_coeff_base_products_mod_coeff_array_ =
                 allocate_uint(coeff_base_mod_count_, pool_);
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
-                inv_coeff_base_products_mod_coeff_array_[i] = 
-                    modulo_uint(coeff_products_array_.get() + (i * coeff_products_uint64_count), 
+                inv_coeff_base_products_mod_coeff_array_[i] =
+                    modulo_uint(coeff_products_array_.get() + (i * coeff_products_uint64_count),
                     coeff_products_uint64_count, coeff_base_array_[i], pool_);
-                if (!try_invert_uint_mod(inv_coeff_base_products_mod_coeff_array_[i], 
+                if (!try_invert_uint_mod(inv_coeff_base_products_mod_coeff_array_[i],
                     coeff_base_array_[i], inv_coeff_base_products_mod_coeff_array_[i]))
                 {
                     reset();
                     return;
                 }
-                mtilde_inv_coeff_base_products_mod_coeff_array_[i] = 
-                    multiply_uint_uint_mod(inv_coeff_base_products_mod_coeff_array_[i], 
+                mtilde_inv_coeff_base_products_mod_coeff_array_[i] =
+                    multiply_uint_uint_mod(inv_coeff_base_products_mod_coeff_array_[i],
                     m_tilde_.value(), coeff_base_array_[i]);
             }
-            
-            // Compute inverse auxiliary moduli mod auxiliary moduli (mi^(-1)) mod mi 
+
+            // Compute inverse auxiliary moduli mod auxiliary moduli (mi^(-1)) mod mi
             inv_aux_base_products_mod_aux_array_ = allocate_uint(aux_base_mod_count_, pool_);
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
-                inv_aux_base_products_mod_aux_array_[i] = 
-                    modulo_uint(aux_products_array.get() + (i * aux_products_uint64_count), 
+                inv_aux_base_products_mod_aux_array_[i] =
+                    modulo_uint(aux_products_array.get() + (i * aux_products_uint64_count),
                         aux_products_uint64_count, aux_base_array_[i], pool_);
-                if (!try_invert_uint_mod(inv_aux_base_products_mod_aux_array_[i], 
+                if (!try_invert_uint_mod(inv_aux_base_products_mod_aux_array_[i],
                     aux_base_array_[i], inv_aux_base_products_mod_aux_array_[i]))
                 {
                     reset();
                     return;
                 }
             }
-            
+
             // Compute coeff modulus products mod mtilde (qi) mod m_tilde_
             coeff_base_products_mod_mtilde_array_ = allocate_uint(coeff_base_mod_count_, pool_);
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
-                coeff_base_products_mod_mtilde_array_[i] = 
-                    modulo_uint(coeff_products_array_.get() + (i * coeff_products_uint64_count), 
+                coeff_base_products_mod_mtilde_array_[i] =
+                    modulo_uint(coeff_products_array_.get() + (i * coeff_products_uint64_count),
                         coeff_products_uint64_count, m_tilde_, pool_);
             }
 
@@ -250,22 +250,22 @@ namespace seal
                 allocate<Pointer<std::uint64_t>>(bsk_base_mod_count_, pool_);
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
-                coeff_base_products_mod_aux_bsk_array_[i] = 
+                coeff_base_products_mod_aux_bsk_array_[i] =
                     allocate_uint(coeff_base_mod_count_, pool_);
                 for (size_t j = 0; j < coeff_base_mod_count_; j++)
                 {
-                    coeff_base_products_mod_aux_bsk_array_[i][j] = 
-                        modulo_uint(coeff_products_array_.get() + (j * coeff_products_uint64_count), 
+                    coeff_base_products_mod_aux_bsk_array_[i][j] =
+                        modulo_uint(coeff_products_array_.get() + (j * coeff_products_uint64_count),
                             coeff_products_uint64_count, aux_base_array_[i], pool_);
                 }
             }
 
             // Add qi mod msk at the end of the array
-            coeff_base_products_mod_aux_bsk_array_[bsk_base_mod_count_ - 1] = 
+            coeff_base_products_mod_aux_bsk_array_[bsk_base_mod_count_ - 1] =
                 allocate_uint(coeff_base_mod_count_, pool_);
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
-                coeff_base_products_mod_aux_bsk_array_[bsk_base_mod_count_ - 1][i] = 
+                coeff_base_products_mod_aux_bsk_array_[bsk_base_mod_count_ - 1][i] =
                     modulo_uint(coeff_products_array_.get() + (i * coeff_products_uint64_count),
                         coeff_products_uint64_count, m_sk_, pool_);
             }
@@ -278,23 +278,23 @@ namespace seal
                 aux_base_products_mod_coeff_array_[i] = allocate_uint(aux_base_mod_count_, pool_);
                 for (size_t j = 0; j < aux_base_mod_count_; j++)
                 {
-                    aux_base_products_mod_coeff_array_[i][j] = 
-                        modulo_uint(aux_products_array.get() + (j * aux_products_uint64_count), 
+                    aux_base_products_mod_coeff_array_[i][j] =
+                        modulo_uint(aux_products_array.get() + (j * aux_products_uint64_count),
                             aux_products_uint64_count, coeff_base_array_[i], pool_);
                 }
             }
 
-            // Compute coeff moduli products inverse mod auxiliary mods  (qi^(-1)) mod mj U {msk} 
+            // Compute coeff moduli products inverse mod auxiliary mods  (qi^(-1)) mod mj U {msk}
             auto coeff_products_all(allocate_uint(coeff_base_mod_count_, pool_));
             auto tmp_products_all(allocate_uint(coeff_base_mod_count_, pool_));
             set_uint(1, coeff_base_mod_count_, coeff_products_all.get());
-            
+
             // Compute the product of all coeff moduli
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
-                multiply_uint_uint64(coeff_products_all.get(), coeff_base_mod_count_, 
+                multiply_uint_uint64(coeff_products_all.get(), coeff_base_mod_count_,
                     coeff_base_array_[i].value(), coeff_base_mod_count_, tmp_products_all.get());
-                set_uint_uint(tmp_products_all.get(), coeff_base_mod_count_, 
+                set_uint_uint(tmp_products_all.get(), coeff_base_mod_count_,
                     coeff_products_all.get());
             }
 
@@ -302,9 +302,9 @@ namespace seal
             inv_coeff_products_all_mod_aux_bsk_array_ = allocate_uint(bsk_base_mod_count_, pool_);
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
-                inv_coeff_products_all_mod_aux_bsk_array_[i] = modulo_uint(coeff_products_all.get(), 
+                inv_coeff_products_all_mod_aux_bsk_array_[i] = modulo_uint(coeff_products_all.get(),
                     coeff_base_mod_count_, aux_base_array_[i], pool_);
-                if (!try_invert_uint_mod(inv_coeff_products_all_mod_aux_bsk_array_[i], 
+                if (!try_invert_uint_mod(inv_coeff_products_all_mod_aux_bsk_array_[i],
                     aux_base_array_[i], inv_coeff_products_all_mod_aux_bsk_array_[i]))
                 {
                     reset();
@@ -313,7 +313,7 @@ namespace seal
             }
 
             // Add product of all coeffs mod msk at the end of the array
-            inv_coeff_products_all_mod_aux_bsk_array_[bsk_base_mod_count_ - 1] = 
+            inv_coeff_products_all_mod_aux_bsk_array_[bsk_base_mod_count_ - 1] =
                 modulo_uint(coeff_products_all.get(), coeff_base_mod_count_, m_sk_, pool_);
             if (!try_invert_uint_mod(inv_coeff_products_all_mod_aux_bsk_array_[bsk_base_mod_count_ - 1],
                 m_sk_, inv_coeff_products_all_mod_aux_bsk_array_[bsk_base_mod_count_ - 1]))
@@ -329,16 +329,16 @@ namespace seal
 
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
-                multiply_uint_uint64(aux_products_all.get(), aux_base_mod_count_, 
+                multiply_uint_uint64(aux_products_all.get(), aux_base_mod_count_,
                     aux_base_array_[i].value(), aux_base_mod_count_, tmp_aux_products_all.get());
-                set_uint_uint(tmp_aux_products_all.get(), aux_base_mod_count_, 
+                set_uint_uint(tmp_aux_products_all.get(), aux_base_mod_count_,
                     aux_products_all.get());
             }
 
             // Compute the auxiliary products inverse mod m_sk_ (M-1) mod m_sk_
-            inv_aux_products_mod_msk_ = modulo_uint(aux_products_all.get(), 
+            inv_aux_products_mod_msk_ = modulo_uint(aux_products_all.get(),
                 aux_base_mod_count_, m_sk_, pool_);
-            if (!try_invert_uint_mod(inv_aux_products_mod_msk_, m_sk_, 
+            if (!try_invert_uint_mod(inv_aux_products_mod_msk_, m_sk_,
                 inv_aux_products_mod_msk_))
             {
                 reset();
@@ -349,15 +349,15 @@ namespace seal
             aux_products_all_mod_coeff_array_ = allocate_uint(coeff_base_mod_count_, pool_);
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
-                aux_products_all_mod_coeff_array_[i] = modulo_uint(aux_products_all.get(), 
+                aux_products_all_mod_coeff_array_[i] = modulo_uint(aux_products_all.get(),
                     aux_base_mod_count_, coeff_base_array_[i], pool_);
             }
 
-            // Compute m_tilde inverse mod bsk base 
+            // Compute m_tilde inverse mod bsk base
             inv_mtilde_mod_bsk_array_ = allocate_uint(bsk_base_mod_count_, pool_);
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
-                if (!try_invert_uint_mod(m_tilde_.value() % aux_base_array_[i].value(), 
+                if (!try_invert_uint_mod(m_tilde_.value() % aux_base_array_[i].value(),
                     aux_base_array_[i], inv_mtilde_mod_bsk_array_[i]))
                 {
                     reset();
@@ -373,10 +373,10 @@ namespace seal
                 return;
             }
 
-            // Compute coeff moduli products inverse mod m_tilde 
-            inv_coeff_products_mod_mtilde_ = modulo_uint(coeff_products_all.get(), 
+            // Compute coeff moduli products inverse mod m_tilde
+            inv_coeff_products_mod_mtilde_ = modulo_uint(coeff_products_all.get(),
                 coeff_base_mod_count_, m_tilde_, pool_);
-            if (!try_invert_uint_mod(inv_coeff_products_mod_mtilde_, m_tilde_, 
+            if (!try_invert_uint_mod(inv_coeff_products_mod_mtilde_, m_tilde_,
                 inv_coeff_products_mod_mtilde_))
             {
                 reset();
@@ -387,13 +387,13 @@ namespace seal
             coeff_products_all_mod_bsk_array_ = allocate_uint(bsk_base_mod_count_, pool_);
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
-                coeff_products_all_mod_bsk_array_[i] = 
-                    modulo_uint(coeff_products_all.get(), coeff_base_mod_count_, 
+                coeff_products_all_mod_bsk_array_[i] =
+                    modulo_uint(coeff_products_all.get(), coeff_base_mod_count_,
                         aux_base_array_[i], pool_);
             }
 
             // Add coeff base products all mod m_sk_ at the end of the array
-            coeff_products_all_mod_bsk_array_[bsk_base_mod_count_ - 1] = 
+            coeff_products_all_mod_bsk_array_[bsk_base_mod_count_ - 1] =
                 modulo_uint(coeff_products_all.get(), coeff_base_mod_count_, m_sk_, pool_);
 
             // Compute inverses of last coeff base modulus modulo the first ones for
@@ -462,7 +462,7 @@ namespace seal
                 }
 
                 // Compute plain_gamma product mod coeff base moduli
-                plain_gamma_product_mod_coeff_array_ = 
+                plain_gamma_product_mod_coeff_array_ =
                     allocate_uint(coeff_base_mod_count_, pool_);
                 for (size_t i = 0; i < coeff_base_mod_count_; i++)
                 {
@@ -511,7 +511,7 @@ namespace seal
             inv_gamma_mod_plain_ = 0;
         }
 
-        void BaseConverter::fastbconv(const uint64_t *input, 
+        void BaseConverter::fastbconv(const uint64_t *input,
             uint64_t *destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
@@ -540,15 +540,15 @@ namespace seal
                 coeff_count_ * coeff_base_mod_count_, pool));
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
-                uint64_t inv_coeff_base_products_mod_coeff_elt = 
+                uint64_t inv_coeff_base_products_mod_coeff_elt =
                     inv_coeff_base_products_mod_coeff_array_[i];
                 SmallModulus coeff_base_array_elt = coeff_base_array_[i];
                 for (size_t k = 0; k < coeff_count_; k++, input++)
                 {
-                    temp_coeff_transition[i + (k * coeff_base_mod_count_)] = 
+                    temp_coeff_transition[i + (k * coeff_base_mod_count_)] =
                         multiply_uint_uint_mod(
-                            *input, 
-                            inv_coeff_base_products_mod_coeff_elt, 
+                            *input,
+                            inv_coeff_base_products_mod_coeff_elt,
                             coeff_base_array_elt
                         );
                 }
@@ -560,10 +560,10 @@ namespace seal
                 SmallModulus bsk_base_array_elt = bsk_base_array_[j];
                 for (size_t k = 0; k < coeff_count_; k++, destination++)
                 {
-                    const uint64_t *coeff_base_products_mod_aux_bsk_array_ptr = 
+                    const uint64_t *coeff_base_products_mod_aux_bsk_array_ptr =
                         coeff_base_products_mod_aux_bsk_array_[j].get();
                     unsigned long long aux_transition[2]{ 0, 0 };
-                    for (size_t i = 0; i < coeff_base_mod_count_; 
+                    for (size_t i = 0; i < coeff_base_mod_count_;
                         i++, temp_coeff_transition_ptr++,
                         coeff_base_products_mod_aux_bsk_array_ptr++)
                     {
@@ -572,9 +572,9 @@ namespace seal
 
                         // Product is 60 bit + 61 bit = 121 bit, so can sum up to 127 of them with no reduction
                         // Thus need coeff_base_mod_count_ <= 127 to guarantee success
-                        multiply_uint64(*temp_coeff_transition_ptr, 
+                        multiply_uint64(*temp_coeff_transition_ptr,
                             *coeff_base_products_mod_aux_bsk_array_ptr, temp);
-                        unsigned char carry = add_uint64(aux_transition[0], 
+                        unsigned char carry = add_uint64(aux_transition[0],
                             temp[0], aux_transition);
                         aux_transition[1] += temp[1] + carry;
                     }
@@ -662,7 +662,7 @@ namespace seal
             }
         }
 
-        void BaseConverter::fastbconv_sk(const uint64_t *input, 
+        void BaseConverter::fastbconv_sk(const uint64_t *input,
             uint64_t *destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
@@ -690,15 +690,15 @@ namespace seal
             const uint64_t *input_ptr = input;
             for (size_t i = 0; i < aux_base_mod_count_; i++)
             {
-                uint64_t inv_aux_base_products_mod_aux_array_elt = 
+                uint64_t inv_aux_base_products_mod_aux_array_elt =
                     inv_aux_base_products_mod_aux_array_[i];
                 SmallModulus aux_base_array_elt = aux_base_array_[i];
                 for (size_t k = 0; k < coeff_count_; k++)
                 {
-                    temp_coeff_transition[i + (k * aux_base_mod_count_)] = 
+                    temp_coeff_transition[i + (k * aux_base_mod_count_)] =
                         multiply_uint_uint_mod(
-                            *input_ptr++, 
-                            inv_aux_base_products_mod_aux_array_elt, 
+                            *input_ptr++,
+                            inv_aux_base_products_mod_aux_array_elt,
                             aux_base_array_elt
                         );
                 }
@@ -712,10 +712,10 @@ namespace seal
                 SmallModulus coeff_base_array_elt = coeff_base_array_[j];
                 for (size_t k = 0; k < coeff_count_; k++, destination_ptr++)
                 {
-                    const uint64_t *aux_base_products_mod_coeff_array_ptr = 
+                    const uint64_t *aux_base_products_mod_coeff_array_ptr =
                         aux_base_products_mod_coeff_array_[j].get();
                     unsigned long long aux_transition[2]{ 0, 0 };
-                    for (size_t i = 0; i < aux_base_mod_count_; i++, temp_ptr++, 
+                    for (size_t i = 0; i < aux_base_mod_count_; i++, temp_ptr++,
                         aux_base_products_mod_coeff_array_ptr++)
                     {
                         // Lazy reduction
@@ -730,7 +730,7 @@ namespace seal
                     *destination_ptr = barrett_reduce_128(aux_transition, coeff_base_array_elt);
                 }
             }
-            
+
             // Compute alpha_sk
             // Require: Input is in Bsk
             // we only use coefficient in B
@@ -741,9 +741,9 @@ namespace seal
             for (size_t k = 0; k < coeff_count_; k++, destination_ptr++)
             {
                 unsigned long long msk_transition[2]{ 0, 0 };
-                const uint64_t *aux_base_products_mod_msk_array_ptr = 
+                const uint64_t *aux_base_products_mod_msk_array_ptr =
                     aux_base_products_mod_msk_array_.get();
-                for (size_t i = 0; i < aux_base_mod_count_; i++, temp_ptr++, 
+                for (size_t i = 0; i < aux_base_mod_count_; i++, temp_ptr++,
                     aux_base_products_mod_msk_array_ptr++)
                 {
                     // Lazy reduction
@@ -769,7 +769,7 @@ namespace seal
             {
                 // It is not necessary for the negation to be reduced modulo the small prime
                 uint64_t negated_input = m_sk_value - *input_ptr;
-                *destination_ptr = multiply_uint_uint_mod(*temp_ptr + negated_input, 
+                *destination_ptr = multiply_uint_uint_mod(*temp_ptr + negated_input,
                     inv_aux_products_mod_msk_, m_sk_);
             }
 
@@ -777,7 +777,7 @@ namespace seal
             destination_ptr = destination;
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
-                uint64_t aux_products_all_mod_coeff_array_elt = 
+                uint64_t aux_products_all_mod_coeff_array_elt =
                     aux_products_all_mod_coeff_array_[i];
                 temp_ptr = alpha_sk.get();
                 SmallModulus coeff_base_array_elt = coeff_base_array_[i];
@@ -790,7 +790,7 @@ namespace seal
                     if (*temp_ptr > m_sk_div_2)
                     {
                         // Lazy reduction
-                        multiply_uint64(aux_products_all_mod_coeff_array_elt, 
+                        multiply_uint64(aux_products_all_mod_coeff_array_elt,
                             m_sk_value - *temp_ptr, m_alpha_sk);
                         m_alpha_sk[1] += add_uint64(m_alpha_sk[0], *destination_ptr, m_alpha_sk);
                         *destination_ptr = barrett_reduce_128(m_alpha_sk, coeff_base_array_elt);
@@ -801,10 +801,10 @@ namespace seal
                         // Lazy reduction
                         // It is not necessary for the negation to be reduced modulo the small prime
                         multiply_uint64(
-                            coeff_base_array_elt_value - aux_products_all_mod_coeff_array_elt, 
+                            coeff_base_array_elt_value - aux_products_all_mod_coeff_array_elt,
                             *temp_ptr, m_alpha_sk
                         );
-                        m_alpha_sk[1] += add_uint64(*destination_ptr, 
+                        m_alpha_sk[1] += add_uint64(*destination_ptr,
                             m_alpha_sk[0], m_alpha_sk);
                         *destination_ptr = barrett_reduce_128(m_alpha_sk, coeff_base_array_elt);
                     }
@@ -828,24 +828,24 @@ namespace seal
              Require: Input should in Bsk U {m_tilde}
              Ensure: Destination array in Bsk = m U {msk}
             */
-            const uint64_t *input_m_tilde_ptr = 
+            const uint64_t *input_m_tilde_ptr =
                 input + coeff_count_ * bsk_base_mod_count_;
             for (size_t k = 0; k < bsk_base_mod_count_; k++)
             {
-                uint64_t coeff_products_all_mod_bsk_array_elt = 
+                uint64_t coeff_products_all_mod_bsk_array_elt =
                     coeff_products_all_mod_bsk_array_[k];
                 uint64_t inv_mtilde_mod_bsk_array_elt = inv_mtilde_mod_bsk_array_[k];
                 SmallModulus bsk_base_array_elt = bsk_base_array_[k];
                 const uint64_t *input_m_tilde_ptr_copy = input_m_tilde_ptr;
 
                 // Compute result for aux base
-                for (size_t i = 0; i < coeff_count_; i++, destination++, 
+                for (size_t i = 0; i < coeff_count_; i++, destination++,
                     input_m_tilde_ptr_copy++, input++)
                 {
                     // Compute r_mtilde
-                    // Duplicate work here:  
+                    // Duplicate work here:
                     // This needs to be computed only once per coefficient, not per Bsk prime.
-                    uint64_t r_mtilde = multiply_uint_uint_mod(*input_m_tilde_ptr_copy, 
+                    uint64_t r_mtilde = multiply_uint_uint_mod(*input_m_tilde_ptr_copy,
                         inv_coeff_products_mod_mtilde_, m_tilde_);
                     r_mtilde = negate_uint_mod(r_mtilde, m_tilde_);
 
@@ -860,7 +860,7 @@ namespace seal
             }
         }
 
-        void BaseConverter::fast_floor(const uint64_t *input, 
+        void BaseConverter::fast_floor(const uint64_t *input,
             uint64_t *destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
@@ -877,35 +877,35 @@ namespace seal
                 throw invalid_argument("pool is not initialied");
             }
 #endif
-            /** 
+            /**
              Require: Input in q U m U {msk}
              Ensure: Destination array in Bsk
             */
             fastbconv(input, destination, pool); //q -> Bsk
-            
+
             size_t index_msk = coeff_base_mod_count_ * coeff_count_;
             input += index_msk;
             for (size_t i = 0; i < bsk_base_mod_count_; i++)
             {
                 SmallModulus bsk_base_array_elt = bsk_base_array_[i];
                 uint64_t bsk_base_array_value = bsk_base_array_elt.value();
-                uint64_t inv_coeff_products_all_mod_aux_bsk_array_elt = 
+                uint64_t inv_coeff_products_all_mod_aux_bsk_array_elt =
                     inv_coeff_products_all_mod_aux_bsk_array_[i];
                 for (size_t k = 0; k < coeff_count_; k++, input++, destination++)
                 {
                     // It is not necessary for the negation to be reduced modulo the small prime
-                    //negate_uint_smallmod(base_convert_Bsk.get() + k + (i * coeff_count_), 
+                    //negate_uint_smallmod(base_convert_Bsk.get() + k + (i * coeff_count_),
                     // bsk_base_array_[i], &negated_base_convert_Bsk);
                     *destination = multiply_uint_uint_mod(
-                        *input + bsk_base_array_value - *destination, 
-                        inv_coeff_products_all_mod_aux_bsk_array_elt, 
+                        *input + bsk_base_array_value - *destination,
+                        inv_coeff_products_all_mod_aux_bsk_array_elt,
                         bsk_base_array_elt
                     );
                 }
             }
         }
 
-        void BaseConverter::fastbconv_mtilde(const uint64_t *input, 
+        void BaseConverter::fastbconv_mtilde(const uint64_t *input,
             uint64_t *destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
@@ -926,21 +926,21 @@ namespace seal
              Require: Input in q
              Ensure: Output in Bsk U {m_tilde}
             */
-            
+
             // Compute in Bsk first; we compute |m_tilde*q^-1i| mod qi
             auto temp_coeff_transition(allocate_uint(
                 coeff_count_ * coeff_base_mod_count_, pool));
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
                 SmallModulus coeff_base_array_elt = coeff_base_array_[i];
-                uint64_t mtilde_inv_coeff_base_products_mod_coeff_elt = 
+                uint64_t mtilde_inv_coeff_base_products_mod_coeff_elt =
                     mtilde_inv_coeff_base_products_mod_coeff_array_[i];
                 for (size_t k = 0; k < coeff_count_; k++, input++)
                 {
-                    temp_coeff_transition[i + (k * coeff_base_mod_count_)] = 
+                    temp_coeff_transition[i + (k * coeff_base_mod_count_)] =
                         multiply_uint_uint_mod(
-                            *input, 
-                            mtilde_inv_coeff_base_products_mod_coeff_elt, 
+                            *input,
+                            mtilde_inv_coeff_base_products_mod_coeff_elt,
                             coeff_base_array_elt
                         );
                 }
@@ -949,7 +949,7 @@ namespace seal
             uint64_t *destination_ptr = destination;
             for (size_t j = 0; j < bsk_base_mod_count_; j++)
             {
-                const uint64_t *coeff_base_products_mod_aux_bsk_array_ptr = 
+                const uint64_t *coeff_base_products_mod_aux_bsk_array_ptr =
                     coeff_base_products_mod_aux_bsk_array_[j].get();
                 uint64_t *temp_coeff_transition_ptr = temp_coeff_transition.get();
                 SmallModulus bsk_base_array_elt = bsk_base_array_[j];
@@ -957,7 +957,7 @@ namespace seal
                 {
                     unsigned long long aux_transition[2]{ 0, 0 };
                     const uint64_t *temp_ptr = coeff_base_products_mod_aux_bsk_array_ptr;
-                    for (size_t i = 0; i < coeff_base_mod_count_; 
+                    for (size_t i = 0; i < coeff_base_mod_count_;
                         i++, temp_ptr++, temp_coeff_transition_ptr++)
                     {
                         // Lazy reduction
@@ -966,24 +966,24 @@ namespace seal
                         // Product is 60 bit + 61 bit = 121 bit, so can sum up to 127 of them with no reduction
                         // Thus need coeff_base_mod_count_ <= 127
                         multiply_uint64(*temp_coeff_transition_ptr, *temp_ptr, temp);
-                        unsigned char carry = add_uint64(aux_transition[0], 
+                        unsigned char carry = add_uint64(aux_transition[0],
                             temp[0], aux_transition);
                         aux_transition[1] += temp[1] + carry;
                     }
                     *destination_ptr = barrett_reduce_128(aux_transition, bsk_base_array_elt);
                 }
             }
-            
+
             // Computing the last element (mod m_tilde) and add it at the end of destination array
             uint64_t *temp_coeff_transition_ptr = temp_coeff_transition.get();
             destination += bsk_base_mod_count_ * coeff_count_;
             for (size_t k = 0; k < coeff_count_; k++, destination++)
             {
                 unsigned long long wide_result[2]{ 0, 0 };
-                const uint64_t *coeff_base_products_mod_mtilde_array_ptr = 
+                const uint64_t *coeff_base_products_mod_mtilde_array_ptr =
                     coeff_base_products_mod_mtilde_array_.get();
                 for (size_t i = 0; i < coeff_base_mod_count_; i++,
-                    temp_coeff_transition_ptr++, 
+                    temp_coeff_transition_ptr++,
                     coeff_base_products_mod_mtilde_array_ptr++)
                 {
                     // Lazy reduction
@@ -992,7 +992,7 @@ namespace seal
                     // Product is 60 bit + 33 bit = 93 bit
                     multiply_uint64(*temp_coeff_transition_ptr,
                         *coeff_base_products_mod_mtilde_array_ptr, aux_transition);
-                    unsigned char carry = add_uint64(aux_transition[0], 
+                    unsigned char carry = add_uint64(aux_transition[0],
                         wide_result[0], wide_result);
                     wide_result[1] += aux_transition[1] + carry;
                 }
@@ -1000,7 +1000,7 @@ namespace seal
             }
         }
 
-        void BaseConverter::fastbconv_plain_gamma(const uint64_t *input, 
+        void BaseConverter::fastbconv_plain_gamma(const uint64_t *input,
             uint64_t *destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
@@ -1019,21 +1019,21 @@ namespace seal
 #endif
             /**
              Require: Input in q
-             Ensure: Output in t (plain modulus) U gamma 
+             Ensure: Output in t (plain modulus) U gamma
             */
             auto temp_coeff_transition(allocate_uint(
                 coeff_count_ * coeff_base_mod_count_, pool));
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
             {
-                uint64_t inv_coeff_base_products_mod_coeff_elt = 
+                uint64_t inv_coeff_base_products_mod_coeff_elt =
                     inv_coeff_base_products_mod_coeff_array_[i];
                 SmallModulus coeff_base_array_elt = coeff_base_array_[i];
                 for (size_t k = 0; k < coeff_count_; k++, input++)
                 {
-                    temp_coeff_transition[i + (k * coeff_base_mod_count_)] = 
+                    temp_coeff_transition[i + (k * coeff_base_mod_count_)] =
                         multiply_uint_uint_mod(
-                            *input, 
-                            inv_coeff_base_products_mod_coeff_elt, 
+                            *input,
+                            inv_coeff_base_products_mod_coeff_elt,
                             coeff_base_array_elt
                         );
                 }
@@ -1043,7 +1043,7 @@ namespace seal
             {
                 SmallModulus plain_gamma_array_elt = plain_gamma_array_[j];
                 uint64_t *temp_coeff_transition_ptr = temp_coeff_transition.get();
-                const uint64_t *coeff_products_mod_plain_gamma_array_ptr = 
+                const uint64_t *coeff_products_mod_plain_gamma_array_ptr =
                     coeff_products_mod_plain_gamma_array_[j].get();
                 for (size_t k = 0; k < coeff_count_; k++, destination++)
                 {
@@ -1058,7 +1058,7 @@ namespace seal
                         // Product is 60 bit + 61 bit = 121 bit, so can sum up to 127 of them with no reduction
                         // Thus need coeff_base_mod_count_ <= 127
                         multiply_uint64(*temp_coeff_transition_ptr, *temp_ptr, plain_transition);
-                        unsigned char carry = add_uint64(plain_transition[0], 
+                        unsigned char carry = add_uint64(plain_transition[0],
                             wide_result[0], wide_result);
                         wide_result[1] += plain_transition[1] + carry;
                     }

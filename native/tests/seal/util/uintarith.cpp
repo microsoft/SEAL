@@ -47,7 +47,7 @@ namespace SEALTest
 #pragma GCC push_options
 #pragma GCC optimize ("O0")
 #elif SEAL_COMPILER == SEAL_COMPILER_CLANG
-#pragma clang optimize off 
+#pragma clang optimize off
 #endif
 
         TEST(UIntArith, AddUInt64)
@@ -1339,7 +1339,7 @@ namespace SEALTest
             result[4] = 5, result[5] = 6, result[6] = 7, result[7] = 8;
 
             uint64_t exponent[2]{ 0, 0 };
-            
+
             input[0] = 0xFFF;
             input[1] = 0;
             exponentiate_uint(input.get(), 2, exponent, 1, 1, result.get(), pool);

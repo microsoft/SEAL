@@ -150,7 +150,7 @@ namespace SEALNetTest
 
             Assert.IsTrue(handle.AllocByteCount > 0ul);
         }
-        
+
         [TestMethod]
         public void KeyEltTest()
         {

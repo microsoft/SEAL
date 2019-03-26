@@ -15,8 +15,8 @@ namespace seal
 {
     namespace util
     {
-        SmallNTTTables::SmallNTTTables(int coeff_count_power, 
-            const SmallModulus &modulus, MemoryPoolHandle pool) : 
+        SmallNTTTables::SmallNTTTables(int coeff_count_power,
+            const SmallModulus &modulus, MemoryPoolHandle pool) :
             pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
@@ -44,7 +44,7 @@ namespace seal
             coeff_count_ = 0;
         }
 
-        bool SmallNTTTables::generate(int coeff_count_power, 
+        bool SmallNTTTables::generate(int coeff_count_power,
             const SmallModulus &modulus)
         {
             reset();
@@ -81,29 +81,29 @@ namespace seal
                 return false;
             }
 
-            // Populate the tables storing (scaled version of) powers of root 
-            // mod q in bit-scrambled order.  
+            // Populate the tables storing (scaled version of) powers of root
+            // mod q in bit-scrambled order.
             ntt_powers_of_primitive_root(root_, root_powers_.get());
-            ntt_scale_powers_of_primitive_root(root_powers_.get(), 
+            ntt_scale_powers_of_primitive_root(root_powers_.get(),
                 scaled_root_powers_.get());
 
-            // Populate the tables storing (scaled version of) powers of 
-            // (root)^{-1} mod q in bit-scrambled order.  
+            // Populate the tables storing (scaled version of) powers of
+            // (root)^{-1} mod q in bit-scrambled order.
             ntt_powers_of_primitive_root(inverse_root, inv_root_powers_.get());
-            ntt_scale_powers_of_primitive_root(inv_root_powers_.get(), 
+            ntt_scale_powers_of_primitive_root(inv_root_powers_.get(),
                 scaled_inv_root_powers_.get());
 
-            // Populate the tables storing (scaled version of ) 2 times 
-            // powers of roots^-1 mod q  in bit-scrambled order. 
+            // Populate the tables storing (scaled version of ) 2 times
+            // powers of roots^-1 mod q  in bit-scrambled order.
             for (size_t i = 0; i < coeff_count_; i++)
             {
-                inv_root_powers_div_two_[i] = 
+                inv_root_powers_div_two_[i] =
                     div2_uint_mod(inv_root_powers_[i], modulus_);
             }
-            ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(), 
+            ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(),
                 scaled_inv_root_powers_div_two_.get());
 
-            // Last compute n^(-1) modulo q. 
+            // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
             generated_ = try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_);
 
@@ -115,23 +115,23 @@ namespace seal
             return true;
         }
 
-        void SmallNTTTables::ntt_powers_of_primitive_root(uint64_t root, 
+        void SmallNTTTables::ntt_powers_of_primitive_root(uint64_t root,
             uint64_t *destination) const
         {
             uint64_t *destination_start = destination;
             *destination_start = 1;
             for (size_t i = 1; i < coeff_count_; i++)
             {
-                uint64_t *next_destination = 
+                uint64_t *next_destination =
                     destination_start + reverse_bits(i, coeff_count_power_);
-                *next_destination = 
+                *next_destination =
                     multiply_uint_uint_mod(*destination, root, modulus_);
                 destination = next_destination;
             }
         }
 
-        // compute floor ( input * beta /q ), where beta is a 64k power of 2 
-        // and  0 < q < beta. 
+        // compute floor ( input * beta /q ), where beta is a 64k power of 2
+        // and  0 < q < beta.
         void SmallNTTTables::ntt_scale_powers_of_primitive_root(
             const uint64_t *input, uint64_t *destination) const
         {
@@ -145,8 +145,8 @@ namespace seal
         }
 
         /**
-        This function computes in-place the negacyclic NTT. The input is 
-        a polynomial a of degree n in R_q, where n is assumed to be a power of 
+        This function computes in-place the negacyclic NTT. The input is
+        a polynomial a of degree n in R_q, where n is assumed to be a power of
         2 and q is a prime such that q = 1 (mod 2n).
 
         The output is a vector A such that the following hold:
@@ -154,12 +154,12 @@ namespace seal
 
         For details, see Michael Naehrig and Patrick Longa.
         */
-        void ntt_negacyclic_harvey_lazy(uint64_t *operand, 
+        void ntt_negacyclic_harvey_lazy(uint64_t *operand,
             const SmallNTTTables &tables)
         {
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus * 2;
-            
+
             // Return the NTT in scrambled order
             size_t n = size_t(1) << tables.coeff_count_power();
             size_t t = n >> 1;
@@ -235,13 +235,13 @@ namespace seal
             }
         }
 
-        // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig). 
+        // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig).
         void inverse_ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
         {
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus * 2;
 
-            // return the bit-reversed order of NTT. 
+            // return the bit-reversed order of NTT.
             size_t n = size_t(1) << tables.coeff_count_power();
             size_t t = 1;
 
@@ -316,8 +316,8 @@ namespace seal
                             // Cleverly check whether currU + currV >= two_times_modulus
                             currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
 
-                            // Need to make it so that div2_uint_mod takes values that are > q. 
-                            //div2_uint_mod(U, modulusptr, coeff_uint64_count, U); 
+                            // Need to make it so that div2_uint_mod takes values that are > q.
+                            //div2_uint_mod(U, modulusptr, coeff_uint64_count, U);
                             // We use also the fact that parity of currU is same as parity of T.
                             // Since our modulus is always so small that currU + masked_modulus < 2^64,
                             // we never need to worry about wrapping around when adding masked_modulus.
@@ -327,7 +327,7 @@ namespace seal
                             *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
 
                             multiply_uint64_hw64(Wprime, T, &H);
-                            // effectively, the next two multiply perform multiply modulo beta = 2**wordsize. 
+                            // effectively, the next two multiply perform multiply modulo beta = 2**wordsize.
                             *V++ = W * T - H * modulus;
                         }
                         j1 += (t << 1);

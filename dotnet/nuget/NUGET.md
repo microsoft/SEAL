@@ -1,6 +1,6 @@
 # Creating a NuGet package
 
-After building `dotnet\src\SEALNet.csproj` you can create a NuGet package that you can 
+After building `dotnet\src\SEALNet.csproj` you can create a NuGet package that you can
 use to easily add Microsoft SEAL capabilities to all of your .NET projects. Currently
 the NuGet package is only supported in Windows.
 
@@ -23,7 +23,7 @@ cd ..\..
 
 After the package is created, copy it from `dotnet\nuget\Release` to a known location (e.g., `C:\NuGetPackages`).
 
-To add a reference to the NuGet package, you will need to configure Visual Studio so it can find 
+To add a reference to the NuGet package, you will need to configure Visual Studio so it can find
 packages in this known location. In Microsoft Visual Studio 2017, for example, you can:
 1. Select the menu uption `Tools / Options...`
 2. On the left pane of the Options dialog, navigate to `NuGet Package Manager / Package Sources`
@@ -31,6 +31,6 @@ packages in this known location. In Microsoft Visual Studio 2017, for example, y
    where you copied the NuGet package (e.g., `C:\NuGetPackages`)
 
 After this, you should be able to add a reference to this package in your own .NET project. After
-creating or opening your project in Visual Studio, you can right click on the project in the 
-Solution Explorer window, and select `Manage NuGet packages...`. In the window that appears 
+creating or opening your project in Visual Studio, you can right click on the project in the
+Solution Explorer window, and select `Manage NuGet packages...`. In the window that appears
 you will be able to select the `Microsoft.Research.SEAL` NuGet package to add to your project.

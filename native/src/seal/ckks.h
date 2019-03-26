@@ -61,30 +61,30 @@ namespace seal
         Creates a CKKSEncoder instance initialized with the specified SEALContext.
 
         @param[in] context The SEALContext
-        @throws std::invalid_argument if the context is not set or encryption parameters 
+        @throws std::invalid_argument if the context is not set or encryption parameters
         are not valid
         @throws std::invalid_argument if scheme is not scheme_type::CKKS
         */
         CKKSEncoder(std::shared_ptr<SEALContext> context);
 
         /**
-        Encodes double-precision floating-point real or complex numbers into a plaintext 
-        polynomial. Dynamic memory allocations in the process are allocated from the 
+        Encodes double-precision floating-point real or complex numbers into a plaintext
+        polynomial. Dynamic memory allocations in the process are allocated from the
         memory pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
-        @param[in] values The vector of double-precision floating-point numbers 
+        @param[in] values The vector of double-precision floating-point numbers
         (of type T) to encode
-        @param[in] parms_id parms_id determining the encryption parameters to be used 
+        @param[in] parms_id parms_id determining the encryption parameters to be used
         by the result plaintext
         @param[in] scale Scaling parameter defining encoding precision
         @param[out] destination The plaintext polynomial to overwrite with the result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if values has invalid size
-        @throws std::invalid_argument if parms_id is not valid for the encryption 
-        parameters 
+        @throws std::invalid_argument if parms_id is not valid for the encryption
+        parameters
         @throws std::invalid_argument if scale is not strictly positive
-        @throws std::invalid_argument if encoding is too large for the encryption 
+        @throws std::invalid_argument if encoding is too large for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -99,20 +99,20 @@ namespace seal
         }
 
         /**
-        Encodes double-precision floating-point real or complex numbers into 
-        a plaintext polynomial. The encryption parameters used are the top level 
-        parameters for the given context. Dynamic memory allocations in the process 
+        Encodes double-precision floating-point real or complex numbers into
+        a plaintext polynomial. The encryption parameters used are the top level
+        parameters for the given context. Dynamic memory allocations in the process
         are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
-        @param[in] values The vector of double-precision floating-point numbers 
+        @param[in] values The vector of double-precision floating-point numbers
         (of type T) to encode
         @param[in] scale Scaling parameter defining encoding precision
         @param[out] destination The plaintext polynomial to overwrite with the result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if values has invalid size
         @throws std::invalid_argument if scale is not strictly positive
-        @throws std::invalid_argument if encoding is too large for the encryption 
+        @throws std::invalid_argument if encoding is too large for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -123,25 +123,25 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(values, context_->parms_id_first(), scale, 
+            encode(values, context_->parms_id_first(), scale,
                 destination, std::move(pool));
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext polynomial. 
-        Dynamic memory allocations in the process are allocated from the memory pool 
+        Encodes a double-precision floating-point number into a plaintext polynomial.
+        Dynamic memory allocations in the process are allocated from the memory pool
         pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
-        @param[in] parms_id parms_id determining the encryption parameters to be used 
+        @param[in] parms_id parms_id determining the encryption parameters to be used
         by the result plaintext
         @param[in] scale Scaling parameter defining encoding precision
         @param[out] destination The plaintext polynomial to overwrite with the result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if parms_id is not valid for the encryption 
+        @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if scale is not strictly positive
-        @throws std::invalid_argument if encoding is too large for the encryption 
+        @throws std::invalid_argument if encoding is too large for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -153,9 +153,9 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext polynomial. 
-        The encryption parameters used are the top level parameters for the given context. 
-        Dynamic memory allocations in the process are allocated from the memory pool 
+        Encodes a double-precision floating-point number into a plaintext polynomial.
+        The encryption parameters used are the top level parameters for the given context.
+        Dynamic memory allocations in the process are allocated from the memory pool
         pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
@@ -163,7 +163,7 @@ namespace seal
         @param[out] destination The plaintext polynomial to overwrite with the result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if scale is not strictly positive
-        @throws std::invalid_argument if encoding is too large for the encryption 
+        @throws std::invalid_argument if encoding is too large for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -171,29 +171,29 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->parms_id_first(), scale, 
+            encode(value, context_->parms_id_first(), scale,
                 destination, std::move(pool));
         }
 
         /**
-        Encodes a double-precision complex number into a plaintext polynomial. Dynamic 
-        memory allocations in the process are allocated from the memory pool pointed to 
+        Encodes a double-precision complex number into a plaintext polynomial. Dynamic
+        memory allocations in the process are allocated from the memory pool pointed to
         by the given MemoryPoolHandle.
 
         @param[in] value The double-precision complex number to encode
-        @param[in] parms_id parms_id determining the encryption parameters to be used 
+        @param[in] parms_id parms_id determining the encryption parameters to be used
         by the result plaintext
         @param[in] scale Scaling parameter defining encoding precision
         @param[out] destination The plaintext polynomial to overwrite with the result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if parms_id is not valid for the encryption 
+        @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if scale is not strictly positive
-        @throws std::invalid_argument if encoding is too large for the encryption 
+        @throws std::invalid_argument if encoding is too large for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encode(std::complex<double> value, 
+        inline void encode(std::complex<double> value,
             parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
@@ -201,9 +201,9 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision complex number into a plaintext polynomial. The 
-        encryption parameters used are the top level parameters for the given context. 
-        Dynamic memory allocations in the process are allocated from the memory pool 
+        Encodes a double-precision complex number into a plaintext polynomial. The
+        encryption parameters used are the top level parameters for the given context.
+        Dynamic memory allocations in the process are allocated from the memory pool
         pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision complex number to encode
@@ -211,7 +211,7 @@ namespace seal
         @param[out] destination The plaintext polynomial to overwrite with the result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if scale is not strictly positive
-        @throws std::invalid_argument if encoding is too large for the encryption 
+        @throws std::invalid_argument if encoding is too large for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -219,7 +219,7 @@ namespace seal
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->parms_id_first(), scale, 
+            encode(value, context_->parms_id_first(), scale,
                 destination, std::move(pool));
         }
 
@@ -227,10 +227,10 @@ namespace seal
         Encodes an integer number into a plaintext polynomial without any scaling.
 
         @param[in] value The integer number to encode
-        @param[in] parms_id parms_id determining the encryption parameters to be used 
+        @param[in] parms_id parms_id determining the encryption parameters to be used
         by the result plaintext
         @param[out] destination The plaintext polynomial to overwrite with the result
-        @throws std::invalid_argument if parms_id is not valid for the encryption 
+        @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         */
         inline void encode(std::int64_t value,
@@ -240,7 +240,7 @@ namespace seal
         }
 
         /**
-        Encodes an integer number into a plaintext polynomial without any scaling. The 
+        Encodes an integer number into a plaintext polynomial without any scaling. The
         encryption parameters used are the top level parameters for the given context.
 
         @param[in] value The integer number to encode
@@ -252,15 +252,15 @@ namespace seal
         }
 
         /**
-        Decodes a plaintext polynomial into double-precision floating-point real or 
-        complex numbers. Dynamic memory allocations in the process are allocated from 
+        Decodes a plaintext polynomial into double-precision floating-point real or
+        complex numbers. Dynamic memory allocations in the process are allocated from
         the memory pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
         @param[in] plain The plaintext to decode
         @param[out] destination The vector to be overwritten with the values in the slots
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not in NTT form or is invalid for the 
+        @throws std::invalid_argument if plain is not in NTT form or is invalid for the
         encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -284,7 +284,7 @@ namespace seal
     private:
         // This is the same function as in evaluator.h
         inline void decompose_single_coeff(
-            const SEALContext::ContextData &context_data, const std::uint64_t *value, 
+            const SEALContext::ContextData &context_data, const std::uint64_t *value,
             std::uint64_t *destination, util::MemoryPool &pool)
         {
             auto &parms = context_data.parms();
@@ -411,8 +411,8 @@ namespace seal
             }
 
             double n_inv = double(1.0) / static_cast<double>(n);
-            
-            // Put the scale in at this point 
+
+            // Put the scale in at this point
             n_inv *= scale;
 
             int max_coeff_bit_count = 1;
@@ -447,7 +447,7 @@ namespace seal
                     double coeffd = std::round(conj_values[i].real());
                     bool is_negative = std::signbit(coeffd);
 
-                    std::uint64_t coeffu = 
+                    std::uint64_t coeffu =
                         static_cast<std::uint64_t>(std::fabs(coeffd));
 
                     if (is_negative)
@@ -462,7 +462,7 @@ namespace seal
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] = 
+                            destination[i + (j * coeff_count)] =
                                 coeffu % coeff_modulus[j].value();
                         }
                     }
@@ -484,7 +484,7 @@ namespace seal
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] = 
+                            destination[i + (j * coeff_count)] =
                                 util::negate_uint_mod(util::barrett_reduce_128(
                                     coeffu, coeff_modulus[j]), coeff_modulus[j]);
                         }
@@ -493,7 +493,7 @@ namespace seal
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] = 
+                            destination[i + (j * coeff_count)] =
                                 util::barrett_reduce_128(coeffu, coeff_modulus[j]);
                         }
                     }
@@ -521,7 +521,7 @@ namespace seal
                     }
 
                     // Next decompose this coefficient
-                    decompose_single_coeff(context_data, coeffu.get(), 
+                    decompose_single_coeff(context_data, coeffu.get(),
                         decomp_coeffu.get(), pool);
 
                     // Finally replace the sign if necessary
@@ -529,7 +529,7 @@ namespace seal
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] = 
+                            destination[i + (j * coeff_count)] =
                                 util::negate_uint_mod(decomp_coeffu[j], coeff_modulus[j]);
                         }
                     }
@@ -557,7 +557,7 @@ namespace seal
         template<typename T,
             typename = std::enable_if_t<std::is_same<T, double>::value ||
             std::is_same<T, std::complex<double>>::value>>
-        void decode_internal(const Plaintext &plain, std::vector<T> &destination, 
+        void decode_internal(const Plaintext &plain, std::vector<T> &destination,
             MemoryPoolHandle pool)
         {
             // Verify parameters.
@@ -579,7 +579,7 @@ namespace seal
             auto &coeff_modulus = parms.coeff_modulus();
             std::size_t coeff_mod_count = coeff_modulus.size();
             std::size_t coeff_count = parms.poly_modulus_degree();
-            std::size_t rns_poly_uint64_count = 
+            std::size_t rns_poly_uint64_count =
                 util::mul_safe(coeff_count, coeff_mod_count);
 
             auto &small_ntt_tables = context_data_ptr->small_ntt_tables();
@@ -653,19 +653,19 @@ namespace seal
                     upper_half_threshold, coeff_mod_count))
                 {
                     double scaled_two_pow_64 = inv_scale;
-                    for (std::size_t j = 0; j < coeff_mod_count; 
+                    for (std::size_t j = 0; j < coeff_mod_count;
                         j++, scaled_two_pow_64 *= two_pow_64)
                     {
                         if (wide_tmp_dest[i * coeff_mod_count + j] > decryption_modulus[j])
                         {
                             auto diff = wide_tmp_dest[i * coeff_mod_count + j] - decryption_modulus[j];
-                            res[i] += diff ? 
+                            res[i] += diff ?
                                 static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                         else
                         {
                             auto diff = decryption_modulus[j] - wide_tmp_dest[i * coeff_mod_count + j];
-                            res[i] -= diff ? 
+                            res[i] -= diff ?
                                 static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                     }
@@ -673,16 +673,16 @@ namespace seal
                 else
                 {
                     double scaled_two_pow_64 = inv_scale;
-                    for (std::size_t j = 0; j < coeff_mod_count; 
+                    for (std::size_t j = 0; j < coeff_mod_count;
                         j++, scaled_two_pow_64 *= two_pow_64)
                     {
                         auto curr_coeff = wide_tmp_dest[i * coeff_mod_count + j];
-                        res[i] += curr_coeff ? 
+                        res[i] += curr_coeff ?
                             static_cast<double>(curr_coeff) * scaled_two_pow_64 : 0.0;
                     }
                 }
 
-                // Scaling instead incorporated above; this can help in cases 
+                // Scaling instead incorporated above; this can help in cases
                 // where otherwise pow(two_pow_64, j) would overflow due to very
                 // large coeff_mod_count and very large scale
                 // res[i] = res_accum * inv_scale;
@@ -719,10 +719,10 @@ namespace seal
             }
         }
 
-        void encode_internal(double value, parms_id_type parms_id, 
+        void encode_internal(double value, parms_id_type parms_id,
             double scale, Plaintext &destination, MemoryPoolHandle pool);
 
-        inline void encode_internal(std::complex<double> value, 
+        inline void encode_internal(std::complex<double> value,
             parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool)
         {

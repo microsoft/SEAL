@@ -53,7 +53,7 @@ namespace seal
         {
             for (auto &b : a)
             {
-                if (!b.is_valid_for(context) || !b.is_ntt_form() || 
+                if (!b.is_valid_for(context) || !b.is_ntt_form() ||
                     b.parms_id() != parms_id_)
                 {
                     return false;
@@ -80,7 +80,7 @@ namespace seal
         {
             for (auto &b : a)
             {
-                if (!b.is_metadata_valid_for(context) || !b.is_ntt_form() || 
+                if (!b.is_metadata_valid_for(context) || !b.is_ntt_form() ||
                     b.parms_id() != parms_id_)
                 {
                     return false;

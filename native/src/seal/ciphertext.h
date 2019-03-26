@@ -16,31 +16,31 @@
 namespace seal
 {
     /**
-    Class to store a ciphertext element. The data for a ciphertext consists 
-    of two or more polynomials, which are in Microsoft SEAL stored in a CRT form with 
-    respect to the factors of the coefficient modulus. This data itself is 
-    not meant to be modified directly by the user, but is instead operated 
-    on by functions in the Evaluator class. The size of the backing array of 
-    a ciphertext depends on the encryption parameters and the size of the 
-    ciphertext (at least 2). If the degree of the poly_modulus encryption 
-    parameter is N, and the number of primes in the coeff_modulus encryption 
-    parameter is K, then the ciphertext backing array requires precisely 
-    8*N*K*size bytes of memory. A ciphertext also carries with it the 
-    parms_id of its associated encryption parameters, which is used to check 
+    Class to store a ciphertext element. The data for a ciphertext consists
+    of two or more polynomials, which are in Microsoft SEAL stored in a CRT form with
+    respect to the factors of the coefficient modulus. This data itself is
+    not meant to be modified directly by the user, but is instead operated
+    on by functions in the Evaluator class. The size of the backing array of
+    a ciphertext depends on the encryption parameters and the size of the
+    ciphertext (at least 2). If the degree of the poly_modulus encryption
+    parameter is N, and the number of primes in the coeff_modulus encryption
+    parameter is K, then the ciphertext backing array requires precisely
+    8*N*K*size bytes of memory. A ciphertext also carries with it the
+    parms_id of its associated encryption parameters, which is used to check
     the validity of the ciphertext for homomorphic operations and decryption.
 
     @par Memory Management
     The size of a ciphertext refers to the number of polynomials it contains,
-    whereas its capacity refers to the number of polynomials that fit in the 
-    current memory allocation. In high-performance applications unnecessary 
-    re-allocations should be avoided by reserving enough memory for the 
-    ciphertext to begin with either by providing the desired capacity to the 
-    constructor as an extra argument, or by calling the reserve function at 
+    whereas its capacity refers to the number of polynomials that fit in the
+    current memory allocation. In high-performance applications unnecessary
+    re-allocations should be avoided by reserving enough memory for the
+    ciphertext to begin with either by providing the desired capacity to the
+    constructor as an extra argument, or by calling the reserve function at
     any time.
 
     @par Thread Safety
-    In general, reading from ciphertext is thread-safe as long as no other 
-    thread is concurrently mutating it. This is due to the underlying data 
+    In general, reading from ciphertext is thread-safe as long as no other
+    thread is concurrently mutating it. This is due to the underlying data
     structure storing the ciphertext not being thread-safe.
 
     @see Plaintext for the class that stores plaintexts.
@@ -64,7 +64,7 @@ namespace seal
         }
 
         /**
-        Constructs an empty ciphertext with capacity 2. In addition to the 
+        Constructs an empty ciphertext with capacity 2. In addition to the
         capacity, the allocation size is determined by the highest-level
         parameters associated to the given SEALContext.
 
@@ -83,8 +83,8 @@ namespace seal
         }
 
         /**
-        Constructs an empty ciphertext with capacity 2. In addition to the 
-        capacity, the allocation size is determined by the encryption parameters 
+        Constructs an empty ciphertext with capacity 2. In addition to the
+        capacity, the allocation size is determined by the encryption parameters
         with given parms_id.
 
         @param[in] context The SEALContext
@@ -93,11 +93,11 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::invalid_argument if parms_id is not valid for the encryption 
+        @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Ciphertext(std::shared_ptr<SEALContext> context, 
+        explicit Ciphertext(std::shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             MemoryPoolHandle pool = MemoryManager::GetPool()) :
             data_(std::move(pool))
@@ -107,8 +107,8 @@ namespace seal
         }
 
         /**
-        Constructs an empty ciphertext with given capacity. In addition to 
-        the capacity, the allocation size is determined by the given 
+        Constructs an empty ciphertext with given capacity. In addition to
+        the capacity, the allocation size is determined by the given
         encryption parameters.
 
         @param[in] context The SEALContext
@@ -118,12 +118,12 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::invalid_argument if parms_id is not valid for the encryption 
+        @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Ciphertext(std::shared_ptr<SEALContext> context, 
+        explicit Ciphertext(std::shared_ptr<SEALContext> context,
             parms_id_type parms_id, size_type size_capacity,
             MemoryPoolHandle pool = MemoryManager::GetPool()) :
             data_(std::move(pool))
@@ -147,9 +147,9 @@ namespace seal
         Ciphertext(Ciphertext &&source) = default;
 
         /**
-        Allocates enough memory to accommodate the backing array of a ciphertext 
-        with given capacity. In addition to the capacity, the allocation size is 
-        determined by the encryption parameters corresponing to the given 
+        Allocates enough memory to accommodate the backing array of a ciphertext
+        with given capacity. In addition to the capacity, the allocation size is
+        determined by the encryption parameters corresponing to the given
         parms_id.
 
         @param[in] context The SEALContext
@@ -158,7 +158,7 @@ namespace seal
         @param[in] size_capacity The capacity
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::invalid_argument if parms_id is not valid for the encryption 
+        @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
@@ -167,8 +167,8 @@ namespace seal
 
         /**
         Allocates enough memory to accommodate the backing array of a ciphertext
-        with given capacity. In addition to the capacity, the allocation size is 
-        determined by the highest-level parameters associated to the given 
+        with given capacity. In addition to the capacity, the allocation size is
+        determined by the highest-level parameters associated to the given
         SEALContext.
 
         @param[in] context The SEALContext
@@ -177,7 +177,7 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
-        inline void reserve(std::shared_ptr<SEALContext> context, 
+        inline void reserve(std::shared_ptr<SEALContext> context,
             size_type size_capacity)
         {
             // Verify parameters
@@ -190,27 +190,27 @@ namespace seal
         }
 
         /**
-        Allocates enough memory to accommodate the backing array of a ciphertext 
-        with given capacity. In addition to the capacity, the allocation size is 
+        Allocates enough memory to accommodate the backing array of a ciphertext
+        with given capacity. In addition to the capacity, the allocation size is
         determined by the current encryption parameters.
 
         @param[in] size_capacity The capacity
         @throws std::invalid_argument if size_capacity is less than 2 or too large
-        @throws std::logic_error if the encryption parameters are not  
+        @throws std::logic_error if the encryption parameters are not
         */
         inline void reserve(size_type size_capacity)
         {
-            // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid 
+            // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid
             // or coeff_mod_count_ is zero (in which case no memory is allocated).
-            reserve_internal(size_capacity, poly_modulus_degree_, 
+            reserve_internal(size_capacity, poly_modulus_degree_,
                 coeff_mod_count_);
         }
 
         /**
-        Resizes the ciphertext to given size, reallocating if the capacity 
-        of the ciphertext is too small. The ciphertext parameters are 
+        Resizes the ciphertext to given size, reallocating if the capacity
+        of the ciphertext is too small. The ciphertext parameters are
         determined by the given SEALContext and parms_id.
-        
+
         This function is mainly intended for internal use and is called
         automatically by functions such as Evaluator::multiply and
         Evaluator::relinearize. A normal user should never have a reason
@@ -226,18 +226,18 @@ namespace seal
         parameters
         @throws std::invalid_argument if size is less than 2 or too large
         */
-        void resize(std::shared_ptr<SEALContext> context, 
+        void resize(std::shared_ptr<SEALContext> context,
             parms_id_type parms_id, size_type size);
 
         /**
         Resizes the ciphertext to given size, reallocating if the capacity
         of the ciphertext is too small. The ciphertext parameters are
-        determined by the highest-level parameters associated to the given 
-        SEALContext. 
-        
-        This function is mainly intended for internal use and is called 
-        automatically by functions such as Evaluator::multiply and 
-        Evaluator::relinearize. A normal user should never have a reason 
+        determined by the highest-level parameters associated to the given
+        SEALContext.
+
+        This function is mainly intended for internal use and is called
+        automatically by functions such as Evaluator::multiply and
+        Evaluator::relinearize. A normal user should never have a reason
         to manually resize a ciphertext.
 
         @param[in] context The SEALContext
@@ -272,14 +272,14 @@ namespace seal
         */
         inline void resize(size_type size)
         {
-            // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid 
+            // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid
             // or coeff_mod_count_ is zero (in which case no memory is allocated).
             resize_internal(size, poly_modulus_degree_, coeff_mod_count_);
         }
 
         /**
-        Resets the ciphertext. This function releases any memory allocated 
-        by the ciphertext, returning it to the memory pool. It also sets all 
+        Resets the ciphertext. This function releases any memory allocated
+        by the ciphertext, returning it to the memory pool. It also sets all
         encryption parameter specific size information to zero.
         */
         inline void release() noexcept
@@ -365,14 +365,14 @@ namespace seal
         }
 #endif
         /**
-        Returns a pointer to a particular polynomial in the ciphertext 
-        data. Note that Microsoft SEAL stores each polynomial in the ciphertext 
-        modulo all of the K primes in the coefficient modulus. The pointer 
+        Returns a pointer to a particular polynomial in the ciphertext
+        data. Note that Microsoft SEAL stores each polynomial in the ciphertext
+        modulo all of the K primes in the coefficient modulus. The pointer
         returned by this function is to the beginning (constant coefficient)
         of the first one of these K polynomials.
 
         @param[in] poly_index The index of the polynomial in the ciphertext
-        @throws std::out_of_range if poly_index is less than 0 or bigger 
+        @throws std::out_of_range if poly_index is less than 0 or bigger
         than the size of the ciphertext
         */
         inline ct_coeff_type *data(size_type poly_index)
@@ -392,10 +392,10 @@ namespace seal
         }
 
         /**
-        Returns a const pointer to a particular polynomial in the 
-        ciphertext data. Note that Microsoft SEAL stores each polynomial in the 
-        ciphertext modulo all of the K primes in the coefficient modulus. 
-        The pointer returned by this function is to the beginning 
+        Returns a const pointer to a particular polynomial in the
+        ciphertext data. Note that Microsoft SEAL stores each polynomial in the
+        ciphertext modulo all of the K primes in the coefficient modulus.
+        The pointer returned by this function is to the beginning
         (constant coefficient) of the first one of these K polynomials.
 
         @param[in] poly_index The index of the polynomial in the ciphertext
@@ -418,10 +418,10 @@ namespace seal
         }
 
         /**
-        Returns a reference to a polynomial coefficient at a particular 
-        index in the ciphertext data. If the polynomial modulus has degree N, 
-        and the number of primes in the coefficient modulus is K, then the 
-        ciphertext contains size*N*K coefficients. Thus, the coeff_index has 
+        Returns a reference to a polynomial coefficient at a particular
+        index in the ciphertext data. If the polynomial modulus has degree N,
+        and the number of primes in the coefficient modulus is K, then the
+        ciphertext contains size*N*K coefficients. Thus, the coeff_index has
         a range of [0, size*N*K).
 
         @param[in] coeff_index The index of the coefficient
@@ -433,14 +433,14 @@ namespace seal
         }
 
         /**
-        Returns a const reference to a polynomial coefficient at a particular 
-        index in the ciphertext data. If the polynomial modulus has degree N, 
-        and the number of primes in the coefficient modulus is K, then the 
-        ciphertext contains size*N*K coefficients. Thus, the coeff_index has 
+        Returns a const reference to a polynomial coefficient at a particular
+        index in the ciphertext data. If the polynomial modulus has degree N,
+        and the number of primes in the coefficient modulus is K, then the
+        ciphertext contains size*N*K coefficients. Thus, the coeff_index has
         a range of [0, size*N*K).
 
         @param[in] coeff_index The index of the coefficient
-        @throws std::out_of_range if coeff_index is out of range 
+        @throws std::out_of_range if coeff_index is out of range
         */
         inline const ct_coeff_type &operator [](size_type coeff_index) const
         {
@@ -448,8 +448,8 @@ namespace seal
         }
 
         /**
-        Returns the number of primes in the coefficient modulus of the 
-        associated encryption parameters. This directly affects the 
+        Returns the number of primes in the coefficient modulus of the
+        associated encryption parameters. This directly affects the
         allocation size of the ciphertext.
         */
         inline size_type coeff_mod_count() const noexcept
@@ -458,8 +458,8 @@ namespace seal
         }
 
         /**
-        Returns the degree of the polynomial modulus of the associated 
-        encryption parameters. This directly affects the allocation size 
+        Returns the degree of the polynomial modulus of the associated
+        encryption parameters. This directly affects the allocation size
         of the ciphertext.
         */
         inline size_type poly_modulus_degree() const noexcept
@@ -468,8 +468,8 @@ namespace seal
         }
 
         /**
-        Returns the capacity of the allocation. This means the largest size 
-        of the ciphertext that can be stored in the current allocation with 
+        Returns the capacity of the allocation. This means the largest size
+        of the ciphertext that can be stored in the current allocation with
         the current encryption parameters.
         */
         inline size_type size_capacity() const noexcept
@@ -503,8 +503,8 @@ namespace seal
 
         /**
         Check whether the current ciphertext is valid for a given SEALContext.
-        If the given SEALContext is not set, the encryption parameters are invalid, 
-        or the ciphertext data does not match the SEALContext, this function 
+        If the given SEALContext is not set, the encryption parameters are invalid,
+        or the ciphertext data does not match the SEALContext, this function
         returns false. Otherwise, returns true.
 
         @param[in] context The SEALContext
@@ -513,26 +513,26 @@ namespace seal
 
         /**
         Check whether the current ciphertext is valid for a given SEALContext.
-        If the given SEALContext is not set, the encryption parameters are invalid, 
-        or the ciphertext data does not match the SEALContext, this function 
+        If the given SEALContext is not set, the encryption parameters are invalid,
+        or the ciphertext data does not match the SEALContext, this function
         returns false. Otherwise, returns true. This function only checks the metadata
-        and not the ciphertext data itself. 
+        and not the ciphertext data itself.
 
         @param[in] context The SEALContext
         */
         bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
 
         /**
-        Check whether the current ciphertext is transparent, i.e. does not require 
-        a secret key to decrypt. In typical security models such transparent 
-        ciphertexts would not be considered to be valid. Starting from the second 
-        polynomial in the current ciphertext, this function returns true if all 
+        Check whether the current ciphertext is transparent, i.e. does not require
+        a secret key to decrypt. In typical security models such transparent
+        ciphertexts would not be considered to be valid. Starting from the second
+        polynomial in the current ciphertext, this function returns true if all
         following coefficients are identically zero. Otherwise, returns false.
         */
         inline bool is_transparent() const
         {
             return (!uint64_count() ||
-                (size_ < SEAL_CIPHERTEXT_SIZE_MIN) || 
+                (size_ < SEAL_CIPHERTEXT_SIZE_MIN) ||
                 std::all_of(data(1), data_.cend(), util::is_zero<ct_coeff_type>));
         }
 
@@ -548,7 +548,7 @@ namespace seal
         /**
         Loads a ciphertext from an input stream overwriting the current ciphertext.
         No checking of the validity of the ciphertext data against encryption
-        parameters is performed. This function should not be used unless the 
+        parameters is performed. This function should not be used unless the
         ciphertext comes from a fully trusted source.
 
         @param[in] stream The stream to load the ciphertext from
@@ -647,7 +647,7 @@ namespace seal
         struct CiphertextPrivateHelper;
 
     private:
-        void reserve_internal(size_type size_capacity, 
+        void reserve_internal(size_type size_capacity,
             size_type poly_modulus_degree, size_type coeff_mod_count);
 
         void resize_internal(size_type size, size_type poly_modulus_degree,
@@ -656,7 +656,7 @@ namespace seal
         parms_id_type parms_id_ = parms_id_zero;
 
         bool is_ntt_form_ = false;
-        
+
         size_type size_capacity_ = 2;
 
         size_type size_ = 0;

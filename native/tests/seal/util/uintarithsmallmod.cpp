@@ -28,7 +28,7 @@ namespace SEALTest
 
             mod = 4611686018427289601ULL;
             ASSERT_EQ(1ULL, increment_uint_mod(0, mod));
-            ASSERT_EQ(0ULL, increment_uint_mod(4611686018427289600ULL, mod));                
+            ASSERT_EQ(0ULL, increment_uint_mod(4611686018427289600ULL, mod));
             ASSERT_EQ(1ULL, increment_uint_mod(0, mod));
         }
 
@@ -75,7 +75,7 @@ namespace SEALTest
             SmallModulus mod(3);
             ASSERT_EQ(0ULL, div2_uint_mod(0ULL, mod));
             ASSERT_EQ(2ULL, div2_uint_mod(1ULL, mod));
-            
+
             mod = 17;
             ASSERT_EQ(11ULL, div2_uint_mod(5ULL, mod));
             ASSERT_EQ(4ULL, div2_uint_mod(8ULL, mod));

@@ -17,15 +17,15 @@ namespace seal
     namespace util
     {
         MemoryPoolHeadMT::MemoryPoolHeadMT(size_t item_byte_count,
-            bool clear_on_destruction) : 
+            bool clear_on_destruction) :
             clear_on_destruction_(clear_on_destruction),
-            locked_(false), item_byte_count_(item_byte_count), 
-            item_count_(MemoryPool::first_alloc_count), 
+            locked_(false), item_byte_count_(item_byte_count),
+            item_count_(MemoryPool::first_alloc_count),
             first_item_(nullptr)
         {
-            if ((item_byte_count_ == 0) || 
+            if ((item_byte_count_ == 0) ||
                 (item_byte_count_ > MemoryPool::max_batch_alloc_byte_count) ||
-                (mul_safe(item_byte_count_, MemoryPool::first_alloc_count) > 
+                (mul_safe(item_byte_count_, MemoryPool::first_alloc_count) >
                     MemoryPool::max_batch_alloc_byte_count))
             {
                 throw invalid_argument("invalid allocation size");
@@ -129,10 +129,10 @@ namespace seal
 
                     // Increase allocation size unless we are already at max
                     size_t new_size = safe_cast<size_t>(
-                        ceil(MemoryPool::alloc_size_multiplier * 
+                        ceil(MemoryPool::alloc_size_multiplier *
                             static_cast<double>(last_alloc.size)));
                     size_t new_alloc_byte_count = mul_safe(new_size, item_byte_count_);
-                    if (new_alloc_byte_count > 
+                    if (new_alloc_byte_count >
                         MemoryPool::max_batch_alloc_byte_count)
                     {
                         new_size = last_alloc.size;
@@ -171,13 +171,13 @@ namespace seal
         MemoryPoolHeadST::MemoryPoolHeadST(size_t item_byte_count,
             bool clear_on_destruction) :
             clear_on_destruction_(clear_on_destruction),
-            item_byte_count_(item_byte_count), 
-            item_count_(MemoryPool::first_alloc_count), 
+            item_byte_count_(item_byte_count),
+            item_count_(MemoryPool::first_alloc_count),
             first_item_(nullptr)
         {
-            if ((item_byte_count_ == 0) || 
+            if ((item_byte_count_ == 0) ||
                 (item_byte_count_ > MemoryPool::max_batch_alloc_byte_count) ||
-                (mul_safe(item_byte_count_, MemoryPool::first_alloc_count) > 
+                (mul_safe(item_byte_count_, MemoryPool::first_alloc_count) >
                     MemoryPool::max_batch_alloc_byte_count))
             {
                 throw invalid_argument("invalid allocation size");
@@ -268,10 +268,10 @@ namespace seal
 
                     // Increase allocation size unless we are already at max
                     size_t new_size = safe_cast<size_t>(
-                        ceil(MemoryPool::alloc_size_multiplier * 
+                        ceil(MemoryPool::alloc_size_multiplier *
                             static_cast<double>(last_alloc.size)));
                     size_t new_alloc_byte_count = mul_safe(new_size, item_byte_count_);
-                    if (new_alloc_byte_count > 
+                    if (new_alloc_byte_count >
                         MemoryPool::max_batch_alloc_byte_count)
                     {
                         new_size = last_alloc.size;
@@ -305,11 +305,11 @@ namespace seal
             return old_first;
         }
 
-        const size_t MemoryPool::max_single_alloc_byte_count = 
+        const size_t MemoryPool::max_single_alloc_byte_count =
             []() -> size_t {
                 int bit_shift = static_cast<int>(
                     ceil(log2(MemoryPool::alloc_size_multiplier)));
-                if (bit_shift < 0 || unsigned_geq(bit_shift, 
+                if (bit_shift < 0 || unsigned_geq(bit_shift,
                     sizeof(size_t) * static_cast<size_t>(bits_per_byte)))
                 {
                     throw logic_error("alloc_size_multiplier too large");
@@ -321,7 +321,7 @@ namespace seal
             []() -> size_t {
                 int bit_shift = static_cast<int>(
                     ceil(log2(MemoryPool::alloc_size_multiplier)));
-                if (bit_shift < 0 || unsigned_geq(bit_shift, 
+                if (bit_shift < 0 || unsigned_geq(bit_shift,
                     sizeof(size_t) * static_cast<size_t>(bits_per_byte)))
                 {
                     throw logic_error("alloc_size_multiplier too large");
@@ -421,9 +421,9 @@ namespace seal
         {
             ReaderLock lock(pools_locker_.acquire_read());
 
-            return accumulate(pools_.cbegin(), pools_.cend(), size_t(0), 
+            return accumulate(pools_.cbegin(), pools_.cend(), size_t(0),
                 [](size_t byte_count, MemoryPoolHead *head) {
-                    return add_safe(byte_count, 
+                    return add_safe(byte_count,
                         mul_safe(head->item_count(), head->item_byte_count()));
                 });
         }
@@ -470,7 +470,7 @@ namespace seal
                 }
             }
 
-            // Size was not found so just add it, but first check if we are at 
+            // Size was not found so just add it, but first check if we are at
             // maximum pool head count already.
             if (pools_.size() >= max_pool_head_count)
             {
@@ -492,9 +492,9 @@ namespace seal
 
         size_t MemoryPoolST::alloc_byte_count() const
         {
-            return accumulate(pools_.cbegin(), pools_.cend(), size_t(0), 
+            return accumulate(pools_.cbegin(), pools_.cend(), size_t(0),
                 [](size_t byte_count, MemoryPoolHead *head) {
-                    return add_safe(byte_count, 
+                    return add_safe(byte_count,
                         mul_safe(head->item_count(), head->item_byte_count()));
                 });
         }

@@ -17,7 +17,7 @@ namespace seal
 
             using param_type = ClippedNormalDistribution;
 
-            ClippedNormalDistribution(result_type mean, result_type standard_deviation, 
+            ClippedNormalDistribution(result_type mean, result_type standard_deviation,
                 result_type max_deviation);
 
             template <typename RNG>

@@ -15,7 +15,7 @@ namespace seal
 
     @par Thread Safety
     In general, reading from PublicKey is thread-safe as long as no other thread
-    is concurrently mutating it. This is due to the underlying data structure 
+    is concurrently mutating it. This is due to the underlying data structure
     storing the public key not being thread-safe.
 
     @see KeyGenerator for the class that generates the public key.
@@ -78,9 +78,9 @@ namespace seal
         }
 
         /**
-        Check whether the current PublicKey is valid for a given SEALContext. If 
-        the given SEALContext is not set, the encryption parameters are invalid, 
-        or the PublicKey data does not match the SEALContext, this function returns 
+        Check whether the current PublicKey is valid for a given SEALContext. If
+        the given SEALContext is not set, the encryption parameters are invalid,
+        or the PublicKey data does not match the SEALContext, this function returns
         false. Otherwise, returns true.
 
         @param[in] context The SEALContext
@@ -98,9 +98,9 @@ namespace seal
         }
 
         /**
-        Check whether the current PublicKey is valid for a given SEALContext. If 
-        the given SEALContext is not set, the encryption parameters are invalid, 
-        or the PublicKey data does not match the SEALContext, this function returns 
+        Check whether the current PublicKey is valid for a given SEALContext. If
+        the given SEALContext is not set, the encryption parameters are invalid,
+        or the PublicKey data does not match the SEALContext, this function returns
         false. Otherwise, returns true. This function only checks the metadata
         and not the public key data itself.
 
@@ -114,7 +114,7 @@ namespace seal
                 return false;
             }
             auto parms_id = context->key_parms_id();
-            return pk_.is_metadata_valid_for(std::move(context)) && 
+            return pk_.is_metadata_valid_for(std::move(context)) &&
                 pk_.is_ntt_form() && pk_.parms_id() == parms_id;
         }
 
@@ -133,7 +133,7 @@ namespace seal
         /**
         Loads a PublicKey from an input stream overwriting the current PublicKey.
         No checking of the validity of the PublicKey data against encryption
-        parameters is performed. This function should not be used unless the 
+        parameters is performed. This function should not be used unless the
         PublicKey comes from a fully trusted source.
 
         @param[in] stream The stream to load the PublicKey from

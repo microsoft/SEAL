@@ -13,7 +13,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    BatchEncoder::BatchEncoder(std::shared_ptr<SEALContext> context) : 
+    BatchEncoder::BatchEncoder(std::shared_ptr<SEALContext> context) :
         context_(std::move(context))
     {
         // Verify parameters
@@ -43,7 +43,7 @@ namespace seal
         roots_of_unity_ = allocate_uint(slots_, pool_);
 
         // Fill the vector of roots of unity with all distinct odd powers of generator.
-        // These are all the primitive (2*slots_)-th roots of unity in integers modulo 
+        // These are all the primitive (2*slots_)-th roots of unity in integers modulo
         // parms.plain_modulus().
         populate_roots_of_unity_vector(context_data);
 
@@ -62,7 +62,7 @@ namespace seal
 
         for (size_t i = 1; i < slots_; i++)
         {
-            roots_of_unity_[i] = multiply_uint_uint_mod(roots_of_unity_[i - 1], 
+            roots_of_unity_[i] = multiply_uint_uint_mod(roots_of_unity_[i - 1],
                 generator_sq, modulus);
         }
     }
@@ -72,7 +72,7 @@ namespace seal
         int logn = get_power_of_two(slots_);
         matrix_reps_index_map_ = allocate_uint(slots_, pool_);
 
-        // Copy from the matrix to the value vectors 
+        // Copy from the matrix to the value vectors
         size_t row_size = slots_ >> 1;
         size_t m = slots_ << 1;
         uint64_t gen = 3;
@@ -93,7 +93,7 @@ namespace seal
         }
     }
 
-    void BatchEncoder::encode(const vector<uint64_t> &values_matrix, 
+    void BatchEncoder::encode(const vector<uint64_t> &values_matrix,
         Plaintext &destination)
     {
         auto &context_data = *context_->context_data_first();
@@ -119,7 +119,7 @@ namespace seal
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
 
-        // First write the values to destination coefficients. 
+        // First write the values to destination coefficients.
         // Read in top row, then bottom row.
         for (size_t i = 0; i < values_matrix_size; i++)
         {
@@ -135,7 +135,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
 
-    void BatchEncoder::encode(const vector<int64_t> &values_matrix, 
+    void BatchEncoder::encode(const vector<int64_t> &values_matrix,
         Plaintext &destination)
     {
         auto &context_data = *context_->context_data_first();
@@ -162,12 +162,12 @@ namespace seal
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
 
-        // First write the values to destination coefficients.  
+        // First write the values to destination coefficients.
         // Read in top row, then bottom row.
         for (size_t i = 0; i < values_matrix_size; i++)
         {
-            *(destination.data() + matrix_reps_index_map_[i]) = 
-                (values_matrix[i] < 0) ? (modulus + static_cast<uint64_t>(values_matrix[i])) : 
+            *(destination.data() + matrix_reps_index_map_[i]) =
+                (values_matrix[i] < 0) ? (modulus + static_cast<uint64_t>(values_matrix[i])) :
                     static_cast<uint64_t>(values_matrix[i]);
         }
         for (size_t i = values_matrix_size; i < slots_; i++)
@@ -180,7 +180,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
 #ifdef SEAL_USE_MSGSL_SPAN
-    void BatchEncoder::encode(gsl::span<const uint64_t> values_matrix, 
+    void BatchEncoder::encode(gsl::span<const uint64_t> values_matrix,
         Plaintext &destination)
     {
         auto &context_data = *context_->context_data_first();
@@ -206,12 +206,12 @@ namespace seal
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
 
-        // First write the values to destination coefficients. Read 
+        // First write the values to destination coefficients. Read
         // in top row, then bottom row.
         using index_type = decltype(values_matrix)::index_type;
         for (size_t i = 0; i < values_matrix_size; i++)
         {
-            *(destination.data() + matrix_reps_index_map_[i]) = 
+            *(destination.data() + matrix_reps_index_map_[i]) =
                 values_matrix[static_cast<index_type>(i)];
         }
         for (size_t i = values_matrix_size; i < slots_; i++)
@@ -224,7 +224,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
 
-    void BatchEncoder::encode(gsl::span<const int64_t> values_matrix, 
+    void BatchEncoder::encode(gsl::span<const int64_t> values_matrix,
         Plaintext &destination)
     {
         auto &context_data = *context_->context_data_first();
@@ -251,14 +251,14 @@ namespace seal
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
 
-        // First write the values to destination coefficients. Read 
+        // First write the values to destination coefficients. Read
         // in top row, then bottom row.
         using index_type = decltype(values_matrix)::index_type;
         for (size_t i = 0; i < values_matrix_size; i++)
         {
-            *(destination.data() + matrix_reps_index_map_[i]) = 
-                (values_matrix[static_cast<index_type>(i)] < 0) ? 
-                (modulus + static_cast<uint64_t>(values_matrix[static_cast<index_type>(i)])) : 
+            *(destination.data() + matrix_reps_index_map_[i]) =
+                (values_matrix[static_cast<index_type>(i)] < 0) ?
+                (modulus + static_cast<uint64_t>(values_matrix[static_cast<index_type>(i)])) :
                 static_cast<uint64_t>(values_matrix[static_cast<index_type>(i)]);
         }
         for (size_t i = values_matrix_size; i < slots_; i++)
@@ -296,7 +296,7 @@ namespace seal
             throw invalid_argument("plain is not valid for encryption parameters");
         }
 #endif
-        // We need to permute the coefficients of plain. To do this, we allocate 
+        // We need to permute the coefficients of plain. To do this, we allocate
         // temporary space.
         size_t input_plain_coeff_count = min(plain.coeff_count(), slots_);
         auto temp(allocate_uint(input_plain_coeff_count, pool));
@@ -306,7 +306,7 @@ namespace seal
         plain.resize(slots_);
         plain.parms_id() = parms_id_zero;
 
-        // First write the values to destination coefficients. Read 
+        // First write the values to destination coefficients. Read
         // in top row, then bottom row.
         for (size_t i = 0; i < input_plain_coeff_count; i++)
         {
@@ -402,7 +402,7 @@ namespace seal
         {
             uint64_t curr_value = temp_dest[matrix_reps_index_map_[i]];
             destination[i] = (curr_value > plain_modulus_div_two) ?
-                (static_cast<int64_t>(curr_value) - static_cast<int64_t>(modulus)) : 
+                (static_cast<int64_t>(curr_value) - static_cast<int64_t>(modulus)) :
                 static_cast<int64_t>(curr_value);
         }
     }
@@ -426,7 +426,7 @@ namespace seal
         auto &context_data = *context_->context_data_first();
 
         using index_type = decltype(destination)::index_type;
-        if(unsigned_gt(destination.size(), numeric_limits<int>::max()) || 
+        if(unsigned_gt(destination.size(), numeric_limits<int>::max()) ||
             unsigned_neq(destination.size(), slots_))
         {
             throw invalid_argument("destination has incorrect size");
@@ -471,7 +471,7 @@ namespace seal
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         using index_type = decltype(destination)::index_type;
-        if(unsigned_gt(destination.size(), numeric_limits<int>::max()) || 
+        if(unsigned_gt(destination.size(), numeric_limits<int>::max()) ||
             unsigned_neq(destination.size(), slots_))
         {
             throw invalid_argument("destination has incorrect size");
@@ -495,7 +495,7 @@ namespace seal
         {
             uint64_t curr_value = temp_dest[matrix_reps_index_map_[i]];
             destination[static_cast<index_type>(i)] = (curr_value > plain_modulus_div_two) ?
-                    (static_cast<int64_t>(curr_value) - static_cast<int64_t>(modulus)) : 
+                    (static_cast<int64_t>(curr_value) - static_cast<int64_t>(modulus)) :
                     static_cast<int64_t>(curr_value);
         }
     }
@@ -530,7 +530,7 @@ namespace seal
         // Transform destination using negacyclic NTT.
         ntt_negacyclic_harvey(temp.get(), *context_data.plain_ntt_tables());
 
-        // Set plain to full slot count size (note that all new coefficients are 
+        // Set plain to full slot count size (note that all new coefficients are
         // set to zero).
         plain.resize(slots_);
 

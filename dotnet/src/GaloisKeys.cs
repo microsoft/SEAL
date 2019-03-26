@@ -20,24 +20,24 @@ namespace Microsoft.Research.SEAL
     /// is a polynomial of degree N, in batching the idea is to view a plaintext polynomial as
     /// a 2-by-(N/2) matrix of integers modulo plaintext modulus. Normal homomorphic computations
     /// operate on such encrypted matrices element (slot) wise. However, special rotation
-    /// operations allow us to also rotate the matrix rows cyclically in either direction, and 
+    /// operations allow us to also rotate the matrix rows cyclically in either direction, and
     /// rotate the columns (swap the rows). These operations require the Galois keys.
     /// </para>
     /// <para>
     /// Decomposition Bit Count
     /// Decomposition bit count (dbc) is a parameter that describes a performance trade-off in
-    /// the rotation operation. Its function is exactly the same as in relinearization. Namely, 
+    /// the rotation operation. Its function is exactly the same as in relinearization. Namely,
     /// the polynomials in the ciphertexts (with large coefficients) get decomposed into a smaller
-    /// base 2^dbc, coefficient-wise. Each of the decomposition factors corresponds to a piece of 
-    /// data in the Galois keys, so the smaller the dbc is, the larger the Galois keys are. 
+    /// base 2^dbc, coefficient-wise. Each of the decomposition factors corresponds to a piece of
+    /// data in the Galois keys, so the smaller the dbc is, the larger the Galois keys are.
     /// Moreover, a smaller dbc results in less invariant noise budget being consumed in the
-    /// rotation operation. However, using a large dbc is much faster, and often one would want 
-    /// to optimize the dbc to be as large as possible for performance. The dbc is upper-bounded 
+    /// rotation operation. However, using a large dbc is much faster, and often one would want
+    /// to optimize the dbc to be as large as possible for performance. The dbc is upper-bounded
     /// by the value of 60, and lower-bounded by the value of 1.
     /// </para>
     /// <para>
     /// Thread Safety
-    /// In general, reading from GaloisKeys is thread-safe as long as no other thread is 
+    /// In general, reading from GaloisKeys is thread-safe as long as no other thread is
     /// concurrently mutating it. This is due to the underlying data structure storing the
     /// Galois keys not being thread-safe.
     /// </para>
@@ -158,13 +158,13 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a copy of a Galois key.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
-        /// Returns a copy of a Galois key. The returned Galois key corresponds to the given 
+        /// Returns a copy of a Galois key. The returned Galois key corresponds to the given
         /// Galois element.
         /// </remarks>
         /// <param name="galoisElt">The Galois element</param>
-        /// <exception cref="ArgumentException">if the key corresponding to galoisElt does 
+        /// <exception cref="ArgumentException">if the key corresponding to galoisElt does
         /// not exist</exception>
         public IEnumerable<Ciphertext> Key(ulong galoisElt)
         {
@@ -187,7 +187,7 @@ namespace Microsoft.Research.SEAL
         /// Returns whether a Galois key corresponding to a given Galois key element
         /// exists.
         /// </summary>
-        /// 
+        ///
         /// <param name="galoisElt">The Galois element</param>
         /// <exception cref="ArgumentException">if Galois element is not valid</exception>
         public bool HasKey(ulong galoisElt)
@@ -215,9 +215,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Check whether the current GaloisKeys is valid for a given SEALContext. If 
-        /// the given SEALContext is not set, the encryption parameters are invalid, 
-        /// or the GaloisKeys data does not match the SEALContext, this function returns 
+        /// Check whether the current GaloisKeys is valid for a given SEALContext. If
+        /// the given SEALContext is not set, the encryption parameters are invalid,
+        /// or the GaloisKeys data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -234,7 +234,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Check whether the current GaloisKeys is valid for a given SEALContext.If
         /// the given SEALContext is not set, the encryption parameters are invalid,
-        /// or the GaloisKeys data does not match the SEALContext, this function returns 
+        /// or the GaloisKeys data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true. This function only checks the metadata
         /// and not the Galois key data itself.
         /// </summary>
@@ -252,9 +252,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the GaloisKeys instance to an output stream.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
-        /// Saves the GaloisKeys instance to an output stream. The output is in binary format 
+        /// Saves the GaloisKeys instance to an output stream. The output is in binary format
         /// and not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the GaloisKeys to</param>
@@ -294,7 +294,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Loads a GaloisKeys from an input stream overwriting the current GaloisKeys.
         /// No checking of the validity of the GaloisKeys data against encryption
-        /// parameters is performed. This function should not be used unless the 
+        /// parameters is performed. This function should not be used unless the
         /// GaloisKeys comes from a fully trusted source.
         /// </summary>
         /// <param name="stream">The stream to load the GaloisKeys from</param>
@@ -362,7 +362,7 @@ namespace Microsoft.Research.SEAL
         /// Loads a GaloisKeys from an input stream overwriting the current GaloisKeys.
         /// The loaded GaloisKeys is verified to be valid for the given SEALContext.
         /// </summary>
-        /// 
+        ///
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the GaloisKeys instance from</param>
         /// <exception cref="ArgumentNullException">if either stream or context are null</exception>

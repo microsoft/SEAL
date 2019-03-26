@@ -12,10 +12,10 @@
 namespace seal
 {
     /**
-    A simple wrapper class to implement C++ UniformRandomBitGenerator type properties 
+    A simple wrapper class to implement C++ UniformRandomBitGenerator type properties
     for a given polymorphic UniformRandomGenerator instance. The resulting object can
-    be used as a randomness source in C++ standard random number distribution classes, 
-    such as std::uniform_int_distribution, std::normal_distribution, or any of the 
+    be used as a randomness source in C++ standard random number distribution classes,
+    such as std::uniform_int_distribution, std::normal_distribution, or any of the
     standard RandomNumberEngine classes.
     */
     class RandomToStandardAdapter
@@ -24,8 +24,8 @@ namespace seal
         using result_type = std::uint32_t;
 
         /**
-        Creates a new RandomToStandardAdapter backed by a given UniformRandomGenerator. 
-        
+        Creates a new RandomToStandardAdapter backed by a given UniformRandomGenerator.
+
         @param[in] generator A backing UniformRandomGenerator instance
         @throws std::invalid_argument if generator is null
         */

@@ -32,7 +32,7 @@ namespace Microsoft.Research.SEAL
     }
 
     /// <summary>
-    /// The MemoryManager class can be used to create instances of MemoryPoolHandle 
+    /// The MemoryManager class can be used to create instances of MemoryPoolHandle
     /// based on a given "profile". A profile is implemented by inheriting from the
     /// MMProf class (pure virtual) and encapsulates internal logic for deciding which
     /// memory pool to use.
@@ -49,7 +49,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Sets the current profile to a given one and returns an instance pointing 
+        /// Sets the current profile to a given one and returns an instance pointing
         /// to the previously set profile.
         /// </summary>
         /// <param name="newProfile">New memory manager profile</param>
@@ -68,22 +68,22 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a MemoryPoolHandle according to the currently set memory manager 
-        /// profile and profOpt. The following values for profOpt have an effect 
+        /// Returns a MemoryPoolHandle according to the currently set memory manager
+        /// profile and profOpt. The following values for profOpt have an effect
         /// independent of the current profile:
-        /// 
-        /// 
+        ///
+        ///
         ///     MMProfOpt.ForceNew: return MemoryPoolHandle.New()
         ///     MMProfOpt.ForceGlobal: return MemoryPoolHandle.Global()
         ///     MMProfOpt.ForceThreadLocal: return MemoryPoolHandle.ThreadLocal()
-        /// 
-        /// Other values for profOpt are forwarded to the current profile and, depending 
+        ///
+        /// Other values for profOpt are forwarded to the current profile and, depending
         /// on the profile, may or may not have an effect. The value MMProfOpt.Default
         /// will always invoke a default behavior for the current profile.
         /// </summary>
         /// <param name="profOpt">A MMProfOpt parameter used to provide additional
         /// instructions to the memory manager profile for internal logic.</param>
-        /// <param name="clearOnDestruction">Indicates whether the memory pool data 
+        /// <param name="clearOnDestruction">Indicates whether the memory pool data
         /// should be cleared when destroyed.This can be important when memory pools
         /// are used to store private data. This parameter is only used with MMProfOpt.ForceNew,
         /// and ignored in all other cases.</param>

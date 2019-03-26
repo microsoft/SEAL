@@ -13,8 +13,8 @@ namespace Microsoft.Research.SEAL
     /// <remarks>
     /// <para>
     /// Thread Safety
-    /// In general, reading from SecretKey is thread-safe as long as no other 
-    /// thread is concurrently mutating it. This is due to the underlying data 
+    /// In general, reading from SecretKey is thread-safe as long as no other
+    /// thread is concurrently mutating it. This is due to the underlying data
     /// structure storing the secret key not being thread-safe.
     /// </para>
     /// </remarks>
@@ -84,9 +84,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Check whether the current SecretKey is valid for a given SEALContext. If 
-        /// the given SEALContext is not set, the encryption parameters are invalid, 
-        /// or the SecretKey data does not match the SEALContext, this function returns 
+        /// Check whether the current SecretKey is valid for a given SEALContext. If
+        /// the given SEALContext is not set, the encryption parameters are invalid,
+        /// or the SecretKey data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -101,8 +101,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Check whether the current SecretKey is valid for a given SEALContext. If 
-        /// the given SEALContext is not set, the encryption parameters are invalid, 
+        /// Check whether the current SecretKey is valid for a given SEALContext. If
+        /// the given SEALContext is not set, the encryption parameters are invalid,
         /// or the SecretKey data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true. This function only checks the metadata
         /// and not the secret key data itself.
@@ -121,9 +121,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the SecretKey to an output stream.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
-        /// Saves the SecretKey to an output stream. The output is in binary format and 
+        /// Saves the SecretKey to an output stream. The output is in binary format and
         /// not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the SecretKey to</param>
@@ -139,7 +139,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Loads a SecretKey from an input stream overwriting the current SecretKey.
         /// No checking of the validity of the SecretKey data against encryption
-        /// parameters is performed. This function should not be used unless the 
+        /// parameters is performed. This function should not be used unless the
         /// SecretKey comes from a fully trusted source.
         /// </summary>
         /// <param name="stream">The stream to load the SecretKey from</param>
@@ -157,7 +157,7 @@ namespace Microsoft.Research.SEAL
         /// Loads a SecretKey from an input stream overwriting the current SecretKey.
         /// The loaded SecretKey is verified to be valid for the given SEALContext.
         /// </summary>
-        /// 
+        ///
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the SecretKey from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>

@@ -20,14 +20,14 @@ namespace Microsoft.Research.SEAL
     /// <para>
     /// Memory Management
     /// The coefficient count of a plaintext refers to the number of word-size
-    /// coefficients in the plaintext, whereas its capacity refers to the number 
-    /// of word-size coefficients that fit in the current memory allocation. In 
-    /// high-performance applications unnecessary re-allocations should be avoided 
-    /// by reserving enough memory for the plaintext to begin with either by 
-    /// providing the desired capacity to the constructor as an extra argument, or 
-    /// by calling the reserve function at any time. 
-    /// 
-    /// When the scheme is SchemeType.BFV each coefficient of a plaintext is 
+    /// coefficients in the plaintext, whereas its capacity refers to the number
+    /// of word-size coefficients that fit in the current memory allocation. In
+    /// high-performance applications unnecessary re-allocations should be avoided
+    /// by reserving enough memory for the plaintext to begin with either by
+    /// providing the desired capacity to the constructor as an extra argument, or
+    /// by calling the reserve function at any time.
+    ///
+    /// When the scheme is SchemeType.BFV each coefficient of a plaintext is
     /// a 64-bit word, but when the scheme is SchemeType.CKKS the plaintext is
     /// by default stored in an NTT transformed form with respect to each of the
     /// primes in the coefficient modulus. Thus, the size of the allocation that
@@ -103,7 +103,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <remarks>
         /// The string description of the polynomial must adhere to the format
-        /// returned by ToString(), which is of the form "7FFx^3 + 1x^1 + 3" 
+        /// returned by ToString(), which is of the form "7FFx^3 + 1x^1 + 3"
         /// and summarized by the following
         /// rules:
         /// 1. Terms are listed in order of strictly decreasing exponent
@@ -148,7 +148,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Allocates enough memory to accommodate the backing array of a plaintext 
+        /// Allocates enough memory to accommodate the backing array of a plaintext
         /// with given capacity.
         /// </summary>
         /// <param name="capacity">The capacity</param>
@@ -170,7 +170,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Resets the plaintext. This function releases any memory allocated by the 
+        /// Resets the plaintext. This function releases any memory allocated by the
         /// plaintext, returning it to the memory pool.
         /// </summary>
         public void Release()
@@ -179,9 +179,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Resizes the plaintext to have a given coefficient count. The plaintext 
-        /// is automatically reallocated if the new coefficient count does not fit in 
-        /// the current capacity. 
+        /// Resizes the plaintext to have a given coefficient count. The plaintext
+        /// is automatically reallocated if the new coefficient count does not fit in
+        /// the current capacity.
         /// </summary>
         /// <param name="coeffCount">The number of coefficients in the plaintext
         /// polynomial</param>
@@ -203,7 +203,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Copies a given plaintext to the current one.
         /// </summary>
-        /// 
+        ///
         /// <param name="assign">The plaintext to copy from</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
         public void Set(Plaintext assign)
@@ -217,7 +217,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Sets the value of the current plaintext to the polynomial represented by the a given hexadecimal string.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// <para>
         /// Sets the value of the current plaintext to the polynomial represented by the a given hexadecimal string.
@@ -252,7 +252,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Sets the value of the current plaintext to a given constant polynomial.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Sets the value of the current plaintext to a given constant polynomial. The coefficient count
         /// is set to one.
@@ -267,7 +267,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Sets a given range of coefficients of a plaintext polynomial to zero.
         /// </summary>
-        /// 
+        ///
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
         /// <param name="length">The number of coefficients to set to zero</param>
         /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
@@ -290,7 +290,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Sets the plaintext polynomial coefficients to zero starting at a given index.
         /// </summary>
-        /// 
+        ///
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
         /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
         public void SetZero(ulong startCoeff)
@@ -318,7 +318,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Gets/set the value of a given coefficient of the plaintext polynomial.
         /// </summary>
-        /// 
+        ///
         /// <param name="coeffIndex">The index of the coefficient in the plaintext polynomial</param>
         /// <exception cref="ArgumentOutOfRangeException">if coeffIndex is not within [0, CoeffCount)</exception>
         public ulong this[ulong coeffIndex]
@@ -445,9 +445,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Check whether the current Plaintext is valid for a given SEALContext. If 
-        /// the given SEALContext is not set, the encryption parameters are invalid, 
-        /// or the Plaintext data does not match the SEALContext, this function returns 
+        /// Check whether the current Plaintext is valid for a given SEALContext. If
+        /// the given SEALContext is not set, the encryption parameters are invalid,
+        /// or the Plaintext data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -464,7 +464,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Check whether the current Plaintext is valid for a given SEALContext.If
         /// the given SEALContext is not set, the encryption parameters are invalid,
-        /// or the Plaintext data does not match the SEALContext, this function returns 
+        /// or the Plaintext data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true. This function only checks the metadata
         /// and not the plaintext data itself.
         /// </summary>
@@ -482,9 +482,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the plaintext to an output stream.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
-        /// Saves the plaintext to an output stream. The output is in binary format and not human-readable. 
+        /// Saves the plaintext to an output stream. The output is in binary format and not human-readable.
         /// The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the plaintext to</param>
@@ -513,7 +513,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Loads a plaintext from an input stream overwriting the current plaintext.
         /// No checking of the validity of the plaintext data against encryption
-        /// parameters is performed. This function should not be used unless the 
+        /// parameters is performed. This function should not be used unless the
         /// plaintext comes from a fully trusted source.
         /// </summary>
         /// <param name="stream">The stream to load the plaintext from</param>
@@ -600,7 +600,7 @@ namespace Microsoft.Research.SEAL
         /// Returns a copy of parmsId. The parmsId must remain zero
         /// unless the plaintext polynomial is in NTT form.
         /// </summary>
-        /// <seealso cref="EncryptionParameters">see EncryptionParameters for more 
+        /// <seealso cref="EncryptionParameters">see EncryptionParameters for more
         /// information about parmsId.</seealso>
         public ParmsId ParmsId
         {

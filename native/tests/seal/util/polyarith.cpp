@@ -359,8 +359,8 @@ namespace SEALTest
             ASSERT_EQ(poly3[4], 0ULL);
             ASSERT_EQ(poly3[5], 0ULL);
             ASSERT_EQ(poly3[6], 0ULL);
-            ASSERT_EQ(poly3[7], 0ULL);                
-            
+            ASSERT_EQ(poly3[7], 0ULL);
+
             poly1[0] = 2;
             poly1[1] = 0;
             poly1[2] = 1;

@@ -691,7 +691,7 @@ namespace seal
         */
         inline BigUInt operator *(const BigUInt &operand2) const
         {
-            int result_bits = util::add_safe(significant_bit_count(), 
+            int result_bits = util::add_safe(significant_bit_count(),
                 operand2.significant_bit_count());
             BigUInt result(result_bits);
             util::multiply_uint_uint(value_.get(), uint64_count(), operand2.data(),
@@ -1569,7 +1569,7 @@ namespace seal
 
         @param[in] stream The stream to load the BigUInt from
         @throws std::logic_error if BigUInt is an alias and the loaded BigUInt
-        is too large to fit with the current bit 
+        is too large to fit with the current bit
         @throws std::exception if a valid BigUInt could not be read from stream
         */
         void load(std::istream &stream);

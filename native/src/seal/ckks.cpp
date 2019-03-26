@@ -16,7 +16,7 @@ namespace seal
     // member variables with no initialization here.
     constexpr double CKKSEncoder::PI_;
 
-    CKKSEncoder::CKKSEncoder(shared_ptr<SEALContext> context) : 
+    CKKSEncoder::CKKSEncoder(shared_ptr<SEALContext> context) :
         context_(context)
     {
         // Verify parameters
@@ -41,7 +41,7 @@ namespace seal
 
         matrix_reps_index_map_ = allocate_uint(coeff_count, pool_);
 
-        // Copy from the matrix to the value vectors 
+        // Copy from the matrix to the value vectors
         uint64_t gen = 3;
         uint64_t pos = 1;
         uint64_t m = coeff_count << 1;
@@ -62,7 +62,7 @@ namespace seal
 
         roots_ = allocate<complex<double>>(coeff_count, pool_);
         inv_roots_ = allocate<complex<double>>(coeff_count, pool_);
-        complex<double> psi{ cos((2 * PI_) / static_cast<double>(m)), 
+        complex<double> psi{ cos((2 * PI_) / static_cast<double>(m)),
             sin((2 * PI_) / static_cast<double>(m)) };
         for (size_t i = 0; i < coeff_count; i++)
         {
@@ -71,7 +71,7 @@ namespace seal
         }
     }
 
-    void CKKSEncoder::encode_internal(double value, parms_id_type parms_id, 
+    void CKKSEncoder::encode_internal(double value, parms_id_type parms_id,
         double scale, Plaintext &destination, MemoryPoolHandle pool)
     {
         // Verify parameters.

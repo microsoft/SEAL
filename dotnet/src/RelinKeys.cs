@@ -22,7 +22,7 @@ namespace Microsoft.Research.SEAL
     /// that the smallest possible size for a ciphertext is 2, so the first relinearization key is
     /// corresponds to the square of the secret key. The second relinearization key corresponds to
     /// the cube of the secret key, and so on. For example, to relinearize a ciphertext of size
-    /// 7 back to size 2, one would need 5 relinearization keys, although it is hard to imagine 
+    /// 7 back to size 2, one would need 5 relinearization keys, although it is hard to imagine
     /// a situation where it makes sense to have size 7 ciphertexts, as operating on such objects
     /// would be very slow. Most commonly only one relinearization key is needed, and relinearization
     /// is performed after every multiplication.
@@ -30,19 +30,19 @@ namespace Microsoft.Research.SEAL
     /// <para>
     /// Decomposition Bit Count
     /// Decomposition bit count (dbc) is a parameter that describes a performance trade-off in
-    /// the relinearization process. Namely, in the relinearization process the polynomials in 
+    /// the relinearization process. Namely, in the relinearization process the polynomials in
     /// the ciphertexts (with large coefficients) get decomposed into a smaller base 2^dbc,
     /// coefficient-wise. Each of the decomposition factors corresponds to a piece of data in
     /// the relinearization key, so the smaller the dbc is, the larger the relinearization keys are.
     /// Moreover, a smaller dbc results in less invariant noise budget being consumed in the
-    /// relinearization process. However, using a large dbc is much faster, and often one 
-    /// would want to optimize the dbc to be as large as possible for performance. The dbc is 
+    /// relinearization process. However, using a large dbc is much faster, and often one
+    /// would want to optimize the dbc to be as large as possible for performance. The dbc is
     /// upper-bounded by the value of 60, and lower-bounded by the value of 1.
     /// </para>
     /// <para>
     /// Thread Safety
     /// In general, reading from RelinKeys is thread-safe as long as no other thread is
-    /// concurrently mutating it. This is due to the underlying data structure storing the 
+    /// concurrently mutating it. This is due to the underlying data structure storing the
     /// relinearization keys not being thread-safe.
     /// </para>
     /// </remarks>
@@ -76,7 +76,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a new RelinKeys instance initialized with a pointer to a 
+        /// Creates a new RelinKeys instance initialized with a pointer to a
         /// native RelinKeys object
         /// </summary>
         /// <param name="relinKeys">Pointer to native RelinKeys object</param>
@@ -160,13 +160,13 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a copy of an evaluation key.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
-        /// Returns a copy of a relinearization key. The returned evaluation key corresponds to the 
+        /// Returns a copy of a relinearization key. The returned evaluation key corresponds to the
         /// given power of the secret key.
         /// </remarks>
         /// <param name="keyPower">The power of the secret key</param>
-        /// <exception cref="ArgumentOutOfRangeException">if the key corresponding to keyPower does not 
+        /// <exception cref="ArgumentOutOfRangeException">if the key corresponding to keyPower does not
         /// exist</exception>
         public IEnumerable<Ciphertext> Key(ulong keyPower)
         {
@@ -195,10 +195,10 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns whether a relinearizaton key corresponding to a given power of the secret key 
+        /// Returns whether a relinearizaton key corresponding to a given power of the secret key
         /// exists.
         /// </summary>
-        /// 
+        ///
         /// <param name="keyPower">The power of the secret key</param>
         public bool HasKey(ulong keyPower)
         {
@@ -225,9 +225,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Check whether the current RelinKeys is valid for a given SEALContext. If 
-        /// the given SEALContext is not set, the encryption parameters are invalid, 
-        /// or the RelinKeys data does not match the SEALContext, this function returns 
+        /// Check whether the current RelinKeys is valid for a given SEALContext. If
+        /// the given SEALContext is not set, the encryption parameters are invalid,
+        /// or the RelinKeys data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -244,7 +244,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Check whether the current RelinKeys is valid for a given SEALContext. If
         /// the given SEALContext is not set, the encryption parameters are invalid,
-        /// or the RelinKeys data does not match the SEALContext, this function returns 
+        /// or the RelinKeys data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true. This function only checks the metadata
         /// and not the relinearization key data itself.
         /// </summary>
@@ -262,9 +262,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the RelinKeys instance to an output stream.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
-        /// Saves the RelinKeys instance to an output stream. The output is in binary format 
+        /// Saves the RelinKeys instance to an output stream. The output is in binary format
         /// and not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the RelinKeys to</param>
@@ -304,7 +304,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Loads a RelinKeys from an input stream overwriting the current RelinKeys.
         /// No checking of the validity of the RelinKeys data against encryption
-        /// parameters is performed. This function should not be used unless the 
+        /// parameters is performed. This function should not be used unless the
         /// RelinKeys comes from a fully trusted source.
         /// </summary>
         /// <param name="stream">The stream to load the RelinKeys from</param>
@@ -374,7 +374,7 @@ namespace Microsoft.Research.SEAL
         /// Loads a RelinKeys from an input stream overwriting the current RelinKeys.
         /// The loaded RelinKeys is verified to be valid for the given SEALContext.
         /// </summary>
-        /// 
+        ///
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the RelinKeys instance from</param>
         /// <exception cref="ArgumentNullException">if either stream or context are null</exception>

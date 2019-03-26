@@ -22,14 +22,14 @@ namespace seal
 {
     namespace util
     {
-        template<typename T = void, 
+        template<typename T = void,
             typename = std::enable_if_t<std::is_standard_layout<T>::value>>
         class ConstPointer;
 
         template<>
         class ConstPointer<SEAL_BYTE>;
 
-        template<typename T = void, 
+        template<typename T = void,
             typename = std::enable_if_t<std::is_standard_layout<T>::value>>
         class Pointer;
 
@@ -75,7 +75,7 @@ namespace seal
         public:
             struct allocation
             {
-                allocation() : 
+                allocation() :
                     size(0), data_ptr(nullptr), free(0), head_ptr(nullptr)
                 {
                 }
@@ -99,7 +99,7 @@ namespace seal
             // Byte size of the allocations (items) owned by this pool
             virtual std::size_t item_byte_count() const noexcept = 0;
 
-            // Total number of items allocated 
+            // Total number of items allocated
             virtual std::size_t item_count() const noexcept = 0;
 
             virtual MemoryPoolItem *get() = 0;
@@ -112,7 +112,7 @@ namespace seal
         {
         public:
             // Creates a new MemoryPoolHeadMT with allocation for one single item.
-            MemoryPoolHeadMT(std::size_t item_byte_count, 
+            MemoryPoolHeadMT(std::size_t item_byte_count,
                 bool clear_on_destruction = false);
 
             ~MemoryPoolHeadMT() noexcept override;
@@ -217,14 +217,14 @@ namespace seal
             static const std::size_t max_single_alloc_byte_count;
 
             // Number of different size allocations allowed by a single memory pool
-            static constexpr std::size_t max_pool_head_count = 
+            static constexpr std::size_t max_pool_head_count =
                 std::numeric_limits<std::size_t>::max();
 
             // Largest allowed size of batch allocation
             static const std::size_t max_batch_alloc_byte_count;
 
             static constexpr std::size_t first_alloc_count = 1;
-            
+
             virtual ~MemoryPool() = default;
 
             virtual Pointer<SEAL_BYTE> get_for_byte_count(std::size_t byte_count) = 0;
@@ -284,7 +284,7 @@ namespace seal
             }
 
             std::size_t alloc_byte_count() const override;
-            
+
         protected:
             MemoryPoolST(const MemoryPoolST &copy) = delete;
 

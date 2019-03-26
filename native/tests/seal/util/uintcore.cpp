@@ -353,7 +353,7 @@ namespace SEALTest
         }
 
         TEST(UIntCore, GetSignificantUInt64CountUInt)
-        {   
+        {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto ptr(allocate_uint(2, pool));
             ptr[0] = 0;
@@ -390,7 +390,7 @@ namespace SEALTest
         }
 
         TEST(UIntCore, GetNonzeroUInt64CountUInt)
-        {   
+        {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto ptr(allocate_uint(2, pool));
             ptr[0] = 0;
@@ -756,7 +756,7 @@ namespace SEALTest
 
             ptr2 = duplicate_uint_if_needed(ptr.get(), 2, 1, false, pool);
             ASSERT_TRUE(ptr2.get() == ptr.get());
-            
+
             ptr2 = duplicate_uint_if_needed(ptr.get(), 1, 2, false, pool);
             ASSERT_TRUE(ptr2.get() != ptr.get());
             ASSERT_EQ(ptr[0], ptr2[0]);
@@ -777,7 +777,7 @@ namespace SEALTest
             ASSERT_EQ(32ULL, hamming_weight(0xFFFFFFFFULL));
             ASSERT_EQ(64ULL, hamming_weight(0xFFFFFFFFFFFFFFFFULL));
             ASSERT_EQ(32ULL, hamming_weight(0xF0F0F0F0F0F0F0F0ULL));
-            ASSERT_EQ(16ULL, hamming_weight(0xA0A0A0A0A0A0A0A0ULL)); 
+            ASSERT_EQ(16ULL, hamming_weight(0xA0A0A0A0A0A0A0A0ULL));
         }
 
         TEST(UIntCore, HammingWeightSplit)

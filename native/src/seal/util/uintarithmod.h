@@ -12,8 +12,8 @@ namespace seal
 {
     namespace util
     {
-        inline void increment_uint_mod(const std::uint64_t *operand, 
-            const std::uint64_t *modulus, std::size_t uint64_count, 
+        inline void increment_uint_mod(const std::uint64_t *operand,
+            const std::uint64_t *modulus, std::size_t uint64_count,
             std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -43,15 +43,15 @@ namespace seal
             }
 #endif
             unsigned char carry = increment_uint(operand, uint64_count, result);
-            if (carry || 
+            if (carry ||
                 is_greater_than_or_equal_uint_uint(result, modulus, uint64_count))
             {
                 sub_uint_uint(result, modulus, uint64_count, result);
             }
         }
 
-        inline void decrement_uint_mod(const std::uint64_t *operand, 
-            const std::uint64_t *modulus, std::size_t uint64_count, 
+        inline void decrement_uint_mod(const std::uint64_t *operand,
+            const std::uint64_t *modulus, std::size_t uint64_count,
             std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -86,8 +86,8 @@ namespace seal
             }
         }
 
-        inline void negate_uint_mod(const std::uint64_t *operand, 
-            const std::uint64_t *modulus, std::size_t uint64_count, 
+        inline void negate_uint_mod(const std::uint64_t *operand,
+            const std::uint64_t *modulus, std::size_t uint64_count,
             std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -124,8 +124,8 @@ namespace seal
             }
         }
 
-        inline void div2_uint_mod(const std::uint64_t *operand, 
-            const std::uint64_t *modulus, std::size_t uint64_count, 
+        inline void div2_uint_mod(const std::uint64_t *operand,
+            const std::uint64_t *modulus, std::size_t uint64_count,
             std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -160,7 +160,7 @@ namespace seal
                 right_shift_uint(result, 1, uint64_count, result);
                 if (carry)
                 {
-                    set_bit_uint(result, uint64_count, 
+                    set_bit_uint(result, uint64_count,
                         static_cast<int>(uint64_count) * bits_per_uint64 - 1);
                 }
             }
@@ -170,8 +170,8 @@ namespace seal
             }
         }
 
-        inline void add_uint_uint_mod(const std::uint64_t *operand1, 
-            const std::uint64_t *operand2, const std::uint64_t *modulus, 
+        inline void add_uint_uint_mod(const std::uint64_t *operand1,
+            const std::uint64_t *operand2, const std::uint64_t *modulus,
             std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -209,15 +209,15 @@ namespace seal
             }
 #endif
             unsigned char carry = add_uint_uint(operand1, operand2, uint64_count, result);
-            if (carry || 
+            if (carry ||
                 is_greater_than_or_equal_uint_uint(result, modulus, uint64_count))
             {
                 sub_uint_uint(result, modulus, uint64_count, result);
             }
         }
 
-        inline void sub_uint_uint_mod(const std::uint64_t *operand1, 
-            const std::uint64_t *operand2, const std::uint64_t *modulus, 
+        inline void sub_uint_uint_mod(const std::uint64_t *operand1,
+            const std::uint64_t *operand2, const std::uint64_t *modulus,
             std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -259,9 +259,9 @@ namespace seal
                 add_uint_uint(result, modulus, uint64_count, result);
             }
         }
-        
-        bool try_invert_uint_mod(const std::uint64_t *operand, 
-            const std::uint64_t *modulus, std::size_t uint64_count, std::uint64_t *result, 
+
+        bool try_invert_uint_mod(const std::uint64_t *operand,
+            const std::uint64_t *modulus, std::size_t uint64_count, std::uint64_t *result,
             MemoryPool &pool);
     }
 }

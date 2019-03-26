@@ -12,8 +12,8 @@ namespace seal
 {
     namespace util
     {
-        bool try_invert_uint_mod(const uint64_t *operand, 
-            const uint64_t *modulus, size_t uint64_count, 
+        bool try_invert_uint_mod(const uint64_t *operand,
+            const uint64_t *modulus, size_t uint64_count,
             uint64_t *result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
@@ -58,7 +58,7 @@ namespace seal
             // and operand being denominator. Notice that numerator > denominator.
             uint64_t *numerator = alloc_anchor.get();
             set_uint_uint(modulus, uint64_count, numerator);
-            
+
             uint64_t *denominator = numerator + uint64_count;
             set_uint_uint(operand, uint64_count, denominator);
 
@@ -96,7 +96,7 @@ namespace seal
 
                 // Shift denominator to bring MSB in alignment with MSB of numerator.
                 int denominator_shift = numerator_bits - denominator_bits;
-                left_shift_uint(denominator, denominator_shift, 
+                left_shift_uint(denominator, denominator_shift,
                     division_uint64_count, denominator);
                 denominator_bits += denominator_shift;
 
@@ -109,12 +109,12 @@ namespace seal
                 {
                     // NOTE: MSBs of numerator and denominator are aligned.
 
-                    // Even though MSB of numerator and denominator are aligned, 
+                    // Even though MSB of numerator and denominator are aligned,
                     // still possible numerator < denominator.
-                    if (sub_uint_uint(numerator, denominator, 
+                    if (sub_uint_uint(numerator, denominator,
                         division_uint64_count, difference))
                     {
-                        // numerator < denominator and MSBs are aligned, so current 
+                        // numerator < denominator and MSBs are aligned, so current
                         // quotient bit is zero and next one is definitely one.
                         if (remaining_shifts == 0)
                         {
@@ -122,7 +122,7 @@ namespace seal
                             break;
                         }
 
-                        // Effectively shift numerator left by 1 by instead adding 
+                        // Effectively shift numerator left by 1 by instead adding
                         // numerator to difference (to prevent overflow in numerator).
                         add_uint_uint(difference, numerator, division_uint64_count, difference);
 
@@ -135,14 +135,14 @@ namespace seal
                     // Update quotient to reflect subtraction.
                     *quotient |= 1;
 
-                    // Determine amount to shift numerator to bring MSB in alignment 
+                    // Determine amount to shift numerator to bring MSB in alignment
                     // with denominator.
-                    numerator_bits = 
+                    numerator_bits =
                         get_significant_bit_count_uint(difference, division_uint64_count);
                     int numerator_shift = denominator_bits - numerator_bits;
                     if (numerator_shift > remaining_shifts)
                     {
-                        // Clip the maximum shift to determine only the integer 
+                        // Clip the maximum shift to determine only the integer
                         // (as opposed to fractional) bits.
                         numerator_shift = remaining_shifts;
                     }
@@ -150,7 +150,7 @@ namespace seal
                     // Shift and update numerator.
                     if (numerator_bits > 0)
                     {
-                        left_shift_uint(difference, numerator_shift, 
+                        left_shift_uint(difference, numerator_shift,
                             division_uint64_count, numerator);
                         numerator_bits += numerator_shift;
                     }
@@ -160,15 +160,15 @@ namespace seal
                         set_zero_uint(division_uint64_count, numerator);
                     }
 
-                    // Adjust quotient and remaining shifts as a result of 
+                    // Adjust quotient and remaining shifts as a result of
                     // shifting numerator.
-                    left_shift_uint(quotient, numerator_shift, 
+                    left_shift_uint(quotient, numerator_shift,
                         division_uint64_count, quotient);
                     remaining_shifts -= numerator_shift;
                 }
 
                 // Correct for shifting of denominator.
-                right_shift_uint(denominator, denominator_shift, 
+                right_shift_uint(denominator, denominator_shift,
                     division_uint64_count, denominator);
                 denominator_bits -= denominator_shift;
 
@@ -179,37 +179,37 @@ namespace seal
                 }
 
                 // Correct for shifting of denominator.
-                right_shift_uint(numerator, denominator_shift, 
+                right_shift_uint(numerator, denominator_shift,
                     division_uint64_count, numerator);
                 numerator_bits -= denominator_shift;
 
                 // Integrate quotient with invert coefficients.
                 // Calculate: invert_prior + -quotient * invert_curr
-                multiply_truncate_uint_uint(quotient, invert_curr, 
+                multiply_truncate_uint_uint(quotient, invert_curr,
                     uint64_count, invert_next);
                 invert_next_positive = !invert_curr_positive;
                 if (invert_prior_positive == invert_next_positive)
                 {
                     // If both sides of add have same sign, then simple add and
-                    // do not need to worry about overflow due to known limits 
+                    // do not need to worry about overflow due to known limits
                     // on the coefficients proved in the euclidean algorithm.
                     add_uint_uint(invert_prior, invert_next, uint64_count, invert_next);
                 }
                 else
                 {
-                    // If both sides of add have opposite sign, then subtract 
+                    // If both sides of add have opposite sign, then subtract
                     // and check for overflow.
-                    uint64_t borrow = sub_uint_uint(invert_prior, invert_next, 
+                    uint64_t borrow = sub_uint_uint(invert_prior, invert_next,
                         uint64_count, invert_next);
                     if (borrow == 0)
                     {
-                        // No borrow means |invert_prior| >= |invert_next|, 
+                        // No borrow means |invert_prior| >= |invert_next|,
                         // so sign is same as invert_prior.
                         invert_next_positive = invert_prior_positive;
                     }
                     else
                     {
-                        // Borrow means |invert prior| < |invert_next|, 
+                        // Borrow means |invert prior| < |invert_next|,
                         // so sign is opposite of invert_prior.
                         invert_next_positive = !invert_prior_positive;
                         negate_uint(invert_next, uint64_count, invert_next);

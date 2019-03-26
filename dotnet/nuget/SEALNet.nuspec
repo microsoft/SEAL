@@ -2,7 +2,7 @@
 
 <!-- Copyright (c) Microsoft Corporation. All rights reserved.
      Licensed under the MIT license. -->
-       
+
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Microsoft.Research.SEALNet</id>

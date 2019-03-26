@@ -64,7 +64,7 @@ namespace seal
                 Total bit count: 438 = 6 * 55 + 2 * 54
                 */
                 { 16384,{
-                    0x7fffffff380001,  0x7ffffffef00001,  
+                    0x7fffffff380001,  0x7ffffffef00001,
                     0x7ffffffeac0001,  0x7ffffffe700001,
                     0x7ffffffe600001,  0x7ffffffe4c0001,
                     0x3fffffff000001,  0x3ffffffef40001
@@ -76,10 +76,10 @@ namespace seal
                 Total bit count: 881 = 11 * 59 + 4 * 58
                 */
                 { 32768,{
-                    0x7ffffffffcc0001,  0x7ffffffffb00001,  0x7ffffffff2c0001,  
-                    0x7ffffffff240001,  0x7fffffffe900001,  0x7fffffffe3c0001,  
-                    0x7fffffffe240001,  0x7fffffffddc0001,  0x7fffffffd740001,  
-                    0x7fffffffd640001,  0x7fffffffd080001,  0x3ffffffff040001,  
+                    0x7ffffffffcc0001,  0x7ffffffffb00001,  0x7ffffffff2c0001,
+                    0x7ffffffff240001,  0x7fffffffe900001,  0x7fffffffe3c0001,
+                    0x7fffffffe240001,  0x7fffffffddc0001,  0x7fffffffd740001,
+                    0x7fffffffd640001,  0x7fffffffd080001,  0x3ffffffff040001,
                     0x3fffffffed00001,  0x3fffffffeb00001,  0x3fffffffea00001
                 } }
             };
@@ -192,7 +192,7 @@ namespace seal
                 Total bit count: 237 = 60 + 3 * 59
                 */
                 { 16384,{
-                    0xffffffffffc0001,  0x7ffffffffcc0001,  
+                    0xffffffffffc0001,  0x7ffffffffcc0001,
                     0x7ffffffffb00001,  0x7ffffffff2c0001
                 } },
 
@@ -202,9 +202,9 @@ namespace seal
                 Total bit count: 476 = 4 * 60 + 4 * 59
                 */
                 { 32768,{
-                    0xffffffffffc0001,  0xfffffffff840001,  
+                    0xffffffffffc0001,  0xfffffffff840001,
                     0xfffffffff240001,  0xffffffffe7c0001,
-                    0x7ffffffffcc0001,  0x7ffffffffb00001,  
+                    0x7ffffffffcc0001,  0x7ffffffffb00001,
                     0x7ffffffff2c0001,  0x7ffffffff240001
                 } }
             };

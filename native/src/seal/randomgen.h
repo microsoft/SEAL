@@ -14,12 +14,12 @@
 namespace seal
 {
     /**
-    Provides the base class for a uniform random number generator. Instances of 
-    this class are typically returned from the UniformRandomGeneratorFactory class. 
-    This class is meant for users to sub-class to implement their own random number 
+    Provides the base class for a uniform random number generator. Instances of
+    this class are typically returned from the UniformRandomGeneratorFactory class.
+    This class is meant for users to sub-class to implement their own random number
     generators. The implementation should provide a uniform random unsigned 32-bit
     value for each call to generate(). Note that the library will never make
-    concurrent calls to generate() to the same instance (but individual instances 
+    concurrent calls to generate() to the same instance (but individual instances
     of the same class may have concurrent calls). The uniformity and unpredictability
     of the numbers generated is essential for making a secure cryptographic system.
 
@@ -43,12 +43,12 @@ namespace seal
 
     /**
     Provides the base class for a factory instance that creates instances of
-    UniformRandomGenerator. This class is meant for users to sub-class to implement 
-    their own random number generators. Note that each instance returned may be 
-    used concurrently across separate threads, but each individual instance does 
+    UniformRandomGenerator. This class is meant for users to sub-class to implement
+    their own random number generators. Note that each instance returned may be
+    used concurrently across separate threads, but each individual instance does
     not need to be thread-safe.
 
-    @see UniformRandomGenerator for details relating to the random number generator 
+    @see UniformRandomGenerator for details relating to the random number generator
     instances.
     @see StandardRandomAdapterFactory for an implementation of
     UniformRandomGeneratorFactory that supports the standard C++ library's
@@ -60,7 +60,7 @@ namespace seal
         /**
         Creates a new uniform random number generator.
         */
-        virtual auto create() 
+        virtual auto create()
             -> std::shared_ptr<UniformRandomGenerator> = 0;
 
         /**
@@ -79,7 +79,7 @@ namespace seal
     };
 #ifdef SEAL_USE_AES_NI_PRNG
     /**
-    Provides an implementation of UniformRandomGenerator for using very fast 
+    Provides an implementation of UniformRandomGenerator for using very fast
     AES-NI randomness with given 128-bit seed.
     */
     class FastPRNG : public UniformRandomGenerator
@@ -102,7 +102,7 @@ namespace seal
         virtual std::uint32_t generate() override
         {
             std::uint32_t result;
-            std::copy_n(buffer_head_, util::bytes_per_uint32, 
+            std::copy_n(buffer_head_, util::bytes_per_uint32,
                 reinterpret_cast<SEAL_BYTE*>(&result));
             buffer_head_ += util::bytes_per_uint32;
             if (buffer_head_ == buffer_.cend())
@@ -120,9 +120,9 @@ namespace seal
     private:
         AESEncryptor aes_enc_;
 
-        static constexpr std::size_t bytes_per_block_ = 
+        static constexpr std::size_t bytes_per_block_ =
             sizeof(aes_block) / sizeof(SEAL_BYTE);
-        
+
         static constexpr std::size_t buffer_block_size_ = 8;
 
         static constexpr std::size_t buffer_size_ =
@@ -150,7 +150,7 @@ namespace seal
         /**
         Creates a new FastPRNGFactory instance that initializes every FastPRNG
         instance it creates with the given seed. A zero seed (default value)
-        signals that each random number generator created by the factory should 
+        signals that each random number generator created by the factory should
         use a different random seed obtained from std::random_device.
 
         @param[in] seed_lw Low-word for seed for the PRNG
@@ -280,7 +280,7 @@ namespace seal
             return std::shared_ptr<UniformRandomGenerator>{
                 new StandardRandomAdapter<RNG>() };
         }
-        
+
     private:
     };
 }

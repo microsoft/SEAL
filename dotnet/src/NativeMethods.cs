@@ -233,8 +233,8 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SmallModulus_ConstRatio(
-            IntPtr thisptr, 
-            ulong length, 
+            IntPtr thisptr,
+            ulong length,
             [MarshalAs(UnmanagedType.LPArray)] ulong[] ratio);
 
         [DllImport(sealnetnative, EntryPoint = "SmallModulus_Equals1", PreserveSig = false)]
@@ -267,14 +267,14 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EncParams_GetCoeffModulus(
-            IntPtr thisptr, 
-            ref ulong length, 
+            IntPtr thisptr,
+            ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EncParams_SetCoeffModulus(
-            IntPtr thisptr, 
-            ulong length, 
+            IntPtr thisptr,
+            ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(sealnetnative, PreserveSig = false)]

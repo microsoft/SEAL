@@ -8,15 +8,15 @@ namespace Microsoft.Research.SEAL
 {
     /// <summary>
     /// The MMProf is a pure virtual class that every profile for the MemoryManager
-    /// should inherit from. The only functionality this class implements is the 
-    /// GetPool() function that returns a MemoryPoolHandle pointing 
+    /// should inherit from. The only functionality this class implements is the
+    /// GetPool() function that returns a MemoryPoolHandle pointing
     /// to a pool selected by internal logic. The returned MemoryPoolHandle must
-    /// point to a valid memory pool. 
+    /// point to a valid memory pool.
     /// </summary>
     public abstract class MMProf : NativeObject
     {
         /// <summary>
-        /// Returns a MemoryPoolHandle pointing to a pool selected by internal logic 
+        /// Returns a MemoryPoolHandle pointing to a pool selected by internal logic
         /// in a derived class.
         /// </summary>
         public MemoryPoolHandle GetPool()
@@ -52,7 +52,7 @@ namespace Microsoft.Research.SEAL
     }
 
     /// <summary>
-    /// A memory manager profile that always returns a MemoryPoolHandle pointing to 
+    /// A memory manager profile that always returns a MemoryPoolHandle pointing to
     /// specific memory pool.
     /// </summary>
     public class MMProfFixed : MMProf
@@ -76,8 +76,8 @@ namespace Microsoft.Research.SEAL
     }
 
     /// <summary>
-    /// A memory manager profile that always returns a MemoryPoolHandle pointing to 
-    /// the new thread-safe memory pool. This profile should not be used except in 
+    /// A memory manager profile that always returns a MemoryPoolHandle pointing to
+    /// the new thread-safe memory pool. This profile should not be used except in
     /// special circumstances, as it does not result in any reuse of allocated memory.
     /// </summary>
     public class MMProfNew : MMProf
@@ -93,12 +93,12 @@ namespace Microsoft.Research.SEAL
     }
 
     /// <summary>
-    /// A memory manager profile that always returns a MemoryPoolHandle pointing to 
-    /// the thread-local memory pool. This profile should be used with care, as any 
+    /// A memory manager profile that always returns a MemoryPoolHandle pointing to
+    /// the thread-local memory pool. This profile should be used with care, as any
     /// memory allocated by it will be released once the thread exits. In other words,
-    /// the thread-local memory pool cannot be used to share memory across different 
+    /// the thread-local memory pool cannot be used to share memory across different
     /// threads. On the other hand, this profile can be useful when a very high number
-    /// of threads doing simultaneous allocations would cause contention in the 
+    /// of threads doing simultaneous allocations would cause contention in the
     /// global memory pool.
     /// </summary>
     public class MMProfThreadLocal : MMProf

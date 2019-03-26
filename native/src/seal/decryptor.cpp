@@ -42,12 +42,12 @@ namespace seal
 
         // Allocate secret_key_ and copy over value
         secret_key_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(secret_key.data().data(), coeff_count, coeff_mod_count, 
+        set_poly_poly(secret_key.data().data(), coeff_count, coeff_mod_count,
             secret_key_.get());
 
         // Set the secret_key_array to have size 1 (first power of secret)
         secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(secret_key_.get(), coeff_count, coeff_mod_count, 
+        set_poly_poly(secret_key_.get(), coeff_count, coeff_mod_count,
             secret_key_array_.get());
         secret_key_array_size_ = 1;
     }
@@ -78,7 +78,7 @@ namespace seal
         }
     }
 
-    void Decryptor::bfv_decrypt(const Ciphertext &encrypted, 
+    void Decryptor::bfv_decrypt(const Ciphertext &encrypted,
         Plaintext &destination, MemoryPoolHandle pool)
     {
         if (encrypted.is_ntt_form())
@@ -223,12 +223,12 @@ namespace seal
         destination.parms_id() = parms_id_zero;
 
         // Perform final multiplication by gamma inverse mod plain_modulus
-        multiply_poly_scalar_coeffmod(wide_destination.get(), 
+        multiply_poly_scalar_coeffmod(wide_destination.get(),
             max(plain_coeff_count, size_t(1)),
             inv_gamma, plain_gamma_array[0], destination.data());
     }
 
-    void Decryptor::ckks_decrypt(const Ciphertext &encrypted, 
+    void Decryptor::ckks_decrypt(const Ciphertext &encrypted,
         Plaintext &destination, MemoryPoolHandle pool)
     {
         if (!encrypted.is_ntt_form())
@@ -344,7 +344,7 @@ namespace seal
         // Compute powers of secret key until max_power
         auto new_secret_key_array(allocate_poly(mul_safe(new_size, coeff_count),
             coeff_mod_count, pool_));
-        set_poly_poly(secret_key_array_.get(), mul_safe(old_size, coeff_count), 
+        set_poly_poly(secret_key_array_.get(), mul_safe(old_size, coeff_count),
             coeff_mod_count, new_secret_key_array.get());
 
         uint64_t *prev_poly_ptr = new_secret_key_array.get() +
@@ -430,7 +430,7 @@ namespace seal
                 multiply_uint_uint64(coeff_products_array + (j * coeff_mod_count),
                     coeff_mod_count, tmp, coeff_mod_count, temp.get());
                 add_uint_uint_mod(temp.get(), value + (i * coeff_mod_count),
-                    context_data.total_coeff_modulus(), 
+                    context_data.total_coeff_modulus(),
                     coeff_mod_count, value + (i * coeff_mod_count));
             }
             set_zero_uint(coeff_mod_count, temp.get());
@@ -485,7 +485,7 @@ namespace seal
         */
         // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q
         // in destination_poly.
-        // Make a copy of the encryption for NTT (except the first polynomial is 
+        // Make a copy of the encryption for NTT (except the first polynomial is
         // not needed).
         auto encrypted_copy(allocate_poly(
             mul_safe(encrypted_size - 1, coeff_count), coeff_mod_count, pool_));
@@ -511,7 +511,7 @@ namespace seal
 
                 dyadic_product_coeffmod(copy_operand1.get(), current_array2, coeff_count,
                     coeff_modulus[i], copy_operand1.get());
-                add_poly_poly_coeffmod(noise_poly.get() + (i * coeff_count), 
+                add_poly_poly_coeffmod(noise_poly.get() + (i * coeff_count),
                     copy_operand1.get(),
                     coeff_count, coeff_modulus[i],
                     noise_poly.get() + (i * coeff_count));

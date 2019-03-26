@@ -11,7 +11,7 @@ namespace Microsoft.Research.SEAL
     /// the IntegerEncoder class converts an integer into a plaintext polynomial by placing its
     /// binary digits as the coefficients of the polynomial. Decoding the integer amounts to
     /// evaluating the plaintext polynomial at x=2.
-    /// 
+    ///
     /// Addition and multiplication on the integer side translate into addition and multiplication
     /// on the encoded plaintext polynomial side, provided that the length of the polynomial
     /// never grows to be of the size of the polynomial modulus (PolyModulus), and that the
@@ -87,7 +87,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial and returns the result as uint. Mathematically 
+        /// Decodes a plaintext polynomial and returns the result as uint. Mathematically
         /// this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
@@ -104,7 +104,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial and returns the result as ulong. Mathematically 
+        /// Decodes a plaintext polynomial and returns the result as ulong. Mathematically
         /// this amounts to evaluating the input polynomial at X=2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
@@ -194,7 +194,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial and returns the result as int. Mathematically 
+        /// Decodes a plaintext polynomial and returns the result as int. Mathematically
         /// this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>
@@ -211,7 +211,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial and returns the result as long. Mathematically 
+        /// Decodes a plaintext polynomial and returns the result as long. Mathematically
         /// this amounts to evaluating the input polynomial at X = 2.
         /// </summary>
         /// <param name="plain">The plaintext to be decoded</param>

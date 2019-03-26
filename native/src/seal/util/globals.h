@@ -36,13 +36,13 @@ For .NET Framework wrapper support (C++/CLI) we need to
             HomomorphicEncryption.org security tables provide an upper bound for the bit-length
             of the coefficient modulus up to poly_modulus_degree 65536.
             */
-            const std::map<std::size_t, int> 
+            const std::map<std::size_t, int>
                 max_secure_coeff_modulus_bit_count { SEAL_HE_STD_PARMS_128_TC };
 
             /**
             Default value for the standard deviation of the noise (error) distribution.
             */
-            constexpr double default_noise_standard_deviation = 
+            constexpr double default_noise_standard_deviation =
                 SEAL_HE_STD_PARMS_ERROR_STD_DEV;
 
             constexpr double noise_distribution_width_multiplier = 6;

@@ -14,7 +14,7 @@ namespace Microsoft.Research.SEAL
     /// <para>
     /// Thread Safety
     /// In general, reading from PublicKey is thread-safe as long as no other thread
-    /// is concurrently mutating it. This is due to the underlying data structure 
+    /// is concurrently mutating it. This is due to the underlying data structure
     /// storing the public key not being thread-safe.
     /// </para>
     /// </remarks>
@@ -86,9 +86,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the PublicKey to an output stream.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
-        /// Saves the PublicKey to an output stream. The output is in binary format and 
+        /// Saves the PublicKey to an output stream. The output is in binary format and
         /// not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the PublicKey to</param>
@@ -104,7 +104,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Loads a PublicKey from an input stream overwriting the current PublicKey.
         /// No checking of the validity of the PublicKey data against encryption
-        /// parameters is performed. This function should not be used unless the 
+        /// parameters is performed. This function should not be used unless the
         /// PublicKey comes from a fully trusted source.
         /// </summary>
         /// <param name="stream">The stream to load the PublicKey from</param>
@@ -120,7 +120,7 @@ namespace Microsoft.Research.SEAL
 
 
         /// <summary>
-        /// Loads a PublicKey from an input stream overwriting the current 
+        /// Loads a PublicKey from an input stream overwriting the current
         /// PublicKey.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -146,8 +146,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Check whether the current PublicKey is valid for a given SEALContext. If 
-        /// the given SEALContext is not set, the encryption parameters are invalid, 
+        /// Check whether the current PublicKey is valid for a given SEALContext. If
+        /// the given SEALContext is not set, the encryption parameters are invalid,
         /// or the PublicKey data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true.
         /// </summary>
@@ -163,8 +163,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Check whether the current PublicKey is valid for a given SEALContext. If 
-        /// the given SEALContext is not set, the encryption parameters are invalid, 
+        /// Check whether the current PublicKey is valid for a given SEALContext. If
+        /// the given SEALContext is not set, the encryption parameters are invalid,
         /// or the PublicKey data does not match the SEALContext, this function returns
         /// false. Otherwise, returns true. This function only checks the metadata
         /// and not the public key data itself.

@@ -7,24 +7,24 @@ using System;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>Stores a set of attributes (qualifiers) of a set of encryption parameters.</summary>
-    /// 
+    ///
     /// <remarks>
-    /// Stores a set of attributes (qualifiers) of a set of encryption parameters. These 
-    /// parameters are mainly used internally in various parts of the library, e.g. to 
-    /// determine which algorithmic optimizations the current support. The qualifiers are 
-    /// automatically created by the <see cref="SEALContext" /> class, silently passed 
-    /// on to classes such as <see cref="Encryptor" />, <see cref="Evaluator" />, and 
-    /// <see cref="Decryptor" />, and the only way to change them is by changing the 
-    /// encryption parameters themselves. In other words, a user will never have to create 
-    /// their own instance of EncryptionParameterQualifiers, and in most cases never have 
+    /// Stores a set of attributes (qualifiers) of a set of encryption parameters. These
+    /// parameters are mainly used internally in various parts of the library, e.g. to
+    /// determine which algorithmic optimizations the current support. The qualifiers are
+    /// automatically created by the <see cref="SEALContext" /> class, silently passed
+    /// on to classes such as <see cref="Encryptor" />, <see cref="Evaluator" />, and
+    /// <see cref="Decryptor" />, and the only way to change them is by changing the
+    /// encryption parameters themselves. In other words, a user will never have to create
+    /// their own instance of EncryptionParameterQualifiers, and in most cases never have
     /// to worry about them at all.
     /// </remarks>
-    /// <seealso>See EncryptionParameters.GetQualifiers() for obtaining the 
+    /// <seealso>See EncryptionParameters.GetQualifiers() for obtaining the
     /// EncryptionParameterQualifiers corresponding to a certain parameter set.</seealso>
     public class EncryptionParameterQualifiers : NativeObject
     {
         /// <summary>
-        /// Create a copy of an existing instance of  Encryption Parameter Qualifiers 
+        /// Create a copy of an existing instance of  Encryption Parameter Qualifiers
         /// </summary>
         /// <param name="copy">Original object to copy</param>
         public EncryptionParameterQualifiers(EncryptionParameterQualifiers copy)

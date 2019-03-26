@@ -211,7 +211,7 @@ namespace SEALTest
             poly2[0] = 2;
             poly2[1] = 3;
             poly2[2] = 4;
-            
+
             divide_poly_poly_coeffmod_inplace(poly1.get(), poly2.get(), 5, mod, result.get());
             ASSERT_EQ(2ULL, poly1[0]);
             ASSERT_EQ(2ULL, poly1[1]);
@@ -303,7 +303,7 @@ namespace SEALTest
             polymod[1] = 3;
             polymod[2] = 0;
             polymod[3] = 2;
-            
+
             ASSERT_FALSE(try_invert_poly_coeffmod(poly.get(), polymod.get(), 4, mod, result.get(), pool));
 
             poly[0] = 1;

@@ -82,7 +82,7 @@ namespace seal
                 acquire(locker);
             }
 
-            ReaderLock(ReaderWriterLocker &locker, try_to_lock_t) noexcept : 
+            ReaderLock(ReaderWriterLocker &locker, try_to_lock_t) noexcept :
                 locker_(nullptr)
             {
                 try_acquire(locker);
@@ -137,7 +137,7 @@ namespace seal
                 acquire(locker);
             }
 
-            WriterLock(ReaderWriterLocker &locker, try_to_lock_t) noexcept : 
+            WriterLock(ReaderWriterLocker &locker, try_to_lock_t) noexcept :
                 locker_(nullptr)
             {
                 try_acquire(locker);

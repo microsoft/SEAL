@@ -15,7 +15,7 @@ namespace seal
 {
     namespace util
     {
-        inline std::uint64_t increment_uint_mod(std::uint64_t operand, 
+        inline std::uint64_t increment_uint_mod(std::uint64_t operand,
             const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -33,7 +33,7 @@ namespace seal
                 -static_cast<std::int64_t>(operand >= modulus.value())));
         }
 
-        inline std::uint64_t decrement_uint_mod(std::uint64_t operand, 
+        inline std::uint64_t decrement_uint_mod(std::uint64_t operand,
             const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -47,11 +47,11 @@ namespace seal
             }
 #endif
             std::int64_t carry = (operand == 0);
-            return operand - 1 + (modulus.value() & 
+            return operand - 1 + (modulus.value() &
                 static_cast<std::uint64_t>(-carry));
         }
 
-        inline std::uint64_t negate_uint_mod(std::uint64_t operand, 
+        inline std::uint64_t negate_uint_mod(std::uint64_t operand,
             const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -65,11 +65,11 @@ namespace seal
             }
 #endif
             std::int64_t non_zero = (operand != 0);
-            return (modulus.value() - operand) 
+            return (modulus.value() - operand)
                 & static_cast<std::uint64_t>(-non_zero);
         }
 
-        inline std::uint64_t div2_uint_mod(std::uint64_t operand, 
+        inline std::uint64_t div2_uint_mod(std::uint64_t operand,
             const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -96,7 +96,7 @@ namespace seal
             return operand >> 1;
         }
 
-        inline std::uint64_t add_uint_uint_mod(std::uint64_t operand1, 
+        inline std::uint64_t add_uint_uint_mod(std::uint64_t operand1,
             std::uint64_t operand2, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -119,7 +119,7 @@ namespace seal
                 -static_cast<std::int64_t>(operand1 >= modulus.value())));
         }
 
-        inline std::uint64_t sub_uint_uint_mod(std::uint64_t operand1, 
+        inline std::uint64_t sub_uint_uint_mod(std::uint64_t operand1,
             std::uint64_t operand2, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -139,12 +139,12 @@ namespace seal
 #endif
             unsigned long long temp;
             std::int64_t borrow = SEAL_SUB_BORROW_UINT64(operand1, operand2, 0, &temp);
-            return static_cast<std::uint64_t>(temp) + 
+            return static_cast<std::uint64_t>(temp) +
                 (modulus.value() & static_cast<std::uint64_t>(-borrow));
         }
 
         template<typename T, typename = std::enable_if<is_uint64_v<T>>>
-        inline std::uint64_t barrett_reduce_128(const T *input, 
+        inline std::uint64_t barrett_reduce_128(const T *input,
             const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -181,12 +181,12 @@ namespace seal
             tmp3 = input[0] - tmp1 * modulus.value();
 
             // Claim: One more subtraction is enough
-            return static_cast<std::uint64_t>(tmp3) - 
+            return static_cast<std::uint64_t>(tmp3) -
                 (modulus.value() & static_cast<uint64_t>(
                     -static_cast<std::int64_t>(tmp3 >= modulus.value())));
         }
 
-        inline std::uint64_t multiply_uint_uint_mod(std::uint64_t operand1, 
+        inline std::uint64_t multiply_uint_uint_mod(std::uint64_t operand1,
             std::uint64_t operand2, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -200,7 +200,7 @@ namespace seal
             return barrett_reduce_128(z, modulus);
         }
 
-        inline void modulo_uint_inplace(std::uint64_t *value, 
+        inline void modulo_uint_inplace(std::uint64_t *value,
             std::size_t value_uint64_count, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -223,8 +223,8 @@ namespace seal
             }
         }
 
-        inline std::uint64_t modulo_uint(const std::uint64_t *value, 
-            std::size_t value_uint64_count, const SmallModulus &modulus, 
+        inline std::uint64_t modulo_uint(const std::uint64_t *value,
+            std::size_t value_uint64_count, const SmallModulus &modulus,
             MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
@@ -255,30 +255,30 @@ namespace seal
             return value_copy[0];
         }
 
-        inline bool try_invert_uint_mod(uint64_t operand, 
+        inline bool try_invert_uint_mod(uint64_t operand,
             const SmallModulus &modulus, std::uint64_t &result)
         {
             return try_mod_inverse(operand, modulus.value(), result);
         }
 
-        bool is_primitive_root(std::uint64_t root, std::uint64_t degree, 
+        bool is_primitive_root(std::uint64_t root, std::uint64_t degree,
             const SmallModulus &prime_modulus);
 
-        // Try to find a primitive degree-th root of unity modulo small prime 
+        // Try to find a primitive degree-th root of unity modulo small prime
         // modulus, where degree must be a power of two.
-        bool try_primitive_root(std::uint64_t degree, 
+        bool try_primitive_root(std::uint64_t degree,
             const SmallModulus &prime_modulus, std::uint64_t &destination);
 
-        // Try to find the smallest (as integer) primitive degree-th root of 
+        // Try to find the smallest (as integer) primitive degree-th root of
         // unity modulo small prime modulus, where degree must be a power of two.
-        bool try_minimal_primitive_root(std::uint64_t degree, 
+        bool try_minimal_primitive_root(std::uint64_t degree,
             const SmallModulus &prime_modulus, std::uint64_t &destination);
-   
-        std::uint64_t exponentiate_uint_mod(std::uint64_t operand, 
+
+        std::uint64_t exponentiate_uint_mod(std::uint64_t operand,
             std::uint64_t exponent, const SmallModulus &modulus);
 
-        void divide_uint_uint_mod_inplace(uint64_t *numerator, 
-            const SmallModulus &modulus, std::size_t uint64_count, 
+        void divide_uint_uint_mod_inplace(uint64_t *numerator,
+            const SmallModulus &modulus, std::size_t uint64_count,
             uint64_t *quotient, MemoryPool &pool);
 
         std::uint64_t steps_to_galois_elt(int steps, std::size_t coeff_count);

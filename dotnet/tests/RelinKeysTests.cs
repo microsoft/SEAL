@@ -109,7 +109,7 @@ namespace SEALNetTest
                 }
             }
         }
-        
+
         [TestMethod]
         public void GetKeyTest()
         {

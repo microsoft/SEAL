@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-target_sources(seal 
+target_sources(seal
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
         ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp

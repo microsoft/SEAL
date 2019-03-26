@@ -44,7 +44,7 @@ namespace seal
         {
             throw invalid_argument("value must be non-null for non-zero bit count");
         }
-    } 
+    }
 #ifdef SEAL_USE_MSGSL_SPAN
     BigUInt::BigUInt(gsl::span<uint64_t> value)
     {
@@ -170,7 +170,7 @@ namespace seal
             divide_round_up(assign_sig_bit_count, bits_per_uint64));
         if (uint64_count() > 0)
         {
-            set_uint_uint(assign.value_.get(), assign_uint64_count, 
+            set_uint_uint(assign.value_.get(), assign_uint64_count,
                 uint64_count(), value_.get());
         }
         return *this;
@@ -214,12 +214,12 @@ namespace seal
         {
             BigUInt operand2resized(result_bits);
             operand2resized = operand2;
-            divide_uint_uint(value_.get(), operand2resized.data(), result_uint64_count, 
+            divide_uint_uint(value_.get(), operand2resized.data(), result_uint64_count,
                 result.data(), remainder.data(), pool_);
         }
         else
         {
-            divide_uint_uint(value_.get(), operand2.data(), result_uint64_count, 
+            divide_uint_uint(value_.get(), operand2.data(), result_uint64_count,
                 result.data(), remainder.data(), pool_);
         }
         return result;
@@ -241,12 +241,12 @@ namespace seal
         {
             BigUInt operand2resized(result_bits);
             operand2resized = operand2;
-            divide_uint_uint_inplace(remainder.data(), operand2resized.data(), 
+            divide_uint_uint_inplace(remainder.data(), operand2resized.data(),
                 uint64_count, quotient.data(), pool_);
         }
         else
         {
-            divide_uint_uint_inplace(remainder.data(), operand2.data(), 
+            divide_uint_uint_inplace(remainder.data(), operand2.data(),
                 uint64_count, quotient.data(), pool_);
         }
         return quotient;

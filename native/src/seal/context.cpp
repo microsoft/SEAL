@@ -24,7 +24,7 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         auto &plain_modulus = parms.plain_modulus();
 
-        // The number of coeff moduli is restricted to 62 for lazy reductions 
+        // The number of coeff moduli is restricted to 62 for lazy reductions
         // in baseconverter.cpp to work
         if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX ||
             coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
@@ -64,7 +64,7 @@ namespace seal
             multiply_uint_uint64(context_data.total_coeff_modulus_.get(),
                 coeff_mod_count, coeff_modulus[i].value(), coeff_mod_count,
                 temp.get());
-            set_uint_uint(temp.get(), coeff_mod_count, 
+            set_uint_uint(temp.get(), coeff_mod_count,
                 context_data.total_coeff_modulus_.get());
         }
         context_data.total_coeff_modulus_bit_count_ = get_significant_bit_count_uint(
@@ -105,7 +105,7 @@ namespace seal
         context_data.qualifiers_.using_he_std_security = true;
 
         // Check if the noise_standard_deviation is less than the default value
-        if (parms.noise_standard_deviation() < 
+        if (parms.noise_standard_deviation() <
             util::global_variables::default_noise_standard_deviation)
         {
             // Not secure according to HomomorphicEncryption.org security standard
@@ -117,7 +117,7 @@ namespace seal
 #endif
         }
 
-        // Check if the parameters are secure according to HomomorphicEncryption.org 
+        // Check if the parameters are secure according to HomomorphicEncryption.org
         // security standard
         if (util::global_variables::
             max_secure_coeff_modulus_bit_count.count(poly_modulus_degree) &&
@@ -135,11 +135,11 @@ namespace seal
 
         // Can we use NTT with coeff_modulus?
         context_data.qualifiers_.using_ntt = true;
-        context_data.small_ntt_tables_ = 
+        context_data.small_ntt_tables_ =
             allocate<SmallNTTTables>(coeff_mod_count, pool_, pool_);
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            if (!context_data.small_ntt_tables_[i].generate(coeff_count_power, 
+            if (!context_data.small_ntt_tables_[i].generate(coeff_count_power,
                 coeff_modulus[i]))
             {
                 // Parameters are not valid
@@ -186,8 +186,8 @@ namespace seal
                 context_data.qualifiers_.using_batching = true;
             }
 
-            // Check for plain_lift 
-            // If all the small coefficient moduli are larger than plain modulus, 
+            // Check for plain_lift
+            // If all the small coefficient moduli are larger than plain modulus,
             // we can quickly lift plain coefficients to RNS form
             context_data.qualifiers_.using_fast_plain_lift = true;
             for (size_t i = 0; i < coeff_mod_count; i++)
@@ -196,7 +196,7 @@ namespace seal
                     (coeff_modulus[i].value() > plain_modulus.value());
             }
 
-            // Calculate coeff_div_plain_modulus (BFV-"Delta") and the remainder 
+            // Calculate coeff_div_plain_modulus (BFV-"Delta") and the remainder
             // upper_half_increment
             context_data.coeff_div_plain_modulus_ = allocate_uint(coeff_mod_count, pool_);
             context_data.upper_half_increment_ = allocate_uint(coeff_mod_count, pool_);
@@ -281,7 +281,7 @@ namespace seal
             // Compute the upper_half_threshold for this modulus.
             context_data.upper_half_threshold_ = allocate_uint(
                 coeff_mod_count, pool_);
-            increment_uint(context_data.total_coeff_modulus(), 
+            increment_uint(context_data.total_coeff_modulus(),
                 coeff_mod_count, context_data.upper_half_threshold_.get());
             right_shift_uint(context_data.upper_half_threshold_.get(), 1,
                 coeff_mod_count, context_data.upper_half_threshold_.get());
@@ -333,10 +333,10 @@ namespace seal
         // Add pointer to previous context_data to the next one (doubly linked list)
         // We need to remove constness first to modify this
         const_pointer_cast<ContextData>(
-            context_data_map_.at(prev_parms_id))->next_context_data_ = 
+            context_data_map_.at(prev_parms_id))->next_context_data_ =
                 context_data_map_.at(next_parms_id);
         const_pointer_cast<ContextData>(
-            context_data_map_.at(next_parms_id))->prev_context_data_ = 
+            context_data_map_.at(next_parms_id))->prev_context_data_ =
                 context_data_map_.at(prev_parms_id);
 
         return next_parms_id;
@@ -357,11 +357,11 @@ namespace seal
                 UniformRandomGeneratorFactory::default_factory());
         }
 
-        // Validate parameters and add new ContextData to the map 
+        // Validate parameters and add new ContextData to the map
         // Note that this happens even if parameters are not valid
 
         // First create key_parms_id_.
-        context_data_map_.emplace(make_pair(parms.parms_id(), 
+        context_data_map_.emplace(make_pair(parms.parms_id(),
             make_shared<const ContextData>(validate(parms))));
         key_parms_id_ = parms.parms_id();
 
@@ -374,7 +374,7 @@ namespace seal
         {
             parms_id_first_ = key_parms_id_;
         }
-        else 
+        else
         {
             auto next_parms_id = create_next_context_data(key_parms_id_);
             parms_id_first_ = (next_parms_id == parms_id_zero) ?

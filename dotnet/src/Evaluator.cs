@@ -21,7 +21,7 @@ namespace Microsoft.Research.SEAL
     /// view, such as matrix row and column rotations. Other operations such as relinearization
     /// have no semantic meaning but are necessary for performance reasons.
     /// </summary>
-    /// 
+    ///
     /// <remarks>
     /// <para>
     /// Arithmetic Operations
@@ -32,20 +32,20 @@ namespace Microsoft.Research.SEAL
     /// ciphertexts. For this we provide fast "plain" operations: plain addition, plain subtraction,
     /// aand plain multiplication.
     /// </para>
-    /// 
+    ///
     /// <para>
     /// Relinearization
     /// One of the most important non-arithmetic operations is relinearization, which takes
     /// as input a ciphertext of size K+1 and relinearization keys (at least K-1 keys are needed),
     /// and changes the size of the ciphertext down to 2 (minimum size). For most use-cases only
     /// one relinearization key suffices, in which case relinearization should be performed after
-    /// every multiplication. Homomorphic multiplication of ciphertexts of size K+1 and L+1 
+    /// every multiplication. Homomorphic multiplication of ciphertexts of size K+1 and L+1
     /// outputs a ciphertext of size K+L+1, and the computational cost of multiplication is
-    /// proportional to K*L. Plain multiplication and addition operations of any type do not 
-    /// change the size. The performance of relinearization is determined by the decomposition 
+    /// proportional to K*L. Plain multiplication and addition operations of any type do not
+    /// change the size. The performance of relinearization is determined by the decomposition
     /// bit count that the relinearization keys were generated with.
     /// </para>
-    /// 
+    ///
     /// <para>
     /// Rotations
     /// When batching is enabled, we provide operations for rotating the plaintext matrix rows
@@ -53,28 +53,28 @@ namespace Microsoft.Research.SEAL
     /// require Galois keys to have been generated, and their performance depends on the
     /// decomposition bit count that the Galois keys were generated with.
     /// </para>
-    /// 
+    ///
     /// <para>
     /// Other Operations
     /// We also provide operations for transforming ciphertexts to NTT form and back, and for
     /// transforming plaintext polynomials to NTT form. These can be used in a very fast plain
-    /// multiplication variant, that assumes the inputs to be in NTT form. Since the NTT has to 
-    /// be done in any case in plain multiplication, this function can be used when e.g. one 
-    /// plaintext input is used in several plain multiplication, and transforming it several 
+    /// multiplication variant, that assumes the inputs to be in NTT form. Since the NTT has to
+    /// be done in any case in plain multiplication, this function can be used when e.g. one
+    /// plaintext input is used in several plain multiplication, and transforming it several
     /// times would not make sense.
     /// </para>
-    /// 
+    ///
     /// <para>
     /// NTT form
-    /// When using the BFV scheme (SchemeType.BFV), all plaintexts and ciphertexts should 
-    /// remain by default in the usual coefficient representation, i.e. not in NTT form. 
-    /// When using the CKKS scheme (SchemeType.CKKS), all plaintexts and ciphertexts 
-    /// should remain by default in NTT form. We call these scheme-specific NTT states the 
-    /// "default NTT form". Some functions, such as add, work even if the inputs are not in 
-    /// the default state, but others, such as multiply, will throw an exception. The output 
-    /// of all evaluation functions will be in the same state as the input(s), with the 
-    /// exception of the TransformToNTT and TransformFromNTT functions, which change the 
-    /// state. Ideally, unless these two functions are called, all other functions should 
+    /// When using the BFV scheme (SchemeType.BFV), all plaintexts and ciphertexts should
+    /// remain by default in the usual coefficient representation, i.e. not in NTT form.
+    /// When using the CKKS scheme (SchemeType.CKKS), all plaintexts and ciphertexts
+    /// should remain by default in NTT form. We call these scheme-specific NTT states the
+    /// "default NTT form". Some functions, such as add, work even if the inputs are not in
+    /// the default state, but others, such as multiply, will throw an exception. The output
+    /// of all evaluation functions will be in the same state as the input(s), with the
+    /// exception of the TransformToNTT and TransformFromNTT functions, which change the
+    /// state. Ideally, unless these two functions are called, all other functions should
     /// "just work".
     /// </para>
     /// </remarks>
@@ -87,7 +87,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Creates an Evaluator instance initialized with the specified SEALContext.
         /// </summary>
-        /// 
+        ///
         /// <param name="context">The SEALContext</param>
         /// <exception cref="ArgumentNullException"> if context is null</exception>
         /// <exception cref="ArgumentException"> if the context is not set or encryption
@@ -104,7 +104,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Negates a ciphertext.
         /// </summary>
-        /// 
+        ///
         /// <param name="encrypted">The ciphertext to negate</param>
         /// <exception cref="ArgumentNullException">if encrypted is null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
@@ -306,8 +306,8 @@ namespace Microsoft.Research.SEAL
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void Multiply(Ciphertext encrypted1, 
-                    Ciphertext encrypted2, Ciphertext destination, 
+        public void Multiply(Ciphertext encrypted1,
+                    Ciphertext encrypted2, Ciphertext destination,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted1)
@@ -376,8 +376,8 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Relinearizes a ciphertext. This functions relinearizes encrypted, reducing its size
-        /// down to 2. If the size of encrypted is K+1, the given relinearization keys need to 
-        /// have size at least K-1. Dynamic memory allocations in the process are allocated 
+        /// down to 2. If the size of encrypted is K+1, the given relinearization keys need to
+        /// have size at least K-1. Dynamic memory allocations in the process are allocated
         /// from the memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to relinearize</param>
@@ -451,7 +451,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too 
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
@@ -478,7 +478,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
         /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too 
+        /// <exception cref="ArgumentException">if, when using SchemeType.CKKS, the scale is too
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
@@ -583,8 +583,8 @@ namespace Microsoft.Research.SEAL
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void ModSwitchTo(Ciphertext encrypted, 
-                    ParmsId parmsId, Ciphertext destination, 
+        public void ModSwitchTo(Ciphertext encrypted,
+                    ParmsId parmsId, Ciphertext destination,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -753,8 +753,8 @@ namespace Microsoft.Research.SEAL
         /// than the parameters corresponding to parmsId</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void RescaleTo(Ciphertext encrypted, 
-                    ParmsId parmsId, Ciphertext destination, 
+        public void RescaleTo(Ciphertext encrypted,
+                    ParmsId parmsId, Ciphertext destination,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -773,7 +773,7 @@ namespace Microsoft.Research.SEAL
         /// ciphertext given as an std::vector and stores the result in the destination parameter.
         /// The multiplication is done in a depth-optimal order, and relinearization is performed
         /// automatically after every multiplication in the process. In relinearization the given
-        /// relinearization keys are used. Dynamic memory allocations in the process are allocated 
+        /// relinearization keys are used. Dynamic memory allocations in the process are allocated
         /// from the memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypteds">The ciphertexts to multiply</param>
@@ -830,7 +830,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ExponentiateInplace(Ciphertext encrypted,
-                    ulong exponent, RelinKeys relinKeys, 
+                    ulong exponent, RelinKeys relinKeys,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -880,7 +880,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Adds a ciphertext and a plaintext. The plaintext must be valid for the current 
+        /// Adds a ciphertext and a plaintext. The plaintext must be valid for the current
         /// encryption parameters.
         /// </summary>
         /// <param name="encrypted">The ciphertext to add</param>
@@ -901,9 +901,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Adds a ciphertext and a plaintext. This function adds a ciphertext and a plaintext 
-        /// and stores the result in the destination parameter. The plaintext must be valid for 
-        /// the current encryption parameters. 
+        /// Adds a ciphertext and a plaintext. This function adds a ciphertext and a plaintext
+        /// and stores the result in the destination parameter. The plaintext must be valid for
+        /// the current encryption parameters.
         /// </summary>
         /// <param name="encrypted">The ciphertext to add</param>
         /// <param name="plain">The plaintext to add</param>
@@ -927,7 +927,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Subtracts a plaintext from a ciphertext. The plaintext must be valid for the current 
+        /// Subtracts a plaintext from a ciphertext. The plaintext must be valid for the current
         /// encryption parameters.
         /// </summary>
         /// <param name="encrypted">The ciphertext to subtract from</param>
@@ -948,9 +948,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Subtracts a plaintext from a ciphertext. This function subtracts a plaintext from 
-        /// a ciphertext and stores the result in the destination parameter. The plaintext must 
-        /// be valid for the current encryption parameters. 
+        /// Subtracts a plaintext from a ciphertext. This function subtracts a plaintext from
+        /// a ciphertext and stores the result in the destination parameter. The plaintext must
+        /// be valid for the current encryption parameters.
         /// </summary>
         /// <param name="encrypted">The ciphertext to subtract from</param>
         /// <param name="plain">The plaintext to subtract</param>
@@ -974,8 +974,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Multiplies a ciphertext with a plaintext. The plaintext must be valid for the current 
-        /// encryption parameters, and cannot be identially 0. Dynamic memory allocations in the 
+        /// Multiplies a ciphertext with a plaintext. The plaintext must be valid for the current
+        /// encryption parameters, and cannot be identially 0. Dynamic memory allocations in the
         /// process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to multiply</param>
@@ -1002,10 +1002,10 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Multiplies a ciphertext with a plaintext. This function multiplies a ciphertext 
-        /// with a plaintext and stores the result in the destination parameter. The plaintext 
-        /// must be valid for the current encryption parameters, and cannot be identially 0. 
-        /// Dynamic memory allocations in the process are allocated from the memory pool pointed 
+        /// Multiplies a ciphertext with a plaintext. This function multiplies a ciphertext
+        /// with a plaintext and stores the result in the destination parameter. The plaintext
+        /// must be valid for the current encryption parameters, and cannot be identially 0.
+        /// Dynamic memory allocations in the process are allocated from the memory pool pointed
         /// to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to multiply</param>
@@ -1021,8 +1021,8 @@ namespace Microsoft.Research.SEAL
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void MultiplyPlain(Ciphertext encrypted, 
-                    Plaintext plain, Ciphertext destination, 
+        public void MultiplyPlain(Ciphertext encrypted,
+                    Plaintext plain, Ciphertext destination,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -1087,8 +1087,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if plain or parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void TransformToNTT(Plaintext plain, 
-                    ParmsId parmsId, Plaintext destinationNTT, 
+        public void TransformToNTT(Plaintext plain,
+                    ParmsId parmsId, Plaintext destinationNTT,
                     MemoryPoolHandle pool = null)
         {
             if (null == plain)
@@ -1130,7 +1130,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is already in NTT form</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void TransformToNTT(Ciphertext encrypted, 
+        public void TransformToNTT(Ciphertext encrypted,
                     Ciphertext destinationNTT)
         {
             if (null == encrypted)
@@ -1169,7 +1169,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encryptedNTT is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encryptedNTT is not in NTT form</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void TransformFromNTT(Ciphertext encryptedNTT, 
+        public void TransformFromNTT(Ciphertext encryptedNTT,
                     Ciphertext destination)
         {
             if (null == encryptedNTT)
@@ -1185,13 +1185,13 @@ namespace Microsoft.Research.SEAL
         /// an appropriate set of Galois keys must also be provided. Dynamic memory allocations
         /// in the process are allocated from the memory pool pointed to by the given
         /// MemoryPoolHandle.
-        /// 
+        ///
         /// The desired Galois automorphism is given as a Galois element, and must be an odd
         /// integer in the interval [1, M-1], where M = 2*N, and N = degree(PolyModulus). Used
         /// with batching, a Galois element 3^i % M corresponds to a cyclic row rotation i steps
         /// to the left, and a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation
         /// i steps to the right. The Galois element M-1 corresponds to a column rotation (row
-        /// swap) in BFV, and complex conjugation in CKKS. In the polynomial view (not batching), 
+        /// swap) in BFV, and complex conjugation in CKKS. In the polynomial view (not batching),
         /// a Galois automorphism by a Galois element p changes Enc(plain(x)) to Enc(plain(x^p)).
         /// </summary>
         /// <param name="encrypted">The ciphertext to apply the Galois automorphism to</param>
@@ -1210,7 +1210,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ApplyGaloisInplace(Ciphertext encrypted,
-                    ulong galoisElt, GaloisKeys galoisKeys, 
+                    ulong galoisElt, GaloisKeys galoisKeys,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -1224,7 +1224,7 @@ namespace Microsoft.Research.SEAL
         /// destination parameter. To evaluate the Galois automorphism, an appropriate set of
         /// Galois keys must also be provided. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
-        /// 
+        ///
         /// The desired Galois automorphism is given as a Galois element, and must be an odd
         /// integer in the interval [1, M-1], where M = 2*N, and N = degree(PolyModulus). Used
         /// with batching, a Galois element 3^i % M corresponds to a cyclic row rotation i steps
@@ -1249,9 +1249,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void ApplyGalois(Ciphertext encrypted, 
-                    ulong galoisElt, GaloisKeys galoisKeys, 
-                    Ciphertext destination, 
+        public void ApplyGalois(Ciphertext encrypted,
+                    ulong galoisElt, GaloisKeys galoisKeys,
+                    Ciphertext destination,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -1266,12 +1266,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Rotates plaintext matrix rows cyclically. When batching is used with the BFV scheme, 
-        /// this function rotates the encrypted plaintext matrix rows cyclically to the left 
-        /// (steps &gt; 0) or to the right (steps &lt; 0). Since the size of the batched matrix is 
-        /// 2-by-(N/2), where N is the degree of the polynomial modulus, the number of steps 
-        /// to rotate must have absolute value at most N/2-1. Dynamic memory allocations in 
-        /// the process are allocated from the memory pool pointed to by the given 
+        /// Rotates plaintext matrix rows cyclically. When batching is used with the BFV scheme,
+        /// this function rotates the encrypted plaintext matrix rows cyclically to the left
+        /// (steps &gt; 0) or to the right (steps &lt; 0). Since the size of the batched matrix is
+        /// 2-by-(N/2), where N is the degree of the polynomial modulus, the number of steps
+        /// to rotate must have absolute value at most N/2-1. Dynamic memory allocations in
+        /// the process are allocated from the memory pool pointed to by the given
         /// MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to rotate</param>
@@ -1291,8 +1291,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void RotateRowsInplace(Ciphertext encrypted, 
-            int steps, GaloisKeys galoisKeys, 
+        public void RotateRowsInplace(Ciphertext encrypted,
+            int steps, GaloisKeys galoisKeys,
             MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -1304,12 +1304,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Rotates plaintext matrix rows cyclically. When batching is used with the BFV scheme, 
-        /// this function rotates the encrypted plaintext matrix rows cyclically to the left 
-        /// (steps &gt; 0) or to the right (steps &lt; 0) and writes the result to the destination 
-        /// parameter. Since the size of the batched matrix is 2-by-(N/2), where N is the degree 
+        /// Rotates plaintext matrix rows cyclically. When batching is used with the BFV scheme,
+        /// this function rotates the encrypted plaintext matrix rows cyclically to the left
+        /// (steps &gt; 0) or to the right (steps &lt; 0) and writes the result to the destination
+        /// parameter. Since the size of the batched matrix is 2-by-(N/2), where N is the degree
         /// of the polynomial modulus, the number of steps to rotate must have absolute value at
-        /// most N/2-1. Dynamic memory allocations in the process are allocated from the memory 
+        /// most N/2-1. Dynamic memory allocations in the process are allocated from the memory
         /// pool pointed to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to rotate</param>
@@ -1346,11 +1346,11 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Rotates plaintext matrix columns cyclically. When batching is used with the BFV 
-        /// scheme, this function rotates the encrypted plaintext matrix columns cyclically. 
-        /// Since the size of the batched matrix is 2-by-(N/2), where N is the degree of the 
-        /// polynomial modulus, this means simply swapping the two rows. Dynamic memory 
-        /// allocations in the process are allocated from the memory pool pointed to by the 
+        /// Rotates plaintext matrix columns cyclically. When batching is used with the BFV
+        /// scheme, this function rotates the encrypted plaintext matrix columns cyclically.
+        /// Since the size of the batched matrix is 2-by-(N/2), where N is the degree of the
+        /// polynomial modulus, this means simply swapping the two rows. Dynamic memory
+        /// allocations in the process are allocated from the memory pool pointed to by the
         /// given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to rotate</param>
@@ -1369,7 +1369,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateColumnsInplace(Ciphertext encrypted,
-                    GaloisKeys galoisKeys, 
+                    GaloisKeys galoisKeys,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -1382,10 +1382,10 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Rotates plaintext matrix columns cyclically. When batching is used with the BFV
-        /// scheme, this function rotates the encrypted plaintext matrix columns cyclically, 
-        /// and writes the result to the destination parameter. Since the size of the batched 
-        /// matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, this means 
-        /// simply swapping the two rows. Dynamic memory allocations in the process are 
+        /// scheme, this function rotates the encrypted plaintext matrix columns cyclically,
+        /// and writes the result to the destination parameter. Since the size of the batched
+        /// matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, this means
+        /// simply swapping the two rows. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to rotate</param>
@@ -1421,10 +1421,10 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Rotates plaintext vector cyclically. When using the CKKS scheme, this function
-        /// rotates the encrypted plaintext vector cyclically to the left (steps &gt; 0) or to 
-        /// the right (steps &lt; 0). Since the size of the batched matrix is 2-by-(N/2), where 
-        /// N is the degree of the polynomial modulus, the number of steps to rotate must 
-        /// have absolute value at most N/2-1. Dynamic memory allocations in the process are 
+        /// rotates the encrypted plaintext vector cyclically to the left (steps &gt; 0) or to
+        /// the right (steps &lt; 0). Since the size of the batched matrix is 2-by-(N/2), where
+        /// N is the degree of the polynomial modulus, the number of steps to rotate must
+        /// have absolute value at most N/2-1. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to rotate</param>
@@ -1459,10 +1459,10 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Rotates plaintext vector cyclically. When using the CKKS scheme, this function
         /// rotates the encrypted plaintext vector cyclically to the left (steps &gt; 0) or to
-        /// the right (steps &lt; 0) and writes the result to the destination parameter. Since 
-        /// the size of the batched matrix is 2-by-(N/2), where N is the degree of the 
-        /// polynomial modulus, the number of steps to rotate must have absolute value at 
-        /// most N/2-1. Dynamic memory allocations in the process are allocated from the 
+        /// the right (steps &lt; 0) and writes the result to the destination parameter. Since
+        /// the size of the batched matrix is 2-by-(N/2), where N is the degree of the
+        /// polynomial modulus, the number of steps to rotate must have absolute value at
+        /// most N/2-1. Dynamic memory allocations in the process are allocated from the
         /// memory pool pointed to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to rotate</param>
@@ -1499,9 +1499,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Complex conjugates plaintext slot values. When using the CKKS scheme, this 
-        /// function complex conjugates all values in the underlying plaintext. Dynamic 
-        /// memory allocations in the process are allocated from the memory pool pointed 
+        /// Complex conjugates plaintext slot values. When using the CKKS scheme, this
+        /// function complex conjugates all values in the underlying plaintext. Dynamic
+        /// memory allocations in the process are allocated from the memory pool pointed
         /// to by the given MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to rotate</param>
@@ -1520,7 +1520,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ComplexConjugateInplace(Ciphertext encrypted,
-                    GaloisKeys galoisKeys, 
+                    GaloisKeys galoisKeys,
                     MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
@@ -1533,9 +1533,9 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Complex conjugates plaintext slot values. When using the CKKS scheme, this
-        /// function complex conjugates all values in the underlying plaintext, and 
-        /// writes the result to the destination parameter. Dynamic memory allocations 
-        /// in the process are allocated from the memory pool pointed to by the given 
+        /// function complex conjugates all values in the underlying plaintext, and
+        /// writes the result to the destination parameter. Dynamic memory allocations
+        /// in the process are allocated from the memory pool pointed to by the given
         /// MemoryPoolHandle.
         /// </summary>
         /// <param name="encrypted">The ciphertext to rotate</param>

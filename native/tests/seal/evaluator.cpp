@@ -169,8 +169,8 @@ namespace SEALTest
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(
-                { DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1), 
-                DefaultParams::small_mods_30bit(2), DefaultParams::small_mods_30bit(3), 
+                { DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1),
+                DefaultParams::small_mods_30bit(2), DefaultParams::small_mods_30bit(3),
                 DefaultParams::small_mods_30bit(4) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
@@ -264,7 +264,7 @@ namespace SEALTest
                     ASSERT_TRUE(tmp < 0.5);
                 }
             }
-                
+
         }
         {
             //adding two random vectors 100 times
@@ -985,8 +985,8 @@ namespace SEALTest
             SmallModulus plain_modulus((1ULL << 40) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus({ 
-                DefaultParams::small_mods_30bit(0), 
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_30bit(0),
                 DefaultParams::small_mods_60bit(0),
                 DefaultParams::small_mods_60bit(1) });
             auto context = SEALContext::Create(parms);
@@ -1086,8 +1086,8 @@ namespace SEALTest
             SmallModulus plain_modulus((1ULL << 60) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus({ 
-                DefaultParams::small_mods_60bit(0), 
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_60bit(0),
                 DefaultParams::small_mods_60bit(1),
                 DefaultParams::small_mods_60bit(2) });
             auto context = SEALContext::Create(parms);
@@ -1316,7 +1316,7 @@ namespace SEALTest
             //multiplying two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1), 
+            parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1),
                 DefaultParams::small_mods_30bit(2) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
@@ -1917,7 +1917,7 @@ namespace SEALTest
 
             std::vector<std::complex<double>> input(slot_size, 0.0);
             std::vector<std::complex<double>> expected(slot_size, 0.0);
-                
+
             int data_bound = 1 << 7;
             srand(static_cast<unsigned>(time(NULL)));
 
@@ -2074,8 +2074,8 @@ namespace SEALTest
             //multiplying two random vectors 100 times
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus({ 
-                DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1), 
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1),
                 DefaultParams::small_mods_30bit(2), DefaultParams::small_mods_30bit(3) });
             auto context = SEALContext::Create(parms);
             auto next_parms_id = context->context_data_first()->
@@ -2921,7 +2921,7 @@ namespace SEALTest
             // maximal number of slots
             size_t slot_size = 4;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), 
+            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0),
                 DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
@@ -3000,7 +3000,7 @@ namespace SEALTest
         {
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), 
+            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
                 DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);

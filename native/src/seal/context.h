@@ -131,7 +131,7 @@ namespace seal
     get_context_data(parms_id_type) function. The functions context_data_first() and
     context_data_last() return the ContextData corresponding to the first and the last
     set of parameters in the "data" part of the chain, i.e., the second and the last
-    element in the full chain. The chain itself is a doubly linked list, and is referred 
+    element in the full chain. The chain itself is a doubly linked list, and is referred
     to as the modulus switching chain.
 
     @see EncryptionParameters for more details on the parameters.
@@ -176,8 +176,8 @@ namespace seal
             }
 
             /**
-            Returns a pointer to a pre-computed product of all primes in the coefficient 
-            modulus. The security of the encryption parameters largely depends on the 
+            Returns a pointer to a pre-computed product of all primes in the coefficient
+            modulus. The security of the encryption parameters largely depends on the
             bit-length of this product, and on the degree of the polynomial modulus.
             */
             inline const std::uint64_t *total_coeff_modulus() const noexcept
@@ -301,8 +301,8 @@ namespace seal
             }
 
         private:
-            ContextData(EncryptionParameters parms, MemoryPoolHandle pool) : 
-                pool_(std::move(pool)), parms_(parms) 
+            ContextData(EncryptionParameters parms, MemoryPoolHandle pool) :
+                pool_(std::move(pool)), parms_(parms)
             {
                 if (!pool_)
                 {
@@ -347,13 +347,13 @@ namespace seal
 
         /**
         Creates an instance of SEALContext, and performs several pre-computations
-        on the given EncryptionParameters. 
+        on the given EncryptionParameters.
 
         @param[in] parms The encryption parameters
-        @param[in] expand_mod_chain Determines whether the modulus switching chain 
+        @param[in] expand_mod_chain Determines whether the modulus switching chain
         should be created
         */
-        static auto Create(const EncryptionParameters &parms, 
+        static auto Create(const EncryptionParameters &parms,
             bool expand_mod_chain = true)
         {
             return std::shared_ptr<SEALContext>(
@@ -412,12 +412,12 @@ namespace seal
         */
         inline auto parameters_set() const
         {
-            return context_data_first() ? 
+            return context_data_first() ?
                 context_data_first()->qualifiers_.parameters_set : false;
         }
 
         /**
-        Returns a parms_id_type corresponding to the set of encryption 
+        Returns a parms_id_type corresponding to the set of encryption
         parameters that are used for keys.
         */
         inline auto &key_parms_id() const noexcept
@@ -457,7 +457,7 @@ namespace seal
         on the given EncryptionParameters.
 
         @param[in] parms The encryption parameters
-        @param[in] expand_mod_chain Determines whether the modulus switching chain 
+        @param[in] expand_mod_chain Determines whether the modulus switching chain
         should be created
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized

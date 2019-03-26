@@ -336,14 +336,14 @@ endif()
 if(SEAL_LIB_BUILD_TYPE STREQUAL "Shared")
     add_library(seal SHARED "")
 
-    # Set SOVERSION for shared library 
-    set_target_properties(seal PROPERTIES 
+    # Set SOVERSION for shared library
+    set_target_properties(seal PROPERTIES
         SOVERSION ${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 else()
     add_library(seal STATIC "")
 endif()
 
-# Set VERSION for all library build types 
+# Set VERSION for all library build types
 set_target_properties(seal PROPERTIES VERSION ${SEAL_VERSION})
 
 # Add source files to library and header files to install
@@ -411,7 +411,7 @@ install(
 # Version file; we require exact version match for downstream
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    ${SEAL_CONFIG_VERSION_FILENAME} 
+    ${SEAL_CONFIG_VERSION_FILENAME}
     VERSION ${SEAL_VERSION}
     COMPATIBILITY ExactVersion)
 

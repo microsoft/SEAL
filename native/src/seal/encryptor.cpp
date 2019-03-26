@@ -19,7 +19,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    Encryptor::Encryptor(shared_ptr<SEALContext> context, 
+    Encryptor::Encryptor(shared_ptr<SEALContext> context,
         const PublicKey &public_key) : context_(move(context)),
         public_key_(public_key)
     {
@@ -150,7 +150,7 @@ namespace seal
             {
                 throw invalid_argument("plain cannot be in NTT form");
             }
-            
+
             encrypt_zero(context_->parms_id_first(), destination);
 
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
@@ -197,7 +197,7 @@ namespace seal
         }
     }
 
-    void Encryptor::preencrypt(const uint64_t *plain, size_t plain_coeff_count, 
+    void Encryptor::preencrypt(const uint64_t *plain, size_t plain_coeff_count,
         const SEALContext::ContextData &context_data, uint64_t *destination)
     {
         auto &parms = context_data.parms();

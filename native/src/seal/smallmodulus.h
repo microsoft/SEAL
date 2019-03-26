@@ -13,13 +13,13 @@ namespace seal
 {
     /**
     Represent an integer modulus of up to 62 bits. An instance of the SmallModulus
-    class represents a non-negative integer modulus up to 62 bits. In particular, 
+    class represents a non-negative integer modulus up to 62 bits. In particular,
     the encryption parameter plain_modulus, and the primes in coeff_modulus, are
-    represented by instances of SmallModulus. The purpose of this class is to 
+    represented by instances of SmallModulus. The purpose of this class is to
     perform and store the pre-computation required by Barrett reduction.
 
     @par Thread Safety
-    In general, reading from SmallModulus is thread-safe as long as no other thread 
+    In general, reading from SmallModulus is thread-safe as long as no other thread
     is concurrently mutating it.
 
     @see EncryptionParameters for a description of the encryption parameters.
@@ -28,7 +28,7 @@ namespace seal
     {
     public:
         /**
-        Creates a SmallModulus instance. The value of the SmallModulus is set to 
+        Creates a SmallModulus instance. The value of the SmallModulus is set to
         the given value, or to zero by default.
 
         @param[in] value The integer modulus
@@ -150,8 +150,8 @@ namespace seal
         }
 
         /**
-        Saves the SmallModulus to an output stream. The full state of the modulus is 
-        serialized. The output is in binary format and not human-readable. The output 
+        Saves the SmallModulus to an output stream. The full state of the modulus is
+        serialized. The output is in binary format and not human-readable. The output
         stream must have the "binary" flag set.
 
         @param[in] stream The stream to save the SmallModulus to
@@ -168,10 +168,10 @@ namespace seal
         void load(std::istream &stream);
 
     private:
-        SmallModulus(std::uint64_t value, 
-            std::array<std::uint64_t, 3> const_ratio, 
+        SmallModulus(std::uint64_t value,
+            std::array<std::uint64_t, 3> const_ratio,
             int bit_count, std::size_t uint64_count) :
-            value_(value), const_ratio_(const_ratio), 
+            value_(value), const_ratio_(const_ratio),
             bit_count_(bit_count), uint64_count_(uint64_count)
         {
         }

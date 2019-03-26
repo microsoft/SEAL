@@ -126,7 +126,7 @@ namespace seal
             }
 
             inline std::uint64_t get_from_scaled_inv_root_powers_div_two(
-                std::size_t index) const 
+                std::size_t index) const
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -176,14 +176,14 @@ namespace seal
 
             SmallNTTTables &operator =(SmallNTTTables &&assign) = delete;
 
-            // Computed bit-scrambled vector of first 1 << coeff_count_power powers 
+            // Computed bit-scrambled vector of first 1 << coeff_count_power powers
             // of a primitive root.
-            void ntt_powers_of_primitive_root(std::uint64_t root, 
+            void ntt_powers_of_primitive_root(std::uint64_t root,
                 std::uint64_t *destination) const;
 
-            // Scales the elements of a vector returned by powers_of_primitive_root(...) 
+            // Scales the elements of a vector returned by powers_of_primitive_root(...)
             // by word_size/modulus and rounds down.
-            void ntt_scale_powers_of_primitive_root(const std::uint64_t *input, 
+            void ntt_scale_powers_of_primitive_root(const std::uint64_t *input,
                 std::uint64_t *destination) const;
 
             MemoryPoolHandle pool_;
@@ -220,16 +220,16 @@ namespace seal
 
         };
 
-        void ntt_negacyclic_harvey_lazy(std::uint64_t *operand, 
+        void ntt_negacyclic_harvey_lazy(std::uint64_t *operand,
             const SmallNTTTables &tables);
 
-        inline void ntt_negacyclic_harvey(std::uint64_t *operand, 
+        inline void ntt_negacyclic_harvey(std::uint64_t *operand,
             const SmallNTTTables &tables)
         {
             ntt_negacyclic_harvey_lazy(operand, tables);
 
-            // Finally maybe we need to reduce every coefficient modulo q, but we 
-            // know that they are in the range [0, 4q). 
+            // Finally maybe we need to reduce every coefficient modulo q, but we
+            // know that they are in the range [0, 4q).
             // Since word size is controlled this is fast.
             std::uint64_t modulus = tables.modulus().value();
             std::uint64_t two_times_modulus = modulus * 2;
@@ -248,10 +248,10 @@ namespace seal
             }
         }
 
-        void inverse_ntt_negacyclic_harvey_lazy(std::uint64_t *operand, 
+        void inverse_ntt_negacyclic_harvey_lazy(std::uint64_t *operand,
             const SmallNTTTables &tables);
 
-        inline void inverse_ntt_negacyclic_harvey(std::uint64_t *operand, 
+        inline void inverse_ntt_negacyclic_harvey(std::uint64_t *operand,
             const SmallNTTTables &tables)
         {
             inverse_ntt_negacyclic_harvey_lazy(operand, tables);
@@ -259,8 +259,8 @@ namespace seal
             std::uint64_t modulus = tables.modulus().value();
             std::size_t n = std::size_t(1) << tables.coeff_count_power();
 
-            // Final adjustments; compute a[j] = a[j] * n^{-1} mod q. 
-            // We incorporated the final adjustment in the butterfly. Only need 
+            // Final adjustments; compute a[j] = a[j] * n^{-1} mod q.
+            // We incorporated the final adjustment in the butterfly. Only need
             // to reduce here.
             for (; n--; operand++)
             {

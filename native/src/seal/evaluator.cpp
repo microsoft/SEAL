@@ -262,7 +262,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_inplace(Ciphertext &encrypted1, 
+    void Evaluator::multiply_inplace(Ciphertext &encrypted1,
         const Ciphertext &encrypted2, MemoryPoolHandle pool)
     {
         // Verify parameters.
@@ -302,7 +302,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::bfv_multiply(Ciphertext &encrypted1, 
+    void Evaluator::bfv_multiply(Ciphertext &encrypted1,
         const Ciphertext &encrypted2, MemoryPoolHandle pool)
     {
         if (encrypted1.is_ntt_form() || encrypted2.is_ntt_form())
@@ -456,7 +456,7 @@ namespace seal
         }
 
         // Perform multiplication on arbitrary size ciphertexts
-        for (size_t secret_power_index = 0; 
+        for (size_t secret_power_index = 0;
             secret_power_index < dest_count; secret_power_index++)
         {
             // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
@@ -465,7 +465,7 @@ namespace seal
             // and strictly less than [encrypted_array.size()]
             current_encrypted1_limit = min(encrypted1_size, secret_power_index + 1);
 
-            for (size_t encrypted1_index = 0; 
+            for (size_t encrypted1_index = 0;
                 encrypted1_index < current_encrypted1_limit; encrypted1_index++)
             {
                 // check if a corresponding component in encrypted2 exists
@@ -531,9 +531,9 @@ namespace seal
             }
         }
 
-        // Now we multiply plain modulus to both results in base q and Bsk and 
-        // allocate them together in one container as 
-        // (te0)q(te'0)Bsk | ... |te count)q (te' count)Bsk to make it ready for 
+        // Now we multiply plain modulus to both results in base q and Bsk and
+        // allocate them together in one container as
+        // (te0)q(te'0)Bsk | ... |te count)q (te' count)Bsk to make it ready for
         // fast_floor
         auto tmp_coeff_bsk_together(allocate_poly(
             coeff_count, dest_count * (coeff_mod_count + bsk_base_mod_count), pool));
@@ -579,13 +579,13 @@ namespace seal
         }
     }
 
-    void Evaluator::ckks_multiply(Ciphertext &encrypted1, 
+    void Evaluator::ckks_multiply(Ciphertext &encrypted1,
         const Ciphertext &encrypted2, MemoryPoolHandle pool)
     {
         if (!(encrypted1.is_ntt_form() && encrypted2.is_ntt_form()))
         {
             throw invalid_argument("encrypted1 or encrypted2 must be in NTT form");
-        } 
+        }
 
         // Extract encryption parameters.
         auto &context_data = *context_->get_context_data(encrypted1.parms_id());
@@ -596,8 +596,8 @@ namespace seal
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
 
-        double new_scale = encrypted1.scale() * encrypted2.scale(); 
-        
+        double new_scale = encrypted1.scale() * encrypted2.scale();
+
         // Check that scale is positive and not too large
         if (new_scale <= 0 || (static_cast<int>(log2(new_scale)) >=
             context_data.total_coeff_modulus_bit_count()))
@@ -1118,8 +1118,8 @@ namespace seal
         encrypted.scale() = new_scale;
     }
 
-    void Evaluator::relinearize_internal(Ciphertext &encrypted, 
-        const RelinKeys &relin_keys, size_t destination_size, 
+    void Evaluator::relinearize_internal(Ciphertext &encrypted,
+        const RelinKeys &relin_keys, size_t destination_size,
         MemoryPoolHandle pool)
     {
         // Verify parameters.
@@ -1174,7 +1174,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::mod_switch_scale_to_next(const Ciphertext &encrypted, 
+    void Evaluator::mod_switch_scale_to_next(const Ciphertext &encrypted,
         Ciphertext &destination, MemoryPoolHandle pool)
     {
         auto context_data_ptr = context_->get_context_data(encrypted.parms_id());
@@ -1268,12 +1268,12 @@ namespace seal
         }
     }
 
-    void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted, 
+    void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted,
         Ciphertext &destination, MemoryPoolHandle pool)
     {
         // Assuming at this point encrypted is already validated.
         auto context_data_ptr = context_->get_context_data(encrypted.parms_id());
-        if (context_data_ptr->parms().scheme() == scheme_type::CKKS && 
+        if (context_data_ptr->parms().scheme() == scheme_type::CKKS &&
             !encrypted.is_ntt_form())
         {
             throw invalid_argument("CKKS encrypted must be in NTT form");
@@ -1325,7 +1325,7 @@ namespace seal
             destination.scale() = encrypted.scale();
 
             // Copy data to destination
-            set_uint_uint(temp.get(), rns_poly_total_count * encrypted_size, 
+            set_uint_uint(temp.get(), rns_poly_total_count * encrypted_size,
                 destination.data());
         }
         else
@@ -1378,14 +1378,14 @@ namespace seal
         size_t coeff_count = next_parms.poly_modulus_degree();
 
         // Compute destination size first for exception safety
-        auto dest_size = mul_safe(next_coeff_mod_count, coeff_count); 
+        auto dest_size = mul_safe(next_coeff_mod_count, coeff_count);
 
         plain.parms_id() = parms_id_zero;
         plain.resize(dest_size);
         plain.parms_id() = next_parms.parms_id();
     }
 
-    void Evaluator::mod_switch_to_next(const Ciphertext &encrypted, 
+    void Evaluator::mod_switch_to_next(const Ciphertext &encrypted,
         Ciphertext &destination, MemoryPoolHandle pool)
     {
         // Verify parameters.
@@ -1428,7 +1428,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::mod_switch_to_inplace(Ciphertext &encrypted, 
+    void Evaluator::mod_switch_to_inplace(Ciphertext &encrypted,
         parms_id_type parms_id, MemoryPoolHandle pool)
     {
         // Verify parameters.
@@ -1733,7 +1733,7 @@ namespace seal
             for (size_t i = 0; i < plain.coeff_count(); i++)
             {
                 // This is Encryptor::preencrypt
-                // Multiply plain by scalar coeff_div_plain_modulus and reposition 
+                // Multiply plain by scalar coeff_div_plain_modulus and reposition
                 // if in upper-half.
                 if (plain[i] >= plain_upper_half_threshold)
                 {
@@ -1768,8 +1768,8 @@ namespace seal
         {
             for (size_t j = 0; j < coeff_mod_count; j++)
             {
-                add_poly_poly_coeffmod(encrypted.data() + (j * coeff_count), 
-                    plain.data() + (j*coeff_count), coeff_count, 
+                add_poly_poly_coeffmod(encrypted.data() + (j * coeff_count),
+                    plain.data() + (j*coeff_count), coeff_count,
                     coeff_modulus[j], encrypted.data() + (j * coeff_count));
             }
             break;
@@ -1845,7 +1845,7 @@ namespace seal
             for (size_t i = 0; i < plain.coeff_count(); i++)
             {
                 // This is Encryptor::preencrypt changed to subtract instead
-                // Multiply plain by scalar coeff_div_plain_modulus and reposition 
+                // Multiply plain by scalar coeff_div_plain_modulus and reposition
                 // if in upper-half.
                 if (plain[i] >= plain_upper_half_threshold)
                 {
@@ -1880,8 +1880,8 @@ namespace seal
         {
             for (size_t j = 0; j < coeff_mod_count; j++)
             {
-                sub_poly_poly_coeffmod(encrypted.data() + (j * coeff_count), 
-                    plain.data() + (j * coeff_count), coeff_count, 
+                sub_poly_poly_coeffmod(encrypted.data() + (j * coeff_count),
+                    plain.data() + (j * coeff_count), coeff_count,
                     coeff_modulus[j], encrypted.data() + (j * coeff_count));
             }
             break;
@@ -1899,7 +1899,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_plain_inplace(Ciphertext &encrypted, 
+    void Evaluator::multiply_plain_inplace(Ciphertext &encrypted,
         const Plaintext &plain, MemoryPoolHandle pool)
     {
         // Verify parameters.
@@ -1941,7 +1941,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_plain_normal(Ciphertext &encrypted, 
+    void Evaluator::multiply_plain_normal(Ciphertext &encrypted,
         const Plaintext &plain, MemoryPool &pool)
     {
         // Extract encryption parameters.
@@ -1978,8 +1978,8 @@ namespace seal
         encrypted.scale() = new_scale;
 
         /*
-        Optimizations for constant / monomial multiplication can lead to the  
-        presence of a timing side-channel in use-cases where the plaintext 
+        Optimizations for constant / monomial multiplication can lead to the
+        presence of a timing side-channel in use-cases where the plaintext
         data should also be kept private.
         */
         if (plain_nonzero_coeff_count == 1)
@@ -1995,7 +1995,7 @@ namespace seal
                     auto decomposed_coeff(allocate_uint(coeff_mod_count, pool));
                     add_uint_uint64(plain_upper_half_increment, plain[mono_exponent],
                         coeff_mod_count, adjusted_coeff.get());
-                    decompose_single_coeff(context_data, adjusted_coeff.get(), 
+                    decompose_single_coeff(context_data, adjusted_coeff.get(),
                         decomposed_coeff.get(), pool);
 
                     for (size_t i = 0; i < encrypted_size; i++)
@@ -2017,8 +2017,8 @@ namespace seal
                         {
                             negacyclic_multiply_poly_mono_coeffmod(
                                 encrypted.data(i) + (j * coeff_count), coeff_count,
-                                plain[mono_exponent] + plain_upper_half_increment[j], 
-                                mono_exponent, coeff_modulus[j], 
+                                plain[mono_exponent] + plain_upper_half_increment[j],
+                                mono_exponent, coeff_modulus[j],
                                 encrypted.data(i) + (j * coeff_count), pool);
                         }
                     }
@@ -2037,7 +2037,7 @@ namespace seal
                     }
                 }
             }
-            
+
             return;
         }
 
@@ -2117,7 +2117,7 @@ namespace seal
         }
     }
 
-    void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt, 
+    void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt,
         const Plaintext &plain_ntt)
     {
         // Verify parameters.
@@ -2169,7 +2169,7 @@ namespace seal
         encrypted_ntt.scale() = new_scale;
     }
 
-    void Evaluator::transform_to_ntt_inplace(Plaintext &plain, 
+    void Evaluator::transform_to_ntt_inplace(Plaintext &plain,
         parms_id_type parms_id, MemoryPoolHandle pool)
     {
         // Verify parameters.
@@ -2458,7 +2458,7 @@ namespace seal
         // Check the Galois key for galois_elt at this point.
         for (auto &b : galois_keys.key(galois_elt))
         {
-            if (!b.is_metadata_valid_for(context_) || !b.is_ntt_form() || 
+            if (!b.is_metadata_valid_for(context_) || !b.is_ntt_form() ||
                 b.parms_id() != galois_keys.parms_id())
             {
                 throw invalid_argument("galois_keys is not valid for encryption parameters");
@@ -2567,8 +2567,8 @@ namespace seal
         size_t coeff_count = context_data.parms().poly_modulus_degree();
 
         // Perform rotation and key switching
-        apply_galois_inplace(encrypted, 
-            steps_to_galois_elt(steps, coeff_count), 
+        apply_galois_inplace(encrypted,
+            steps_to_galois_elt(steps, coeff_count),
             galois_keys, move(pool));
     }
 
@@ -2722,7 +2722,7 @@ namespace seal
                             temp_poly[k].get()[(j * coeff_count + l) * 2],
                             local_wide_product[0],
                             &local_low_word);
-                        temp_poly[k].get()[(j * coeff_count + l) * 2] = 
+                        temp_poly[k].get()[(j * coeff_count + l) * 2] =
                             local_low_word;
                         temp_poly[k].get()[(j * coeff_count + l) * 2 + 1] +=
                             local_wide_product[1] + local_carry;
@@ -2738,7 +2738,7 @@ namespace seal
             for (size_t k = 0; k < 2; k++)
             {
                 // Reduce (ct mod 4qk) mod qk
-                uint64_t *temp_poly_ptr = temp_poly[k].get() + 
+                uint64_t *temp_poly_ptr = temp_poly[k].get() +
                     decomp_mod_count * coeff_count * 2;
                 for (size_t l = 0; l < coeff_count; l ++)
                 {

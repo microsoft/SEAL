@@ -9,7 +9,7 @@ using System.Text;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>Represent an integer modulus of up to 62 bits.</summary>
-    /// 
+    ///
     /// <remarks>
     /// <para>
     /// Represent an integer modulus of up to 62 bits. An instance of the SmallModulus
@@ -23,12 +23,12 @@ namespace Microsoft.Research.SEAL
     /// is  concurrently mutating it.
     /// </para>
     /// </remarks>
-    /// <seealso cref="EncryptionParameters">See EncryptionParameters for a description 
+    /// <seealso cref="EncryptionParameters">See EncryptionParameters for a description
     /// of the encryption parameters.</seealso>
     public class SmallModulus : NativeObject, IEquatable<SmallModulus>, IEquatable<ulong>
     {
         /// <summary>Creates a SmallModulus instance.</summary>
-        /// 
+        ///
         /// <remarks>
         /// Creates a SmallModulus instance. The value of the SmallModulus is set to 0.
         /// </remarks>
@@ -39,7 +39,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>Creates a SmallModulus instance.</summary>
-        /// 
+        ///
         /// <remarks>
         /// Creates a SmallModulus instance. The value of the SmallModulus is set to
         /// the given value.
@@ -54,7 +54,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>Creates a new SmallModulus by copying a given one.</summary>
-        /// 
+        ///
         /// <param name="copy">The SmallModulus to copy from</param>
         /// <exception cref="System.ArgumentNullException">if copy is null</exception>
         public SmallModulus(SmallModulus copy)
@@ -77,7 +77,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>Copies a given SmallModulus to the current one.</summary>
-        /// 
+        ///
         /// <param name="assign">The SmallModulus to copy from</param>
         /// <exception cref="System.ArgumentNullException">if assign is null</exception>
         public void Set(SmallModulus assign)
@@ -89,9 +89,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>Sets the value of the SmallModulus.</summary>
-        /// 
+        ///
         /// <param name="value">The new integer modulus</param>
-        /// <exception cref="System.ArgumentException">if value is 1 or more than 
+        /// <exception cref="System.ArgumentException">if value is 1 or more than
         /// 62 bits</exception>
         public void Set(ulong value)
         {
@@ -99,7 +99,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the significant bit count of the value of the current 
+        /// Returns the significant bit count of the value of the current
         /// SmallModulus.
         /// </summary>
         public int BitCount
@@ -112,7 +112,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the size (in 64-bit words) of the value of the current 
+        /// Returns the size (in 64-bit words) of the value of the current
         /// SmallModulus.
         /// </summary>
         public ulong UInt64Count
@@ -136,9 +136,9 @@ namespace Microsoft.Research.SEAL
             }
         }
 
-        /// <summary>Returns the Barrett ratio computed for the value of the current 
+        /// <summary>Returns the Barrett ratio computed for the value of the current
         /// SmallModulus.</summary>
-        /// 
+        ///
         /// <remarks>
         /// Returns the Barrett ratio computed for the value of the current SmallModulus.
         /// The first two components of the Barrett ratio are the floor of 2^128/value,
@@ -167,12 +167,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>Saves the SmallModulus to an output stream.</summary>
-        /// 
+        ///
         /// <remarks>
-        /// Saves the SmallModulus to an output stream. The output is in binary format and 
+        /// Saves the SmallModulus to an output stream. The output is in binary format and
         /// not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
-        /// 
+        ///
         /// <param name="stream">The stream to save the SmallModulus to</param>
         /// <exception cref="System.ArgumentNullException">if stream is null</exception>
         public void Save(Stream stream)
@@ -188,9 +188,9 @@ namespace Microsoft.Research.SEAL
             }
         }
 
-        /// <summary>Loads a SmallModulus from an input stream overwriting the current 
+        /// <summary>Loads a SmallModulus from an input stream overwriting the current
         /// SmallModulus.</summary>
-        /// 
+        ///
         /// <param name="stream">The stream to load the SmallModulus from</param>
         /// <exception cref="System.ArgumentNullException">if stream is null</exception>
         public void Load(Stream stream)
@@ -244,7 +244,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>Creates a SmallModulus instance.</summary>
-        /// 
+        ///
         /// <remarks>
         /// Creates a SmallModulus instance. The value of the SmallModulus is set to
         /// the given value.

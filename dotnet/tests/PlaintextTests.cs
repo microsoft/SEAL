@@ -30,7 +30,7 @@ namespace SEALNetTest
             Assert.AreEqual(10ul, plain3.Capacity);
             Assert.AreEqual(10ul, plain3.CoeffCount);
         }
-        
+
         [TestMethod]
         public void CreateWithHexTest()
         {

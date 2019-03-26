@@ -16,7 +16,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    IntegerEncoder::IntegerEncoder(std::shared_ptr<SEALContext> context) : 
+    IntegerEncoder::IntegerEncoder(std::shared_ptr<SEALContext> context) :
         context_(std::move(context))
     {
         // Verify parameters
@@ -124,13 +124,13 @@ namespace seal
             value.significant_bit_count());
         destination.resize(encode_coeff_count);
         destination.set_zero();
-        
+
         size_t coeff_index = 0;
         size_t coeff_count = safe_cast<size_t>(value.significant_bit_count());
         size_t coeff_uint64_count = value.uint64_count();
         while (coeff_index < coeff_count)
         {
-            if (is_bit_set_uint(value.data(), coeff_uint64_count, 
+            if (is_bit_set_uint(value.data(), coeff_uint64_count,
                 safe_cast<int>(coeff_index)))
             {
                 destination[coeff_index] = 1;
@@ -211,7 +211,7 @@ namespace seal
             bool next_result_was_negative = next_result < 0;
             next_result += coeff_value;
             bool next_result_is_negative = next_result < 0;
-            if ((next_result_was_negative == coeff_is_negative) && 
+            if ((next_result_was_negative == coeff_is_negative) &&
                 (next_result_was_negative != next_result_is_negative))
             {
                 // Accumulation and coefficient had same signs, but accumulator changed signs after addition, so must be overflow.
@@ -235,7 +235,7 @@ namespace seal
             unsigned long long coeff = plain[bit_index];
 
             // Left shift result, resizing if highest bit set.
-            if (is_bit_set_uint(result, result_uint64_count, 
+            if (is_bit_set_uint(result, result_uint64_count,
                 safe_cast<int>(result_bit_capacity) - 1))
             {
                 // Resize to make bigger.
@@ -270,7 +270,7 @@ namespace seal
                         result_uint64_count, bits_per_uint64_sz));
                     result_uint64_count++;
                     result_bit_capacity = mul_safe(
-                        result_uint64_count, bits_per_uint64_sz); 
+                        result_uint64_count, bits_per_uint64_sz);
                     resultint.resize(safe_cast<int>(result_bit_capacity));
                     result = resultint.data();
                     set_bit_uint(result, result_uint64_count, carry_bit_index);
@@ -281,7 +281,7 @@ namespace seal
                 // Result and coefficient have opposite signs so subtract.
                 if (sub_uint_uint64(result, pos_value, result_uint64_count, result))
                 {
-                    // Subtraction produced a borrow so coefficient is larger (in magnitude) 
+                    // Subtraction produced a borrow so coefficient is larger (in magnitude)
                     // than result, so need to negate result.
                     negate_uint(result, result_uint64_count, result);
                     result_is_negative = !result_is_negative;

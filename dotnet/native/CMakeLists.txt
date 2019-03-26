@@ -54,7 +54,7 @@ endfunction()
 add_subdirectory(sealnet)
 
 # Add local include directories for build
-target_include_directories(sealnetnative 
+target_include_directories(sealnetnative
     PRIVATE $<BUILD_INTERFACE:${SEALNetNative_SOURCE_DIR}>)
 
 # Install the native component of the .NET wrapper library.

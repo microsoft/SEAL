@@ -67,7 +67,7 @@ namespace SEALTest
 
             input = 2, modulus = 2;
             ASSERT_FALSE(try_mod_inverse(input, modulus, result));
-            
+
             input = 3, modulus = 2;
             ASSERT_TRUE(try_mod_inverse(input, modulus, result));
             ASSERT_EQ(result, 1ULL);

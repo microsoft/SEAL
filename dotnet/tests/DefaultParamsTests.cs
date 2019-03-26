@@ -67,7 +67,7 @@ namespace SEALNetTest
         {
             IEnumerable<SmallModulus> coeffs = DefaultParams.CoeffModulus192(2000);
         }
-        
+
         [TestMethod]
         public void Coeffs256Test()
         {

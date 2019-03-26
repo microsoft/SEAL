@@ -10,7 +10,7 @@ namespace seal
 {
     namespace util
     {
-        vector<uint64_t> conjugate_classes(uint64_t modulus, 
+        vector<uint64_t> conjugate_classes(uint64_t modulus,
             uint64_t subgroup_generator)
         {
             if (!product_fits_in(modulus, subgroup_generator))
@@ -92,7 +92,7 @@ namespace seal
             return orders;
         }
 
-        void babystep_giantstep(uint64_t modulus, 
+        void babystep_giantstep(uint64_t modulus,
             vector<uint64_t> &baby_steps, vector<uint64_t> &giant_steps)
         {
             int exponent = get_power_of_two(modulus);
@@ -119,7 +119,7 @@ namespace seal
                 value = mul_safe(value, g) % m;
             }
 
-            // now value should equal to g**kprime 
+            // now value should equal to g**kprime
             uint64_t value2 = value;
             for (uint64_t j = 0; j < l; j++)
             {
@@ -129,8 +129,8 @@ namespace seal
         }
 
         pair<size_t, size_t> decompose_babystep_giantstep(
-            uint64_t modulus, uint64_t input, 
-            const vector<uint64_t> &baby_steps, 
+            uint64_t modulus, uint64_t input,
+            const vector<uint64_t> &baby_steps,
             const vector<uint64_t> &giant_steps)
         {
             for (size_t i = 0; i < giant_steps.size(); i++)

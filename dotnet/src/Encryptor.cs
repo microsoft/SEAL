@@ -8,13 +8,13 @@ namespace Microsoft.Research.SEAL
 {
     /// <summary>
     /// Encrypts Plaintext objects into Ciphertext objects. Constructing an Encryptor requires
-    /// a SEALContext with valid encryption parameters, and the public key. 
+    /// a SEALContext with valid encryption parameters, and the public key.
     /// </summary>
     /// <remarks>
     /// <para>
     /// Overloads
     /// For the encrypt function we provide two overloads concerning the memory pool used in
-    /// allocations needed during the operation. In one overload the global memory pool is used 
+    /// allocations needed during the operation. In one overload the global memory pool is used
     /// for this purpose, and in another overload the user can supply a MemoryPoolHandle
     /// to to be used instead. This is to allow one single Encryptor to be used concurrently by
     /// several threads without running into thread contention in allocations taking place during
@@ -25,18 +25,18 @@ namespace Microsoft.Research.SEAL
     /// </para>
     /// <para>
     /// NTT form
-    /// When using the BFV scheme (SchemeType.BFV), all plaintext and ciphertexts should 
-    /// remain by default in the usual coefficient representation, i.e. not in NTT form. 
-    /// When using the CKKS scheme (SchemeType.CKKS), all plaintexts and ciphertexts 
-    /// should remain by default in NTT form. We call these scheme-specific NTT states the 
-    /// "default NTT form". Decryption requires the input ciphertexts to be in the default 
+    /// When using the BFV scheme (SchemeType.BFV), all plaintext and ciphertexts should
+    /// remain by default in the usual coefficient representation, i.e. not in NTT form.
+    /// When using the CKKS scheme (SchemeType.CKKS), all plaintexts and ciphertexts
+    /// should remain by default in NTT form. We call these scheme-specific NTT states the
+    /// "default NTT form". Decryption requires the input ciphertexts to be in the default
     /// NTT form, and will throw an exception if this is not the case.
     /// </para>
     /// </remarks>
     public class Encryptor : NativeObject
     {
         /// <summary>
-        /// Creates an Encryptor instance initialized with the specified SEALContext 
+        /// Creates an Encryptor instance initialized with the specified SEALContext
         /// and public key.
         /// </summary>
         /// <param name="context">The SEALContext</param>
@@ -58,7 +58,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Encrypts a plaintext and stores the result in the destination parameter. Dynamic
-        /// memory allocations in the process are allocated from the memory pool pointed to by 
+        /// memory allocations in the process are allocated from the memory pool pointed to by
         /// the given MemoryPoolHandle.
         /// </summary>
         /// <param name="plain">The plaintext to encrypt</param>
@@ -68,7 +68,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is not in default NTT form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void Encrypt(Plaintext plain, Ciphertext destination, 
+        public void Encrypt(Plaintext plain, Ciphertext destination,
             MemoryPoolHandle pool = null)
         {
             if (null == plain)

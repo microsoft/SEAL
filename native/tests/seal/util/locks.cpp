@@ -205,7 +205,7 @@ namespace SEALTest
                 }
                 writer1->release();
             });
-                
+
             writer1->wait_until_trying();
             ASSERT_TRUE(writer1->is_trying_to_lock());
             ASSERT_FALSE(writer1->is_locked());
@@ -262,7 +262,7 @@ namespace SEALTest
             *should_unlock_winner = true;
             winner->wait_until_unlocked();
             ASSERT_FALSE(winner->is_locked());
-            
+
             waiting->wait_until_locked();
             ASSERT_TRUE(waiting->is_locked());
 

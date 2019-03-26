@@ -51,7 +51,7 @@ namespace seal
         {
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            // Read the scheme identifier 
+            // Read the scheme identifier
             scheme_type scheme;
             stream.read(reinterpret_cast<char*>(&scheme), sizeof(scheme_type));
 

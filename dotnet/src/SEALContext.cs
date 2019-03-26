@@ -13,7 +13,7 @@ namespace Microsoft.Research.SEAL
     /// is constructed from a given set of encryption parameters. It validates the parameters
     /// for correctness, evaluates their properties, and performs and stores the results of
     /// several costly pre-computations.
-    /// 
+    ///
     /// After the user has set at least the PolyModulus, CoeffModulus, and PlainModulus
     /// parameters in a given EncryptionParameters instance, the parameters can be validated
     /// for correctness and functionality by constructing an instance of SEALContext. The
@@ -47,7 +47,7 @@ namespace Microsoft.Research.SEAL
     {
         /// <summary>
         /// Creates an instance of SEALContext, and performs several pre-computations
-        /// on the given EncryptionParameters. 
+        /// on the given EncryptionParameters.
         /// </summary>
         /// <param name="parms">The encryption parameters.</param>
         /// <param name="expandModChain">Determines whether the modulus switching chain
@@ -101,10 +101,10 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Returns the ContextData corresponding to encryption parameters with a given
-        /// parmsId. If parameters with the given parmsId are not found then the function 
+        /// parmsId. If parameters with the given parmsId are not found then the function
         /// returns null.
         /// </summary>
-        /// 
+        ///
         /// <param name="parmsId">The parmsId of the encryption parameters</param>
         /// <exception cref="ArgumentNullException">if parmsId is null</exception>
         public ContextData GetContextData(ParmsId parmsId)

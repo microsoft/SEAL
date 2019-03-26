@@ -118,7 +118,7 @@ namespace seal
             }
 
             // Determine bit length of coefficient.
-            int coeff_bit_count = 
+            int coeff_bit_count =
                 get_hex_string_bit_count(hex_poly_ptr + pos, coeff_length);
             if (coeff_bit_count > assign_coeff_bit_count)
             {
@@ -236,7 +236,7 @@ namespace seal
         else
         {
             auto &parms = context->context_data_first()->parms();
-            uint64_t modulus = parms.plain_modulus().value(); 
+            uint64_t modulus = parms.plain_modulus().value();
             const pt_coeff_type *ptr = data();
             for (size_t k = 0; k < data_.size(); k++, ptr++)
             {

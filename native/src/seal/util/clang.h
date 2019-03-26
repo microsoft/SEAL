@@ -7,7 +7,7 @@
 
 // We require clang >= 5
 #if (__clang_major__ < 5) || not defined(__cplusplus)
-#error "SEAL requires __clang_major__  >= 5" 
+#error "SEAL requires __clang_major__  >= 5"
 #endif
 
 // Read in config.h
@@ -57,12 +57,12 @@
 #ifdef SEAL_USE__ADDCARRY_U64
 #define SEAL_ADD_CARRY_UINT64(operand1, operand2, carry, result) _addcarry_u64(     \
     carry, operand1, operand2, result)
-#endif 
+#endif
 
 #ifdef SEAL_USE__SUBBORROW_U64
 #define SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result) _subborrow_u64(  \
     borrow, operand1, operand2, result)
-#endif 
+#endif
 
 #endif //SEAL_USE_INTRIN
 

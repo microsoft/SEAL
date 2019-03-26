@@ -87,14 +87,14 @@ namespace seal
 #ifdef SEAL_USE_IF_CONSTEXPR
 #define SEAL_IF_CONSTEXPR if constexpr
 #else
-#define SEAL_IF_CONSTEXPR if 
+#define SEAL_IF_CONSTEXPR if
 #endif
 
 // Use [[maybe_unused]] from C++17
 #ifdef SEAL_USE_MAYBE_UNUSED
 #define SEAL_MAYBE_UNUSED [[maybe_unused]]
 #else
-#define SEAL_MAYBE_UNUSED 
+#define SEAL_MAYBE_UNUSED
 #endif
 
 // Which random number generator factory to use by default

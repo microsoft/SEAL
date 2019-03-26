@@ -16,8 +16,8 @@ namespace seal
 {
     namespace util
     {
-        void multiply_poly_scalar_coeffmod(const uint64_t *poly, 
-            size_t coeff_count, uint64_t scalar, const SmallModulus &modulus, 
+        void multiply_poly_scalar_coeffmod(const uint64_t *poly,
+            size_t coeff_count, uint64_t scalar, const SmallModulus &modulus,
             uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -46,9 +46,9 @@ namespace seal
             {
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
                 multiply_uint64(*poly, scalar, z);
-            
+
                 // Reduces z using base 2^64 Barrett reduction
-                
+
                 // Multiply input and const_ratio
                 // Round 1
                 multiply_uint64_hw64(z[0], const_ratio_0, &carry);
@@ -71,9 +71,9 @@ namespace seal
             }
         }
 
-        void multiply_poly_poly_coeffmod(const uint64_t *operand1, 
-            size_t operand1_coeff_count, const uint64_t *operand2, 
-            size_t operand2_coeff_count, const SmallModulus &modulus, 
+        void multiply_poly_poly_coeffmod(const uint64_t *operand1,
+            size_t operand1_coeff_count, const uint64_t *operand2,
+            size_t operand2_coeff_count, const SmallModulus &modulus,
             size_t result_coeff_count, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -109,7 +109,7 @@ namespace seal
                 operand1, operand1_coeff_count, 1);
             operand2_coeff_count = get_significant_coeff_count_poly(
                 operand2, operand2_coeff_count, 1);
-            for (size_t operand1_index = 0; 
+            for (size_t operand1_index = 0;
                 operand1_index < operand1_coeff_count; operand1_index++)
             {
                 if (operand1[operand1_index] == 0)
@@ -118,7 +118,7 @@ namespace seal
                     continue;
                 }
                 // Do expensive add
-                for (size_t operand2_index = 0; 
+                for (size_t operand2_index = 0;
                     operand2_index < operand2_coeff_count; operand2_index++)
                 {
                     size_t product_coeff_index = operand1_index + operand2_index;
@@ -142,8 +142,8 @@ namespace seal
             }
         }
 
-        void multiply_poly_poly_coeffmod(const uint64_t *operand1, 
-            const uint64_t *operand2, size_t coeff_count, 
+        void multiply_poly_poly_coeffmod(const uint64_t *operand1,
+            const uint64_t *operand2, size_t coeff_count,
             const SmallModulus &modulus, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -200,8 +200,8 @@ namespace seal
             }
         }
 
-        void divide_poly_poly_coeffmod_inplace(uint64_t *numerator, 
-            const uint64_t *denominator, size_t coeff_count, 
+        void divide_poly_poly_coeffmod_inplace(uint64_t *numerator,
+            const uint64_t *denominator, size_t coeff_count,
             const SmallModulus &modulus, uint64_t *quotient)
         {
 #ifdef SEAL_DEBUG
@@ -276,9 +276,9 @@ namespace seal
                     // Determine shift necesarry to bring significant coefficients in alignment.
                     size_t denominator_shift = numerator_coeffs - denominator_coeffs;
 
-                    // Determine quotient's coefficient, which is scalar that makes 
-                    // denominator's leading coefficient one multiplied by leading 
-                    // coefficient of denominator (which when subtracted will zero 
+                    // Determine quotient's coefficient, which is scalar that makes
+                    // denominator's leading coefficient one multiplied by leading
+                    // coefficient of denominator (which when subtracted will zero
                     // out the topmost denominator coefficient).
                     uint64_t &quotient_coeff = quotient[denominator_shift];
                     temp_quotient = multiply_uint_uint_mod(
@@ -286,7 +286,7 @@ namespace seal
                     quotient_coeff = temp_quotient;
 
                     // Subtract numerator and quotient*denominator (shifted by denominator_shift).
-                    for (size_t denominator_coeff_index = 0; 
+                    for (size_t denominator_coeff_index = 0;
                         denominator_coeff_index < denominator_coeffs; denominator_coeff_index++)
                     {
                         // Multiply denominator's coefficient by quotient.
@@ -304,7 +304,7 @@ namespace seal
             }
         }
 
-        void apply_galois(const uint64_t *input, int coeff_count_power, 
+        void apply_galois(const uint64_t *input, int coeff_count_power,
             uint64_t galois_elt, const SmallModulus &modulus, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -320,13 +320,13 @@ namespace seal
             {
                 throw invalid_argument("result cannot point to the same value as input");
             }
-            if (coeff_count_power < get_power_of_two(SEAL_POLY_MOD_DEGREE_MIN) || 
+            if (coeff_count_power < get_power_of_two(SEAL_POLY_MOD_DEGREE_MIN) ||
                 coeff_count_power > get_power_of_two(SEAL_POLY_MOD_DEGREE_MAX))
             {
                 throw invalid_argument("coeff_count_power");
             }
             // Verify coprime conditions.
-            if (!(galois_elt & 1) || 
+            if (!(galois_elt & 1) ||
                 (galois_elt >= 2 * (uint64_t(1) << coeff_count_power)))
             {
                 throw invalid_argument("galois element is not valid");
@@ -348,14 +348,14 @@ namespace seal
                     // Explicit inline
                     //result[index] = negate_uint_mod(result[index], modulus);
                     int64_t non_zero = (result_value != 0);
-                    result_value = (modulus_value - result_value) & 
+                    result_value = (modulus_value - result_value) &
                         static_cast<uint64_t>(-non_zero);
                 }
                 result[index] = result_value;
             }
         }
 
-        void apply_galois_ntt(const uint64_t *input, int coeff_count_power, 
+        void apply_galois_ntt(const uint64_t *input, int coeff_count_power,
             uint64_t galois_elt, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -376,7 +376,7 @@ namespace seal
                 throw invalid_argument("coeff_count_power");
             }
             // Verify coprime conditions.
-            if (!(galois_elt & 1) || 
+            if (!(galois_elt & 1) ||
                 (galois_elt >= 2 * (uint64_t(1) << coeff_count_power)))
             {
                 throw invalid_argument("galois element is not valid");
@@ -394,8 +394,8 @@ namespace seal
             }
         }
 
-        void dyadic_product_coeffmod(const uint64_t *operand1, 
-            const uint64_t *operand2, size_t coeff_count, 
+        void dyadic_product_coeffmod(const uint64_t *operand1,
+            const uint64_t *operand2, size_t coeff_count,
             const SmallModulus &modulus, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -456,7 +456,7 @@ namespace seal
             }
         }
 
-        uint64_t poly_infty_norm_coeffmod(const uint64_t *operand, 
+        uint64_t poly_infty_norm_coeffmod(const uint64_t *operand,
             size_t coeff_count, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -472,7 +472,7 @@ namespace seal
             // Construct negative threshold (first negative modulus value) to compute absolute values of coeffs.
             uint64_t modulus_neg_threshold = (modulus.value() + 1) >> 1;
 
-            // Mod out the poly coefficients and choose a symmetric representative from 
+            // Mod out the poly coefficients and choose a symmetric representative from
             // [-modulus,modulus). Keep track of the max.
             uint64_t result = 0;
             for (size_t coeff_index = 0; coeff_index < coeff_count; coeff_index++)
@@ -490,7 +490,7 @@ namespace seal
             return result;
         }
 
-        bool try_invert_poly_coeffmod(const uint64_t *operand, const uint64_t *poly_modulus, 
+        bool try_invert_poly_coeffmod(const uint64_t *operand, const uint64_t *poly_modulus,
             size_t coeff_count, const SmallModulus &modulus, uint64_t *result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
@@ -510,7 +510,7 @@ namespace seal
             {
                 throw invalid_argument("result");
             }
-            if (get_significant_uint64_count_uint(operand, coeff_count) >= 
+            if (get_significant_uint64_count_uint(operand, coeff_count) >=
                 get_significant_uint64_count_uint(poly_modulus, coeff_count))
             {
                 throw out_of_range("operand");
@@ -570,9 +570,9 @@ namespace seal
                 // NOTE: degree(numerator) >= degree(denominator).
 
                 // Determine scalar necessary to make denominator monic.
-                uint64_t leading_denominator_coeff = 
+                uint64_t leading_denominator_coeff =
                     denominator[denominator_coeffs - 1];
-                if (!try_invert_uint_mod(leading_denominator_coeff, modulus, 
+                if (!try_invert_uint_mod(leading_denominator_coeff, modulus,
                     monic_denominator_scalar))
                 {
                     throw invalid_argument("modulus is not coprime with leading denominator coefficient");
@@ -593,9 +593,9 @@ namespace seal
                         // Determine shift necessary to bring significant coefficients in alignment.
                         size_t denominator_shift = numerator_coeffs - denominator_coeffs;
 
-                        // Determine quotient's coefficient, which is scalar that makes 
-                        // denominator's leading coefficient one multiplied by leading 
-                        // coefficient of denominator (which when subtracted will zero 
+                        // Determine quotient's coefficient, which is scalar that makes
+                        // denominator's leading coefficient one multiplied by leading
+                        // coefficient of denominator (which when subtracted will zero
                         // out the topmost denominator coefficient).
                         uint64_t &quotient_coeff = quotient[denominator_shift];
                         temp_quotient = multiply_uint_uint_mod(
@@ -603,15 +603,15 @@ namespace seal
                         quotient_coeff  = temp_quotient;
 
                         // Subtract numerator and quotient*denominator (shifted by denominator_shift).
-                        for (size_t denominator_coeff_index = 0; 
-                            denominator_coeff_index < denominator_coeffs; 
+                        for (size_t denominator_coeff_index = 0;
+                            denominator_coeff_index < denominator_coeffs;
                             denominator_coeff_index++)
                         {
                             // Multiply denominator's coefficient by quotient.
                             uint64_t denominator_coeff = denominator[denominator_coeff_index];
                             subtrahend = multiply_uint_uint_mod(temp_quotient, denominator_coeff, modulus);
 
-                            // Subtract numerator with resulting product, appropriately shifted by 
+                            // Subtract numerator with resulting product, appropriately shifted by
                             // denominator shift.
                             uint64_t &numerator_coeff = numerator[denominator_coeff_index + denominator_shift];
                             numerator_coeff = sub_uint_uint_mod(numerator_coeff, subtrahend, modulus);
@@ -622,7 +622,7 @@ namespace seal
                     numerator_coeffs--;
                 }
 
-                // Double check that numerator coefficients is correct because possible 
+                // Double check that numerator coefficients is correct because possible
                 // other coefficients are zero.
                 numerator_coeffs = get_significant_coeff_count_poly(
                     numerator, coeff_count, size_t(1));
@@ -635,9 +635,9 @@ namespace seal
 
                 // Integrate quotient with invert coefficients.
                 // Calculate: invert_next = invert_prior + -quotient * invert_curr
-                multiply_truncate_poly_poly_coeffmod(quotient.get(), invert_curr, 
+                multiply_truncate_poly_poly_coeffmod(quotient.get(), invert_curr,
                     coeff_count, modulus, invert_next);
-                sub_poly_poly_coeffmod(invert_prior, invert_next, coeff_count, 
+                sub_poly_poly_coeffmod(invert_prior, invert_next, coeff_count,
                     modulus, invert_next);
 
                 // Swap prior and curr, and then curr and next.
@@ -657,20 +657,20 @@ namespace seal
 
             // Determine scalar necessary to make denominator monic.
             uint64_t leading_denominator_coeff = denominator[0];
-            if (!try_invert_uint_mod(leading_denominator_coeff, modulus, 
+            if (!try_invert_uint_mod(leading_denominator_coeff, modulus,
                 monic_denominator_scalar))
             {
                 throw invalid_argument("modulus is not coprime with leading denominator coefficient");
             }
 
             // Multiply inverse by scalar and done.
-            multiply_poly_scalar_coeffmod(invert_curr, coeff_count, 
+            multiply_poly_scalar_coeffmod(invert_curr, coeff_count,
                 monic_denominator_scalar, modulus, result);
             return true;
         }
 
-        void negacyclic_shift_poly_coeffmod(const uint64_t *operand, 
-            size_t coeff_count, size_t shift, const SmallModulus &modulus, 
+        void negacyclic_shift_poly_coeffmod(const uint64_t *operand,
+            size_t coeff_count, size_t shift, const SmallModulus &modulus,
             uint64_t *result)
         {
 #ifdef SEAL_DEBUG

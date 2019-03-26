@@ -16,20 +16,20 @@
 namespace seal
 {
     /**
-    A resizable container for storing an array of integral data types. The 
-    allocations are done from a memory pool. The IntArray class is mainly 
-    intended for internal use and provides the underlying data structure for 
+    A resizable container for storing an array of integral data types. The
+    allocations are done from a memory pool. The IntArray class is mainly
+    intended for internal use and provides the underlying data structure for
     Plaintext and Ciphertext classes.
 
     @par Size and Capacity
-    IntArray allows the user to pre-allocate memory (capacity) for the array 
-    in cases where the array is known to be resized in the future and memory 
+    IntArray allows the user to pre-allocate memory (capacity) for the array
+    in cases where the array is known to be resized in the future and memory
     moves are to be avoided at the time of resizing. The size of the IntArray
     can never exceed its capacity. The capacity and size can be changed using
     the reserve and resize functions, respectively.
 
     @par Thread Safety
-    In general, reading from IntArray is thread-safe as long as no other thread 
+    In general, reading from IntArray is thread-safe as long as no other thread
     is concurrently mutating it.
     */
     template<typename T_, typename = std::enable_if_t<std::is_integral<T_>::value>>
@@ -45,7 +45,7 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        IntArray(MemoryPoolHandle pool = MemoryManager::GetPool()) : 
+        IntArray(MemoryPoolHandle pool = MemoryManager::GetPool()) :
             pool_(std::move(pool))
         {
             if (!pool_)
@@ -63,7 +63,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit IntArray(size_type size,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) : 
+            MemoryPoolHandle pool = MemoryManager::GetPool()) :
             pool_(std::move(pool))
         {
             if (!pool_)
@@ -87,7 +87,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit IntArray(size_type capacity, size_type size,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) : 
+            MemoryPoolHandle pool = MemoryManager::GetPool()) :
             pool_(std::move(pool))
         {
             if (!pool_)
@@ -200,7 +200,7 @@ namespace seal
         }
 
         /**
-        Returns a reference to the array element at a given index. This 
+        Returns a reference to the array element at a given index. This
         function performs bounds checking and will throw an error if the
         index is out of range.
 
@@ -228,7 +228,7 @@ namespace seal
         }
 
         /**
-        Returns a reference to the array element at a given index. This 
+        Returns a reference to the array element at a given index. This
         function does not perform bounds checking.
 
         @param[in] index The index of the array element
@@ -290,7 +290,7 @@ namespace seal
         }
 
         /**
-        Releases any allocated memory to the memory pool and sets the size 
+        Releases any allocated memory to the memory pool and sets the size
         and capacity of the array to zero.
         */
         inline void release() noexcept
@@ -310,7 +310,7 @@ namespace seal
 
         /**
         Allocates enough memory for storing a given number of elements without
-        changing the size of the array. If the given capacity is smaller than 
+        changing the size of the array. If the given capacity is smaller than
         the current size, the size is automatically set to equal the new capacity.
 
         @param[in] capacity The capacity of the array
@@ -330,7 +330,7 @@ namespace seal
         }
 
         /**
-        Reallocates the array so that its capacity exactly matches its size. 
+        Reallocates the array so that its capacity exactly matches its size.
         */
         inline void shrink_to_fit()
         {
@@ -363,7 +363,7 @@ namespace seal
                 return;
             }
 
-            // At this point we know for sure that size_ <= capacity_ < size so need 
+            // At this point we know for sure that size_ <= capacity_ < size so need
             // to reallocate to bigger
             auto new_data(util::allocate<T>(size, pool_));
             std::copy_n(cbegin(), size_, new_data.get());
@@ -413,7 +413,7 @@ namespace seal
         }
 
         /**
-        Saves the IntArray to an output stream. The output is in binary format 
+        Saves the IntArray to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
         @param[in] stream The stream to save the IntArray to

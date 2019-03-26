@@ -49,7 +49,7 @@ namespace seal
         ciphertext.i128 = _mm_aesenclast_si128(ciphertext.i128, round_key_[10]);
     }
 
-    void AESEncryptor::ecb_encrypt(const aes_block *plaintext, 
+    void AESEncryptor::ecb_encrypt(const aes_block *plaintext,
         size_t aes_block_count, aes_block *ciphertext) const
     {
         for (; aes_block_count--; ciphertext++, plaintext++)
@@ -68,7 +68,7 @@ namespace seal
         }
     }
 
-    void AESEncryptor::counter_encrypt(size_t start_index, 
+    void AESEncryptor::counter_encrypt(size_t start_index,
         size_t aes_block_count, aes_block *ciphertext) const
     {
         for (; aes_block_count--; start_index++, ciphertext++)

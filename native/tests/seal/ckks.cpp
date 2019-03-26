@@ -174,20 +174,20 @@ namespace SEALTest
             // Many primes
             uint32_t slots = 32;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus({ 
-                DefaultParams::small_mods_30bit(0), 
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_30bit(0),
                 DefaultParams::small_mods_30bit(1),
-                DefaultParams::small_mods_30bit(2), 
-                DefaultParams::small_mods_30bit(3), 
+                DefaultParams::small_mods_30bit(2),
+                DefaultParams::small_mods_30bit(3),
                 DefaultParams::small_mods_30bit(4),
                 DefaultParams::small_mods_30bit(5),
                 DefaultParams::small_mods_30bit(6),
                 DefaultParams::small_mods_30bit(7),
                 DefaultParams::small_mods_30bit(8),
-                DefaultParams::small_mods_30bit(9), 
+                DefaultParams::small_mods_30bit(9),
                 DefaultParams::small_mods_30bit(10),
-                DefaultParams::small_mods_30bit(11), 
-                DefaultParams::small_mods_30bit(12), 
+                DefaultParams::small_mods_30bit(11),
+                DefaultParams::small_mods_30bit(12),
                 DefaultParams::small_mods_30bit(13),
                 DefaultParams::small_mods_30bit(14),
                 DefaultParams::small_mods_30bit(15),

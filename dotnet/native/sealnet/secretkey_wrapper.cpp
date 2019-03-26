@@ -85,7 +85,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_IsMetadataValidFor(void *thisptr, void 
     const auto &sharedctx = SharedContextFromVoid(contextptr);
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(result, E_POINTER);
-    
+
     *result = skey->is_metadata_valid_for(sharedctx);
     return S_OK;
 }

@@ -118,7 +118,7 @@ namespace SEALNetTest
             SmallModulus sm = new SmallModulus();
             sm.Set(0x7FFFFFFFFFFFFFFFul);
         }
-       
+
         [TestMethod]
         public void ConstRatioTest()
         {
