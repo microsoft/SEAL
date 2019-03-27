@@ -180,10 +180,40 @@ namespace seal
             // Barrett subtraction
             tmp3 = input[0] - tmp1 * modulus.value();
 
-            // Claim: One more subtraction is enough
+            // One more subtraction is enough
             return static_cast<std::uint64_t>(tmp3) -
-                (modulus.value() & static_cast<uint64_t>(
+                (modulus.value() & static_cast<std::uint64_t>(
                     -static_cast<std::int64_t>(tmp3 >= modulus.value())));
+        }
+
+        template<typename T, typename = std::enable_if<is_uint64_v<T>>>
+        inline std::uint64_t barrett_reduce_63(T input,
+            const SmallModulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (modulus.is_zero())
+            {
+                throw std::invalid_argument("modulus");
+            }
+            if (input >> 63)
+            {
+                throw std::invalid_argument(input);
+            }
+#endif
+            // Reduces input using base 2^64 Barrett reduction
+            // input must be at most 63 bits
+
+            unsigned long long tmp[2];
+            const std::uint64_t *const_ratio = modulus.const_ratio().data();
+            multiply_uint64(input, const_ratio[1], tmp);
+
+            // Barrett subtraction
+            tmp[0] = input - tmp[1] * modulus.value();
+
+            // One more subtraction is enough
+            return static_cast<std::uint64_t>(tmp[0]) -
+                (modulus.value() & static_cast<std::uint64_t>(
+                    -static_cast<std::int64_t>(tmp[0] >= modulus.value())));
         }
 
         inline std::uint64_t multiply_uint_uint_mod(std::uint64_t operand1,

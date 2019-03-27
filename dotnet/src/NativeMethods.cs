@@ -198,6 +198,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void EPQ_UsingFastPlainLift(IntPtr thisptr, out bool usingFastPlainLift);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void EPQ_UsingDescendingModulusChain(IntPtr thisptr, out bool usingDescendingModulusChain);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EPQ_UsingHEStdSecurity(IntPtr thisptr, out bool usingHEStdSecurity);
 
         #endregion

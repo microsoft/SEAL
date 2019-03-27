@@ -34,9 +34,36 @@ namespace seal
                 throw std::invalid_argument("modulus");
             }
 #endif
-            const std::uint64_t modulus_value = modulus.value();
             std::transform(poly, poly + coeff_count, result,
-                [&](auto coeff) { return coeff % modulus_value; });
+                [&](auto coeff) {
+                    uint64_t temp[2]{ coeff, 0 };
+                    return barrett_reduce_128(temp, modulus); });
+        }
+
+        inline void modulo_poly_coeffs_63(const std::uint64_t *poly,
+            std::size_t coeff_count, const SmallModulus &modulus,
+            std::uint64_t *result)
+        {
+#ifdef SEAL_DEBUG
+            if (poly == nullptr && coeff_count > 0)
+            {
+                throw std::invalid_argument("poly");
+            }
+            if (result == nullptr && coeff_count > 0)
+            {
+                throw std::invalid_argument("result");
+            }
+            if (modulus.is_zero())
+            {
+                throw std::invalid_argument("modulus");
+            }
+#endif
+            // This function is the fastest for reducing polynomial coefficients,
+            // but requires that the input coefficients are at most 63 bits, unlike
+            // modulo_poly_coeffs that allows also 64-bit coefficients.
+            std::transform(poly, poly + coeff_count, result,
+                [&](auto coeff) {
+                    return barrett_reduce_63(coeff, modulus); });
         }
 
         inline void negate_poly_coeffmod(const std::uint64_t *poly,

@@ -79,6 +79,13 @@ namespace seal
         bool using_fast_plain_lift;
 
         /**
+        Tells whether the coefficient modulus consists of a set of primes that are in
+        decreasing order. If this is true, certain modular reductions in base conversion
+        can be omitted, improving performance.
+        */
+        bool using_descending_modulus_chain;
+
+        /**
         Tells whether the encryption parameters are secure based on the standard parameters
         from HomomorphicEncryption.org security standard.
         */
@@ -91,6 +98,7 @@ namespace seal
             using_ntt(false),
             using_batching(false),
             using_fast_plain_lift(false),
+            using_descending_modulus_chain(false),
             using_he_std_security(false)
         {
         }

@@ -82,7 +82,12 @@ namespace seal
 
         inline auto allocate_zero_uint(std::size_t uint64_count, MemoryPool &pool)
         {
-            return allocate<std::uint64_t>(uint64_count, pool, std::uint64_t(0));
+            auto result(allocate_uint(uint64_count, pool));
+            set_zero_uint(uint64_count, result.get());
+            return result;
+
+            // The following looks better but seems to yield worse results.
+            // return allocate<std::uint64_t>(uint64_count, pool, std::uint64_t(0));
         }
 
         inline void set_uint(std::uint64_t value, std::size_t uint64_count,

@@ -591,31 +591,24 @@ namespace seal
             for (size_t i = 0; i < coeff_base_mod_count_ - 1; i++)
             {
                 // (ct mod qk) mod qi
-                modulo_poly_coeffs(
-                        rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
-                        coeff_count_,
-                        coeff_base_array_[i],
-                        temp.get());
-                // (-(ct mod qk)) mod qi
-                negate_poly_coeffmod(
-                        temp.get(),
-                        coeff_count_,
-                        coeff_base_array_[i],
-                        temp.get());
-                // ((ct mod qi) - (ct mod qk)) mod qi
-                add_poly_poly_coeffmod(
-                        rns_poly + i * coeff_count_,
-                        temp.get(),
-                        coeff_count_,
-                        coeff_base_array_[i],
-                        rns_poly + i * coeff_count_);
+                modulo_poly_coeffs_63(
+                    rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    temp.get());
+                sub_poly_poly_coeffmod(
+                    rns_poly + i * coeff_count_,
+                    temp.get(),
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    rns_poly + i * coeff_count_);
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                 multiply_poly_scalar_coeffmod(
-                        rns_poly + i * coeff_count_,
-                        coeff_count_,
-                        inv_last_coeff_mod_array_[i],
-                        coeff_base_array_[i],
-                        rns_poly + i * coeff_count_);
+                    rns_poly + i * coeff_count_,
+                    coeff_count_,
+                    inv_last_coeff_mod_array_[i],
+                    coeff_base_array_[i],
+                    rns_poly + i * coeff_count_);
             }
         }
 
@@ -632,21 +625,15 @@ namespace seal
             for (size_t i = 0; i < coeff_base_mod_count_ - 1; i++)
             {
                 // (ct mod qk) mod qi
-                modulo_poly_coeffs(
+                modulo_poly_coeffs_63(
                     rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_,
                     coeff_count_,
                     coeff_base_array_[i],
                     temp.get());
                 // Convert to NTT form
                 ntt_negacyclic_harvey(temp.get(), rns_ntt_tables[i]);
-                // (-(ct mod qk)) mod qi
-                negate_poly_coeffmod(
-                    temp.get(),
-                    coeff_count_,
-                    coeff_base_array_[i],
-                    temp.get());
                 // ((ct mod qi) - (ct mod qk)) mod qi
-                add_poly_poly_coeffmod(
+                sub_poly_poly_coeffmod(
                     rns_poly + i * coeff_count_,
                     temp.get(),
                     coeff_count_,

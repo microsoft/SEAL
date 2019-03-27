@@ -114,13 +114,12 @@ namespace Microsoft.Research.SEAL
             }
         }
 
-        ///
         /// <summary>
         /// Tells whether fast plain lift is supported by the encryption parameters. A certain
         /// performance optimization in multiplication of a ciphertext by a plaintext
         /// (Evaluator.MultiplyPlain) and in transforming a plaintext element to NTT domain
         /// (Evaluator.TransformToNTT) can be used when the plaintext modulus is smaller than
-        /// each prime in the coefficient modulus.In this case the variable UsingFastPlainLift
+        /// each prime in the coefficient modulus. In this case the variable UsingFastPlainLift
         /// is set to true.
         /// </summary>
         public bool UsingFastPlainLift
@@ -128,6 +127,20 @@ namespace Microsoft.Research.SEAL
             get
             {
                 NativeMethods.EPQ_UsingFastPlainLift(NativePtr, out bool result);
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Tells whether the coefficient modulus consists of a set of primes that are in
+        /// decreasing order. If this is true, certain modular reductions in base conversion
+        /// can be omitted, improving performance.
+        /// </summary>
+        public bool UsingDescendingModulusChain
+        {
+            get
+            {
+                NativeMethods.EPQ_UsingDescendingModulusChain(NativePtr, out bool result);
                 return result;
             }
         }

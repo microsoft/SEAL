@@ -1228,19 +1228,17 @@ namespace seal
         for (size_t poly_index = 0; poly_index < encrypted_size; poly_index++)
         {
             // Set temp1 to ct mod qk
-            set_uint_uint(encrypted_copy.data(poly_index) + next_coeff_mod_count * coeff_count,
+            set_uint_uint(
+                encrypted_copy.data(poly_index) + next_coeff_mod_count * coeff_count,
                 coeff_count, temp1.get());
             for (size_t mod_index = 0; mod_index < next_coeff_mod_count; mod_index++,
                 temp2_ptr += coeff_count)
             {
                 // (ct mod qk) mod qi
-                modulo_poly_coeffs(temp1.get(), coeff_count,
-                    next_coeff_modulus[mod_index], temp2_ptr);
-                // (-(ct mod qk)) mod qi
-                negate_poly_coeffmod(temp2_ptr, coeff_count,
+                modulo_poly_coeffs_63(temp1.get(), coeff_count,
                     next_coeff_modulus[mod_index], temp2_ptr);
                 // ((ct mod qi) - (ct mod qk)) mod qi
-                add_poly_poly_coeffmod(
+                sub_poly_poly_coeffmod(
                     encrypted_copy.data(poly_index) + mod_index * coeff_count, temp2_ptr,
                     coeff_count, next_coeff_modulus[mod_index], temp2_ptr);
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
@@ -2679,13 +2677,22 @@ namespace seal
                 }
                 else
                 {
-                    // Note: The consequence of removing this modulo reduction
-                    // is not clear. Keep it here to guarantee correctness.
-                    modulo_poly_coeffs(
-                        local_small_poly_0.get(),
-                        coeff_count,
-                        key_modulus[index],
-                        local_small_poly_1.get());
+                    // Reduce modulus only if needed
+                    if (key_modulus[i].value() > key_modulus[index].value())
+                    {
+                        set_uint_uint(
+                            local_small_poly_0.get(),
+                            coeff_count,
+                            local_small_poly_1.get());
+                    }
+                    else
+                    {
+                        modulo_poly_coeffs_63(
+                            local_small_poly_0.get(),
+                            coeff_count,
+                            key_modulus[index],
+                            local_small_poly_1.get());
+                    }
 
                     // Lazy reduction, output in [0, 4q).
                     ntt_negacyclic_harvey_lazy(
@@ -2694,9 +2701,6 @@ namespace seal
                     local_encrypted_ptr = local_small_poly_1.get();
                 }
                 // Two components in key
-                unsigned long long local_wide_product[2];
-                unsigned long long local_low_word;
-                unsigned char local_carry;
                 for (size_t k = 0; k < 2; k++)
                 {
                     // dyadic_product_coeffmod(
@@ -2714,6 +2718,10 @@ namespace seal
                     const uint64_t *key_ptr = key_vector[i].data(k);
                     for (size_t l = 0; l < coeff_count; l++)
                     {
+                        unsigned long long local_wide_product[2];
+                        unsigned long long local_low_word;
+                        unsigned char local_carry;
+
                         multiply_uint64(
                             local_encrypted_ptr[l],
                             key_ptr[(index * coeff_count) + l],
@@ -2740,7 +2748,7 @@ namespace seal
                 // Reduce (ct mod 4qk) mod qk
                 uint64_t *temp_poly_ptr = temp_poly[k].get() +
                     decomp_mod_count * coeff_count * 2;
-                for (size_t l = 0; l < coeff_count; l ++)
+                for (size_t l = 0; l < coeff_count; l++)
                 {
                     temp_poly_ptr[l] = barrett_reduce_128(
                         temp_poly_ptr + l * 2,
@@ -2756,14 +2764,14 @@ namespace seal
                 {
                     temp_poly_ptr = temp_poly[k].get() + j * coeff_count * 2;
                     // (ct mod 4qi) mod qi
-                    for (size_t l = 0; l < coeff_count; l ++)
+                    for (size_t l = 0; l < coeff_count; l++)
                     {
                         temp_poly_ptr[l] = barrett_reduce_128(
                             temp_poly_ptr + l * 2,
                             key_modulus[j]);
                     }
                     // (ct mod 4qk) mod qi
-                    modulo_poly_coeffs(
+                    modulo_poly_coeffs_63(
                         temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
                         coeff_count,
                         key_modulus[j],
@@ -2780,14 +2788,8 @@ namespace seal
                             temp_poly_ptr,
                             small_ntt_tables[j]);
                     }
-                    // (-(ct mod 4qk)) mod qi
-                    negate_poly_coeffmod(
-                        local_small_poly.get(),
-                        coeff_count,
-                        key_modulus[j],
-                        local_small_poly.get());
                     // ((ct mod qi) - (ct mod qk)) mod qi
-                    add_poly_poly_coeffmod(
+                    sub_poly_poly_coeffmod(
                         temp_poly_ptr,
                         local_small_poly.get(),
                         coeff_count,
