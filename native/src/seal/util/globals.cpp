@@ -41,46 +41,46 @@ namespace seal
 
                 /*
                 Polynomial modulus: 1x^4096 + 1
-                Modulus count: 2
-                Total bit count: 109 = 55 + 54
+                Modulus count: 3
+                Total bit count: 109 = 2 * 36 + 37
                 */
                 { 4096,{
-                    0x7fffffff380001,  0x3fffffff000001
+                    0xffffee001, 0xffffc4001, 0x1ffffe0001
                 } },
 
                 /*
                 Polynomial modulus: 1x^8192 + 1
-                Modulus count: 4
-                Total bit count: 218 = 2 * 55 + 2 * 54
+                Modulus count: 5
+                Total bit count: 218 = 2 * 43 + 3 * 44
                 */
                 { 8192,{
-                    0x7fffffff380001,  0x7ffffffef00001,
-                    0x3fffffff000001,  0x3ffffffef40001
+                    0x7fffffd8001, 0x7fffffc8001,
+                    0xfffffffc001, 0xffffff6c001, 0xfffffebc001
                 } },
 
                 /*
                 Polynomial modulus: 1x^16384 + 1
-                Modulus count: 8
-                Total bit count: 438 = 6 * 55 + 2 * 54
+                Modulus count: 9
+                Total bit count: 438 = 3 * 48 + 6 * 49
                 */
                 { 16384,{
-                    0x7fffffff380001,  0x7ffffffef00001,
-                    0x7ffffffeac0001,  0x7ffffffe700001,
-                    0x7ffffffe600001,  0x7ffffffe4c0001,
-                    0x3fffffff000001,  0x3ffffffef40001
+                    0xfffffffd8001, 0xfffffffa0001, 0xfffffff00001,
+                    0x1fffffff68001, 0x1fffffff50001, 0x1ffffffee8001,
+                    0x1ffffffea0001, 0x1ffffffe88001, 0x1ffffffe48001
                 } },
 
                 /*
                 Polynomial modulus: 1x^32768 + 1
-                Modulus count: 15
-                Total bit count: 881 = 11 * 59 + 4 * 58
+                Modulus count: 16
+                Total bit count: 881 = 15 * 55 + 56
                 */
                 { 32768,{
-                    0x7ffffffffcc0001,  0x7ffffffffb00001,  0x7ffffffff2c0001,
-                    0x7ffffffff240001,  0x7fffffffe900001,  0x7fffffffe3c0001,
-                    0x7fffffffe240001,  0x7fffffffddc0001,  0x7fffffffd740001,
-                    0x7fffffffd640001,  0x7fffffffd080001,  0x3ffffffff040001,
-                    0x3fffffffed00001,  0x3fffffffeb00001,  0x3fffffffea00001
+                    0x7fffffffe90001, 0x7fffffffbf0001, 0x7fffffffbd0001,
+                    0x7fffffffba0001, 0x7fffffffaa0001, 0x7fffffffa50001,
+                    0x7fffffff9f0001, 0x7fffffff7e0001, 0x7fffffff770001,
+                    0x7fffffff380001, 0x7fffffff330001, 0x7fffffff2d0001,
+                    0x7fffffff170001, 0x7fffffff150001, 0x7ffffffef00001,
+                    0xfffffffff70001
                 } }
             };
 
@@ -106,45 +106,43 @@ namespace seal
 
                 /*
                 Polynomial modulus: 1x^4096 + 1
-                Modulus count: 2
-                Total bit count: 75 = 38 + 37
+                Modulus count: 3
+                Total bit count: 75 = 3 * 25
                 */
                 { 4096,{
-                    0x3fffe80001,  0x1ffffc0001
+                    0x1ffc001, 0x1fce001, 0x1fc0001
                 } },
 
                 /*
                 Polynomial modulus: 1x^8192 + 1
-                Modulus count: 3
-                Total bit count: 152 = 2 * 51 + 50
+                Modulus count: 4
+                Total bit count: 152 = 4 * 38
                 */
                 { 8192,{
-                    0x7ffffff9c0001,  0x7ffffff900001,  0x3ffffffb80001
+                    0x3ffffac001, 0x3ffff54001,
+                    0x3ffff48001, 0x3ffff28001
                 } },
 
                 /*
                 Polynomial modulus: 1x^16384 + 1
-                Modulus count: 5
-                Total bit count: 300 = 5 * 60
+                Modulus count: 6
+                Total bit count: 300 = 6 * 50
                 */
                 { 16384,{
-                    0xffffffffffc0001,  0xfffffffff840001,
-                    0xfffffffff240001,  0xffffffffe7c0001,
-                    0xffffffffe740001
-
+                    0x3ffffffdf0001, 0x3ffffffd48001, 0x3ffffffd20001,
+                    0x3ffffffd18001, 0x3ffffffcd0001, 0x3ffffffc70001
                 } },
 
                 /*
                 Polynomial modulus: 1x^32768 + 1
-                Modulus count: 10
-                Total bit count: 600 = 10 * 60
+                Modulus count: 11
+                Total bit count: 600 = 5 * 54 + 6 * 55
                 */
                 { 32768,{
-                    0xffffffffffc0001, 0xfffffffff840001,
-                    0xfffffffff240001, 0xffffffffe7c0001,
-                    0xffffffffe740001, 0xffffffffe4c0001,
-                    0xffffffffe440001, 0xffffffffe400001,
-                    0xffffffffdbc0001, 0xffffffffd840001
+                    0x3fffffffd60001, 0x3fffffffca0001, 0x3fffffff6d0001,
+                    0x3fffffff5d0001, 0x3fffffff550001, 0x7fffffffe90001,
+                    0x7fffffffbf0001, 0x7fffffffbd0001, 0x7fffffffba0001,
+                    0x7fffffffaa0001, 0x7fffffffa50001
                 } }
             };
 
@@ -179,33 +177,32 @@ namespace seal
 
                 /*
                 Polynomial modulus: 1x^8192 + 1
-                Modulus count: 2
-                Total bit count: 118 = 2 * 59
+                Modulus count: 3
+                Total bit count: 118 = 2 * 39 + 40
                 */
                 { 8192,{
-                    0x7ffffffffcc0001,  0x7ffffffffb00001
+                    0x7ffffec001, 0x7ffffb0001, 0xfffffdc001
                 } },
 
                 /*
                 Polynomial modulus: 1x^16384 + 1
-                Modulus count: 4
-                Total bit count: 237 = 60 + 3 * 59
+                Modulus count: 5
+                Total bit count: 237 = 3 * 47 + 2 * 48
                 */
                 { 16384,{
-                    0xffffffffffc0001,  0x7ffffffffcc0001,
-                    0x7ffffffffb00001,  0x7ffffffff2c0001
+                    0x7ffffffc8001, 0x7ffffff00001, 0x7fffffe70001,
+                    0xfffffffd8001, 0xfffffffa0001
                 } },
 
                 /*
                 Polynomial modulus: 1x^32768 + 1
-                Modulus count: 8
-                Total bit count: 476 = 4 * 60 + 4 * 59
+                Modulus count: 9
+                Total bit count: 476 = 52 + 8 * 53
                 */
                 { 32768,{
-                    0xffffffffffc0001,  0xfffffffff840001,
-                    0xfffffffff240001,  0xffffffffe7c0001,
-                    0x7ffffffffcc0001,  0x7ffffffffb00001,
-                    0x7ffffffff2c0001,  0x7ffffffff240001
+                    0xffffffff00001, 0x1fffffffe30001, 0x1fffffffd80001,
+                    0x1fffffffd10001, 0x1fffffffc50001, 0x1fffffffbf0001,
+                    0x1fffffffb90001, 0x1fffffffb60001, 0x1fffffffa50001
                 } }
             };
 
