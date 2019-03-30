@@ -32,7 +32,7 @@ namespace seal
             keys_[i].reserve(keys_dim2);
             for (size_t j = 0; j < keys_dim2; j++)
             {
-                keys_[i].emplace_back(pool_);
+                keys_[i].emplace_back(PublicKey(pool_));
                 keys_[i][j] = assign.keys_[i][j];
             }
         }
@@ -115,7 +115,7 @@ namespace seal
                 keys_.back().reserve(safe_cast<size_t>(keys_dim2));
                 for (size_t j = 0; j < keys_dim2; j++)
                 {
-                    Ciphertext new_key(pool_);
+                    PublicKey new_key(pool_);
                     new_key.unsafe_load(stream);
                     keys_[index].emplace_back(move(new_key));
                 }

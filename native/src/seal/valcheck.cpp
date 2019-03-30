@@ -4,6 +4,13 @@
 #include "seal/valcheck.h"
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
+#include "seal/plaintext.h"
+#include "seal/ciphertext.h"
+#include "seal/secretkey.h"
+#include "seal/publickey.h"
+#include "seal/kswitchkeys.h"
+#include "seal/relinkeys.h"
+#include "seal/galoiskeys.h"
 
 using namespace std;
 using namespace seal::util;
@@ -12,7 +19,7 @@ namespace seal
 {
     bool is_metadata_valid_for(
         const Plaintext &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -61,7 +68,7 @@ namespace seal
 
     bool is_metadata_valid_for(
         const Ciphertext &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -101,7 +108,7 @@ namespace seal
 
     bool is_metadata_valid_for(
         const SecretKey &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -129,7 +136,7 @@ namespace seal
 
     bool is_metadata_valid_for(
         const PublicKey &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -164,7 +171,7 @@ namespace seal
 
     bool is_metadata_valid_for(
         const KSwitchKeys &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -194,9 +201,25 @@ namespace seal
         return true;
     }
 
+    bool is_metadata_valid_for(
+        const RelinKeys &in,
+        shared_ptr<const SEALContext> context)
+    {
+        return is_metadata_valid_for(
+            static_cast<const KSwitchKeys &>(in), move(context));
+    }
+
+    bool is_metadata_valid_for(
+        const GaloisKeys &in,
+        shared_ptr<const SEALContext> context)
+    {
+        return is_metadata_valid_for(
+            static_cast<const KSwitchKeys &>(in), move(context));
+    }
+
     bool is_valid_for(
         const Plaintext &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Check metadata
         if (!is_metadata_valid_for(in, context))
@@ -246,7 +269,7 @@ namespace seal
 
     bool is_valid_for(
         const Ciphertext &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Check metadata
         if (!is_metadata_valid_for(in, context))
@@ -283,7 +306,7 @@ namespace seal
 
     bool is_valid_for(
         const SecretKey &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Check metadata
         if (!is_metadata_valid_for(in, context))
@@ -316,7 +339,7 @@ namespace seal
 
     bool is_valid_for(
         const PublicKey &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Check metadata
         if (!is_metadata_valid_for(in, context))
@@ -347,11 +370,13 @@ namespace seal
                 }
             }
         }
+
+        return true;
     }
 
     bool is_valid_for(
         const KSwitchKeys &in,
-        shared_ptr<const SEALContext> context) noexcept
+        shared_ptr<const SEALContext> context)
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -379,5 +404,19 @@ namespace seal
         }
 
         return true;
+    }
+
+    bool is_valid_for(
+        const RelinKeys &in,
+        shared_ptr<const SEALContext> context)
+    {
+        return is_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
+    }
+
+    bool is_valid_for(
+        const GaloisKeys &in,
+        shared_ptr<const SEALContext> context)
+    {
+        return is_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
     }
 }

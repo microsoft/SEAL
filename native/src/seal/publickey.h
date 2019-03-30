@@ -27,6 +27,7 @@ namespace seal
     class PublicKey
     {
         friend class KeyGenerator;
+        friend class KSwitchKeys;
 
     public:
         /**
@@ -151,6 +152,17 @@ namespace seal
         }
 
     private:
+        /**
+        Creates an empty public key.
+
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        PublicKey(MemoryPoolHandle pool) :
+            pk_(std::move(pool))
+        {
+        }
+
         Ciphertext pk_;
     };
 }

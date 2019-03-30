@@ -85,7 +85,7 @@ namespace seal
         auto &prev_context_data = *prev_context_data_ptr;
         if (prev_context_data_ptr)
         {
-            auto &prev_parms_id = prev_context_data.parms().parms_id();
+            auto &prev_parms_id = prev_context_data.parms_id();
             auto &base_converter = prev_context_data.base_converter();
 
             // Zero encryption without modulus switching
@@ -138,7 +138,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
         // Verify that plain is valid.
-        if (!plain.is_valid_for(context_))
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -177,7 +177,7 @@ namespace seal
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
 
-            encrypt_zero(parms.parms_id(), destination);
+            encrypt_zero(context_data.parms_id(), destination);
 
             // The plaintext gets added into the c_0 term of ciphertext (c_0,c_1).
             for (size_t i = 0; i < coeff_mod_count; i++)

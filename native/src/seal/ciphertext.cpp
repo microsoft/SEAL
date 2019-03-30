@@ -53,7 +53,7 @@ namespace seal
 
         // Need to set parms_id first
         auto &parms = context_data_ptr->parms();
-        parms_id_ = parms.parms_id();
+        parms_id_ = context_data_ptr->parms_id();
 
         reserve_internal(size_capacity, parms.poly_modulus_degree(),
             safe_cast<size_type>(parms.coeff_modulus().size()));
@@ -104,7 +104,7 @@ namespace seal
 
         // Need to set parms_id first
         auto &parms = context_data_ptr->parms();
-        parms_id_ = parms.parms_id();
+        parms_id_ = context_data_ptr->parms_id();
 
         resize_internal(size, parms.poly_modulus_degree(),
             safe_cast<size_type>(parms.coeff_modulus().size()));

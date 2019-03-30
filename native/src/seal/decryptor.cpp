@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include "seal/decryptor.h"
+#include "seal/valcheck.h"
 #include "seal/util/common.h"
 #include "seal/util/uintcore.h"
 #include "seal/util/uintarith.h"
@@ -55,7 +56,7 @@ namespace seal
     void Decryptor::decrypt(const Ciphertext &encrypted, Plaintext &destination)
     {
         // Verify that encrypted is valid.
-        if (!encrypted.is_valid_for(context_))
+        if (!is_valid_for(encrypted, context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -441,7 +442,7 @@ namespace seal
     int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
     {
         // Verify that encrypted is valid.
-        if (!encrypted.is_valid_for(context_))
+        if (!is_valid_for(encrypted, context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }

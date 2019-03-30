@@ -18,6 +18,7 @@
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/common.h"
 #include "seal/kswitchkeys.h"
+#include "seal/valcheck.h"
 
 namespace seal
 {
@@ -429,7 +430,7 @@ namespace seal
         inline void mod_switch_to_next_inplace(Plaintext &plain)
         {
             // Verify parameters.
-            if (!plain.is_valid_for(context_))
+            if (!is_valid_for(plain, context_))
             {
                 throw std::invalid_argument("plain is not valid for encryption parameters");
             }

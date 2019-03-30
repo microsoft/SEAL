@@ -170,7 +170,7 @@ namespace seal
         */
         void generate_one_kswitch_key(
             const uint64_t *new_key,
-            std::vector<Ciphertext> &destination);
+            std::vector<PublicKey> &destination);
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);

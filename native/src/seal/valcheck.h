@@ -42,7 +42,7 @@ namespace seal
     */
     bool is_metadata_valid_for(
         const Ciphertext &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given secret key is valid for a given SEALContext. If the
@@ -56,7 +56,7 @@ namespace seal
     */
     bool is_metadata_valid_for(
         const SecretKey &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given public key is valid for a given SEALContext. If the
@@ -70,7 +70,7 @@ namespace seal
     */
     bool is_metadata_valid_for(
         const PublicKey &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given KSwitchKeys is valid for a given SEALContext. If the
@@ -84,7 +84,7 @@ namespace seal
     */
     bool is_metadata_valid_for(
         const KSwitchKeys &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given RelinKeys is valid for a given SEALContext. If the
@@ -96,13 +96,9 @@ namespace seal
     @param[in] in The RelinKeys to check
     @param[in] context The SEALContext
     */
-    inline bool is_metadata_valid_for(
+    bool is_metadata_valid_for(
         const RelinKeys &in,
-        std::shared_ptr<const SEALContext> context) noexcept
-    {
-        return is_metadata_valid_for(
-            static_cast<const KSwitchKeys &>(in), std::move(context));
-    }
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given GaloisKeys is valid for a given SEALContext. If the
@@ -114,13 +110,9 @@ namespace seal
     @param[in] in The RelinKeys to check
     @param[in] context The SEALContext
     */
-    inline bool is_metadata_valid_for(
+    bool is_metadata_valid_for(
         const GaloisKeys &in,
-        std::shared_ptr<const SEALContext> context) noexcept
-    {
-        return is_metadata_valid_for(
-            static_cast<const KSwitchKeys &>(in), std::move(context));
-    }
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given plaintext is valid for a given SEALContext. If the
@@ -133,7 +125,7 @@ namespace seal
     */
     bool is_valid_for(
         const Plaintext &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given ciphertext is valid for a given SEALContext. If the
@@ -146,7 +138,7 @@ namespace seal
     */
     bool is_valid_for(
         const Ciphertext &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given secret key is valid for a given SEALContext. If the
@@ -159,7 +151,7 @@ namespace seal
     */
     bool is_valid_for(
         const SecretKey &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given public key is valid for a given SEALContext. If the
@@ -172,7 +164,7 @@ namespace seal
     */
     bool is_valid_for(
         const PublicKey &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given KSwitchKeys is valid for a given SEALContext. If
@@ -185,7 +177,7 @@ namespace seal
     */
     bool is_valid_for(
         const KSwitchKeys &in,
-        std::shared_ptr<const SEALContext> context) noexcept;
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given RelinKeys is valid for a given SEALContext. If the
@@ -198,10 +190,7 @@ namespace seal
     */
     bool is_valid_for(
         const RelinKeys &in,
-        std::shared_ptr<const SEALContext> context) noexcept
-    {
-        return is_valid_for(static_cast<const KSwitchKeys &>(in), std::move(context));
-    }
+        std::shared_ptr<const SEALContext> context);
 
     /**
     Check whether the given GaloisKeys is valid for a given SEALContext. If the
@@ -214,8 +203,5 @@ namespace seal
     */
     bool is_valid_for(
         const GaloisKeys &in,
-        std::shared_ptr<const SEALContext> context) noexcept
-    {
-        return is_valid_for(static_cast<const KSwitchKeys &>(in), std::move(context));
-    }
+        std::shared_ptr<const SEALContext> context);
 }

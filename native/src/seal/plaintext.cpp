@@ -203,53 +203,6 @@ namespace seal
         return *this;
     }
 
-    bool Plaintext::is_valid_for(shared_ptr<const SEALContext> context) const
-    {
-        // Check metadata
-        if (!is_metadata_valid_for(context))
-        {
-            return false;
-        }
-
-        // Check the data
-        if (is_ntt_form())
-        {
-            auto context_data_ptr = context->get_context_data(parms_id_);
-            auto &parms = context_data_ptr->parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            size_t coeff_mod_count = coeff_modulus.size();
-            size_t poly_modulus_degree = parms.poly_modulus_degree();
-
-            const pt_coeff_type *ptr = data();
-            for (size_t j = 0; j < coeff_mod_count; j++)
-            {
-                uint64_t modulus = coeff_modulus[j].value();
-                for (size_t k = 0; k < poly_modulus_degree; k++, ptr++)
-                {
-                    if (*ptr >= modulus)
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-        else
-        {
-            auto &parms = context->context_data_first()->parms();
-            uint64_t modulus = parms.plain_modulus().value();
-            const pt_coeff_type *ptr = data();
-            for (size_t k = 0; k < data_.size(); k++, ptr++)
-            {
-                if (*ptr >= modulus)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
     void Plaintext::save(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
