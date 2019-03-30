@@ -173,6 +173,15 @@ namespace seal
             }
 
             /**
+            Returns the parms_id of the current parameters. This function is intended
+            mainly for internal use.
+            */
+            inline auto &parms_id() const noexcept
+            {
+                return parms_.parms_id();
+            }
+
+            /**
             Returns a copy of EncryptionParameterQualifiers corresponding to the
             current encryption parameters. Note that to change the qualifiers it is
             necessary to create a new instance of SEALContext once appropriate changes

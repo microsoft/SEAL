@@ -15,6 +15,7 @@
 #include "seal/encryptionparams.h"
 #include "seal/intarray.h"
 #include "seal/context.h"
+#include "seal/valcheck.h"
 
 namespace seal
 {
@@ -518,27 +519,6 @@ namespace seal
         }
 
         /**
-        Check whether the current Plaintext is valid for a given SEALContext. If
-        the given SEALContext is not set, the encryption parameters are invalid,
-        or the Plaintext data does not match the SEALContext, this function returns
-        false. Otherwise, returns true.
-
-        @param[in] context The SEALContext
-        */
-        bool is_valid_for(std::shared_ptr<const SEALContext> context) const;
-
-        /**
-        Check whether the current Plaintext is valid for a given SEALContext. If
-        the given SEALContext is not set, the encryption parameters are invalid,
-        or the Plaintext data does not match the SEALContext, this function returns
-        false. Otherwise, returns true. This function only checks the metadata
-        and not the plaintext data itself.
-
-        @param[in] context The SEALContext
-        */
-        bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const;
-
-        /**
         Saves the plaintext to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
@@ -574,7 +554,7 @@ namespace seal
             std::istream &stream)
         {
             unsafe_load(stream);
-            if (!is_valid_for(std::move(context)))
+            if (!is_valid_for(*this, std::move(context)))
             {
                 throw std::invalid_argument("Plaintext data is invalid");
             }

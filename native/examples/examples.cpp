@@ -1140,22 +1140,18 @@ void example_bfv_basics_iv()
     parms.set_plain_modulus(1 << 20);
 
     /*
-    In Microsoft SEAL a particular set of encryption parameters (excluding the random
-    number generator) is identified uniquely by a SHA-3 hash of the parameters.
-    This hash is called the `parms_id' and can be easily accessed and printed
-    at any time. The hash will change as soon as any of the relevant parameters
-    is changed.
-    */
-    cout << "Current parms_id: " << parms.parms_id() << endl;
-    cout << "Changing plain_modulus ..." << endl;
-    parms.set_plain_modulus((1 << 20) + 1);
-    cout << "Current parms_id: " << parms.parms_id() << endl << endl;
-
-    /*
     Create the context.
     */
     auto context = SEALContext::Create(parms);
     print_parameters(context);
+
+    /*
+    In Microsoft SEAL a particular set of encryption parameters (excluding the
+    random number generator) is identified uniquely by a SHA-3 hash of the
+    parameters. This hash is called the `parms_id' and can be easily accessed
+    and printed at any time. The hash will change as soon as any of the relevant
+    parameters is changed.
+    */
 
     /*
     All keys and ciphertext, and in the CKKS also plaintexts, carry the parms_id
@@ -1206,7 +1202,7 @@ void example_bfv_basics_iv()
         context_data = context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
-        cout << "parms_id: " << context_data->parms().parms_id() << endl;
+        cout << "parms_id: " << context_data->parms_id() << endl;
         cout << "coeff_modulus primes: ";
         cout << hex;
         for(const auto &prime : context_data->parms().coeff_modulus())
@@ -1325,7 +1321,7 @@ void example_bfv_basics_iv()
         context_data = context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
-        cout << "parms_id: " << context_data->parms().parms_id() << endl;
+        cout << "parms_id: " << context_data->parms_id() << endl;
         cout << "coeff_modulus primes: ";
         cout << hex;
         for (const auto &prime : context_data->parms().coeff_modulus())

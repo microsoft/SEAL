@@ -250,48 +250,6 @@ namespace seal
         return true;
     }
 
-    bool Plaintext::is_metadata_valid_for(shared_ptr<const SEALContext> context) const
-    {
-        // Verify parameters
-        if (!context || !context->parameters_set())
-        {
-            return false;
-        }
-
-        if (is_ntt_form())
-        {
-            auto context_data_ptr = context->get_context_data(parms_id_);
-            if (!context_data_ptr)
-            {
-                return false;
-            }
-
-            auto &parms = context_data_ptr->parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            size_t poly_modulus_degree = parms.poly_modulus_degree();
-            if (mul_safe(coeff_modulus.size(), poly_modulus_degree) != data_.size())
-            {
-                return false;
-            }
-        }
-        else
-        {
-            auto &parms = context->context_data_first()->parms();
-            if (parms.scheme() != scheme_type::BFV)
-            {
-                return false;
-            }
-
-            size_t poly_modulus_degree = parms.poly_modulus_degree();
-            if (data_.size() > poly_modulus_degree)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     void Plaintext::save(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();

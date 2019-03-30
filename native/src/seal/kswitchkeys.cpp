@@ -40,57 +40,6 @@ namespace seal
         return *this;
     }
 
-    bool KSwitchKeys::is_valid_for(shared_ptr<const SEALContext> context) const noexcept
-    {
-        // Check metadata
-        if (!is_metadata_valid_for(context))
-        {
-            return false;
-        }
-
-        // Check the data
-        for (auto &a : keys_)
-        {
-            for (auto &b : a)
-            {
-                if (!b.is_valid_for(context) || !b.is_ntt_form() ||
-                    b.parms_id() != parms_id_)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    bool KSwitchKeys::is_metadata_valid_for(shared_ptr<const SEALContext> context) const noexcept
-    {
-        // Verify parameters
-        if (!context || !context->parameters_set())
-        {
-            return false;
-        }
-        if (parms_id_ != context->key_parms_id())
-        {
-            return false;
-        }
-
-        for (auto &a : keys_)
-        {
-            for (auto &b : a)
-            {
-                if (!b.is_metadata_valid_for(context) || !b.is_ntt_form() ||
-                    b.parms_id() != parms_id_)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
     void KSwitchKeys::save(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();

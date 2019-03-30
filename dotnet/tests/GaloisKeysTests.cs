@@ -20,7 +20,6 @@ namespace SEALNetTest
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(0ul, keys.Size);
-            Assert.AreEqual(0, keys.DecompositionBitCount);
         }
 
         [TestMethod]
@@ -29,16 +28,14 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys(decompositionBitCount: 30);
+            GaloisKeys keys = keygen.GaloisKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(30, keys.DecompositionBitCount);
             Assert.AreEqual(22ul, keys.Size);
 
             GaloisKeys copy = new GaloisKeys(keys);
 
             Assert.IsNotNull(copy);
-            Assert.AreEqual(30, copy.DecompositionBitCount);
             Assert.AreEqual(22ul, copy.Size);
         }
 
@@ -48,11 +45,10 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             KeyGenerator keyGen = new KeyGenerator(context);
 
-            GaloisKeys keys = keyGen.GaloisKeys(decompositionBitCount: 30);
+            GaloisKeys keys = keyGen.GaloisKeys();
             GaloisKeys other = new GaloisKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(30, keys.DecompositionBitCount);
             Assert.AreEqual(22ul, keys.Size);
 
             using (MemoryStream ms = new MemoryStream())
@@ -64,7 +60,6 @@ namespace SEALNetTest
                 other.Load(context, ms);
             }
 
-            Assert.AreEqual(30, other.DecompositionBitCount);
             Assert.AreEqual(22ul, other.Size);
             Assert.IsTrue(other.IsMetadataValidFor(context));
 
@@ -103,22 +98,19 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys(decompositionBitCount: 30);
+            GaloisKeys keys = keygen.GaloisKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(30, keys.DecompositionBitCount);
             Assert.AreEqual(22ul, keys.Size);
 
             GaloisKeys keys2 = new GaloisKeys();
 
             Assert.IsNotNull(keys2);
-            Assert.AreEqual(0, keys2.DecompositionBitCount);
             Assert.AreEqual(0ul, keys2.Size);
 
             keys2.Set(keys);
 
             Assert.AreNotSame(keys, keys2);
-            Assert.AreEqual(30, keys2.DecompositionBitCount);
             Assert.AreEqual(22ul, keys2.Size);
         }
 
@@ -128,11 +120,10 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys(decompositionBitCount: 30);
+            GaloisKeys keys = keygen.GaloisKeys();
             MemoryPoolHandle handle = keys.Pool;
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(30, keys.DecompositionBitCount);
             Assert.AreEqual(22ul, keys.Size);
 
             Assert.IsFalse(keys.HasKey(galoisElt: 1));
@@ -157,10 +148,9 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys(decompositionBitCount: 15, galoisElts: new ulong[] { 1, 3 });
+            GaloisKeys keys = keygen.GaloisKeys(galoisElts: new ulong[] { 1, 3 });
             Assert.IsNotNull(keys);
 
-            Assert.AreEqual(15, keys.DecompositionBitCount);
             Assert.AreEqual(2ul, keys.Size);
 
             Assert.IsTrue(keys.HasKey(1));
@@ -179,10 +169,9 @@ namespace SEALNetTest
             SEALContext context = SEALContext.Create(parms);
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys(decompositionBitCount: 15, steps: new int[] { 1, 2, 3 });
+            GaloisKeys keys = keygen.GaloisKeys(steps: new int[] { 1, 2, 3 });
             Assert.IsNotNull(keys);
 
-            Assert.AreEqual(15, keys.DecompositionBitCount);
             Assert.AreEqual(3ul, keys.Size);
 
             Assert.IsFalse(keys.HasKey(1));

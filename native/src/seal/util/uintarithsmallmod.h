@@ -197,7 +197,7 @@ namespace seal
             }
             if (input >> 63)
             {
-                throw std::invalid_argument(input);
+                throw std::invalid_argument("input");
             }
 #endif
             // Reduces input using base 2^64 Barrett reduction

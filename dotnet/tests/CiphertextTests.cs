@@ -247,7 +247,7 @@ namespace SEALNetTest
             };
             SEALContext context = SEALContext.Create(parms);
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeys(decompositionBitCount: 4);
+            GaloisKeys galoisKeys = keygen.GaloisKeys();
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Evaluator evaluator = new Evaluator(context);
             CKKSEncoder encoder = new CKKSEncoder(context);

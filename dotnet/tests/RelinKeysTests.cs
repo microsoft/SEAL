@@ -19,7 +19,6 @@ namespace SEALNetTest
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(0ul, keys.Size);
-            Assert.AreEqual(0, keys.DecompositionBitCount);
         }
 
         [TestMethod]
@@ -28,23 +27,20 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            RelinKeys keys = keygen.RelinKeys(decompositionBitCount: 30);
+            RelinKeys keys = keygen.RelinKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(30, keys.DecompositionBitCount);
             Assert.AreEqual(1ul, keys.Size);
 
             RelinKeys copy = new RelinKeys(keys);
 
             Assert.IsNotNull(copy);
-            Assert.AreEqual(30, copy.DecompositionBitCount);
             Assert.AreEqual(1ul, copy.Size);
 
             RelinKeys copy2 = new RelinKeys();
 
             copy2.Set(keys);
             Assert.IsNotNull(copy2);
-            Assert.AreEqual(30, copy2.DecompositionBitCount);
             Assert.AreEqual(1ul, copy2.Size);
         }
 
@@ -54,16 +50,14 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            RelinKeys keys = keygen.RelinKeys(decompositionBitCount: 30, count: 2);
+            RelinKeys keys = keygen.RelinKeys(count: 2);
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(30, keys.DecompositionBitCount);
             Assert.AreEqual(2ul, keys.Size);
 
             RelinKeys other = new RelinKeys();
             MemoryPoolHandle handle = other.Pool;
 
-            Assert.AreEqual(0, other.DecompositionBitCount);
             Assert.AreEqual(0ul, other.Size);
             ulong alloced = handle.AllocByteCount;
 
@@ -76,7 +70,6 @@ namespace SEALNetTest
                 other.Load(context, ms);
             }
 
-            Assert.AreEqual(30, other.DecompositionBitCount);
             Assert.AreEqual(2ul, other.Size);
             Assert.IsTrue(other.IsMetadataValidFor(context));
             Assert.IsTrue(handle.AllocByteCount > 0ul);
@@ -115,7 +108,7 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.Context;
             KeyGenerator keygen = new KeyGenerator(context);
-            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: 60, count: 3);
+            RelinKeys relinKeys = keygen.RelinKeys(count: 3);
 
             Assert.IsFalse(relinKeys.HasKey(0));
             Assert.IsFalse(relinKeys.HasKey(1));

@@ -26,7 +26,3 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_SmallMods50Bit(uint64_t index, void **s
 SEALNETNATIVE HRESULT SEALCALL DefParams_SmallMods40Bit(uint64_t index, void **small_modulus);
 
 SEALNETNATIVE HRESULT SEALCALL DefParams_SmallMods30Bit(uint64_t index, void **small_modulus);
-
-SEALNETNATIVE HRESULT SEALCALL DefParams_DBCMax(int *dbc_max_value);
-
-SEALNETNATIVE HRESULT SEALCALL DefParams_DBCMin(int *dbc_min_value);

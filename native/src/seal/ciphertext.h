@@ -12,17 +12,18 @@
 #include "seal/context.h"
 #include "seal/memorymanager.h"
 #include "seal/intarray.h"
+#include "seal/valcheck.h"
 
 namespace seal
 {
     /**
     Class to store a ciphertext element. The data for a ciphertext consists
-    of two or more polynomials, which are in Microsoft SEAL stored in a CRT form with
-    respect to the factors of the coefficient modulus. This data itself is
-    not meant to be modified directly by the user, but is instead operated
-    on by functions in the Evaluator class. The size of the backing array of
-    a ciphertext depends on the encryption parameters and the size of the
-    ciphertext (at least 2). If the degree of the poly_modulus encryption
+    of two or more polynomials, which are in Microsoft SEAL stored in a CRT
+    form with respect to the factors of the coefficient modulus. This data
+    itself is not meant to be modified directly by the user, but is instead
+    operated on by functions in the Evaluator class. The size of the backing
+    array of a ciphertext depends on the encryption parameters and the size
+    of theciphertext (at least 2). If the degree of the poly_modulus encryption
     parameter is N, and the number of primes in the coeff_modulus encryption
     parameter is K, then the ciphertext backing array requires precisely
     8*N*K*size bytes of memory. A ciphertext also carries with it the
@@ -502,27 +503,6 @@ namespace seal
         }
 
         /**
-        Check whether the current ciphertext is valid for a given SEALContext.
-        If the given SEALContext is not set, the encryption parameters are invalid,
-        or the ciphertext data does not match the SEALContext, this function
-        returns false. Otherwise, returns true.
-
-        @param[in] context The SEALContext
-        */
-        bool is_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
-
-        /**
-        Check whether the current ciphertext is valid for a given SEALContext.
-        If the given SEALContext is not set, the encryption parameters are invalid,
-        or the ciphertext data does not match the SEALContext, this function
-        returns false. Otherwise, returns true. This function only checks the metadata
-        and not the ciphertext data itself.
-
-        @param[in] context The SEALContext
-        */
-        bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
-
-        /**
         Check whether the current ciphertext is transparent, i.e. does not require
         a secret key to decrypt. In typical security models such transparent
         ciphertexts would not be considered to be valid. Starting from the second
@@ -572,7 +552,7 @@ namespace seal
             std::istream &stream)
         {
             unsafe_load(stream);
-            if (!is_valid_for(std::move(context)))
+            if (!is_valid_for(*this, std::move(context)))
             {
                 throw std::invalid_argument("ciphertext data is invalid");
             }

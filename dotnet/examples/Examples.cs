@@ -869,23 +869,18 @@ namespace SEALNetExamples
             };
 
             /*
-            In Microsoft SEAL a particular set of encryption parameters (excluding the random
-            number generator) is identified uniquely by a SHA-3 hash of the parameters.
-            This hash is called the `ParmsId' and can be easily accessed and printed
-            at any time. The hash will change as soon as any of the relevant parameters
-            is changed.
-            */
-            Console.WriteLine($"Current ParmsId: {parms.ParmsId}");
-            Console.WriteLine("Changing PlainModulus...");
-            parms.SetPlainModulus((1 << 20) + 1);
-            Console.WriteLine($"Current ParmsId: {parms.ParmsId}");
-            Console.WriteLine();
-
-            /*
             Create the context.
             */
             SEALContext context = SEALContext.Create(parms);
             Utilities.PrintParameters(context);
+
+            /*
+            In Microsoft SEAL a particular set of encryption parameters (excluding the
+            random number generator) is identified uniquely by a SHA-3 hash of the
+            parameters. This hash is called the `ParmsId' and can be easily accessed and
+            printed at any time. The hash will change as soon as any of the relevant
+            parameters is changed.
+            */
 
             /*
             All keys and ciphertext, and in the CKKS also plaintexts, carry the ParmsId

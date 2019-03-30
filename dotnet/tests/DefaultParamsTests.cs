@@ -145,15 +145,5 @@ namespace SEALNetTest
 
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => DefaultParams.SmallMods30Bit(64));
         }
-
-        [TestMethod]
-        public void DBCMaxMinTest()
-        {
-            int dbcMax = DefaultParams.DBCmax;
-            int dbcMin = DefaultParams.DBCmin;
-
-            Assert.AreEqual(60, dbcMax);
-            Assert.AreEqual(1, dbcMin);
-        }
     }
 }

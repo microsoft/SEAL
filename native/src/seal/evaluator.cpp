@@ -2589,9 +2589,17 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
+        if (!target)
+        {
+            throw invalid_argument("target");
+        }
         if (kswitch_keys.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("parameter mismatch");
+        }
+        if (kswitch_keys_index >= kswitch_keys.data().size())
+        {
+            throw out_of_range("kswitch_keys_index");
         }
         if (!pool)
         {

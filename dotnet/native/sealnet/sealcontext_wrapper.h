@@ -23,6 +23,8 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_ParmsIdLast(void *thisptr, uint64_t *
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_ParametersSet(void *thisptr, bool *params_set);
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataFirst(void *thisptr, void **first_context_data);
+SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataFirst(void *thisptr, void **context_data);
+
+SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataLast(void *thisptr, void **context_data);
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void **context_data);

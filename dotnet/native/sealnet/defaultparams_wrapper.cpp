@@ -130,19 +130,3 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_SmallMods30Bit(uint64_t index, void **s
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
 }
-
-SEALNETNATIVE HRESULT SEALCALL DefParams_DBCMax(int *dbc_max_value)
-{
-    IfNullRet(dbc_max_value, E_POINTER);
-
-    *dbc_max_value = DefaultParams::dbc_max();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL DefParams_DBCMin(int *dbc_min_value)
-{
-    IfNullRet(dbc_min_value, E_POINTER);
-
-    *dbc_min_value = DefaultParams::dbc_min();
-    return S_OK;
-}

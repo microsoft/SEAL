@@ -53,14 +53,12 @@ namespace seal
     multiplication of ciphertexts of size K+1 and L+1 outputs a ciphertext of size
     K+L+1, and the computational cost of multiplication is proportional to K*L.
     Plain multiplication and addition operations of any type do not change the
-    size. The performance of relinearization is determined by the decomposition
-    bit count that the relinearization keys were generated with.
+    size. Relinearization requires relinearization keys to have been generated.
 
     @par Rotations
     When batching is enabled, we provide operations for rotating the plaintext matrix
     rows cyclically left or right, and for rotating the columns (swapping the rows).
-    Rotations require Galois keys to have been generated, and their performance
-    depends on the decomposition bit count that the Galois keys were generated with.
+    Rotations require Galois keys to have been generated.
 
     @par Other Operations
     We also provide operations for transforming ciphertexts to NTT form and back,
@@ -1463,22 +1461,6 @@ namespace seal
             }
         }
 
-        /**
-        Decompose target polynomial in an RNS friendly way.
-        Compute inner product of decomposed polynomial and a key switching key.
-        The 1st polynomial of results is added to the 1st of encrypted.
-        The 2nd polynomial of results is added to the 1st of encrypted.
-        For relinearization, target is usually the last polynomial of encrypted.
-        For galois rotation, target is a intermediate result.
-
-        @param[in] encrypted A ciphertext with at least size two.
-        @param[in] target A polynomial in data RNS representation.
-        @param[in] kswitch_keys Key switching keys in NTT form.
-        @param[in] key_index Indicates the correct key switching key to use.
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool.
-        @throws std::logic_error if scheme is not scheme_type::CKKS
-        @throws std::invalid_argument
-        */
         void switch_key_inplace(Ciphertext &encrypted,
             std::uint64_t *target,
             const KSwitchKeys &kswitch_keys,

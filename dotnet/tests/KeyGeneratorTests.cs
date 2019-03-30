@@ -104,18 +104,12 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey, keygen.PublicKey));
             Assert.ThrowsException<ArgumentException>(() => keygen = new KeyGenerator(context, secret, keygen.PublicKey));
 
-            Assert.ThrowsException<ArgumentException>(() => keygen.RelinKeys(0, 1));
-            Assert.ThrowsException<ArgumentException>(() => keygen.RelinKeys(DefaultParams.DBCmax + 1, 1));
+            Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(elts_null));
+            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(elts));
 
-            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(0));
-            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(DefaultParams.DBCmax + 1));
-
-            Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(30, elts_null));
-            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(0, elts));
-
-            Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(30, steps_null));
-            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(0, steps));
-            Assert.ThrowsException<InvalidOperationException>(() => keygen.GaloisKeys(30, new List<int> { 1 }));
+            Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(steps_null));
+            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(steps));
+            Assert.ThrowsException<InvalidOperationException>(() => keygen.GaloisKeys(new List<int> { 1 }));
         }
     }
 }

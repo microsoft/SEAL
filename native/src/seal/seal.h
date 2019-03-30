@@ -24,3 +24,4 @@
 #include "seal/relinkeys.h"
 #include "seal/secretkey.h"
 #include "seal/smallmodulus.h"
+#include "seal/valcheck.h"

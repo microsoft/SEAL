@@ -28,13 +28,11 @@ namespace SEALTest
 
             RelinKeys keys;
             RelinKeys test_keys;
-            keys = keygen.relin_keys(1, 1);
-            ASSERT_EQ(keys.decomposition_bit_count(), 1);
+            keys = keygen.relin_keys(1);
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
             for (size_t j = 0; j < test_keys.size(); j++)
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
@@ -45,13 +43,11 @@ namespace SEALTest
                 }
             }
 
-            keys = keygen.relin_keys(2, 1);
-            ASSERT_EQ(keys.decomposition_bit_count(), 2);
+            keys = keygen.relin_keys(2);
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
             for (size_t j = 0; j < test_keys.size(); j++)
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
@@ -62,30 +58,11 @@ namespace SEALTest
                 }
             }
 
-            keys = keygen.relin_keys(59, 2);
-            ASSERT_EQ(keys.decomposition_bit_count(), 59);
+            keys = keygen.relin_keys(5);
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
-                {
-                    ASSERT_EQ(keys.key(j + 2)[i].size(), test_keys.key(j + 2)[i].size());
-                    ASSERT_EQ(keys.key(j + 2)[i].uint64_count(), test_keys.key(j + 2)[i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data(), test_keys.key(j + 2)[i].data(), keys.key(j + 2)[i].uint64_count()));
-                }
-            }
-
-            keys = keygen.relin_keys(60, 5);
-            ASSERT_EQ(keys.decomposition_bit_count(), 60);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
             for (size_t j = 0; j < test_keys.size(); j++)
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
@@ -107,13 +84,11 @@ namespace SEALTest
 
             RelinKeys keys;
             RelinKeys test_keys;
-            keys = keygen.relin_keys(8, 1);
-            ASSERT_EQ(keys.decomposition_bit_count(), 8);
+            keys = keygen.relin_keys(1);
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
             for (size_t j = 0; j < test_keys.size(); j++)
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
@@ -124,13 +99,11 @@ namespace SEALTest
                 }
             }
 
-            keys = keygen.relin_keys(8, 2);
-            ASSERT_EQ(keys.decomposition_bit_count(), 8);
+            keys = keygen.relin_keys(2);
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
             for (size_t j = 0; j < test_keys.size(); j++)
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
@@ -141,30 +114,11 @@ namespace SEALTest
                 }
             }
 
-            keys = keygen.relin_keys(59, 2);
-            ASSERT_EQ(keys.decomposition_bit_count(), 59);
+            keys = keygen.relin_keys(5);
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
-                {
-                    ASSERT_EQ(keys.key(j + 2)[i].size(), test_keys.key(j + 2)[i].size());
-                    ASSERT_EQ(keys.key(j + 2)[i].uint64_count(), test_keys.key(j + 2)[i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data(), test_keys.key(j + 2)[i].data(), keys.key(j + 2)[i].uint64_count()));
-                }
-            }
-
-            keys = keygen.relin_keys(60, 5);
-            ASSERT_EQ(keys.decomposition_bit_count(), 60);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
             for (size_t j = 0; j < test_keys.size(); j++)
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)

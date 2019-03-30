@@ -23,10 +23,6 @@ SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Set(void *thisptr, void *assign);
 
 SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Size(void *thisptr, uint64_t *size);
 
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_DBC(void *thisptr, int *dbc);
-
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_SetDBC(void *thisptr, int dbc);
-
 SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetKeyCount(void *thisptr, uint64_t *key_count);
 
 SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **ciphers);

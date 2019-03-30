@@ -307,7 +307,7 @@ namespace seal
         }
 
         // Set destination parameters as in encrypted
-        //destination.parms_id() = last_parms_id;
+        //destination.parms_id() = parms_id_last;
         destination.parms_id() = encrypted.parms_id();
         destination.scale() = encrypted.scale();
     }

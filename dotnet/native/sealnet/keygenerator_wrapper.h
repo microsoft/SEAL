@@ -21,13 +21,13 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create3(void *sealContext, void *sec
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, int decomposition_bit_count, uint64_t count, void **relin_keys);
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, uint64_t count, void **relin_keys);
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys1(void *thisptr, int decomposition_bit_count, void **galois_keys);
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys1(void *thisptr, void **galois_keys);
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys2(void *thisptr, int decomposition_bit_count, uint64_t count, uint64_t *galois_elts, void **galois_keys);
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys2(void *thisptr, uint64_t count, uint64_t *galois_elts, void **galois_keys);
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys3(void *thisptr, int decomposition_bit_count, uint64_t count, int *steps, void **galois_keys);
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys3(void *thisptr, uint64_t count, int *steps, void **galois_keys);
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_PublicKey(void *thisptr, void **public_key);
 
