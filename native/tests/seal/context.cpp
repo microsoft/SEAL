@@ -205,21 +205,21 @@ namespace SEALTest
             ASSERT_EQ(size_t(2), context_data->chain_index());
             ASSERT_EQ(71047416497ULL, *context_data->total_coeff_modulus());
             ASSERT_FALSE(!!context_data->prev_context_data());
-            ASSERT_EQ(context_data->parms().parms_id(), context->parms_id_first());
+            ASSERT_EQ(context_data->parms_id(), context->parms_id_first());
             auto prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(1), context_data->chain_index());
             ASSERT_EQ(1084081ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(0), context_data->chain_index());
             ASSERT_EQ(5617ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             ASSERT_FALSE(!!context_data->next_context_data());
-            ASSERT_EQ(context_data->parms().parms_id(), context->parms_id_last());
+            ASSERT_EQ(context_data->parms_id(), context->parms_id_last());
 
             context = SEALContext::Create(parms, false);
             ASSERT_EQ(size_t(0), context->context_data_first()->chain_index());
@@ -236,27 +236,27 @@ namespace SEALTest
             ASSERT_EQ(size_t(3), context_data->chain_index());
             ASSERT_EQ(71047416497ULL, *context_data->total_coeff_modulus());
             ASSERT_FALSE(!!context_data->prev_context_data());
-            ASSERT_EQ(context_data->parms().parms_id(), context->parms_id_first());
+            ASSERT_EQ(context_data->parms_id(), context->parms_id_first());
             auto prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(2), context_data->chain_index());
             ASSERT_EQ(1084081ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(1), context_data->chain_index());
             ASSERT_EQ(5617ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(0), context_data->chain_index());
             ASSERT_EQ(41ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             ASSERT_FALSE(!!context_data->next_context_data());
-            ASSERT_EQ(context_data->parms().parms_id(), context->parms_id_last());
+            ASSERT_EQ(context_data->parms_id(), context->parms_id_last());
 
             context = SEALContext::Create(parms, false);
             ASSERT_EQ(size_t(0), context->context_data_first()->chain_index());

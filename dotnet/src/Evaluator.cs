@@ -43,7 +43,7 @@ namespace Microsoft.Research.SEAL
     /// proportional to K*L. Plain multiplication and addition operations of any type do not
     /// change the size. Relinearization requires relinearization keys to have been generated.
     /// </para>
-    /// 
+    ///
     /// <para>
     /// Rotations
     /// When batching is enabled, we provide operations for rotating the plaintext matrix rows

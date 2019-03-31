@@ -37,9 +37,9 @@ namespace SEALTest
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
                 {
-                    ASSERT_EQ(keys.key(j + 2)[i].size(), test_keys.key(j + 2)[i].size());
-                    ASSERT_EQ(keys.key(j + 2)[i].uint64_count(), test_keys.key(j + 2)[i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data(), test_keys.key(j + 2)[i].data(), keys.key(j + 2)[i].uint64_count()));
+                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
+                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
                 }
             }
 
@@ -52,9 +52,9 @@ namespace SEALTest
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
                 {
-                    ASSERT_EQ(keys.key(j + 2)[i].size(), test_keys.key(j + 2)[i].size());
-                    ASSERT_EQ(keys.key(j + 2)[i].uint64_count(), test_keys.key(j + 2)[i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data(), test_keys.key(j + 2)[i].data(), keys.key(j + 2)[i].uint64_count()));
+                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
+                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
                 }
             }
 
@@ -67,9 +67,9 @@ namespace SEALTest
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
                 {
-                    ASSERT_EQ(keys.key(j + 2)[i].size(), test_keys.key(j + 2)[i].size());
-                    ASSERT_EQ(keys.key(j + 2)[i].uint64_count(), test_keys.key(j + 2)[i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data(), test_keys.key(j + 2)[i].data(), keys.key(j + 2)[i].uint64_count()));
+                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
+                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
                 }
             }
         }
@@ -93,9 +93,9 @@ namespace SEALTest
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
                 {
-                    ASSERT_EQ(keys.key(j + 2)[i].size(), test_keys.key(j + 2)[i].size());
-                    ASSERT_EQ(keys.key(j + 2)[i].uint64_count(), test_keys.key(j + 2)[i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data(), test_keys.key(j + 2)[i].data(), keys.key(j + 2)[i].uint64_count()));
+                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
+                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
                 }
             }
 
@@ -108,9 +108,9 @@ namespace SEALTest
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
                 {
-                    ASSERT_EQ(keys.key(j + 2)[i].size(), test_keys.key(j + 2)[i].size());
-                    ASSERT_EQ(keys.key(j + 2)[i].uint64_count(), test_keys.key(j + 2)[i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data(), test_keys.key(j + 2)[i].data(), keys.key(j + 2)[i].uint64_count()));
+                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
+                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
                 }
             }
 
@@ -123,9 +123,9 @@ namespace SEALTest
             {
                 for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
                 {
-                    ASSERT_EQ(keys.key(j + 2)[i].size(), test_keys.key(j + 2)[i].size());
-                    ASSERT_EQ(keys.key(j + 2)[i].uint64_count(), test_keys.key(j + 2)[i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data(), test_keys.key(j + 2)[i].data(), keys.key(j + 2)[i].uint64_count()));
+                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
+                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
                 }
             }
         }

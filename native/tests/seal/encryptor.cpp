@@ -41,42 +41,42 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
         }
         {
             parms.set_poly_modulus_degree(128);
@@ -94,42 +94,42 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
         }
 
         {
@@ -148,42 +148,42 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
         }
     }
 
@@ -211,11 +211,11 @@ namespace SEALTest
             std::vector<std::complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            encoder.encode(input, parms.parms_id(), delta, plain);
+            encoder.encode(input, context->parms_id_first(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
             //check correctness of encryption
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             decryptor.decrypt(encrypted, plainRes);
             encoder.decode(plainRes, output);
@@ -246,11 +246,11 @@ namespace SEALTest
             std::vector<std::complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            encoder.encode(input, parms.parms_id(), delta, plain);
+            encoder.encode(input, context->parms_id_first(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
             //check correctness of encryption
-            ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
             decryptor.decrypt(encrypted, plainRes);
             encoder.decode(plainRes, output);
@@ -291,11 +291,11 @@ namespace SEALTest
                     input[i] = pow(-1.0, rand() % 2) * static_cast<double>(rand() % input_bound);
                 }
 
-                encoder.encode(input, parms.parms_id(), delta, plain);
+                encoder.encode(input, context->parms_id_first(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
                 //check correctness of encryption
-                ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+                ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
@@ -337,11 +337,11 @@ namespace SEALTest
                     input[i] = pow(-1.0, rand() % 2) * static_cast<double>(rand() % input_bound);
                 }
 
-                encoder.encode(input, parms.parms_id(), delta, plain);
+                encoder.encode(input, context->parms_id_first(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
                 //check correctness of encryption
-                ASSERT_TRUE(encrypted.parms_id() == parms.parms_id());
+                ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plain, output);
@@ -379,7 +379,7 @@ namespace SEALTest
             ASSERT_NE(nullptr, context_data_first.get());
             auto second_context_data = context_data_first->next_context_data();
             ASSERT_NE(nullptr, second_context_data.get());
-            auto second_parms_id = second_context_data->parms().parms_id();
+            auto second_parms_id = second_context_data->parms_id();
 
             encoder.encode(input, second_parms_id, delta, plain);
             encryptor.encrypt(plain, encrypted);

@@ -27,65 +27,66 @@ namespace SEALTest
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys();
-            ASSERT_TRUE(evk.parms_id() == parms.parms_id());
-            ASSERT_EQ(4ULL, evk.key(2)[0].size());
+            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_EQ(1ULL, evk.key(2).size());
             for (size_t j = 0; j < evk.size(); j++)
             {
                 for (size_t i = 0; i < evk.key(j + 2).size(); i++)
                 {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].size(); k++)
+                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
                     {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data(k), evk.key(j + 2)[i].poly_modulus_degree(), evk.key(j + 2)[i].coeff_mod_count()));
+                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
                     }
                 }
             }
 
             evk = keygen.relin_keys(2);
-            ASSERT_TRUE(evk.parms_id() == parms.parms_id());
-            ASSERT_EQ(60ULL, evk.key(2)[0].size());
+            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_EQ(1ULL, evk.key(2).size());
+            ASSERT_EQ(1ULL, evk.key(3).size());
             for (size_t j = 0; j < evk.size(); j++)
             {
                 for (size_t i = 0; i < evk.key(j + 2).size(); i++)
                 {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].size(); k++)
+                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
                     {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data(k), evk.key(j + 2)[i].poly_modulus_degree(), evk.key(j + 2)[i].coeff_mod_count()));
+                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
                     }
                 }
             }
 
             GaloisKeys galks = keygen.galois_keys();
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
-            ASSERT_EQ(4ULL, galks.key(3)[0].size());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(10ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
             ASSERT_TRUE(galks.has_key(5));
             ASSERT_TRUE(galks.has_key(7));
             ASSERT_FALSE(galks.has_key(9));
             ASSERT_FALSE(galks.has_key(127));
-            ASSERT_EQ(2ULL, galks.key(1)[0].size());
-            ASSERT_EQ(2ULL, galks.key(3)[0].size());
-            ASSERT_EQ(2ULL, galks.key(5)[0].size());
-            ASSERT_EQ(2ULL, galks.key(7)[0].size());
-            ASSERT_EQ(4ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.key(1).size());
+            ASSERT_EQ(1ULL, galks.key(3).size());
+            ASSERT_EQ(1ULL, galks.key(5).size());
+            ASSERT_EQ(1ULL, galks.key(7).size());
+            ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(127));
-            ASSERT_EQ(4ULL, galks.key(1)[0].size());
+            ASSERT_EQ(1ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 127 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
-            ASSERT_EQ(4ULL, galks.key(127)[0].size());
+            ASSERT_EQ(1ULL, galks.key(127).size());
             ASSERT_EQ(1ULL, galks.size());
         }
         {
@@ -97,65 +98,66 @@ namespace SEALTest
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys(2);
-            ASSERT_TRUE(evk.parms_id() == parms.parms_id());
-            ASSERT_EQ(2ULL, evk.key(2)[0].size());
+            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_EQ(3ULL, evk.key(2).size());
+            ASSERT_EQ(3ULL, evk.key(3).size());
             for (size_t j = 0; j < evk.size(); j++)
             {
                 for (size_t i = 0; i < evk.key(j + 2).size(); i++)
                 {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].size(); k++)
+                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
                     {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data(k), evk.key(j + 2)[i].poly_modulus_degree(), evk.key(j + 2)[i].coeff_mod_count()));
+                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
                     }
                 }
             }
 
             evk = keygen.relin_keys();
-            ASSERT_TRUE(evk.parms_id() == parms.parms_id());
-            ASSERT_EQ(30ULL, evk.key(2)[0].size());
+            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_EQ(3ULL, evk.key(2).size());
             for (size_t j = 0; j < evk.size(); j++)
             {
                 for (size_t i = 0; i < evk.key(j + 2).size(); i++)
                 {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].size(); k++)
+                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
                     {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data(k), evk.key(j + 2)[i].poly_modulus_degree(), evk.key(j + 2)[i].coeff_mod_count()));
+                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
                     }
                 }
             }
 
             GaloisKeys galks = keygen.galois_keys();
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
-            ASSERT_EQ(2ULL, galks.key(3)[0].size());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_EQ(3ULL, galks.key(3).size());
             ASSERT_EQ(14ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
             ASSERT_TRUE(galks.has_key(5));
             ASSERT_TRUE(galks.has_key(7));
             ASSERT_FALSE(galks.has_key(9));
             ASSERT_FALSE(galks.has_key(511));
-            ASSERT_EQ(2ULL, galks.key(1)[0].size());
-            ASSERT_EQ(2ULL, galks.key(3)[0].size());
-            ASSERT_EQ(2ULL, galks.key(5)[0].size());
-            ASSERT_EQ(2ULL, galks.key(7)[0].size());
+            ASSERT_EQ(3ULL, galks.key(1).size());
+            ASSERT_EQ(3ULL, galks.key(3).size());
+            ASSERT_EQ(3ULL, galks.key(5).size());
+            ASSERT_EQ(3ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(511));
-            ASSERT_EQ(4ULL, galks.key(1)[0].size());
+            ASSERT_EQ(3ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 511 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
-            ASSERT_EQ(4ULL, galks.key(511)[0].size());
+            ASSERT_EQ(3ULL, galks.key(511).size());
             ASSERT_EQ(1ULL, galks.size());
         }
     }
@@ -171,51 +173,51 @@ namespace SEALTest
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys();
-            ASSERT_TRUE(evk.parms_id() == parms.parms_id());
-            ASSERT_EQ(2ULL, evk.key(2)[0].size());
+            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_EQ(1ULL, evk.key(2).size());
             for (size_t j = 0; j < evk.size(); j++)
             {
                 for (size_t i = 0; i < evk.key(j + 2).size(); i++)
                 {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].size(); k++)
+                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
                     {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data(k), evk.key(j + 2)[i].poly_modulus_degree(), evk.key(j + 2)[i].coeff_mod_count()));
+                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
                     }
                 }
             }
 
             GaloisKeys galks = keygen.galois_keys();
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
-            ASSERT_EQ(2ULL, galks.key(3)[0].size());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(10ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
             ASSERT_TRUE(galks.has_key(5));
             ASSERT_TRUE(galks.has_key(7));
             ASSERT_FALSE(galks.has_key(9));
             ASSERT_FALSE(galks.has_key(127));
-            ASSERT_EQ(2ULL, galks.key(1)[0].size());
-            ASSERT_EQ(2ULL, galks.key(3)[0].size());
-            ASSERT_EQ(2ULL, galks.key(5)[0].size());
-            ASSERT_EQ(2ULL, galks.key(7)[0].size());
+            ASSERT_EQ(1ULL, galks.key(1).size());
+            ASSERT_EQ(1ULL, galks.key(3).size());
+            ASSERT_EQ(1ULL, galks.key(5).size());
+            ASSERT_EQ(1ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(127));
-            ASSERT_EQ(4ULL, galks.key(1)[0].size());
+            ASSERT_EQ(1ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 127 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
-            ASSERT_EQ(4ULL, galks.key(127)[0].size());
+            ASSERT_EQ(1ULL, galks.key(127).size());
             ASSERT_EQ(1ULL, galks.size());
         }
         {
@@ -226,65 +228,67 @@ namespace SEALTest
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys(2);
-            ASSERT_TRUE(evk.parms_id() == parms.parms_id());
-            ASSERT_EQ(2ULL, evk.key(2)[0].size());
+            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_EQ(3ULL, evk.key(2).size());
+            ASSERT_EQ(3ULL, evk.key(3).size());
             for (size_t j = 0; j < evk.size(); j++)
             {
                 for (size_t i = 0; i < evk.key(j + 2).size(); i++)
                 {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].size(); k++)
+                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
                     {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data(k), evk.key(j + 2)[i].poly_modulus_degree(), evk.key(j + 2)[i].coeff_mod_count()));
+                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
                     }
                 }
             }
 
             evk = keygen.relin_keys();
-            ASSERT_TRUE(evk.parms_id() == parms.parms_id());
-            ASSERT_EQ(30ULL, evk.key(2)[0].size());
+            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_EQ(3ULL, evk.key(2).size());
+            ASSERT_EQ(3ULL, evk.key(3).size());
             for (size_t j = 0; j < evk.size(); j++)
             {
                 for (size_t i = 0; i < evk.key(j + 2).size(); i++)
                 {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].size(); k++)
+                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
                     {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data(k), evk.key(j + 2)[i].poly_modulus_degree(), evk.key(j + 2)[i].coeff_mod_count()));
+                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
                     }
                 }
             }
 
             GaloisKeys galks = keygen.galois_keys();
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
-            ASSERT_EQ(2ULL, galks.key(3)[0].size());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_EQ(3ULL, galks.key(3).size());
             ASSERT_EQ(14ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
             ASSERT_TRUE(galks.has_key(5));
             ASSERT_TRUE(galks.has_key(7));
             ASSERT_FALSE(galks.has_key(9));
             ASSERT_FALSE(galks.has_key(511));
-            ASSERT_EQ(2ULL, galks.key(1)[0].size());
-            ASSERT_EQ(2ULL, galks.key(3)[0].size());
-            ASSERT_EQ(2ULL, galks.key(5)[0].size());
-            ASSERT_EQ(2ULL, galks.key(7)[0].size());
+            ASSERT_EQ(3ULL, galks.key(1).size());
+            ASSERT_EQ(3ULL, galks.key(3).size());
+            ASSERT_EQ(3ULL, galks.key(5).size());
+            ASSERT_EQ(3ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(511));
-            ASSERT_EQ(4ULL, galks.key(1)[0].size());
+            ASSERT_EQ(3ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 511 });
-            ASSERT_TRUE(galks.parms_id() == parms.parms_id());
+            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
-            ASSERT_EQ(4ULL, galks.key(511)[0].size());
+            ASSERT_EQ(3ULL, galks.key(511).size());
             ASSERT_EQ(1ULL, galks.size());
         }
     }

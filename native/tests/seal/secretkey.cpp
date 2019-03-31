@@ -25,7 +25,7 @@ namespace SEALTest
             KeyGenerator keygen(context);
 
             SecretKey sk = keygen.secret_key();
-            ASSERT_TRUE(sk.parms_id() == parms.parms_id());
+            ASSERT_TRUE(sk.parms_id() == context->key_parms_id());
             sk.save(stream);
 
             SecretKey sk2;
@@ -44,7 +44,7 @@ namespace SEALTest
             KeyGenerator keygen(context);
 
             SecretKey sk = keygen.secret_key();
-            ASSERT_TRUE(sk.parms_id() == parms.parms_id());
+            ASSERT_TRUE(sk.parms_id() == context->key_parms_id());
             sk.save(stream);
 
             SecretKey sk2;

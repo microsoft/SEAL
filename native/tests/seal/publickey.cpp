@@ -25,7 +25,7 @@ namespace SEALTest
             KeyGenerator keygen(context);
 
             PublicKey pk = keygen.public_key();
-            ASSERT_TRUE(pk.parms_id() == parms.parms_id());
+            ASSERT_TRUE(pk.parms_id() == context->key_parms_id());
             pk.save(stream);
 
             PublicKey pk2;
@@ -48,7 +48,7 @@ namespace SEALTest
             KeyGenerator keygen(context);
 
             PublicKey pk = keygen.public_key();
-            ASSERT_TRUE(pk.parms_id() == parms.parms_id());
+            ASSERT_TRUE(pk.parms_id() == context->key_parms_id());
             pk.save(stream);
 
             PublicKey pk2;

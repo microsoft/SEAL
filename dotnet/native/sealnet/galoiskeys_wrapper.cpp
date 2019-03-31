@@ -13,7 +13,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-namespace 
+namespace
 {
     HRESULT GetKeyFromVector(const vector<Ciphertext> &key, uint64_t *count, void **ciphers)
     {
