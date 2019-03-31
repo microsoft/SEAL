@@ -49,7 +49,7 @@ namespace SEALTest
                     ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(), keys.data()[j][i].data().uint64_count()));
                 }
             }
-            ASSERT_EQ(10ULL, keys.data().size());
+            ASSERT_EQ(64ULL, keys.data().size());
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
@@ -82,7 +82,7 @@ namespace SEALTest
                     ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(), keys.data()[j][i].data().uint64_count()));
                 }
             }
-            ASSERT_EQ(14ULL, keys.data().size());
+            ASSERT_EQ(256ULL, keys.data().size());
         }
     }
 }

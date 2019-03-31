@@ -58,7 +58,7 @@ namespace SEALTest
             GaloisKeys galks = keygen.galois_keys();
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_EQ(1ULL, galks.key(3).size());
-            ASSERT_EQ(10ULL, galks.size());
+            ASSERT_EQ(64ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -80,20 +80,22 @@ namespace SEALTest
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(127));
             ASSERT_EQ(1ULL, galks.key(1).size());
-            ASSERT_EQ(1ULL, galks.size());
+            ASSERT_EQ(64ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 127 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
             ASSERT_EQ(1ULL, galks.key(127).size());
-            ASSERT_EQ(1ULL, galks.size());
+            ASSERT_EQ(64ULL, galks.size());
         }
         {
             parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(1 << 6);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1) });
+            parms.set_coeff_modulus({ 
+                DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_30bit(0), 
+                DefaultParams::small_mods_30bit(1) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 
@@ -129,7 +131,7 @@ namespace SEALTest
             GaloisKeys galks = keygen.galois_keys();
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_EQ(3ULL, galks.key(3).size());
-            ASSERT_EQ(14ULL, galks.size());
+            ASSERT_EQ(256ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -189,7 +191,7 @@ namespace SEALTest
             GaloisKeys galks = keygen.galois_keys();
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_EQ(1ULL, galks.key(3).size());
-            ASSERT_EQ(10ULL, galks.size());
+            ASSERT_EQ(64ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -223,7 +225,9 @@ namespace SEALTest
         {
             parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(256);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1) });
+            parms.set_coeff_modulus({ 
+                DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_30bit(0), 
+                DefaultParams::small_mods_30bit(1) });
             auto context = SEALContext::Create(parms);
             KeyGenerator keygen(context);
 

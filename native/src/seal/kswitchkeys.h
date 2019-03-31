@@ -79,7 +79,7 @@ namespace seal
         /**
         Returns the current number of keyswitching keys.
         */
-        inline std::size_t size() const
+        inline std::size_t size() const noexcept
         {
             return keys_.size();
         }
