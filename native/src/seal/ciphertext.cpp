@@ -126,6 +126,7 @@ namespace seal
 
         // Set the size parameters
         size_ = size;
+        size_capacity_ = max<size_type>(size_, size_capacity_);
         poly_modulus_degree_ = poly_modulus_degree;
         coeff_mod_count_ = coeff_mod_count;
     }
@@ -195,6 +196,7 @@ namespace seal
             parms_id_ = parms_id;
             is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
             size_ = safe_cast<size_type>(size64);
+            size_capacity_ = max<size_type>(size_, size_capacity_);
             poly_modulus_degree_ = safe_cast<size_type>(poly_modulus_degree64);
             coeff_mod_count_ = safe_cast<size_type>(coeff_mod_count64);
             scale_ = scale;

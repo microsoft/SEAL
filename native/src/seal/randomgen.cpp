@@ -21,7 +21,7 @@ namespace seal
 #ifdef SEAL_USE_AES_NI_PRNG
     auto FastPRNGFactory::create() -> shared_ptr<UniformRandomGenerator>
     {
-        if (!(seed_[0] & seed_[1]))
+        if (!(seed_[0] | seed_[1]))
         {
             return make_shared<FastPRNG>(random_uint64(), random_uint64());
         }

@@ -204,6 +204,12 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = parms.coeff_modulus().size();
 
+        // Size check
+        if (!product_fits_in(coeff_count, coeff_mod_count))
+        {
+            throw logic_error("invalid parameters");
+        }
+
         shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
         // Make sure we have enough secret keys computed
@@ -458,11 +464,10 @@ namespace seal
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
         auto &key_modulus = key_parms.coeff_modulus();
-        size_t rns_mod_count = key_parms.coeff_modulus().size();
         shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
-        if (!product_fits_in(coeff_count, rns_mod_count))
+        if (!product_fits_in(coeff_count, decomp_mod_count))
         {
             throw logic_error("invalid parameters");
         }
@@ -501,11 +506,11 @@ namespace seal
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
-        size_t rns_mod_count = key_parms.coeff_modulus().size();
+        size_t coeff_mod_count = key_parms.coeff_modulus().size();
         shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
-        if (!product_fits_in(coeff_count, rns_mod_count))
+        if (!product_fits_in(coeff_count, coeff_mod_count, num_keys))
         {
             throw logic_error("invalid parameters");
         }
@@ -514,7 +519,7 @@ namespace seal
         auto temp(allocate_uint(coeff_count, pool_));
         for (size_t l = 0; l < num_keys; l++)
         {
-            const uint64_t *new_key_ptr = new_keys + l * rns_mod_count * coeff_count;
+            const uint64_t *new_key_ptr = new_keys + l * coeff_mod_count * coeff_count;
             generate_one_kswitch_key(new_key_ptr, destination.data()[l]);
         }
     }

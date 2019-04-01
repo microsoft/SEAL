@@ -1463,7 +1463,7 @@ namespace seal
         }
 
         void switch_key_inplace(Ciphertext &encrypted,
-            std::uint64_t *target,
+            const std::uint64_t *target,
             const KSwitchKeys &kswitch_keys,
             std::size_t key_index,
             MemoryPoolHandle pool = MemoryManager::GetPool());

@@ -1159,9 +1159,9 @@ namespace seal
         {
             switch_key_inplace(
                 encrypted,
-                encrypted.data(encrypted_size - 1 - i),
+                encrypted.data(encrypted_size - 1),
                 static_cast<const KSwitchKeys &>(relin_keys),
-                RelinKeys::get_index(encrypted_size - 1 - i),
+                RelinKeys::get_index(encrypted_size - 1),
                 pool);
             encrypted_size--;
         }
@@ -2575,7 +2575,7 @@ namespace seal
 
     void Evaluator::switch_key_inplace(
         Ciphertext &encrypted,
-        uint64_t *target,
+        const uint64_t *target,
         const KSwitchKeys &kswitch_keys,
         size_t kswitch_keys_index,
         MemoryPoolHandle pool)
@@ -2667,7 +2667,7 @@ namespace seal
             auto local_small_poly_1(allocate_uint(coeff_count, pool));
             auto local_small_poly_2(allocate_uint(coeff_count, pool));
 
-            uint64_t *local_encrypted_ptr = nullptr;
+            const uint64_t *local_encrypted_ptr = nullptr;
             set_uint_uint(
                 target + i * coeff_count,
                 coeff_count,
