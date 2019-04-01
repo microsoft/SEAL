@@ -1133,8 +1133,6 @@ namespace seal
             throw invalid_argument("relin_keys is not valid for encryption parameters");
         }
 
-        // Extract encryption parameters.
-        auto &parms = context_data_ptr->parms();
         size_t encrypted_size = encrypted.size();
 
         // Verify parameters.
