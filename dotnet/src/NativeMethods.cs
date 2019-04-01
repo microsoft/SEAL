@@ -341,12 +341,6 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void DefParams_SmallMods30Bit(ulong index, out IntPtr smallModulus);
 
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_DBCMax(out int dbcMax);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_DBCMin(out int dbcMin);
-
         #endregion
 
         #region SEALContext methods
@@ -368,6 +362,9 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_ContextDataFirst(IntPtr thisptr, out IntPtr contextData);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SEALContext_ContextDataLast(IntPtr thisptr, out IntPtr contextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_GetContextData(IntPtr thisptr, ulong[] parmsId, out IntPtr contextData);
@@ -732,12 +729,6 @@ namespace Microsoft.Research.SEAL
         internal static extern void GaloisKeys_Size(IntPtr thisptr, out ulong size);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void GaloisKeys_DBC(IntPtr thisptr, out int dbc);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void GaloisKeys_SetDBC(IntPtr thisptr, int value);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void GaloisKeys_ClearDataAndReserve(IntPtr thisptr, ulong size);
 
         [DllImport(sealnetnative, PreserveSig = false)]
@@ -787,16 +778,16 @@ namespace Microsoft.Research.SEAL
         internal static extern void KeyGenerator_Destroy(IntPtr thisptr);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, int decompositionBitCount, ulong count, out IntPtr relinKeys);
+        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, ulong count, out IntPtr relinKeys);
 
         [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys1", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, int decompositionBitCount, out IntPtr galoisKeys);
+        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, out IntPtr galoisKeys);
 
         [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys2", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, int decompositionBitCount, ulong count, ulong[] galoisElts, out IntPtr galoisKeys);
+        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, ulong count, ulong[] galoisElts, out IntPtr galoisKeys);
 
         [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys3", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, int decompositionBitCount, ulong count, int[] steps, out IntPtr galoisKeys);
+        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, ulong count, int[] steps, out IntPtr galoisKeys);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KeyGenerator_PublicKey(IntPtr thisptr, out IntPtr publicKey);
@@ -822,12 +813,6 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void RelinKeys_Size(IntPtr thisptr, out ulong size);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void RelinKeys_DBC(IntPtr thisptr, out int dbc);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void RelinKeys_SetDBC(IntPtr thisptr, int value);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void RelinKeys_ClearDataAndReserve(IntPtr thisptr, ulong size);

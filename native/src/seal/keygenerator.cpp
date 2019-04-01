@@ -53,7 +53,7 @@ namespace seal
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (!secret_key.is_valid_for(context_) ||
+        if (!is_valid_for(secret_key, context_) ||
             secret_key.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("secret_key is not valid for encryption parameters");
@@ -80,12 +80,12 @@ namespace seal
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (!secret_key.is_valid_for(context_) ||
+        if (!is_valid_for(secret_key, context_) ||
             secret_key.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("secret_key is not valid for encryption parameters");
         }
-        if (!public_key.is_valid_for(context_) ||
+        if (!is_valid_for(public_key, context_) ||
             public_key.parms_id() != context_->key_parms_id())
         {
             throw invalid_argument("public_key is not valid for encryption parameters");
@@ -147,7 +147,7 @@ namespace seal
         secret_key_array_size_ = 1;
 
         // Set the parms_id for secret key
-        secret_key_.parms_id() = parms.parms_id();
+        secret_key_.parms_id() = context_data.parms_id();
 
         // Secret key has been generated
         sk_generated_ = true;
@@ -181,10 +181,10 @@ namespace seal
         shared_ptr<UniformRandomGenerator> random(
             parms.random_generator()->create());
         encrypt_zero_symmetric(secret_key_, public_key_.data(), context_,
-            parms.parms_id(), random, true, pool_);
+            context_data.parms_id(), random, true, pool_);
 
         // Set the parms_id for public key
-        public_key_.parms_id() = parms.parms_id();
+        public_key_.parms_id() = context_data.parms_id();
 
         // Public key has been generated
         pk_generated_ = true;
@@ -204,6 +204,12 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = parms.coeff_modulus().size();
 
+        // Size check
+        if (!product_fits_in(coeff_count, coeff_mod_count))
+        {
+            throw logic_error("invalid parameters");
+        }
+
         shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
         // Make sure we have enough secret keys computed
@@ -219,7 +225,7 @@ namespace seal
             static_cast<KSwitchKeys &>(relin_keys));
 
         // Set the parms_id
-        relin_keys.parms_id() = parms.parms_id();
+        relin_keys.parms_id() = context_data.parms_id();
 
         return relin_keys;
     }
@@ -229,7 +235,7 @@ namespace seal
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
         {
-            throw logic_error("cannot generate galois keys for unspecified secret key");
+            throw logic_error("cannot generate Galois keys for unspecified secret key");
         }
 
         // Extract encryption parameters.
@@ -278,7 +284,7 @@ namespace seal
                     rotated_secret_key.get() + i * coeff_count);
             }
 
-            // Initialize galois key
+            // Initialize Galois key
             // This is the location in the galois_keys vector
             uint64_t index = GaloisKeys::get_index(galois_elt);
             shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
@@ -290,7 +296,7 @@ namespace seal
         }
 
         // Set the parms_id
-        galois_keys.parms_id_ = parms.parms_id();
+        galois_keys.parms_id_ = context_data.parms_id();
 
         return galois_keys;
     }
@@ -300,7 +306,7 @@ namespace seal
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
         {
-            throw logic_error("cannot generate galois keys for unspecified secret key");
+            throw logic_error("cannot generate Galois keys for unspecified secret key");
         }
 
         // Extract encryption parameters.
@@ -325,7 +331,7 @@ namespace seal
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
         {
-            throw logic_error("cannot generate galois keys for unspecified secret key");
+            throw logic_error("cannot generate Galois keys for unspecified secret key");
         }
 
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
@@ -451,18 +457,17 @@ namespace seal
 
     void KeyGenerator::generate_one_kswitch_key(
         const uint64_t *new_key,
-        std::vector<Ciphertext> &destination)
+        std::vector<PublicKey> &destination)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         size_t decomp_mod_count = context_->context_data_first()->parms().coeff_modulus().size();
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
         auto &key_modulus = key_parms.coeff_modulus();
-        size_t rns_mod_count = key_parms.coeff_modulus().size();
         shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
-        if (!product_fits_in(coeff_count, rns_mod_count))
+        if (!product_fits_in(coeff_count, decomp_mod_count))
         {
             throw logic_error("invalid parameters");
         }
@@ -474,8 +479,8 @@ namespace seal
         uint64_t factor = 0;
         for (size_t j = 0; j < decomp_mod_count; j++)
         {
-            encrypt_zero_symmetric(secret_key_, destination[j], context_,
-                key_parms.parms_id(), random, true, pool_);
+            encrypt_zero_symmetric(secret_key_, destination[j].data(), context_,
+                key_context_data.parms_id(), random, true, pool_);
 
             factor = key_modulus.back().value() % key_modulus[j].value();
             multiply_poly_scalar_coeffmod(
@@ -485,11 +490,11 @@ namespace seal
                 key_modulus[j],
                 temp.get());
             add_poly_poly_coeffmod(
-                destination[j].data(0) + j * coeff_count,
+                destination[j].data().data() + j * coeff_count,
                 temp.get(),
                 coeff_count,
                 key_modulus[j],
-                destination[j].data(0) + j * coeff_count);
+                destination[j].data().data() + j * coeff_count);
         }
     }
 
@@ -501,11 +506,11 @@ namespace seal
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
-        size_t rns_mod_count = key_parms.coeff_modulus().size();
+        size_t coeff_mod_count = key_parms.coeff_modulus().size();
         shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
-        if (!product_fits_in(coeff_count, rns_mod_count))
+        if (!product_fits_in(coeff_count, coeff_mod_count, num_keys))
         {
             throw logic_error("invalid parameters");
         }
@@ -514,7 +519,7 @@ namespace seal
         auto temp(allocate_uint(coeff_count, pool_));
         for (size_t l = 0; l < num_keys; l++)
         {
-            const uint64_t *new_key_ptr = new_keys + l * rns_mod_count * coeff_count;
+            const uint64_t *new_key_ptr = new_keys + l * coeff_mod_count * coeff_count;
             generate_one_kswitch_key(new_key_ptr, destination.data()[l]);
         }
     }

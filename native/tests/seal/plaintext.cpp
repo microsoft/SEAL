@@ -132,7 +132,7 @@ namespace SEALTest
             ASSERT_FALSE(plain2.is_ntt_form());
 
             Evaluator evaluator(context);
-            evaluator.transform_to_ntt_inplace(plain, context->first_parms_id());
+            evaluator.transform_to_ntt_inplace(plain, context->parms_id_first());
             plain.save(stream);
             plain2.load(context, stream);
             ASSERT_TRUE(plain.data() != plain2.data());

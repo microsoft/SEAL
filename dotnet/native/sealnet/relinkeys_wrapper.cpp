@@ -13,17 +13,6 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-namespace seal
-{
-    struct RelinKeys::RelinKeysPrivateHelper
-    {
-        static void set_decomposition_bit_count(RelinKeys &keys, int value)
-        {
-            keys.decomposition_bit_count_ = value;
-        }
-    };
-}
-
 SEALNETNATIVE HRESULT SEALCALL RelinKeys_Create1(void **relin_keys)
 {
     IfNullRet(relin_keys, E_POINTER);
@@ -71,25 +60,6 @@ SEALNETNATIVE HRESULT SEALCALL RelinKeys_Size(void *thisptr, uint64_t *size)
     IfNullRet(size, E_POINTER);
 
     *size = keys->size();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_DBC(void *thisptr, int *dbc)
-{
-    RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
-    IfNullRet(keys, E_POINTER);
-    IfNullRet(dbc, E_POINTER);
-
-    *dbc = keys->decomposition_bit_count();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_SetDBC(void *thisptr, int dbc)
-{
-    RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
-    IfNullRet(keys, E_POINTER);
-
-    RelinKeys::RelinKeysPrivateHelper::set_decomposition_bit_count(*keys, dbc);
     return S_OK;
 }
 

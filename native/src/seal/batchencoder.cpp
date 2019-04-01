@@ -7,6 +7,7 @@
 #include <limits>
 #include "seal/batchencoder.h"
 #include "seal/util/polycore.h"
+#include "seal/valcheck.h"
 
 using namespace std;
 using namespace seal::util;
@@ -325,7 +326,7 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, vector<uint64_t> &destination,
         MemoryPoolHandle pool)
     {
-        if (!plain.is_valid_for(context_))
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -365,7 +366,7 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, vector<int64_t> &destination,
         MemoryPoolHandle pool)
     {
-        if (!plain.is_valid_for(context_))
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -410,7 +411,7 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, gsl::span<uint64_t> destination,
         MemoryPoolHandle pool)
     {
-        if (!plain.is_valid_for(context_))
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -454,7 +455,7 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, gsl::span<int64_t> destination,
         MemoryPoolHandle pool)
     {
-        if (!plain.is_valid_for(context_))
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -502,7 +503,7 @@ namespace seal
 #endif
     void BatchEncoder::decode(Plaintext &plain, MemoryPoolHandle pool)
     {
-        if (!plain.is_valid_for(context_))
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }

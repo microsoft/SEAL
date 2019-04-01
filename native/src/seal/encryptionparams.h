@@ -74,6 +74,8 @@ namespace seal
     */
     class EncryptionParameters
     {
+        friend class SEALContext;
+
     public:
         /**
         Creates an empty set of encryption parameters. At a minimum, the user needs
@@ -254,7 +256,7 @@ namespace seal
         @param[in] random_generator Pointer to the random generator factory
         */
         inline void set_random_generator(
-            std::shared_ptr<UniformRandomGeneratorFactory> random_generator)
+            std::shared_ptr<UniformRandomGeneratorFactory> random_generator) noexcept
         {
             random_generator_ = std::move(random_generator);
         }
@@ -262,7 +264,7 @@ namespace seal
         /**
         Returns the encryption scheme type.
         */
-        inline scheme_type scheme() const
+        inline scheme_type scheme() const noexcept
         {
             return scheme_;
         }
@@ -270,7 +272,7 @@ namespace seal
         /**
         Returns the degree of the polynomial modulus parameter.
         */
-        inline std::size_t poly_modulus_degree() const
+        inline std::size_t poly_modulus_degree() const noexcept
         {
             return poly_modulus_degree_;
         }
@@ -278,7 +280,7 @@ namespace seal
         /**
         Returns a const reference to the currently set coefficient modulus parameter.
         */
-        inline const std::vector<SmallModulus> &coeff_modulus() const
+        inline const std::vector<SmallModulus> &coeff_modulus() const noexcept
         {
             return coeff_modulus_;
         }
@@ -286,7 +288,7 @@ namespace seal
         /**
         Returns a const reference to the currently set plaintext modulus parameter.
         */
-        inline const SmallModulus &plain_modulus() const
+        inline const SmallModulus &plain_modulus() const noexcept
         {
             return plain_modulus_;
         }
@@ -294,7 +296,7 @@ namespace seal
         /**
         Returns the currently set standard deviation of the noise distribution.
         */
-        inline double noise_standard_deviation() const
+        inline double noise_standard_deviation() const noexcept
         {
             return noise_standard_deviation_;
         }
@@ -304,7 +306,7 @@ namespace seal
         This value cannot be directly controlled by the user, and is automatically
         set to be an appropriate multiple of the noise_standard_deviation parameter.
         */
-        inline double noise_max_deviation() const
+        inline double noise_max_deviation() const noexcept
         {
             return noise_max_deviation_;
         }
@@ -312,7 +314,7 @@ namespace seal
         /**
         Returns a pointer to the random number generator factory to use for encryption.
         */
-        inline std::shared_ptr<UniformRandomGeneratorFactory> random_generator() const
+        inline std::shared_ptr<UniformRandomGeneratorFactory> random_generator() const noexcept
         {
             return random_generator_;
         }
@@ -325,7 +327,7 @@ namespace seal
 
         @parms[in] other The EncryptionParameters to compare against
         */
-        inline bool operator ==(const EncryptionParameters &other) const
+        inline bool operator ==(const EncryptionParameters &other) const noexcept
         {
             return (parms_id_ == other.parms_id_);
         }
@@ -338,18 +340,9 @@ namespace seal
 
         @parms[in] other The EncryptionParameters to compare against
         */
-        inline bool operator !=(const EncryptionParameters &other) const
+        inline bool operator !=(const EncryptionParameters &other) const noexcept
         {
             return (parms_id_ != other.parms_id_);
-        }
-
-        /**
-        Returns the parms_id of the current parameters. This function is intended
-        mainly for internal use.
-        */
-        inline auto &parms_id() const
-        {
-            return parms_id_;
         }
 
         /**
@@ -373,6 +366,15 @@ namespace seal
         static EncryptionParameters Load(std::istream &stream);
 
     private:
+        /**
+        Returns the parms_id of the current parameters. This function is intended
+        mainly for internal use.
+        */
+        inline auto &parms_id() const noexcept
+        {
+            return parms_id_;
+        }
+
         void compute_parms_id();
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();

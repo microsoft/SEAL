@@ -227,30 +227,5 @@ namespace Microsoft.Research.SEAL
                 throw;
             }
         }
-
-        /// <summary>
-        /// Returns the largest allowed decomposition bit count (60).
-        /// </summary>
-        public static int DBCmax
-        {
-            get
-            {
-                NativeMethods.DefParams_DBCMax(out int dbcMax);
-                return dbcMax;
-            }
-        }
-
-
-        /// <summary>
-        /// Returns the smallest allowed decomposition bit count (1).
-        /// </summary>
-        public static int DBCmin
-        {
-            get
-            {
-                NativeMethods.DefParams_DBCMin(out int dbcMin);
-                return dbcMin;
-            }
-        }
     }
 }

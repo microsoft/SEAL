@@ -6,24 +6,24 @@
 #include <iostream>
 #include <vector>
 #include <limits>
-#include "seal/ciphertext.h"
+#include "seal/publickey.h"
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
+#include "seal/valcheck.h"
 
 namespace seal
 {
     /**
     Class to store keyswitching keys. It should never be necessary for normal
-    users to create an instance of this class. It is used strictly as a base
-    class for RelinKeys and GaloisKeys classes.
+    users to create an instance of KSwitchKeys. This class is used strictly as
+    a base class for RelinKeys and GaloisKeys classes.
 
     @par Keyswitching
-    Concretely, keyswitching is used to change a ciphertext encrypted
-    with one key to be encrypted with another key. It is a general technique
-    and is used in relinearization and galois rotation. A keyswitching key
-    can contain a sequence (vector) of keys. In RelinKeys, each key is an
-    encryption of a power of secret key. In GaloisKeys, each key corresponds
-    to a type of rotation.
+    Concretely, keyswitching is used to change a ciphertext encrypted with one
+    key to be encrypted with another key. It is a general technique and is used
+    in relinearization and Galois rotations. A keyswitching key contains a sequence
+    (vector) of keys. In RelinKeys, each key is an encryption of a power of the
+    secret key. In GaloisKeys, each key corresponds to a type of rotation.
 
     @par Thread Safety
     In general, reading from KSwitchKeys is thread-safe as long as no
@@ -79,7 +79,7 @@ namespace seal
         /**
         Returns the current number of keyswitching keys.
         */
-        inline std::size_t size() const
+        inline std::size_t size() const noexcept
         {
             return keys_.size();
         }
@@ -121,28 +121,6 @@ namespace seal
         }
 
         /**
-        Check whether the current KSwitchKeys is valid for a given
-        SEALContext. If the given SEALContext is not set, the encryption
-        parameters are invalid, or the KSwitchKeys data does not match the
-        SEALContext, this function returns false. Otherwise, returns true.
-
-        @param[in] context The SEALContext
-        */
-        bool is_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
-
-        /**
-        Check whether the current KSwitchKeys is valid for a given
-        SEALContext. If the given SEALContext is not set, the encryption
-        parameters are invalid, or the KSwitchKeys data does not match the
-        SEALContext, this function returns false. Otherwise, returns true. This
-        function only checks the metadata and not the keyswitching key data
-        itself.
-
-        @param[in] context The SEALContext
-        */
-        bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
-
-        /**
         Saves the KSwitchKeys instance to an output stream. The output is
         in binary format and not human-readable. The output stream must have
         the "binary" flag set.
@@ -179,7 +157,7 @@ namespace seal
             std::istream &stream)
         {
             unsafe_load(stream);
-            if (!is_valid_for(std::move(context)))
+            if (!is_valid_for(*this, std::move(context)))
             {
                 throw std::invalid_argument("KSwitchKeys data is invalid");
             }
@@ -193,11 +171,6 @@ namespace seal
             return pool_;
         }
 
-        /**
-        Enables access to private members of seal::KSwitchKeys for .NET wrapper.
-        */
-        struct KSwitchKeysPrivateHelper;
-
     private:
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
@@ -206,6 +179,6 @@ namespace seal
         /**
         The vector of keyswitching keys.
         */
-        std::vector<std::vector<Ciphertext>> keys_{};
+        std::vector<std::vector<PublicKey>> keys_{};
     };
 }

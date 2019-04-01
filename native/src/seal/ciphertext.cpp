@@ -53,7 +53,7 @@ namespace seal
 
         // Need to set parms_id first
         auto &parms = context_data_ptr->parms();
-        parms_id_ = parms.parms_id();
+        parms_id_ = context_data_ptr->parms_id();
 
         reserve_internal(size_capacity, parms.poly_modulus_degree(),
             safe_cast<size_type>(parms.coeff_modulus().size()));
@@ -76,8 +76,7 @@ namespace seal
         data_.reserve(new_data_capacity);
         data_.resize(new_data_size);
 
-        // Set the size and size_capacity
-        size_capacity_ = size_capacity;
+        // Set the size
         size_ = min<size_type>(size_capacity, size_);
         poly_modulus_degree_ = poly_modulus_degree;
         coeff_mod_count_ = coeff_mod_count;
@@ -104,7 +103,7 @@ namespace seal
 
         // Need to set parms_id first
         auto &parms = context_data_ptr->parms();
-        parms_id_ = parms.parms_id();
+        parms_id_ = context_data_ptr->parms_id();
 
         resize_internal(size, parms.poly_modulus_degree(),
             safe_cast<size_type>(parms.coeff_modulus().size()));
@@ -128,71 +127,6 @@ namespace seal
         size_ = size;
         poly_modulus_degree_ = poly_modulus_degree;
         coeff_mod_count_ = coeff_mod_count;
-    }
-
-    bool Ciphertext::is_valid_for(shared_ptr<const SEALContext> context) const noexcept
-    {
-        // Check metadata
-        if (!is_metadata_valid_for(context))
-        {
-            return false;
-        }
-
-        // Check the data
-        auto context_data_ptr = context->get_context_data(parms_id_);
-        auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
-        const ct_coeff_type *ptr = data();
-        for (size_t i = 0; i < size_; i++)
-        {
-            for (size_t j = 0; j < coeff_mod_count_; j++)
-            {
-                uint64_t modulus = coeff_modulus[j].value();
-                for (size_t k = 0; k < poly_modulus_degree_; k++, ptr++)
-                {
-                    if (*ptr >= modulus)
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return true;
-    }
-
-    bool Ciphertext::is_metadata_valid_for(
-        shared_ptr<const SEALContext> context) const noexcept
-    {
-        // Verify parameters
-        if (!context || !context->parameters_set())
-        {
-            return false;
-        }
-
-        // Are the parameters valid for this ciphertext?
-        auto context_data_ptr = context->get_context_data(parms_id_);
-        if (!context_data_ptr)
-        {
-            return false;
-        }
-
-        // Check that the metadata matches
-        auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
-        size_t poly_modulus_degree = context_data_ptr->parms().poly_modulus_degree();
-        if ((coeff_modulus.size() != coeff_mod_count_) ||
-            (poly_modulus_degree != poly_modulus_degree_))
-        {
-            return false;
-        }
-
-        // Check that size is either 0 or within right bounds
-        if ((size_ < SEAL_CIPHERTEXT_SIZE_MIN && size_ != 0) ||
-            size_ > SEAL_CIPHERTEXT_SIZE_MAX)
-        {
-            return false;
-        }
-
-        return true;
     }
 
     void Ciphertext::save(ostream &stream) const

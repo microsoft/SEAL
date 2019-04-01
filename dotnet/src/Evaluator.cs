@@ -32,7 +32,6 @@ namespace Microsoft.Research.SEAL
     /// ciphertexts. For this we provide fast "plain" operations: plain addition, plain subtraction,
     /// aand plain multiplication.
     /// </para>
-    ///
     /// <para>
     /// Relinearization
     /// One of the most important non-arithmetic operations is relinearization, which takes
@@ -42,16 +41,14 @@ namespace Microsoft.Research.SEAL
     /// every multiplication. Homomorphic multiplication of ciphertexts of size K+1 and L+1
     /// outputs a ciphertext of size K+L+1, and the computational cost of multiplication is
     /// proportional to K*L. Plain multiplication and addition operations of any type do not
-    /// change the size. The performance of relinearization is determined by the decomposition
-    /// bit count that the relinearization keys were generated with.
+    /// change the size. Relinearization requires relinearization keys to have been generated.
     /// </para>
     ///
     /// <para>
     /// Rotations
     /// When batching is enabled, we provide operations for rotating the plaintext matrix rows
     /// cyclically left or right, and for rotating the columns (swapping the rows). Rotations
-    /// require Galois keys to have been generated, and their performance depends on the
-    /// decomposition bit count that the Galois keys were generated with.
+    /// require Galois keys to have been generated.
     /// </para>
     ///
     /// <para>

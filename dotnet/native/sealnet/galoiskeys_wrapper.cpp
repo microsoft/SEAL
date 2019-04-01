@@ -13,18 +13,8 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-namespace seal
+namespace
 {
-    struct GaloisKeys::GaloisKeysPrivateHelper
-    {
-        static void set_decomposition_bit_count(GaloisKeys &keys, int value)
-        {
-            keys.decomposition_bit_count_ = value;
-        }
-    };
-}
-
-namespace {
     HRESULT GetKeyFromVector(const vector<Ciphertext> &key, uint64_t *count, void **ciphers)
     {
         *count = key.size();
@@ -91,25 +81,6 @@ SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Size(void *thisptr, uint64_t *size)
     IfNullRet(size, E_POINTER);
 
     *size = keys->size();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_DBC(void *thisptr, int *dbc)
-{
-    GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
-    IfNullRet(keys, E_POINTER);
-    IfNullRet(dbc, E_POINTER);
-
-    *dbc = keys->decomposition_bit_count();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_SetDBC(void *thisptr, int dbc)
-{
-    GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
-    IfNullRet(keys, E_POINTER);
-
-    GaloisKeys::GaloisKeysPrivateHelper::set_decomposition_bit_count(*keys, dbc);
     return S_OK;
 }
 

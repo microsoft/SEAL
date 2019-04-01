@@ -17,7 +17,7 @@ namespace Microsoft.Research.SEAL
     /// <remarks>
     /// <para>
     /// Relinearization
-    /// Concretely, an relinearization key corresponding to a power K of the secret key can be used
+    /// Concretely, a relinearization key corresponding to a power K of the secret key can be used
     /// in the relinearization operation to change a ciphertext of size K+1 to size K. Recall
     /// that the smallest possible size for a ciphertext is 2, so the first relinearization key is
     /// corresponds to the square of the secret key. The second relinearization key corresponds to
@@ -26,18 +26,6 @@ namespace Microsoft.Research.SEAL
     /// a situation where it makes sense to have size 7 ciphertexts, as operating on such objects
     /// would be very slow. Most commonly only one relinearization key is needed, and relinearization
     /// is performed after every multiplication.
-    /// </para>
-    /// <para>
-    /// Decomposition Bit Count
-    /// Decomposition bit count (dbc) is a parameter that describes a performance trade-off in
-    /// the relinearization process. Namely, in the relinearization process the polynomials in
-    /// the ciphertexts (with large coefficients) get decomposed into a smaller base 2^dbc,
-    /// coefficient-wise. Each of the decomposition factors corresponds to a piece of data in
-    /// the relinearization key, so the smaller the dbc is, the larger the relinearization keys are.
-    /// Moreover, a smaller dbc results in less invariant noise budget being consumed in the
-    /// relinearization process. However, using a large dbc is much faster, and often one
-    /// would want to optimize the dbc to be as large as possible for performance. The dbc is
-    /// upper-bounded by the value of 60, and lower-bounded by the value of 1.
     /// </para>
     /// <para>
     /// Thread Safety
@@ -107,22 +95,6 @@ namespace Microsoft.Research.SEAL
             {
                 NativeMethods.RelinKeys_Size(NativePtr, out ulong size);
                 return size;
-            }
-        }
-
-        /// <summary>
-        /// Returns the decomposition bit count.
-        /// </summary>
-        public int DecompositionBitCount
-        {
-            get
-            {
-                NativeMethods.RelinKeys_DBC(NativePtr, out int dbc);
-                return dbc;
-            }
-            private set
-            {
-                NativeMethods.RelinKeys_SetDBC(NativePtr, value);
             }
         }
 
@@ -280,9 +252,6 @@ namespace Microsoft.Research.SEAL
                 // Save ParmsId
                 ParmsId.Save(writer.BaseStream);
 
-                // Save the decomposition bit count
-                writer.Write(DecompositionBitCount);
-
                 // Save the size of Keys
                 IEnumerable<IEnumerable<Ciphertext>> data = Data;
                 writer.Write((ulong)data.LongCount());
@@ -325,10 +294,6 @@ namespace Microsoft.Research.SEAL
 
                 using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    // Read the decomposition bit count
-                    int dbc = reader.ReadInt32();
-                    DecompositionBitCount = dbc;
-
                     // Read the size
                     ulong size = reader.ReadUInt64();
 
@@ -382,7 +347,7 @@ namespace Microsoft.Research.SEAL
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">If the stream data is invalid or is not
         /// valid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save an RelinKeys instance.</seealso>
+        /// <seealso cref="Save(Stream)">See Save() to save a RelinKeys instance.</seealso>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)

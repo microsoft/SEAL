@@ -74,14 +74,6 @@ const shared_ptr<SEALContext> &sealnet::SharedContextFromVoid(void *context)
     return ctxiter->second;
 }
 
-void sealnet::CopyParmsId(const uint64_t *src, parms_id_type &dest)
-{
-    if (nullptr != src)
-    {
-        copy_n(src, dest.size(), begin(dest));
-    }
-}
-
 HRESULT sealnet::ToStringHelper(const string &str, char *outstr, uint64_t *length)
 {
     uint64_t result_length = add_safe(static_cast<uint64_t>(str.length()), uint64_t(1));

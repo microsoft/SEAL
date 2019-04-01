@@ -36,7 +36,7 @@ namespace SEALTest
             CKKSEncoder encoder(context);
             double delta = (1ULL << 16);
             Plaintext plain;
-            encoder.encode(values, parms.parms_id(), delta, plain);
+            encoder.encode(values, context->parms_id_first(), delta, plain);
             std::vector<std::complex<double>> result;
             encoder.decode(plain, result);
 
@@ -67,7 +67,7 @@ namespace SEALTest
             CKKSEncoder encoder(context);
             double delta = (1ULL << 40);
             Plaintext plain;
-            encoder.encode(values, parms.parms_id(), delta, plain);
+            encoder.encode(values, context->parms_id_first(), delta, plain);
             std::vector<std::complex<double>> result;
             encoder.decode(plain, result);
 
@@ -98,7 +98,7 @@ namespace SEALTest
             CKKSEncoder encoder(context);
             double delta = (1ULL << 40);
             Plaintext plain;
-            encoder.encode(values, parms.parms_id(), delta, plain);
+            encoder.encode(values, context->parms_id_first(), delta, plain);
             std::vector<std::complex<double>> result;
             encoder.decode(plain, result);
 
@@ -129,7 +129,7 @@ namespace SEALTest
             CKKSEncoder encoder(context);
             double delta = (1ULL << 40);
             Plaintext plain;
-            encoder.encode(values, parms.parms_id(), delta, plain);
+            encoder.encode(values, context->parms_id_first(), delta, plain);
             std::vector<std::complex<double>> result;
             encoder.decode(plain, result);
 
@@ -160,7 +160,7 @@ namespace SEALTest
             CKKSEncoder encoder(context);
             double delta = (1ULL << 40);
             Plaintext plain;
-            encoder.encode(values, parms.parms_id(), delta, plain);
+            encoder.encode(values, context->parms_id_first(), delta, plain);
             std::vector<std::complex<double>> result;
             encoder.decode(plain, result);
 
@@ -211,7 +211,7 @@ namespace SEALTest
             CKKSEncoder encoder(context);
             double delta = (1ULL << 40);
             Plaintext plain;
-            encoder.encode(values, parms.parms_id(), delta, plain);
+            encoder.encode(values, context->parms_id_first(), delta, plain);
             std::vector<std::complex<double>> result;
             encoder.decode(plain, result);
 
@@ -244,7 +244,7 @@ namespace SEALTest
                 // Use a very large scale
                 double delta = pow(2.0, 110);
                 Plaintext plain;
-                encoder.encode(values, parms.parms_id(), delta, plain);
+                encoder.encode(values, context->parms_id_first(), delta, plain);
                 std::vector<std::complex<double>> result;
                 encoder.decode(plain, result);
 
@@ -258,7 +258,7 @@ namespace SEALTest
                 // Use a scale over 128 bits
                 double delta = pow(2.0, 130);
                 Plaintext plain;
-                encoder.encode(values, parms.parms_id(), delta, plain);
+                encoder.encode(values, context->parms_id_first(), delta, plain);
                 std::vector<std::complex<double>> result;
                 encoder.decode(plain, result);
 
@@ -291,7 +291,7 @@ namespace SEALTest
             for (int iRun = 0; iRun < 50; iRun++)
             {
                 double value = static_cast<double>(rand() % data_bound);
-                encoder.encode(value, parms.parms_id(), delta, plain);
+                encoder.encode(value, context->parms_id_first(), delta, plain);
                 encoder.decode(plain, result);
 
                 for (size_t i = 0; i < slots; ++i)
@@ -318,7 +318,7 @@ namespace SEALTest
                 for (int iRun = 0; iRun < 50; iRun++)
                 {
                     int value = static_cast<int>(rand() % data_bound);
-                    encoder.encode(value, parms.parms_id(), plain);
+                    encoder.encode(value, context->parms_id_first(), plain);
                     encoder.decode(plain, result);
 
                     for (size_t i = 0; i < slots; ++i)
@@ -337,7 +337,7 @@ namespace SEALTest
                 for (int iRun = 0; iRun < 50; iRun++)
                 {
                     int value = static_cast<int>(rand() % data_bound);
-                    encoder.encode(value, parms.parms_id(), plain);
+                    encoder.encode(value, context->parms_id_first(), plain);
                     encoder.decode(plain, result);
 
                     for (size_t i = 0; i < slots; ++i)
@@ -356,7 +356,7 @@ namespace SEALTest
                 for (int iRun = 0; iRun < 50; iRun++)
                 {
                     int value = static_cast<int>(rand() % data_bound);
-                    encoder.encode(value, parms.parms_id(), plain);
+                    encoder.encode(value, context->parms_id_first(), plain);
                     encoder.decode(plain, result);
 
                     for (size_t i = 0; i < slots; ++i)

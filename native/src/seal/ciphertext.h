@@ -12,17 +12,18 @@
 #include "seal/context.h"
 #include "seal/memorymanager.h"
 #include "seal/intarray.h"
+#include "seal/valcheck.h"
 
 namespace seal
 {
     /**
     Class to store a ciphertext element. The data for a ciphertext consists
-    of two or more polynomials, which are in Microsoft SEAL stored in a CRT form with
-    respect to the factors of the coefficient modulus. This data itself is
-    not meant to be modified directly by the user, but is instead operated
-    on by functions in the Evaluator class. The size of the backing array of
-    a ciphertext depends on the encryption parameters and the size of the
-    ciphertext (at least 2). If the degree of the poly_modulus encryption
+    of two or more polynomials, which are in Microsoft SEAL stored in a CRT
+    form with respect to the factors of the coefficient modulus. This data
+    itself is not meant to be modified directly by the user, but is instead
+    operated on by functions in the Evaluator class. The size of the backing
+    array of a ciphertext depends on the encryption parameters and the size
+    of theciphertext (at least 2). If the degree of the poly_modulus encryption
     parameter is N, and the number of primes in the coeff_modulus encryption
     parameter is K, then the ciphertext backing array requires precisely
     8*N*K*size bytes of memory. A ciphertext also carries with it the
@@ -286,7 +287,6 @@ namespace seal
         {
             parms_id_ = parms_id_zero;
             is_ntt_form_ = false;
-            size_capacity_ = 2;
             size_ = 0;
             poly_modulus_degree_ = 0;
             coeff_mod_count_ = 0;
@@ -468,16 +468,6 @@ namespace seal
         }
 
         /**
-        Returns the capacity of the allocation. This means the largest size
-        of the ciphertext that can be stored in the current allocation with
-        the current encryption parameters.
-        */
-        inline size_type size_capacity() const noexcept
-        {
-            return size_capacity_;
-        }
-
-        /**
         Returns the size of the ciphertext.
         */
         inline size_type size() const noexcept
@@ -494,33 +484,24 @@ namespace seal
         }
 
         /**
+        Returns the capacity of the allocation. This means the largest size
+        of the ciphertext that can be stored in the current allocation with
+        the current encryption parameters.
+        */
+        inline size_type size_capacity() const noexcept
+        {
+            size_type poly_uint64_count = poly_modulus_degree_ * coeff_mod_count_;
+            return poly_uint64_count ?
+                uint64_count_capacity() / poly_uint64_count : size_type(0);
+        }
+
+        /**
         Returns the total size of the current ciphertext in 64-bit words.
         */
         inline size_type uint64_count() const noexcept
         {
             return data_.size();
         }
-
-        /**
-        Check whether the current ciphertext is valid for a given SEALContext.
-        If the given SEALContext is not set, the encryption parameters are invalid,
-        or the ciphertext data does not match the SEALContext, this function
-        returns false. Otherwise, returns true.
-
-        @param[in] context The SEALContext
-        */
-        bool is_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
-
-        /**
-        Check whether the current ciphertext is valid for a given SEALContext.
-        If the given SEALContext is not set, the encryption parameters are invalid,
-        or the ciphertext data does not match the SEALContext, this function
-        returns false. Otherwise, returns true. This function only checks the metadata
-        and not the ciphertext data itself.
-
-        @param[in] context The SEALContext
-        */
-        bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
 
         /**
         Check whether the current ciphertext is transparent, i.e. does not require
@@ -572,7 +553,7 @@ namespace seal
             std::istream &stream)
         {
             unsafe_load(stream);
-            if (!is_valid_for(std::move(context)))
+            if (!is_valid_for(*this, std::move(context)))
             {
                 throw std::invalid_argument("ciphertext data is invalid");
             }
@@ -656,8 +637,6 @@ namespace seal
         parms_id_type parms_id_ = parms_id_zero;
 
         bool is_ntt_form_ = false;
-
-        size_type size_capacity_ = 2;
 
         size_type size_ = 0;
 

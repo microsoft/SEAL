@@ -7,6 +7,7 @@
 #include <memory>
 #include "seal/ciphertext.h"
 #include "seal/context.h"
+#include "seal/valcheck.h"
 
 namespace seal
 {
@@ -26,6 +27,7 @@ namespace seal
     class PublicKey
     {
         friend class KeyGenerator;
+        friend class KSwitchKeys;
 
     public:
         /**
@@ -78,47 +80,6 @@ namespace seal
         }
 
         /**
-        Check whether the current PublicKey is valid for a given SEALContext. If
-        the given SEALContext is not set, the encryption parameters are invalid,
-        or the PublicKey data does not match the SEALContext, this function returns
-        false. Otherwise, returns true.
-
-        @param[in] context The SEALContext
-        */
-        inline bool is_valid_for(std::shared_ptr<const SEALContext> context) const noexcept
-        {
-            // Check metadata
-            if (!is_metadata_valid_for(context))
-            {
-                return false;
-            }
-
-            // Check the data
-            return pk_.is_valid_for(std::move(context));
-        }
-
-        /**
-        Check whether the current PublicKey is valid for a given SEALContext. If
-        the given SEALContext is not set, the encryption parameters are invalid,
-        or the PublicKey data does not match the SEALContext, this function returns
-        false. Otherwise, returns true. This function only checks the metadata
-        and not the public key data itself.
-
-        @param[in] context The SEALContext
-        */
-        inline bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept
-        {
-            // Verify parameters
-            if (!context || !context->parameters_set())
-            {
-                return false;
-            }
-            auto parms_id = context->key_parms_id();
-            return pk_.is_metadata_valid_for(std::move(context)) &&
-                pk_.is_ntt_form() && pk_.parms_id() == parms_id;
-        }
-
-        /**
         Saves the PublicKey to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
@@ -160,7 +121,7 @@ namespace seal
             std::istream &stream)
         {
             unsafe_load(stream);
-            if (!is_valid_for(std::move(context)))
+            if (!is_valid_for(*this, std::move(context)))
             {
                 throw std::invalid_argument("PublicKey data is invalid");
             }
@@ -191,6 +152,17 @@ namespace seal
         }
 
     private:
+        /**
+        Creates an empty public key.
+
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        PublicKey(MemoryPoolHandle pool) :
+            pk_(std::move(pool))
+        {
+        }
+
         Ciphertext pk_;
     };
 }

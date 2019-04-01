@@ -32,63 +32,12 @@ namespace seal
             keys_[i].reserve(keys_dim2);
             for (size_t j = 0; j < keys_dim2; j++)
             {
-                keys_[i].emplace_back(pool_);
+                keys_[i].emplace_back(PublicKey(pool_));
                 keys_[i][j] = assign.keys_[i][j];
             }
         }
 
         return *this;
-    }
-
-    bool KSwitchKeys::is_valid_for(shared_ptr<const SEALContext> context) const noexcept
-    {
-        // Check metadata
-        if (!is_metadata_valid_for(context))
-        {
-            return false;
-        }
-
-        // Check the data
-        for (auto &a : keys_)
-        {
-            for (auto &b : a)
-            {
-                if (!b.is_valid_for(context) || !b.is_ntt_form() ||
-                    b.parms_id() != parms_id_)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    bool KSwitchKeys::is_metadata_valid_for(shared_ptr<const SEALContext> context) const noexcept
-    {
-        // Verify parameters
-        if (!context || !context->parameters_set())
-        {
-            return false;
-        }
-        if (parms_id_ != context->key_parms_id())
-        {
-            return false;
-        }
-
-        for (auto &a : keys_)
-        {
-            for (auto &b : a)
-            {
-                if (!b.is_metadata_valid_for(context) || !b.is_ntt_form() ||
-                    b.parms_id() != parms_id_)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     void KSwitchKeys::save(ostream &stream) const
@@ -166,7 +115,7 @@ namespace seal
                 keys_.back().reserve(safe_cast<size_t>(keys_dim2));
                 for (size_t j = 0; j < keys_dim2; j++)
                 {
-                    Ciphertext new_key(pool_);
+                    PublicKey new_key(pool_);
                     new_key.unsafe_load(stream);
                     keys_[index].emplace_back(move(new_key));
                 }

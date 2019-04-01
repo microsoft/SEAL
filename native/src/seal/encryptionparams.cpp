@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 #include "seal/encryptionparams.h"
+#include "seal/util/uintcore.h"
 #include <limits>
 
 using namespace std;

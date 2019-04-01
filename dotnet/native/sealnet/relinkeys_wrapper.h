@@ -23,10 +23,6 @@ SEALNETNATIVE HRESULT SEALCALL RelinKeys_Set(void *thisptr, void *copy);
 
 SEALNETNATIVE HRESULT SEALCALL RelinKeys_Size(void *thisptr, uint64_t *size);
 
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_DBC(void *thisptr, int *dbc);
-
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_SetDBC(void *thisptr, int dbc);
-
 SEALNETNATIVE HRESULT SEALCALL RelinKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **ciphers);
 
 SEALNETNATIVE HRESULT SEALCALL RelinKeys_HasKey(void *thisptr, uint64_t key_power, bool *has_key);

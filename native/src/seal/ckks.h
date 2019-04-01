@@ -561,7 +561,7 @@ namespace seal
             MemoryPoolHandle pool)
         {
             // Verify parameters.
-            if (!plain.is_valid_for(context_))
+            if (!is_valid_for(plain, context_))
             {
                 throw std::invalid_argument("plain is not valid for encryption parameters");
             }

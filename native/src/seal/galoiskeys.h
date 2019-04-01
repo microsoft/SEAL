@@ -38,14 +38,20 @@ namespace seal
     {
     public:
         /**
-        Returns a const reference to a Galois key. The returned Galois key corresponds
-        to the given Galois element.
+        Returns the index of a Galois key in the backing KSwitchKeys instance that
+        corresponds to the given Galois element, assuming that it exists in the
+        backing KSwitchKeys.
 
         @param[in] galois_elt The Galois element
-        @throws std::invalid_argument if the key corresponding to galois_elt does not exist
+        @throws std::invalid_argument if galois_elt is not valid
         */
         inline static std::size_t get_index(std::size_t galois_elt)
         {
+            // Verify parameters
+            if (!(galois_elt & 1))
+            {
+                throw std::invalid_argument("galois_elt is not valid");
+            }
             return (galois_elt - 1) >> 1;
         }
 
@@ -60,7 +66,7 @@ namespace seal
         {
             if (!has_key(galois_elt))
             {
-                throw std::invalid_argument("requested key does not exist");
+                throw std::invalid_argument("galois_elt does not exist");
             }
             return keys_[get_index(galois_elt)];
         }
@@ -69,16 +75,10 @@ namespace seal
         Returns whether a Galois key corresponding to a given Galois element exists.
 
         @param[in] galois_elt The Galois element
-        @throws std::invalid_argument if Galois element is not valid
+        @throws std::invalid_argument if galois_elt is not valid
         */
         inline bool has_key(std::uint64_t galois_elt) const
         {
-            // Verify parameters
-            if (!(galois_elt & 1))
-            {
-                throw std::invalid_argument("galois element is not valid");
-            }
-
             auto index = get_index(galois_elt);
             return index < keys_.size() && !keys_[index].empty();
         }

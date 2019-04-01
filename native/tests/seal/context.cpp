@@ -115,7 +115,8 @@ namespace SEALTest
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
             auto context = SEALContext::Create(parms);
-            ASSERT_EQ(697ULL, *context->context_data_first()->total_coeff_modulus());
+            ASSERT_EQ(17ULL, *context->context_data_first()->total_coeff_modulus());
+            ASSERT_EQ(697ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->context_data_first()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
             ASSERT_TRUE(qualifiers.using_fft);
@@ -166,7 +167,8 @@ namespace SEALTest
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
             auto context = SEALContext::Create(parms);
-            ASSERT_EQ(26441ULL, *context->context_data_first()->total_coeff_modulus());
+            ASSERT_EQ(137ULL, *context->context_data_first()->total_coeff_modulus());
+            ASSERT_EQ(26441ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->context_data_first()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
             ASSERT_TRUE(qualifiers.using_fft);
@@ -183,7 +185,8 @@ namespace SEALTest
         parms.set_random_generator(nullptr);
         {
             auto context = SEALContext::Create(parms);
-            ASSERT_EQ(26441ULL, *context->context_data_first()->total_coeff_modulus());
+            ASSERT_EQ(137ULL, *context->context_data_first()->total_coeff_modulus());
+            ASSERT_EQ(26441ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->context_data_first()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
             ASSERT_TRUE(qualifiers.using_fft);
@@ -201,68 +204,72 @@ namespace SEALTest
             parms.set_coeff_modulus({ 41, 137, 193, 65537 });
             parms.set_plain_modulus(73);
             auto context = SEALContext::Create(parms, true);
-            auto context_data = context->context_data_first();
+            auto context_data = context->key_context_data();
             ASSERT_EQ(size_t(2), context_data->chain_index());
             ASSERT_EQ(71047416497ULL, *context_data->total_coeff_modulus());
             ASSERT_FALSE(!!context_data->prev_context_data());
-            ASSERT_EQ(context_data->parms().parms_id(), context->first_parms_id());
+            ASSERT_EQ(context_data->parms_id(), context->key_parms_id());
             auto prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(1), context_data->chain_index());
             ASSERT_EQ(1084081ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(0), context_data->chain_index());
             ASSERT_EQ(5617ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             ASSERT_FALSE(!!context_data->next_context_data());
-            ASSERT_EQ(context_data->parms().parms_id(), context->last_parms_id());
+            ASSERT_EQ(context_data->parms_id(), context->parms_id_last());
 
             context = SEALContext::Create(parms, false);
+            ASSERT_EQ(size_t(1), context->key_context_data()->chain_index());
             ASSERT_EQ(size_t(0), context->context_data_first()->chain_index());
-            ASSERT_EQ(71047416497ULL, *context->context_data_first()->total_coeff_modulus());
+            ASSERT_EQ(71047416497ULL, *context->key_context_data()->total_coeff_modulus());
+            ASSERT_EQ(1084081ULL, *context->context_data_first()->total_coeff_modulus());
             ASSERT_FALSE(!!context->context_data_first()->next_context_data());
-            ASSERT_FALSE(!!context->context_data_first()->prev_context_data());
+            ASSERT_TRUE(!!context->context_data_first()->prev_context_data());
         }
         {
             EncryptionParameters parms(scheme_type::CKKS);
             parms.set_poly_modulus_degree(4);
             parms.set_coeff_modulus({ 41, 137, 193, 65537 });
             auto context = SEALContext::Create(parms, true);
-            auto context_data = context->context_data_first();
+            auto context_data = context->key_context_data();
             ASSERT_EQ(size_t(3), context_data->chain_index());
             ASSERT_EQ(71047416497ULL, *context_data->total_coeff_modulus());
             ASSERT_FALSE(!!context_data->prev_context_data());
-            ASSERT_EQ(context_data->parms().parms_id(), context->first_parms_id());
+            ASSERT_EQ(context_data->parms_id(), context->key_parms_id());
             auto prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(2), context_data->chain_index());
             ASSERT_EQ(1084081ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(1), context_data->chain_index());
             ASSERT_EQ(5617ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(0), context_data->chain_index());
             ASSERT_EQ(41ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms().parms_id(),
-                      prev_context_data->parms().parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
+                      prev_context_data->parms_id());
             ASSERT_FALSE(!!context_data->next_context_data());
-            ASSERT_EQ(context_data->parms().parms_id(), context->last_parms_id());
+            ASSERT_EQ(context_data->parms_id(), context->parms_id_last());
 
             context = SEALContext::Create(parms, false);
+            ASSERT_EQ(size_t(1), context->key_context_data()->chain_index());
             ASSERT_EQ(size_t(0), context->context_data_first()->chain_index());
-            ASSERT_EQ(71047416497ULL, *context->context_data_first()->total_coeff_modulus());
+            ASSERT_EQ(71047416497ULL, *context->key_context_data()->total_coeff_modulus());
+            ASSERT_EQ(1084081ULL, *context->context_data_first()->total_coeff_modulus());
             ASSERT_FALSE(!!context->context_data_first()->next_context_data());
-            ASSERT_FALSE(!!context->context_data_first()->prev_context_data());
+            ASSERT_TRUE(!!context->context_data_first()->prev_context_data());
         }
     }
 }

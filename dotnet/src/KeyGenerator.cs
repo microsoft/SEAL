@@ -122,15 +122,10 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Generates and returns the specified number of relinearization keys.
         /// </summary>
-        /// <param name="decompositionBitCount">The decomposition bit count</param>
         /// <param name="count">The number of relinearization keys to generate</param>
-        /// <exception cref="ArgumentException">if decompositionBitCount is not within [1, 60]</exception>
-        public RelinKeys RelinKeys(int decompositionBitCount, ulong count = 1)
+        public RelinKeys RelinKeys(ulong count = 1)
         {
-            if (decompositionBitCount < 1 || decompositionBitCount > 60)
-                throw new ArgumentException("decompositionBitCount should be within [1, 60]");
-
-            NativeMethods.KeyGenerator_RelinKeys(NativePtr, decompositionBitCount, count, out IntPtr relinKeysPtr);
+            NativeMethods.KeyGenerator_RelinKeys(NativePtr, count, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr);
         }
 
@@ -144,15 +139,9 @@ namespace Microsoft.Research.SEAL
         /// (e.g. rotations) on encrypted data. Most users will want to use this overload of
         /// the function.
         /// </remarks>
-        /// <param name="decompositionBitCount">The decomposition bit count</param>
-        /// <exception cref="ArgumentException">if decompositionBitCount is not
-        /// within [1, 60]</exception>
-        public GaloisKeys GaloisKeys(int decompositionBitCount)
+        public GaloisKeys GaloisKeys()
         {
-            if (decompositionBitCount < 1 || decompositionBitCount > 60)
-                throw new ArgumentException("decompositionBitCount should be within [1, 60]");
-
-            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, out IntPtr galoisKeysPtr);
+            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, out IntPtr galoisKeysPtr);
             return new GaloisKeys(galoisKeysPtr);
         }
 
@@ -161,31 +150,29 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         ///
         /// <remarks>
-        /// Generates Galois keys. This function creates specific Galois keys that can be used to
-        /// apply specific Galois automorphisms on encrypted data. The user needs to give as
-        /// input a vector of Galois elements corresponding to the keys that are to be created.
+        /// Generates Galois keys. This function creates specific Galois keys that
+        /// can be used to apply specific Galois automorphisms on encrypted data.
+        /// The user needs to give as input a vector of Galois elements corresponding
+        /// to the keys that are to be created.
         ///
-        /// The Galois elements are odd integers in the interval [1, M-1], where M = 2*N, and
-        /// N = degree(PolyModulus). Used with batching, a Galois element 3^i % M corresponds
-        /// to a cyclic row rotation i steps to the left, and a Galois element 3^(N/2-i) % M
-        /// corresponds to a cyclic row rotation i steps to the right. The Galois element M-1
-        /// corresponds to a column rotation (row swap). In the polynomial view (not batching),
-        /// a Galois automorphism by a Galois element p changes Enc(plain(x)) to Enc(plain(x^p)).
+        /// The Galois elements are odd integers in the interval [1, M-1], where
+        /// M = 2*N, and N = degree(PolyModulus). Used with batching, a Galois element
+        /// 3^i % M corresponds to a cyclic row rotation i steps to the left, and
+        /// a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation i
+        /// steps to the right. The Galois element M-1 corresponds to a column rotation
+        /// (row swap). In the polynomial view (not batching), a Galois automorphism by
+        /// a Galois element p changes Enc(plain(x)) to Enc(plain(x^p)).
         /// </remarks>
-        /// <param name="decompositionBitCount">The decomposition bit count</param>
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
-        /// <exception cref="ArgumentException">if decompositionBitCount is not
-        /// within [1, 60]</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not
         /// valid</exception>
-        public GaloisKeys GaloisKeys(int decompositionBitCount,
-            IEnumerable<ulong> galoisElts)
+        public GaloisKeys GaloisKeys(IEnumerable<ulong> galoisElts)
         {
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
 
             ulong[] galoisEltsArr = galoisElts.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, (ulong)galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
+            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, (ulong)galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
             return new GaloisKeys(galoisKeysPtr);
         }
 
@@ -198,15 +185,12 @@ namespace Microsoft.Research.SEAL
         /// A step count of zero can be used to indicate a column rotation in the BFV
         /// scheme complex conjugation in the CKKS scheme.
         /// </summary>
-        /// <param name="decompositionBitCount">The decomposition bit count</param>
         /// <param name="steps">The rotation step counts for which to generate keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
-        /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching
-        /// and scheme is SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if decompositionBitCount is not within [1, 60]</exception>
+        /// <exception cref="InvalidOperationException">if the encryption parameters do not
+        /// support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
-        public GaloisKeys GaloisKeys(int decompositionBitCount,
-            IEnumerable<int> steps)
+        public GaloisKeys GaloisKeys(IEnumerable<int> steps)
         {
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
@@ -214,7 +198,7 @@ namespace Microsoft.Research.SEAL
             try
             {
                 int[] stepsArr = steps.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, decompositionBitCount, (ulong)stepsArr.Length, stepsArr, out IntPtr galoisKeys);
+                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, (ulong)stepsArr.Length, stepsArr, out IntPtr galoisKeys);
                 return new GaloisKeys(galoisKeys);
             }
             catch (COMException ex)

@@ -24,18 +24,6 @@ namespace Microsoft.Research.SEAL
     /// rotate the columns (swap the rows). These operations require the Galois keys.
     /// </para>
     /// <para>
-    /// Decomposition Bit Count
-    /// Decomposition bit count (dbc) is a parameter that describes a performance trade-off in
-    /// the rotation operation. Its function is exactly the same as in relinearization. Namely,
-    /// the polynomials in the ciphertexts (with large coefficients) get decomposed into a smaller
-    /// base 2^dbc, coefficient-wise. Each of the decomposition factors corresponds to a piece of
-    /// data in the Galois keys, so the smaller the dbc is, the larger the Galois keys are.
-    /// Moreover, a smaller dbc results in less invariant noise budget being consumed in the
-    /// rotation operation. However, using a large dbc is much faster, and often one would want
-    /// to optimize the dbc to be as large as possible for performance. The dbc is upper-bounded
-    /// by the value of 60, and lower-bounded by the value of 1.
-    /// </para>
-    /// <para>
     /// Thread Safety
     /// In general, reading from GaloisKeys is thread-safe as long as no other thread is
     /// concurrently mutating it. This is due to the underlying data structure storing the
@@ -105,22 +93,6 @@ namespace Microsoft.Research.SEAL
             {
                 NativeMethods.GaloisKeys_Size(NativePtr, out ulong size);
                 return size;
-            }
-        }
-
-        /// <summary>
-        /// Returns the decomposition bit count.
-        /// </summary>
-        public int DecompositionBitCount
-        {
-            get
-            {
-                NativeMethods.GaloisKeys_DBC(NativePtr, out int dbc);
-                return dbc;
-            }
-            private set
-            {
-                NativeMethods.GaloisKeys_SetDBC(NativePtr, value);
             }
         }
 
@@ -270,9 +242,6 @@ namespace Microsoft.Research.SEAL
                 // Save the ParmsId
                 ParmsId.Save(writer.BaseStream);
 
-                // Save the Decomposition Bit Count
-                writer.Write(DecompositionBitCount);
-
                 // Save the size of Keys
                 IEnumerable<IEnumerable<Ciphertext>> data = Data;
                 writer.Write((ulong)data.LongCount());
@@ -314,10 +283,6 @@ namespace Microsoft.Research.SEAL
 
                 using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    // Read the decomposition bit count
-                    int dbc = reader.ReadInt32();
-                    DecompositionBitCount = dbc;
-
                     // Read the size
                     ulong size = reader.ReadUInt64();
 
@@ -370,7 +335,7 @@ namespace Microsoft.Research.SEAL
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if the loaded data is invalid or is not
         /// valid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save an GaloisKeys instance.</seealso>
+        /// <seealso cref="Save(Stream)">See Save() to save a GaloisKeys instance.</seealso>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)

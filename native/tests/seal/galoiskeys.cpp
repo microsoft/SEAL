@@ -29,67 +29,27 @@ namespace SEALTest
 
             GaloisKeys keys;
             GaloisKeys test_keys;
-            ASSERT_EQ(keys.decomposition_bit_count(), 0);
             keys.save(stream);
             test_keys.unsafe_load(stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
+            ASSERT_EQ(keys.data().size(), test_keys.data().size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            ASSERT_EQ(0ULL, keys.size());
+            ASSERT_EQ(0ULL, keys.data().size());
 
-            keys = keygen.galois_keys(1);
-            ASSERT_EQ(keys.decomposition_bit_count(), 1);
+            keys = keygen.galois_keys();
             keys.save(stream);
             test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
+            ASSERT_EQ(keys.data().size(), test_keys.data().size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            for (size_t j = 0; j < test_keys.size(); j++)
+            for (size_t j = 0; j < test_keys.data().size(); j++)
             {
                 for (size_t i = 0; i < test_keys.data()[j].size(); i++)
                 {
-                    ASSERT_EQ(keys.data()[j][i].size(), test_keys.data()[j][i].size());
-                    ASSERT_EQ(keys.data()[j][i].uint64_count(), test_keys.data()[j][i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data(), test_keys.data()[j][i].data(), keys.data()[j][i].uint64_count()));
+                    ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
+                    ASSERT_EQ(keys.data()[j][i].data().uint64_count(), test_keys.data()[j][i].data().uint64_count());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(), keys.data()[j][i].data().uint64_count()));
                 }
             }
-            ASSERT_EQ(10ULL, keys.size());
-
-            keys = keygen.galois_keys(8);
-            ASSERT_EQ(keys.decomposition_bit_count(), 8);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.data()[j].size(); i++)
-                {
-                    ASSERT_EQ(keys.data()[j][i].size(), test_keys.data()[j][i].size());
-                    ASSERT_EQ(keys.data()[j][i].uint64_count(), test_keys.data()[j][i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data(), test_keys.data()[j][i].data(), keys.data()[j][i].uint64_count()));
-                }
-            }
-            ASSERT_EQ(10ULL, keys.size());
-
-            keys = keygen.galois_keys(60);
-            ASSERT_EQ(keys.decomposition_bit_count(), 60);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.data()[j].size(); i++)
-                {
-                    ASSERT_EQ(keys.data()[j][i].size(), test_keys.data()[j][i].size());
-                    ASSERT_EQ(keys.data()[j][i].uint64_count(), test_keys.data()[j][i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data(), test_keys.data()[j][i].data(), keys.data()[j][i].uint64_count()));
-                }
-            }
-            ASSERT_EQ(10ULL, keys.size());
+            ASSERT_EQ(64ULL, keys.data().size());
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
@@ -102,49 +62,27 @@ namespace SEALTest
 
             GaloisKeys keys;
             GaloisKeys test_keys;
-            ASSERT_EQ(keys.decomposition_bit_count(), 0);
             keys.save(stream);
             test_keys.unsafe_load(stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
+            ASSERT_EQ(keys.data().size(), test_keys.data().size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            ASSERT_EQ(0ULL, keys.size());
+            ASSERT_EQ(0ULL, keys.data().size());
 
-            keys = keygen.galois_keys(8);
-            ASSERT_EQ(keys.decomposition_bit_count(), 8);
+            keys = keygen.galois_keys();
             keys.save(stream);
             test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
+            ASSERT_EQ(keys.data().size(), test_keys.data().size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            for (size_t j = 0; j < test_keys.size(); j++)
+            for (size_t j = 0; j < test_keys.data().size(); j++)
             {
                 for (size_t i = 0; i < test_keys.data()[j].size(); i++)
                 {
-                    ASSERT_EQ(keys.data()[j][i].size(), test_keys.data()[j][i].size());
-                    ASSERT_EQ(keys.data()[j][i].uint64_count(), test_keys.data()[j][i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data(), test_keys.data()[j][i].data(), keys.data()[j][i].uint64_count()));
+                    ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
+                    ASSERT_EQ(keys.data()[j][i].data().uint64_count(), test_keys.data()[j][i].data().uint64_count());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(), keys.data()[j][i].data().uint64_count()));
                 }
             }
-            ASSERT_EQ(14ULL, keys.size());
-
-            keys = keygen.galois_keys(60);
-            ASSERT_EQ(keys.decomposition_bit_count(), 60);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            ASSERT_EQ(keys.decomposition_bit_count(), test_keys.decomposition_bit_count());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.data()[j].size(); i++)
-                {
-                    ASSERT_EQ(keys.data()[j][i].size(), test_keys.data()[j][i].size());
-                    ASSERT_EQ(keys.data()[j][i].uint64_count(), test_keys.data()[j][i].uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data(), test_keys.data()[j][i].data(), keys.data()[j][i].uint64_count()));
-                }
-            }
-            ASSERT_EQ(14ULL, keys.size());
+            ASSERT_EQ(256ULL, keys.data().size());
         }
     }
 }

@@ -19,6 +19,7 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/valcheck.cpp
 )
 
 install(
@@ -47,6 +48,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/seal.h
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.h
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.h
+        ${CMAKE_CURRENT_LIST_DIR}/valcheck.h
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal
 )

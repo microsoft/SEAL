@@ -17,7 +17,7 @@ namespace seal
     Class to store relinearization keys.
 
     @par Relinearization
-    Concretely, an relinearization key corresponding to a power K of the secret
+    Concretely, a relinearization key corresponding to a power K of the secret
     key can be used in the relinearization operation to change a ciphertext of size
     K+1 to size K. Recall that the smallest possible size for a ciphertext is 2,
     so the first relinearization key is corresponds to the square of the secret
@@ -42,20 +42,24 @@ namespace seal
     {
     public:
         /**
-        Returns a const reference to an relinearization key. The returned
-        relinearization key corresponds to the given power of the secret key.
+        Returns the index of a relinearization key in the backing KSwitchKeys
+        instance that corresponds to the given secret key power, assuming that
+        it exists in the backing KSwitchKeys.
 
         @param[in] key_power The power of the secret key
-        @throws std::invalid_argument if the key corresponding to key_power does
-        not exist
+        @throws std::invalid_argument if kew_power is less than 2
         */
         inline static std::size_t get_index(std::size_t key_power)
         {
+            if (key_power < 2)
+            {
+                throw std::invalid_argument("key_power cannot be less than 2");
+            }
             return key_power - 2;
         }
 
         /**
-        Returns a const reference to an relinearization key. The returned
+        Returns a const reference to a relinearization key. The returned
         relinearization key corresponds to the given power of the secret key.
 
         @param[in] key_power The power of the secret key
@@ -71,14 +75,16 @@ namespace seal
         }
 
         /**
-        Returns whether an relinearization key corresponding to a given power of
+        Returns whether a relinearization key corresponding to a given power of
         the secret key exists.
 
         @param[in] key_power The power of the secret key
+        @throws std::invalid_argument if kew_power is less than 2
         */
-        inline bool has_key(std::size_t key_power) const noexcept
+        inline bool has_key(std::size_t key_power) const
         {
-            return (key_power >= 2) && (keys_.size() >= key_power - 1);
+            auto index = get_index(key_power);
+            return index < keys_.size();
         }
     };
 }
