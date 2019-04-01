@@ -287,7 +287,6 @@ namespace seal
         {
             parms_id_ = parms_id_zero;
             is_ntt_form_ = false;
-            size_capacity_ = 2;
             size_ = 0;
             poly_modulus_degree_ = 0;
             coeff_mod_count_ = 0;
@@ -469,16 +468,6 @@ namespace seal
         }
 
         /**
-        Returns the capacity of the allocation. This means the largest size
-        of the ciphertext that can be stored in the current allocation with
-        the current encryption parameters.
-        */
-        inline size_type size_capacity() const noexcept
-        {
-            return size_capacity_;
-        }
-
-        /**
         Returns the size of the ciphertext.
         */
         inline size_type size() const noexcept
@@ -492,6 +481,18 @@ namespace seal
         inline size_type uint64_count_capacity() const noexcept
         {
             return data_.capacity();
+        }
+
+        /**
+        Returns the capacity of the allocation. This means the largest size
+        of the ciphertext that can be stored in the current allocation with
+        the current encryption parameters.
+        */
+        inline size_type size_capacity() const noexcept
+        {
+            size_type poly_uint64_count = poly_modulus_degree_ * coeff_mod_count_;
+            return poly_uint64_count ?
+                uint64_count_capacity() / poly_uint64_count : size_type(0);
         }
 
         /**
@@ -636,8 +637,6 @@ namespace seal
         parms_id_type parms_id_ = parms_id_zero;
 
         bool is_ntt_form_ = false;
-
-        size_type size_capacity_ = 2;
 
         size_type size_ = 0;
 
