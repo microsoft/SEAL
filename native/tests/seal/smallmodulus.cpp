@@ -3,6 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "seal/smallmodulus.h"
+#include "seal/defaultparams.h"
 
 using namespace seal;
 using namespace std;
@@ -88,5 +89,28 @@ namespace SEALTest
         ASSERT_EQ(mod2.const_ratio()[0], mod.const_ratio()[0]);
         ASSERT_EQ(mod2.const_ratio()[1], mod.const_ratio()[1]);
         ASSERT_EQ(mod2.const_ratio()[2], mod.const_ratio()[2]);
+    }
+
+    TEST(SmallModlusTest, GeneratePrimes)
+    {
+        SmallModulus mod;
+        mod = DefaultParams::small_mods_30bit(0);
+        ASSERT_TRUE(is_prime(mod));
+
+        mod = DefaultParams::small_mods_30bit(0).value() *
+            DefaultParams::small_mods_30bit(1).value();
+        ASSERT_FALSE(is_prime(mod));
+
+        vector<SmallModulus> primes = get_primes(50, 8, 0x1 << 16);
+        ASSERT_EQ(primes.size(), 8);
+        for (size_t i = 0; i < primes.size(); i++)
+        {
+            if (i)
+            {
+                ASSERT_TRUE(primes[i].value() < primes[i - 1].value());
+            }
+            ASSERT_EQ(primes[i].bit_count(), 50);
+            ASSERT_TRUE(is_prime(primes[i]));
+        }
     }
 }
