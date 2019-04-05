@@ -66,30 +66,6 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_IsValidFor(void *thisptr, void *contextptr, bool *result)
-{
-    SecretKey *skey = FromVoid<SecretKey>(thisptr);
-    IfNullRet(skey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(contextptr);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = skey->is_valid_for(sharedctx);
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL SecretKey_IsMetadataValidFor(void *thisptr, void *contextptr, bool *result)
-{
-    SecretKey *skey = FromVoid<SecretKey>(thisptr);
-    IfNullRet(skey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(contextptr);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = skey->is_metadata_valid_for(sharedctx);
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL SecretKey_ParmsId(void *thisptr, uint64_t *parms_id)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);

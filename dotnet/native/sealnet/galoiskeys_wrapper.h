@@ -39,8 +39,4 @@ SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetParmsId(void *thisptr, uint64_t *pa
 
 SEALNETNATIVE HRESULT SEALCALL GaloisKeys_SetParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_IsValidFor(void *thisptr, void *contextptr, bool *result);
-
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_IsMetadataValidFor(void *thisptr, void *contextptr, bool *result);
-
 SEALNETNATIVE HRESULT SEALCALL GaloisKeys_Pool(void *thisptr, void **pool);

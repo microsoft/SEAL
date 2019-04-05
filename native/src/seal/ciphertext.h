@@ -552,11 +552,13 @@ namespace seal
         inline void load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
-            unsafe_load(stream);
-            if (!is_valid_for(*this, std::move(context)))
+            Ciphertext new_data(pool());
+            new_data.unsafe_load(stream);
+            if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::invalid_argument("ciphertext data is invalid");
             }
+            std::swap(*this, new_data);
         }
 
         /**

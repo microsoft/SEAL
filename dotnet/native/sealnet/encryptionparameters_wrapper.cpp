@@ -134,22 +134,6 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_GetScheme(void *thisptr, int *scheme)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_GetParmsId(void *thisptr, uint64_t *parms_id)
-{
-    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
-    IfNullRet(params, E_POINTER);
-    IfNullRet(parms_id, E_POINTER);
-
-    // We will assume the array is always size sha3_block_uint64_count
-    const auto &parmsid = params->parms_id();
-    for (size_t i = 0; i < util::HashFunction::sha3_block_uint64_count; i++)
-    {
-        parms_id[i] = parmsid[i];
-    }
-
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL EncParams_GetPlainModulus(void *thisptr, void **plain_modulus)
 {
     EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);

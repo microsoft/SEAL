@@ -139,45 +139,10 @@ namespace Microsoft.Research.SEAL
 
             UnsafeLoad(stream);
 
-            if (!IsValidFor(context))
+            if (!ValCheck.IsValidFor(this, context))
             {
                 throw new ArgumentException("PublicKey data is invalid for the context");
             }
-        }
-
-        /// <summary>
-        /// Check whether the current PublicKey is valid for a given SEALContext. If
-        /// the given SEALContext is not set, the encryption parameters are invalid,
-        /// or the PublicKey data does not match the SEALContext, this function returns
-        /// false. Otherwise, returns true.
-        /// </summary>
-        /// <param name="context">The SEALContext</param>
-        /// <exception cref="ArgumentNullException">if context is null</exception>
-        public bool IsValidFor(SEALContext context)
-        {
-            if (null == context)
-                throw new ArgumentNullException(nameof(context));
-
-            NativeMethods.PublicKey_IsValidFor(NativePtr, context.NativePtr, out bool result);
-            return result;
-        }
-
-        /// <summary>
-        /// Check whether the current PublicKey is valid for a given SEALContext. If
-        /// the given SEALContext is not set, the encryption parameters are invalid,
-        /// or the PublicKey data does not match the SEALContext, this function returns
-        /// false. Otherwise, returns true. This function only checks the metadata
-        /// and not the public key data itself.
-        /// </summary>
-        /// <param name="context">The SEALContext</param>
-        /// <exception cref="ArgumentNullException">if context is null</exception>
-        public bool IsMetadataValidFor(SEALContext context)
-        {
-            if (null == context)
-                throw new ArgumentNullException(nameof(context));
-
-            NativeMethods.PublicKey_IsMetadataValidFor(NativePtr, context.NativePtr, out bool result);
-            return result;
         }
 
         /// <summary>

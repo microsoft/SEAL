@@ -67,30 +67,6 @@ SEALNETNATIVE HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_IsValidFor(void *thisptr, void *context, bool *result)
-{
-    PublicKey *pkey = FromVoid<PublicKey>(thisptr);
-    IfNullRet(pkey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = pkey->is_valid_for(sharedctx);
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL PublicKey_IsMetadataValidFor(void *thisptr, void *context, bool *result)
-{
-    PublicKey *pkey = FromVoid<PublicKey>(thisptr);
-    IfNullRet(pkey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = pkey->is_metadata_valid_for(sharedctx);
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);

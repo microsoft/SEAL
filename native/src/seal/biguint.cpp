@@ -131,7 +131,7 @@ namespace seal
         decltype(value_) new_value;
         if (new_uint64_count > 0)
         {
-            new_value.swap_with(allocate_uint(new_uint64_count, pool_));
+            new_value = allocate_uint(new_uint64_count, pool_);
         }
 
         // Copy over old value.
@@ -145,7 +145,7 @@ namespace seal
         reset();
 
         // Update class.
-        value_.swap_with(new_value);
+        swap(value_, new_value);
         bit_count_ = bit_count;
     }
 

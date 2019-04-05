@@ -171,30 +171,6 @@ SEALNETNATIVE HRESULT SEALCALL RelinKeys_SetParmsId(void *thisptr, uint64_t *par
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_IsValidFor(void *thisptr, void *context, bool *result)
-{
-    RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
-    IfNullRet(keys, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = keys->is_valid_for(sharedctx);
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_IsMetadataValidFor(void *thisptr, void *context, bool *result)
-{
-    RelinKeys *keys = FromVoid<RelinKeys>(thisptr);
-    IfNullRet(keys, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = keys->is_metadata_valid_for(sharedctx);
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL RelinKeys_Pool(void *thisptr, void **pool)
 {
     RelinKeys *keys = FromVoid<RelinKeys>(thisptr);

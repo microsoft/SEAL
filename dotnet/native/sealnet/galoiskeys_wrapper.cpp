@@ -15,7 +15,7 @@ using namespace sealnet;
 
 namespace
 {
-    HRESULT GetKeyFromVector(const vector<Ciphertext> &key, uint64_t *count, void **ciphers)
+    HRESULT GetKeyFromVector(const vector<PublicKey> &key, uint64_t *count, void **ciphers)
     {
         *count = key.size();
 
@@ -25,10 +25,10 @@ namespace
             return S_OK;
         }
 
-        auto ciphertexts = reinterpret_cast<Ciphertext**>(ciphers);
+        auto pkeys = reinterpret_cast<PublicKey**>(ciphers);
         for (size_t i = 0; i < key.size(); i++)
         {
-            ciphertexts[i] = new Ciphertext(key[i]);
+            pkeys[i] = new PublicKey(key[i]);
         }
 
         return S_OK;
@@ -191,30 +191,6 @@ SEALNETNATIVE HRESULT SEALCALL GaloisKeys_SetParmsId(void *thisptr, uint64_t *pa
     IfNullRet(parms_id, E_POINTER);
 
     CopyParmsId(parms_id, keys->parms_id());
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_IsValidFor(void *thisptr, void *contextptr, bool *result)
-{
-    GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
-    IfNullRet(keys, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(contextptr);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = keys->is_valid_for(sharedctx);
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_IsMetadataValidFor(void *thisptr, void *contextptr, bool *result)
-{
-    GaloisKeys *keys = FromVoid<GaloisKeys>(thisptr);
-    IfNullRet(keys, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(contextptr);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = keys->is_metadata_valid_for(sharedctx);
     return S_OK;
 }
 

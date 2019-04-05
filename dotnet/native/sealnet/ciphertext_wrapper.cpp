@@ -460,30 +460,6 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Release(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsValidFor(void *thisptr, void *context, bool *result)
-{
-    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
-    IfNullRet(cipher, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = cipher->is_valid_for(sharedctx);
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsMetadataValidFor(void *thisptr, void *context, bool *result)
-{
-    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
-    IfNullRet(cipher, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = cipher->is_metadata_valid_for(sharedctx);
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsTransparent(void *thisptr, bool *result)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);

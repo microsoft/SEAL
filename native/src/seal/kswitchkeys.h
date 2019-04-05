@@ -30,11 +30,8 @@ namespace seal
     other thread is concurrently mutating it. This is due to the underlying
     data structure storing the keyswitching keys not being thread-safe.
 
-    @see SecretKey for the class that stores the secret key.
-    @see PublicKey for the class that stores the public key.
     @see RelinKeys for the class that stores the relinearization keys.
     @see GaloisKeys for the class that stores the Galois keys.
-    @see KeyGenerator for the class that generates the keyswitching keys.
     */
     class KSwitchKeys
     {
@@ -44,7 +41,7 @@ namespace seal
 
     public:
         /**
-        Creates an empty set of keyswitching keys.
+        Creates an empty KSwitchKeys.
         */
         KSwitchKeys() = default;
 
@@ -85,7 +82,7 @@ namespace seal
         }
 
         /**
-        Returns a reference to the keyswitching keys data.
+        Returns a reference to the KSwitchKeys data.
         */
         inline auto &data() noexcept
         {
@@ -93,11 +90,41 @@ namespace seal
         }
 
         /**
-        Returns a const reference to the keyswitching keys data.
+        Returns a const reference to the KSwitchKeys data.
         */
         inline auto &data() const noexcept
         {
             return keys_;
+        }
+
+        /**
+        Returns a reference to a keyswitching key at a given index.
+
+        @param[in] index The index of the keyswitching key
+        @throws std::invalid_argument if the key does not exist
+        */
+        inline auto &data(std::size_t index)
+        {
+            if (index >= keys_.size() || keys_[index].empty())
+            {
+                throw std::invalid_argument("keyswitching key does not exist");
+            }
+            return keys_[index];
+        }
+
+        /**
+        Returns a const reference to a keyswitching key at a given index.
+
+        @param[in] index The index of the keyswitching key
+        @throws std::invalid_argument if the key at the given index does not exist
+        */
+        inline const auto &data(std::size_t index) const
+        {
+            if (index >= keys_.size() || keys_[index].empty())
+            {
+                throw std::invalid_argument("keyswitching key does not exist");
+            }
+            return keys_[index];
         }
 
         /**
@@ -156,11 +183,14 @@ namespace seal
         inline void load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
-            unsafe_load(stream);
-            if (!is_valid_for(*this, std::move(context)))
+            KSwitchKeys new_keys;
+            new_keys.pool_ = pool_;
+            new_keys.unsafe_load(stream);
+            if (!is_valid_for(new_keys, std::move(context)))
             {
                 throw std::invalid_argument("KSwitchKeys data is invalid");
             }
+            std::swap(*this, new_keys);
         }
 
         /**

@@ -74,7 +74,9 @@ namespace seal
         */
         SecretKey &operator =(const SecretKey &assign)
         {
-            sk_ = assign.sk_;
+            Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+            new_sk = assign.sk_;
+            std::swap(sk_, new_sk);
             return *this;
         }
 
@@ -124,7 +126,10 @@ namespace seal
         */
         inline void unsafe_load(std::istream &stream)
         {
-            sk_.unsafe_load(stream);
+            // We use a fresh memory pool with `clear_on_destruction' enabled.
+            Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+            new_sk.unsafe_load(stream);
+            std::swap(sk_, new_sk);
         }
 
         /**
@@ -142,11 +147,13 @@ namespace seal
         inline void load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
-            unsafe_load(stream);
-            if (!is_valid_for(*this, std::move(context)))
+            SecretKey new_sk;
+            new_sk.unsafe_load(stream);
+            if (!is_valid_for(new_sk, std::move(context)))
             {
                 throw std::invalid_argument("SecretKey data is invalid");
             }
+            std::swap(*this, new_sk);
         }
 
         /**

@@ -10,6 +10,7 @@
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
 #include "seal/kswitchkeys.h"
+#include "seal/util/common.h"
 
 namespace seal
 {
@@ -45,30 +46,14 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if galois_elt is not valid
         */
-        inline static std::size_t get_index(std::size_t galois_elt)
+        inline static std::size_t get_index(std::uint64_t galois_elt)
         {
             // Verify parameters
             if (!(galois_elt & 1))
             {
                 throw std::invalid_argument("galois_elt is not valid");
             }
-            return (galois_elt - 1) >> 1;
-        }
-
-        /**
-        Returns a const reference to a Galois key. The returned Galois key corresponds
-        to the given Galois element.
-
-        @param[in] galois_elt The Galois element
-        @throws std::invalid_argument if the key corresponding to galois_elt does not exist
-        */
-        inline auto &key(std::uint64_t galois_elt) const
-        {
-            if (!has_key(galois_elt))
-            {
-                throw std::invalid_argument("galois_elt does not exist");
-            }
-            return keys_[get_index(galois_elt)];
+            return util::safe_cast<std::size_t>((galois_elt - 1) >> 1);
         }
 
         /**
@@ -79,8 +64,20 @@ namespace seal
         */
         inline bool has_key(std::uint64_t galois_elt) const
         {
-            auto index = get_index(galois_elt);
-            return index < keys_.size() && !keys_[index].empty();
+            std::size_t index = get_index(galois_elt);
+            return data().size() > index && !data()[index].empty();
+        }
+
+        /**
+        Returns a const reference to a Galois key. The returned Galois key corresponds
+        to the given Galois element.
+
+        @param[in] galois_elt The Galois element
+        @throws std::invalid_argument if the key corresponding to galois_elt does not exist
+        */
+        inline const auto &key(std::uint64_t galois_elt) const
+        {
+            return KSwitchKeys::data(get_index(galois_elt));
         }
     };
 }

@@ -71,10 +71,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetScale(void *thisptr, double scale);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Equals(void *thisptr, void *other, bool *result);
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_IsValidFor(void *thisptr, void *contextpr, bool *result);
-
-SEALNETNATIVE HRESULT SEALCALL Plaintext_IsMetadataValidFor(void *thisptr, void *contextpr, bool *result);
-
 SEALNETNATIVE HRESULT SEALCALL Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Pool(void *thisptr, void **pool);

@@ -271,17 +271,6 @@ namespace seal
         }
 
         /**
-        Swaps the current array with a given array.
-        */
-        inline void swap_with(IntArray<T> &other) noexcept
-        {
-            std::swap(pool_, other.pool_);
-            std::swap(capacity_, other.capacity_);
-            std::swap(size_, other.size_);
-            data_.swap_with(other.data_);
-        }
-
-        /**
         Returns the currently used MemoryPoolHandle.
         */
         inline MemoryPoolHandle pool() const noexcept
@@ -322,7 +311,7 @@ namespace seal
             // Create new allocation and copy over value
             auto new_data(util::allocate<T>(capacity, pool_));
             std::copy_n(cbegin(), copy_size, new_data.get());
-            data_.swap_with(new_data);
+            std::swap(data_, new_data);
 
             // Set the coeff_count and capacity
             capacity_ = capacity;
@@ -368,7 +357,7 @@ namespace seal
             auto new_data(util::allocate<T>(size, pool_));
             std::copy_n(cbegin(), size_, new_data.get());
             std::fill(new_data.get() + size_, new_data.get() + size, T{ 0 });
-            data_.swap_with(new_data);
+            std::swap(data_, new_data);
 
             // Set the coeff_count and capacity
             capacity_ = size;

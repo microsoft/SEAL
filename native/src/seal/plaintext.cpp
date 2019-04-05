@@ -226,6 +226,8 @@ namespace seal
 
     void Plaintext::unsafe_load(istream &stream)
     {
+        Plaintext new_data(data_.pool());
+
         auto old_except_mask = stream.exceptions();
         try
         {
@@ -239,24 +241,21 @@ namespace seal
             stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
 
             // Load the data
-            IntArray<pt_coeff_type> new_data(data_.pool());
-            new_data.load(stream);
+            new_data.data_.load(stream);
 
             // Set the parms_id
-            parms_id_ = parms_id;
+            new_data.parms_id_ = parms_id;
 
             // Set the scale
-            scale_ = scale;
-
-            // Set the data
-            data_.swap_with(new_data);
+            new_data.scale_ = scale;
         }
         catch (const exception &)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
+
+        swap(*this, new_data);
     }
 }

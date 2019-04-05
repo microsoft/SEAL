@@ -162,6 +162,8 @@ namespace seal
 
     void Ciphertext::unsafe_load(istream &stream)
     {
+        Ciphertext new_data(data_.pool());
+
         auto old_except_mask = stream.exceptions();
         try
         {
@@ -182,31 +184,28 @@ namespace seal
             stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
 
             // Load the data
-            IntArray<ct_coeff_type> new_data(data_.pool());
-            new_data.load(stream);
-            if (unsigned_neq(new_data.size(),
+            new_data.data_.load(stream);
+            if (unsigned_neq(new_data.data_.size(),
                 mul_safe(size64, poly_modulus_degree64, coeff_mod_count64)))
             {
                 throw invalid_argument("ciphertext data is invalid");
             }
 
             // Set values
-            parms_id_ = parms_id;
-            is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
-            size_ = safe_cast<size_type>(size64);
-            poly_modulus_degree_ = safe_cast<size_type>(poly_modulus_degree64);
-            coeff_mod_count_ = safe_cast<size_type>(coeff_mod_count64);
-            scale_ = scale;
-
-            // Set the data
-            data_.swap_with(new_data);
+            new_data.parms_id_ = parms_id;
+            new_data.is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
+            new_data.size_ = safe_cast<size_type>(size64);
+            new_data.poly_modulus_degree_ = safe_cast<size_type>(poly_modulus_degree64);
+            new_data.coeff_mod_count_ = safe_cast<size_type>(coeff_mod_count64);
+            new_data.scale_ = scale;
         }
         catch (const exception &)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
+
+        swap(*this, new_data);
     }
 }

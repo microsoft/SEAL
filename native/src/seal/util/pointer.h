@@ -144,19 +144,6 @@ namespace seal
                 acquire(other);
             }
 
-            inline void swap_with(Pointer<SEAL_BYTE> &other) noexcept
-            {
-                std::swap(data_, other.data_);
-                std::swap(head_, other.head_);
-                std::swap(item_, other.item_);
-                std::swap(alias_, other.alias_);
-            }
-
-            inline void swap_with(Pointer<SEAL_BYTE> &&other) noexcept
-            {
-                swap_with(other);
-            }
-
             ~Pointer() noexcept
             {
                 release();
@@ -444,19 +431,6 @@ namespace seal
                 acquire(other);
             }
 
-            inline void swap_with(Pointer<T> &other) noexcept
-            {
-                std::swap(data_, other.data_);
-                std::swap(head_, other.head_);
-                std::swap(item_, other.item_);
-                std::swap(alias_, other.alias_);
-            }
-
-            inline void swap_with(Pointer<T> &&other) noexcept
-            {
-                swap_with(other);
-            }
-
             ~Pointer() noexcept
             {
                 release();
@@ -678,23 +652,9 @@ namespace seal
                 other.alias_ = false;
             }
 
-            void acquire(ConstPointer<SEAL_BYTE> &&other) noexcept
+            inline void acquire(ConstPointer<SEAL_BYTE> &&other) noexcept
             {
                 acquire(other);
-            }
-
-            inline void swap_with(ConstPointer<SEAL_BYTE> &other) noexcept
-            {
-                std::swap(data_, other.data_);
-                std::swap(head_, other.head_);
-                std::swap(item_, other.item_);
-                std::swap(alias_, other.alias_);
-            }
-
-
-            inline void swap_with(ConstPointer<SEAL_BYTE> &&other) noexcept
-            {
-                swap_with(other);
             }
 
             ~ConstPointer() noexcept
@@ -1093,19 +1053,6 @@ namespace seal
             inline void acquire(Pointer<SEAL_BYTE> &&other)
             {
                 acquire(other);
-            }
-
-            inline void swap_with(ConstPointer<T> &other) noexcept
-            {
-                std::swap(data_, other.data_);
-                std::swap(head_, other.head_);
-                std::swap(item_, other.item_);
-                std::swap(alias_, other.alias_);
-            }
-
-            inline void swap_with(ConstPointer<T> &&other) noexcept
-            {
-                swap_with(other);
             }
 
             ~ConstPointer() noexcept

@@ -37,8 +37,4 @@ SEALNETNATIVE HRESULT SEALCALL RelinKeys_GetParmsId(void *thisptr, uint64_t *par
 
 SEALNETNATIVE HRESULT SEALCALL RelinKeys_SetParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_IsValidFor(void *thisptr, void *context, bool *result);
-
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_IsMetadataValidFor(void *thisptr, void *context, bool *result);
-
 SEALNETNATIVE HRESULT SEALCALL RelinKeys_Pool(void *thisptr, void **pool);
