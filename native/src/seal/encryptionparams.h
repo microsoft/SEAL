@@ -398,6 +398,50 @@ namespace seal
 
         parms_id_type parms_id_ = parms_id_zero;
     };
+
+    /**
+    For a given poly_modulus_degree, choose the maximum 128-bit secure coeff
+    modulus bit size according to HomomorphicEncryption.org, and generate
+    coeff_modulus_count number of primes of similar sizes in increasing order.
+    */
+    // \todo Ordering of coeff_modulus needs some more consideration.
+    // It seems beneficial to use decreasing order and set the max to last.
+    inline std::vector<SmallModulus> get_coeff_modulus(
+        std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
+    {
+        std::size_t total_coeff_modulus_bit_count = util::global_variables::
+            max_secure_coeff_modulus_bit_count.at(poly_modulus_degree);
+        std::size_t count_small, bit_size_small, count_large, bit_size_large;
+        bit_size_small = total_coeff_modulus_bit_count / coeff_modulus_count;
+        bit_size_large = bit_size_small + 1;
+        count_large = total_coeff_modulus_bit_count -
+            bit_size_small * coeff_modulus_count;
+        count_small = coeff_modulus_count - count_large;
+
+        std::vector<SmallModulus> destination;
+        std::vector<SmallModulus> temp;
+        if (count_small)
+        {
+            temp = get_primes(bit_size_small, count_small, poly_modulus_degree);
+            // reverse order
+            while (!temp.empty())
+            {
+                destination.push_back(temp.back());
+                temp.pop_back();
+            }
+        }
+        if (count_large)
+        {
+            temp = get_primes(bit_size_large, count_large, poly_modulus_degree);
+            // reverse order
+            while (!temp.empty())
+            {
+                destination.push_back(temp.back());
+                temp.pop_back();
+            }
+        }
+    }
+
 }
 
 /**
