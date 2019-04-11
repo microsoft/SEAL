@@ -164,5 +164,55 @@ namespace seal
 			}
 			return 0;
 		}
+
+		/**
+		Sort the coefficient modulus vector inplace for the best performance.
+		The rules are:
+		put the maximum prime to the last (minimize noise growth in switch_key),
+		sort the rest in decreasing order (remove modular reductions in ModSwitch).
+		
+		@param[in] coeff_modulus The coeff_modulus vector to sort.
+		*/
+		inline static void sort_coeff_modulus(std::vector<SmallModulus> &coeff_modulus)
+		{
+			bool compare = [](const SmallModulus &a, const SmallModulus &b)
+			{
+				return a.value() > b.value();
+			};
+			std::sort(coeff_modulus.begin(), coeff_modulus.end(), compare);
+			std::rotate(coeff_modulus.begin(), coeff_modulus.begin() + 1, coeff_modulus.end());
+		}
+
+		/**
+    For a given poly_modulus_degree, choose the maximum 128-bit secure coeff
+    modulus bit size according to HomomorphicEncryption.org, and generate
+    coeff_modulus_count number of primes of similar sizes in increasing order,
+		except that the maximum prime is set to the last position.
+    */
+    inline std::vector<SmallModulus> get_coeff_modulus(
+        std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
+    {
+        std::size_t total_coeff_modulus_bit_count = util::global_variables::
+            max_secure_coeff_modulus_bit_count.at(poly_modulus_degree);
+        std::size_t count_small, bit_size_small, count_large, bit_size_large;
+        bit_size_small = total_coeff_modulus_bit_count / coeff_modulus_count;
+        bit_size_large = bit_size_small + 1;
+        count_large = total_coeff_modulus_bit_count -
+            bit_size_small * coeff_modulus_count;
+        count_small = coeff_modulus_count - count_large;
+
+        std::vector<SmallModulus> destination;
+        std::vector<SmallModulus> temp;
+				if (count_large)
+        {
+            destination = get_primes(bit_size_large, count_large, poly_modulus_degree);
+        }
+        if (count_small)
+        {
+            temp = get_primes(bit_size_small, count_small, poly_modulus_degree);
+						destination.insert(destination.end(), temp.begin(), temp.end());
+        }
+				std::rotate(destination.begin(), destination.begin() + 1, destination.end());
+    }
 	};
 }
