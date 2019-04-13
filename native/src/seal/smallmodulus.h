@@ -186,4 +186,58 @@ namespace seal
 
         std::size_t uint64_count_ = 0;
     };
+
+
+    /**
+    Returns true if value is a prime based on Miller-Rabin primality test.
+    @par[in] in The SmallModulus to be tested.
+    @par[in] num_rounds The number of rounds of testing to be performed.
+    Note: Input uses SmallModulus for faster modular arithmetic required in
+    Miller-Rabin test, in comparison to using std::uint64_t.
+    */
+    bool is_prime(const SmallModulus &input, std::size_t num_rounds = 40);
+
+    /**
+    Returns in decreasing order a vector of the largest prime numbers with a
+    given bitsize that all support NTTs of a given size.
+    @par[in] bit_size the bit_size of primes to be generated, no less than 2 and
+    no larger than 62
+    @par[in] count the total number of primes to be generated, larger than 0
+    @par[in] ntt_size equals to poly_modulus_degree in EncryptionParms, so that
+    all primes support NTT for a given parameter set
+    @throws std::logic_error if cannot find enough qualifying primes
+    */
+    inline std::vector<SmallModulus> get_primes(std::size_t bit_size,
+        std::size_t count, std::size_t ntt_size)
+    {
+        if (bit_size >= 63 || bit_size <= 1)
+        {
+            throw std::invalid_argument("A prime must have at least 2 bit and at most 62 bits.");
+        }
+        if (0 == count)
+        {
+            throw std::invalid_argument("The count of primes to be generated must be positive.");
+        }
+        std::vector<SmallModulus> destination(count);
+        auto dest = destination.begin();
+        std::uint64_t factor = 2 * static_cast<std::uint64_t>(ntt_size);
+        // start with 2^bit_size - 2 * ntt_size + 1
+        std::uint64_t value = (uint64_t(0x1) << bit_size) - factor + 1;
+        while (count > 0 && value > (uint64_t(0x1) << (bit_size - 1)))
+        {
+            *dest = value;
+            if (is_prime(*dest))
+            {
+                count--;
+                dest++;
+            }
+            value -= factor;
+        }
+
+        if (count > 0)
+        {
+            throw std::logic_error("Cannot find enough qualifying primes");
+        }
+        return destination;
+    }
 }
