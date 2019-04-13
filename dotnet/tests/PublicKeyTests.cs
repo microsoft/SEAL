@@ -105,8 +105,8 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => key.Load(null, new MemoryStream()));
             Assert.ThrowsException<ArgumentException>(() => key.Load(context, new MemoryStream()));
 
-            Assert.ThrowsException<ArgumentNullException>(() => key.IsValidFor(null));
-            Assert.ThrowsException<ArgumentNullException>(() => key.IsMetadataValidFor(null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(key, null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(key, null));
         }
     }
 }

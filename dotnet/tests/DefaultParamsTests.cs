@@ -17,22 +17,24 @@ namespace SEALNetTest
             List<SmallModulus> coeffs = new List<SmallModulus>(DefaultParams.CoeffModulus128(4096));
 
             Assert.IsNotNull(coeffs);
-            Assert.AreEqual(2, coeffs.Count);
-            Assert.AreEqual(0x007fffffff380001ul, coeffs[0].Value);
-            Assert.AreEqual(0x003fffffff000001ul, coeffs[1].Value);
+            Assert.AreEqual(3, coeffs.Count);
+            Assert.AreEqual(0xffffee001ul, coeffs[0].Value);
+            Assert.AreEqual(0xffffc4001ul, coeffs[1].Value);
+            Assert.AreEqual(0x1ffffe0001ul, coeffs[2].Value);
 
             coeffs = new List<SmallModulus>(DefaultParams.CoeffModulus128(16384));
 
             Assert.IsNotNull(coeffs);
-            Assert.AreEqual(8, coeffs.Count);
-            Assert.AreEqual(0x007fffffff380001ul, coeffs[0].Value);
-            Assert.AreEqual(0x007ffffffef00001ul, coeffs[1].Value);
-            Assert.AreEqual(0x007ffffffeac0001ul, coeffs[2].Value);
-            Assert.AreEqual(0x007ffffffe700001ul, coeffs[3].Value);
-            Assert.AreEqual(0x007ffffffe600001ul, coeffs[4].Value);
-            Assert.AreEqual(0x007ffffffe4c0001ul, coeffs[5].Value);
-            Assert.AreEqual(0x003fffffff000001ul, coeffs[6].Value);
-            Assert.AreEqual(0x003ffffffef40001ul, coeffs[7].Value);
+            Assert.AreEqual(9, coeffs.Count);
+            Assert.AreEqual(0xfffffffd8001ul, coeffs[0].Value);
+            Assert.AreEqual(0xfffffffa0001ul, coeffs[1].Value);
+            Assert.AreEqual(0xfffffff00001ul, coeffs[2].Value);
+            Assert.AreEqual(0x1fffffff68001ul, coeffs[3].Value);
+            Assert.AreEqual(0x1fffffff50001ul, coeffs[4].Value);
+            Assert.AreEqual(0x1ffffffee8001ul, coeffs[5].Value);
+            Assert.AreEqual(0x1ffffffea0001ul, coeffs[6].Value);
+            Assert.AreEqual(0x1ffffffe88001ul, coeffs[7].Value);
+            Assert.AreEqual(0x1ffffffe48001ul, coeffs[8].Value);
         }
 
         [TestMethod]
@@ -48,17 +50,19 @@ namespace SEALNetTest
             List<SmallModulus> coeffs = new List<SmallModulus>(DefaultParams.CoeffModulus192(4096));
 
             Assert.IsNotNull(coeffs);
-            Assert.AreEqual(2, coeffs.Count);
-            Assert.AreEqual(0x0000003fffe80001ul, coeffs[0].Value);
-            Assert.AreEqual(0x0000001ffffc0001ul, coeffs[1].Value);
+            Assert.AreEqual(3, coeffs.Count);
+            Assert.AreEqual(0x1ffc001ul, coeffs[0].Value);
+            Assert.AreEqual(0x1fce001ul, coeffs[1].Value);
+            Assert.AreEqual(0x1fc0001ul, coeffs[2].Value);
 
             coeffs = new List<SmallModulus>(DefaultParams.CoeffModulus192(8192));
 
             Assert.IsNotNull(coeffs);
-            Assert.AreEqual(3, coeffs.Count);
-            Assert.AreEqual(0x0007ffffff9c0001ul, coeffs[0].Value);
-            Assert.AreEqual(0x0007ffffff900001ul, coeffs[1].Value);
-            Assert.AreEqual(0x0003ffffffb80001ul, coeffs[2].Value);
+            Assert.AreEqual(4, coeffs.Count);
+            Assert.AreEqual(0x3ffffac001ul, coeffs[0].Value);
+            Assert.AreEqual(0x3ffff54001ul, coeffs[1].Value);
+            Assert.AreEqual(0x3ffff48001ul, coeffs[2].Value);
+            Assert.AreEqual(0x3ffff28001ul, coeffs[3].Value);
         }
 
         [TestMethod]
@@ -75,14 +79,15 @@ namespace SEALNetTest
 
             Assert.IsNotNull(coeffs);
             Assert.AreEqual(1, coeffs.Count);
-            Assert.AreEqual(0x03ffffffff040001ul, coeffs[0].Value);
+            Assert.AreEqual(0x3ffffffff040001ul, coeffs[0].Value);
 
             coeffs = new List<SmallModulus>(DefaultParams.CoeffModulus256(8192));
 
             Assert.IsNotNull(coeffs);
-            Assert.AreEqual(2, coeffs.Count);
-            Assert.AreEqual(0x07ffffffffcc0001ul, coeffs[0].Value);
-            Assert.AreEqual(0x07ffffffffb00001ul, coeffs[1].Value);
+            Assert.AreEqual(3, coeffs.Count);
+            Assert.AreEqual(0x7ffffec001ul, coeffs[0].Value);
+            Assert.AreEqual(0x7ffffb0001ul, coeffs[1].Value);
+            Assert.AreEqual(0xfffffdc001ul, coeffs[2].Value);
         }
 
         [TestMethod]

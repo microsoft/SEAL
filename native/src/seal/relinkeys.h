@@ -47,7 +47,7 @@ namespace seal
         it exists in the backing KSwitchKeys.
 
         @param[in] key_power The power of the secret key
-        @throws std::invalid_argument if kew_power is less than 2
+        @throws std::invalid_argument if key_power is less than 2
         */
         inline static std::size_t get_index(std::size_t key_power)
         {
@@ -63,7 +63,7 @@ namespace seal
         the secret key exists.
 
         @param[in] key_power The power of the secret key
-        @throws std::invalid_argument if kew_power is less than 2
+        @throws std::invalid_argument if key_power is less than 2
         */
         inline bool has_key(std::size_t key_power) const
         {

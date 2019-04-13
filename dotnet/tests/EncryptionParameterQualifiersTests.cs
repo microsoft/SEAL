@@ -15,10 +15,11 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
 
             Assert.IsTrue(context.ContextDataFirst.Qualifiers.ParametersSet);
-            Assert.IsFalse(context.ContextDataFirst.Qualifiers.UsingBatching);
+            Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingBatching);
             Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingFastPlainLift);
             Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingFFT);
             Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(context.ContextDataFirst.Qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingNTT);
 
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
@@ -34,6 +35,7 @@ namespace SEALNetTest
             Assert.IsFalse(context2.ContextDataFirst.Qualifiers.UsingFastPlainLift);
             Assert.IsTrue(context2.ContextDataFirst.Qualifiers.UsingFFT);
             Assert.IsTrue(context2.ContextDataFirst.Qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(context.ContextDataFirst.Qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context2.ContextDataFirst.Qualifiers.UsingNTT);
 
             EncryptionParameterQualifiers qualifiers = new EncryptionParameterQualifiers(context2.ContextDataFirst.Qualifiers);
@@ -44,6 +46,7 @@ namespace SEALNetTest
             Assert.IsFalse(qualifiers.UsingFastPlainLift);
             Assert.IsTrue(qualifiers.UsingFFT);
             Assert.IsTrue(qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(qualifiers.UsingNTT);
         }
 

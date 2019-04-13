@@ -20,19 +20,18 @@ namespace seal
     */
     struct Ciphertext::CiphertextPrivateHelper
     {
-        static void resize(seal::Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree,
+        static void resize(Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree,
             size_t coeff_mod_count)
         {
             ciphertext->resize_internal(size, poly_modulus_degree, coeff_mod_count);
         }
 
-        static void set_ntt_form(seal::Ciphertext *ciphertext, bool is_ntt_form)
+        static void set_ntt_form(Ciphertext *ciphertext, bool is_ntt_form)
         {
             ciphertext->is_ntt_form_ = is_ntt_form;
         }
     };
 }
-
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
 {

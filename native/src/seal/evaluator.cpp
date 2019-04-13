@@ -2412,7 +2412,7 @@ namespace seal
         // Verify parameters
         if (!(galois_elt & 1) || unsigned_geq(galois_elt, m))
         {
-            throw invalid_argument("galois element is not valid");
+            throw invalid_argument("Galois element is not valid");
         }
         if (encrypted_size > 2)
         {

@@ -86,7 +86,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the current number of keyswitching keys.
+        /// Returns the current number of keyswitching keys. Only keys that are
+        /// non-empty are counted.
         /// </summary>
         public ulong Size
         {

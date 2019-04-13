@@ -47,6 +47,16 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_Destroy(void *thisptr)
     return S_OK;
 }
 
+SEALNETNATIVE HRESULT SEALCALL SEALContext_KeyParmsId(void *thisptr, uint64_t *parms_id)
+{
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
+    IfNullRet(context, E_POINTER);
+    IfNullRet(parms_id, E_POINTER);
+
+    CopyParmsId(context->key_parms_id(), parms_id);
+    return S_OK;
+}
+
 SEALNETNATIVE HRESULT SEALCALL SEALContext_ParmsIdFirst(void *thisptr, uint64_t *parms_id)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
@@ -74,6 +84,18 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_ParametersSet(void *thisptr, bool *pa
     IfNullRet(params_set, E_POINTER);
 
     *params_set = context->parameters_set();
+    return S_OK;
+}
+
+SEALNETNATIVE HRESULT SEALCALL SEALContext_KeyContextData(void *thisptr, void **context_data)
+{
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
+    IfNullRet(context, E_POINTER);
+    IfNullRet(context_data, E_POINTER);
+
+    // The pointer that is returned should not be deleted.
+    auto data = context->key_context_data();
+    *context_data = const_cast<SEALContext::ContextData*>(data.get());
     return S_OK;
 }
 
@@ -115,4 +137,3 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_GetContextData(void *thisptr, uint64_
     *context_data = const_cast<SEALContext::ContextData*>(data.get());
     return S_OK;
 }
-

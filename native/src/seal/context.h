@@ -173,8 +173,7 @@ namespace seal
             }
 
             /**
-            Returns the parms_id of the current parameters. This function is intended
-            mainly for internal use.
+            Returns the parms_id of the current parameters.
             */
             inline auto &parms_id() const noexcept
             {
@@ -363,7 +362,7 @@ namespace seal
         SEALContext() = delete;
 
         /**
-        Creates an instance of SEALContext, and performs several pre-computations
+        Creates an instance of SEALContext and performs several pre-computations
         on the given EncryptionParameters.
 
         @param[in] parms The encryption parameters
@@ -434,8 +433,8 @@ namespace seal
         }
 
         /**
-        Returns a parms_id_type corresponding to the set of encryption
-        parameters that are used for keys.
+        Returns a parms_id_type corresponding to the set of encryption parameters 
+        that are used for keys.
         */
         inline auto &key_parms_id() const noexcept
         {

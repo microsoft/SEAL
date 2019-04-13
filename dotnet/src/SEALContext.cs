@@ -46,7 +46,7 @@ namespace Microsoft.Research.SEAL
     public class SEALContext : NativeObject
     {
         /// <summary>
-        /// Creates an instance of SEALContext, and performs several pre-computations
+        /// Creates an instance of SEALContext and performs several pre-computations
         /// on the given EncryptionParameters.
         /// </summary>
         /// <param name="parms">The encryption parameters.</param>
@@ -66,9 +66,43 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Create an instance of SEALContext from a native pointer
         /// </summary>
-        private SEALContext(IntPtr ptr)
-            : base(ptr)
+        private SEALContext(IntPtr ptr) : base(ptr)
         {
+        }
+
+        /// <summary>
+        /// Returns the ContextData corresponding to encryption parameters with a given
+        /// parmsId. If parameters with the given parmsId are not found then the function
+        /// returns null.
+        /// </summary>
+        ///
+        /// <param name="parmsId">The parmsId of the encryption parameters</param>
+        /// <exception cref="ArgumentNullException">if parmsId is null</exception>
+        public ContextData GetContextData(ParmsId parmsId)
+        {
+            if (null == parmsId)
+                throw new ArgumentNullException(nameof(parmsId));
+
+            NativeMethods.SEALContext_GetContextData(NativePtr, parmsId.Block, out IntPtr contextData);
+            if (IntPtr.Zero.Equals(contextData))
+                return null;
+
+            ContextData data = new ContextData(contextData, owned: false);
+            return data;
+        }
+
+        /// <summary>
+        /// Returns the ContextData corresponding to encryption parameters that are
+        /// used for keys.
+        /// </summary>
+        public ContextData KeyContextData
+        {
+            get
+            {
+                NativeMethods.SEALContext_KeyContextData(NativePtr, out IntPtr contextData);
+                ContextData data = new ContextData(contextData, owned: false);
+                return data;
+            }
         }
 
         /// <summary>
@@ -100,27 +134,6 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the ContextData corresponding to encryption parameters with a given
-        /// parmsId. If parameters with the given parmsId are not found then the function
-        /// returns null.
-        /// </summary>
-        ///
-        /// <param name="parmsId">The parmsId of the encryption parameters</param>
-        /// <exception cref="ArgumentNullException">if parmsId is null</exception>
-        public ContextData GetContextData(ParmsId parmsId)
-        {
-            if (null == parmsId)
-                throw new ArgumentNullException(nameof(parmsId));
-
-            NativeMethods.SEALContext_GetContextData(NativePtr, parmsId.Block, out IntPtr contextData);
-            if (IntPtr.Zero.Equals(contextData))
-                return null;
-
-            ContextData data = new ContextData(contextData, owned: false);
-            return data;
-        }
-
-        /// <summary>
         /// Returns whether the encryption parameters are valid.
         /// </summary>
         public bool ParametersSet
@@ -129,6 +142,20 @@ namespace Microsoft.Research.SEAL
             {
                 NativeMethods.SEALContext_ParametersSet(NativePtr, out bool paramsSet);
                 return paramsSet;
+            }
+        }
+
+        /// <summary>
+        /// Returns a ParmsId corresponding to the set of encryption parameters 
+        /// that are used for keys.
+        /// </summary>
+        public ParmsId KeyParmsId
+        {
+            get
+            {
+                ParmsId parms = new ParmsId();
+                NativeMethods.SEALContext_KeyParmsId(NativePtr, parms.Block);
+                return parms;
             }
         }
 
@@ -194,6 +221,18 @@ namespace Microsoft.Research.SEAL
                     return new EncryptionParameters(parms);
                 }
             }
+
+            /// <summary>
+            /// Returns the parmsId of the current parameters.
+            /// </summary>
+            public ParmsId ParmsId
+            {
+                get
+                {
+                    return Parms.ParmsId;
+                }
+            }
+
 
             /// <summary>
             /// Returns a copy of EncryptionParameterQualifiers corresponding to the

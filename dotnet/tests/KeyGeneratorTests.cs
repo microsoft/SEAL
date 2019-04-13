@@ -27,11 +27,11 @@ namespace SEALNetTest
 
             Ciphertext cipher = pubKey.Data;
             Assert.IsNotNull(cipher);
-            Assert.AreEqual(16384ul, cipher.UInt64Count);
+            Assert.AreEqual(81920ul, cipher.UInt64Count);
 
             Plaintext plain = secKey.Data;
             Assert.IsNotNull(plain);
-            Assert.AreEqual(8192ul, plain.CoeffCount);
+            Assert.AreEqual(40960ul, plain.CoeffCount);
         }
 
         [TestMethod]
@@ -88,9 +88,9 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.Context;
             KeyGenerator keygen = new KeyGenerator(context);
             SecretKey secret = new SecretKey();
-            List<ulong> elts = new List<ulong>();
+            List<ulong> elts = new List<ulong> { 16385 };
             List<ulong> elts_null = null;
-            List<int> steps = new List<int>();
+            List<int> steps = new List<int> { 4096 };
             List<int> steps_null = null;
 
             Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(null));
@@ -109,7 +109,6 @@ namespace SEALNetTest
 
             Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(steps_null));
             Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(steps));
-            Assert.ThrowsException<InvalidOperationException>(() => keygen.GaloisKeys(new List<int> { 1 }));
         }
     }
 }

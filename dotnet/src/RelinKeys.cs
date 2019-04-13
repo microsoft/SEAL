@@ -1,13 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-using Microsoft.Research.SEAL.Tools;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Microsoft.Research.SEAL
 {
@@ -43,10 +39,8 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Creates an empty set of relinearization keys.
         /// </summary>
-        public RelinKeys()
+        public RelinKeys() : base()
         {
-            NativeMethods.RelinKeys_Create(out IntPtr ptr);
-            NativePtr = ptr;
         }
 
         /// <summary>
@@ -55,47 +49,118 @@ namespace Microsoft.Research.SEAL
         /// <param name="copy">The RelinKeys to copy from</param>
         /// <exception cref="ArgumentNullException">if copy is null</exception>
         public RelinKeys(RelinKeys copy)
+            : base((KSwitchKeys)copy)
         {
-            if (null == copy)
-                throw new ArgumentNullException(nameof(copy));
-
-            NativeMethods.RelinKeys_Create(copy.NativePtr, out IntPtr ptr);
-            NativePtr = ptr;
         }
 
         /// <summary>
-        /// Creates a new RelinKeys instance initialized with a pointer to a
-        /// native RelinKeys object
+        /// Creates a new RelinKeys instance initialized with a pointer to a native
+        /// KSwitchKeys object.
         /// </summary>
-        /// <param name="relinKeys">Pointer to native RelinKeys object</param>
-        internal RelinKeys(IntPtr relinKeys)
+        /// <param name="kswitchKeys">Pointer to native KSwitchKeys object</param>
+        /// <param name="owned">Whether this instance owns the native pointer</param>
+        internal RelinKeys(IntPtr kswitchKeys, bool owned = true)
+            : base(kswitchKeys, owned)
         {
-            NativePtr = relinKeys;
         }
 
         /// <summary>
-        /// Copies a given RelinKeys instance to the current one.
+        /// Returns the index of a relinearization key in the backing KSwitchKeys instance 
+        /// that corresponds to the given secret key power, assuming that it exists in the
+        /// backing KSwitchKeys.
         /// </summary>
-        /// <param name="copy">The RelinKeys to copy from</param>
-        /// <exception cref="ArgumentNullException">if copy is null</exception>
-        public void Set(RelinKeys copy)
-        {
-            if (null == copy)
-                throw new ArgumentNullException(nameof(copy));
-
-            NativeMethods.RelinKeys_Set(NativePtr, copy.NativePtr);
-        }
-
-        /// <summary>
-        /// Returns whether a relinearizaton key corresponding to a given power of the secret key
-        /// exists.
-        /// </summary>
-        ///
         /// <param name="keyPower">The power of the secret key</param>
+        /// <exception cref="ArgumentException">if keyPower is less than 2</exception>
+        public static ulong GetIndex(ulong keyPower)
+        {
+            NativeMethods.RelinKeys_GetIndex(keyPower, out ulong index);
+            return index;
+        }
+
+        /// <summary>
+        /// Returns whether a relinearization key corresponding to a given Galois key
+        /// element exists.
+        /// </summary>
+        /// <param name="keyPower">The power of the secret key</param>
+        /// <exception cref="ArgumentException">if keyPower is less than 2</exception>
         public bool HasKey(ulong keyPower)
         {
-            NativeMethods.RelinKeys_HasKey(NativePtr, keyPower, out bool hasKey);
-            return hasKey;
+            ulong index = GetIndex(keyPower);
+            return (ulong)Data.LongCount() > index && Data.ElementAt((int)index).Count() != 0;
         }
+
+        /// <summary>
+        /// Returns a copy of a relinearization key.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// Returns a copy of a relinearization key. The returned relinearization key 
+        /// corresponds to the given power of the secret key.
+        /// </remarks>
+        /// <param name="keyPower">The power of the secret key</param>
+        /// <exception cref="ArgumentException">if the key corresponding to keyPower 
+        /// does not exist</exception>
+        public IEnumerable<PublicKey> Key(ulong keyPower)
+        {
+            return new List<PublicKey>(Data.ElementAt((int)GetIndex(keyPower)));
+        }
+
+        ///// <summary>
+        ///// Creates an empty set of relinearization keys.
+        ///// </summary>
+        //public RelinKeys()
+        //{
+        //    NativeMethods.RelinKeys_Create(out IntPtr ptr);
+        //    NativePtr = ptr;
+        //}
+
+        ///// <summary>
+        ///// Creates a new RelinKeys instance by copying a given instance.
+        ///// </summary>
+        ///// <param name="copy">The RelinKeys to copy from</param>
+        ///// <exception cref="ArgumentNullException">if copy is null</exception>
+        //public RelinKeys(RelinKeys copy)
+        //{
+        //    if (null == copy)
+        //        throw new ArgumentNullException(nameof(copy));
+
+        //    NativeMethods.RelinKeys_Create(copy.NativePtr, out IntPtr ptr);
+        //    NativePtr = ptr;
+        //}
+
+        ///// <summary>
+        ///// Creates a new RelinKeys instance initialized with a pointer to a
+        ///// native RelinKeys object
+        ///// </summary>
+        ///// <param name="relinKeys">Pointer to native RelinKeys object</param>
+        //internal RelinKeys(IntPtr relinKeys)
+        //{
+        //    NativePtr = relinKeys;
+        //}
+
+        ///// <summary>
+        ///// Copies a given RelinKeys instance to the current one.
+        ///// </summary>
+        ///// <param name="copy">The RelinKeys to copy from</param>
+        ///// <exception cref="ArgumentNullException">if copy is null</exception>
+        //public void Set(RelinKeys copy)
+        //{
+        //    if (null == copy)
+        //        throw new ArgumentNullException(nameof(copy));
+
+        //    NativeMethods.RelinKeys_Set(NativePtr, copy.NativePtr);
+        //}
+
+        ///// <summary>
+        ///// Returns whether a relinearizaton key corresponding to a given power of the secret key
+        ///// exists.
+        ///// </summary>
+        /////
+        ///// <param name="keyPower">The power of the secret key</param>
+        //public bool HasKey(ulong keyPower)
+        //{
+        //    NativeMethods.RelinKeys_HasKey(NativePtr, keyPower, out bool hasKey);
+        //    return hasKey;
+        //}
     }
 }

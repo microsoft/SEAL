@@ -365,10 +365,16 @@ namespace seal
         */
         static EncryptionParameters Load(std::istream &stream);
 
+        /**
+        Enables access to private members of seal::EncryptionParameters for .NET
+        wrapper.
+        */
+        struct EncryptionParametersPrivateHelper;
+
     private:
         /**
         Returns the parms_id of the current parameters. This function is intended
-        mainly for internal use.
+        for internal use.
         */
         inline auto &parms_id() const noexcept
         {

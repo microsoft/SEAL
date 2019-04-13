@@ -74,11 +74,16 @@ namespace seal
         KSwitchKeys &operator =(KSwitchKeys &&assign) = default;
 
         /**
-        Returns the current number of keyswitching keys.
+        Returns the current number of keyswitching keys. Only keys that are
+        non-empty are counted.
         */
         inline std::size_t size() const noexcept
         {
-            return keys_.size();
+            return std::accumulate(keys_.cbegin(), keys_.cend(), std::size_t(0),
+                [](std::size_t res, auto &next_key)
+                {
+                    return res + (next_key.empty() ? 0 : 1);
+                });
         }
 
         /**

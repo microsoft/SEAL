@@ -22,6 +22,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_Plaintext_IsMetadataValidFor(void *plain
     IfNullRet(result, E_POINTER);
 
     *result = is_metadata_valid_for(*plain, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_Ciphertext_IsMetadataValidFor(void *ciphertext, void *contextptr, bool *result)
@@ -33,6 +34,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_Ciphertext_IsMetadataValidFor(void *ciph
     IfNullRet(result, E_POINTER);
 
     *result = is_metadata_valid_for(*cipher, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_SecretKey_IsMetadataValidFor(void *secret_key, void *contextptr, bool *result)
@@ -44,6 +46,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_SecretKey_IsMetadataValidFor(void *secre
     IfNullRet(result, E_POINTER);
 
     *result = is_metadata_valid_for(*skey, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_PublicKey_IsMetadataValidFor(void *public_key, void *contextptr, bool *result)
@@ -55,6 +58,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_PublicKey_IsMetadataValidFor(void *publi
     IfNullRet(result, E_POINTER);
 
     *result = is_metadata_valid_for(*pkey, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_KSwitchKeys_IsMetadataValidFor(void *kswitch_keys, void *contextptr, bool *result)
@@ -66,6 +70,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_KSwitchKeys_IsMetadataValidFor(void *ksw
     IfNullRet(result, E_POINTER);
 
     *result = is_metadata_valid_for(*keys, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_RelinKeys_IsMetadataValidFor(void *relin_keys, void *contextptr, bool *result)
@@ -77,6 +82,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_RelinKeys_IsMetadataValidFor(void *relin
     IfNullRet(result, E_POINTER);
 
     *result = is_metadata_valid_for(*keys, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_GaloisKeys_IsMetadataValidFor(void *galois_keys, void *contextptr, bool *result)
@@ -88,6 +94,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_GaloisKeys_IsMetadataValidFor(void *galo
     IfNullRet(result, E_POINTER);
 
     *result = is_metadata_valid_for(*keys, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_Plaintext_IsValidFor(void *plaintext, void *contextptr, bool *result)
@@ -99,6 +106,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_Plaintext_IsValidFor(void *plaintext, vo
     IfNullRet(result, E_POINTER);
 
     *result = is_valid_for(*plain, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_Ciphertext_IsValidFor(void *ciphertext, void *contextptr, bool *result)
@@ -110,6 +118,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_Ciphertext_IsValidFor(void *ciphertext, 
     IfNullRet(result, E_POINTER);
 
     *result = is_valid_for(*cipher, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_SecretKey_IsValidFor(void *secret_key, void *contextptr, bool *result)
@@ -121,6 +130,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_SecretKey_IsValidFor(void *secret_key, v
     IfNullRet(result, E_POINTER);
 
     *result = is_valid_for(*skey, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_PublicKey_IsValidFor(void *public_key, void *contextptr, bool *result)
@@ -132,6 +142,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_PublicKey_IsValidFor(void *public_key, v
     IfNullRet(result, E_POINTER);
 
     *result = is_valid_for(*pkey, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_KSwitchKeys_IsValidFor(void *kswitch_keys, void *contextptr, bool *result)
@@ -143,6 +154,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_KSwitchKeys_IsValidFor(void *kswitch_key
     IfNullRet(result, E_POINTER);
 
     *result = is_valid_for(*keys, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_RelinKeys_IsValidFor(void *relin_keys, void *contextptr, bool *result)
@@ -154,6 +166,7 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_RelinKeys_IsValidFor(void *relin_keys, v
     IfNullRet(result, E_POINTER);
 
     *result = is_valid_for(*keys, sharedctx);
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL ValCheck_GaloisKeys_IsValidFor(void *galois_keys, void *contextptr, bool *result)
@@ -165,4 +178,5 @@ SEALNETNATIVE HRESULT SEALCALL ValCheck_GaloisKeys_IsValidFor(void *galois_keys,
     IfNullRet(result, E_POINTER);
 
     *result = is_valid_for(*keys, sharedctx);
+    return S_OK;
 }

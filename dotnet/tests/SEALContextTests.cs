@@ -64,7 +64,7 @@ namespace SEALNetTest
             };
             SEALContext context = SEALContext.Create(parms);
 
-            SEALContext.ContextData data = context.ContextDataFirst;
+            SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
 
             EncryptionParameters parms2 = data.Parms;
@@ -123,7 +123,7 @@ namespace SEALNetTest
             };
             SEALContext context = SEALContext.Create(parms);
 
-            SEALContext.ContextData data = context.ContextDataFirst;
+            SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
 
             // This should be available in CKKS
@@ -164,16 +164,24 @@ namespace SEALNetTest
             SEALContext context1 = SEALContext.Create(parms);
 
             // By default there is a chain
-            SEALContext.ContextData contextData = context1.ContextDataFirst;
+            SEALContext.ContextData contextData = context1.KeyContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);
+            Assert.IsNotNull(contextData.NextContextData);
+            contextData = context1.ContextDataFirst;
+            Assert.IsNotNull(contextData);
+            Assert.IsNotNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
 
             // This should not create a chain
             SEALContext context2 = SEALContext.Create(parms, expandModChain: false);
-            contextData = context2.ContextDataFirst;
+            contextData = context2.KeyContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);
+            Assert.IsNotNull(contextData.NextContextData);
+            contextData = context2.ContextDataFirst;
+            Assert.IsNotNull(contextData);
+            Assert.IsNotNull(contextData.PrevContextData);
             Assert.IsNull(contextData.NextContextData);
         }
     }
