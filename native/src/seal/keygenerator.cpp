@@ -263,7 +263,7 @@ namespace seal
             // Verify coprime conditions.
             if (!(galois_elt & 1) || (galois_elt >= 2 * coeff_count))
             {
-                throw invalid_argument("galois element is not valid");
+                throw invalid_argument("Galois element is not valid");
             }
 
             // Do we already have the key?

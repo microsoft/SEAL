@@ -73,10 +73,6 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetScale(void *thisptr, double scale);
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Release(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsValidFor(void *thisptr, void *context, bool *result);
-
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsMetadataValidFor(void *thisptr, void *context, bool *result);
-
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsTransparent(void *thisptr, bool *result);
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Pool(void *thisptr, void **pool);

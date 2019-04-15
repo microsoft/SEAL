@@ -113,6 +113,7 @@
     <ClInclude Include="sealnet\evaluator_wrapper.h" />
     <ClInclude Include="sealnet\galoiskeys_wrapper.h" />
     <ClInclude Include="sealnet\keygenerator_wrapper.h" />
+    <ClInclude Include="sealnet\kswitchkeys_wrapper.h" />
     <ClInclude Include="sealnet\memorymanager_wrapper.h" />
     <ClInclude Include="sealnet\memorypoolhandle_wrapper.h" />
     <ClInclude Include="sealnet\plaintext_wrapper.h" />
@@ -124,6 +125,7 @@
     <ClInclude Include="sealnet\stdafx.h" />
     <ClInclude Include="sealnet\targetver.h" />
     <ClInclude Include="sealnet\utilities.h" />
+    <ClInclude Include="sealnet\valcheck_wrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sealnet\contextdata_wrapper.cpp" />
@@ -140,6 +142,7 @@
     <ClCompile Include="sealnet\evaluator_wrapper.cpp" />
     <ClCompile Include="sealnet\galoiskeys_wrapper.cpp" />
     <ClCompile Include="sealnet\keygenerator_wrapper.cpp" />
+    <ClCompile Include="sealnet\kswitchkeys_wrapper.cpp" />
     <ClCompile Include="sealnet\memorymanager_wrapper.cpp" />
     <ClCompile Include="sealnet\memorypoolhandle_wrapper.cpp" />
     <ClCompile Include="sealnet\plaintext_wrapper.cpp" />
@@ -154,6 +157,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="sealnet\valcheck_wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

@@ -361,7 +361,8 @@ namespace SEALNetTest
             List<SmallModulus> coeffModulus = new List<SmallModulus>
             {
                 DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
+                DefaultParams.SmallMods40Bit(1),
+                DefaultParams.SmallMods40Bit(2)
             };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
@@ -531,7 +532,8 @@ namespace SEALNetTest
             List<SmallModulus> coeffModulus = new List<SmallModulus>
             {
                 DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
+                DefaultParams.SmallMods40Bit(1),
+                DefaultParams.SmallMods40Bit(2),
             };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
@@ -698,7 +700,8 @@ namespace SEALNetTest
             List<SmallModulus> coeffModulus = new List<SmallModulus>
             {
                 DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
+                DefaultParams.SmallMods40Bit(1),
+                DefaultParams.SmallMods40Bit(2),
             };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
@@ -713,15 +716,15 @@ namespace SEALNetTest
             Plaintext plaindest = new Plaintext();
             Assert.IsFalse(plain.IsNTTForm);
 
-            evaluator.TransformToNTT(plain, parms.ParmsId, plaindest);
+            evaluator.TransformToNTT(plain, context.ParmsIdFirst, plaindest);
             Assert.IsTrue(plaindest.IsZero);
             Assert.IsTrue(plaindest.IsNTTForm);
-            Assert.IsTrue(plaindest.ParmsId == parms.ParmsId);
+            Assert.IsTrue(plaindest.ParmsId == context.ParmsIdFirst);
 
             plain = new Plaintext("1");
             Assert.IsFalse(plain.IsNTTForm);
 
-            evaluator.TransformToNTTInplace(plain, parms.ParmsId);
+            evaluator.TransformToNTTInplace(plain, context.ParmsIdFirst);
             Assert.IsTrue(plain.IsNTTForm);
 
             for (ulong i = 0; i < 256; i++)
@@ -768,7 +771,7 @@ namespace SEALNetTest
             decryptor.Decrypt(encdest2, plaindest);
             Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(0ul, plaindest[0]);
-            Assert.AreEqual(parms.ParmsId, encdest2.ParmsId);
+            Assert.AreEqual(context.ParmsIdFirst, encdest2.ParmsId);
 
             encryptor.Encrypt(new Plaintext("1"), encrypted);
             Assert.IsFalse(encrypted.IsNTTForm);
@@ -783,7 +786,7 @@ namespace SEALNetTest
 
             Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(1ul, plaindest[0]);
-            Assert.AreEqual(parms.ParmsId, encrypted.ParmsId);
+            Assert.AreEqual(context.ParmsIdFirst, encrypted.ParmsId);
         }
 
         [TestMethod]
@@ -836,7 +839,8 @@ namespace SEALNetTest
             {
                 DefaultParams.SmallMods30Bit(0),
                 DefaultParams.SmallMods30Bit(1),
-                DefaultParams.SmallMods30Bit(2)
+                DefaultParams.SmallMods30Bit(2),
+                DefaultParams.SmallMods30Bit(3),
             };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
@@ -856,20 +860,43 @@ namespace SEALNetTest
             Plaintext plaindest = new Plaintext();
 
             encryptor.Encrypt(new Plaintext("1"), encrypted);
-            evaluator.ModSwitchTo(encrypted, parms.ParmsId, encdest);
+            ParmsId destParmsId = context.ContextDataFirst.NextContextData
+                .NextContextData.ParmsId;
+
+            evaluator.ModSwitchTo(encrypted, context.ParmsIdFirst, encdest);
             decryptor.Decrypt(encdest, plaindest);
 
-            Assert.IsTrue(encdest.ParmsId == parms.ParmsId);
+            Assert.IsTrue(encrypted.ParmsId == context.ParmsIdFirst);
+            Assert.IsTrue(encdest.ParmsId == context.ParmsIdFirst);
             Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(1ul, plaindest[0]);
 
-            encryptor.Encrypt(new Plaintext("2"), encrypted);
-            evaluator.ModSwitchToInplace(encrypted, parms.ParmsId);
+            evaluator.ModSwitchTo(encrypted, destParmsId, encdest);
+            decryptor.Decrypt(encdest, plaindest);
+
+            Assert.IsTrue(encrypted.ParmsId == context.ParmsIdFirst);
+            Assert.IsTrue(encdest.ParmsId == destParmsId);
+            Assert.AreEqual(1ul, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest[0]);
+
+            encryptor.Encrypt(new Plaintext("3x^2 + 2x^1 + 1"), encrypted);
+            evaluator.ModSwitchToInplace(encrypted, context.ParmsIdFirst);
             decryptor.Decrypt(encrypted, plaindest);
 
-            Assert.IsTrue(encrypted.ParmsId == parms.ParmsId);
-            Assert.AreEqual(1ul, plaindest.CoeffCount);
-            Assert.AreEqual(2ul, plaindest[0]);
+            Assert.IsTrue(encrypted.ParmsId == context.ParmsIdFirst);
+            Assert.AreEqual(3ul, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest[0]);
+            Assert.AreEqual(2ul, plaindest[1]);
+            Assert.AreEqual(3ul, plaindest[2]);
+
+            evaluator.ModSwitchToInplace(encrypted, destParmsId);
+            decryptor.Decrypt(encrypted, plaindest);
+
+            Assert.IsTrue(encrypted.ParmsId == destParmsId);
+            Assert.AreEqual(3ul, plaindest.CoeffCount);
+            Assert.AreEqual(1ul, plaindest[0]);
+            Assert.AreEqual(2ul, plaindest[1]);
+            Assert.AreEqual(3ul, plaindest[2]);
         }
 
         [TestMethod]
@@ -883,7 +910,8 @@ namespace SEALNetTest
                     DefaultParams.SmallMods40Bit(0),
                     DefaultParams.SmallMods40Bit(1),
                     DefaultParams.SmallMods40Bit(2),
-                    DefaultParams.SmallMods40Bit(3)
+                    DefaultParams.SmallMods40Bit(3),
+                    DefaultParams.SmallMods40Bit(4)
                 }
             };
 
@@ -1122,7 +1150,7 @@ namespace SEALNetTest
 
             List<Complex> output = new List<Complex>();
 
-            encoder.Encode(input, parms.ParmsId, delta, plain);
+            encoder.Encode(input, context.ParmsIdFirst, delta, plain);
 
             int shift = 1;
             encryptor.Encrypt(plain, encrypted);
@@ -1136,7 +1164,7 @@ namespace SEALNetTest
                 Assert.AreEqual(input[(i + shift) % slotSize].Imaginary, Math.Round(output[i].Imaginary), delta: 0.1);
             }
 
-            encoder.Encode(input, parms.ParmsId, delta, plain);
+            encoder.Encode(input, context.ParmsIdFirst, delta, plain);
             shift = 3;
             encryptor.Encrypt(plain, encrypted);
             evaluator.RotateVectorInplace(encrypted, shift, galoisKeys);
@@ -1190,7 +1218,7 @@ namespace SEALNetTest
 
             List<Complex> output = new List<Complex>();
 
-            encoder.Encode(input, parms.ParmsId, delta, plain);
+            encoder.Encode(input, context.ParmsIdFirst, delta, plain);
             encryptor.Encrypt(plain, encrypted);
             evaluator.ComplexConjugateInplace(encrypted, galoisKeys);
             decryptor.Decrypt(encrypted, plain);

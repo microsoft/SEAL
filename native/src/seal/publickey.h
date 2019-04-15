@@ -102,7 +102,9 @@ namespace seal
         */
         inline void unsafe_load(std::istream &stream)
         {
-            pk_.unsafe_load(stream);
+            Ciphertext new_pk(pk_.pool());
+            new_pk.unsafe_load(stream);
+            std::swap(pk_, new_pk);
         }
 
         /**
@@ -120,11 +122,13 @@ namespace seal
         inline void load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
-            unsafe_load(stream);
-            if (!is_valid_for(*this, std::move(context)))
+            PublicKey new_pk(pool());
+            new_pk.unsafe_load(stream);
+            if (!is_valid_for(new_pk, std::move(context)))
             {
                 throw std::invalid_argument("PublicKey data is invalid");
             }
+            std::swap(*this, new_pk);
         }
 
         /**
@@ -150,6 +154,11 @@ namespace seal
         {
             return pk_.pool();
         }
+
+        /**
+        Enables access to private members of seal::PublicKey for .NET wrapper.
+        */
+        struct PublicKeyPrivateHelper;
 
     private:
         /**

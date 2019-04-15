@@ -20,19 +20,18 @@ namespace seal
     */
     struct Ciphertext::CiphertextPrivateHelper
     {
-        static void resize(seal::Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree,
+        static void resize(Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree,
             size_t coeff_mod_count)
         {
             ciphertext->resize_internal(size, poly_modulus_degree, coeff_mod_count);
         }
 
-        static void set_ntt_form(seal::Ciphertext *ciphertext, bool is_ntt_form)
+        static void set_ntt_form(Ciphertext *ciphertext, bool is_ntt_form)
         {
             ciphertext->is_ntt_form_ = is_ntt_form;
         }
     };
 }
-
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
 {
@@ -457,30 +456,6 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Release(void *thisptr)
     IfNullRet(cipher, E_POINTER);
 
     cipher->release();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsValidFor(void *thisptr, void *context, bool *result)
-{
-    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
-    IfNullRet(cipher, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = cipher->is_valid_for(sharedctx);
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsMetadataValidFor(void *thisptr, void *context, bool *result)
-{
-    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
-    IfNullRet(cipher, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    IfNullRet(result, E_POINTER);
-
-    *result = cipher->is_metadata_valid_for(sharedctx);
     return S_OK;
 }
 

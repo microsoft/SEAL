@@ -31,12 +31,12 @@ namespace SEALNetTest
             GaloisKeys keys = keygen.GaloisKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(22ul, keys.Size);
+            Assert.AreEqual(24ul, keys.Size);
 
             GaloisKeys copy = new GaloisKeys(keys);
 
             Assert.IsNotNull(copy);
-            Assert.AreEqual(22ul, copy.Size);
+            Assert.AreEqual(24ul, copy.Size);
         }
 
         [TestMethod]
@@ -49,7 +49,7 @@ namespace SEALNetTest
             GaloisKeys other = new GaloisKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(22ul, keys.Size);
+            Assert.AreEqual(24ul, keys.Size);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -60,33 +60,33 @@ namespace SEALNetTest
                 other.Load(context, ms);
             }
 
-            Assert.AreEqual(22ul, other.Size);
-            Assert.IsTrue(other.IsMetadataValidFor(context));
+            Assert.AreEqual(24ul, other.Size);
+            Assert.IsTrue(ValCheck.IsMetadataValidFor(other, context));
 
-            List<IEnumerable<Ciphertext>> keysData = new List<IEnumerable<Ciphertext>>(keys.Data);
-            List<IEnumerable<Ciphertext>> otherData = new List<IEnumerable<Ciphertext>>(other.Data);
+            List<IEnumerable<PublicKey>> keysData = new List<IEnumerable<PublicKey>>(keys.Data);
+            List<IEnumerable<PublicKey>> otherData = new List<IEnumerable<PublicKey>>(other.Data);
 
             Assert.AreEqual(keysData.Count, otherData.Count);
             for (int i = 0; i < keysData.Count; i++)
             {
-                List<Ciphertext> keysCiphers = new List<Ciphertext>(keysData[i]);
-                List<Ciphertext> otherCiphers = new List<Ciphertext>(otherData[i]);
+                List<PublicKey> keysCiphers = new List<PublicKey>(keysData[i]);
+                List<PublicKey> otherCiphers = new List<PublicKey>(otherData[i]);
 
                 Assert.AreEqual(keysCiphers.Count, otherCiphers.Count);
 
                 for (int j = 0; j < keysCiphers.Count; j++)
                 {
-                    Ciphertext keysCipher = keysCiphers[j];
-                    Ciphertext otherCipher = otherCiphers[j];
+                    PublicKey keysCipher = keysCiphers[j];
+                    PublicKey otherCipher = otherCiphers[j];
 
-                    Assert.AreEqual(keysCipher.Size, otherCipher.Size);
-                    Assert.AreEqual(keysCipher.PolyModulusDegree, otherCipher.PolyModulusDegree);
-                    Assert.AreEqual(keysCipher.CoeffModCount, otherCipher.CoeffModCount);
+                    Assert.AreEqual(keysCipher.Data.Size, otherCipher.Data.Size);
+                    Assert.AreEqual(keysCipher.Data.PolyModulusDegree, otherCipher.Data.PolyModulusDegree);
+                    Assert.AreEqual(keysCipher.Data.CoeffModCount, otherCipher.Data.CoeffModCount);
 
-                    ulong coeffCount = keysCipher.Size * keysCipher.PolyModulusDegree * keysCipher.CoeffModCount;
+                    ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModCount;
                     for (ulong k = 0; k < coeffCount; k++)
                     {
-                        Assert.AreEqual(keysCipher[k], otherCipher[k]);
+                        Assert.AreEqual(keysCipher.Data[k], otherCipher.Data[k]);
                     }
                 }
             }
@@ -101,7 +101,7 @@ namespace SEALNetTest
             GaloisKeys keys = keygen.GaloisKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(22ul, keys.Size);
+            Assert.AreEqual(24ul, keys.Size);
 
             GaloisKeys keys2 = new GaloisKeys();
 
@@ -111,7 +111,7 @@ namespace SEALNetTest
             keys2.Set(keys);
 
             Assert.AreNotSame(keys, keys2);
-            Assert.AreEqual(22ul, keys2.Size);
+            Assert.AreEqual(24ul, keys2.Size);
         }
 
         [TestMethod]
@@ -124,7 +124,7 @@ namespace SEALNetTest
             MemoryPoolHandle handle = keys.Pool;
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(22ul, keys.Size);
+            Assert.AreEqual(24ul, keys.Size);
 
             Assert.IsFalse(keys.HasKey(galoisElt: 1));
             Assert.IsTrue(keys.HasKey(galoisElt: 3));
@@ -133,11 +133,11 @@ namespace SEALNetTest
             Assert.IsTrue(keys.HasKey(galoisElt: 9));
             Assert.IsFalse(keys.HasKey(galoisElt: 11));
 
-            IEnumerable<Ciphertext> key = keys.Key(3);
-            Assert.AreEqual(2, key.Count());
+            IEnumerable<PublicKey> key = keys.Key(3);
+            Assert.AreEqual(4, key.Count());
 
-            IEnumerable<Ciphertext> key2 = keys.Key(9);
-            Assert.AreEqual(2, key2.Count());
+            IEnumerable<PublicKey> key2 = keys.Key(9);
+            Assert.AreEqual(4, key2.Count());
 
             Assert.IsTrue(handle.AllocByteCount > 0ul);
         }
@@ -200,8 +200,8 @@ namespace SEALNetTest
 
             Assert.ThrowsException<ArgumentNullException>(() => keys.Set(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys.IsValidFor(null));
-            Assert.ThrowsException<ArgumentNullException>(() => keys.IsMetadataValidFor(null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
 
             Assert.ThrowsException<ArgumentNullException>(() => keys.Save(null));
 

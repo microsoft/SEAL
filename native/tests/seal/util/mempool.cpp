@@ -226,7 +226,7 @@ namespace SEALTest
                 Pointer<uint64_t> p4 = pool.get_for_byte_count(bytes_per_uint64 * 2);
                 ASSERT_TRUE(p4.is_set());
                 uint64_t *allocation2 = p4.get();
-                p3.swap_with(p4);
+                swap(p3, p4);
                 ASSERT_TRUE(p3.is_set());
                 ASSERT_TRUE(p3.get() == allocation2);
                 ASSERT_TRUE(p4.is_set());
@@ -272,7 +272,7 @@ namespace SEALTest
                 Pointer<SEAL_BYTE> p4 = pool.get_for_byte_count(bytes_per_uint64 * 2);
                 ASSERT_TRUE(p4.is_set());
                 SEAL_BYTE *allocation2 = p4.get();
-                p3.swap_with(p4);
+                swap(p3, p4);
                 ASSERT_TRUE(p3.is_set());
                 ASSERT_TRUE(p3.get() == allocation2);
                 ASSERT_TRUE(p4.is_set());
@@ -554,7 +554,7 @@ namespace SEALTest
                 Pointer<uint64_t> p4 = pool.get_for_byte_count(bytes_per_uint64 * 2);
                 ASSERT_TRUE(p4.is_set());
                 uint64_t *allocation2 = p4.get();
-                p3.swap_with(p4);
+                swap(p3, p4);
                 ASSERT_TRUE(p3.is_set());
                 ASSERT_TRUE(p3.get() == allocation2);
                 ASSERT_TRUE(p4.is_set());
@@ -600,7 +600,7 @@ namespace SEALTest
                 Pointer<SEAL_BYTE> p4 = pool.get_for_byte_count(bytes_per_uint64 * 2);
                 ASSERT_TRUE(p4.is_set());
                 SEAL_BYTE *allocation2 = p4.get();
-                p3.swap_with(p4);
+                swap(p3, p4);
                 ASSERT_TRUE(p3.is_set());
                 ASSERT_TRUE(p3.get() == allocation2);
                 ASSERT_TRUE(p4.is_set());

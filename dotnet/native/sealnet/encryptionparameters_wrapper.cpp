@@ -15,6 +15,20 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
+namespace seal
+{
+    /**
+    Enables access to private members of seal::EncryptionParameters.
+    */
+    struct EncryptionParameters::EncryptionParametersPrivateHelper
+    {
+        static auto parms_id(const EncryptionParameters &parms)
+        {
+            return parms.parms_id();
+        }
+    };
+}
+
 SEALNETNATIVE HRESULT SEALCALL EncParams_Create1(int scheme, void **enc_params)
 {
     IfNullRet(enc_params, E_POINTER);
@@ -141,7 +155,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_GetParmsId(void *thisptr, uint64_t *par
     IfNullRet(parms_id, E_POINTER);
 
     // We will assume the array is always size sha3_block_uint64_count
-    const auto &parmsid = params->parms_id();
+    auto parmsid = EncryptionParameters::EncryptionParametersPrivateHelper::parms_id(*params);
     for (size_t i = 0; i < util::HashFunction::sha3_block_uint64_count; i++)
     {
         parms_id[i] = parmsid[i];

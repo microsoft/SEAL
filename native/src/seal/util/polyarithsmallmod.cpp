@@ -329,7 +329,7 @@ namespace seal
             if (!(galois_elt & 1) ||
                 (galois_elt >= 2 * (uint64_t(1) << coeff_count_power)))
             {
-                throw invalid_argument("galois element is not valid");
+                throw invalid_argument("Galois element is not valid");
             }
             if (modulus.is_zero())
             {
@@ -379,7 +379,7 @@ namespace seal
             if (!(galois_elt & 1) ||
                 (galois_elt >= 2 * (uint64_t(1) << coeff_count_power)))
             {
-                throw invalid_argument("galois element is not valid");
+                throw invalid_argument("Galois element is not valid");
             }
 #endif
             size_t coeff_count = size_t(1) << coeff_count_power;

@@ -98,8 +98,8 @@ namespace SEALNetTest
 
             Assert.ThrowsException<ArgumentNullException>(() => key.Set(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => key.IsValidFor(null));
-            Assert.ThrowsException<ArgumentNullException>(() => key.IsMetadataValidFor(null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(key, null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(key, null));
 
             Assert.ThrowsException<ArgumentNullException>(() => key.Save(null));
             Assert.ThrowsException<ArgumentNullException>(() => key.UnsafeLoad(null));

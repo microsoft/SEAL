@@ -16,10 +16,10 @@ namespace SEALNetTest
         {
             EncryptionParameters encParams = new EncryptionParameters(SchemeType.BFV)
             {
-                PolyModulusDegree = 4096,
-                CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 4096)
+                PolyModulusDegree = 8192,
+                CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192)
             };
-            encParams.SetPlainModulus(0x133Ful);
+            encParams.SetPlainModulus(65537ul);
             Context = SEALContext.Create(encParams);
         }
 

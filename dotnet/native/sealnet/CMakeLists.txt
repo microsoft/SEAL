@@ -17,6 +17,7 @@ target_sources(sealnetnative
         ${CMAKE_CURRENT_LIST_DIR}/galoiskeys_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/intencoder_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator_wrapper.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/memorypoolhandle_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/plaintext_wrapper.cpp
@@ -26,4 +27,5 @@ target_sources(sealnetnative
         ${CMAKE_CURRENT_LIST_DIR}/secretkey_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/utilities.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/valcheck.cpp
 )

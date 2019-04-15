@@ -71,33 +71,33 @@ namespace SEALNetTest
             }
 
             Assert.AreEqual(2ul, other.Size);
-            Assert.IsTrue(other.IsMetadataValidFor(context));
+            Assert.IsTrue(ValCheck.IsMetadataValidFor(other, context));
             Assert.IsTrue(handle.AllocByteCount > 0ul);
 
-            List<IEnumerable<Ciphertext>> keysData = new List<IEnumerable<Ciphertext>>(keys.Data);
-            List<IEnumerable<Ciphertext>> otherData = new List<IEnumerable<Ciphertext>>(other.Data);
+            List<IEnumerable<PublicKey>> keysData = new List<IEnumerable<PublicKey>>(keys.Data);
+            List<IEnumerable<PublicKey>> otherData = new List<IEnumerable<PublicKey>>(other.Data);
 
             Assert.AreEqual(keysData.Count, otherData.Count);
             for (int i = 0; i < keysData.Count; i++)
             {
-                List<Ciphertext> keysCiphers = new List<Ciphertext>(keysData[i]);
-                List<Ciphertext> otherCiphers = new List<Ciphertext>(otherData[i]);
+                List<PublicKey> keysCiphers = new List<PublicKey>(keysData[i]);
+                List<PublicKey> otherCiphers = new List<PublicKey>(otherData[i]);
 
                 Assert.AreEqual(keysCiphers.Count, otherCiphers.Count);
 
                 for (int j = 0; j < keysCiphers.Count; j++)
                 {
-                    Ciphertext keysCipher = keysCiphers[j];
-                    Ciphertext otherCipher = otherCiphers[j];
+                    PublicKey keysCipher = keysCiphers[j];
+                    PublicKey otherCipher = otherCiphers[j];
 
-                    Assert.AreEqual(keysCipher.Size, otherCipher.Size);
-                    Assert.AreEqual(keysCipher.PolyModulusDegree, otherCipher.PolyModulusDegree);
-                    Assert.AreEqual(keysCipher.CoeffModCount, otherCipher.CoeffModCount);
+                    Assert.AreEqual(keysCipher.Data.Size, otherCipher.Data.Size);
+                    Assert.AreEqual(keysCipher.Data.PolyModulusDegree, otherCipher.Data.PolyModulusDegree);
+                    Assert.AreEqual(keysCipher.Data.CoeffModCount, otherCipher.Data.CoeffModCount);
 
-                    ulong coeffCount = keysCipher.Size * keysCipher.PolyModulusDegree * keysCipher.CoeffModCount;
+                    ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModCount;
                     for (ulong k = 0; k < coeffCount; k++)
                     {
-                        Assert.AreEqual(keysCipher[k], otherCipher[k]);
+                        Assert.AreEqual(keysCipher.Data[k], otherCipher.Data[k]);
                     }
                 }
             }
@@ -110,29 +110,28 @@ namespace SEALNetTest
             KeyGenerator keygen = new KeyGenerator(context);
             RelinKeys relinKeys = keygen.RelinKeys(count: 3);
 
-            Assert.IsFalse(relinKeys.HasKey(0));
-            Assert.IsFalse(relinKeys.HasKey(1));
             Assert.IsTrue(relinKeys.HasKey(2));
             Assert.IsTrue(relinKeys.HasKey(3));
             Assert.IsTrue(relinKeys.HasKey(4));
             Assert.IsFalse(relinKeys.HasKey(5));
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => relinKeys.Key(1));
+            Assert.ThrowsException<ArgumentException>(() => relinKeys.Key(0));
+            Assert.ThrowsException<ArgumentException>(() => relinKeys.Key(1));
 
-            List<Ciphertext> key1 = new List<Ciphertext>(relinKeys.Key(2));
-            Assert.AreEqual(2, key1.Count);
-            Assert.AreEqual(2ul, key1[0].CoeffModCount);
-            Assert.AreEqual(2ul, key1[1].CoeffModCount);
+            List<PublicKey> key1 = new List<PublicKey>(relinKeys.Key(2));
+            Assert.AreEqual(4, key1.Count);
+            Assert.AreEqual(5ul, key1[0].Data.CoeffModCount);
+            Assert.AreEqual(5ul, key1[1].Data.CoeffModCount);
 
-            List<Ciphertext> key2 = new List<Ciphertext>(relinKeys.Key(3));
-            Assert.AreEqual(2, key2.Count);
-            Assert.AreEqual(2ul, key2[0].CoeffModCount);
-            Assert.AreEqual(2ul, key2[1].CoeffModCount);
+            List<PublicKey> key2 = new List<PublicKey>(relinKeys.Key(3));
+            Assert.AreEqual(4, key2.Count);
+            Assert.AreEqual(5ul, key2[0].Data.CoeffModCount);
+            Assert.AreEqual(5ul, key2[1].Data.CoeffModCount);
 
-            List<Ciphertext> key3 = new List<Ciphertext>(relinKeys.Key(4));
-            Assert.AreEqual(2, key3.Count);
-            Assert.AreEqual(2ul, key3[0].CoeffModCount);
-            Assert.AreEqual(2ul, key3[1].CoeffModCount);
+            List<PublicKey> key3 = new List<PublicKey>(relinKeys.Key(4));
+            Assert.AreEqual(4, key3.Count);
+            Assert.AreEqual(5ul, key3[0].Data.CoeffModCount);
+            Assert.AreEqual(5ul, key3[1].Data.CoeffModCount);
         }
 
         [TestMethod]
@@ -145,8 +144,8 @@ namespace SEALNetTest
 
             Assert.ThrowsException<ArgumentNullException>(() => keys.Set(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys.IsValidFor(null));
-            Assert.ThrowsException<ArgumentNullException>(() => keys.IsMetadataValidFor(null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
+            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
 
             Assert.ThrowsException<ArgumentNullException>(() => keys.Save(null));
 

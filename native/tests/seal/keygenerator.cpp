@@ -58,7 +58,7 @@ namespace SEALTest
             GaloisKeys galks = keygen.galois_keys();
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_EQ(1ULL, galks.key(3).size());
-            ASSERT_EQ(64ULL, galks.size());
+            ASSERT_EQ(10ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -72,7 +72,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(1ULL, galks.key(5).size());
             ASSERT_EQ(1ULL, galks.key(7).size());
-            ASSERT_EQ(64ULL, galks.size());
+            ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -80,14 +80,14 @@ namespace SEALTest
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(127));
             ASSERT_EQ(1ULL, galks.key(1).size());
-            ASSERT_EQ(64ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 127 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
             ASSERT_EQ(1ULL, galks.key(127).size());
-            ASSERT_EQ(64ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.size());
         }
         {
             parms.set_noise_standard_deviation(3.20);
@@ -131,7 +131,7 @@ namespace SEALTest
             GaloisKeys galks = keygen.galois_keys();
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_EQ(2ULL, galks.key(3).size());
-            ASSERT_EQ(256ULL, galks.size());
+            ASSERT_EQ(14ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -145,7 +145,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, galks.key(3).size());
             ASSERT_EQ(2ULL, galks.key(5).size());
             ASSERT_EQ(2ULL, galks.key(7).size());
-            ASSERT_EQ(256ULL, galks.size());
+            ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -153,14 +153,14 @@ namespace SEALTest
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(511));
             ASSERT_EQ(2ULL, galks.key(1).size());
-            ASSERT_EQ(256ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 511 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
             ASSERT_EQ(2ULL, galks.key(511).size());
-            ASSERT_EQ(256ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.size());
         }
     }
 
@@ -191,7 +191,7 @@ namespace SEALTest
             GaloisKeys galks = keygen.galois_keys();
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_EQ(1ULL, galks.key(3).size());
-            ASSERT_EQ(64ULL, galks.size());
+            ASSERT_EQ(10ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -205,7 +205,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(1ULL, galks.key(5).size());
             ASSERT_EQ(1ULL, galks.key(7).size());
-            ASSERT_EQ(64ULL, galks.size());
+            ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -213,14 +213,14 @@ namespace SEALTest
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(127));
             ASSERT_EQ(1ULL, galks.key(1).size());
-            ASSERT_EQ(64ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 127 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
             ASSERT_EQ(1ULL, galks.key(127).size());
-            ASSERT_EQ(64ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.size());
         }
         {
             parms.set_noise_standard_deviation(3.20);
@@ -263,7 +263,7 @@ namespace SEALTest
             GaloisKeys galks = keygen.galois_keys();
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_EQ(2ULL, galks.key(3).size());
-            ASSERT_EQ(256ULL, galks.size());
+            ASSERT_EQ(14ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -277,7 +277,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, galks.key(3).size());
             ASSERT_EQ(2ULL, galks.key(5).size());
             ASSERT_EQ(2ULL, galks.key(7).size());
-            ASSERT_EQ(256ULL, galks.size());
+            ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 1 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
@@ -285,14 +285,14 @@ namespace SEALTest
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(511));
             ASSERT_EQ(2ULL, galks.key(1).size());
-            ASSERT_EQ(256ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys(vector<uint64_t>{ 511 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
             ASSERT_EQ(2ULL, galks.key(511).size());
-            ASSERT_EQ(256ULL, galks.size());
+            ASSERT_EQ(1ULL, galks.size());
         }
     }
 

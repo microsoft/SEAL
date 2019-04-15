@@ -23,10 +23,6 @@ SEALNETNATIVE HRESULT SEALCALL PublicKey_Data(void *thisptr, void **data);
 
 SEALNETNATIVE HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_IsValidFor(void *thisptr, void *context, bool *result);
-
-SEALNETNATIVE HRESULT SEALCALL PublicKey_IsMetadataValidFor(void *thisptr, void *context, bool *result);
-
 SEALNETNATIVE HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool);
 
 SEALNETNATIVE HRESULT SEALCALL PublicKey_Destroy(void *thisptr);

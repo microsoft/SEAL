@@ -47,7 +47,7 @@ namespace seal
         it exists in the backing KSwitchKeys.
 
         @param[in] key_power The power of the secret key
-        @throws std::invalid_argument if kew_power is less than 2
+        @throws std::invalid_argument if key_power is less than 2
         */
         inline static std::size_t get_index(std::size_t key_power)
         {
@@ -59,6 +59,19 @@ namespace seal
         }
 
         /**
+        Returns whether a relinearization key corresponding to a given power of
+        the secret key exists.
+
+        @param[in] key_power The power of the secret key
+        @throws std::invalid_argument if key_power is less than 2
+        */
+        inline bool has_key(std::size_t key_power) const
+        {
+            std::size_t index = get_index(key_power);
+            return data().size() > index && !data()[index].empty();
+        }
+
+        /**
         Returns a const reference to a relinearization key. The returned
         relinearization key corresponds to the given power of the secret key.
 
@@ -67,24 +80,7 @@ namespace seal
         */
         inline auto &key(std::size_t key_power) const
         {
-            if (!has_key(key_power))
-            {
-                throw std::invalid_argument("requested key does not exist");
-            }
-            return keys_[get_index(key_power)];
-        }
-
-        /**
-        Returns whether a relinearization key corresponding to a given power of
-        the secret key exists.
-
-        @param[in] key_power The power of the secret key
-        @throws std::invalid_argument if kew_power is less than 2
-        */
-        inline bool has_key(std::size_t key_power) const
-        {
-            auto index = get_index(key_power);
-            return index < keys_.size();
+            return KSwitchKeys::data(get_index(key_power));
         }
     };
 }

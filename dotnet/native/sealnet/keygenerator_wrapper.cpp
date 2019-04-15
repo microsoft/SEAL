@@ -79,7 +79,6 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create3(void *sealContext, void *sec
     }
 }
 
-
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
