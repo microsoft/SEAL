@@ -180,8 +180,8 @@ namespace seal
 
         shared_ptr<UniformRandomGenerator> random(
             parms.random_generator()->create());
-        encrypt_zero_symmetric(secret_key_, public_key_.data(), context_,
-            context_data.parms_id(), random, true, pool_);
+        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), 
+            random, true, public_key_.data(), pool_);
 
         // Set the parms_id for public key
         public_key_.parms_id() = context_data.parms_id();
@@ -479,8 +479,9 @@ namespace seal
         uint64_t factor = 0;
         for (size_t j = 0; j < decomp_mod_count; j++)
         {
-            encrypt_zero_symmetric(secret_key_, destination[j].data(), context_,
-                key_context_data.parms_id(), random, true, pool_);
+            encrypt_zero_symmetric(secret_key_, context_, 
+                key_context_data.parms_id(), random, true, 
+                destination[j].data(), pool_);
 
             factor = key_modulus.back().value() % key_modulus[j].value();
             multiply_poly_scalar_coeffmod(

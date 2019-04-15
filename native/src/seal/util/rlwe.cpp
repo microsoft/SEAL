@@ -139,11 +139,11 @@ namespace seal
 
         void encrypt_zero_asymmetric(
             const PublicKey &public_key,
-            Ciphertext &destination,
             shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             shared_ptr<UniformRandomGenerator> random,
             bool is_ntt_form,
+            Ciphertext &destination,
             MemoryPoolHandle pool)
         {
             if (!pool)
@@ -230,11 +230,11 @@ namespace seal
 
         void encrypt_zero_symmetric(
             const SecretKey &secret_key,
-            Ciphertext &destination,
             shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             shared_ptr<UniformRandomGenerator> random,
             bool is_ntt_form,
+            Ciphertext &destination,
             MemoryPoolHandle pool)
         {
             if (!pool)

@@ -90,8 +90,8 @@ namespace seal
 
             // Zero encryption without modulus switching
             Ciphertext temp(pool);
-            encrypt_zero_asymmetric(public_key_, temp, context_, prev_parms_id,
-                random, is_ntt_form, pool);
+            encrypt_zero_asymmetric(public_key_, context_, prev_parms_id,
+                random, is_ntt_form, temp, pool);
             if (temp.is_ntt_form() != is_ntt_form)
             {
                 throw invalid_argument("NTT form mismatch");
@@ -123,8 +123,8 @@ namespace seal
         }
         else
         {
-            encrypt_zero_asymmetric(public_key_, destination, context_,
-                parms_id, random, is_ntt_form, pool);
+            encrypt_zero_asymmetric(public_key_, context_,
+                parms_id, random, is_ntt_form, destination, pool);
         }
     }
 

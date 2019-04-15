@@ -33,20 +33,20 @@ namespace seal
 
         void encrypt_zero_asymmetric(
             const PublicKey &public_key,
-            Ciphertext &destination,
             std::shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             std::shared_ptr<UniformRandomGenerator> random,
             bool is_ntt_form,
+            Ciphertext &destination,
             MemoryPoolHandle pool);
 
         void encrypt_zero_symmetric(
             const SecretKey &secret_key,
-            Ciphertext &destination,
             std::shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             std::shared_ptr<UniformRandomGenerator> random,
             bool is_ntt_form,
+            Ciphertext &destination,
             MemoryPoolHandle pool);
     }
 }
