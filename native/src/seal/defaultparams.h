@@ -187,6 +187,9 @@ namespace seal
         modulus bit size according to HomomorphicEncryption.org, and generate
         coeff_modulus_count number of primes of similar sizes in increasing order,
         except that the maximum prime is set to the last position.
+
+        @param[in] poly_modulus_degree The polynomial modulus degree in parameters.
+        @param[in] coeff_modulus_count The amount of SmallModulus requested.
         */
         inline std::vector<SmallModulus> get_coeff_modulus(
             std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)

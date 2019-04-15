@@ -336,7 +336,7 @@ void example_bfv_basics_i()
     Overall, this will result in worse performance.
 
     To make parameter selection easier for the user, we have constructed sets
-    of largest safe coefficient moduli for 128-bit and 192-bit security levels
+    of the largest safe coefficient moduli for 128-bit and 192-bit security levels
     for different choices of the polynomial modulus. These default parameters
     follow the recommendations in the Security Standard Draft available at
     http://HomomorphicEncryption.org. The security estimates are a complicated
@@ -377,10 +377,27 @@ void example_bfv_basics_i()
     in mind that the choice of coeff_modulus has a dramatic effect on security
     and should almost always be obtained through coeff_modulus_xxx(int).
 
+    For more a flexible prime selection, we have added a prime generation method
+
+        get_primes(std::size_t bit_size, std::size_t count, std::size_t ntt_size)
+
+    that returns the largest "count" primes with "bit_size" bits which support
+    NTT of size "ntt_size".
+
     Performance is mainly affected by the size of the polynomial modulus, and
     the number of prime factors in the coefficient modulus; hence in some cases
     it can be important to use as few prime factors in the coefficient modulus
     as possible.
+
+    However, there are scenarios that are demonstrated in later examples where
+    a user would like to choose more small primes than the default parameters.
+    We provide a method
+
+        DefaultParams::get_coeff_modulus(std::size_t poly_modulus_degree,
+                                        std::size_t coeff_modulus_count)
+
+    to generate an desired amount of small primes for 128-bit security level for
+    one polynomial modulus degree.
 
     In this example we use the default coefficient modulus for a 128-bit security
     level. Concretely, this coefficient modulus consists of only one 54-bit prime
