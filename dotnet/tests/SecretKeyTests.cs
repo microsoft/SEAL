@@ -25,7 +25,7 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 6),
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             KeyGenerator keygen = new KeyGenerator(context);
 
             SecretKey secret = keygen.SecretKey;
@@ -54,7 +54,7 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 6),
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             KeyGenerator keygen = new KeyGenerator(context);
 
             SecretKey secret = keygen.SecretKey;

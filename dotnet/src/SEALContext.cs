@@ -53,21 +53,13 @@ namespace Microsoft.Research.SEAL
         /// <param name="expandModChain">Determines whether the modulus switching chain
         /// should be created</param>
         /// <exception cref="ArgumentNullException">if parms is null</exception>
-        public static SEALContext Create(EncryptionParameters parms, bool expandModChain = true)
+        public SEALContext(EncryptionParameters parms, bool expandModChain = true)
         {
             if (null == parms)
                 throw new ArgumentNullException(nameof(parms));
 
             NativeMethods.SEALContext_Create(parms.NativePtr, expandModChain, out IntPtr contextPtr);
-            SEALContext context = new SEALContext(contextPtr);
-            return context;
-        }
-
-        /// <summary>
-        /// Create an instance of SEALContext from a native pointer
-        /// </summary>
-        private SEALContext(IntPtr ptr) : base(ptr)
-        {
+            NativePtr = contextPtr;
         }
 
         /// <summary>

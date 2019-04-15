@@ -20,7 +20,7 @@ namespace SEALNetTest
                 CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192)
             };
             encParams.SetPlainModulus(65537ul);
-            Context = SEALContext.Create(encParams);
+            Context = new SEALContext(encParams);
         }
 
         public static SEALContext Context { get; private set; } = null;

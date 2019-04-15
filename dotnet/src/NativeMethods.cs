@@ -7,6 +7,7 @@ using System.Text;
 
 namespace Microsoft.Research.SEAL
 {
+    [Guid("A7AAD62F-3A48-4188-B6C3-523C294CFDAD")]
     static class NativeMethods
     {
         private const string sealnetnative = "sealnetnative";
@@ -220,6 +221,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void SmallModulus_IsZero(IntPtr thisptr, out bool isZero);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SmallModulus_IsPrime(IntPtr thisptr, out bool isPrime);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SmallModulus_Value(IntPtr thisptr, out ulong value);
 
         [DllImport(sealnetnative, PreserveSig = false)]
@@ -245,6 +249,13 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, EntryPoint = "SmallModulus_Equals2", PreserveSig = false)]
         internal static extern void SmallModulus_Equals(IntPtr thisptr, ulong other, out bool result);
+
+        [DllImport(sealnetnative, EntryPoint = "SmallModulus_GetPrimes", PreserveSig = false)]
+        internal static extern void SmallModulus_GetPrimes(
+            int bitSize, 
+            ulong count, 
+            ulong nttSize,
+            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] primeArray);
 
         #endregion
 

@@ -82,7 +82,7 @@ namespace seal
         /**
         Returns the significant bit count of the value of the current SmallModulus.
         */
-        inline int bit_count() const
+        inline int bit_count() const noexcept
         {
             return bit_count_;
         }
@@ -90,7 +90,7 @@ namespace seal
         /**
         Returns the size (in 64-bit words) of the value of the current SmallModulus.
         */
-        inline std::size_t uint64_count() const
+        inline std::size_t uint64_count() const noexcept
         {
             return uint64_count_;
         }
@@ -98,7 +98,7 @@ namespace seal
         /**
         Returns a const pointer to the value of the current SmallModulus.
         */
-        inline const uint64_t *data() const
+        inline const uint64_t *data() const noexcept
         {
             return &value_;
         }
@@ -106,7 +106,7 @@ namespace seal
         /**
         Returns the value of the current SmallModulus.
         */
-        inline std::uint64_t value() const
+        inline std::uint64_t value() const noexcept
         {
             return value_;
         }
@@ -116,7 +116,7 @@ namespace seal
         The first two components of the Barrett ratio are the floor of 2^128/value,
         and the third component is the remainder.
         */
-        inline auto &const_ratio() const
+        inline auto &const_ratio() const noexcept
         {
             return const_ratio_;
         }
@@ -124,9 +124,17 @@ namespace seal
         /**
         Returns whether the value of the current SmallModulus is zero.
         */
-        inline bool is_zero() const
+        inline bool is_zero() const noexcept
         {
             return value_ == 0;
+        }
+
+        /**
+        Returns whether the value of the current SmallModulus is a prime number.
+        */
+        inline bool is_prime() const noexcept
+        {
+            return is_prime_;
         }
 
         /**
@@ -134,7 +142,7 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator ==(const SmallModulus &compare) const
+        inline bool operator ==(const SmallModulus &compare) const noexcept
         {
             return value_ == compare.value_;
         }
@@ -144,7 +152,7 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator !=(const SmallModulus &compare) const
+        inline bool operator !=(const SmallModulus &compare) const noexcept
         {
             return !(value_ == compare.value_);
         }
@@ -167,77 +175,42 @@ namespace seal
         */
         void load(std::istream &stream);
 
-    private:
-        SmallModulus(std::uint64_t value,
-            std::array<std::uint64_t, 3> const_ratio,
-            int bit_count, std::size_t uint64_count) :
-            value_(value), const_ratio_(const_ratio),
-            bit_count_(bit_count), uint64_count_(uint64_count)
-        {
-        }
+        /**
+        Returns in decreasing order a vector of the largest prime numbers of a given
+        length that all support NTTs of a given size. More precisely, the generated
+        primes are all congruent to 1 modulo 2 * ntt_size. Typically, the user might
+        call this function by passing poly_modulus_degree as ntt_size if the primes
+        are to be used as a coefficient modulus primes for encryption parameters.
 
+        @param[in] bit_size the bit-size of primes to be generated, no less than 2 and
+        no larger than 62
+        @param[in] count The total number of primes to be generated
+        @param[in] ntt_size The size of NTT that should be supported
+        @throws std::invalid_argument if bit_size is less than 2
+        @throws std::invalid_argument if count or ntt_size is zero
+        @throws std::logic_error if enough qualifying primes cannot be found
+        */
+        static std::vector<SmallModulus> GetPrimes(int bit_size, std::size_t count, 
+            std::size_t ntt_size);
+
+    private:
         void set_value(std::uint64_t value);
+
+        /**
+        Returns true if value is a prime based on Miller-Rabin primality test.
+
+        @param[in] num_rounds The number of rounds of testing to be performed
+        */
+        bool is_prime_internal(std::size_t num_rounds = 40) const;
 
         std::uint64_t value_ = 0;
 
         std::array<std::uint64_t, 3> const_ratio_{ { 0, 0, 0 } };
 
+        std::size_t uint64_count_ = 0;
+
         int bit_count_ = 0;
 
-        std::size_t uint64_count_ = 0;
+        bool is_prime_ = false;
     };
-
-
-    /**
-    Returns true if value is a prime based on Miller-Rabin primality test.
-    @par[in] in The SmallModulus to be tested.
-    @par[in] num_rounds The number of rounds of testing to be performed.
-    Note: Input uses SmallModulus for faster modular arithmetic required in
-    Miller-Rabin test, in comparison to using std::uint64_t.
-    */
-    bool is_prime(const SmallModulus &input, std::size_t num_rounds = 40);
-
-    /**
-    Returns in decreasing order a vector of the largest prime numbers with a
-    given bitsize that all support NTTs of a given size.
-    @par[in] bit_size the bit_size of primes to be generated, no less than 2 and
-    no larger than 62
-    @par[in] count the total number of primes to be generated, larger than 0
-    @par[in] ntt_size equals to poly_modulus_degree in EncryptionParms, so that
-    all primes support NTT for a given parameter set
-    @throws std::logic_error if cannot find enough qualifying primes
-    */
-    inline std::vector<SmallModulus> get_primes(std::size_t bit_size,
-        std::size_t count, std::size_t ntt_size)
-    {
-        if (bit_size >= 63 || bit_size <= 1)
-        {
-            throw std::invalid_argument("A prime must have at least 2 bit and at most 62 bits.");
-        }
-        if (0 == count)
-        {
-            throw std::invalid_argument("The count of primes to be generated must be positive.");
-        }
-        std::vector<SmallModulus> destination(count);
-        auto dest = destination.begin();
-        std::uint64_t factor = 2 * static_cast<std::uint64_t>(ntt_size);
-        // start with 2^bit_size - 2 * ntt_size + 1
-        std::uint64_t value = (uint64_t(0x1) << bit_size) - factor + 1;
-        while (count > 0 && value > (uint64_t(0x1) << (bit_size - 1)))
-        {
-            *dest = value;
-            if (is_prime(*dest))
-            {
-                count--;
-                dest++;
-            }
-            value -= factor;
-        }
-
-        if (count > 0)
-        {
-            throw std::logic_error("Cannot find enough qualifying primes");
-        }
-        return destination;
-    }
 }

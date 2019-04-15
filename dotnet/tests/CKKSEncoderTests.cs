@@ -23,7 +23,7 @@ namespace SEALNetTest
             coeffModulus.Add(DefaultParams.SmallMods40Bit(2));
             coeffModulus.Add(DefaultParams.SmallMods40Bit(3));
             parms.CoeffModulus = coeffModulus;
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
 
             int slots = 16;
             Plaintext plain = new Plaintext();
@@ -57,7 +57,7 @@ namespace SEALNetTest
             coeffModulus.Add(DefaultParams.SmallMods40Bit(2));
             coeffModulus.Add(DefaultParams.SmallMods40Bit(3));
             parms.CoeffModulus = coeffModulus;
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             Plaintext plain = new Plaintext();
@@ -89,7 +89,7 @@ namespace SEALNetTest
                 }
             };
 
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             Plaintext plain = new Plaintext();
@@ -117,7 +117,7 @@ namespace SEALNetTest
             coeffModulus.Add(DefaultParams.SmallMods60Bit(2));
             coeffModulus.Add(DefaultParams.SmallMods60Bit(3));
             parms.CoeffModulus = coeffModulus;
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             List<Complex> values = new List<Complex>(slots);
@@ -156,7 +156,7 @@ namespace SEALNetTest
                 }
             };
 
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             CKKSEncoder encoder = new CKKSEncoder(context);
             Plaintext plain = new Plaintext();
 
@@ -185,7 +185,7 @@ namespace SEALNetTest
                 }
             };
 
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             CKKSEncoder encoder = new CKKSEncoder(context);
             List<double> vald = new List<double>();
             List<double> vald_null = null;

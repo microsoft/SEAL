@@ -28,7 +28,7 @@ namespace SEALNetTest
                 CoeffModulus = DefaultParams.CoeffModulus128(4096)
             };
 
-            SEALContext context2 = SEALContext.Create(parms);
+            SEALContext context2 = new SEALContext(parms);
 
             Assert.IsTrue(context2.ContextDataFirst.Qualifiers.ParametersSet);
             Assert.IsTrue(context2.ContextDataFirst.Qualifiers.UsingBatching);

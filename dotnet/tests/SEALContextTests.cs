@@ -16,8 +16,8 @@ namespace SEALNetTest
             EncryptionParameters encParams1 = new EncryptionParameters(SchemeType.BFV);
             EncryptionParameters encParams2 = new EncryptionParameters(SchemeType.CKKS);
 
-            SEALContext context1 = SEALContext.Create(encParams1);
-            SEALContext context2 = SEALContext.Create(encParams2);
+            SEALContext context1 = new SEALContext(encParams1);
+            SEALContext context2 = new SEALContext(encParams2);
 
             Assert.IsNotNull(context1);
             Assert.IsNotNull(context2);
@@ -62,7 +62,7 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 6),
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -121,7 +121,7 @@ namespace SEALNetTest
                 PolyModulusDegree = 2 * (ulong)slotSize,
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -161,7 +161,7 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 20)
             };
 
-            SEALContext context1 = SEALContext.Create(parms);
+            SEALContext context1 = new SEALContext(parms);
 
             // By default there is a chain
             SEALContext.ContextData contextData = context1.KeyContextData;
@@ -174,7 +174,7 @@ namespace SEALNetTest
             Assert.IsNotNull(contextData.NextContextData);
 
             // This should not create a chain
-            SEALContext context2 = SEALContext.Create(parms, expandModChain: false);
+            SEALContext context2 = new SEALContext(parms, expandModChain: false);
             contextData = context2.KeyContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);

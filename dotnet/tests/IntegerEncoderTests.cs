@@ -14,7 +14,7 @@ namespace SEALNetTest
             {
                 PlainModulus = new SmallModulus(8192)
             };
-            SEALContext context1 = SEALContext.Create(parms1);
+            SEALContext context1 = new SEALContext(parms1);
             IntegerEncoder encoder = new IntegerEncoder(context1);
             Assert.IsNotNull(encoder);
             Assert.AreEqual(8192ul, encoder.PlainModulus.Value);
@@ -23,7 +23,7 @@ namespace SEALNetTest
             {
                 PlainModulus = new SmallModulus(4096)
             };
-            SEALContext context2 = SEALContext.Create(parms2);
+            SEALContext context2 = new SEALContext(parms2);
             IntegerEncoder encoder2 = new IntegerEncoder(context2);
             Assert.IsNotNull(encoder2);
             Assert.AreEqual(4096ul, encoder2.PlainModulus.Value);
@@ -40,7 +40,7 @@ namespace SEALNetTest
             {
                 PlainModulus = new SmallModulus(1024)
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             IntegerEncoder encoder = new IntegerEncoder(context);
 
             Plaintext plain = encoder.Encode(10);
@@ -135,7 +135,7 @@ namespace SEALNetTest
             {
                 PlainModulus = new SmallModulus(1024)
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             IntegerEncoder encoder = new IntegerEncoder(context);
 
             Plaintext plain = new Plaintext("0x^5 + 1x^4 + 1x^3 + 1x^1 + 0");
@@ -165,7 +165,7 @@ namespace SEALNetTest
             {
                 PlainModulus = new SmallModulus(4ul)
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             SEALContext context_null = null;
             IntegerEncoder enc = new IntegerEncoder(context);
             IntegerEncoder copy_null = null;
