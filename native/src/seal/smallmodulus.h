@@ -150,6 +150,46 @@ namespace seal
         }
 
         /**
+        Compares two SmallModulus instances.
+
+        @param[in] compare The SmallModulus to compare against
+        */
+        inline bool operator <(const SmallModulus &compare) const
+        {
+            return value_ < compare.value_;
+        }
+
+        /**
+        Compares two SmallModulus instances.
+
+        @param[in] compare The SmallModulus to compare against
+        */
+        inline bool operator <=(const SmallModulus &compare) const
+        {
+            return value_ <= compare.value_;
+        }
+
+        /**
+        Compares two SmallModulus instances.
+
+        @param[in] compare The SmallModulus to compare against
+        */
+        inline bool operator >(const SmallModulus &compare) const
+        {
+            return value_ > compare.value_;
+        }
+
+        /**
+        Compares two SmallModulus instances.
+
+        @param[in] compare The SmallModulus to compare against
+        */
+        inline bool operator >=(const SmallModulus &compare) const
+        {
+            return value_ >= compare.value_;
+        }
+
+        /**
         Saves the SmallModulus to an output stream. The full state of the modulus is
         serialized. The output is in binary format and not human-readable. The output
         stream must have the "binary" flag set.

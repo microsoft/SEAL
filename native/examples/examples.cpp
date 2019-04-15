@@ -67,14 +67,14 @@ void print_parameters(shared_ptr<SEALContext> context)
     }
 
     cout << "/ Encryption parameters:" << endl;
-    cout << "| scheme: " << scheme_name << endl;
-    cout << "| poly_modulus_degree: " <<
+    cout << "|   scheme: " << scheme_name << endl;
+    cout << "|   poly_modulus_degree: " <<
         context_data.parms().poly_modulus_degree() << endl;
 
     /*
     Print the size of the true (product) coefficient modulus.
     */
-    cout << "| coeff_modulus size: " << context_data.
+    cout << "|   coeff_modulus size: " << context_data.
         total_coeff_modulus_bit_count() << " bits" << endl;
 
     /*
@@ -82,11 +82,11 @@ void print_parameters(shared_ptr<SEALContext> context)
     */
     if (context_data.parms().scheme() == scheme_type::BFV)
     {
-        cout << "| plain_modulus: " << context_data.
+        cout << "|   plain_modulus: " << context_data.
             parms().plain_modulus().value() << endl;
     }
 
-    cout << "\\ noise_standard_deviation: " << context_data.
+    cout << "\\   noise_standard_deviation: " << context_data.
         parms().noise_standard_deviation() << endl;
     cout << endl;
 }
@@ -464,8 +464,10 @@ void example_bfv_basics_i()
     BatchEncoder or the CKKSEncoder (discussed later).
 
     [BatchEncoder]
-    If plain_modulus is a prime congruent to 1 modulo 2*poly_modulus_degree, the
-    plaintext elements can be viewed as 2-by-(poly_modulus_degree / 2) matrices
+    If plain_modulus is a prime congruent to 1 modulo 2*poly_modulus_degree,
+    or if plain_modulus is a composite number where the order of the multiplicative
+    group of integers modulo plain_modulus is divisible by 2*poly_modulus_degree,
+    the plaintext elements can be viewed as 2-by-(poly_modulus_degree / 2) matrices
     with elements integers modulo plain_modulus. When a desired computation can
     be vectorized, using BatchEncoder can result in a massive performance boost
     over naively encrypting and operating on each input number separately. Thus,
