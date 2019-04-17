@@ -252,8 +252,8 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, EntryPoint = "SmallModulus_GetPrimes", PreserveSig = false)]
         internal static extern void SmallModulus_GetPrimes(
-            int bitSize, 
-            ulong count, 
+            int bitSize,
+            ulong count,
             ulong nttSize,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] primeArray);
 
@@ -366,10 +366,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void SEALContext_KeyParmsId(IntPtr thisptr, ulong[] parmsId);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_ParmsIdFirst(IntPtr thisptr, ulong[] parmsId);
+        internal static extern void SEALContext_FirstParmsId(IntPtr thisptr, ulong[] parmsId);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_ParmsIdLast(IntPtr thisptr, ulong[] parmsId);
+        internal static extern void SEALContext_LastParmsId(IntPtr thisptr, ulong[] parmsId);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_ParametersSet(IntPtr thisptr, out bool paramsSet);
@@ -378,10 +378,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void SEALContext_KeyContextData(IntPtr thisptr, out IntPtr contextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_ContextDataFirst(IntPtr thisptr, out IntPtr contextData);
+        internal static extern void SEALContext_FirstContextData(IntPtr thisptr, out IntPtr contextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_ContextDataLast(IntPtr thisptr, out IntPtr contextData);
+        internal static extern void SEALContext_LastContextData(IntPtr thisptr, out IntPtr contextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_GetContextData(IntPtr thisptr, ulong[] parmsId, out IntPtr contextData);

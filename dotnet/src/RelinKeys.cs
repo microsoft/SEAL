@@ -65,7 +65,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the index of a relinearization key in the backing KSwitchKeys instance 
+        /// Returns the index of a relinearization key in the backing KSwitchKeys instance
         /// that corresponds to the given secret key power, assuming that it exists in the
         /// backing KSwitchKeys.
         /// </summary>
@@ -94,11 +94,11 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         ///
         /// <remarks>
-        /// Returns a copy of a relinearization key. The returned relinearization key 
+        /// Returns a copy of a relinearization key. The returned relinearization key
         /// corresponds to the given power of the secret key.
         /// </remarks>
         /// <param name="keyPower">The power of the secret key</param>
-        /// <exception cref="ArgumentException">if the key corresponding to keyPower 
+        /// <exception cref="ArgumentException">if the key corresponding to keyPower
         /// does not exist</exception>
         public IEnumerable<PublicKey> Key(ulong keyPower)
         {

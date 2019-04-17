@@ -204,7 +204,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Loads a SmallModulus from an input stream overwriting the current
         /// SmallModulus.</summary>
-        /// 
+        ///
         /// <param name="stream">The stream to load the SmallModulus from</param>
         /// <exception cref="System.ArgumentNullException">if stream is null</exception>
         public void Load(Stream stream)
@@ -315,7 +315,7 @@ namespace Microsoft.Research.SEAL
         /// Returns in decreasing order a vector of the largest prime numbers of a given
         /// length that all support NTTs of a given size.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Returns in decreasing order a vector of the largest prime numbers of a given
         /// length that all support NTTs of a given size. More precisely, the generated

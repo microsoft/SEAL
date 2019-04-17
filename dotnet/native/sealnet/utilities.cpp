@@ -51,7 +51,7 @@ void sealnet::BuildSmallModulusPointers(const vector<SmallModulus> &in_mods, uin
     uint64_t count = 0;
     SmallModulus* *mod_ptr_array = reinterpret_cast<SmallModulus**>(out_mods);
 
-    transform(in_mods.begin(), in_mods.end(), mod_ptr_array, 
+    transform(in_mods.begin(), in_mods.end(), mod_ptr_array,
         [](const auto &mod) { return new SmallModulus(mod); }
     );
 }

@@ -27,7 +27,7 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
         if (context_data.parms().scheme() != scheme_type::BFV)
         {
             throw invalid_argument("unsupported scheme");
@@ -97,7 +97,7 @@ namespace seal
     void BatchEncoder::encode(const vector<uint64_t> &values_matrix,
         Plaintext &destination)
     {
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
 
         // Validate input parameters
         size_t values_matrix_size = values_matrix.size();
@@ -139,7 +139,7 @@ namespace seal
     void BatchEncoder::encode(const vector<int64_t> &values_matrix,
         Plaintext &destination)
     {
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         // Validate input parameters
@@ -184,7 +184,7 @@ namespace seal
     void BatchEncoder::encode(gsl::span<const uint64_t> values_matrix,
         Plaintext &destination)
     {
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
 
         // Validate input parameters
         size_t values_matrix_size = static_cast<size_t>(values_matrix.size());
@@ -228,7 +228,7 @@ namespace seal
     void BatchEncoder::encode(gsl::span<const int64_t> values_matrix,
         Plaintext &destination)
     {
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         // Validate input parameters
@@ -283,7 +283,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
 
         // Validate input parameters
         if (plain.coeff_count() > context_data.parms().poly_modulus_degree())
@@ -339,7 +339,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
 
         // Set destination size
         destination.resize(slots_);
@@ -379,7 +379,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         // Set destination size
@@ -424,7 +424,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
 
         using index_type = decltype(destination)::index_type;
         if(unsigned_gt(destination.size(), numeric_limits<int>::max()) ||
@@ -468,7 +468,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         using index_type = decltype(destination)::index_type;
@@ -516,7 +516,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->context_data_first();
+        auto &context_data = *context_->first_context_data();
 
         // Never include the leading zero coefficient (if present)
         size_t plain_coeff_count = min(plain.coeff_count(), slots_);

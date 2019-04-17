@@ -57,23 +57,23 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_KeyParmsId(void *thisptr, uint64_t *p
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ParmsIdFirst(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_FirstParmsId(void *thisptr, uint64_t *parms_id)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    CopyParmsId(context->parms_id_first(), parms_id);
+    CopyParmsId(context->first_parms_id(), parms_id);
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ParmsIdLast(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_LastParmsId(void *thisptr, uint64_t *parms_id)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    CopyParmsId(context->parms_id_last(), parms_id);
+    CopyParmsId(context->last_parms_id(), parms_id);
     return S_OK;
 }
 
@@ -99,26 +99,26 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_KeyContextData(void *thisptr, void **
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataFirst(void *thisptr, void **context_data)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_FirstContextData(void *thisptr, void **context_data)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(context_data, E_POINTER);
 
     // The pointer that is returned should not be deleted.
-    auto data = context->context_data_first();
+    auto data = context->first_context_data();
     *context_data = const_cast<SEALContext::ContextData*>(data.get());
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataLast(void *thisptr, void **context_data)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_LastContextData(void *thisptr, void **context_data)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(context_data, E_POINTER);
 
     // The pointer that is returned should not be deleted.
-    auto data = context->context_data_last();
+    auto data = context->last_context_data();
     *context_data = const_cast<SEALContext::ContextData*>(data.get());
     return S_OK;
 }

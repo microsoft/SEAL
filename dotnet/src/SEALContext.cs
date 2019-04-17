@@ -36,7 +36,7 @@ namespace Microsoft.Research.SEAL
     /// the CoeffModulus, until the resulting parameters are no longer valid, e.g., there are
     /// no more primes left. These derived encryption parameters are used by ciphertexts and
     /// plaintexts and their respective ContextData can be accessed through the
-    /// GetContextData(ParmsId) function. The properties ContextDataFirst and LastContextData
+    /// GetContextData(ParmsId) function. The properties FirstContextData and LastContextData
     /// return the ContextData corresponding to the first and the last set of parameters in
     /// the "data" part of the chain, i.e., the second and the last element in the full chain.
     /// The chain is a doubly linked list and is referred to as the modulus switching chain.
@@ -101,11 +101,11 @@ namespace Microsoft.Research.SEAL
         /// Returns the ContextData corresponding to the first encryption parameters
         /// that are used for data.
         /// </summary>
-        public ContextData ContextDataFirst
+        public ContextData FirstContextData
         {
             get
             {
-                NativeMethods.SEALContext_ContextDataFirst(NativePtr, out IntPtr contextData);
+                NativeMethods.SEALContext_FirstContextData(NativePtr, out IntPtr contextData);
                 ContextData data = new ContextData(contextData, owned: false);
                 return data;
             }
@@ -115,11 +115,11 @@ namespace Microsoft.Research.SEAL
         /// Returns the ContextData corresponding to the last encryption parameters
         /// that are used for data.
         /// </summary>
-        public ContextData ContextDataLast
+        public ContextData LastContextData
         {
             get
             {
-                NativeMethods.SEALContext_ContextDataLast(NativePtr, out IntPtr contextData);
+                NativeMethods.SEALContext_LastContextData(NativePtr, out IntPtr contextData);
                 ContextData data = new ContextData(contextData, owned: false);
                 return data;
             }
@@ -138,7 +138,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a ParmsId corresponding to the set of encryption parameters 
+        /// Returns a ParmsId corresponding to the set of encryption parameters
         /// that are used for keys.
         /// </summary>
         public ParmsId KeyParmsId
@@ -155,12 +155,12 @@ namespace Microsoft.Research.SEAL
         /// Returns a ParmsId corresponding to the first encryption parameters that
         /// are used for data.
         /// </summary>
-        public ParmsId ParmsIdFirst
+        public ParmsId FirstParmsId
         {
             get
             {
                 ParmsId parms = new ParmsId();
-                NativeMethods.SEALContext_ParmsIdFirst(NativePtr, parms.Block);
+                NativeMethods.SEALContext_FirstParmsId(NativePtr, parms.Block);
                 return parms;
             }
         }
@@ -169,12 +169,12 @@ namespace Microsoft.Research.SEAL
         /// Returns a ParmsId corresponding to the last encryption parameters that
         /// are used for data.
         /// </summary>
-        public ParmsId ParmsIdLast
+        public ParmsId LastParmsId
         {
             get
             {
                 ParmsId parms = new ParmsId();
-                NativeMethods.SEALContext_ParmsIdLast(NativePtr, parms.Block);
+                NativeMethods.SEALContext_LastParmsId(NativePtr, parms.Block);
                 return parms;
             }
         }

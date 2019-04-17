@@ -186,7 +186,7 @@ namespace seal
             {
                 throw std::invalid_argument("invalid context");
             }
-            auto parms_id = context->parms_id_first();
+            auto parms_id = context->first_parms_id();
             reserve(std::move(context), parms_id, size_capacity);
         }
 
@@ -255,7 +255,7 @@ namespace seal
             {
                 throw std::invalid_argument("invalid context");
             }
-            auto parms_id = context->parms_id_first();
+            auto parms_id = context->first_parms_id();
             resize(std::move(context), parms_id, size);
         }
 

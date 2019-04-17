@@ -190,7 +190,7 @@ namespace seal
         @throws std::invalid_argument if count or ntt_size is zero
         @throws std::logic_error if enough qualifying primes cannot be found
         */
-        static std::vector<SmallModulus> GetPrimes(int bit_size, std::size_t count, 
+        static std::vector<SmallModulus> GetPrimes(int bit_size, std::size_t count,
             std::size_t ntt_size);
 
     private:

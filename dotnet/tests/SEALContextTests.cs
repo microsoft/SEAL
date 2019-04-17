@@ -25,11 +25,11 @@ namespace SEALNetTest
             Assert.IsFalse(context1.ParametersSet);
             Assert.IsFalse(context2.ParametersSet);
 
-            Assert.AreNotSame(context1.ParmsIdFirst, context1.ParmsIdLast);
-            Assert.AreEqual(context1.ParmsIdFirst, context1.ParmsIdLast);
+            Assert.AreNotSame(context1.FirstParmsId, context1.LastParmsId);
+            Assert.AreEqual(context1.FirstParmsId, context1.LastParmsId);
 
-            SEALContext.ContextData data1 = context2.ContextDataFirst;
-            SEALContext.ContextData data2 = context2.GetContextData(context2.ParmsIdFirst);
+            SEALContext.ContextData data1 = context2.FirstContextData;
+            SEALContext.ContextData data2 = context2.GetContextData(context2.FirstParmsId);
 
             Assert.AreNotSame(data1, data2);
             ulong[] totalCoeffMod1 = data1.TotalCoeffModulus;
@@ -168,7 +168,7 @@ namespace SEALNetTest
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
-            contextData = context1.ContextDataFirst;
+            contextData = context1.FirstContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNotNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
@@ -179,7 +179,7 @@ namespace SEALNetTest
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
-            contextData = context2.ContextDataFirst;
+            contextData = context2.FirstContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNotNull(contextData.PrevContextData);
             Assert.IsNull(contextData.NextContextData);

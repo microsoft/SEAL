@@ -13,7 +13,7 @@ namespace Microsoft.Research.SEAL
     /// <summary>
     /// Class to store keyswitching keys.
     /// </summary>
-    /// 
+    ///
     /// <remarks>
     /// <para>
     /// Class to store keyswitching keys. It should never be necessary for normal
@@ -172,7 +172,7 @@ namespace Microsoft.Research.SEAL
                 IEnumerable<IEnumerable<PublicKey>> data = Data;
                 writer.Write((ulong)data.LongCount());
 
-                // Loop over entries in the first list  
+                // Loop over entries in the first list
                 foreach (IEnumerable<PublicKey> key in data)
                 {
                     writer.Write((ulong)key.LongCount());

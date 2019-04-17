@@ -175,7 +175,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="copy">The GaloisKeys to copy from</param>
         /// <exception cref="ArgumentNullException">if copy is null</exception>
-        public GaloisKeys(GaloisKeys copy) 
+        public GaloisKeys(GaloisKeys copy)
             : base((KSwitchKeys)copy)
         {
         }

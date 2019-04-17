@@ -45,7 +45,7 @@ namespace seal
     void Evaluator::populate_Zmstar_to_generator()
     {
         uint64_t n = static_cast<uint64_t>(
-            context_->context_data_first()->parms().poly_modulus_degree());
+            context_->first_context_data()->parms().poly_modulus_degree());
         uint64_t m = n << 1;
 
         for (uint64_t i = 0; i < n / 2; i++)
@@ -279,7 +279,7 @@ namespace seal
             throw invalid_argument("encrypted1 and encrypted2 parameter mismatch");
         }
 
-        auto context_data_ptr = context_->context_data_first();
+        auto context_data_ptr = context_->first_context_data();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -706,7 +706,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        auto context_data_ptr = context_->context_data_first();
+        auto context_data_ptr = context_->first_context_data();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -1396,7 +1396,7 @@ namespace seal
         }
 
         auto context_data_ptr = context_->get_context_data(encrypted.parms_id());
-        if (context_->parms_id_last() == encrypted.parms_id())
+        if (context_->last_parms_id() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
         }
@@ -1405,7 +1405,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        switch (context_->context_data_first()->parms().scheme())
+        switch (context_->first_context_data()->parms().scheme())
         {
         case scheme_type::BFV:
             // Modulus switching with scaling
@@ -1490,7 +1490,7 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (context_->parms_id_last() == encrypted.parms_id())
+        if (context_->last_parms_id() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
         }
@@ -1499,7 +1499,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        switch (context_->context_data_first()->parms().scheme())
+        switch (context_->first_context_data()->parms().scheme())
         {
         case scheme_type::BFV:
             throw invalid_argument("unsupported operation for scheme type");
@@ -2747,6 +2747,7 @@ namespace seal
                 }
             }
         }
+
         // Results are now stored in temp_poly[k]
         // Modulus switching should be performed
         if (use_special_mod)
@@ -2839,6 +2840,6 @@ namespace seal
                 }
             }
         }
-        
+
     }
 }

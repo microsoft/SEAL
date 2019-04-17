@@ -19,16 +19,16 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_Destroy(void *thisptr);
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_KeyParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ParmsIdFirst(void *thisptr, uint64_t *parms_id);
+SEALNETNATIVE HRESULT SEALCALL SEALContext_FirstParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ParmsIdLast(void *thisptr, uint64_t *parms_id);
+SEALNETNATIVE HRESULT SEALCALL SEALContext_LastParmsId(void *thisptr, uint64_t *parms_id);
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_ParametersSet(void *thisptr, bool *params_set);
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_KeyContextData(void *thisptr, void **context_data);
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataFirst(void *thisptr, void **context_data);
+SEALNETNATIVE HRESULT SEALCALL SEALContext_FirstContextData(void *thisptr, void **context_data);
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataLast(void *thisptr, void **context_data);
+SEALNETNATIVE HRESULT SEALCALL SEALContext_LastContextData(void *thisptr, void **context_data);
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void **context_data);

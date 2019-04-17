@@ -31,7 +31,7 @@ namespace SEALTest
         ASSERT_EQ(0ULL, ctxt.uint64_count());
         ASSERT_EQ(10ULL * 2 * 1, ctxt.uint64_count_capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         const uint64_t *ptr = ctxt.data();
 
@@ -41,7 +41,7 @@ namespace SEALTest
         ASSERT_EQ(5ULL * 2 * 1, ctxt.uint64_count_capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ptr = ctxt.data();
 
         ctxt.reserve(10);
@@ -50,7 +50,7 @@ namespace SEALTest
         ASSERT_EQ(10ULL * 2 * 1, ctxt.uint64_count_capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ptr = ctxt.data();
 
@@ -60,7 +60,7 @@ namespace SEALTest
         ASSERT_EQ(0ULL, ctxt.uint64_count());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ptr = ctxt.data();
 
@@ -70,7 +70,7 @@ namespace SEALTest
         ASSERT_EQ(0ULL, ctxt.uint64_count());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
 
         Ciphertext ctxt2{ ctxt };
