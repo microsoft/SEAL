@@ -2820,5 +2820,25 @@ namespace seal
                 }
             }
         }
+        else
+        {
+            for (size_t j = 0; j < rns_mod_count; j++)
+            {
+                for (size_t k = 0; k < 2; k++)
+                {
+                    // Reduce (ct mod 4qk) mod qk
+                    uint64_t *temp_poly_ptr =
+                        temp_poly[k].get() + j * coeff_count * 2;
+                    uint64_t *encrypted_ptr = encrypted.data(k) + j * coeff_count;
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        encrypted_ptr[l] = barrett_reduce_128(
+                            temp_poly_ptr + l * 2,
+                            key_modulus[j]);
+                    }
+                }
+            }
+        }
+        
     }
 }
