@@ -245,7 +245,9 @@ namespace SEALNetTest
                 CoeffModulus = coeffModulus,
                 PolyModulusDegree = 8
             };
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: true,
+                enforceHEStdSecurity: false);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);

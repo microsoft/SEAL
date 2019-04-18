@@ -368,12 +368,20 @@ namespace seal
         @param[in] parms The encryption parameters
         @param[in] expand_mod_chain Determines whether the modulus switching chain
         should be created
+        @param[in] enforce_he_std_security Determines whether a minimum of 128-bit
+        security level according to HomomorphicEncryption.org security standard
+        should be enforced
         */
         static auto Create(const EncryptionParameters &parms,
-            bool expand_mod_chain = true)
+            bool expand_mod_chain = true, bool enforce_he_std_security = true)
         {
             return std::shared_ptr<SEALContext>(
-                new SEALContext(parms, expand_mod_chain, MemoryManager::GetPool()));
+                new SEALContext(
+                    parms,
+                    expand_mod_chain,
+                    enforce_he_std_security,
+                    MemoryManager::GetPool())
+                );
         }
 
         /**
@@ -475,11 +483,14 @@ namespace seal
         @param[in] parms The encryption parameters
         @param[in] expand_mod_chain Determines whether the modulus switching chain
         should be created
+        @param[in] enforce_he_std_security Determines whether a minimum of 128-bit
+        security level according to HomomorphicEncryption.org security standard
+        should be enforced
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
         SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-            MemoryPoolHandle pool);
+            bool enforce_he_std_security, MemoryPoolHandle pool);
 
         ContextData validate(EncryptionParameters parms);
 
@@ -501,5 +512,7 @@ namespace seal
 
         std::unordered_map<
             parms_id_type, std::shared_ptr<const ContextData>> context_data_map_{};
+
+        bool enforce_he_std_security_;
     };
 }

@@ -166,7 +166,9 @@ namespace SEALNetTest
                 PolyModulusDegree = 64,
                 CoeffModulus = new List<SmallModulus>() {  DefaultParams.SmallMods60Bit(0) }
             };
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys(steps: new int[] { 1, 2, 3 });

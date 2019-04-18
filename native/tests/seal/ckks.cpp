@@ -23,7 +23,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(2 * slots);
             parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
                 DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
 
             std::vector<std::complex<double>> values(slots);
 
@@ -51,7 +51,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(2 * slots);
             parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1),
                 DefaultParams::small_mods_60bit(2), DefaultParams::small_mods_60bit(3) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
 
             std::vector<std::complex<double>> values(slots);
 
@@ -82,7 +82,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(2 * slots);
             parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0),
                 DefaultParams::small_mods_60bit(1), DefaultParams::small_mods_60bit(2) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
 
             std::vector<std::complex<double>> values(slots);
 
@@ -113,7 +113,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(2 * slots);
             parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1),
                 DefaultParams::small_mods_30bit(2), DefaultParams::small_mods_30bit(3), DefaultParams::small_mods_30bit(4) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
 
             std::vector<std::complex<double>> values(slots);
 
@@ -144,7 +144,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1),
                 DefaultParams::small_mods_30bit(2), DefaultParams::small_mods_30bit(3), DefaultParams::small_mods_30bit(4) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
 
             std::vector<std::complex<double>> values(slots);
 
@@ -195,7 +195,7 @@ namespace SEALTest
                 DefaultParams::small_mods_30bit(17),
                 DefaultParams::small_mods_30bit(18),
             });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
 
             std::vector<std::complex<double>> values(slots);
 
@@ -226,7 +226,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(2 * slots);
             parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
                 DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3), DefaultParams::small_mods_40bit(4) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
 
             std::vector<std::complex<double>> values(slots);
 
@@ -279,7 +279,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
                 DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             CKKSEncoder encoder(context);
 
             srand(static_cast<unsigned>(time(NULL)));
@@ -306,7 +306,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(slots * 2);
             parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
                 DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             CKKSEncoder encoder(context);
 
             srand(static_cast<unsigned>(time(NULL)));

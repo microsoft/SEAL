@@ -119,27 +119,29 @@ namespace seal
         {
             // Not secure according to HomomorphicEncryption.org security standard
             context_data.qualifiers_.using_he_std_security = false;
-#ifdef SEAL_ENFORCE_HE_STD_SECURITY
-            // Parameters are not valid
-            context_data.qualifiers_.parameters_set = false;
-            return context_data;
-#endif
+            if (enforce_he_std_security_)
+            {
+                // Parameters are not valid
+                context_data.qualifiers_.parameters_set = false;
+                return context_data;
+            }
         }
 
         // Check if the parameters are secure according to HomomorphicEncryption.org
         // security standard
-        if (util::global_variables::
-            max_secure_coeff_modulus_bit_count.count(poly_modulus_degree) &&
+        if (!util::global_variables::
+            max_secure_coeff_modulus_bit_count.count(poly_modulus_degree) ||
             (context_data.total_coeff_modulus_bit_count_ > util::global_variables::
                 max_secure_coeff_modulus_bit_count.at(poly_modulus_degree)))
         {
             // Not secure according to HomomorphicEncryption.org security standard
             context_data.qualifiers_.using_he_std_security = false;
-#ifdef SEAL_ENFORCE_HE_STD_SECURITY
-            // Parameters are not valid
-            context_data.qualifiers_.parameters_set = false;
-            return context_data;
-#endif
+            if (enforce_he_std_security_)
+            {
+                // Parameters are not valid
+                context_data.qualifiers_.parameters_set = false;
+                return context_data;
+            }
         }
 
         // Can we use NTT with coeff_modulus?
@@ -352,7 +354,8 @@ namespace seal
     }
 
     SEALContext::SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-        MemoryPoolHandle pool) : pool_(move(pool))
+        bool enforce_he_std_security, MemoryPoolHandle pool)
+        : pool_(move(pool)), enforce_he_std_security_(enforce_he_std_security)
     {
         if (!pool_)
         {

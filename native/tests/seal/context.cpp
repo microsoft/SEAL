@@ -3,6 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "seal/context.h"
+#include "seal/defaultparams.h"
 
 using namespace seal;
 using namespace std;
@@ -15,7 +16,7 @@ namespace SEALTest
         auto scheme = scheme_type::BFV;
         EncryptionParameters parms(scheme);
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
             ASSERT_FALSE(qualifiers.using_fft);
@@ -31,7 +32,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
             ASSERT_FALSE(qualifiers.using_fft);
@@ -47,7 +48,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
             ASSERT_TRUE(qualifiers.using_fft);
@@ -63,7 +64,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(2ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
@@ -80,7 +81,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(3ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
@@ -97,7 +98,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
@@ -114,7 +115,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(17ULL, *context->first_context_data()->total_coeff_modulus());
             ASSERT_EQ(697ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
@@ -132,7 +133,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
@@ -149,7 +150,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
@@ -166,7 +167,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(137ULL, *context->first_context_data()->total_coeff_modulus());
             ASSERT_EQ(26441ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
@@ -184,7 +185,7 @@ namespace SEALTest
         parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(nullptr);
         {
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(137ULL, *context->first_context_data()->total_coeff_modulus());
             ASSERT_EQ(26441ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
@@ -193,6 +194,42 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_TRUE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
+        }
+
+        // Parameters not OK due to too small poly_modulus_degree and enforce_he_std_security
+        parms.set_poly_modulus_degree(4);
+        parms.set_coeff_modulus({ 137, 193 });
+        parms.set_plain_modulus(73);
+        parms.set_noise_standard_deviation(3.20);
+        parms.set_random_generator(nullptr);
+        {
+            auto context = SEALContext::Create(parms, false, true);
+            auto qualifiers = context->first_context_data()->qualifiers();
+            ASSERT_FALSE(qualifiers.parameters_set);
+        }
+
+        // Parameters not OK due to too small noise_standard_deviation and enforce_he_std_security
+        parms.set_poly_modulus_degree(1024);
+        parms.set_coeff_modulus({ 137, 193 });
+        parms.set_plain_modulus(73);
+        parms.set_noise_standard_deviation(3.19);
+        parms.set_random_generator(nullptr);
+        {
+            auto context = SEALContext::Create(parms, false, true);
+            auto qualifiers = context->first_context_data()->qualifiers();
+            ASSERT_FALSE(qualifiers.parameters_set);
+        }
+
+        // Parameters not OK due to too large coeff_modulus and enforce_he_std_security
+        parms.set_poly_modulus_degree(2048);
+        parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
+        parms.set_plain_modulus(73);
+        parms.set_noise_standard_deviation(3.19);
+        parms.set_random_generator(nullptr);
+        {
+            auto context = SEALContext::Create(parms, false, true);
+            auto qualifiers = context->first_context_data()->qualifiers();
+            ASSERT_FALSE(qualifiers.parameters_set);
         }
     }
 
@@ -203,7 +240,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(4);
             parms.set_coeff_modulus({ 41, 137, 193, 65537 });
             parms.set_plain_modulus(73);
-            auto context = SEALContext::Create(parms, true);
+            auto context = SEALContext::Create(parms, true, false);
             auto context_data = context->key_context_data();
             ASSERT_EQ(size_t(2), context_data->chain_index());
             ASSERT_EQ(71047416497ULL, *context_data->total_coeff_modulus());
@@ -224,7 +261,7 @@ namespace SEALTest
             ASSERT_FALSE(!!context_data->next_context_data());
             ASSERT_EQ(context_data->parms_id(), context->last_parms_id());
 
-            context = SEALContext::Create(parms, false);
+            context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(size_t(1), context->key_context_data()->chain_index());
             ASSERT_EQ(size_t(0), context->first_context_data()->chain_index());
             ASSERT_EQ(71047416497ULL, *context->key_context_data()->total_coeff_modulus());
@@ -236,7 +273,7 @@ namespace SEALTest
             EncryptionParameters parms(scheme_type::CKKS);
             parms.set_poly_modulus_degree(4);
             parms.set_coeff_modulus({ 41, 137, 193, 65537 });
-            auto context = SEALContext::Create(parms, true);
+            auto context = SEALContext::Create(parms, true, false);
             auto context_data = context->key_context_data();
             ASSERT_EQ(size_t(3), context_data->chain_index());
             ASSERT_EQ(71047416497ULL, *context_data->total_coeff_modulus());
@@ -263,7 +300,7 @@ namespace SEALTest
             ASSERT_FALSE(!!context_data->next_context_data());
             ASSERT_EQ(context_data->parms_id(), context->last_parms_id());
 
-            context = SEALContext::Create(parms, false);
+            context = SEALContext::Create(parms, false, false);
             ASSERT_EQ(size_t(1), context->key_context_data()->chain_index());
             ASSERT_EQ(size_t(0), context->first_context_data()->chain_index());
             ASSERT_EQ(71047416497ULL, *context->key_context_data()->total_coeff_modulus());

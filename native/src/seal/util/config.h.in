@@ -7,7 +7,6 @@
 #cmakedefine SEAL_USE_MAYBE_UNUSED
 #cmakedefine SEAL_USE_STD_BYTE
 #cmakedefine SEAL_USE_SHARED_MUTEX
-#cmakedefine SEAL_ENFORCE_HE_STD_SECURITY
 #cmakedefine SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
 #cmakedefine SEAL_USE_INTRIN
 #cmakedefine SEAL_USE__UMUL128

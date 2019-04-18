@@ -62,7 +62,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 6),
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: true,
+                enforceHEStdSecurity: false);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -79,7 +81,7 @@ namespace SEALNetTest
             Assert.IsTrue(qualifiers.UsingFastPlainLift);
             Assert.IsTrue(qualifiers.UsingFFT);
             Assert.IsTrue(qualifiers.UsingNTT);
-            Assert.IsTrue(qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(qualifiers.UsingHEStdSecurity);
 
             ulong[] cdpm = data.CoeffDivPlainModulus;
             Assert.AreEqual(3, cdpm.Length);
@@ -121,7 +123,9 @@ namespace SEALNetTest
                 PolyModulusDegree = 2 * (ulong)slotSize,
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: true,
+                enforceHEStdSecurity: false);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -161,7 +165,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 20)
             };
 
-            SEALContext context1 = new SEALContext(parms);
+            SEALContext context1 = new SEALContext(parms,
+                expandModChain: true,
+                enforceHEStdSecurity: false);
 
             // By default there is a chain
             SEALContext.ContextData contextData = context1.KeyContextData;

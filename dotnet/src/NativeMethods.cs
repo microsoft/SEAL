@@ -357,7 +357,11 @@ namespace Microsoft.Research.SEAL
         #region SEALContext methods
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_Create(IntPtr encryptionParams, bool expandModChain, out IntPtr context);
+        internal static extern void SEALContext_Create(
+            IntPtr encryptionParams,
+            bool expandModChain,
+            bool enforceHEStdSecurity,
+            out IntPtr context);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_Destroy(IntPtr thisptr);

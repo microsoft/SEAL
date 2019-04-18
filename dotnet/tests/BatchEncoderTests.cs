@@ -21,7 +21,9 @@ namespace SEALNetTest
             parms.CoeffModulus = coeffModulus;
             parms.PlainModulus = new SmallModulus(257);
 
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -94,7 +96,9 @@ namespace SEALNetTest
             parms.CoeffModulus = coeffModulus;
             parms.PlainModulus = new SmallModulus(257);
 
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -171,7 +175,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(257)
             };
 
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -214,7 +220,9 @@ namespace SEALNetTest
                 CoeffModulus = coeffModulus
             };
 
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
 
             Assert.ThrowsException<ArgumentException>(() =>
             {
@@ -236,7 +244,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(257)
             };
 
-            SEALContext context = new SEALContext(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
             BatchEncoder enc = new BatchEncoder(context);
             List<ulong> valu = new List<ulong>();
             List<ulong> valu_null = null;

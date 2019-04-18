@@ -23,7 +23,7 @@ namespace SEALTest
         parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0) });
         parms.set_plain_modulus(2);
         parms.set_noise_standard_deviation(1.0);
-        auto context = SEALContext::Create(parms);
+        auto context = SEALContext::Create(parms, false, false);
 
         Ciphertext ctxt(context);
         ctxt.reserve(10);
@@ -100,7 +100,7 @@ namespace SEALTest
         parms.set_plain_modulus(2);
         parms.set_noise_standard_deviation(1.0);
 
-        auto context = SEALContext::Create(parms);
+        auto context = SEALContext::Create(parms, false, false);
 
         Ciphertext ctxt(context);
         Ciphertext ctxt2;
@@ -114,7 +114,7 @@ namespace SEALTest
         parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(1024));
         parms.set_plain_modulus(0xF0F0);
         parms.set_noise_standard_deviation(3.14159);
-        context = SEALContext::Create(parms);
+        context = SEALContext::Create(parms, false, false);
         KeyGenerator keygen(context);
         Encryptor encryptor(context, keygen.public_key());
         encryptor.encrypt(Plaintext("Ax^10 + 9x^9 + 8x^8 + 7x^7 + 6x^6 + 5x^5 + 4x^4 + 3x^3 + 2x^2 + 1"), ctxt);

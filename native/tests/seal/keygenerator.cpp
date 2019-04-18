@@ -23,7 +23,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(1 << 6);
             parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys();
@@ -96,7 +96,7 @@ namespace SEALTest
             parms.set_coeff_modulus({
                 DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_30bit(0),
                 DefaultParams::small_mods_30bit(1) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys(2);
@@ -171,7 +171,7 @@ namespace SEALTest
             parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys();
@@ -228,7 +228,7 @@ namespace SEALTest
             parms.set_coeff_modulus({
                 DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_30bit(0),
                 DefaultParams::small_mods_30bit(1) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys(2);
@@ -303,7 +303,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(1 << 6);
         parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
-        auto context = SEALContext::Create(parms);
+        auto context = SEALContext::Create(parms, false, false);
         {
             KeyGenerator keygen(context);
             auto pk = keygen.public_key();

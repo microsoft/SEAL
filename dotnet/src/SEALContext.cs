@@ -52,13 +52,18 @@ namespace Microsoft.Research.SEAL
         /// <param name="parms">The encryption parameters.</param>
         /// <param name="expandModChain">Determines whether the modulus switching chain
         /// should be created</param>
+        /// <param name="enforceHEStdSecurity">Determines whether a minimum of 128-bit
+        /// security level according to HomomorphicEncryption.org security standard
+        /// should be enforced</param>
         /// <exception cref="ArgumentNullException">if parms is null</exception>
-        public SEALContext(EncryptionParameters parms, bool expandModChain = true)
+        public SEALContext(EncryptionParameters parms,
+            bool expandModChain = true, bool enforceHEStdSecurity = true)
         {
             if (null == parms)
                 throw new ArgumentNullException(nameof(parms));
 
-            NativeMethods.SEALContext_Create(parms.NativePtr, expandModChain, out IntPtr contextPtr);
+            NativeMethods.SEALContext_Create(parms.NativePtr,
+                expandModChain, enforceHEStdSecurity, out IntPtr contextPtr);
             NativePtr = contextPtr;
         }
 

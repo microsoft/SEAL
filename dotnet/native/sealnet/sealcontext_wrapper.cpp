@@ -25,13 +25,14 @@ namespace sealnet
     unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams, bool expand_mod_chain, void **context)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams,
+    bool expand_mod_chain, bool enforce_he_std_security, void **context)
 {
     EncryptionParameters *encParams = FromVoid<EncryptionParameters>(encryptionParams);
     IfNullRet(encParams, E_POINTER);
     IfNullRet(context, E_POINTER);
 
-    auto result = SEALContext::Create(*encParams, expand_mod_chain);
+    auto result = SEALContext::Create(*encParams, expand_mod_chain, enforce_he_std_security);
     pointer_store_[result.get()] = result;
 
     *context = result.get();
