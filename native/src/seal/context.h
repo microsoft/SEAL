@@ -16,7 +16,7 @@ namespace seal
 {
     /**
     Stores a set of attributes (qualifiers) of a set of encryption parameters.
-    These parameters are mainly used internally in various parts of the library, e.g.
+    These parameters are mainly used internally in various parts of the library, e.g.,
     to determine which algorithmic optimizations the current support. The qualifiers
     are automatically created by the SEALContext class, silently passed on to classes
     such as Encryptor, Evaluator, and Decryptor, and the only way to change them is by
@@ -467,6 +467,18 @@ namespace seal
             return last_parms_id_;
         }
 
+        /**
+        Returns whether the coefficient modulus supports keyswitching. In practice, 
+        support for keyswitching is required by Evaluator::relinearize, 
+        Evaluator::apply_galois, and all rotation and conjugation operations. For
+        keyswitching to be available, the coefficient modulus parameter must consist
+        of at least two prime number factors.
+        */
+        inline bool using_keyswitching() const noexcept
+        {
+            return using_keyswitching_;
+        }
+
     private:
         SEALContext(const SEALContext &copy) = delete;
 
@@ -513,6 +525,14 @@ namespace seal
         std::unordered_map<
             parms_id_type, std::shared_ptr<const ContextData>> context_data_map_{};
 
+        /**
+        Is HomomorphicEncryption.org security standard enforced?
+        */
         bool enforce_he_std_security_;
+
+        /**
+        Is keyswitching supported by the encryption parameters?
+        */
+        bool using_keyswitching_;
     };
 }

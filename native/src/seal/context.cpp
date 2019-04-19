@@ -318,7 +318,7 @@ namespace seal
     }
 
     parms_id_type SEALContext::create_next_context_data(
-            const parms_id_type &prev_parms_id)
+        const parms_id_type &prev_parms_id)
     {
         // Create the next set of parameters by removing last modulus
         auto next_parms = context_data_map_.at(prev_parms_id)->parms_;
@@ -377,9 +377,9 @@ namespace seal
             make_shared<const ContextData>(validate(parms))));
         key_parms_id_ = parms.parms_id();
 
-        // Then create data_parms_id_head_ if the parameters are valid and there is
+        // Then create first_parms_id_ if the parameters are valid and there is
         // more than one modulus in coeff_modulus. This is equivalent to expanding
-        // the chain by one step. Otherwise, set data_parms_id_head_ to equal
+        // the chain by one step. Otherwise, we set first_parms_id_ to equal
         // key_parms_id_.
         if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set ||
             parms.coeff_modulus().size() == 1)
@@ -393,8 +393,11 @@ namespace seal
                 key_parms_id_ : next_parms_id;
         }
 
-        // Set the data tail to point to data head
+        // Set last_parms_id_ to point to first_parms_id_
         last_parms_id_ = first_parms_id_;
+
+        // Check if keyswitching is available
+        using_keyswitching_ = (first_parms_id_ != key_parms_id_);
 
         // If modulus switching chain is to be created, compute the remaining
         // parameter sets as long as they are valid to use (parameters_set == true)

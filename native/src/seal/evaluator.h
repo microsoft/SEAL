@@ -339,6 +339,7 @@ namespace seal
         parameters in the current context
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void relinearize_inplace(Ciphertext &encrypted, const RelinKeys &relin_keys,
@@ -365,6 +366,7 @@ namespace seal
         parameters in the current context
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void relinearize(const Ciphertext &encrypted,
@@ -658,6 +660,7 @@ namespace seal
         is too large for the encryption parameters
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         void multiply_many(std::vector<Ciphertext> &encrypteds,
@@ -685,6 +688,7 @@ namespace seal
         @throws std::invalid_argument if exponent is zero
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         void exponentiate_inplace(Ciphertext &encrypted,
@@ -713,6 +717,7 @@ namespace seal
         @throws std::invalid_argument if exponent is zero
         @throws std::invalid_argument if the size of relin_keys is too small
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void exponentiate(const Ciphertext &encrypted, std::uint64_t exponent,
@@ -982,6 +987,7 @@ namespace seal
         @throws std::invalid_argument if the Galois element is not valid
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         void apply_galois_inplace(Ciphertext &encrypted,
@@ -1018,6 +1024,7 @@ namespace seal
         @throws std::invalid_argument if the Galois element is not valid
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void apply_galois(const Ciphertext &encrypted,
@@ -1054,6 +1061,7 @@ namespace seal
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_rows_inplace(Ciphertext &encrypted,
@@ -1093,6 +1101,7 @@ namespace seal
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_rows(const Ciphertext &encrypted, int steps,
@@ -1126,6 +1135,7 @@ namespace seal
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_columns_inplace(Ciphertext &encrypted,
@@ -1162,6 +1172,7 @@ namespace seal
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_columns(const Ciphertext &encrypted,
@@ -1195,6 +1206,7 @@ namespace seal
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_vector_inplace(Ciphertext &encrypted,
@@ -1232,6 +1244,7 @@ namespace seal
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_vector(const Ciphertext &encrypted, int steps,
@@ -1261,6 +1274,7 @@ namespace seal
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void complex_conjugate_inplace(Ciphertext &encrypted,
@@ -1294,6 +1308,7 @@ namespace seal
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void complex_conjugate(const Ciphertext &encrypted,

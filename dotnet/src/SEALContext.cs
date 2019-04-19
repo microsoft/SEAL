@@ -8,12 +8,19 @@ namespace Microsoft.Research.SEAL
 {
     /// <summary>
     /// Performs sanity checks (validation) and pre-computations for a given set of encryption
+    /// parameters. 
+    /// </summary>
+    /// 
+    /// <remarks>
+    /// <para>
+    /// Performs sanity checks (validation) and pre-computations for a given set of encryption
     /// parameters. While the EncryptionParameters class is intended to be a light-weight class
     /// to store the encryption parameters, the SEALContext class is a heavy-weight class that
     /// is constructed from a given set of encryption parameters. It validates the parameters
     /// for correctness, evaluates their properties, and performs and stores the results of
     /// several costly pre-computations.
-    ///
+    /// </para>
+    /// <para>
     /// After the user has set at least the PolyModulus, CoeffModulus, and PlainModulus
     /// parameters in a given EncryptionParameters instance, the parameters can be validated
     /// for correctness and functionality by constructing an instance of SEALContext. The
@@ -24,7 +31,8 @@ namespace Microsoft.Research.SEAL
     /// given parameter set has been deemed valid and is ready to be used. If the parameters
     /// were for some reason not appropriately set, the ParametersSet flag will be false,
     /// and a new SEALContext will have to be created after the parameters are corrected.
-    ///
+    /// </para>
+    /// <para>
     /// By default, SEALContext creates a chain of SEALContext.ContextData instances. The
     /// first one in the chain corresponds to special encryption parameters that are reserved
     /// to be used by the various key classes (SecretKey, PublicKey, etc.). These are the
@@ -40,7 +48,8 @@ namespace Microsoft.Research.SEAL
     /// return the ContextData corresponding to the first and the last set of parameters in
     /// the "data" part of the chain, i.e., the second and the last element in the full chain.
     /// The chain is a doubly linked list and is referred to as the modulus switching chain.
-    /// </summary>
+    /// </para>
+    /// </remarks>
     /// <see cref="EncryptionParameters">see EncryptionParameters for more details on the parameters.</see>
     /// <see cref="EncryptionParameterQualifiers">see EncryptionParameterQualifiers for more details on the qualifiers.</see>
     public class SEALContext : NativeObject
@@ -181,6 +190,27 @@ namespace Microsoft.Research.SEAL
                 ParmsId parms = new ParmsId();
                 NativeMethods.SEALContext_LastParmsId(NativePtr, parms.Block);
                 return parms;
+            }
+        }
+
+
+        /// <summary>
+        /// Returns whether the coefficient modulus supports keyswitching. 
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// Returns whether the coefficient modulus supports keyswitching. In 
+        /// practice, support for keyswitching is required by Evaluator.Relinearize, 
+        /// Evaluator.ApplyGalois, and all rotation and conjugation operations. 
+        /// For keyswitching to be available, the coefficient modulus parameter must 
+        /// consist of at least two prime number factors.
+        /// </remarks>
+        public bool UsingKeySwitching
+        {
+            get
+            {
+                NativeMethods.SEALContext_UsingKeySwitching(NativePtr, out bool result);
+                return result;
             }
         }
 

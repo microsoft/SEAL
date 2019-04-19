@@ -388,6 +388,7 @@ namespace Microsoft.Research.SEAL
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RelinearizeInplace(Ciphertext encrypted, RelinKeys relinKeys,
                     MemoryPoolHandle pool = null)
@@ -419,6 +420,7 @@ namespace Microsoft.Research.SEAL
         /// parameters in the current context</exception>
         /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Relinearize(Ciphertext encrypted,
                     RelinKeys relinKeys, Ciphertext destination,
@@ -787,6 +789,7 @@ namespace Microsoft.Research.SEAL
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void MultiplyMany(IEnumerable<Ciphertext> encrypteds,
                     RelinKeys relinKeys, Ciphertext destination,
@@ -825,6 +828,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if exponent is zero</exception>
         /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ExponentiateInplace(Ciphertext encrypted,
                     ulong exponent, RelinKeys relinKeys,
@@ -860,6 +864,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if exponent is zero</exception>
         /// <exception cref="ArgumentException">if the size of relinKeys is too small</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void Exponentiate(Ciphertext encrypted, ulong exponent,
                     RelinKeys relinKeys, Ciphertext destination,
@@ -1205,6 +1210,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if the Galois element is not valid</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ApplyGaloisInplace(Ciphertext encrypted,
                     ulong galoisElt, GaloisKeys galoisKeys,
@@ -1245,6 +1251,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if the Galois element is not valid</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ApplyGalois(Ciphertext encrypted,
                     ulong galoisElt, GaloisKeys galoisKeys,
@@ -1287,6 +1294,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if steps has too big absolute value</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateRowsInplace(Ciphertext encrypted,
             int steps, GaloisKeys galoisKeys,
@@ -1326,6 +1334,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if steps has too big absolute value</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateRows(Ciphertext encrypted, int steps,
                     GaloisKeys galoisKeys, Ciphertext destination,
@@ -1364,6 +1373,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateColumnsInplace(Ciphertext encrypted,
                     GaloisKeys galoisKeys,
@@ -1400,6 +1410,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateColumns(Ciphertext encrypted,
                     GaloisKeys galoisKeys, Ciphertext destination,
@@ -1440,6 +1451,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if steps has too big absolute value</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateVectorInplace(Ciphertext encrypted,
             int steps, GaloisKeys galoisKeys,
@@ -1479,6 +1491,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if steps has too big absolute value</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void RotateVector(Ciphertext encrypted, int steps,
                     GaloisKeys galoisKeys, Ciphertext destination,
@@ -1515,6 +1528,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ComplexConjugateInplace(Ciphertext encrypted,
                     GaloisKeys galoisKeys,
@@ -1549,6 +1563,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
         /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
         public void ComplexConjugate(Ciphertext encrypted,
                     GaloisKeys galoisKeys, Ciphertext destination,

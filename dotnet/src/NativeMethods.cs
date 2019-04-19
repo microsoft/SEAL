@@ -390,6 +390,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_GetContextData(IntPtr thisptr, ulong[] parmsId, out IntPtr contextData);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SEALContext_UsingKeySwitching(IntPtr thisptr, out bool usingKeySwitching);
+
         #endregion
 
         #region ContextData methods

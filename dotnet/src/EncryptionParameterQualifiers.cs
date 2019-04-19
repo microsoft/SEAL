@@ -6,11 +6,13 @@ using System;
 
 namespace Microsoft.Research.SEAL
 {
-    /// <summary>Stores a set of attributes (qualifiers) of a set of encryption parameters.</summary>
+    /// <summary>
+    /// Stores a set of attributes (qualifiers) of a set of encryption parameters.
+    /// </summary>
     ///
     /// <remarks>
     /// Stores a set of attributes (qualifiers) of a set of encryption parameters. These
-    /// parameters are mainly used internally in various parts of the library, e.g. to
+    /// parameters are mainly used internally in various parts of the library, e.g., to
     /// determine which algorithmic optimizations the current support. The qualifiers are
     /// automatically created by the <see cref="SEALContext" /> class, silently passed
     /// on to classes such as <see cref="Encryptor" />, <see cref="Evaluator" />, and
@@ -24,7 +26,7 @@ namespace Microsoft.Research.SEAL
     public class EncryptionParameterQualifiers : NativeObject
     {
         /// <summary>
-        /// Create a copy of an existing instance of  Encryption Parameter Qualifiers
+        /// Create a copy of an existing instance of EncryptionParameterQualifiers
         /// </summary>
         /// <param name="copy">Original object to copy</param>
         public EncryptionParameterQualifiers(EncryptionParameterQualifiers copy)
@@ -37,10 +39,10 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Create an instance of Encryption Parameter Qualifiers through a pointer to
+        /// Create an instance of EncryptionParameterQualifiers through a pointer to
         /// a native object.
         /// </summary>
-        /// <param name="ptr">Pointer to native Encryption Parameter Qualifiers.</param>
+        /// <param name="ptr">Pointer to native EncryptionParameterQualifiers.</param>
         /// <param name="owned">Whether this instance owns the native pointer.</param>
         internal EncryptionParameterQualifiers(IntPtr ptr, bool owned = true)
             : base(ptr, owned)
@@ -61,13 +63,17 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Tells whether FFT can be used for polynomial multiplication.If the polynomial modulus
+        /// Tells whether FFT can be used for polynomial multiplication.
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// Tells whether FFT can be used for polynomial multiplication. If the polynomial modulus
         /// is of the form X^N+1, where N is a power of two, then FFT can be used for fast
         /// multiplication of polynomials modulo the polynomial modulus. In this case the
         /// variable UsingFFT will be set to true. However, currently Microsoft SEAL requires this
         /// to be the case for the parameters to be valid. Therefore, ParametersSet can only
         /// be true if UsingFFT is true.
-        /// </summary>
+        /// </remarks>
         public bool UsingFFT
         {
             get
@@ -78,14 +84,18 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Tells whether NTT can be used for polynomial multiplication.If the primes in the
+        /// Tells whether NTT can be used for polynomial multiplication.
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// Tells whether NTT can be used for polynomial multiplication. If the primes in the
         /// coefficient modulus are congruent to 1 modulo 2N, where X^N+1 is the polynomial
         /// modulus and N is a power of two, then the number-theoretic transform (NTT) can be
         /// used for fast multiplications of polynomials modulo the polynomial modulus and
         /// coefficient modulus.In this case the variable UsingNTT will be set to true. However,
         /// currently Microsoft SEAL requires this to be the case for the parameters to be valid.
         /// Therefore, ParametersSet can only be true if UsingNTT is true.
-        /// </summary>
+        /// </remarks>
         public bool UsingNTT
         {
             get
@@ -96,7 +106,11 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Tells whether batching is supported by the encryption parameters.If the plaintext
+        /// Tells whether batching is supported by the encryption parameters.
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// Tells whether batching is supported by the encryption parameters. If the plaintext
         /// modulus is congruent to 1 modulo 2N, where X^N+1 is the polynomial modulus and N is
         /// a power of two, then it is possible to use the BatchEncoder class to view plaintext
         /// elements as 2-by-(N/2) matrices of integers modulo the plaintext modulus.This is
@@ -104,7 +118,7 @@ namespace Microsoft.Research.SEAL
         /// a SIMD fashion, and rotate the matrix rows and columns.When the computation is
         /// easily vectorizable, using batching can yield a huge performance boost.If the
         /// encryption parameters support batching, the variable UsingBatching is set to true.
-        /// </summary>
+        /// </remarks>
         public bool UsingBatching
         {
             get
@@ -115,13 +129,17 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Tells whether fast plain lift is supported by the encryption parameters.
+        /// </summary>
+        /// 
+        /// <remarks>
         /// Tells whether fast plain lift is supported by the encryption parameters. A certain
         /// performance optimization in multiplication of a ciphertext by a plaintext
         /// (Evaluator.MultiplyPlain) and in transforming a plaintext element to NTT domain
         /// (Evaluator.TransformToNTT) can be used when the plaintext modulus is smaller than
         /// each prime in the coefficient modulus. In this case the variable UsingFastPlainLift
         /// is set to true.
-        /// </summary>
+        /// </remarks>
         public bool UsingFastPlainLift
         {
             get
@@ -133,9 +151,14 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Tells whether the coefficient modulus consists of a set of primes that are in
+        /// decreasing order.
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// Tells whether the coefficient modulus consists of a set of primes that are in
         /// decreasing order. If this is true, certain modular reductions in base conversion
         /// can be omitted, improving performance.
-        /// </summary>
+        /// </remarks>
         public bool UsingDescendingModulusChain
         {
             get
@@ -157,7 +180,6 @@ namespace Microsoft.Research.SEAL
                 return result;
             }
         }
-
 
         /// <summary>
         /// Destroy native object.
