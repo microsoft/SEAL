@@ -70,15 +70,6 @@ namespace seal
         context_data.total_coeff_modulus_bit_count_ = get_significant_bit_count_uint(
             context_data.total_coeff_modulus_.get(), coeff_mod_count);
 
-        // Check whether the coefficient modulus consists of a set of primes that
-        // are in decreasing order
-        context_data.qualifiers_.using_descending_modulus_chain = true;
-        for (size_t i = 0; i < coeff_mod_count - 1; i++)
-        {
-            context_data.qualifiers_.using_descending_modulus_chain
-                &= (coeff_modulus[i].value() < coeff_modulus[i + 1].value());
-        }
-
         // Check polynomial modulus degree and create poly_modulus
         size_t poly_modulus_degree = parms.poly_modulus_degree();
         int coeff_count_power = get_power_of_two(poly_modulus_degree);
@@ -311,6 +302,15 @@ namespace seal
             // Parameters are not valid
             context_data.qualifiers_.parameters_set = false;
             return context_data;
+        }
+
+        // Check whether the coefficient modulus consists of a set of primes that
+        // are in decreasing order
+        context_data.qualifiers_.using_descending_modulus_chain = true;
+        for (size_t i = 0; i < coeff_mod_count - 1; i++)
+        {
+            context_data.qualifiers_.using_descending_modulus_chain
+                &= (coeff_modulus[i].value() > coeff_modulus[i + 1].value());
         }
 
         // Done with validation and pre-computations

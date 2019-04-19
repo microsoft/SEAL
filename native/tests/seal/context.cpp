@@ -23,6 +23,9 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Not relatively prime coeff moduli
@@ -39,6 +42,9 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Plain modulus not relatively prime to coeff moduli
@@ -55,6 +61,9 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Plain modulus not smaller than product of coeff moduli
@@ -72,6 +81,9 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // FFT poly but not NTT modulus
@@ -89,6 +101,9 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Parameters OK; no fast plain lift
@@ -106,6 +121,9 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Parameters OK; fast plain lift
@@ -119,11 +137,15 @@ namespace SEALTest
             ASSERT_EQ(17ULL, *context->first_context_data()->total_coeff_modulus());
             ASSERT_EQ(697ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
+            auto key_qualifiers = context->key_context_data()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(key_qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_TRUE(context->using_keyswitching());
         }
 
         // Parameters OK; no batching due to non-prime plain modulus
@@ -141,6 +163,9 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Parameters OK; batching enabled
@@ -158,6 +183,9 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_TRUE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Parameters OK; batching and fast plain lift enabled
@@ -171,11 +199,15 @@ namespace SEALTest
             ASSERT_EQ(137ULL, *context->first_context_data()->total_coeff_modulus());
             ASSERT_EQ(26441ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
+            auto key_qualifiers = context->key_context_data()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_TRUE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(key_qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_TRUE(context->using_keyswitching());
         }
 
         // Parameters OK; batching and fast plain lift enabled; nullptr RNG
@@ -189,11 +221,15 @@ namespace SEALTest
             ASSERT_EQ(137ULL, *context->first_context_data()->total_coeff_modulus());
             ASSERT_EQ(26441ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
+            auto key_qualifiers = context->key_context_data()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_TRUE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
+            ASSERT_FALSE(key_qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_TRUE(context->using_keyswitching());
         }
 
         // Parameters not OK due to too small poly_modulus_degree and enforce_he_std_security
@@ -206,6 +242,8 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, true);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Parameters not OK due to too small noise_standard_deviation and enforce_he_std_security
@@ -218,18 +256,75 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, true);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
 
         // Parameters not OK due to too large coeff_modulus and enforce_he_std_security
         parms.set_poly_modulus_degree(2048);
         parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
         parms.set_plain_modulus(73);
-        parms.set_noise_standard_deviation(3.19);
+        parms.set_noise_standard_deviation(3.20);
         parms.set_random_generator(nullptr);
         {
             auto context = SEALContext::Create(parms, false, true);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
+        }
+
+        // Parameters OK; descending modulus chain
+        parms.set_poly_modulus_degree(4096);
+        parms.set_coeff_modulus({ 0xffffee001, 0xffffc4001 });
+        parms.set_plain_modulus(73);
+        {
+            auto context = SEALContext::Create(parms, false, true);
+            auto qualifiers = context->first_context_data()->qualifiers();
+            auto key_qualifiers = context->key_context_data()->qualifiers();
+            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.using_fft);
+            ASSERT_TRUE(qualifiers.using_ntt);
+            ASSERT_FALSE(qualifiers.using_batching);
+            ASSERT_TRUE(qualifiers.using_fast_plain_lift);
+            ASSERT_TRUE(qualifiers.using_descending_modulus_chain);
+            ASSERT_TRUE(key_qualifiers.using_he_std_security);
+            ASSERT_TRUE(context->using_keyswitching());
+        }
+
+        // Parameters OK; no standard security
+        parms.set_poly_modulus_degree(2048);
+        parms.set_coeff_modulus({ 0x1ffffe0001, 0xffffee001, 0xffffc4001 });
+        parms.set_plain_modulus(73);
+        {
+            auto context = SEALContext::Create(parms, false, false);
+            auto qualifiers = context->first_context_data()->qualifiers();
+            auto key_qualifiers = context->key_context_data()->qualifiers();
+            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.using_fft);
+            ASSERT_TRUE(qualifiers.using_ntt);
+            ASSERT_FALSE(qualifiers.using_batching);
+            ASSERT_TRUE(qualifiers.using_fast_plain_lift);
+            ASSERT_TRUE(key_qualifiers.using_descending_modulus_chain);
+            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_TRUE(context->using_keyswitching());
+        }
+
+        // Parameters OK; using batching; no keyswitching
+        parms.set_poly_modulus_degree(2048);
+        parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0) });
+        parms.set_plain_modulus(65537);
+        {
+            auto context = SEALContext::Create(parms, false, false);
+            auto qualifiers = context->first_context_data()->qualifiers();
+            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.using_fft);
+            ASSERT_TRUE(qualifiers.using_ntt);
+            ASSERT_TRUE(qualifiers.using_batching);
+            ASSERT_TRUE(qualifiers.using_fast_plain_lift);
+            ASSERT_TRUE(qualifiers.using_descending_modulus_chain);
+            ASSERT_TRUE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(context->using_keyswitching());
         }
     }
 
