@@ -1319,6 +1319,11 @@ namespace seal
             complex_conjugate_inplace(destination, galois_keys, std::move(pool));
         }
 
+        /**
+        Enables access to private members of seal::Evaluator for .NET wrapper.
+        */
+        struct EvaluatorPrivateHelper;
+
     private:
         Evaluator(const Evaluator &copy) = delete;
 

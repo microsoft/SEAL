@@ -524,6 +524,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Evaluator_ComplexConjugate(IntPtr thisptr, IntPtr encrypted, IntPtr galoisKeys, IntPtr destination, IntPtr pool);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Evaluator_ContextUsingKeySwitching(IntPtr thisptr, out bool usingKeySwitching);
+
         #endregion
 
         #region Ciphertext methods

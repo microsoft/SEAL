@@ -81,7 +81,7 @@ namespace Microsoft.Research.SEAL
         /// <see cref="PlainModulus"/> for the parameters to be valid.
         /// </remarks>
         /// <param name="scheme">Scheme for the encryption parameters</param>
-        /// <exception cref="System.ArgumentException">if given scheme is not available</exception>
+        /// <exception cref="ArgumentException">if given scheme is not available</exception>
         public EncryptionParameters(SchemeType scheme)
         {
             NativeMethods.EncParams_Create((int)scheme, out IntPtr ptr);
@@ -166,8 +166,8 @@ namespace Microsoft.Research.SEAL
         ///     security level (bigger is worse). In Microsoft SEAL each of the prime numbers in the coefficient
         ///     modulus must be at most 60 bits, and must be congruent to 1 modulo 2*degree(PolyModulus).
         /// </remarks>
-        /// <exception cref="System.ArgumentNullException">if the value being set is null</exception>
-        /// <exception cref="System.ArgumentException">if the value being set is invalid</exception>
+        /// <exception cref="ArgumentNullException">if the value being set is null</exception>
+        /// <exception cref="ArgumentException">if the value being set is invalid</exception>
         public IEnumerable<SmallModulus> CoeffModulus
         {
             get
@@ -211,7 +211,7 @@ namespace Microsoft.Research.SEAL
         ///     however, that some features (e.g. batching) require the plaintext modulus to be of
         ///     a particular form.
         /// </remarks>
-        /// <exception cref="System.ArgumentNullException">if the value being set is null</exception>
+        /// <exception cref="ArgumentNullException">if the value being set is null</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
         public SmallModulus PlainModulus
         {
@@ -321,7 +321,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="parms">Encryption Parameters to save</param>
         /// <param name="stream">The stream to save the EncryptionParameters to</param>
-        /// <exception cref="System.ArgumentNullException">if either parms or stream are null</exception>
+        /// <exception cref="ArgumentNullException">if either parms or stream are null</exception>
         /// <seealso cref="Load(Stream)">See Load() to load a saved EncryptionParameters instance.</seealso>
         public static void Save(EncryptionParameters parms, Stream stream)
         {
@@ -356,8 +356,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         ///
         /// <param name="stream">The stream to load the EncryptionParameters from</param>
-        /// <exception cref="System.ArgumentNullException">if stream is null</exception>
-        /// <exception cref="System.ArgumentException">if parameters cannot be read correctly</exception>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if parameters cannot be read correctly</exception>
         /// <seealso cref="Save(EncryptionParameters, Stream)">See Save(EncryptionParameters, Stream) to save an EncryptionParameters instance.</seealso>
         public static EncryptionParameters Load(Stream stream)
         {

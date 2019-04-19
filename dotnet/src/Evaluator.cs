@@ -5,6 +5,7 @@ using Microsoft.Research.SEAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
@@ -86,8 +87,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         ///
         /// <param name="context">The SEALContext</param>
-        /// <exception cref="ArgumentNullException"> if context is null</exception>
-        /// <exception cref="ArgumentException"> if the context is not set or encryption
+        /// <exception cref="ArgumentNullException">if context is null</exception>
+        /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
         public Evaluator(SEALContext context)
         {
@@ -129,7 +130,15 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            NativeMethods.Evaluator_Negate(NativePtr, encrypted.NativePtr, destination.NativePtr);
+            try
+            {
+                NativeMethods.Evaluator_Negate(NativePtr, encrypted.NativePtr, destination.NativePtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -179,7 +188,15 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            NativeMethods.Evaluator_Add(NativePtr, encrypted1.NativePtr, encrypted2.NativePtr, destination.NativePtr);
+            try
+            {
+                NativeMethods.Evaluator_Add(NativePtr, encrypted1.NativePtr, encrypted2.NativePtr, destination.NativePtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -203,7 +220,15 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr[] encarray = encrypteds.Select(c => c.NativePtr).ToArray();
-            NativeMethods.Evaluator_AddMany(NativePtr, (ulong)encarray.Length, encarray, destination.NativePtr);
+            try
+            {
+                NativeMethods.Evaluator_AddMany(NativePtr, (ulong)encarray.Length, encarray, destination.NativePtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -243,8 +268,7 @@ namespace Microsoft.Research.SEAL
         /// NTT forms</exception>
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 have different scale</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void Sub(Ciphertext encrypted1, Ciphertext encrypted2,
-                    Ciphertext destination)
+        public void Sub(Ciphertext encrypted1, Ciphertext encrypted2, Ciphertext destination)
         {
             if (null == encrypted1)
                 throw new ArgumentNullException(nameof(encrypted1));
@@ -253,7 +277,15 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            NativeMethods.Evaluator_Sub(NativePtr, encrypted1.NativePtr, encrypted2.NativePtr, destination.NativePtr);
+            try
+            {
+                NativeMethods.Evaluator_Sub(NativePtr, encrypted1.NativePtr, encrypted2.NativePtr, destination.NativePtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -303,9 +335,8 @@ namespace Microsoft.Research.SEAL
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void Multiply(Ciphertext encrypted1,
-                    Ciphertext encrypted2, Ciphertext destination,
-                    MemoryPoolHandle pool = null)
+        public void Multiply(Ciphertext encrypted1, Ciphertext encrypted2, 
+            Ciphertext destination, MemoryPoolHandle pool = null)
         {
             if (null == encrypted1)
                 throw new ArgumentNullException(nameof(encrypted1));
@@ -315,8 +346,15 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-
-            NativeMethods.Evaluator_Multiply(NativePtr, encrypted1.NativePtr, encrypted2.NativePtr, destination.NativePtr, poolPtr);
+            try
+            {
+                NativeMethods.Evaluator_Multiply(NativePtr, encrypted1.NativePtr, encrypted2.NativePtr, destination.NativePtr, poolPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -334,8 +372,7 @@ namespace Microsoft.Research.SEAL
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void SquareInplace(Ciphertext encrypted,
-                    MemoryPoolHandle pool = null)
+        public void SquareInplace(Ciphertext encrypted, MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
                 throw new ArgumentNullException(nameof(encrypted));
@@ -359,8 +396,7 @@ namespace Microsoft.Research.SEAL
         /// is too large for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void Square(Ciphertext encrypted, Ciphertext destination,
-                    MemoryPoolHandle pool = null)
+        public void Square(Ciphertext encrypted, Ciphertext destination, MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
                 throw new ArgumentNullException(nameof(encrypted));
@@ -368,7 +404,15 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Evaluator_Square(NativePtr, encrypted.NativePtr, destination.NativePtr, poolPtr);
+            try
+            {
+                NativeMethods.Evaluator_Square(NativePtr, encrypted.NativePtr, destination.NativePtr, poolPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -390,8 +434,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void RelinearizeInplace(Ciphertext encrypted, RelinKeys relinKeys,
-                    MemoryPoolHandle pool = null)
+        public void RelinearizeInplace(Ciphertext encrypted, RelinKeys relinKeys, 
+            MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
                 throw new ArgumentNullException(nameof(encrypted));
@@ -422,9 +466,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void Relinearize(Ciphertext encrypted,
-                    RelinKeys relinKeys, Ciphertext destination,
-                    MemoryPoolHandle pool = null)
+        public void Relinearize(Ciphertext encrypted, RelinKeys relinKeys, 
+            Ciphertext destination, MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
                 throw new ArgumentNullException(nameof(encrypted));
@@ -434,7 +477,15 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Evaluator_Relinearize(NativePtr, encrypted.NativePtr, relinKeys.NativePtr, destination.NativePtr, poolPtr);
+            try
+            {
+                NativeMethods.Evaluator_Relinearize(NativePtr, encrypted.NativePtr, relinKeys.NativePtr, destination.NativePtr, poolPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -454,8 +505,7 @@ namespace Microsoft.Research.SEAL
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void ModSwitchToNext(Ciphertext encrypted, Ciphertext destination,
-                    MemoryPoolHandle pool = null)
+        public void ModSwitchToNext(Ciphertext encrypted, Ciphertext destination, MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
                 throw new ArgumentNullException(nameof(encrypted));
@@ -463,7 +513,15 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Evaluator_ModSwitchToNext(NativePtr, encrypted.NativePtr, destination.NativePtr, poolPtr);
+            try
+            {
+                NativeMethods.Evaluator_ModSwitchToNext(NativePtr, encrypted.NativePtr, destination.NativePtr, poolPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -481,13 +539,20 @@ namespace Microsoft.Research.SEAL
         /// large for the new encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void ModSwitchToNextInplace(Ciphertext encrypted,
-                    MemoryPoolHandle pool = null)
+        public void ModSwitchToNextInplace(Ciphertext encrypted, MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
                 throw new ArgumentNullException(nameof(encrypted));
 
-            ModSwitchToNext(encrypted, destination: encrypted, pool: pool);
+            try
+            {
+                ModSwitchToNext(encrypted, destination: encrypted, pool: pool);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Result ciphertext is transparent", ex);
+            }
         }
 
         /// <summary>
@@ -1586,6 +1651,12 @@ namespace Microsoft.Research.SEAL
         protected override void DestroyNativeObject()
         {
             NativeMethods.Evaluator_Destroy(NativePtr);
+        }
+
+        internal bool ContextUsingKeySwitching()
+        {
+            NativeMethods.Evaluator_ContextUsingKeySwitching(NativePtr, out bool result);
+            return result;
         }
     }
 }

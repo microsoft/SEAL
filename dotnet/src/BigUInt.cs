@@ -82,7 +82,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Creates a zero-initialized BigUInt of the specified bit width.</summary>
         /// <param name="bitCount">The bit width</param>
-        /// <exception cref="System.ArgumentException">if bitCount is negative</exception>
+        /// <exception cref="ArgumentException">if bitCount is negative</exception>
         public BigUInt(int bitCount)
         {
             if (bitCount < 0)
@@ -103,9 +103,9 @@ namespace Microsoft.Research.SEAL
         ///
         /// <param name="bitCount">The bit width</param>
         /// <param name="hexString">The hexadecimal integer string specifying the initial value</param>
-        /// <exception cref="System.ArgumentNullException">if hexString is null</exception>
-        /// <exception cref="System.ArgumentException">if bitCount is negative</exception>
-        /// <exception cref="System.ArgumentException">if hexString does not adhere to the expected format</exception>
+        /// <exception cref="ArgumentNullException">if hexString is null</exception>
+        /// <exception cref="ArgumentException">if bitCount is negative</exception>
+        /// <exception cref="ArgumentException">if hexString does not adhere to the expected format</exception>
         public BigUInt(int bitCount, string hexString)
         {
             if (null == hexString)
@@ -121,9 +121,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>Creates a BigUInt of the specified bit width and initializes it to the specified unsigned integer
         /// value.</summary>
         ///
-        /// <param name = "bitCount" > The bit width</param>
-        /// <param name = "value" > The initial value to set the BigUInt</param>
-        /// <exception cref = "System.ArgumentException" >if bitCount is negative</exception>
+        /// <param name="bitCount"> The bit width</param>
+        /// <param name="value"> The initial value to set the BigUInt</param>
+        /// <exception cref="ArgumentException">if bitCount is negative</exception>
         public BigUInt(int bitCount, ulong value)
         {
             if (bitCount < 0)
@@ -143,9 +143,9 @@ namespace Microsoft.Research.SEAL
         /// the characters 0-9, A-F, or a-f, most-significant nibble first.
         /// </remarks>
         ///
-        /// <param name = "hexString" > The hexadecimal integer string specifying the initial value</param>
-        /// <exception cref = "System.ArgumentNullException" > If hexString is null</exception>
-        /// <exception cref = "System.ArgumentException" > If hexString does not adhere to the expected format</exception>
+        /// <param name="hexString"> The hexadecimal integer string specifying the initial value</param>
+        /// <exception cref="ArgumentNullException">if hexString is null</exception>
+        /// <exception cref="ArgumentException">if hexString does not adhere to the expected format</exception>
         public BigUInt(string hexString)
         {
             if (null == hexString)
@@ -162,7 +162,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         ///
         /// <param name="copy">The BigUInt to copy from</param>
-        /// <exception cref="System.ArgumentNullException">if copy is null</exception>
+        /// <exception cref="ArgumentNullException">if copy is null</exception>
         public BigUInt(BigUInt copy)
         {
             if (null == copy)
@@ -178,8 +178,8 @@ namespace Microsoft.Research.SEAL
         /// by the<see cref= "System.Numerics.BigInteger" />.
         /// </summary >
         ///
-        /// <param name= "bigInteger" > The initial value of the BigUInt</param>
-        /// <exception cref = "System.ArgumentNullException" > If bigInteger is null</exception>
+        /// <param name= "bigInteger"> The initial value of the BigUInt</param>
+        /// <exception cref="ArgumentNullException">if bigInteger is null</exception>
         public BigUInt(BigInteger bigInteger)
         {
             if (null == bigInteger)
@@ -203,7 +203,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Returns whether or not the BigUInt is an alias.</summary>
         ///
-        /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of aliased BigUInt.</seealso>
+        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of aliased BigUInt.</seealso>
         public bool IsAlias
         {
             get
@@ -215,7 +215,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Returns the bit count for the BigUInt.</summary>
         ///
-        /// <seealso cref = "GetSignificantBitCount()" > See GetSignificantBitCount() to instead ignore leading zero bits.</seealso>
+        /// <seealso cref = "GetSignificantBitCount()"> See GetSignificantBitCount() to instead ignore leading zero bits.</seealso>
         public int BitCount
         {
             get
@@ -227,7 +227,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Returns the number of bytes in the backing array used to store the BigUInt value.</summary>
         ///
-        /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of the format of the backing array.</seealso>
+        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of the format of the backing array.</seealso>
         public ulong ByteCount
         {
             get
@@ -239,7 +239,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Returns the number of System.UInt64 in the backing array used to store the BigUInt value.</summary>
         ///
-        /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of the format of the backing array.</seealso>
+        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of the format of the backing array.</seealso>
         public ulong UInt64Count
         {
             get
@@ -255,9 +255,9 @@ namespace Microsoft.Research.SEAL
         /// are indexed least-significant byte first.
         /// </remarks>
         ///
-        /// <param name = "index" > The index of the byte to get/set</param>
-        /// <exception cref = "System.ArgumentOutOfRangeException" > If index is not within [0, <see cref="ByteCount"/>)</exception>
-        /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of the format of the backing array.</seealso>
+        /// <param name="index"> The index of the byte to get/set</param>
+        /// <exception cref="ArgumentOutOfRangeException">if index is not within [0, <see cref="ByteCount"/>)</exception>
+        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of the format of the backing array.</seealso>
         public byte this[ulong index]
         {
             get
@@ -283,9 +283,9 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// Returns the <see cref="ulong"/> value that is at position <paramref name="index"/> in the backing
         /// array storing the BigUInt value.
-        /// <seealso cref = "UInt64Count" > See UInt64Count to determine the number of System.UInt64 values in the
+        /// <seealso cref = "UInt64Count"> See UInt64Count to determine the number of System.UInt64 values in the
         /// backing array.</seealso>
-        /// <seealso cref = "BigUInt" > See BigUInt for a detailed description of the format of the backing array.</seealso>
+        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of the format of the backing array.</seealso>
         /// </remarks>
         /// <param name="index"></param>
         /// <exception cref="ArgumentOutOfRangeException">if index is not within [0, <see cref="UInt64Count"/>)</exception>
@@ -328,9 +328,9 @@ namespace Microsoft.Research.SEAL
         /// Only significant bits are used to size the BigUInt.
         /// </remarks>
         ///
-        /// <param name = "assign" > The BigUInt whose value should be assigned to the current BigUInt</param>
-        /// <exception cref = "System.ArgumentNullException" > If assign is null</exception>
-        /// <exception cref = "System.InvalidOperationException" > If BigUInt is an alias and the assigned BigUInt is too large to fit
+        /// <param name="assign"> The BigUInt whose value should be assigned to the current BigUInt</param>
+        /// <exception cref="ArgumentNullException">if assign is null</exception>
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and the assigned BigUInt is too large to fit
         /// the current bit width</exception>
         public void Set(BigUInt assign)
         {
@@ -350,10 +350,10 @@ namespace Microsoft.Research.SEAL
         /// characters 0-9, A-F, or a-f, most-significant nibble first.
         /// </remarks>
         ///
-        /// <param name = "assign" > The hexadecimal integer string specifying the value to assign</param>
-        /// <exception cref = "System.ArgumentNullException" > If assign is null</exception>
-        /// <exception cref = "System.ArgumentException" > If assign does not adhere to the expected format</exception>
-        /// <exception cref = "System.InvalidOperationException" > If BigUInt is an alias and the assigned value is too large to fit
+        /// <param name="assign"> The hexadecimal integer string specifying the value to assign</param>
+        /// <exception cref="ArgumentNullException">if assign is null</exception>
+        /// <exception cref="ArgumentException">if assign does not adhere to the expected format</exception>
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and the assigned value is too large to fit
         /// the current bit width</exception>
         public void Set(string assign)
         {
@@ -367,8 +367,8 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Overwrites the BigUInt with the specified integer value, enlarging if needed to fit the value.</summary>
         ///
-        /// <param name = "assign" > The value to assign</param>
-        /// <exception cref = "System.InvalidOperationException" > If BigUInt is an alias and the significant bit count of assign is
+        /// <param name="assign"> The value to assign</param>
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and the significant bit count of assign is
         /// too large to fit the current bit width</exception>
         public void Set(ulong assign)
         {
@@ -391,7 +391,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         ///
         /// <param name="stream">The stream to save the BigUInt to</param>
-        /// <exception cref="System.ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <seealso cref="Load(Stream)">See Load() to load a saved BigUInt.</seealso>
         public void Save(Stream stream)
         {
@@ -414,8 +414,8 @@ namespace Microsoft.Research.SEAL
         /// BigUInt.</summary>
         ///
         /// <param name="stream">The stream to load the BigUInt from</param>
-        /// <exception cref="System.ArgumentNullException">if stream is null</exception>
-        /// <exception cref="System.InvalidOperationException">if BigUInt is an alias and the loaded BigUInt is too large to fit
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and the loaded BigUInt is too large to fit
         /// with the current bit width</exception>
         /// <seealso cref="Save(Stream)">See Save() to save a BigUInt.</seealso>
         public void Load(Stream stream)
@@ -449,8 +449,8 @@ namespace Microsoft.Research.SEAL
         /// <summary>Resizes the BigUInt to the specified bit width, copying over the old value as much as will fit.</summary>
         ///
         /// <param name="bitCount">The bit width</param>
-        /// <exception cref="System.ArgumentException">if bitCount is negative</exception>
-        /// <exception cref="System.InvalidOperationException">if the BigUInt is an alias</exception>
+        /// <exception cref="ArgumentException">if bitCount is negative</exception>
+        /// <exception cref="InvalidOperationException">if the BigUInt is an alias</exception>
         public void Resize(int bitCount)
         {
             if (bitCount < 0)
@@ -462,7 +462,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the BigUInt value as a <see cref="System.Numerics.BigInteger"/>.
+        /// Returns the BigUInt value as a <see cref="Numerics.BigInteger"/>.
         /// </summary>
         /// <returns></returns>
         public BigInteger ToBigInteger()
@@ -518,9 +518,9 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand2">The second operand to divide</param>
         /// <param name="remainder">The BigUInt to store the remainder</param>
-        /// <exception cref="System.ArgumentNullException">if operand2 or remainder is null</exception>
-        /// <exception cref="System.ArgumentException">if operand2 is zero</exception>
-        /// <exception cref="System.InvalidOperationException">if the remainder is an alias and the operator attempts to enlarge
+        /// <exception cref="ArgumentNullException">if operand2 or remainder is null</exception>
+        /// <exception cref="ArgumentException">if operand2 is zero</exception>
+        /// <exception cref="InvalidOperationException">if the remainder is an alias and the operator attempts to enlarge
         /// the BigUInt to fit the result</exception>
         public BigUInt DivideRemainder(BigUInt operand2, BigUInt remainder)
         {
@@ -548,9 +548,9 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand2">The second operand to divide</param>
         /// <param name="remainder">The BigUInt to store the remainder</param>
-        /// <exception cref="System.ArgumentNullException">if remainder is null</exception>
-        /// <exception cref="System.ArgumentException">if operand2 is zero</exception>
-        /// <exception cref="System.InvalidOperationException">if the remainder is an alias which the function attempts to enlarge
+        /// <exception cref="ArgumentNullException">if remainder is null</exception>
+        /// <exception cref="ArgumentException">if operand2 is zero</exception>
+        /// <exception cref="InvalidOperationException">if the remainder is an alias which the function attempts to enlarge
         /// to fit the result</exception>
         public BigUInt DivideRemainder(ulong operand2, BigUInt remainder)
         {
@@ -573,10 +573,10 @@ namespace Microsoft.Research.SEAL
         /// count of the inverse is set to be the significant bit count of the modulus.
         /// </remarks>
         /// <param name="modulus">The modulus to calculate the inverse with respect to</param>
-        /// <exception cref="System.ArgumentNullException">if modulus is null</exception>
-        /// <exception cref="System.ArgumentException">if modulus is zero</exception>
-        /// <exception cref="System.ArgumentException">if modulus is not greater than the BigUInt value</exception>
-        /// <exception cref="System.ArgumentException">if the BigUInt value and modulus are not co-prime</exception>
+        /// <exception cref="ArgumentNullException">if modulus is null</exception>
+        /// <exception cref="ArgumentException">if modulus is zero</exception>
+        /// <exception cref="ArgumentException">if modulus is not greater than the BigUInt value</exception>
+        /// <exception cref="ArgumentException">if the BigUInt value and modulus are not co-prime</exception>
         public BigUInt ModuloInvert(BigUInt modulus)
         {
             if (null == modulus)
@@ -595,9 +595,9 @@ namespace Microsoft.Research.SEAL
         /// count of the inverse is set to be the significant bit count of the modulus.
         /// </remarks>
         /// <param name="modulus">The modulus to calculate the inverse with respect to</param>
-        /// <exception cref="System.ArgumentException">if modulus is zero</exception>
-        /// <exception cref="System.ArgumentException">if modulus is not greater than the BigUInt value</exception>
-        /// <exception cref="System.ArgumentException">if the BigUInt value and modulus are not co-prime</exception>
+        /// <exception cref="ArgumentException">if modulus is zero</exception>
+        /// <exception cref="ArgumentException">if modulus is not greater than the BigUInt value</exception>
+        /// <exception cref="ArgumentException">if the BigUInt value and modulus are not co-prime</exception>
         public BigUInt ModuloInvert(ulong modulus)
         {
             NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus, out IntPtr resultptr);
@@ -616,10 +616,10 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="modulus">The modulus to calculate the inverse with respect to</param>
         /// <param name="inverse">Stores the inverse if the inverse operation was successful</param>
-        /// <exception cref="System.ArgumentNullException">if modulus or inverse is null</exception>
-        /// <exception cref="System.ArgumentException">if modulus is zero</exception>
-        /// <exception cref="System.ArgumentException">if modulus is not greater than the BigUInt value</exception>
-        /// <exception cref="System.InvalidOperationException">if the inverse is an alias which the function attempts to enlarge
+        /// <exception cref="ArgumentNullException">if modulus or inverse is null</exception>
+        /// <exception cref="ArgumentException">if modulus is zero</exception>
+        /// <exception cref="ArgumentException">if modulus is not greater than the BigUInt value</exception>
+        /// <exception cref="InvalidOperationException">if the inverse is an alias which the function attempts to enlarge
         /// to fit the result</exception>
         public bool TryModuloInvert(BigUInt modulus, BigUInt inverse)
         {
@@ -644,10 +644,10 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="modulus">The modulus to calculate the inverse with respect to</param>
         /// <param name="inverse">Stores the inverse if the inverse operation was successful</param>
-        /// <exception cref="System.ArgumentNullException">if inverse is null</exception>
-        /// <exception cref="System.ArgumentException">if modulus is zero</exception>
-        /// <exception cref="System.ArgumentException">if modulus is not greater than the BigUInt value</exception>
-        /// <exception cref="System.InvalidOperationException">if the inverse is an alias which the function attempts to enlarge
+        /// <exception cref="ArgumentNullException">if inverse is null</exception>
+        /// <exception cref="ArgumentException">if modulus is zero</exception>
+        /// <exception cref="ArgumentException">if modulus is not greater than the BigUInt value</exception>
+        /// <exception cref="InvalidOperationException">if the inverse is an alias which the function attempts to enlarge
         /// to fit the result</exception>
         public bool TryModuloInvert(ulong modulus, BigUInt inverse)
         {
@@ -666,8 +666,8 @@ namespace Microsoft.Research.SEAL
         /// the current one.
         /// </remarks>
         /// <param name="destination">The BigUInt to overwrite with the duplicate</param>
-        /// <exception cref="System.ArgumentNullException">if destination is null</exception>
-        /// <exception cref="System.InvalidOperationException">if the destination BigUInt is an alias</exception>
+        /// <exception cref="ArgumentNullException">if destination is null</exception>
+        /// <exception cref="InvalidOperationException">if the destination BigUInt is an alias</exception>
         public void DuplicateTo(BigUInt destination)
         {
             if (null == destination)
@@ -684,8 +684,8 @@ namespace Microsoft.Research.SEAL
         /// are set to be exactly the same as in the given one.
         /// </remarks>
         /// <param name="value">The BigUInt to duplicate</param>
-        /// <exception cref="System.ArgumentNullException">if value is null</exception>
-        /// <exception cref="System.InvalidOperationException">if the current BigUInt is an alias</exception>
+        /// <exception cref="ArgumentNullException">if value is null</exception>
+        /// <exception cref="InvalidOperationException">if the current BigUInt is an alias</exception>
         public void DuplicateFrom(BigUInt value)
         {
             if (null == value)
@@ -699,7 +699,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>Returns a copy of the BigUInt value resized to the significant bit count.</summary>
         ///
         /// <param name="operand">The operand to copy</param>
-        /// <exception cref="System.ArgumentNullException">if operand is null</exception>
+        /// <exception cref="ArgumentNullException">if operand is null</exception>
         public static BigUInt operator +(BigUInt operand)
         {
             if (null == operand)
@@ -714,7 +714,7 @@ namespace Microsoft.Research.SEAL
         /// Returns a negated copy of the BigUInt value. The bit count does not change.
         /// </remarks>
         /// <param name="operand">The operand to negate</param>
-        /// <exception cref="System.ArgumentNullException">if operand is null</exception>
+        /// <exception cref="ArgumentNullException">if operand is null</exception>
         public static BigUInt operator -(BigUInt operand)
         {
             if (null == operand)
@@ -731,7 +731,7 @@ namespace Microsoft.Research.SEAL
         /// Returns an inverted copy of the BigUInt value. The bit count does not change.
         /// </remarks>
         /// <param name="operand">The operand to invert</param>
-        /// <exception cref="System.ArgumentNullException">if operand is null</exception>
+        /// <exception cref="ArgumentNullException">if operand is null</exception>
         public static BigUInt operator ~(BigUInt operand)
         {
             if (null == operand)
@@ -749,8 +749,8 @@ namespace Microsoft.Research.SEAL
         /// carry.
         /// </remarks>
         /// <param name="operand">The operand to increment</param>
-        /// <exception cref="System.ArgumentNullException">if operand is null</exception>
-        /// <exception cref="System.InvalidOperationException">if BigUInt is an alias and a carry occurs requiring the BigUInt to
+        /// <exception cref="ArgumentNullException">if operand is null</exception>
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and a carry occurs requiring the BigUInt to
         /// be resized</exception>
         public static BigUInt operator ++(BigUInt operand)
         {
@@ -768,7 +768,7 @@ namespace Microsoft.Research.SEAL
         /// Decrements the BigUInt and returns the decremented value. The bit count does not change.
         /// </remarks>
         /// <param name="operand">The operand to decrement</param>
-        /// <exception cref="System.ArgumentNullException">if operand is null</exception>
+        /// <exception cref="ArgumentNullException">if operand is null</exception>
         public static BigUInt operator --(BigUInt operand)
         {
             if (null == operand)
@@ -787,7 +787,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to add</param>
         /// <param name="operand2">The second operand to add</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 or operand2 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 or operand2 is null</exception>
         public static BigUInt operator +(BigUInt operand1, BigUInt operand2)
         {
             if (null == operand1)
@@ -808,7 +808,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to add</param>
         /// <param name="operand2">The second operand to add</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 is null</exception>
         public static BigUInt operator +(BigUInt operand1, ulong operand2)
         {
             if (null == operand1)
@@ -827,7 +827,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to subtract</param>
         /// <param name="operand2">The second operand to subtract</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 or operand2 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 or operand2 is null</exception>
         public static BigUInt operator -(BigUInt operand1, BigUInt operand2)
         {
             if (null == operand1)
@@ -848,7 +848,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to subtract</param>
         /// <param name="operand2">The second operand to subtract</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 is null</exception>
         public static BigUInt operator -(BigUInt operand1, ulong operand2)
         {
             if (null == operand1)
@@ -867,7 +867,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to multiply</param>
         /// <param name="operand2">The second operand to multiply</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 or operand2 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 or operand2 is null</exception>
         public static BigUInt operator *(BigUInt operand1, BigUInt operand2)
         {
             if (null == operand1)
@@ -888,7 +888,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to multiply</param>
         /// <param name="operand2">The second operand to multiply</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 is null</exception>
         public static BigUInt operator *(BigUInt operand1, ulong operand2)
         {
             if (null == operand1)
@@ -907,8 +907,8 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to divide</param>
         /// <param name="operand2">The second operand to divide</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 or operand2 is null</exception>
-        /// <exception cref="System.ArgumentException">if operand2 is zero</exception>
+        /// <exception cref="ArgumentNullException">if operand1 or operand2 is null</exception>
+        /// <exception cref="ArgumentException">if operand2 is zero</exception>
         public static BigUInt operator /(BigUInt operand1, BigUInt operand2)
         {
             if (null == operand1)
@@ -931,8 +931,8 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to divide</param>
         /// <param name="operand2">The second operand to divide</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 is null</exception>
-        /// <exception cref="System.ArgumentException">if operand2 is zero</exception>
+        /// <exception cref="ArgumentNullException">if operand1 is null</exception>
+        /// <exception cref="ArgumentException">if operand2 is zero</exception>
         public static BigUInt operator /(BigUInt operand1, ulong operand2)
         {
             if (null == operand1)
@@ -953,7 +953,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to XOR</param>
         /// <param name="operand2">The second operand to XOR</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 or operand2 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 or operand2 is null</exception>
         public static BigUInt operator ^(BigUInt operand1, BigUInt operand2)
         {
             if (null == operand1)
@@ -974,7 +974,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to XOR</param>
         /// <param name="operand2">The second operand to XOR</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 is null</exception>
         public static BigUInt operator ^(BigUInt operand1, ulong operand2)
         {
             if (null == operand1)
@@ -993,7 +993,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to AND</param>
         /// <param name="operand2">The second operand to AND</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 or operand2 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 or operand2 is null</exception>
         public static BigUInt operator &(BigUInt operand1, BigUInt operand2)
         {
             if (null == operand1)
@@ -1014,7 +1014,7 @@ namespace Microsoft.Research.SEAL
         ///  </remarks>
         ///  <param name="operand1">The first operand to AND</param>
         ///  <param name="operand2">The second operand to AND</param>
-        ///  <exception cref="System.ArgumentNullException">if operand1 is null</exception>
+        ///  <exception cref="ArgumentNullException">if operand1 is null</exception>
         public static BigUInt operator &(BigUInt operand1, ulong operand2)
         {
             if (null == operand1)
@@ -1033,7 +1033,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to OR</param>
         /// <param name="operand2">The second operand to OR</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 or operand2 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 or operand2 is null</exception>
         public static BigUInt operator |(BigUInt operand1, BigUInt operand2)
         {
             if (null == operand1)
@@ -1054,7 +1054,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The first operand to OR</param>
         /// <param name="operand2">The second operand to OR</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 is null</exception>
+        /// <exception cref="ArgumentNullException">if operand1 is null</exception>
         public static BigUInt operator |(BigUInt operand1, ulong operand2)
         {
             if (null == operand1)
@@ -1073,8 +1073,8 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The operand to left-shift</param>
         /// <param name="shift">The number of bits to shift by</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 is null</exception>
-        /// <exception cref="System.ArgumentException">if shift is negative</exception>
+        /// <exception cref="ArgumentNullException">if operand1 is null</exception>
+        /// <exception cref="ArgumentException">if shift is negative</exception>
         public static BigUInt operator <<(BigUInt operand1, int shift)
         {
             if (null == operand1)
@@ -1095,8 +1095,8 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="operand1">The operand to right-shift</param>
         /// <param name="shift">The number of bits to shift by</param>
-        /// <exception cref="System.ArgumentNullException">if operand1 is null</exception>
-        /// <exception cref="System.ArgumentException">if shift is negative</exception>
+        /// <exception cref="ArgumentNullException">if operand1 is null</exception>
+        /// <exception cref="ArgumentException">if shift is negative</exception>
         public static BigUInt operator >>(BigUInt operand1, int shift)
         {
             if (null == operand1)
@@ -1114,7 +1114,7 @@ namespace Microsoft.Research.SEAL
         /// Returns the BigUInt value as a double. Note that precision may be lost during the conversion.
         /// </remarks>
         /// <param name="value">The value to convert</param>
-        /// <exception cref="System.ArgumentNullException">if value is null</exception>
+        /// <exception cref="ArgumentNullException">if value is null</exception>
         public static explicit operator double(BigUInt value)
         {
             if (null == value)
@@ -1129,7 +1129,7 @@ namespace Microsoft.Research.SEAL
         /// Returns the BigUInt value as a float. Note that precision may be lost during the conversion.
         /// </remarks>
         /// <param name="value">The value to convert</param>
-        /// <exception cref="System.ArgumentNullException">if value is null</exception>
+        /// <exception cref="ArgumentNullException">if value is null</exception>
         public static explicit operator float(BigUInt value)
         {
             if (null == value)
@@ -1145,7 +1145,7 @@ namespace Microsoft.Research.SEAL
         /// the higher bits are dropped.
         /// </remarks>
         /// <param name="value">The value to convert</param>
-        /// <exception cref="System.ArgumentNullException">if value is null</exception>
+        /// <exception cref="ArgumentNullException">if value is null</exception>
         public static explicit operator ulong(BigUInt value)
         {
             if (null == value)
@@ -1163,7 +1163,7 @@ namespace Microsoft.Research.SEAL
         /// 64-bits, the result may be negative and the higher bits are dropped.
         /// </remarks>
         /// <param name="value">The value to convert</param>
-        /// <exception cref="System.ArgumentNullException">if value is null</exception>
+        /// <exception cref="ArgumentNullException">if value is null</exception>
         public static explicit operator long(BigUInt value)
         {
             if (null == value)
@@ -1179,7 +1179,7 @@ namespace Microsoft.Research.SEAL
         /// the higher bits are dropped.
         /// </remarks>
         /// <param name="value">The value to convert</param>
-        /// <exception cref="System.ArgumentNullException">if value is null</exception>
+        /// <exception cref="ArgumentNullException">if value is null</exception>
         public static explicit operator uint(BigUInt value)
         {
             if (null == value)
@@ -1195,7 +1195,7 @@ namespace Microsoft.Research.SEAL
         /// 32-bits, the result may be negative and the higher bits are dropped.
         /// </remarks>
         /// <param name="value">The value to convert</param>
-        /// <exception cref="System.ArgumentNullException">if value is null</exception>
+        /// <exception cref="ArgumentNullException">if value is null</exception>
         public static explicit operator int(BigUInt value)
         {
             if (null == value)
