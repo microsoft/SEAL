@@ -71,7 +71,7 @@ namespace seal
 
     @par NTT form
     When using the BFV scheme (scheme_type::BFV), all plaintexts and ciphertexts
-    should remain by default in the usual coefficient representation, i.e. not
+    should remain by default in the usual coefficient representation, i.e., not
     in NTT form. When using the CKKS scheme (scheme_type::CKKS), all plaintexts
     and ciphertexts should remain by default in NTT form. We call these scheme-
     specific NTT states the "default NTT form". Some functions, such as add, work
@@ -850,7 +850,7 @@ namespace seal
         is done with respect to encryption parameters corresponding to a given parms_id.
         For the operation to be valid, the plaintext must have degree less than
         poly_modulus_degree and each coefficient must be less than the plaintext
-        modulus, i.e. the plaintext must be a valid plaintext under the current
+        modulus, i.e., the plaintext must be a valid plaintext under the current
         encryption parameters. Dynamic memory allocations in the process are allocated
         from the memory pool pointed to by the given MemoryPoolHandle.
 
@@ -873,7 +873,7 @@ namespace seal
         is done with respect to encryption parameters corresponding to a given
         parms_id. The result is stored in the destination_ntt parameter. For the
         operation to be valid, the plaintext must have degree less than poly_modulus_degree
-        and each coefficient must be less than the plaintext modulus, i.e. the plaintext
+        and each coefficient must be less than the plaintext modulus, i.e., the plaintext
         must be a valid plaintext under the current encryption parameters. Dynamic
         memory allocations in the process are allocated from the memory pool pointed
         to by the given MemoryPoolHandle.

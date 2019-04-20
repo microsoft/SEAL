@@ -43,13 +43,13 @@ namespace Microsoft.Research.SEAL
     /// </para>
     /// <para>
     /// Managing Lifetime
-    /// Internally, the MemoryPoolHandle wraps a shared pointer pointing to
+    /// Internally, the MemoryPoolHandle wraps a C++ shared pointer pointing to
     /// a memory pool class. Thus, as long as a MemoryPoolHandle pointing to
     /// a particular memory pool exists, the pool stays alive. Classes such as
     /// Evaluator and Ciphertext store their own local copies of a MemoryPoolHandle
     /// to guarantee that the pool stays alive as long as the managing object
     /// itself stays alive. The global memory pool is implemented as a global
-    /// std::shared_ptr to a memory pool class, and is thus expected to stay
+    /// C++ std::shared_ptr to a memory pool class, and is thus expected to stay
     /// alive for the entire duration of the program execution. Note that it can
     /// be problematic to create other global objects that use the memory pool
     /// e.g. in their constructor, as one would have to ensure the initialization

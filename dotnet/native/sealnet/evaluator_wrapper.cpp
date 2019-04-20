@@ -20,6 +20,14 @@ using namespace seal;
 using namespace sealnet;
 using namespace seal::util;
 
+struct seal::Evaluator::EvaluatorPrivateHelper
+{
+    static bool using_keyswitching(const Evaluator &ev)
+    {
+        return ev.context_->using_keyswitching();
+    }
+};
+
 SEALNETNATIVE HRESULT SEALCALL Evaluator_Create(void *sealContext, void **evaluator)
 {
     SEALContext *context = FromVoid<SEALContext>(sealContext);
@@ -151,6 +159,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_AddPlain(void *thisptr, void *encrypted
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, void *destination)
@@ -198,6 +210,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_SubPlain(void *thisptr, void *encrypted
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -257,6 +273,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, uint64_t co
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool)
@@ -279,6 +299,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyPlain(void *thisptr, void *encr
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -377,10 +401,6 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchToNext2(void *thisptr, void *p
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
-    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
@@ -434,10 +454,6 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo2(void *thisptr, void *plain
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
-    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destination, void *pool)
@@ -458,6 +474,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleToNext(void *thisptr, void *encr
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -484,6 +504,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleTo(void *thisptr, void *encrypte
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool)
@@ -506,6 +530,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Exponentiate(void *thisptr, void *encry
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -552,6 +580,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformToNTT2(void *thisptr, void *en
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *destination)
@@ -571,6 +603,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformFromNTT(void *thisptr, void *e
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -595,6 +631,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ApplyGalois(void *thisptr, void *encryp
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool)
@@ -617,6 +657,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateRows(void *thisptr, void *encrypt
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -641,6 +685,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateColumns(void *thisptr, void *encr
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool)
@@ -663,6 +711,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateVector(void *thisptr, void *encry
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -687,6 +739,10 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ComplexConjugate(void *thisptr, void *e
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_ContextUsingKeySwitching(void *thisptr, bool *using_keyswitching)
@@ -695,6 +751,6 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ContextUsingKeySwitching(void *thisptr,
     IfNullRet(eval, E_POINTER);
     IfNullRet(using_keyswitching, E_POINTER);
 
-    *using_keyswitching = Evaluator::EvaluatorPrivateHelper::get_using_keyswitching();
+    *using_keyswitching = Evaluator::EvaluatorPrivateHelper::using_keyswitching(*eval);
     return S_OK;
 }
