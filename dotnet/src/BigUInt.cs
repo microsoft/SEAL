@@ -392,7 +392,6 @@ namespace Microsoft.Research.SEAL
         ///
         /// <param name="stream">The stream to save the BigUInt to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(Stream)">See Load() to load a saved BigUInt.</seealso>
         public void Save(Stream stream)
         {
             if (null == stream)
@@ -417,7 +416,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="InvalidOperationException">if BigUInt is an alias and the loaded BigUInt is too large to fit
         /// with the current bit width</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save a BigUInt.</seealso>
         public void Load(Stream stream)
         {
             if (null == stream)

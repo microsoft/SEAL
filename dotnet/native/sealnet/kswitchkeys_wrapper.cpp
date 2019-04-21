@@ -95,13 +95,13 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Size(void *thisptr, uint64_t *size)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_GetKeyCount(void *thisptr, uint64_t *key_count)
+SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_RawSize(void *thisptr, uint64_t *size)
 {
     KSwitchKeys *keys = FromVoid<KSwitchKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
-    IfNullRet(key_count, E_POINTER);
+    IfNullRet(size, E_POINTER);
 
-    *key_count = keys->data().size();
+    *size = keys->data().size();
     return S_OK;
 }
 

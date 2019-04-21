@@ -747,7 +747,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void KSwitchKeys_ClearDataAndReserve(IntPtr thisptr, ulong size);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KSwitchKeys_GetKeyCount(IntPtr thisptr, out ulong keyCount);
+        internal static extern void KSwitchKeys_RawSize(IntPtr thisptr, out ulong keyCount);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KSwitchKeys_GetKeyList(IntPtr thisptr, ulong index, ref ulong count, IntPtr[] key_list);

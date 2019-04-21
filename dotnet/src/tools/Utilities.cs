@@ -17,19 +17,21 @@ namespace Microsoft.Research.SEAL.Tools
         {
             const int hash_seed = 17;
             const int hash_multiply = 23;
-
             int hash = hash_seed;
 
-            for (int i = 0; i < array.Length; i++)
+            unchecked
             {
-                ulong value = array[i];
-                if (value != 0)
+                for (int i = 0; i < array.Length; i++)
                 {
-                    hash *= hash_multiply;
-                    hash += (int)value;
-                    value >>= 32;
-                    hash *= hash_multiply;
-                    hash += (int)value;
+                    ulong value = array[i];
+                    if (value != 0)
+                    {
+                        hash *= hash_multiply;
+                        hash += (int)value;
+                        value >>= 32;
+                        hash *= hash_multiply;
+                        hash += (int)value;
+                    }
                 }
             }
 

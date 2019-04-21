@@ -61,8 +61,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a new KSwitchKeys instance initialized with a pointer to a
-        /// native KSwitchKeys object.
+        /// Creates a new KSwitchKeys instance initialized with a pointer to a native
+        /// KSwitchKeys object.
         /// </summary>
         /// <param name="kswitchKeys">Pointer to native KSwitchKeys object</param>
         /// <param name="owned">Whether this instance owns the native pointer</param>
@@ -86,8 +86,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the current number of keyswitching keys. Only keys that are
-        /// non-empty are counted.
+        /// Returns the current number of keyswitching keys. Only keys that are non-empty
+        /// are counted.
         /// </summary>
         public ulong Size
         {
@@ -99,14 +99,18 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a copy of the KSwitchKeys data.
+        /// Returns the KSwitchKeys data.
         /// </summary>
+        /// <remarks>
+        /// Returns the KSwitchKeys data. The returned object is valid only as long as
+        /// the KSwitchKeys is valid and not changed.
+        /// </remarks>
         public IEnumerable<IEnumerable<PublicKey>> Data
         {
             get
             {
                 List<List<PublicKey>> result = new List<List<PublicKey>>();
-                NativeMethods.KSwitchKeys_GetKeyCount(NativePtr, out ulong size);
+                NativeMethods.KSwitchKeys_RawSize(NativePtr, out ulong size);
 
                 for (ulong i = 0; i < size; i++)
                 {
@@ -119,7 +123,7 @@ namespace Microsoft.Research.SEAL
                     List<PublicKey> key = new List<PublicKey>((int)count);
                     foreach (IntPtr ptr in pointers)
                     {
-                        key.Add(new PublicKey(ptr));
+                        key.Add(new PublicKey(ptr, owned: false));
                     }
 
                     result.Add(key);
@@ -130,7 +134,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a reference to parmsId.
+        /// Returns a copy of ParmsId.
         /// </summary>
         /// <see cref="EncryptionParameters">see EncryptionParameters for more information about parmsId.</see>
         public ParmsId ParmsId
@@ -150,14 +154,12 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the KSwitchKeys instance to an output stream.
         /// </summary>
-        ///
         /// <remarks>
-        /// Saves the KSwitchKeys instance to an output stream. The output is in binary format
-        /// and not human-readable. The output stream must have the "binary" flag set.
+        /// Saves the KSwitchKeys instance to an output stream. The output is in binary
+        /// format and not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the KSwitchKeys to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved KSwitchKeys instance.</seealso>
         public void Save(Stream stream)
         {
             if (null == stream)
@@ -188,10 +190,13 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
+        /// </summary>
+        /// <remarks>
+        /// Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
         /// No checking of the validity of the KSwitchKeys data against encryption
         /// parameters is performed. This function should not be used unless the
         /// KSwitchKeys comes from a fully trusted source.
-        /// </summary>
+        /// </remarks>
         /// <param name="stream">The stream to load the KSwitchKeys from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if a valid KSwitchKeys could not be read from stream</exception>
@@ -251,9 +256,11 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
-        /// The loaded GaloisKeys is verified to be valid for the given SEALContext.
         /// </summary>
-        ///
+        /// <remarks>
+        /// Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
+        /// The loaded GaloisKeys is verified to be valid for the given SEALContext.
+        /// </remarks>
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the KSwitchKeys instance from</param>
         /// <exception cref="ArgumentNullException">if either stream or context are null</exception>
@@ -261,7 +268,6 @@ namespace Microsoft.Research.SEAL
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if the loaded data is invalid or is not
         /// valid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save a KSwitchKeys instance.</seealso>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)

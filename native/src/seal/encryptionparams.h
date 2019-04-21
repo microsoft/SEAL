@@ -419,8 +419,12 @@ namespace std
         std::size_t operator()(
             const seal::parms_id_type &parms_id) const
         {
-            return std::accumulate(parms_id.begin(), parms_id.end(), std::size_t(0),
-                [](std::size_t acc, std::uint64_t curr) { return acc ^ curr; });
+            std::uint64_t hash = 17;
+            hash = 31 * hash + parms_id[0];
+            hash = 31 * hash + parms_id[1];
+            hash = 31 * hash + parms_id[2];
+            hash = 31 * hash + parms_id[3];
+            return static_cast<std::size_t>(hash);
         }
     };
 }

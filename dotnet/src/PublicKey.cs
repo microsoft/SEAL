@@ -71,8 +71,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a copy of the underlying Ciphertext
+        /// Returns the underlying Ciphertext.
         /// </summary>
+        /// <remarks>
+        /// Returns the underlying Ciphertext. The returned Ciphertext is valid
+        /// only as long as the PublicKey is valid and not changed.
+        /// </remarks>
         public Ciphertext Data
         {
             get
@@ -86,7 +90,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the PublicKey to an output stream.
         /// </summary>
-        ///
         /// <remarks>
         /// Saves the PublicKey to an output stream. The output is in binary format and
         /// not human-readable. The output stream must have the "binary" flag set.
@@ -103,10 +106,13 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Loads a PublicKey from an input stream overwriting the current PublicKey.
+        /// </summary>
+        /// <remarks>
+        /// Loads a PublicKey from an input stream overwriting the current PublicKey.
         /// No checking of the validity of the PublicKey data against encryption
         /// parameters is performed. This function should not be used unless the
         /// PublicKey comes from a fully trusted source.
-        /// </summary>
+        /// </remarks>
         /// <param name="stream">The stream to load the PublicKey from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if a valid PublicKey could not be read from stream</exception>
@@ -120,8 +126,7 @@ namespace Microsoft.Research.SEAL
 
 
         /// <summary>
-        /// Loads a PublicKey from an input stream overwriting the current
-        /// PublicKey.
+        /// Loads a PublicKey from an input stream overwriting the current PublicKey.
         /// </summary>
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the PublicKey from</param>
@@ -146,7 +151,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a reference to parmsId.
+        /// Returns a copy of ParmsId.
         /// </summary>
         public ParmsId ParmsId
         {

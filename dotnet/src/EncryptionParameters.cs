@@ -326,7 +326,6 @@ namespace Microsoft.Research.SEAL
         /// <param name="parms">Encryption Parameters to save</param>
         /// <param name="stream">The stream to save the EncryptionParameters to</param>
         /// <exception cref="ArgumentNullException">if either parms or stream are null</exception>
-        /// <seealso cref="Load(Stream)">See Load() to load a saved EncryptionParameters instance.</seealso>
         public static void Save(EncryptionParameters parms, Stream stream)
         {
             if (null == parms)
@@ -362,7 +361,6 @@ namespace Microsoft.Research.SEAL
         /// <param name="stream">The stream to load the EncryptionParameters from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if parameters cannot be read correctly</exception>
-        /// <seealso cref="Save(EncryptionParameters, Stream)">See Save(EncryptionParameters, Stream) to save an EncryptionParameters instance.</seealso>
         public static EncryptionParameters Load(Stream stream)
         {
             if (null == stream)

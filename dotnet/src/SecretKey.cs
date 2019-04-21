@@ -71,8 +71,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a copy of the underlying Plaintext.
+        /// Returns the underlying Plaintext.
         /// </summary>
+        /// <remarks>
+        /// Returns the underlying Plaintext. The returned Plaintext is valid
+        /// only as long as the SecretKey is valid and not changed.
+        /// </remarks>
         public Plaintext Data
         {
             get
@@ -86,7 +90,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the SecretKey to an output stream.
         /// </summary>
-        ///
         /// <remarks>
         /// Saves the SecretKey to an output stream. The output is in binary format and
         /// not human-readable. The output stream must have the "binary" flag set.
@@ -122,7 +125,6 @@ namespace Microsoft.Research.SEAL
         /// Loads a SecretKey from an input stream overwriting the current SecretKey.
         /// The loaded SecretKey is verified to be valid for the given SEALContext.
         /// </summary>
-        ///
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the SecretKey from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
@@ -146,7 +148,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a reference to parmsId.
+        /// Returns a copy of ParmsId.
         /// </summary>
         public ParmsId ParmsId
         {

@@ -10,13 +10,16 @@ using System.Text;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
+    /// Class to store a plaintext element.
+    /// </summary>
+    /// <remarks>
+    /// <para>
     /// Class to store a plaintext element. The data for the plaintext is
     /// a polynomial with coefficients modulo the plaintext modulus. The degree
     /// of the plaintext polynomial must be one less than the degree of the
     /// polynomial modulus. The backing array always allocates one 64-bit word
     /// per each coefficient of the polynomial.
-    /// </summary>
-    /// <remarks>
+    /// </para>
     /// <para>
     /// Memory Management
     /// The coefficient count of a plaintext refers to the number of word-size
@@ -88,8 +91,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if capacity is less than coeffCount</exception>
         /// <exception cref="ArgumentException">if coeffCount is negative</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Plaintext(ulong capacity, ulong coeffCount,
-                    MemoryPoolHandle pool = null)
+        public Plaintext(ulong capacity, ulong coeffCount, MemoryPoolHandle pool = null)
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
@@ -288,9 +290,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Sets the plaintext polynomial coefficients to zero starting at a given index.
+        /// Sets the plaintext polynomial coefficients to zero starting at a given
+        /// index.
         /// </summary>
-        ///
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
         /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
         public void SetZero(ulong startCoeff)
@@ -318,7 +320,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Gets/set the value of a given coefficient of the plaintext polynomial.
         /// </summary>
-        ///
         /// <param name="coeffIndex">The index of the coefficient in the plaintext polynomial</param>
         /// <exception cref="ArgumentOutOfRangeException">if coeffIndex is not within [0, CoeffCount)</exception>
         public ulong this[ulong coeffIndex]
@@ -447,24 +448,20 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the plaintext to an output stream.
         /// </summary>
-        ///
         /// <remarks>
         /// Saves the plaintext to an output stream. The output is in binary format and not human-readable.
         /// The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the plaintext to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved plaintext.</seealso>
         public void Save(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            // First the ParmsId
-            ParmsId.Save(stream);
-
             using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
             {
+                ParmsId.Save(stream);
                 writer.Write(Scale);
                 writer.Write(CoeffCount);
                 for (ulong i = 0; i < CoeffCount; i++)
@@ -491,17 +488,16 @@ namespace Microsoft.Research.SEAL
 
             try
             {
-                ParmsId parms = new ParmsId();
-                parms.Load(stream);
-                ParmsId = parms;
-
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
+                    ParmsId parms = new ParmsId();
+                    parms.Load(stream);
+                    ParmsId = parms;
+
                     double scale = reader.ReadDouble();
                     ulong coeffCount = reader.ReadUInt64();
 
                     Scale = scale;
-
                     ulong[] newData = new ulong[coeffCount];
 
                     for (ulong i = 0; i < coeffCount; i++)
@@ -533,7 +529,6 @@ namespace Microsoft.Research.SEAL
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if the loaded plaintext is invalid, or it is
         /// invalid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save a plaintext.</seealso>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -562,8 +557,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a copy of parmsId. The parmsId must remain zero
-        /// unless the plaintext polynomial is in NTT form.
+        /// Returns a copy of ParmsId. The ParmsId must remain zero unless the
+        /// plaintext polynomial is in NTT form.
         /// </summary>
         /// <seealso cref="EncryptionParameters">see EncryptionParameters for more
         /// information about parmsId.</seealso>
@@ -615,11 +610,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns whether or not the plaintext has the same semantic value as a given plaintext.
+        /// Returns whether or not the plaintext has the same semantic value as a given
+        /// plaintext.
         /// </summary>
         /// <remarks>
-        /// Returns whether or not the plaintext has the same semantic value as a given plaintext. Leading
-        /// zero coefficients are ignored by the comparison.
+        /// Returns whether or not the plaintext has the same semantic value as a given
+        /// plaintext. Leading zero coefficients are ignored by the comparison.
         /// </remarks>
         /// <param name="obj">The object to compare against</param>
         public override bool Equals(object obj)
@@ -629,11 +625,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns whether or not the plaintext has the same semantic value as a given plaintext.
+        /// Returns whether or not the plaintext has the same semantic value as a given
+        /// plaintext.
         /// </summary>
         /// <remarks>
-        /// Returns whether or not the plaintext has the same semantic value as a given plaintext. Leading
-        /// zero coefficients are ignored by the comparison.
+        /// Returns whether or not the plaintext has the same semantic value as a given
+        /// plaintext. Leading zero coefficients are ignored by the comparison.
         /// </remarks>
         /// <param name="other">The plaintext to compare against</param>
         public bool Equals(Plaintext other)
