@@ -83,6 +83,25 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void KeyCopyTest()
+        {
+            SEALContext context = GlobalContext.BFVContext;
+            PublicKey pk = null;
+            SecretKey sk = null;
+
+            using (KeyGenerator keygen = new KeyGenerator(context))
+            {
+                pk = keygen.PublicKey;
+                sk = keygen.SecretKey;
+            }
+
+            ParmsId parmsIdPK = pk.ParmsId;
+            ParmsId parmsIdSK = sk.ParmsId;
+            Assert.AreEqual(parmsIdPK, parmsIdSK);
+            Assert.AreEqual(parmsIdPK, context.KeyParmsId);
+        }
+
+        [TestMethod]
         public void ExceptionsTest()
         {
             SEALContext context = GlobalContext.BFVContext;

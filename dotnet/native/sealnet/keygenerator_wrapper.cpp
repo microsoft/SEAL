@@ -178,10 +178,8 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_PublicKey(void *thisptr, void **publ
     IfNullRet(keygen, E_POINTER);
     IfNullRet(public_key, E_POINTER);
 
-    // This returns an existing object, not a new object.
-    // Make sure the managed side does not try to delete it.
-    const PublicKey *pubKey = &keygen->public_key();
-    *public_key = const_cast<PublicKey*>(pubKey);
+    PublicKey *key = new PublicKey(keygen->public_key());
+    *public_key = key;
     return S_OK;
 }
 
@@ -191,9 +189,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_SecretKey(void *thisptr, void **secr
     IfNullRet(keygen, E_POINTER);
     IfNullRet(secret_key, E_POINTER);
 
-    // This returns an existing object, not a new object.
-    // Make sure the managed side does not try to delete it.
-    const SecretKey *secretKey = &keygen->secret_key();
-    *secret_key = const_cast<SecretKey*>(secretKey);
+    SecretKey *key = new SecretKey(keygen->secret_key());
+    *secret_key = key;
     return S_OK;
 }

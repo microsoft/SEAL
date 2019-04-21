@@ -14,7 +14,8 @@ namespace Microsoft.Research.SEAL.Tools
         /// Derived classes should override this method to release managed resources.
         /// </summary>
         protected virtual void DisposeManagedResources()
-        {            // Derived classes will override this behavior.
+        {
+            // Derived classes will override this behavior.
         }
 
         /// <summary>
