@@ -16,7 +16,7 @@ namespace SEALNetTest
         [TestMethod]
         public void CreateTest()
         {
-            Evaluator evaluator = new Evaluator(GlobalContext.Context);
+            Evaluator evaluator = new Evaluator(GlobalContext.BFVContext);
             Assert.IsNotNull(evaluator);
         }
 

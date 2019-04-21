@@ -462,7 +462,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the BigUInt value as a <see cref="Numerics.BigInteger"/>.
+        /// Returns the BigUInt value as a <see cref="System.Numerics.BigInteger"/>.
         /// </summary>
         /// <returns></returns>
         public BigInteger ToBigInteger()

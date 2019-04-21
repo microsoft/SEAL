@@ -127,20 +127,20 @@ namespace seal
 
     By default, SEALContext creates a chain of SEALContext::ContextData instances. The
     first one in the chain corresponds to special encryption parameters that are reserved
-    to be used by the various key classes (SecretKey, PublicKey, etc.). These are the
-    exact same encryption parameters that are created by the user and passed to the
-    constructor of SEALContext. The functions key_context_data() and key_parms_id()
-    return the ContextData and the parms_id corresponding to these special parameters.
-    The rest of the ContextData instances in the chain correspond to encryption parameters
-    that are derived from the first encryption parameters by always removing the last one
-    of the moduli in the coeff_modulus, until the resulting parameters are no longer valid,
-    e.g., there are no more primes left. These derived encryption parameters are used by
-    ciphertexts and plaintexts and their respective ContextData can be accessed through the
+    to be used by the various key classes (SecretKey, PublicKey, etc.). These are the exact
+    same encryption parameters that are created by the user and passed to th constructor of
+    SEALContext. The functions key_context_data() and key_parms_id() return the ContextData
+    and the parms_id corresponding to these special parameters. The rest of the ContextData
+    instances in the chain correspond to encryption parameters that are derived from the
+    first encryption parameters by always removing the last one of the moduli in the
+    coeff_modulus, until the resulting parameters are no longer valid, e.g., there are no
+    more primes left. These derived encryption parameters are used by ciphertexts and
+    plaintexts and their respective ContextData can be accessed through the
     get_context_data(parms_id_type) function. The functions first_context_data() and
     last_context_data() return the ContextData corresponding to the first and the last
-    set of parameters in the "data" part of the chain, i.e., the second and the last
-    element in the full chain. The chain itself is a doubly linked list, and is referred
-    to as the modulus switching chain.
+    set of parameters in the "data" part of the chain, i.e., the second and the last element
+    in the full chain. The chain itself is a doubly linked list, and is referred to as the
+    modulus switching chain.
 
     @see EncryptionParameters for more details on the parameters.
     @see EncryptionParameterQualifiers for more details on the qualifiers.
@@ -468,8 +468,8 @@ namespace seal
         }
 
         /**
-        Returns whether the coefficient modulus supports keyswitching. In practice, 
-        support for keyswitching is required by Evaluator::relinearize, 
+        Returns whether the coefficient modulus supports keyswitching. In practice,
+        support for keyswitching is required by Evaluator::relinearize,
         Evaluator::apply_galois, and all rotation and conjugation operations. For
         keyswitching to be available, the coefficient modulus parameter must consist
         of at least two prime number factors.

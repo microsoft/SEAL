@@ -24,7 +24,7 @@ namespace SEALNetTest
         [TestMethod]
         public void CreateNonEmptyRelinKeysTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
             RelinKeys keys = keygen.RelinKeys();
@@ -47,7 +47,7 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
             RelinKeys keys = keygen.RelinKeys(count: 2);
@@ -106,7 +106,7 @@ namespace SEALNetTest
         [TestMethod]
         public void GetKeyTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             RelinKeys relinKeys = keygen.RelinKeys(count: 3);
 
@@ -138,7 +138,7 @@ namespace SEALNetTest
         public void ExceptionsTest()
         {
             RelinKeys keys = new RelinKeys();
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
 
             Assert.ThrowsException<ArgumentNullException>(() => keys = new RelinKeys(null));
 

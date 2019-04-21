@@ -65,7 +65,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Tells whether FFT can be used for polynomial multiplication.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Tells whether FFT can be used for polynomial multiplication. If the polynomial modulus
         /// is of the form X^N+1, where N is a power of two, then FFT can be used for fast
@@ -86,7 +86,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Tells whether NTT can be used for polynomial multiplication.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Tells whether NTT can be used for polynomial multiplication. If the primes in the
         /// coefficient modulus are congruent to 1 modulo 2N, where X^N+1 is the polynomial
@@ -108,7 +108,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Tells whether batching is supported by the encryption parameters.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Tells whether batching is supported by the encryption parameters. If the plaintext
         /// modulus is congruent to 1 modulo 2N, where X^N+1 is the polynomial modulus and N is
@@ -131,7 +131,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Tells whether fast plain lift is supported by the encryption parameters.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Tells whether fast plain lift is supported by the encryption parameters. A certain
         /// performance optimization in multiplication of a ciphertext by a plaintext
@@ -153,7 +153,7 @@ namespace Microsoft.Research.SEAL
         /// Tells whether the coefficient modulus consists of a set of primes that are in
         /// decreasing order.
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         /// Tells whether the coefficient modulus consists of a set of primes that are in
         /// decreasing order. If this is true, certain modular reductions in base conversion

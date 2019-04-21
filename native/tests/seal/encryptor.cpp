@@ -19,7 +19,7 @@ using namespace std;
 
 namespace SEALTest
 {
-    TEST(EncryptorTest, FVEncryptDecrypt)
+    TEST(EncryptorTest, BFVEncryptDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -134,7 +134,9 @@ namespace SEALTest
 
         {
             parms.set_poly_modulus_degree(256);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2) });
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+                DefaultParams::small_mods_40bit(2) });
             auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
@@ -187,6 +189,89 @@ namespace SEALTest
         }
     }
 
+    TEST(EncryptorTest, BFVEncryptZeroDecrypt)
+    {
+        EncryptionParameters parms(scheme_type::BFV);
+        SmallModulus plain_modulus(1 << 6);
+        parms.set_plain_modulus(plain_modulus);
+        parms.set_poly_modulus_degree(64);
+        parms.set_coeff_modulus({
+            DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+            DefaultParams::small_mods_40bit(2) });
+        auto context = SEALContext::Create(parms, true, false);
+        KeyGenerator keygen(context);
+
+        Encryptor encryptor(context, keygen.public_key());
+        Decryptor decryptor(context, keygen.secret_key());
+
+        Ciphertext ct;
+        encryptor.encrypt_zero(ct);
+        ASSERT_FALSE(ct.is_ntt_form());
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        Plaintext pt;
+        decryptor.decrypt(ct, pt);
+        ASSERT_TRUE(pt.is_zero());
+
+        parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
+        encryptor.encrypt_zero(next_parms, ct);
+        ASSERT_FALSE(ct.is_ntt_form());
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        ASSERT_EQ(ct.parms_id(), next_parms);
+        decryptor.decrypt(ct, pt);
+        ASSERT_TRUE(pt.is_zero());
+    }
+
+    TEST(EncryptorTest, CKKSEncryptZeroDecrypt)
+    {
+        EncryptionParameters parms(scheme_type::CKKS);
+        parms.set_poly_modulus_degree(64);
+        parms.set_coeff_modulus({
+            DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+            DefaultParams::small_mods_40bit(2) });
+        auto context = SEALContext::Create(parms, true, false);
+        KeyGenerator keygen(context);
+
+        Encryptor encryptor(context, keygen.public_key());
+        Decryptor decryptor(context, keygen.secret_key());
+        CKKSEncoder encoder(context);
+
+        Ciphertext ct;
+        encryptor.encrypt_zero(ct);
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_TRUE(ct.is_ntt_form());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        ct.scale() = std::pow(2.0, 20);
+        Plaintext pt;
+        decryptor.decrypt(ct, pt);
+
+        std::vector<std::complex<double>> res;
+        encoder.decode(pt, res);
+        for (auto val : res)
+        {
+            ASSERT_NEAR(val.real(), 0.0, 0.01);
+            ASSERT_NEAR(val.imag(), 0.0, 0.01);
+        }
+
+        parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
+        encryptor.encrypt_zero(next_parms, ct);
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_TRUE(ct.is_ntt_form());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        ct.scale() = std::pow(2.0, 20);
+        ASSERT_EQ(ct.parms_id(), next_parms);
+        decryptor.decrypt(ct, pt);
+        ASSERT_EQ(pt.parms_id(), next_parms);
+
+        encoder.decode(pt, res);
+        for (auto val : res)
+        {
+            ASSERT_NEAR(val.real(), 0.0, 0.01);
+            ASSERT_NEAR(val.imag(), 0.0, 0.01);
+        }
+    }
+
     TEST(EncryptorTest, CKKSEncryptDecrypt)
     {
         EncryptionParameters parms(scheme_type::CKKS);
@@ -195,7 +280,9 @@ namespace SEALTest
             //input consists of ones
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+                DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
             auto context = SEALContext::Create(parms, true, false);
             KeyGenerator keygen(context);
 
@@ -230,7 +317,9 @@ namespace SEALTest
             //input consists of zeros
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+                DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
             auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
@@ -265,7 +354,9 @@ namespace SEALTest
             // Input is a random mix of positive and negative integers
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1), DefaultParams::small_mods_60bit(2) });
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1),
+                DefaultParams::small_mods_60bit(2) });
             auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
@@ -311,7 +402,9 @@ namespace SEALTest
             // Input is a random mix of positive and negative integers
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1), DefaultParams::small_mods_60bit(2) });
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1),
+                DefaultParams::small_mods_60bit(2) });
             auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 

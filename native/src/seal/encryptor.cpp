@@ -119,7 +119,12 @@ namespace seal
                     coeff_mod_count,
                     destination.data(j));
             }
+
             destination.is_ntt_form() = is_ntt_form;
+
+            // Need to set the scale here since encrypt_zero_asymmetric only sets
+            // it for temp
+            destination.scale() = temp.scale();
         }
         else
         {

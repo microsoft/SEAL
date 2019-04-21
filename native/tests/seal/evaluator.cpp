@@ -21,7 +21,7 @@ using namespace std;
 
 namespace SEALTest
 {
-    TEST(EvaluatorTest, FVEncryptNegateDecrypt)
+    TEST(EvaluatorTest, BFVEncryptNegateDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -75,7 +75,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptAddDecrypt)
+    TEST(EvaluatorTest, BFVEncryptAddDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -718,7 +718,7 @@ namespace SEALTest
         }
     }
 
-    TEST(EvaluatorTest, FVEncryptSubDecrypt)
+    TEST(EvaluatorTest, BFVEncryptSubDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -777,7 +777,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptAddPlainDecrypt)
+    TEST(EvaluatorTest, BFVEncryptAddPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -831,7 +831,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptSubPlainDecrypt)
+    TEST(EvaluatorTest, BFVEncryptSubPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -884,7 +884,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptMultiplyPlainDecrypt)
+    TEST(EvaluatorTest, BFVEncryptMultiplyPlainDecrypt)
     {
         {
             EncryptionParameters parms(scheme_type::BFV);
@@ -1017,7 +1017,7 @@ namespace SEALTest
         }
     }
 
-    TEST(EvaluatorTest, FVEncryptMultiplyDecrypt)
+    TEST(EvaluatorTest, BFVEncryptMultiplyDecrypt)
     {
         {
             EncryptionParameters parms(scheme_type::BFV);
@@ -1247,7 +1247,7 @@ namespace SEALTest
     }
 
 #include "seal/randomgen.h"
-    TEST(EvaluatorTest, FVRelinearize)
+    TEST(EvaluatorTest, BFVRelinearize)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -3167,7 +3167,7 @@ namespace SEALTest
         }
     }
 
-    TEST(EvaluatorTest, FVEncryptSquareDecrypt)
+    TEST(EvaluatorTest, BFVEncryptSquareDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 8);
@@ -3230,7 +3230,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptMultiplyManyDecrypt)
+    TEST(EvaluatorTest, BFVEncryptMultiplyManyDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -3313,7 +3313,7 @@ namespace SEALTest
             ASSERT_TRUE(product.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptExponentiateDecrypt)
+    TEST(EvaluatorTest, BFVEncryptExponentiateDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -3358,7 +3358,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptAddManyDecrypt)
+    TEST(EvaluatorTest, BFVEncryptAddManyDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -3555,7 +3555,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptMultiplyPlainNTTDecrypt)
+    TEST(EvaluatorTest, BFVEncryptMultiplyPlainNTTDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -3622,7 +3622,7 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
     }
 
-    TEST(EvaluatorTest, FVEncryptApplyGaloisDecrypt)
+    TEST(EvaluatorTest, BFVEncryptApplyGaloisDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(257);
@@ -3700,7 +3700,7 @@ namespace SEALTest
         ASSERT_TRUE("1x^3 + 2x^2 + 1x^1 + 1" == plain.to_string());
     }
 
-    TEST(EvaluatorTest, FVEncryptRotateMatrixDecrypt)
+    TEST(EvaluatorTest, BFVEncryptRotateMatrixDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(257);
@@ -3766,7 +3766,7 @@ namespace SEALTest
             6, 7, 8, 5
         }));
     }
-    TEST(EvaluatorTest, FVEncryptModSwitchToNextDecrypt)
+    TEST(EvaluatorTest, BFVEncryptModSwitchToNextDecrypt)
     {
         // the common parameters: the plaintext and the polynomial moduli
         SmallModulus plain_modulus(1 << 6);
@@ -3858,7 +3858,7 @@ namespace SEALTest
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
     }
 
-    TEST(EvaluatorTest, FVEncryptModSwitchToDecrypt)
+    TEST(EvaluatorTest, BFVEncryptModSwitchToDecrypt)
     {
         // the common parameters: the plaintext and the polynomial moduli
         SmallModulus plain_modulus(1 << 6);

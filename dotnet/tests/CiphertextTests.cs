@@ -32,7 +32,7 @@ namespace SEALNetTest
         [TestMethod]
         public void Create2Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             ParmsId parms = context.FirstParmsId;
 
             Assert.AreNotEqual(0ul, parms.Block[0]);
@@ -48,7 +48,7 @@ namespace SEALNetTest
         [TestMethod]
         public void Create3Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             ParmsId parms = context.FirstParmsId;
 
             Assert.AreNotEqual(0ul, parms.Block[0]);
@@ -64,7 +64,7 @@ namespace SEALNetTest
         [TestMethod]
         public void ResizeTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             ParmsId parms = context.FirstParmsId;
 
             Ciphertext cipher = new Ciphertext(context, parms);
@@ -114,7 +114,7 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
@@ -156,7 +156,7 @@ namespace SEALNetTest
         [TestMethod]
         public void IndexTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("1");
@@ -176,7 +176,7 @@ namespace SEALNetTest
         [TestMethod]
         public void IndexRangeFail1Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("1");
@@ -194,7 +194,7 @@ namespace SEALNetTest
         [TestMethod]
         public void IndexRangeFail2Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("1");
@@ -217,7 +217,7 @@ namespace SEALNetTest
         [TestMethod]
         public void IndexRangeFail3Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("1");
@@ -294,7 +294,7 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
             MemoryPoolHandle poolu = new MemoryPoolHandle();
             Ciphertext cipher = new Ciphertext();

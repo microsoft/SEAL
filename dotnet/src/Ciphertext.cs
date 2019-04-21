@@ -81,10 +81,10 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Constructs an empty ciphertext with capacity 2. In addition to the
         /// capacity, the allocation size is determined by the encryption parameters
-        /// with given parmsId.
+        /// with given ParmsId.
         /// </summary>
         /// <param name="context">The SEALContext</param>
-        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// <param name="parmsId">The ParmsId corresponding to the encryption
         /// parameters to be used</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
@@ -93,9 +93,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Ciphertext(SEALContext context,
-                    ParmsId parmsId,
-                    MemoryPoolHandle pool = null)
+        public Ciphertext(SEALContext context, ParmsId parmsId, MemoryPoolHandle pool = null)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -113,7 +111,7 @@ namespace Microsoft.Research.SEAL
         /// encryption parameters.
         /// </summary>
         /// <param name="context">The SEALContext</param>
-        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// <param name="parmsId">The ParmsId corresponding to the encryption
         /// parameters to be used</param>
         /// <param name="sizeCapacity">The capacity</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
@@ -170,7 +168,7 @@ namespace Microsoft.Research.SEAL
         /// parmsId.
         /// </summary>
         /// <param name="context">The SEALContext</param>
-        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// <param name="parmsId">The ParmsId corresponding to the encryption
         /// parameters to be used</param>
         /// <param name="sizeCapacity">The capacity</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
@@ -234,7 +232,7 @@ namespace Microsoft.Research.SEAL
         /// to manually resize a ciphertext.
         /// </summary>
         /// <param name="context">The SEALContext</param>
-        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// <param name="parmsId">The ParmsId corresponding to the encryption
         /// parameters to be used</param>
         /// <param name="size">The new size</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
@@ -489,10 +487,13 @@ namespace Microsoft.Research.SEAL
         /// polynomial in the current ciphertext, this function returns true if all
         /// following coefficients are identically zero. Otherwise, returns false.
         /// </summary>
-        public bool IsTransparent()
+        public bool IsTransparent
         {
-            NativeMethods.Ciphertext_IsTransparent(NativePtr, out bool result);
-            return result;
+            get
+            {
+                NativeMethods.Ciphertext_IsTransparent(NativePtr, out bool result);
+                return result;
+            }
         }
 
         /// <summary>

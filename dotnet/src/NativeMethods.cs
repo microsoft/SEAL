@@ -945,6 +945,12 @@ namespace Microsoft.Research.SEAL
         internal static extern void Encryptor_Encrypt(IntPtr thisptr, IntPtr plaintext, IntPtr destination, IntPtr poolHandle);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptZero1(IntPtr thisptr, ulong[] parmsId, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptZero2(IntPtr thisptr, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_Destroy(IntPtr thisptr);
 
         #endregion

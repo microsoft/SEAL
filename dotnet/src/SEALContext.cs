@@ -8,9 +8,9 @@ namespace Microsoft.Research.SEAL
 {
     /// <summary>
     /// Performs sanity checks (validation) and pre-computations for a given set of encryption
-    /// parameters. 
+    /// parameters.
     /// </summary>
-    /// 
+    ///
     /// <remarks>
     /// <para>
     /// Performs sanity checks (validation) and pre-computations for a given set of encryption
@@ -78,11 +78,11 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Returns the ContextData corresponding to encryption parameters with a given
-        /// parmsId. If parameters with the given parmsId are not found then the function
+        /// parmsId. If parameters with the given ParmsId are not found then the function
         /// returns null.
         /// </summary>
         ///
-        /// <param name="parmsId">The parmsId of the encryption parameters</param>
+        /// <param name="parmsId">The ParmsId of the encryption parameters</param>
         /// <exception cref="ArgumentNullException">if parmsId is null</exception>
         public ContextData GetContextData(ParmsId parmsId)
         {
@@ -195,14 +195,13 @@ namespace Microsoft.Research.SEAL
 
 
         /// <summary>
-        /// Returns whether the coefficient modulus supports keyswitching. 
+        /// Returns whether the coefficient modulus supports keyswitching.
         /// </summary>
-        /// 
         /// <remarks>
-        /// Returns whether the coefficient modulus supports keyswitching. In 
-        /// practice, support for keyswitching is required by Evaluator.Relinearize, 
-        /// Evaluator.ApplyGalois, and all rotation and conjugation operations. 
-        /// For keyswitching to be available, the coefficient modulus parameter must 
+        /// Returns whether the coefficient modulus supports keyswitching. In
+        /// practice, support for keyswitching is required by Evaluator.Relinearize,
+        /// Evaluator.ApplyGalois, and all rotation and conjugation operations.
+        /// For keyswitching to be available, the coefficient modulus parameter must
         /// consist of at least two prime number factors.
         /// </remarks>
         public bool UsingKeySwitching
@@ -250,7 +249,7 @@ namespace Microsoft.Research.SEAL
             }
 
             /// <summary>
-            /// Returns the parmsId of the current parameters.
+            /// Returns the ParmsId of the current parameters.
             /// </summary>
             public ParmsId ParmsId
             {
@@ -263,10 +262,14 @@ namespace Microsoft.Research.SEAL
 
             /// <summary>
             /// Returns a copy of EncryptionParameterQualifiers corresponding to the
+            /// current encryption parameters.
+            /// </summary>
+            /// <remarks>
+            /// Returns a copy of EncryptionParameterQualifiers corresponding to the
             /// current encryption parameters. Note that to change the qualifiers it is
             /// necessary to create a new instance of SEALContext once appropriate changes
             /// to the encryption parameters have been made.
-            /// </summary>
+            /// </remarks>
             public EncryptionParameterQualifiers Qualifiers
             {
                 get
@@ -279,9 +282,13 @@ namespace Microsoft.Research.SEAL
 
             /// <summary>
             /// Returns a the pre-computed product of all primes in the
-            /// coefficient modulus.The security of the encryption parameters largely depends
-            /// on the bit-length of this product, and on the degree of the polynomial modulus.
+            /// coefficient modulus.
             /// </summary>
+            /// <remarks>
+            /// Returns a the pre-computed product of all primes in the
+            /// coefficient modulus. The security of the encryption parameters largely depends
+            /// on the bit-length of this product, and on the degree of the polynomial modulus.
+            /// </remarks>
             public ulong[] TotalCoeffModulus
             {
                 get
@@ -341,10 +348,14 @@ namespace Microsoft.Research.SEAL
 
             /// <summary>
             /// Return a copy of the plaintext upper half increment, i.e. coeffModulus
+            /// minus plainModulus.
+            /// </summary>
+            /// <remarks>
+            /// Return a copy of the plaintext upper half increment, i.e. coeffModulus
             /// minus plainModulus. The upper half increment is represented as an integer
             /// for the full product coeffModulus if UsingFastPlainLift is false and is
             /// otherwise represented modulo each of the CoeffModulus primes in order.
-            /// </summary>
+            /// </remarks>
             public ulong[] PlainUpperHalfIncrement
             {
                 get
@@ -382,15 +393,18 @@ namespace Microsoft.Research.SEAL
 
             /// <summary>
             /// Return a copy of the upper half increment used for computing Delta*m
+            /// and converting the coefficients to modulo CoeffModulus.
+            /// </summary>
+            /// <remarks>
+            /// Return a copy of the upper half increment used for computing Delta*m
             /// and converting the coefficients to modulo CoeffModulus. For example,
             /// t-1 in plaintext should change into
-            /// q - Delta = Delta*t + r_t(q) - Delta
-            /// = Delta*(t-1) + r_t(q)
+            /// q - Delta = Delta*t + r_t(q) - Delta = Delta*(t-1) + r_t(q)
             /// so multiplying the message by Delta is not enough and requires also an
             /// addition of r_t(q). This is precisely the UpperHalfIncrement. Note that
             /// this operation is only done for negative message coefficients, i.e. those
             /// that exceed PlainUpperHalfThreshold.
-            /// </summary>
+            /// </remarks>
             public ulong[] UpperHalfIncrement
             {
                 get
@@ -410,9 +424,13 @@ namespace Microsoft.Research.SEAL
 
             /// <summary>
             /// Returns the context data corresponding to the previous parameters in the
+            /// modulus switching chain.
+            /// </summary>
+            /// <remarks>
+            /// Returns the context data corresponding to the previous parameters in the
             /// modulus switching chain. If the current data is the first one in the chain,
             /// then the result is nullptr.
-            /// </summary>
+            /// </remarks>
             public ContextData PrevContextData
             {
                 get
@@ -429,9 +447,13 @@ namespace Microsoft.Research.SEAL
 
             /// <summary>
             /// Returns the context data corresponding to the next parameters in the modulus
+            /// switching chain.
+            /// </summary>
+            /// <remarks>
+            /// Returns the context data corresponding to the next parameters in the modulus
             /// switching chain. If the current data is the last one in the chain, then the
             /// result is nullptr.
-            /// </summary>
+            /// </remarks>
             public ContextData NextContextData
             {
                 get
@@ -447,9 +469,12 @@ namespace Microsoft.Research.SEAL
             }
 
             /// <summary>
+            /// Returns the index of the parameter set in a chain.
+            /// </summary>
+            /// <remarks>
             /// Returns the index of the parameter set in a chain. The initial parameters
             /// have index 0 and the index increases sequentially in the parameter chain.
-            /// </summary>
+            /// </remarks>
             public ulong ChainIndex
             {
                 get

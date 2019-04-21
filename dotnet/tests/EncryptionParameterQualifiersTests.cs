@@ -12,7 +12,7 @@ namespace SEALNetTest
         [TestMethod]
         public void PropertiesTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
 
             Assert.IsTrue(context.FirstContextData.Qualifiers.ParametersSet);
             Assert.IsTrue(context.FirstContextData.Qualifiers.UsingBatching);
@@ -55,7 +55,7 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            EncryptionParameterQualifiers epq1 = GlobalContext.Context.FirstContextData.Qualifiers;
+            EncryptionParameterQualifiers epq1 = GlobalContext.BFVContext.FirstContextData.Qualifiers;
             EncryptionParameterQualifiers epq2 = null;
 
             Assert.ThrowsException<ArgumentNullException>(() => epq2 = new EncryptionParameterQualifiers(null));

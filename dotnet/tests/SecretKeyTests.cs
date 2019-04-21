@@ -95,7 +95,7 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             SecretKey key = new SecretKey();
 
             Assert.ThrowsException<ArgumentNullException>(() => key = new SecretKey(null));

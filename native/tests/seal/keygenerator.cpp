@@ -15,7 +15,7 @@ using namespace std;
 
 namespace SEALTest
 {
-    TEST(KeyGeneratorTest, FVKeyGeneration)
+    TEST(KeyGeneratorTest, BFVKeyGeneration)
     {
         EncryptionParameters parms(scheme_type::BFV);
         {
@@ -296,7 +296,7 @@ namespace SEALTest
         }
     }
 
-    TEST(KeyGeneratorTest, FVSecretKeyGeneration)
+    TEST(KeyGeneratorTest, BFVSecretKeyGeneration)
     {
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_noise_standard_deviation(3.20);
