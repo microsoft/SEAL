@@ -51,15 +51,19 @@ namespace Microsoft.Research.SEAL
     /// </para>
     /// <para>
     /// The EncryptionParameters class maintains at all times a 256-bit SHA-3 hash of
-    /// the currently set encryption parameters. This hash is then stored by all further
-    /// objects created for these encryption parameters, e.g. <see cref="SEALContext" />,
-    /// <see cref="KeyGenerator" />, <see cref="Encryptor" />, <see cref="Decryptor" />,
-    /// <see cref="Evaluator" />, all secret and public keys, and ciphertexts. The hash
-    /// block is not intended to be directly modified by the user, and is used internally
-    /// to perform quick input compatibility checks.
+    /// the currently set encryption parameters called the ParmsId. This hash acts as
+    /// a unique identifier of the encryption parameters and is used by all further
+    /// objects created for these encryption parameters. The ParmsId is not intended
+    /// to be directly modified by the user but is used internally for pre-computation
+    /// data lookup and input validity checks. In modulus switching the user can use
+    /// the ParmsId to keep track of the chain of encryption parameters. The ParmsId is
+    /// not exposed in the public API of EncryptionParameters, but can be accessed 
+    /// through the <see cref="SEALContext.ContextData" /> class once the SEALContext
+    /// has been created.
     /// </para>
     /// <para>
-    /// In general, reading from EncryptionParameters is thread-safe, while mutating is not.
+    /// In general, reading from EncryptionParameters is thread-safe, while mutating 
+    /// is not.
     /// </para>
     /// <para>
     /// Choosing inappropriate encryption parameters may lead to an encryption scheme
