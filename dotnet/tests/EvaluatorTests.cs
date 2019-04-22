@@ -1280,7 +1280,8 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = new List<SmallModulus>() { DefaultParams.SmallMods40Bit(0) }
+                CoeffModulus = new List<SmallModulus>() {
+                    DefaultParams.SmallMods40Bit(0), DefaultParams.SmallMods40Bit(1) }
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,

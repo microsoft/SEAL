@@ -57,7 +57,7 @@ namespace Microsoft.Research.SEAL
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            NativeMethods.Plaintext_Create(poolPtr, out IntPtr ptr);
+            NativeMethods.Plaintext_Create1(poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -75,7 +75,7 @@ namespace Microsoft.Research.SEAL
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            NativeMethods.Plaintext_Create(coeffCount, poolPtr, out IntPtr ptr);
+            NativeMethods.Plaintext_Create2(coeffCount, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -95,7 +95,7 @@ namespace Microsoft.Research.SEAL
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            NativeMethods.Plaintext_Create(capacity, coeffCount, poolPtr, out IntPtr ptr);
+            NativeMethods.Plaintext_Create3(capacity, coeffCount, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -135,7 +135,21 @@ namespace Microsoft.Research.SEAL
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            NativeMethods.Plaintext_Create(hexPoly, poolPtr, out IntPtr ptr);
+            NativeMethods.Plaintext_Create4(hexPoly, poolPtr, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs a new plaintext by copying a given one.
+        /// </summary>
+        /// <param name="copy">The plaintext to copy from</param>
+        /// <exception cref="ArgumentNullException">if copy is null</exception>
+        public Plaintext(Plaintext copy)
+        {
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            NativeMethods.Plaintext_Create5(copy.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 

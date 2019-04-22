@@ -119,6 +119,17 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create4(char *hexPoly, void *memoryPool
     return E_UNEXPECTED;
 }
 
+SEALNETNATIVE HRESULT SEALCALL Plaintext_Create5(void *copy, void **plaintext)
+{
+    Plaintext *copyptr = FromVoid<Plaintext>(copy);
+    IfNullRet(copyptr, E_POINTER);
+    IfNullRet(plaintext, E_POINTER);
+
+    Plaintext *plain = new Plaintext(*copyptr);
+    *plaintext = plain;
+    return S_OK;
+}
+
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Set1(void *thisptr, void *assign)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);

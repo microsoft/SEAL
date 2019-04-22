@@ -631,17 +631,20 @@ namespace Microsoft.Research.SEAL
 
         #region Plaintext methods
 
-        [DllImport(sealnetnative, EntryPoint = "Plaintext_Create1", PreserveSig = false)]
-        internal static extern void Plaintext_Create(IntPtr memoryPoolHandle, out IntPtr plainText);
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Create1(IntPtr memoryPoolHandle, out IntPtr plainText);
 
-        [DllImport(sealnetnative, EntryPoint = "Plaintext_Create2", PreserveSig = false)]
-        internal static extern void Plaintext_Create(ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Create2(ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
 
-        [DllImport(sealnetnative, EntryPoint = "Plaintext_Create3", PreserveSig = false)]
-        internal static extern void Plaintext_Create(ulong capacity, ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Create3(ulong capacity, ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
 
-        [DllImport(sealnetnative, EntryPoint = "Plaintext_Create4", PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void Plaintext_Create(string hexPoly, IntPtr memoryPoolHandle, out IntPtr plainText);
+        [DllImport(sealnetnative, PreserveSig = false, CharSet = CharSet.Ansi)]
+        internal static extern void Plaintext_Create4(string hexPoly, IntPtr memoryPoolHandle, out IntPtr plainText);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Create5(IntPtr copy, out IntPtr plainText);
 
         [DllImport(sealnetnative, EntryPoint = "Plaintext_Set1", PreserveSig = false)]
         internal static extern void Plaintext_Set(IntPtr thisptr, IntPtr assign);

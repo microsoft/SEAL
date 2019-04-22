@@ -88,8 +88,7 @@ namespace Microsoft.Research.SEAL
         public bool HasKey(ulong keyPower)
         {
             ulong index = GetIndex(keyPower);
-            List<IEnumerable<PublicKey>> dataList = (List<IEnumerable<PublicKey>>)Data;
-            return (ulong)dataList.LongCount() > index && dataList[(int)index].Count() != 0;
+            return (ulong)Data.LongCount() > index && Data.ElementAt((int)index).Count() != 0;
         }
 
         /// <summary>
@@ -105,8 +104,7 @@ namespace Microsoft.Research.SEAL
         /// does not exist</exception>
         public IEnumerable<PublicKey> Key(ulong keyPower)
         {
-            List<IEnumerable<PublicKey>> dataList = (List<IEnumerable<PublicKey>>)Data;
-            return new List<PublicKey>(dataList[(int)GetIndex(keyPower)]);
+            return Data.ElementAt((int)GetIndex(keyPower));
         }
     }
 }

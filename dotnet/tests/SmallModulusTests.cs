@@ -238,34 +238,6 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => sm.Load(null));
             Assert.ThrowsException<ArgumentException>(() => sm.Load(ms_empty));
 
-            MemoryStream ms = new MemoryStream();
-            using (BinaryWriter writer = new BinaryWriter(ms, Encoding.UTF8, leaveOpen: true))
-            {
-                // Bit count
-                writer.Write(16);
-                // Uint64 count
-                writer.Write(1ul);
-                // Value that does not match bit count
-                writer.Write(0x123456789ABCDul);
-            }
-
-            ms.Seek(offset: 0, loc: SeekOrigin.Begin);
-            Assert.ThrowsException<InvalidOperationException>(() => sm.Load(ms));
-
-            ms = new MemoryStream();
-            using (BinaryWriter writer = new BinaryWriter(ms, Encoding.UTF8, leaveOpen: true))
-            {
-                // Bit count
-                writer.Write(16);
-                // UInt64 count that does not match value
-                writer.Write(2ul);
-                // Value
-                writer.Write(0xFABCul);
-            }
-
-            ms.Seek(offset: 0, loc: SeekOrigin.Begin);
-            Assert.ThrowsException<InvalidOperationException>(() => sm.Load(ms));
-
             IEnumerable<SmallModulus> primes = null;
             Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(-1, 1, 1));
             Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(0, 1, 1));
