@@ -96,6 +96,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the PublicKey to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the PublicKey could not be written to stream</exception>
         public void Save(Stream stream)
         {
             if (null == stream)
@@ -115,7 +116,8 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to load the PublicKey from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if a valid PublicKey could not be read from stream</exception>
+        /// <exception cref="ArgumentException">if PublicKey could not be read from
+        /// stream</exception>
         public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
@@ -133,8 +135,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either context or stream are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded PublicKey is invalid for the
-        /// context</exception>
+        /// <exception cref="ArgumentException">if PublicKey could not be read from
+        /// stream or is invalid for the context</exception>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -143,7 +145,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             UnsafeLoad(stream);
-
             if (!ValCheck.IsValidFor(this, context))
             {
                 throw new ArgumentException("PublicKey data is invalid for the context");

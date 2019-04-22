@@ -499,24 +499,32 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="stream">The stream to save the ciphertext to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the ciphertext could not be written to stream</exception>
         public void Save(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            try
             {
-                ParmsId.Save(writer.BaseStream);
-                writer.Write(IsNTTForm);
-                writer.Write(Size);
-                writer.Write(PolyModulusDegree);
-                writer.Write(CoeffModCount);
-
-                ulong ulongCount = Size * PolyModulusDegree * CoeffModCount;
-                for (ulong i = 0; i < ulongCount; i++)
+                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    writer.Write(this[i]);
+                    ParmsId.Save(writer.BaseStream);
+                    writer.Write(IsNTTForm);
+                    writer.Write(Size);
+                    writer.Write(PolyModulusDegree);
+                    writer.Write(CoeffModCount);
+
+                    ulong ulongCount = checked(Size * PolyModulusDegree * CoeffModCount);
+                    for (ulong i = 0; i < ulongCount; i++)
+                    {
+                        writer.Write(this[i]);
+                    }
                 }
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not write Ciphertext", ex);
             }
         }
 
@@ -528,7 +536,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="stream">The stream to load the ciphertext from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if a valid ciphertext could not be read from stream</exception>
+        /// <exception cref="ArgumentException">if a ciphertext could not be read from
+        /// stream</exception>
         public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
@@ -546,11 +555,10 @@ namespace Microsoft.Research.SEAL
                     ulong size = reader.ReadUInt64();
                     ulong polyModulusDegree = reader.ReadUInt64();
                     ulong coeffModCount = reader.ReadUInt64();
-                    ulong ulongCount = size * polyModulusDegree * coeffModCount;
+                    ulong ulongCount = checked(size * polyModulusDegree * coeffModCount);
 
                     IsNTTForm = isNTT;
                     Resize(size, polyModulusDegree, coeffModCount);
-
                     for (ulong i = 0; i < ulongCount; i++)
                     {
                         this[i] = reader.ReadUInt64();
@@ -563,7 +571,7 @@ namespace Microsoft.Research.SEAL
             }
             catch (IOException ex)
             {
-                throw new ArgumentException("Error reading ciphertext", ex);
+                throw new ArgumentException("Could not load Ciphertext", ex);
             }
         }
 
@@ -577,8 +585,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded ciphertext data is invalid or
-        /// is invalid for the context</exception>
+        /// <exception cref="ArgumentException">if a ciphertext could not be read from
+        /// stream or is invalid for the context</exception>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -587,7 +595,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             UnsafeLoad(stream);
-
             if (!ValCheck.IsValidFor(this, context))
             {
                 throw new ArgumentException("Ciphertext data is invalid for the SEALContext");

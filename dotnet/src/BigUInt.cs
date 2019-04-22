@@ -313,7 +313,8 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the number of significant bits for the BigUInt.
         /// </summary>
-        /// <seealso cref="BitCount">See BitCount to instead return the bit count regardless of leading zero bits.</seealso>
+        /// <seealso cref="BitCount">See BitCount to instead return the bit count
+        /// regardless of leading zero bits.</seealso>
         /// <returns>Number of significant bits for the BigUInt.</returns>
         public int GetSignificantBitCount()
         {
@@ -321,13 +322,15 @@ namespace Microsoft.Research.SEAL
             return result;
         }
 
-        /// <summary>Overwrites the BigUInt with the value of the specified BigUInt, enlarging if needed to fit the assigned
-        /// value.</summary>
+        /// <summary>
+        /// Overwrites the BigUInt with the value of the specified BigUInt, enlarging
+        /// if needed to fit the assigned value.
+        /// </summary>
         /// <remarks>
-        /// Overwrites the BigUInt with the value of the specified BigUInt, enlarging if needed to fit the assigned value.
-        /// Only significant bits are used to size the BigUInt.
+        /// Overwrites the BigUInt with the value of the specified BigUInt, enlarging
+        /// if needed to fit the assigned value. Only significant bits are used to size
+        /// the BigUInt.
         /// </remarks>
-        ///
         /// <param name="assign"> The BigUInt whose value should be assigned to the current BigUInt</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
         /// <exception cref="InvalidOperationException">if BigUInt is an alias and the assigned BigUInt is too large to fit
@@ -342,14 +345,16 @@ namespace Microsoft.Research.SEAL
             NativeMethods.BigUInt_Set(NativePtr, assign.NativePtr);
         }
 
-        /// <summary>Overwrites the BigUInt with the unsigned hexadecimal value specified by the string, enlarging if needed to fit
-        /// the assigned value.</summary>
+        /// <summary>
+        /// Overwrites the BigUInt with the unsigned hexadecimal value specified by
+        /// the string, enlarging if needed to fit the assigned value.
+        /// </summary>
         /// <remarks>
-        /// Overwrites the BigUInt with the unsigned hexadecimal value specified by the string, enlarging if needed to fit the
-        /// assigned value. The string must match the format returned by<see cref="ToString()"/> and must consist of only the
-        /// characters 0-9, A-F, or a-f, most-significant nibble first.
+        /// Overwrites the BigUInt with the unsigned hexadecimal value specified by
+        /// the string, enlarging if needed to fit the assigned value. The string must
+        /// match the format returned by<see cref="ToString()"/> and must consist of
+        /// only the characters 0-9, A-F, or a-f, most-significant nibble first.
         /// </remarks>
-        ///
         /// <param name="assign"> The hexadecimal integer string specifying the value to assign</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
         /// <exception cref="ArgumentException">if assign does not adhere to the expected format</exception>
@@ -392,30 +397,42 @@ namespace Microsoft.Research.SEAL
         ///
         /// <param name="stream">The stream to save the BigUInt to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the BigUInt could not be written to stream</exception>
         public void Save(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.Default, leaveOpen: true))
+            try
             {
-                writer.Write(BitCount);
-                ulong byteCount = ByteCount;
-
-                for (ulong i = 0; i < byteCount; i++)
+                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    writer.Write(this[i]);
+                    writer.Write(BitCount);
+                    ulong byteCount = ByteCount;
+
+                    for (ulong i = 0; i < byteCount; i++)
+                    {
+                        writer.Write(this[i]);
+                    }
                 }
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not write BigUInt", ex);
             }
         }
 
-        /// <summary>Loads a BigUInt from an input stream overwriting the current BigUInt and enlarging if needed to fit the loaded
-        /// BigUInt.</summary>
-        ///
+        /// <summary>
+        /// Loads a BigUInt from an input stream overwriting the current BigUInt and
+        /// enlarging if needed to fit the loaded BigUInt.
+        /// </summary>
         /// <param name="stream">The stream to load the BigUInt from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="InvalidOperationException">if BigUInt is an alias and the loaded BigUInt is too large to fit
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and
+        /// the loaded BigUInt is too large to fit
         /// with the current bit width</exception>
+        /// <exception cref="ArgumentException">if a valid BigUInt could not be read
+        /// from stream</exception>
         public void Load(Stream stream)
         {
             if (null == stream)
@@ -423,29 +440,42 @@ namespace Microsoft.Research.SEAL
             if (IsAlias)
                 throw new InvalidOperationException("Cannot load to an Alias");
 
-            using (BinaryReader reader = new BinaryReader(stream, Encoding.Default, leaveOpen: true))
+            try
             {
-                int bitCount = reader.ReadInt32();
-                if (bitCount < 0)
-                    throw new ArgumentException("bitCount cannot be negative");
-
-                if (bitCount > BitCount)
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    // We need to resize.
-                    Resize(bitCount);
-                }
+                    int bitCount = reader.ReadInt32();
+                    if (bitCount < 0)
+                        throw new ArgumentException("bitCount cannot be negative");
 
-                SetZero();
-                ulong byteCount = checked((ulong)Utilities.DivideRoundUp(bitCount, Utilities.BitsPerUInt8));
-                for (ulong i = 0; i < byteCount; i++)
-                {
-                    this[i] = reader.ReadByte();
+                    if (bitCount > BitCount)
+                    {
+                        // We need to resize.
+                        Resize(bitCount);
+                    }
+
+                    SetZero();
+                    ulong byteCount = checked((ulong)Utilities.DivideRoundUp(bitCount, Utilities.BitsPerUInt8));
+                    for (ulong i = 0; i < byteCount; i++)
+                    {
+                        this[i] = reader.ReadByte();
+                    }
                 }
+            }
+            catch (EndOfStreamException ex)
+            {
+                throw new ArgumentException("End of stream reached", ex);
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not load BigUInt", ex);
             }
         }
 
-        /// <summary>Resizes the BigUInt to the specified bit width, copying over the old value as much as will fit.</summary>
-        ///
+        /// <summary>
+        /// Resizes the BigUInt to the specified bit width, copying over the old
+        /// value as much as will fit.
+        /// </summary>
         /// <param name="bitCount">The bit width</param>
         /// <exception cref="ArgumentException">if bitCount is negative</exception>
         /// <exception cref="InvalidOperationException">if the BigUInt is an alias</exception>

@@ -45,7 +45,7 @@ namespace Microsoft.Research.SEAL
     /// structure storing the plaintext not being thread-safe.
     /// </para>
     /// </remarks>
-    /// <seealso cref="Ciphertext">see Ciphertext for the class that stores ciphertexts.</seealso>
+    /// <seealso cref="Ciphertext">See Ciphertext for the class that stores ciphertexts.</seealso>
     public class Plaintext : NativeObject, IEquatable<Plaintext>
     {
         /// <summary>
@@ -449,26 +449,35 @@ namespace Microsoft.Research.SEAL
         /// Saves the plaintext to an output stream.
         /// </summary>
         /// <remarks>
-        /// Saves the plaintext to an output stream. The output is in binary format and not human-readable.
-        /// The output stream must have the "binary" flag set.
+        /// Saves the plaintext to an output stream. The output is in binary format
+        /// and not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the plaintext to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the plaintext could not be written
+        /// to stream</exception>
         public void Save(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            try
             {
-                ParmsId.Save(stream);
-                writer.Write(Scale);
-                writer.Write(CoeffCount);
-                for (ulong i = 0; i < CoeffCount; i++)
+                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    ulong data = this[i];
-                    writer.Write(data);
+                    ParmsId.Save(stream);
+                    writer.Write(Scale);
+                    writer.Write(CoeffCount);
+                    for (ulong i = 0; i < CoeffCount; i++)
+                    {
+                        ulong data = this[i];
+                        writer.Write(data);
+                    }
                 }
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not write KSwitchKeys", ex);
             }
         }
 
@@ -480,7 +489,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="stream">The stream to load the plaintext from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if a valid plaintext could not be read from stream</exception>
+        /// <exception cref="ArgumentException">if a plaintext could not be read from
+        /// stream</exception>
         public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
@@ -488,24 +498,23 @@ namespace Microsoft.Research.SEAL
 
             try
             {
-                using (BinaryReader reader = new BinaryReader(stream))
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
                 {
                     ParmsId parms = new ParmsId();
                     parms.Load(stream);
-                    ParmsId = parms;
 
                     double scale = reader.ReadDouble();
                     ulong coeffCount = reader.ReadUInt64();
 
-                    Scale = scale;
                     ulong[] newData = new ulong[coeffCount];
-
                     for (ulong i = 0; i < coeffCount; i++)
                     {
                         newData[i] = reader.ReadUInt64();
                     }
 
                     NativeMethods.Plaintext_SwapData(NativePtr, coeffCount, newData);
+                    ParmsId = parms;
+                    Scale = scale;
                 }
             }
             catch (EndOfStreamException ex)
@@ -527,8 +536,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either context or stream are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded plaintext is invalid, or it is
-        /// invalid for the context</exception>
+        /// <exception cref="ArgumentException">if a plaintext could not be read from
+        /// stream or is invalid for the context</exception>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -537,7 +546,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             UnsafeLoad(stream);
-
             if (!ValCheck.IsValidFor(this, context))
             {
                 throw new ArgumentException("Plaintext data is invalid for context");

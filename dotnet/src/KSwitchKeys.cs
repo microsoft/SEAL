@@ -160,31 +160,39 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the KSwitchKeys to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the KSwitchKeys could not be written to stream</exception>
         public void Save(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            try
             {
-                // Save the ParmsId
-                ParmsId.Save(writer.BaseStream);
-
-                // Save the size of Keys
-                IEnumerable<IEnumerable<PublicKey>> data = Data;
-                writer.Write((ulong)data.LongCount());
-
-                // Loop over entries in the first list
-                foreach (IEnumerable<PublicKey> key in data)
+                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    writer.Write((ulong)key.LongCount());
+                    // Save the ParmsId
+                    ParmsId.Save(writer.BaseStream);
 
-                    // Loop over keys and save all
-                    foreach (PublicKey pkey in key)
+                    // Save the size of Keys
+                    IEnumerable<IEnumerable<PublicKey>> data = Data;
+                    writer.Write((ulong)data.LongCount());
+
+                    // Loop over entries in the first list
+                    foreach (IEnumerable<PublicKey> key in data)
                     {
-                        pkey.Save(writer.BaseStream);
+                        writer.Write((ulong)key.LongCount());
+
+                        // Loop over keys and save all
+                        foreach (PublicKey pkey in key)
+                        {
+                            pkey.Save(writer.BaseStream);
+                        }
                     }
                 }
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not write KSwitchKeys", ex);
             }
         }
 
@@ -199,7 +207,8 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to load the KSwitchKeys from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if a valid KSwitchKeys could not be read from stream</exception>
+        /// <exception cref="ArgumentException">if KSwitchKeys could not be read from
+        /// stream</exception>
         public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
@@ -250,7 +259,7 @@ namespace Microsoft.Research.SEAL
             }
             catch (IOException ex)
             {
-                throw new ArgumentException("Error reading keys", ex);
+                throw new ArgumentException("Could not load KSwitchKeys", ex);
             }
         }
 
@@ -266,8 +275,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either stream or context are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded data is invalid or is not
-        /// valid for the context</exception>
+        /// <exception cref="ArgumentException">if KSwitchKeys could not be read from
+        /// stream or is invalid for the context</exception>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -276,7 +285,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             UnsafeLoad(stream);
-
             if (!ValCheck.IsValidFor(this, context))
             {
                 throw new ArgumentException("KSwitchKeys data is invalid for the context");

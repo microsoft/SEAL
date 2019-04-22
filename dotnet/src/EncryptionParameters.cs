@@ -326,6 +326,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="parms">Encryption Parameters to save</param>
         /// <param name="stream">The stream to save the EncryptionParameters to</param>
         /// <exception cref="ArgumentNullException">if either parms or stream are null</exception>
+        /// <exception cref="ArgumentException">if the EncryptionParameters could not be written to stream</exception>
         public static void Save(EncryptionParameters parms, Stream stream)
         {
             if (null == parms)
@@ -333,23 +334,30 @@ namespace Microsoft.Research.SEAL
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            try
             {
-                writer.Write((int)parms.Scheme);
-                writer.Write(parms.PolyModulusDegree);
-
-                List<SmallModulus> coeffModulus = new List<SmallModulus>(parms.CoeffModulus);
-                writer.Write(coeffModulus.Count);
-                foreach (SmallModulus mod in coeffModulus)
+                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    mod.Save(writer.BaseStream);
-                }
+                    writer.Write((int)parms.Scheme);
+                    writer.Write(parms.PolyModulusDegree);
 
-                if (parms.Scheme == SchemeType.BFV)
-                {
-                    parms.PlainModulus.Save(writer.BaseStream);
+                    List<SmallModulus> coeffModulus = new List<SmallModulus>(parms.CoeffModulus);
+                    writer.Write(coeffModulus.Count);
+                    foreach (SmallModulus mod in coeffModulus)
+                    {
+                        mod.Save(writer.BaseStream);
+                    }
+
+                    if (parms.Scheme == SchemeType.BFV)
+                    {
+                        parms.PlainModulus.Save(writer.BaseStream);
+                    }
+                    writer.Write(parms.NoiseStandardDeviation);
                 }
-                writer.Write(parms.NoiseStandardDeviation);
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not write EncryptionParameters", ex);
             }
         }
 
@@ -360,7 +368,8 @@ namespace Microsoft.Research.SEAL
         ///
         /// <param name="stream">The stream to load the EncryptionParameters from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if parameters cannot be read correctly</exception>
+        /// <exception cref="ArgumentException">if valid EncryptionParameters could not be
+        /// read from stream</exception>
         public static EncryptionParameters Load(Stream stream)
         {
             if (null == stream)
@@ -406,7 +415,7 @@ namespace Microsoft.Research.SEAL
             }
             catch (IOException ex)
             {
-                throw new ArgumentException("Could not read Encryption Parameters", ex);
+                throw new ArgumentException("Could not load EncryptionParameters", ex);
             }
         }
 
