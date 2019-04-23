@@ -83,11 +83,12 @@ namespace Microsoft.Research.SEAL
         public bool HasKey(ulong galoisElt)
         {
             ulong index = GetIndex(galoisElt);
-            return (ulong)Data.LongCount() > index && Data.ElementAt((int)index).Count() != 0;
+            return (ulong)Data.LongCount() > index &&
+                Data.ElementAt(checked((int)index)).Count() != 0;
         }
 
         /// <summary>
-        /// Returns a specified Galois key. 
+        /// Returns a specified Galois key.
         /// </summary>
         /// <remarks>
         /// Returns a specified Galois key. The returned Galois key corresponds to the
@@ -98,7 +99,7 @@ namespace Microsoft.Research.SEAL
         /// not exist</exception>
         public IEnumerable<PublicKey> Key(ulong galoisElt)
         {
-            return Data.ElementAt((int)GetIndex(galoisElt));
+            return Data.ElementAt(checked((int)GetIndex(galoisElt)));
         }
     }
 }

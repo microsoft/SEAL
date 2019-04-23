@@ -120,7 +120,7 @@ namespace Microsoft.Research.SEAL
                     IntPtr[] pointers = new IntPtr[count];
                     NativeMethods.KSwitchKeys_GetKeyList(NativePtr, i, ref count, pointers);
 
-                    List<PublicKey> key = new List<PublicKey>((int)count);
+                    List<PublicKey> key = new List<PublicKey>(checked((int)count));
                     foreach (IntPtr ptr in pointers)
                     {
                         key.Add(new PublicKey(ptr, owned: false));
@@ -234,7 +234,7 @@ namespace Microsoft.Research.SEAL
                     {
                         // Read size of second list
                         ulong keySize = reader.ReadUInt64();
-                        List<PublicKey> key = new List<PublicKey>((int)keySize);
+                        List<PublicKey> key = new List<PublicKey>(checked((int)keySize));
 
                         // Load all ciphertexts
                         for (ulong j = 0; j < keySize; j++)

@@ -43,12 +43,12 @@ namespace SEALNetTest
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
+                Assert.AreEqual(plainList[checked((int)i)], plainList2[checked((int)i)]);
             }
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                plainList[(int)i] = 5;
+                plainList[checked((int)i)] = 5;
             }
 
             encoder.Encode(plainList, plain);
@@ -58,13 +58,13 @@ namespace SEALNetTest
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
+                Assert.AreEqual(plainList[checked((int)i)], plainList2[checked((int)i)]);
             }
 
             List<ulong> shortList = new List<ulong>();
-            for (int i = 0; i < 20; i++)
+            for (ulong i = 0; i < 20; i++)
             {
-                shortList.Add((ulong)i);
+                shortList.Add(i);
             }
 
             encoder.Encode(shortList, plain);
@@ -82,7 +82,7 @@ namespace SEALNetTest
 
             for (ulong i = 20; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(0ul, shortList2[(int)i]);
+                Assert.AreEqual(0ul, shortList2[checked((int)i)]);
             }
         }
 
@@ -118,12 +118,12 @@ namespace SEALNetTest
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
+                Assert.AreEqual(plainList[checked((int)i)], plainList2[checked((int)i)]);
             }
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                plainList[(int)i] = 5;
+                plainList[checked((int)i)] = 5;
             }
 
             encoder.Encode(plainList, plain);
@@ -133,7 +133,7 @@ namespace SEALNetTest
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
+                Assert.AreEqual(plainList[checked((int)i)], plainList2[checked((int)i)]);
             }
 
             List<long> shortList = new List<long>();
@@ -157,7 +157,7 @@ namespace SEALNetTest
 
             for (ulong i = 20; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(0L, shortList2[(int)i]);
+                Assert.AreEqual(0L, shortList2[checked((int)i)]);
             }
         }
 

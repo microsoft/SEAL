@@ -30,7 +30,6 @@ namespace Microsoft.Research.SEAL
     /// <summary>
     /// Represents the user-customizable encryption scheme settings.
     /// </summary>
-    ///
     /// <remarks>
     /// <para>
     /// Represents user-customizable encryption scheme settings. The parameters (most
@@ -57,12 +56,12 @@ namespace Microsoft.Research.SEAL
     /// to be directly modified by the user but is used internally for pre-computation
     /// data lookup and input validity checks. In modulus switching the user can use
     /// the ParmsId to keep track of the chain of encryption parameters. The ParmsId is
-    /// not exposed in the public API of EncryptionParameters, but can be accessed 
+    /// not exposed in the public API of EncryptionParameters, but can be accessed
     /// through the <see cref="SEALContext.ContextData" /> class once the SEALContext
     /// has been created.
     /// </para>
     /// <para>
-    /// In general, reading from EncryptionParameters is thread-safe, while mutating 
+    /// In general, reading from EncryptionParameters is thread-safe, while mutating
     /// is not.
     /// </para>
     /// <para>
@@ -182,7 +181,7 @@ namespace Microsoft.Research.SEAL
                 IntPtr[] coeffArray = new IntPtr[length];
                 NativeMethods.EncParams_GetCoeffModulus(NativePtr, ref length, coeffArray);
 
-                List<SmallModulus> result = new List<SmallModulus>((int)length);
+                List<SmallModulus> result = new List<SmallModulus>(checked((int)length));
                 foreach(IntPtr sm in coeffArray)
                 {
                     result.Add(new SmallModulus(sm));

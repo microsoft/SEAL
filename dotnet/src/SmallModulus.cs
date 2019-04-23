@@ -325,7 +325,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if enough qualifying primes cannot be found</exception>
         public static IEnumerable<SmallModulus> GetPrimes(int bitSize, ulong count, ulong nttSize)
         {
-            List<SmallModulus> result = new List<SmallModulus>((int)count);
+            List<SmallModulus> result = new List<SmallModulus>(checked((int)count));
 
             try
             {

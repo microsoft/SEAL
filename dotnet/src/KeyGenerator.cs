@@ -190,7 +190,7 @@ namespace Microsoft.Research.SEAL
         /// Generates and returns Galois keys.
         /// </summary>
         /// <remarks>
-        /// This function creates specific Galois keys that can be used to apply specific 
+        /// This function creates specific Galois keys that can be used to apply specific
         /// Galois automorphisms on encrypted data. The user needs to give as input
         /// a vector of desired Galois rotation step counts, where negative step counts
         /// correspond to rotations to the right and positive step counts correspond to

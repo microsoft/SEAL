@@ -154,7 +154,7 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        Ciphertext(const Ciphertext &copy, MemoryPoolHandle pool) : 
+        Ciphertext(const Ciphertext &copy, MemoryPoolHandle pool) :
             Ciphertext(std::move(pool))
         {
             *this = copy;

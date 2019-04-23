@@ -1230,7 +1230,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(value));
 
             ulong ulvalue = (ulong)value;
-            return (int)ulvalue;
+            return checked((int)ulvalue);
         }
 
         #endregion // Operators
