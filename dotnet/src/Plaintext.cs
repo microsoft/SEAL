@@ -154,6 +154,21 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Constructs a new plaintext by copying a given one.
+        /// </summary>
+        /// <param name="copy">The plaintext to copy from</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if either copy or pool are null</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Plaintext(Plaintext copy, MemoryPoolHandle pool) : this(pool)
+        {
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            Set(copy);
+        }
+
+        /// <summary>
         /// Constructs a plaintext by initializing it with a pointer to a native object.
         /// </summary>
         /// <param name="plaintextPtr">Pointer to native Plaintext object</param>

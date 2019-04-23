@@ -150,6 +150,21 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Constructs a new ciphertext by copying a given one.
+        /// </summary>
+        /// <param name="copy">The ciphertext to copy from</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if either copy or pool are null</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Ciphertext(Ciphertext copy, MemoryPoolHandle pool) : this(pool)
+        {
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            Set(copy);
+        }
+
+        /// <summary>
         /// Constructs a new ciphertext by initializing it with a native
         /// object pointer.
         /// </summary>

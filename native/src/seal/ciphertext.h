@@ -148,6 +148,19 @@ namespace seal
         Ciphertext(Ciphertext &&source) = default;
 
         /**
+        Constructs a new ciphertext by copying a given one.
+
+        @param[in] copy The ciphertext to copy from
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        Ciphertext(const Ciphertext &copy, MemoryPoolHandle pool) : 
+            Ciphertext(std::move(pool))
+        {
+            *this = copy;
+        }
+
+        /**
         Allocates enough memory to accommodate the backing array of a ciphertext
         with given capacity. In addition to the capacity, the allocation size is
         determined by the encryption parameters corresponing to the given
