@@ -1164,7 +1164,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(value));
 
             double dblvalue = (double)value;
-            return (float)dblvalue;
+            return unchecked((float)dblvalue);
         }
 
         /// <summary>Returns the lower 64-bits of a BigUInt value.</summary>
@@ -1198,7 +1198,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(value));
 
             ulong ulvalue = (ulong)value;
-            return (long)ulvalue;
+            return unchecked((long)ulvalue);
         }
 
         /// <summary>Returns the lower 32-bits of a BigUInt value.</summary>
@@ -1214,7 +1214,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(value));
 
             ulong ulvalue = (ulong)value;
-            return (uint)ulvalue;
+            return unchecked((uint)ulvalue);
         }
 
         /// <summary>Returns the lower 32-bits of a BigUInt value as a signed-integer.</summary>
@@ -1230,7 +1230,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(value));
 
             ulong ulvalue = (ulong)value;
-            return checked((int)ulvalue);
+            return unchecked((int)ulvalue);
         }
 
         #endregion // Operators

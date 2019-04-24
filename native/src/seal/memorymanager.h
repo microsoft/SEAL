@@ -499,7 +499,6 @@ namespace seal
         profile and prof_opt. The following values for prof_opt have an effect
         independent of the current profile:
 
-
             mm_prof_opt::FORCE_NEW: return MemoryPoolHandle::New()
             mm_prof_opt::FORCE_GLOBAL: return MemoryPoolHandle::Global()
             mm_prof_opt::FORCE_THREAD_LOCAL: return MemoryPoolHandle::ThreadLocal()
@@ -601,7 +600,7 @@ namespace seal
         */
         MMProfGuard(std::unique_ptr<MMProf> &&mm_prof,
             bool start_locked = true) noexcept :
-            mm_switch_lock_(MemoryManager::switch_mutex_,std::defer_lock)
+            mm_switch_lock_(MemoryManager::switch_mutex_, std::defer_lock)
         {
             if (start_locked)
             {
@@ -669,6 +668,9 @@ namespace seal
 
         @throws std::runtime_error if the lock is already owned
         */
+#ifdef _MSC_VER
+        _Acquires_lock_(mm_switch_lock_)
+#endif
         inline void lock()
         {
             if (mm_switch_lock_.owns_lock())
@@ -715,6 +717,9 @@ namespace seal
         @param[in] mm_prof Pointer to a new memory manager profile
         @throws std::runtime_error if the lock is already owned
         */
+#ifdef _MSC_VER
+        _Acquires_lock_(mm_switch_lock_)
+#endif
         inline void lock(
             std::unique_ptr<MMProf> &&mm_prof)
         {
@@ -761,6 +766,9 @@ namespace seal
         @param[in] mm_prof Pointer to a new memory manager profile
         @throws std::runtime_error if the lock is already owned
         */
+#ifdef _MSC_VER
+        _Acquires_lock_(mm_switch_lock_)
+#endif
         inline void lock(MMProf* &&mm_prof)
         {
             if (mm_switch_lock_.owns_lock())
@@ -778,6 +786,9 @@ namespace seal
 
         @throws std::runtime_error if the lock is not owned
         */
+#ifdef _MSC_VER
+        _Releases_lock_(mm_switch_lock_)
+#endif
         inline void unlock()
         {
             if (!mm_switch_lock_.owns_lock())
