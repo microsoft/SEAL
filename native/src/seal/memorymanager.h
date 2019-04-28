@@ -213,7 +213,6 @@ namespace seal
         amount of memory (in bytes) allocated by the memory pool pointed to by
         the current MemoryPoolHandle.
 
-
         @throws std::logic_error if the MemoryPoolHandle is uninitialized
         */
         inline std::size_t alloc_byte_count() const
@@ -223,6 +222,23 @@ namespace seal
                 throw std::logic_error("pool not initialized");
             }
             return pool_->alloc_byte_count();
+        }
+
+        /**
+        Returns the number of MemoryPoolHandle objects sharing this memory pool.
+        The function only reveals the use-count for custom memory pools, and not
+        for the global pool or the thread-local (global) pool, for which it will
+        always return 0.
+
+        @throws std::logic_error if the MemoryPoolHandle is uninitialized
+        */
+        inline long use_count() const
+        {
+            if (!pool_)
+            {
+                throw std::logic_error("pool not initialized");
+            }
+            return pool_.use_count();
         }
 
         /**

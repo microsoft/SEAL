@@ -4,6 +4,7 @@
 #include "gtest/gtest.h"
 #include "seal/util/pointer.h"
 #include "seal/memorymanager.h"
+#include "seal/intarray.h"
 #include "seal/util/uintcore.h"
 
 using namespace seal;
@@ -52,5 +53,18 @@ namespace SEALTest
             auto ptr2(allocate_uint(2, pool));
             ASSERT_TRUE(15LL * bytes_per_uint64 == pool.alloc_byte_count());
         }
+    }
+
+    TEST(MemoryPoolHandleTest, UseCount)
+    {
+        MemoryPoolHandle pool = MemoryPoolHandle::New();
+        ASSERT_EQ(1L, pool.use_count());
+        {
+            IntArray<int> arr(pool);
+            ASSERT_EQ(2L, pool.use_count());
+            IntArray<int> arr2(pool);
+            ASSERT_EQ(3L, pool.use_count());
+        }
+        ASSERT_EQ(1L, pool.use_count());
     }
 }

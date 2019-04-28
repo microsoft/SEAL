@@ -932,6 +932,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void MemoryPoolHandle_AllocByteCount(IntPtr thisptr, out ulong count);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_UseCount(IntPtr thisptr, out long count);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void MemoryPoolHandle_IsInitialized(IntPtr thisptr, out bool initialized);
 
         [DllImport(sealnetnative, PreserveSig = false)]

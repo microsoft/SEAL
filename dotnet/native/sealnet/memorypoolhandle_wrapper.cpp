@@ -117,6 +117,23 @@ SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_AllocByteCount(void *thisptr, ui
     }
 }
 
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_UseCount(void *thisptr, long *count)
+{
+    MemoryPoolHandle *pool = FromVoid<MemoryPoolHandle>(thisptr);
+    IfNullRet(pool, E_POINTER);
+    IfNullRet(count, E_POINTER);
+
+    try
+    {
+        *count = pool->use_count();
+        return S_OK;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+}
+
 SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_IsInitialized(void *thisptr, bool *result)
 {
     MemoryPoolHandle *pool = FromVoid<MemoryPoolHandle>(thisptr);

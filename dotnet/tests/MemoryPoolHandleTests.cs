@@ -93,6 +93,20 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void UseCountTest()
+        {
+            MemoryPoolHandle pool = MemoryPoolHandle.New();
+            Assert.AreEqual(1L, pool.UseCount);
+            Plaintext plain = new Plaintext(pool);
+            Assert.AreEqual(2L, pool.UseCount);
+            Plaintext plain2 = new Plaintext(pool);
+            Assert.AreEqual(3L, pool.UseCount);
+            plain.Dispose();
+            plain2.Dispose();
+            Assert.AreEqual(1L, pool.UseCount);
+        }
+
+        [TestMethod]
         public void ExceptionsTest()
         {
             MemoryPoolHandle handle = new MemoryPoolHandle();

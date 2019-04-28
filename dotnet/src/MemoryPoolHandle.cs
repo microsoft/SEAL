@@ -197,6 +197,34 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Returns the number of MemoryPoolHandle objects sharing this memory pool.
+        /// </summary>
+        /// <remarks>
+        /// Returns the number of MemoryPoolHandle objects sharing this memory pool.
+        /// The function only reveals the use-count for custom memory pools, and not
+        /// for the global pool or the thread-local(global) pool, for which it will
+        /// always return 0.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">if the MemoryPoolHandle is uninitialized</exception>
+        public long UseCount
+        {
+            get
+            {
+                try
+                {
+                    NativeMethods.MemoryPoolHandle_UseCount(NativePtr, out long count);
+                    return count;
+                }
+                catch (COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                        throw new InvalidOperationException("MemoryPoolHandle is uninitialized", ex);
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
         /// Returns whether the MemoryPoolHandle is initialized.
         /// </summary>
         public bool IsInitialized
