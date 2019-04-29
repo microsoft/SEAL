@@ -23,7 +23,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -98,7 +98,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -177,7 +177,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -222,7 +222,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             Assert.ThrowsException<ArgumentException>(() =>
             {
@@ -246,7 +246,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             BatchEncoder enc = new BatchEncoder(context);
             List<ulong> valu = new List<ulong>();
             List<ulong> valu_null = null;

@@ -35,7 +35,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Assert.IsTrue(context.ParametersSet);
@@ -84,7 +84,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -142,7 +142,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -189,7 +189,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -228,7 +228,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -281,7 +281,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -329,7 +329,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -386,7 +386,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -434,7 +434,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -511,7 +511,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -563,7 +563,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -626,7 +626,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys(galoisElts: new ulong[] { 1ul, 3ul, 5ul, 15ul });
 
@@ -735,7 +735,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             Evaluator evaluator = new Evaluator(context);
 
             Plaintext plain = new Plaintext("0");
@@ -775,7 +775,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -834,7 +834,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -880,7 +880,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -949,7 +949,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             CKKSEncoder encoder = new CKKSEncoder(context);
             KeyGenerator keygen = new KeyGenerator(context);
             SecretKey secretKey = keygen.SecretKey;
@@ -1029,7 +1029,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
 
@@ -1110,7 +1110,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
             RelinKeys relinKeys = keygen.RelinKeys(count: 3);
 
@@ -1166,7 +1166,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
 
@@ -1236,7 +1236,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
 
@@ -1285,7 +1285,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             Evaluator evaluator = null;
             Assert.ThrowsException<ArgumentNullException>(() => evaluator = new Evaluator(null));

@@ -27,7 +27,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             PublicKey pub = keygen.PublicKey;
@@ -59,7 +59,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             PublicKey pub = keygen.PublicKey;

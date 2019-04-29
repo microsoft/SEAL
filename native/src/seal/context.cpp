@@ -110,7 +110,7 @@ namespace seal
         {
             // Not secure according to HomomorphicEncryption.org security standard
             context_data.qualifiers_.using_he_std_security = false;
-            if (enforce_he_std_security_)
+            if (enforce_hes_)
             {
                 // Parameters are not valid
                 context_data.qualifiers_.parameters_set = false;
@@ -127,7 +127,7 @@ namespace seal
         {
             // Not secure according to HomomorphicEncryption.org security standard
             context_data.qualifiers_.using_he_std_security = false;
-            if (enforce_he_std_security_)
+            if (enforce_hes_)
             {
                 // Parameters are not valid
                 context_data.qualifiers_.parameters_set = false;
@@ -354,8 +354,8 @@ namespace seal
     }
 
     SEALContext::SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-        bool enforce_he_std_security, MemoryPoolHandle pool)
-        : pool_(move(pool)), enforce_he_std_security_(enforce_he_std_security)
+        bool enforce_hes, MemoryPoolHandle pool)
+        : pool_(move(pool)), enforce_hes_(enforce_hes)
     {
         if (!pool_)
         {

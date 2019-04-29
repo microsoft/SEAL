@@ -232,7 +232,7 @@ namespace SEALTest
             ASSERT_TRUE(context->using_keyswitching());
         }
 
-        // Parameters not OK due to too small poly_modulus_degree and enforce_he_std_security
+        // Parameters not OK due to too small poly_modulus_degree and enforce_hes
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 137, 193 });
         parms.set_plain_modulus(73);
@@ -246,7 +246,7 @@ namespace SEALTest
             ASSERT_FALSE(context->using_keyswitching());
         }
 
-        // Parameters not OK due to too small noise_standard_deviation and enforce_he_std_security
+        // Parameters not OK due to too small noise_standard_deviation and enforce_hes
         parms.set_poly_modulus_degree(1024);
         parms.set_coeff_modulus({ 137, 193 });
         parms.set_plain_modulus(73);
@@ -260,7 +260,7 @@ namespace SEALTest
             ASSERT_FALSE(context->using_keyswitching());
         }
 
-        // Parameters not OK due to too large coeff_modulus and enforce_he_std_security
+        // Parameters not OK due to too large coeff_modulus and enforce_hes
         parms.set_poly_modulus_degree(2048);
         parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
         parms.set_plain_modulus(73);

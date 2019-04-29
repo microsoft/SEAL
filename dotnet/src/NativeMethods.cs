@@ -360,7 +360,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void SEALContext_Create(
             IntPtr encryptionParams,
             bool expandModChain,
-            bool enforceHEStdSecurity,
+            bool enforceHES,
             out IntPtr context);
 
         [DllImport(sealnetnative, PreserveSig = false)]
