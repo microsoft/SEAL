@@ -89,15 +89,8 @@ SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_PoolCount(void *thisptr, uint64_
     IfNullRet(pool, E_POINTER);
     IfNullRet(count, E_POINTER);
 
-    try
-    {
-        *count = pool->pool_count();
-        return S_OK;
-    }
-    catch (const logic_error&)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
-    }
+    *count = pool->pool_count();
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_AllocByteCount(void *thisptr, uint64_t *count)
@@ -106,15 +99,8 @@ SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_AllocByteCount(void *thisptr, ui
     IfNullRet(pool, E_POINTER);
     IfNullRet(count, E_POINTER);
 
-    try
-    {
-        *count = pool->alloc_byte_count();
-        return S_OK;
-    }
-    catch (const logic_error&)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
-    }
+    *count = pool->alloc_byte_count();
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_UseCount(void *thisptr, long *count)
@@ -123,15 +109,8 @@ SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_UseCount(void *thisptr, long *co
     IfNullRet(pool, E_POINTER);
     IfNullRet(count, E_POINTER);
 
-    try
-    {
-        *count = pool->use_count();
-        return S_OK;
-    }
-    catch (const logic_error&)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
-    }
+    *count = pool->use_count();
+    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_IsInitialized(void *thisptr, bool *result)

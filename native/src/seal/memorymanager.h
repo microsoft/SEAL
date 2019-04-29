@@ -138,27 +138,17 @@ namespace seal
         /**
         Returns a MemoryPoolHandle pointing to the global memory pool.
         */
-        inline static MemoryPoolHandle Global()
+        inline static MemoryPoolHandle Global() noexcept
         {
-            // We return an aliased shared_ptr; a global shared_ptr can cause problems
-            // with some wrappers.
-            return MemoryPoolHandle(
-                std::shared_ptr<util::MemoryPool>(std::shared_ptr<util::MemoryPool>(),
-                util::global_variables::global_memory_pool.get()));
+            return util::global_variables::global_memory_pool;
         }
 #ifndef _M_CEE
         /**
-        Returns a MemoryPoolHandle pointing to the thread-local memory pool. Note
-        that the thread-local memory pool cannot be used to communicate across
-        different threads.
+        Returns a MemoryPoolHandle pointing to the thread-local memory pool.
         */
-        inline static MemoryPoolHandle ThreadLocal()
+        inline static MemoryPoolHandle ThreadLocal() noexcept
         {
-            // We return an aliased shared_ptr; a global shared_ptr can cause problems
-            // with some wrappers.
-            return MemoryPoolHandle(
-                std::shared_ptr<util::MemoryPool>(std::shared_ptr<util::MemoryPool>(),
-                util::global_variables::tls_memory_pool.get()));
+            return util::global_variables::tls_memory_pool;
         }
 #endif
         /**
@@ -196,55 +186,34 @@ namespace seal
         only allocated two allocations of sizes 128 KB, this function returns 1.
         If it has instead allocated one allocation of size 64 KB and one of 128 KB,
         this function returns 2.
-
-        @throws std::logic_error if the MemoryPoolHandle is uninitialized
         */
-        inline std::size_t pool_count() const
+        inline std::size_t pool_count() const noexcept
         {
-            if (!pool_)
-            {
-                throw std::logic_error("pool not initialized");
-            }
-            return pool_->pool_count();
+            return !pool_ ? std::size_t(0) : pool_->pool_count();
         }
 
         /**
         Returns the size of allocated memory. This functions returns the total
         amount of memory (in bytes) allocated by the memory pool pointed to by
         the current MemoryPoolHandle.
-
-        @throws std::logic_error if the MemoryPoolHandle is uninitialized
         */
-        inline std::size_t alloc_byte_count() const
+        inline std::size_t alloc_byte_count() const noexcept
         {
-            if (!pool_)
-            {
-                throw std::logic_error("pool not initialized");
-            }
-            return pool_->alloc_byte_count();
+            return !pool_ ? std::size_t(0) : pool_->alloc_byte_count();
         }
 
         /**
         Returns the number of MemoryPoolHandle objects sharing this memory pool.
-        The function only reveals the use-count for custom memory pools, and not
-        for the global pool or the thread-local (global) pool, for which it will
-        always return 0.
-
-        @throws std::logic_error if the MemoryPoolHandle is uninitialized
         */
-        inline long use_count() const
+        inline long use_count() const noexcept
         {
-            if (!pool_)
-            {
-                throw std::logic_error("pool not initialized");
-            }
-            return pool_.use_count();
+            return !pool_ ? 0 : pool_.use_count();
         }
 
         /**
         Returns whether the MemoryPoolHandle is initialized.
         */
-        inline operator bool () const
+        inline operator bool () const noexcept
         {
             return pool_.operator bool();
         }
