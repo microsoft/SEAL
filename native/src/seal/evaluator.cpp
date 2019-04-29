@@ -20,7 +20,7 @@ namespace seal
     namespace
     {
         template<typename T, typename S>
-        bool are_same_scale(T value1, S value2)
+        inline bool are_same_scale(const T &value1, const S &value2) noexcept
         {
             return util::are_close<double>(value1.scale(), value2.scale());
         }

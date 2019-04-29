@@ -559,15 +559,16 @@ namespace seal
 
         template<typename T,
             typename = std::enable_if_t<std::is_floating_point<T>::value>>
-        constexpr bool are_close(T value1, T value2) noexcept
+        inline bool are_close(T value1, T value2) noexcept
         {
-            double scale_factor = std::max<T>({ std::fabs(value1), std::fabs(value2), T{ 1.0 } });
+            double scale_factor = std::max<T>(
+                { std::fabs(value1), std::fabs(value2), T{ 1.0 } });
             return std::fabs(value1 - value2) < epsilon<T> * scale_factor;
         }
 
         template<typename T,
             typename = std::enable_if_t<std::is_integral<T>::value>>
-        constexpr bool is_zero(T value) noexcept
+        inline constexpr bool is_zero(T value) noexcept
         {
             return value == T{ 0 };
         }
