@@ -909,7 +909,7 @@ void example_bfv_basics_iii()
     We can verify that batching is indeed enabled by looking at the encryption
     parameter qualifiers created by SEALContext.
     */
-    auto qualifiers = context->context_data_first()->qualifiers();
+    auto qualifiers = context->first_context_data()->qualifiers();
     cout << "Batching enabled: " << boolalpha << qualifiers.using_batching << endl;
 
     KeyGenerator keygen(context);
@@ -1217,7 +1217,7 @@ void example_bfv_basics_iv()
     is at a higher level in the chain than another set of parameters if its the
     chain index is bigger, i.e. it is earlier in the chain.
     */
-    for(auto context_data = context->context_data_first(); context_data;
+    for(auto context_data = context->first_context_data(); context_data;
         context_data = context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1240,7 +1240,7 @@ void example_bfv_basics_iv()
     switches to the next set down the chain, whereas mod_switch_to(...) switches
     to a parameter set down the chain corresponding to a given parms_id.
     */
-    auto context_data = context->context_data_first();
+    auto context_data = context->first_context_data();
     while(context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1336,7 +1336,7 @@ void example_bfv_basics_iv()
     We can check that indeed the modulus switching chain has not been created.
     The following loop should execute only once.
     */
-    for (context_data = context->context_data_first(); context_data;
+    for (context_data = context->first_context_data(); context_data;
         context_data = context_data->next_context_data())
     {
         cout << "Chain index: " << context_data->chain_index() << endl;
@@ -1804,7 +1804,7 @@ void example_ckks_basics_iii()
     as the scale for a reason that will become clear soon.
     */
     // \todo GET RID OF THIS and use some simpler scale
-    EncryptionParameters current_parms = context->context_data_first()->parms();
+    EncryptionParameters current_parms = context->first_context_data()->parms();
     auto scale = static_cast<double>(current_parms.coeff_modulus().back().value());
     Plaintext plain_x;
     encoder.encode(input, scale, plain_x);
@@ -2038,7 +2038,7 @@ void example_bfv_performance()
         chrono::high_resolution_clock::time_point time_start, time_end;
 
         print_parameters(context);
-        auto &curr_parms = context->context_data_first()->parms();
+        auto &curr_parms = context->first_context_data()->parms();
         auto &plain_modulus = curr_parms.plain_modulus();
         size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
 
@@ -2361,7 +2361,7 @@ void example_ckks_performance()
         chrono::high_resolution_clock::time_point time_start, time_end;
 
         print_parameters(context);
-        auto &curr_parms = context->context_data_first()->parms();
+        auto &curr_parms = context->first_context_data()->parms();
         size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
 
         cout << "Generating secret/public keys: ";
@@ -2378,7 +2378,7 @@ void example_ckks_performance()
         auto time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
 
-        if (!context->context_data_first()->qualifiers().using_batching)
+        if (!context->first_context_data()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;

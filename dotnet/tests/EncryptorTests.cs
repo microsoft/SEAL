@@ -4,6 +4,8 @@
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace SEALNetTest
 {
@@ -13,7 +15,7 @@ namespace SEALNetTest
         [TestMethod]
         public void EncryptTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keyGen = new KeyGenerator(context);
             PublicKey publicKey = keyGen.PublicKey;
             Encryptor encryptor = new Encryptor(context, publicKey);
@@ -32,9 +34,89 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void EncryptZeroTest()
+        {
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keyGen = new KeyGenerator(context);
+                PublicKey publicKey = keyGen.PublicKey;
+                SecretKey secretKey = keyGen.SecretKey;
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Decryptor decryptor = new Decryptor(context, secretKey);
+
+                Assert.IsNotNull(encryptor);
+                Assert.IsNotNull(decryptor);
+
+                Ciphertext cipher = new Ciphertext();
+                encryptor.EncryptZero(cipher);
+                Assert.IsFalse(cipher.IsNTTForm);
+                Assert.IsFalse(cipher.IsTransparent);
+                Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
+                Plaintext plain = new Plaintext();
+                decryptor.Decrypt(cipher, plain);
+                Assert.IsTrue(plain.IsZero);
+
+                ParmsId nextParms = context.FirstContextData.NextContextData.ParmsId;
+                encryptor.EncryptZero(nextParms, cipher);
+                Assert.IsFalse(cipher.IsNTTForm);
+                Assert.IsFalse(cipher.IsTransparent);
+                Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
+                Assert.AreEqual(cipher.ParmsId, nextParms);
+                decryptor.Decrypt(cipher, plain);
+                Assert.IsTrue(plain.IsZero);
+            }
+            {
+                SEALContext context = GlobalContext.CKKSContext;
+                KeyGenerator keyGen = new KeyGenerator(context);
+                PublicKey publicKey = keyGen.PublicKey;
+                SecretKey secretKey = keyGen.SecretKey;
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Decryptor decryptor = new Decryptor(context, secretKey);
+                CKKSEncoder encoder = new CKKSEncoder(context);
+
+                Assert.IsNotNull(encryptor);
+                Assert.IsNotNull(decryptor);
+
+                Ciphertext cipher = new Ciphertext();
+                encryptor.EncryptZero(cipher);
+                Assert.IsTrue(cipher.IsNTTForm);
+                Assert.IsFalse(cipher.IsTransparent);
+                Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
+                cipher.Scale = Math.Pow(2.0, 30);
+                Plaintext plain = new Plaintext();
+                decryptor.Decrypt(cipher, plain);
+
+                List<Complex> res = new List<Complex>();
+                encoder.Decode(plain, res);
+                foreach (Complex val in res)
+                {
+                    Assert.AreEqual(val.Real, 0.0, 0.01);
+                    Assert.AreEqual(val.Imaginary, 0.0, 0.01);
+                }
+
+                ParmsId nextParms = context.FirstContextData.NextContextData.ParmsId;
+                encryptor.EncryptZero(nextParms, cipher);
+                Assert.IsTrue(cipher.IsNTTForm);
+                Assert.IsFalse(cipher.IsTransparent);
+                Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
+                cipher.Scale = Math.Pow(2.0, 30);
+                Assert.AreEqual(cipher.ParmsId, nextParms);
+                decryptor.Decrypt(cipher, plain);
+                Assert.AreEqual(plain.ParmsId, nextParms);
+
+                encoder.Decode(plain, res);
+                foreach (Complex val in res)
+                {
+                    Assert.AreEqual(val.Real, 0.0, 0.01);
+                    Assert.AreEqual(val.Imaginary, 0.0, 0.01);
+                }
+            }
+        }
+
+        [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey pubKey = keygen.PublicKey;
             PublicKey pubKey_invalid = new PublicKey();
@@ -50,6 +132,7 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => encryptor.Encrypt(plain, null));
             Assert.ThrowsException<ArgumentNullException>(() => encryptor.Encrypt(null, cipher));
             Assert.ThrowsException<ArgumentException>(() => encryptor.Encrypt(plain, cipher, pool_invalid));
+            Assert.ThrowsException<ArgumentException>(() => encryptor.EncryptZero(cipher, pool_invalid));
         }
     }
 }

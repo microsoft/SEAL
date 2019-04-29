@@ -33,125 +33,6 @@ namespace Microsoft.Research.SEAL
     /// <see cref="KeyGenerator">see KeyGenerator for the class that generates the Galois keys.</see>
     public class GaloisKeys : KSwitchKeys
     {
-        ///// <summary>
-        ///// Creates an empty set of Galois keys.
-        ///// </summary>
-        //public GaloisKeys()
-        //{
-        //    NativeMethods.GaloisKeys_Create(out IntPtr ptr);
-        //    NativePtr = ptr;
-        //}
-
-        ///// <summary>
-        ///// Creates a new GaloisKeys instance by copying a given instance.
-        ///// </summary>
-        ///// <param name="copy">The GaloisKeys to copy from</param>
-        ///// <exception cref="ArgumentNullException">if copy is null</exception>
-        //public GaloisKeys(GaloisKeys copy)
-        //{
-        //    if (null == copy)
-        //        throw new ArgumentNullException(nameof(copy));
-
-        //    NativeMethods.GaloisKeys_Create(copy.NativePtr, out IntPtr ptr);
-        //    NativePtr = ptr;
-        //}
-
-        ///// <summary>
-        ///// Creates a new GaloisKeys instance initialized with a pointer to a
-        ///// native GaloisKeys object.
-        ///// </summary>
-        ///// <param name="galoisKeys">Pointer to native GaloisKeys object</param>
-        ///// <param name="owned">Whether this instance owns the native pointer</param>
-        //internal GaloisKeys(IntPtr galoisKeys, bool owned = true)
-        //    : base(galoisKeys, owned)
-        //{
-        //}
-
-        ///// <summary>
-        ///// Copies a given GaloisKeys instance to the current one.
-        ///// </summary>
-        /////
-        ///// <param name="assign">The GaloisKeys to copy from</param>
-        ///// <exception cref="ArgumentNullException">if assign is null</exception>
-        //public void Set(GaloisKeys assign)
-        //{
-        //    if (null == assign)
-        //        throw new ArgumentNullException(nameof(assign));
-
-        //    NativeMethods.GaloisKeys_Set(NativePtr, assign.NativePtr);
-        //}
-
-        ///// <summary>
-        ///// Returns the current number of Galois keys.
-        ///// </summary>
-        //public ulong Size
-        //{
-        //    get
-        //    {
-        //        NativeMethods.GaloisKeys_Size(NativePtr, out ulong size);
-        //        return size;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Returns a copy of the Galois keys data.
-        ///// </summary>
-        //public IEnumerable<IEnumerable<Ciphertext>> Data
-        //{
-        //    get
-        //    {
-        //        List<List<Ciphertext>> result = new List<List<Ciphertext>>();
-        //        NativeMethods.GaloisKeys_GetKeyCount(NativePtr, out ulong size);
-
-        //        for (ulong i = 0; i < size; i++)
-        //        {
-        //            ulong count = 0;
-        //            NativeMethods.GaloisKeys_GetKeyList(NativePtr, i, ref count, null);
-
-        //            IntPtr[] pointers = new IntPtr[count];
-        //            NativeMethods.GaloisKeys_GetKeyList(NativePtr, i, ref count, pointers);
-
-        //            List<Ciphertext> ciphers = new List<Ciphertext>((int)count);
-        //            foreach(IntPtr ptr in pointers)
-        //            {
-        //                ciphers.Add(new Ciphertext(ptr));
-        //            }
-
-        //            result.Add(ciphers);
-        //        }
-
-        //        return result;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Returns a copy of a Galois key.
-        ///// </summary>
-        /////
-        ///// <remarks>
-        ///// Returns a copy of a Galois key. The returned Galois key corresponds to the given
-        ///// Galois element.
-        ///// </remarks>
-        ///// <param name="galoisElt">The Galois element</param>
-        ///// <exception cref="ArgumentException">if the key corresponding to galoisElt does
-        ///// not exist</exception>
-        //public IEnumerable<Ciphertext> Key(ulong galoisElt)
-        //{
-        //    ulong count = 0;
-        //    NativeMethods.GaloisKeys_GetKey(NativePtr, galoisElt, ref count, null);
-
-        //    IntPtr[] ciphers = new IntPtr[count];
-        //    NativeMethods.GaloisKeys_GetKey(NativePtr, galoisElt, ref count, ciphers);
-
-        //    List<Ciphertext> result = new List<Ciphertext>((int)count);
-        //    foreach (IntPtr ptr in ciphers)
-        //    {
-        //        result.Add(new Ciphertext(ptr));
-        //    }
-
-        //    return result;
-        //}
-
         /// <summary>
         /// Creates an empty set of Galois keys.
         /// </summary>
@@ -175,8 +56,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="copy">The GaloisKeys to copy from</param>
         /// <exception cref="ArgumentNullException">if copy is null</exception>
-        public GaloisKeys(GaloisKeys copy) 
-            : base((KSwitchKeys)copy)
+        public GaloisKeys(GaloisKeys copy)
+            : base(copy)
         {
         }
 
@@ -202,192 +83,23 @@ namespace Microsoft.Research.SEAL
         public bool HasKey(ulong galoisElt)
         {
             ulong index = GetIndex(galoisElt);
-            return (ulong)Data.LongCount() > index && Data.ElementAt((int)index).Count() != 0;
+            return (ulong)Data.LongCount() > index &&
+                Data.ElementAt(checked((int)index)).Count() != 0;
         }
 
         /// <summary>
-        /// Returns a copy of a Galois key.
+        /// Returns a specified Galois key.
         /// </summary>
-        ///
         /// <remarks>
-        /// Returns a copy of a Galois key. The returned Galois key corresponds to the given
-        /// Galois element.
+        /// Returns a specified Galois key. The returned Galois key corresponds to the
+        /// given Galois element and is valid only as long as the GaloisKeys is valid.
         /// </remarks>
         /// <param name="galoisElt">The Galois element</param>
         /// <exception cref="ArgumentException">if the key corresponding to galoisElt does
         /// not exist</exception>
         public IEnumerable<PublicKey> Key(ulong galoisElt)
         {
-            return new List<PublicKey>(Data.ElementAt((int)GetIndex(galoisElt)));
+            return Data.ElementAt(checked((int)GetIndex(galoisElt)));
         }
-
-        ///// <summary>
-        ///// Returns a reference to parmsId.
-        ///// </summary>
-        ///// <see cref="EncryptionParameters">see EncryptionParameters for more information about parmsId.</see>
-        //public ParmsId ParmsId
-        //{
-        //    get
-        //    {
-        //        ParmsId parms = new ParmsId();
-        //        NativeMethods.GaloisKeys_GetParmsId(NativePtr, parms.Block);
-        //        return parms;
-        //    }
-        //    private set
-        //    {
-        //        NativeMethods.GaloisKeys_SetParmsId(NativePtr, value.Block);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Saves the GaloisKeys instance to an output stream.
-        ///// </summary>
-        /////
-        ///// <remarks>
-        ///// Saves the GaloisKeys instance to an output stream. The output is in binary format
-        ///// and not human-readable. The output stream must have the "binary" flag set.
-        ///// </remarks>
-        ///// <param name="stream">The stream to save the GaloisKeys to</param>
-        ///// <exception cref="ArgumentNullException">if stream is null</exception>
-        ///// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved GaloisKeys instance.</seealso>
-        //public void Save(Stream stream)
-        //{
-        //    if (null == stream)
-        //        throw new ArgumentNullException(nameof(stream));
-
-        //    using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
-        //    {
-        //        // Save the ParmsId
-        //        ParmsId.Save(writer.BaseStream);
-
-        //        // Save the size of Keys
-        //        IEnumerable<IEnumerable<Ciphertext>> data = Data;
-        //        writer.Write((ulong)data.LongCount());
-
-        //        // Loop over entries in the first list
-        //        foreach (IEnumerable<Ciphertext> keyList in data)
-        //        {
-        //            writer.Write((ulong)keyList.LongCount());
-
-        //            // Loop over ciphertexts and save all
-        //            foreach(Ciphertext cipher in keyList)
-        //            {
-        //                cipher.Save(writer.BaseStream);
-        //            }
-        //        }
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Loads a GaloisKeys from an input stream overwriting the current GaloisKeys.
-        ///// No checking of the validity of the GaloisKeys data against encryption
-        ///// parameters is performed. This function should not be used unless the
-        ///// GaloisKeys comes from a fully trusted source.
-        ///// </summary>
-        ///// <param name="stream">The stream to load the GaloisKeys from</param>
-        ///// <exception cref="ArgumentNullException">if stream is null</exception>
-        ///// <exception cref="ArgumentException">if a valid GaloisKeys could not be read from stream</exception>
-        //public void UnsafeLoad(Stream stream)
-        //{
-        //    if (null == stream)
-        //        throw new ArgumentNullException(nameof(stream));
-
-        //    try
-        //    {
-        //        // Read the ParmsId
-        //        ParmsId parmsId = new ParmsId();
-        //        parmsId.Load(stream);
-        //        ParmsId = parmsId;
-
-        //        using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
-        //        {
-        //            // Read the size
-        //            ulong size = reader.ReadUInt64();
-
-        //            // Clear current data and reserve new size
-        //            NativeMethods.GaloisKeys_ClearDataAndReserve(NativePtr, size);
-
-        //            // Read all lists
-        //            for (ulong i = 0; i < size; i++)
-        //            {
-        //                // Read size of second list
-        //                ulong keySize = reader.ReadUInt64();
-        //                List<Ciphertext> ciphers = new List<Ciphertext>((int)keySize);
-
-        //                // Load all ciphertexts
-        //                for (ulong j = 0; j < keySize; j++)
-        //                {
-        //                    Ciphertext cipher = new Ciphertext();
-        //                    cipher.UnsafeLoad(reader.BaseStream);
-        //                    ciphers.Add(cipher);
-        //                }
-
-        //                IntPtr[] pointers = ciphers.Select(c =>
-        //                {
-        //                    return c.NativePtr;
-        //                }).ToArray();
-
-        //                NativeMethods.GaloisKeys_AddKeyList(NativePtr, (ulong)pointers.LongLength, pointers);
-        //            }
-        //        }
-        //    }
-        //    catch (EndOfStreamException ex)
-        //    {
-        //        throw new ArgumentException("Stream ended unexpectedly", ex);
-        //    }
-        //    catch (IOException ex)
-        //    {
-        //        throw new ArgumentException("Error reading keys", ex);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Loads a GaloisKeys from an input stream overwriting the current GaloisKeys.
-        ///// The loaded GaloisKeys is verified to be valid for the given SEALContext.
-        ///// </summary>
-        /////
-        ///// <param name="context">The SEALContext</param>
-        ///// <param name="stream">The stream to load the GaloisKeys instance from</param>
-        ///// <exception cref="ArgumentNullException">if either stream or context are null</exception>
-        ///// <exception cref="ArgumentException">if the context is not set or encryption
-        ///// parameters are not valid</exception>
-        ///// <exception cref="ArgumentException">if the loaded data is invalid or is not
-        ///// valid for the context</exception>
-        ///// <seealso cref="Save(Stream)">See Save() to save a GaloisKeys instance.</seealso>
-        //public void Load(SEALContext context, Stream stream)
-        //{
-        //    if (null == context)
-        //        throw new ArgumentNullException(nameof(context));
-        //    if (null == stream)
-        //        throw new ArgumentNullException(nameof(stream));
-
-        //    UnsafeLoad(stream);
-
-        //    if (!ValCheck.IsValidFor(this, context))
-        //    {
-        //        throw new ArgumentException("GaloisKeys data is invalid for the context");
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Returns the currently used MemoryPoolHandle.
-        ///// </summary>
-        //public MemoryPoolHandle Pool
-        //{
-        //    get
-        //    {
-        //        NativeMethods.GaloisKeys_Pool(NativePtr, out IntPtr pool);
-        //        MemoryPoolHandle handle = new MemoryPoolHandle(pool);
-        //        return handle;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Destroy native object.
-        ///// </summary>
-        //protected override void DestroyNativeObject()
-        //{
-        //    NativeMethods.GaloisKeys_Destroy(NativePtr);
-        //}
     }
 }

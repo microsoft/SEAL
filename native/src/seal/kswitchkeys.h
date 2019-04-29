@@ -106,7 +106,7 @@ namespace seal
         Returns a reference to a keyswitching key at a given index.
 
         @param[in] index The index of the keyswitching key
-        @throws std::invalid_argument if the key does not exist
+        @throws std::invalid_argument if the key at the given index does not exist
         */
         inline auto &data(std::size_t index)
         {

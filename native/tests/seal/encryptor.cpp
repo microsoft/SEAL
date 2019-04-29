@@ -19,7 +19,7 @@ using namespace std;
 
 namespace SEALTest
 {
-    TEST(EncryptorTest, FVEncryptDecrypt)
+    TEST(EncryptorTest, BFVEncryptDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
         SmallModulus plain_modulus(1 << 6);
@@ -28,7 +28,7 @@ namespace SEALTest
         {
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             IntegerEncoder encoder(context);
@@ -41,47 +41,47 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
         }
         {
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             IntegerEncoder encoder(context);
@@ -94,48 +94,50 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
         }
 
         {
             parms.set_poly_modulus_degree(256);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2) });
-            auto context = SEALContext::Create(parms);
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+                DefaultParams::small_mods_40bit(2) });
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             IntegerEncoder encoder(context);
@@ -148,42 +150,125 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+        }
+    }
+
+    TEST(EncryptorTest, BFVEncryptZeroDecrypt)
+    {
+        EncryptionParameters parms(scheme_type::BFV);
+        SmallModulus plain_modulus(1 << 6);
+        parms.set_plain_modulus(plain_modulus);
+        parms.set_poly_modulus_degree(64);
+        parms.set_coeff_modulus({
+            DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+            DefaultParams::small_mods_40bit(2) });
+        auto context = SEALContext::Create(parms, true, false);
+        KeyGenerator keygen(context);
+
+        Encryptor encryptor(context, keygen.public_key());
+        Decryptor decryptor(context, keygen.secret_key());
+
+        Ciphertext ct;
+        encryptor.encrypt_zero(ct);
+        ASSERT_FALSE(ct.is_ntt_form());
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        Plaintext pt;
+        decryptor.decrypt(ct, pt);
+        ASSERT_TRUE(pt.is_zero());
+
+        parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
+        encryptor.encrypt_zero(next_parms, ct);
+        ASSERT_FALSE(ct.is_ntt_form());
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        ASSERT_EQ(ct.parms_id(), next_parms);
+        decryptor.decrypt(ct, pt);
+        ASSERT_TRUE(pt.is_zero());
+    }
+
+    TEST(EncryptorTest, CKKSEncryptZeroDecrypt)
+    {
+        EncryptionParameters parms(scheme_type::CKKS);
+        parms.set_poly_modulus_degree(64);
+        parms.set_coeff_modulus({
+            DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+            DefaultParams::small_mods_40bit(2) });
+        auto context = SEALContext::Create(parms, true, false);
+        KeyGenerator keygen(context);
+
+        Encryptor encryptor(context, keygen.public_key());
+        Decryptor decryptor(context, keygen.secret_key());
+        CKKSEncoder encoder(context);
+
+        Ciphertext ct;
+        encryptor.encrypt_zero(ct);
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_TRUE(ct.is_ntt_form());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        ct.scale() = std::pow(2.0, 20);
+        Plaintext pt;
+        decryptor.decrypt(ct, pt);
+
+        std::vector<std::complex<double>> res;
+        encoder.decode(pt, res);
+        for (auto val : res)
+        {
+            ASSERT_NEAR(val.real(), 0.0, 0.01);
+            ASSERT_NEAR(val.imag(), 0.0, 0.01);
+        }
+
+        parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
+        encryptor.encrypt_zero(next_parms, ct);
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_TRUE(ct.is_ntt_form());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        ct.scale() = std::pow(2.0, 20);
+        ASSERT_EQ(ct.parms_id(), next_parms);
+        decryptor.decrypt(ct, pt);
+        ASSERT_EQ(pt.parms_id(), next_parms);
+
+        encoder.decode(pt, res);
+        for (auto val : res)
+        {
+            ASSERT_NEAR(val.real(), 0.0, 0.01);
+            ASSERT_NEAR(val.imag(), 0.0, 0.01);
         }
     }
 
@@ -195,8 +280,10 @@ namespace SEALTest
             //input consists of ones
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
-            auto context = SEALContext::Create(parms);
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+                DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
+            auto context = SEALContext::Create(parms, true, false);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -211,11 +298,11 @@ namespace SEALTest
             std::vector<std::complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            encoder.encode(input, context->parms_id_first(), delta, plain);
+            encoder.encode(input, context->first_parms_id(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
             //check correctness of encryption
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
             encoder.decode(plainRes, output);
@@ -230,8 +317,10 @@ namespace SEALTest
             //input consists of zeros
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
-            auto context = SEALContext::Create(parms);
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1),
+                DefaultParams::small_mods_40bit(2), DefaultParams::small_mods_40bit(3) });
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -246,11 +335,11 @@ namespace SEALTest
             std::vector<std::complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            encoder.encode(input, context->parms_id_first(), delta, plain);
+            encoder.encode(input, context->first_parms_id(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
             //check correctness of encryption
-            ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
             encoder.decode(plainRes, output);
@@ -265,8 +354,10 @@ namespace SEALTest
             // Input is a random mix of positive and negative integers
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(2 * slot_size);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1), DefaultParams::small_mods_60bit(2) });
-            auto context = SEALContext::Create(parms);
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1),
+                DefaultParams::small_mods_60bit(2) });
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -291,11 +382,11 @@ namespace SEALTest
                     input[i] = pow(-1.0, rand() % 2) * static_cast<double>(rand() % input_bound);
                 }
 
-                encoder.encode(input, context->parms_id_first(), delta, plain);
+                encoder.encode(input, context->first_parms_id(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
                 //check correctness of encryption
-                ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+                ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
@@ -311,8 +402,10 @@ namespace SEALTest
             // Input is a random mix of positive and negative integers
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1), DefaultParams::small_mods_60bit(2) });
-            auto context = SEALContext::Create(parms);
+            parms.set_coeff_modulus({
+                DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_60bit(1),
+                DefaultParams::small_mods_60bit(2) });
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -337,11 +430,11 @@ namespace SEALTest
                     input[i] = pow(-1.0, rand() % 2) * static_cast<double>(rand() % input_bound);
                 }
 
-                encoder.encode(input, context->parms_id_first(), delta, plain);
+                encoder.encode(input, context->first_parms_id(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
                 //check correctness of encryption
-                ASSERT_TRUE(encrypted.parms_id() == context->parms_id_first());
+                ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plain, output);
@@ -360,7 +453,7 @@ namespace SEALTest
             parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0),
                 DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2),
                 DefaultParams::small_mods_40bit(3) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, true, false);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -375,9 +468,9 @@ namespace SEALTest
             std::vector<std::complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            auto context_data_first = context->context_data_first();
-            ASSERT_NE(nullptr, context_data_first.get());
-            auto second_context_data = context_data_first->next_context_data();
+            auto first_context_data = context->first_context_data();
+            ASSERT_NE(nullptr, first_context_data.get());
+            auto second_context_data = first_context_data->next_context_data();
             ASSERT_NE(nullptr, second_context_data.get());
             auto second_parms_id = second_context_data->parms_id();
 

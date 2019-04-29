@@ -180,8 +180,8 @@ namespace seal
 
         shared_ptr<UniformRandomGenerator> random(
             parms.random_generator()->create());
-        encrypt_zero_symmetric(secret_key_, public_key_.data(), context_,
-            context_data.parms_id(), random, true, pool_);
+        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(),
+            random, true, public_key_.data(), pool_);
 
         // Set the parms_id for public key
         public_key_.parms_id() = context_data.parms_id();
@@ -460,7 +460,7 @@ namespace seal
         std::vector<PublicKey> &destination)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-        size_t decomp_mod_count = context_->context_data_first()->parms().coeff_modulus().size();
+        size_t decomp_mod_count = context_->first_context_data()->parms().coeff_modulus().size();
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
         auto &key_modulus = key_parms.coeff_modulus();
@@ -479,8 +479,9 @@ namespace seal
         uint64_t factor = 0;
         for (size_t j = 0; j < decomp_mod_count; j++)
         {
-            encrypt_zero_symmetric(secret_key_, destination[j].data(), context_,
-                key_context_data.parms_id(), random, true, pool_);
+            encrypt_zero_symmetric(secret_key_, context_,
+                key_context_data.parms_id(), random, true,
+                destination[j].data(), pool_);
 
             factor = key_modulus.back().value() % key_modulus[j].value();
             multiply_poly_scalar_coeffmod(

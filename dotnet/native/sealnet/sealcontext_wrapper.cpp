@@ -25,13 +25,14 @@ namespace sealnet
     unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams, bool expand_mod_chain, void **context)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams,
+    bool expand_mod_chain, bool enforce_he_std_security, void **context)
 {
     EncryptionParameters *encParams = FromVoid<EncryptionParameters>(encryptionParams);
     IfNullRet(encParams, E_POINTER);
     IfNullRet(context, E_POINTER);
 
-    auto result = SEALContext::Create(*encParams, expand_mod_chain);
+    auto result = SEALContext::Create(*encParams, expand_mod_chain, enforce_he_std_security);
     pointer_store_[result.get()] = result;
 
     *context = result.get();
@@ -57,23 +58,23 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_KeyParmsId(void *thisptr, uint64_t *p
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ParmsIdFirst(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_FirstParmsId(void *thisptr, uint64_t *parms_id)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    CopyParmsId(context->parms_id_first(), parms_id);
+    CopyParmsId(context->first_parms_id(), parms_id);
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ParmsIdLast(void *thisptr, uint64_t *parms_id)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_LastParmsId(void *thisptr, uint64_t *parms_id)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    CopyParmsId(context->parms_id_last(), parms_id);
+    CopyParmsId(context->last_parms_id(), parms_id);
     return S_OK;
 }
 
@@ -99,26 +100,26 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_KeyContextData(void *thisptr, void **
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataFirst(void *thisptr, void **context_data)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_FirstContextData(void *thisptr, void **context_data)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(context_data, E_POINTER);
 
     // The pointer that is returned should not be deleted.
-    auto data = context->context_data_first();
+    auto data = context->first_context_data();
     *context_data = const_cast<SEALContext::ContextData*>(data.get());
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_ContextDataLast(void *thisptr, void **context_data)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_LastContextData(void *thisptr, void **context_data)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
     IfNullRet(context_data, E_POINTER);
 
     // The pointer that is returned should not be deleted.
-    auto data = context->context_data_last();
+    auto data = context->last_context_data();
     *context_data = const_cast<SEALContext::ContextData*>(data.get());
     return S_OK;
 }
@@ -135,5 +136,15 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_GetContextData(void *thisptr, uint64_
     CopyParmsId(parms_id, parms);
     auto data = context->get_context_data(parms);
     *context_data = const_cast<SEALContext::ContextData*>(data.get());
+    return S_OK;
+}
+
+SEALNETNATIVE HRESULT SEALCALL SEALContext_UsingKeySwitching(void *thisptr, bool *using_keyswitching)
+{
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
+    IfNullRet(context, E_POINTER);
+    IfNullRet(using_keyswitching, E_POINTER);
+
+    *using_keyswitching = context->using_keyswitching();
     return S_OK;
 }

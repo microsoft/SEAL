@@ -45,7 +45,7 @@ namespace seal
     void Evaluator::populate_Zmstar_to_generator()
     {
         uint64_t n = static_cast<uint64_t>(
-            context_->context_data_first()->parms().poly_modulus_degree());
+            context_->first_context_data()->parms().poly_modulus_degree());
         uint64_t m = n << 1;
 
         for (uint64_t i = 0; i < n / 2; i++)
@@ -279,7 +279,7 @@ namespace seal
             throw invalid_argument("encrypted1 and encrypted2 parameter mismatch");
         }
 
-        auto context_data_ptr = context_->context_data_first();
+        auto context_data_ptr = context_->first_context_data();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -706,7 +706,7 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
-        auto context_data_ptr = context_->context_data_first();
+        auto context_data_ptr = context_->first_context_data();
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::BFV:
@@ -1396,7 +1396,7 @@ namespace seal
         }
 
         auto context_data_ptr = context_->get_context_data(encrypted.parms_id());
-        if (context_->parms_id_last() == encrypted.parms_id())
+        if (context_->last_parms_id() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
         }
@@ -1405,7 +1405,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        switch (context_->context_data_first()->parms().scheme())
+        switch (context_->first_context_data()->parms().scheme())
         {
         case scheme_type::BFV:
             // Modulus switching with scaling
@@ -1490,7 +1490,7 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (context_->parms_id_last() == encrypted.parms_id())
+        if (context_->last_parms_id() == encrypted.parms_id())
         {
             throw invalid_argument("end of modulus switching chain reached");
         }
@@ -1499,7 +1499,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        switch (context_->context_data_first()->parms().scheme())
+        switch (context_->first_context_data()->parms().scheme())
         {
         case scheme_type::BFV:
             throw invalid_argument("unsupported operation for scheme type");
@@ -2594,6 +2594,10 @@ namespace seal
         {
             throw invalid_argument("target");
         }
+        if (!context_->using_keyswitching())
+        {
+            throw logic_error("keyswitching is not supported by the context");
+        }
 
         // Don't validate all of kswitch_keys but just check the parms_id.
         if (kswitch_keys.parms_id() != context_->key_parms_id())
@@ -2618,16 +2622,12 @@ namespace seal
             throw invalid_argument("CKKS encrypted must be in NTT form");
         }
 
-        // Whether modulus switching will be performed.
-        bool use_special_mod = (parms_id != context_->key_parms_id());
-
         // Extract encryption parameters.
         size_t coeff_count = parms.poly_modulus_degree();
         size_t decomp_mod_count = parms.coeff_modulus().size();
         auto &key_modulus = key_parms.coeff_modulus();
         size_t key_mod_count = key_modulus.size();
-        size_t rns_mod_count = add_safe(
-            decomp_mod_count, use_special_mod ? size_t(1) : size_t(0));
+        size_t rns_mod_count = decomp_mod_count + 1;
         auto &small_ntt_tables = key_context_data.small_ntt_tables();
         auto &modswitch_factors = key_context_data.base_converter()->
             get_inv_last_coeff_mod_array();
@@ -2747,77 +2747,75 @@ namespace seal
                 }
             }
         }
+
         // Results are now stored in temp_poly[k]
         // Modulus switching should be performed
-        if (use_special_mod)
+        auto local_small_poly(allocate_uint(coeff_count, pool));
+        for (size_t k = 0; k < 2; k++)
         {
-            auto local_small_poly(allocate_uint(coeff_count, pool));
-            for (size_t k = 0; k < 2; k++)
+            // Reduce (ct mod 4qk) mod qk
+            uint64_t *temp_poly_ptr = temp_poly[k].get() +
+                decomp_mod_count * coeff_count * 2;
+            for (size_t l = 0; l < coeff_count; l++)
             {
-                // Reduce (ct mod 4qk) mod qk
-                uint64_t *temp_poly_ptr = temp_poly[k].get() +
-                    decomp_mod_count * coeff_count * 2;
+                temp_poly_ptr[l] = barrett_reduce_128(
+                    temp_poly_ptr + l * 2,
+                    key_modulus[key_mod_count - 1]);
+            }
+            // Lazy reduction, they are then reduced mod qi
+            inverse_ntt_negacyclic_harvey_lazy(
+                temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
+                small_ntt_tables[key_mod_count - 1]);
+
+            uint64_t *encrypted_ptr = encrypted.data(k);
+            for (size_t j = 0; j < decomp_mod_count; j++)
+            {
+                temp_poly_ptr = temp_poly[k].get() + j * coeff_count * 2;
+                // (ct mod 4qi) mod qi
                 for (size_t l = 0; l < coeff_count; l++)
                 {
                     temp_poly_ptr[l] = barrett_reduce_128(
                         temp_poly_ptr + l * 2,
-                        key_modulus[key_mod_count - 1]);
+                        key_modulus[j]);
                 }
-                // Lazy reduction, they are then reduced mod qi
-                inverse_ntt_negacyclic_harvey_lazy(
+                // (ct mod 4qk) mod qi
+                modulo_poly_coeffs_63(
                     temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
-                    small_ntt_tables[key_mod_count - 1]);
-
-                uint64_t *encrypted_ptr = encrypted.data(k);
-                for (size_t j = 0; j < decomp_mod_count; j++)
+                    coeff_count,
+                    key_modulus[j],
+                    local_small_poly.get());
+                if (scheme == scheme_type::CKKS)
                 {
-                    temp_poly_ptr = temp_poly[k].get() + j * coeff_count * 2;
-                    // (ct mod 4qi) mod qi
-                    for (size_t l = 0; l < coeff_count; l++)
-                    {
-                        temp_poly_ptr[l] = barrett_reduce_128(
-                            temp_poly_ptr + l * 2,
-                            key_modulus[j]);
-                    }
-                    // (ct mod 4qk) mod qi
-                    modulo_poly_coeffs_63(
-                        temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
-                        coeff_count,
-                        key_modulus[j],
-                        local_small_poly.get());
-                    if (scheme == scheme_type::CKKS)
-                    {
-                        ntt_negacyclic_harvey(
-                            local_small_poly.get(),
-                            small_ntt_tables[j]);
-                    }
-                    else if (scheme == scheme_type::BFV)
-                    {
-                        inverse_ntt_negacyclic_harvey(
-                            temp_poly_ptr,
-                            small_ntt_tables[j]);
-                    }
-                    // ((ct mod qi) - (ct mod qk)) mod qi
-                    sub_poly_poly_coeffmod(
-                        temp_poly_ptr,
+                    ntt_negacyclic_harvey(
                         local_small_poly.get(),
-                        coeff_count,
-                        key_modulus[j],
-                        temp_poly_ptr);
-                    // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                    multiply_poly_scalar_coeffmod(
-                        temp_poly_ptr,
-                        coeff_count,
-                        modswitch_factors[j],
-                        key_modulus[j],
-                        temp_poly_ptr);
-                    add_poly_poly_coeffmod(
-                        temp_poly_ptr,
-                        encrypted_ptr + j * coeff_count,
-                        coeff_count,
-                        key_modulus[j],
-                        encrypted_ptr + j * coeff_count);
+                        small_ntt_tables[j]);
                 }
+                else if (scheme == scheme_type::BFV)
+                {
+                    inverse_ntt_negacyclic_harvey(
+                        temp_poly_ptr,
+                        small_ntt_tables[j]);
+                }
+                // ((ct mod qi) - (ct mod qk)) mod qi
+                sub_poly_poly_coeffmod(
+                    temp_poly_ptr,
+                    local_small_poly.get(),
+                    coeff_count,
+                    key_modulus[j],
+                    temp_poly_ptr);
+                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
+                multiply_poly_scalar_coeffmod(
+                    temp_poly_ptr,
+                    coeff_count,
+                    modswitch_factors[j],
+                    key_modulus[j],
+                    temp_poly_ptr);
+                add_poly_poly_coeffmod(
+                    temp_poly_ptr,
+                    encrypted_ptr + j * coeff_count,
+                    coeff_count,
+                    key_modulus[j],
+                    encrypted_ptr + j * coeff_count);
             }
         }
     }

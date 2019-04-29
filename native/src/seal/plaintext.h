@@ -153,6 +153,19 @@ namespace seal
         Plaintext(Plaintext &&source) = default;
 
         /**
+        Constructs a new plaintext by copying a given one.
+
+        @param[in] copy The plaintext to copy from
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        Plaintext(const Plaintext &copy, MemoryPoolHandle pool) :
+            Plaintext(std::move(pool))
+        {
+            *this = copy;
+        }
+
+        /**
         Allocates enough memory to accommodate the backing array of a plaintext
         with given capacity.
 

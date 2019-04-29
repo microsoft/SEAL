@@ -10,7 +10,7 @@ using System.IO;
 namespace SEALNetTest
 {
     [TestClass]
-    public class PubllicKeyTests
+    public class PublicKeyTests
     {
         [TestMethod]
         public void CreateTest()
@@ -25,7 +25,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 6),
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             PublicKey pub = keygen.PublicKey;
@@ -55,7 +57,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 6),
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             PublicKey pub = keygen.PublicKey;
@@ -91,7 +95,7 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             PublicKey key = new PublicKey();
 
             Assert.ThrowsException<ArgumentNullException>(() => key = new PublicKey(null));

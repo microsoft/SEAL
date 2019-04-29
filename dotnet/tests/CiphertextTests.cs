@@ -32,8 +32,8 @@ namespace SEALNetTest
         [TestMethod]
         public void Create2Test()
         {
-            SEALContext context = GlobalContext.Context;
-            ParmsId parms = context.ParmsIdFirst;
+            SEALContext context = GlobalContext.BFVContext;
+            ParmsId parms = context.FirstParmsId;
 
             Assert.AreNotEqual(0ul, parms.Block[0]);
             Assert.AreNotEqual(0ul, parms.Block[1]);
@@ -48,8 +48,8 @@ namespace SEALNetTest
         [TestMethod]
         public void Create3Test()
         {
-            SEALContext context = GlobalContext.Context;
-            ParmsId parms = context.ParmsIdFirst;
+            SEALContext context = GlobalContext.BFVContext;
+            ParmsId parms = context.FirstParmsId;
 
             Assert.AreNotEqual(0ul, parms.Block[0]);
             Assert.AreNotEqual(0ul, parms.Block[1]);
@@ -64,8 +64,8 @@ namespace SEALNetTest
         [TestMethod]
         public void ResizeTest()
         {
-            SEALContext context = GlobalContext.Context;
-            ParmsId parms = context.ParmsIdFirst;
+            SEALContext context = GlobalContext.BFVContext;
+            ParmsId parms = context.FirstParmsId;
 
             Ciphertext cipher = new Ciphertext(context, parms);
 
@@ -91,7 +91,7 @@ namespace SEALNetTest
             Assert.AreEqual(0ul, cipher3.SizeCapacity);
 
             Ciphertext cipher4 = new Ciphertext(context);
-            cipher4.Resize(context, context.GetContextData(context.ParmsIdFirst).NextContextData.ParmsId, 4);
+            cipher4.Resize(context, context.GetContextData(context.FirstParmsId).NextContextData.ParmsId, 4);
             Assert.AreEqual(10ul, cipher.SizeCapacity);
 
             Ciphertext cipher5 = new Ciphertext(context);
@@ -114,7 +114,7 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
@@ -156,7 +156,7 @@ namespace SEALNetTest
         [TestMethod]
         public void IndexTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("1");
@@ -176,7 +176,7 @@ namespace SEALNetTest
         [TestMethod]
         public void IndexRangeFail1Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("1");
@@ -194,7 +194,7 @@ namespace SEALNetTest
         [TestMethod]
         public void IndexRangeFail2Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("1");
@@ -217,7 +217,7 @@ namespace SEALNetTest
         [TestMethod]
         public void IndexRangeFail3Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Plaintext plain = new Plaintext("1");
@@ -245,7 +245,9 @@ namespace SEALNetTest
                 CoeffModulus = coeffModulus,
                 PolyModulusDegree = 8
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: true,
+                enforceHEStdSecurity: false);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -270,7 +272,7 @@ namespace SEALNetTest
                 new Complex(4, 4)
             };
             double delta = Math.Pow(2, 70);
-            encoder.Encode(input, context.ParmsIdFirst, delta, plain);
+            encoder.Encode(input, context.FirstParmsId, delta, plain);
             encryptor.Encrypt(plain, encrypted);
 
             Assert.AreEqual(delta, encrypted.Scale, delta: Math.Pow(2, 60));
@@ -292,7 +294,7 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
             MemoryPoolHandle poolu = new MemoryPoolHandle();
             Ciphertext cipher = new Ciphertext();
@@ -301,14 +303,14 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => copy = new Ciphertext((Ciphertext)null));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(context, null, pool));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.ParmsIdFirst, pool));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, pool));
             Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, pool));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext((SEALContext)null, poolu));
             Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, poolu));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(context, null, 6ul));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.ParmsIdFirst, 6ul, poolu));
+            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, 6ul, poolu));
             Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, 6ul, poolu));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher.Reserve(context, null, 10ul));

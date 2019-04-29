@@ -100,7 +100,7 @@ namespace seal
         inline void encrypt_zero(Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encrypt_zero(context_->parms_id_first(), destination, pool);
+            encrypt_zero(context_->first_parms_id(), destination, pool);
         }
 
     private:

@@ -23,7 +23,7 @@ namespace SEALTest
         parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0) });
         parms.set_plain_modulus(2);
         parms.set_noise_standard_deviation(1.0);
-        auto context = SEALContext::Create(parms);
+        auto context = SEALContext::Create(parms, false, false);
 
         Ciphertext ctxt(context);
         ctxt.reserve(10);
@@ -31,7 +31,7 @@ namespace SEALTest
         ASSERT_EQ(0ULL, ctxt.uint64_count());
         ASSERT_EQ(10ULL * 2 * 1, ctxt.uint64_count_capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         const uint64_t *ptr = ctxt.data();
 
@@ -41,7 +41,7 @@ namespace SEALTest
         ASSERT_EQ(5ULL * 2 * 1, ctxt.uint64_count_capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ptr = ctxt.data();
 
         ctxt.reserve(10);
@@ -50,7 +50,7 @@ namespace SEALTest
         ASSERT_EQ(10ULL * 2 * 1, ctxt.uint64_count_capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ptr = ctxt.data();
 
@@ -60,7 +60,7 @@ namespace SEALTest
         ASSERT_EQ(0ULL, ctxt.uint64_count());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ptr = ctxt.data();
 
@@ -70,7 +70,7 @@ namespace SEALTest
         ASSERT_EQ(0ULL, ctxt.uint64_count());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->parms_id_first());
+        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
 
         Ciphertext ctxt2{ ctxt };
@@ -100,7 +100,7 @@ namespace SEALTest
         parms.set_plain_modulus(2);
         parms.set_noise_standard_deviation(1.0);
 
-        auto context = SEALContext::Create(parms);
+        auto context = SEALContext::Create(parms, false, false);
 
         Ciphertext ctxt(context);
         Ciphertext ctxt2;
@@ -114,7 +114,7 @@ namespace SEALTest
         parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(1024));
         parms.set_plain_modulus(0xF0F0);
         parms.set_noise_standard_deviation(3.14159);
-        context = SEALContext::Create(parms);
+        context = SEALContext::Create(parms, false, false);
         KeyGenerator keygen(context);
         Encryptor encryptor(context, keygen.public_key());
         encryptor.encrypt(Plaintext("Ax^10 + 9x^9 + 8x^8 + 7x^7 + 6x^6 + 5x^5 + 4x^4 + 3x^3 + 2x^2 + 1"), ctxt);

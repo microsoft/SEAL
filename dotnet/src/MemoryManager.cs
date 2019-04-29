@@ -72,7 +72,6 @@ namespace Microsoft.Research.SEAL
         /// profile and profOpt. The following values for profOpt have an effect
         /// independent of the current profile:
         ///
-        ///
         ///     MMProfOpt.ForceNew: return MemoryPoolHandle.New()
         ///     MMProfOpt.ForceGlobal: return MemoryPoolHandle.Global()
         ///     MMProfOpt.ForceThreadLocal: return MemoryPoolHandle.ThreadLocal()

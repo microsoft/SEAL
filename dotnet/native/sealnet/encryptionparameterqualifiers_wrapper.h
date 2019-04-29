@@ -29,4 +29,4 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFastPlainLift(void *thisptr, bool *using
 
 SEALNETNATIVE HRESULT SEALCALL EPQ_UsingDescendingModulusChain(void *thisptr, bool *using_descending_modulus_chain);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingHEStdSecurity(void *thisptr, bool *using_HE_std_security);
+SEALNETNATIVE HRESULT SEALCALL EPQ_UsingHEStdSecurity(void *thisptr, bool *using_he_std_security);

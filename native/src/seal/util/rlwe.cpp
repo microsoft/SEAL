@@ -139,11 +139,11 @@ namespace seal
 
         void encrypt_zero_asymmetric(
             const PublicKey &public_key,
-            Ciphertext &destination,
             shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             shared_ptr<UniformRandomGenerator> random,
             bool is_ntt_form,
+            Ciphertext &destination,
             MemoryPoolHandle pool)
         {
             if (!pool)
@@ -172,6 +172,7 @@ namespace seal
             // Ciphertext (c_0,c_1, ...)
             destination.resize(context, parms_id, encrypted_size);
             destination.is_ntt_form() = is_ntt_form;
+            destination.scale() = 1.0;
 
             // c[j] = public_key[j] * u + e[j] where e[j] <-- chi, u <-- R_3.
 
@@ -230,11 +231,11 @@ namespace seal
 
         void encrypt_zero_symmetric(
             const SecretKey &secret_key,
-            Ciphertext &destination,
             shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             shared_ptr<UniformRandomGenerator> random,
             bool is_ntt_form,
+            Ciphertext &destination,
             MemoryPoolHandle pool)
         {
             if (!pool)
@@ -255,6 +256,7 @@ namespace seal
 
             destination.resize(context, parms_id, encrypted_size);
             destination.is_ntt_form() = is_ntt_form;
+            destination.scale() = 1.0;
 
             // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
 

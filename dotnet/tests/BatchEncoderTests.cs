@@ -21,7 +21,9 @@ namespace SEALNetTest
             parms.CoeffModulus = coeffModulus;
             parms.PlainModulus = new SmallModulus(257);
 
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -41,12 +43,12 @@ namespace SEALNetTest
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
+                Assert.AreEqual(plainList[checked((int)i)], plainList2[checked((int)i)]);
             }
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                plainList[(int)i] = 5;
+                plainList[checked((int)i)] = 5;
             }
 
             encoder.Encode(plainList, plain);
@@ -56,13 +58,13 @@ namespace SEALNetTest
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
+                Assert.AreEqual(plainList[checked((int)i)], plainList2[checked((int)i)]);
             }
 
             List<ulong> shortList = new List<ulong>();
-            for (int i = 0; i < 20; i++)
+            for (ulong i = 0; i < 20; i++)
             {
-                shortList.Add((ulong)i);
+                shortList.Add(i);
             }
 
             encoder.Encode(shortList, plain);
@@ -80,7 +82,7 @@ namespace SEALNetTest
 
             for (ulong i = 20; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(0ul, shortList2[(int)i]);
+                Assert.AreEqual(0ul, shortList2[checked((int)i)]);
             }
         }
 
@@ -94,7 +96,9 @@ namespace SEALNetTest
             parms.CoeffModulus = coeffModulus;
             parms.PlainModulus = new SmallModulus(257);
 
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -114,12 +118,12 @@ namespace SEALNetTest
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
+                Assert.AreEqual(plainList[checked((int)i)], plainList2[checked((int)i)]);
             }
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                plainList[(int)i] = 5;
+                plainList[checked((int)i)] = 5;
             }
 
             encoder.Encode(plainList, plain);
@@ -129,7 +133,7 @@ namespace SEALNetTest
 
             for (ulong i = 0; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(plainList[(int)i], plainList2[(int)i]);
+                Assert.AreEqual(plainList[checked((int)i)], plainList2[checked((int)i)]);
             }
 
             List<long> shortList = new List<long>();
@@ -153,7 +157,7 @@ namespace SEALNetTest
 
             for (ulong i = 20; i < encoder.SlotCount; i++)
             {
-                Assert.AreEqual(0L, shortList2[(int)i]);
+                Assert.AreEqual(0L, shortList2[checked((int)i)]);
             }
         }
 
@@ -171,7 +175,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(257)
             };
 
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -214,7 +220,9 @@ namespace SEALNetTest
                 CoeffModulus = coeffModulus
             };
 
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
 
             Assert.ThrowsException<ArgumentException>(() =>
             {
@@ -236,7 +244,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(257)
             };
 
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
             BatchEncoder enc = new BatchEncoder(context);
             List<ulong> valu = new List<ulong>();
             List<ulong> valu_null = null;

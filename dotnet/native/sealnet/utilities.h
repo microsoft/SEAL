@@ -44,7 +44,7 @@ namespace sealnet
     /**
     Build and array of SmallModulus pointers from a vector
     */
-    void BuildCoeffPointers(const std::vector<seal::SmallModulus> &coefficients, uint64_t *length, void **coeffs);
+    void BuildSmallModulusPointers(const std::vector<seal::SmallModulus> &in_mods, uint64_t *length, void **out_mods);
 
     /**
     Get a shared pointer to a SEALContext from a void pointer.

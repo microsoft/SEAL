@@ -21,7 +21,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(1 << 6);
             parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             PublicKey pk = keygen.public_key();
@@ -44,7 +44,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(1 << 20);
             parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_40bit(0) });
-            auto context = SEALContext::Create(parms);
+            auto context = SEALContext::Create(parms, false, false);
             KeyGenerator keygen(context);
 
             PublicKey pk = keygen.public_key();

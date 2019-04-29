@@ -11,17 +11,18 @@ namespace Microsoft.Research.SEAL
 {
     /// <summary>
     /// Class to store a ciphertext element. The data for a ciphertext consists
-    /// of two or more polynomials, which are in Microsoft SEAL stored in a CRT form with
-    /// respect to the factors of the coefficient modulus. This data itself is
-    /// not meant to be modified directly by the user, but is instead operated
-    /// on by functions in the Evaluator class. The size of the backing array of
-    /// a ciphertext depends on the encryption parameters and the size of the
-    /// ciphertext (at least 2). If the degree of the PolyModulus encryption
-    /// parameter is N, and the number of primes in the CoeffModulus encryption
-    /// parameter is K, then the ciphertext backing array requires precisely
-    /// 8*N*K*size bytes of memory. A ciphertext also carries with it the
-    /// parmsId of its associated encryption parameters, which is used to check
-    /// the validity of the ciphertext for homomorphic operations and decryption.
+    /// of two or more polynomials, which are in Microsoft SEAL stored in a CRT
+    /// form with respect to the factors of the coefficient modulus. This data
+    /// itself is not meant to be modified directly by the user, but is instead
+    /// operated on by functions in the Evaluator class. The size of the backing
+    /// array of a ciphertext depends on the encryption parameters and the size
+    /// of the ciphertext (at least 2). If the degree of the PolyModulus
+    /// encryption parameter is N, and the number of primes in the CoeffModulus
+    /// encryption parameter is K, then the ciphertext backing array requires
+    /// precisely 8*N*K*size bytes of memory. A ciphertext also carries with it
+    /// the parmsId of its associated encryption parameters, which is used to
+    /// check the validity of the ciphertext for homomorphic operations and
+    /// decryption.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -67,8 +68,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Ciphertext(SEALContext context,
-                    MemoryPoolHandle pool = null)
+        public Ciphertext(SEALContext context, MemoryPoolHandle pool = null)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -81,10 +81,10 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Constructs an empty ciphertext with capacity 2. In addition to the
         /// capacity, the allocation size is determined by the encryption parameters
-        /// with given parmsId.
+        /// with given ParmsId.
         /// </summary>
         /// <param name="context">The SEALContext</param>
-        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// <param name="parmsId">The ParmsId corresponding to the encryption
         /// parameters to be used</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
@@ -93,9 +93,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Ciphertext(SEALContext context,
-                    ParmsId parmsId,
-                    MemoryPoolHandle pool = null)
+        public Ciphertext(SEALContext context, ParmsId parmsId, MemoryPoolHandle pool = null)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -113,7 +111,7 @@ namespace Microsoft.Research.SEAL
         /// encryption parameters.
         /// </summary>
         /// <param name="context">The SEALContext</param>
-        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// <param name="parmsId">The ParmsId corresponding to the encryption
         /// parameters to be used</param>
         /// <param name="sizeCapacity">The capacity</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
@@ -124,8 +122,7 @@ namespace Microsoft.Research.SEAL
         /// parameters</exception>
         /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Ciphertext(SEALContext context,
-            ParmsId parmsId, ulong sizeCapacity,
+        public Ciphertext(SEALContext context, ParmsId parmsId, ulong sizeCapacity,
             MemoryPoolHandle pool = null)
         {
             if (null == context)
@@ -153,6 +150,21 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Constructs a new ciphertext by copying a given one.
+        /// </summary>
+        /// <param name="copy">The ciphertext to copy from</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if either copy or pool are null</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Ciphertext(Ciphertext copy, MemoryPoolHandle pool) : this(pool)
+        {
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            Set(copy);
+        }
+
+        /// <summary>
         /// Constructs a new ciphertext by initializing it with a native
         /// object pointer.
         /// </summary>
@@ -170,7 +182,7 @@ namespace Microsoft.Research.SEAL
         /// parmsId.
         /// </summary>
         /// <param name="context">The SEALContext</param>
-        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// <param name="parmsId">The ParmsId corresponding to the encryption
         /// parameters to be used</param>
         /// <param name="sizeCapacity">The capacity</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
@@ -179,8 +191,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
-        public void Reserve(SEALContext context,
-            ParmsId parmsId, ulong sizeCapacity)
+        public void Reserve(SEALContext context, ParmsId parmsId, ulong sizeCapacity)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -202,8 +213,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
         /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
-        public void Reserve(SEALContext context,
-            ulong sizeCapacity)
+        public void Reserve(SEALContext context, ulong sizeCapacity)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -234,7 +244,7 @@ namespace Microsoft.Research.SEAL
         /// to manually resize a ciphertext.
         /// </summary>
         /// <param name="context">The SEALContext</param>
-        /// <param name="parmsId">The parmsId corresponding to the encryption
+        /// <param name="parmsId">The ParmsId corresponding to the encryption
         /// parameters to be used</param>
         /// <param name="size">The new size</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
@@ -243,8 +253,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
-        public void Resize(SEALContext context,
-            ParmsId parmsId, ulong size)
+        public void Resize(SEALContext context, ParmsId parmsId, ulong size)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
@@ -489,10 +498,13 @@ namespace Microsoft.Research.SEAL
         /// polynomial in the current ciphertext, this function returns true if all
         /// following coefficients are identically zero. Otherwise, returns false.
         /// </summary>
-        public bool IsTransparent()
+        public bool IsTransparent
         {
-            NativeMethods.Ciphertext_IsTransparent(NativePtr, out bool result);
-            return result;
+            get
+            {
+                NativeMethods.Ciphertext_IsTransparent(NativePtr, out bool result);
+                return result;
+            }
         }
 
         /// <summary>
@@ -502,26 +514,32 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="stream">The stream to save the ciphertext to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved ciphertext.</seealso>
+        /// <exception cref="ArgumentException">if the ciphertext could not be written to stream</exception>
         public void Save(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            try
             {
-                ParmsId.Save(writer.BaseStream);
-
-                writer.Write(IsNTTForm);
-                writer.Write(Size);
-                writer.Write(PolyModulusDegree);
-                writer.Write(CoeffModCount);
-
-                ulong ulongCount = Size * PolyModulusDegree * CoeffModCount;
-                for (ulong i = 0; i < ulongCount; i++)
+                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    writer.Write(this[i]);
+                    ParmsId.Save(writer.BaseStream);
+                    writer.Write(IsNTTForm);
+                    writer.Write(Size);
+                    writer.Write(PolyModulusDegree);
+                    writer.Write(CoeffModCount);
+
+                    ulong ulongCount = checked(Size * PolyModulusDegree * CoeffModCount);
+                    for (ulong i = 0; i < ulongCount; i++)
+                    {
+                        writer.Write(this[i]);
+                    }
                 }
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not write Ciphertext", ex);
             }
         }
 
@@ -533,7 +551,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="stream">The stream to load the ciphertext from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if a valid ciphertext could not be read from stream</exception>
+        /// <exception cref="ArgumentException">if a ciphertext could not be read from
+        /// stream</exception>
         public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
@@ -551,11 +570,10 @@ namespace Microsoft.Research.SEAL
                     ulong size = reader.ReadUInt64();
                     ulong polyModulusDegree = reader.ReadUInt64();
                     ulong coeffModCount = reader.ReadUInt64();
-                    ulong ulongCount = size * polyModulusDegree * coeffModCount;
+                    ulong ulongCount = checked(size * polyModulusDegree * coeffModCount);
 
                     IsNTTForm = isNTT;
                     Resize(size, polyModulusDegree, coeffModCount);
-
                     for (ulong i = 0; i < ulongCount; i++)
                     {
                         this[i] = reader.ReadUInt64();
@@ -568,7 +586,7 @@ namespace Microsoft.Research.SEAL
             }
             catch (IOException ex)
             {
-                throw new ArgumentException("Error reading ciphertext", ex);
+                throw new ArgumentException("Could not load Ciphertext", ex);
             }
         }
 
@@ -582,9 +600,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded ciphertext data is invalid or
-        /// is invalid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save a ciphertext.</seealso>
+        /// <exception cref="ArgumentException">if a ciphertext could not be read from
+        /// stream or is invalid for the context</exception>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -593,7 +610,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             UnsafeLoad(stream);
-
             if (!ValCheck.IsValidFor(this, context))
             {
                 throw new ArgumentException("Ciphertext data is invalid for the SEALContext");
@@ -618,7 +634,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a copy of parmsId.
+        /// Returns a copy of ParmsId.
         /// </summary>
         /// <seealso cref="EncryptionParameters">See EncryptionParameters for more information about parmsId.</seealso>
         public ParmsId ParmsId

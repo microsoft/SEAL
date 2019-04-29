@@ -61,6 +61,16 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_IsZero(void *thisptr, bool *is_zero)
     return S_OK;
 }
 
+SEALNETNATIVE HRESULT SEALCALL SmallModulus_IsPrime(void *thisptr, bool *is_prime)
+{
+    SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
+    IfNullRet(sm, E_POINTER);
+    IfNullRet(is_prime, E_POINTER);
+
+    *is_prime = sm->is_prime();
+    return S_OK;
+}
+
 SEALNETNATIVE HRESULT SEALCALL SmallModulus_Value(void *thisptr, uint64_t *value)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
@@ -154,5 +164,27 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals2(void *thisptr, uint64_t othe
     IfNullRet(result, E_POINTER);
 
     *result = (*sm == other);
+    return S_OK;
+}
+
+SEALNETNATIVE HRESULT SEALCALL SmallModulus_GetPrimes(int bit_size, uint64_t count, uint64_t ntt_size, void **prime_array)
+{
+    IfNullRet(prime_array, E_POINTER);
+
+    vector<SmallModulus> prime_vec;
+    try
+    {
+        prime_vec = SmallModulus::GetPrimes(bit_size, count, ntt_size);
+    }
+    catch (const invalid_argument&)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+
+    BuildSmallModulusPointers(prime_vec, &count, prime_array);
     return S_OK;
 }

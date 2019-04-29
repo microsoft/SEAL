@@ -58,6 +58,30 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void CopyTest()
+        {
+            Plaintext plain = new Plaintext("6x^5 + 5x^4 + 3x^2 + 2x^1 + 1");
+            Assert.IsFalse(plain.IsNTTForm);
+            Plaintext plain2 = new Plaintext(plain);
+            Assert.AreEqual(plain, plain2);
+            Assert.IsFalse(plain2.IsNTTForm);
+            Assert.AreEqual(plain.ParmsId, plain2.ParmsId);
+
+            SEALContext context = GlobalContext.BFVContext;
+            Evaluator evaluator = new Evaluator(context);
+            evaluator.TransformToNTTInplace(plain, context.FirstParmsId);
+            Assert.IsTrue(plain.IsNTTForm);
+            Assert.IsFalse(plain2.IsNTTForm);
+            Assert.AreNotEqual(plain.ParmsId, plain2.ParmsId);
+            Assert.AreEqual(plain.ParmsId, context.FirstParmsId);
+
+            Plaintext plain3 = new Plaintext(plain);
+            Assert.AreEqual(plain3, plain);
+            Assert.IsTrue(plain3.IsNTTForm);
+            Assert.AreEqual(plain3.ParmsId, context.FirstParmsId);
+        }
+
+        [TestMethod]
         public void ToStringTest()
         {
             Plaintext plain = new Plaintext(coeffCount: 6);
@@ -248,7 +272,7 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 5");
             Plaintext other = new Plaintext();
 
@@ -289,7 +313,7 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             Plaintext plain = new Plaintext();
             MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
             MemoryPoolHandle pool_uninit = new MemoryPoolHandle();

@@ -122,7 +122,7 @@ namespace SEALTest
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1) });
             parms.set_plain_modulus(65537);
-            auto context = SEALContext::Create(parms, false);
+            auto context = SEALContext::Create(parms, false, false);
 
             plain.parms_id() = parms_id_zero;
             plain = "1x^63 + 2x^62 + Fx^32 + Ax^9 + 1x^1 + 1";
@@ -132,7 +132,7 @@ namespace SEALTest
             ASSERT_FALSE(plain2.is_ntt_form());
 
             Evaluator evaluator(context);
-            evaluator.transform_to_ntt_inplace(plain, context->parms_id_first());
+            evaluator.transform_to_ntt_inplace(plain, context->first_parms_id());
             plain.save(stream);
             plain2.load(context, stream);
             ASSERT_TRUE(plain.data() != plain2.data());
@@ -142,7 +142,7 @@ namespace SEALTest
             EncryptionParameters parms(scheme_type::CKKS);
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus({ DefaultParams::small_mods_30bit(0), DefaultParams::small_mods_30bit(1) });
-            auto context = SEALContext::Create(parms, false);
+            auto context = SEALContext::Create(parms, false, false);
             CKKSEncoder encoder(context);
 
             encoder.encode(vector<double>{ 0.1, 2.3, 34.4 }, pow(2.0, 20), plain);

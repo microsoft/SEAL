@@ -38,11 +38,6 @@
 #undef SEAL_USE_MAYBE_UNUSED
 #endif
 
-// Define SEAL_ENFORCE_HE_STD_SECURITY to enforce at least 128-bit security level
-// based on HomomorphicEncryption.org estimates. This is incompatible with the
-// unit tests so it is disabled by default.
-#undef SEAL_ENFORCE_HE_STD_SECURITY
-
 // X64
 #ifdef _M_X64
 

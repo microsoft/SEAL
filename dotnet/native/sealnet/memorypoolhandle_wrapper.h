@@ -31,6 +31,8 @@ SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_PoolCount(void *thisptr, uint64_
 
 SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_AllocByteCount(void *thisptr, uint64_t *count);
 
+SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_UseCount(void *thisptr, long *count);
+
 SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_IsInitialized(void *thisptr, bool *result);
 
 SEALNETNATIVE HRESULT SEALCALL MemoryPoolHandle_Equals(void *thisptr, void *otherptr, bool *result);

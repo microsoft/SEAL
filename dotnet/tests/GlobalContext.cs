@@ -20,9 +20,17 @@ namespace SEALNetTest
                 CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192)
             };
             encParams.SetPlainModulus(65537ul);
-            Context = SEALContext.Create(encParams);
+            BFVContext = new SEALContext(encParams);
+
+            encParams = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 8192,
+                CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192)
+            };
+            CKKSContext = new SEALContext(encParams);
         }
 
-        public static SEALContext Context { get; private set; } = null;
+        public static SEALContext BFVContext { get; private set; } = null;
+        public static SEALContext CKKSContext { get; private set; } = null;
     }
 }

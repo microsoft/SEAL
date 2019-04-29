@@ -16,7 +16,7 @@ namespace seal
 {
     /**
     Stores a set of attributes (qualifiers) of a set of encryption parameters.
-    These parameters are mainly used internally in various parts of the library, e.g.
+    These parameters are mainly used internally in various parts of the library, e.g.,
     to determine which algorithmic optimizations the current support. The qualifiers
     are automatically created by the SEALContext class, silently passed on to classes
     such as Encryptor, Evaluator, and Decryptor, and the only way to change them is by
@@ -127,20 +127,20 @@ namespace seal
 
     By default, SEALContext creates a chain of SEALContext::ContextData instances. The
     first one in the chain corresponds to special encryption parameters that are reserved
-    to be used by the various key classes (SecretKey, PublicKey, etc.). These are the
-    exact same encryption parameters that are created by the user and passed to the
-    constructor of SEALContext. The functions key_context_data() and key_parms_id()
-    return the ContextData and the parms_id corresponding to these special parameters.
-    The rest of the ContextData instances in the chain correspond to encryption parameters
-    that are derived from the first encryption parameters by always removing the last one
-    of the moduli in the coeff_modulus, until the resulting parameters are no longer valid,
-    e.g., there are no more primes left. These derived encryption parameters are used by
-    ciphertexts and plaintexts and their respective ContextData can be accessed through the
-    get_context_data(parms_id_type) function. The functions context_data_first() and
-    context_data_last() return the ContextData corresponding to the first and the last
-    set of parameters in the "data" part of the chain, i.e., the second and the last
-    element in the full chain. The chain itself is a doubly linked list, and is referred
-    to as the modulus switching chain.
+    to be used by the various key classes (SecretKey, PublicKey, etc.). These are the exact
+    same encryption parameters that are created by the user and passed to th constructor of
+    SEALContext. The functions key_context_data() and key_parms_id() return the ContextData
+    and the parms_id corresponding to these special parameters. The rest of the ContextData
+    instances in the chain correspond to encryption parameters that are derived from the
+    first encryption parameters by always removing the last one of the moduli in the
+    coeff_modulus, until the resulting parameters are no longer valid, e.g., there are no
+    more primes left. These derived encryption parameters are used by ciphertexts and
+    plaintexts and their respective ContextData can be accessed through the
+    get_context_data(parms_id_type) function. The functions first_context_data() and
+    last_context_data() return the ContextData corresponding to the first and the last
+    set of parameters in the "data" part of the chain, i.e., the second and the last element
+    in the full chain. The chain itself is a doubly linked list, and is referred to as the
+    modulus switching chain.
 
     @see EncryptionParameters for more details on the parameters.
     @see EncryptionParameterQualifiers for more details on the qualifiers.
@@ -340,11 +340,11 @@ namespace seal
 
             util::Pointer<std::uint64_t> total_coeff_modulus_;
 
-            int total_coeff_modulus_bit_count_;
+            int total_coeff_modulus_bit_count_ = 0;
 
             util::Pointer<std::uint64_t> coeff_div_plain_modulus_;
 
-            std::uint64_t plain_upper_half_threshold_;
+            std::uint64_t plain_upper_half_threshold_ = 0;
 
             util::Pointer<std::uint64_t> plain_upper_half_increment_;
 
@@ -368,12 +368,20 @@ namespace seal
         @param[in] parms The encryption parameters
         @param[in] expand_mod_chain Determines whether the modulus switching chain
         should be created
+        @param[in] enforce_he_std_security Determines whether a minimum of 128-bit
+        security level according to HomomorphicEncryption.org security standard
+        should be enforced
         */
         static auto Create(const EncryptionParameters &parms,
-            bool expand_mod_chain = true)
+            bool expand_mod_chain = true, bool enforce_he_std_security = true)
         {
             return std::shared_ptr<SEALContext>(
-                new SEALContext(parms, expand_mod_chain, MemoryManager::GetPool()));
+                new SEALContext(
+                    parms,
+                    expand_mod_chain,
+                    enforce_he_std_security,
+                    MemoryManager::GetPool())
+                );
         }
 
         /**
@@ -405,9 +413,9 @@ namespace seal
         Returns the ContextData corresponding to the first encryption parameters
         that are used for data.
         */
-        inline auto context_data_first() const
+        inline auto first_context_data() const
         {
-            auto data = context_data_map_.find(parms_id_first_);
+            auto data = context_data_map_.find(first_parms_id_);
             return (data != context_data_map_.end()) ?
                 data->second : std::shared_ptr<ContextData>{ nullptr };
         }
@@ -416,9 +424,9 @@ namespace seal
         Returns the ContextData corresponding to the last encryption parameters
         that are used for data.
         */
-        inline auto context_data_last() const
+        inline auto last_context_data() const
         {
-            auto data = context_data_map_.find(parms_id_last_);
+            auto data = context_data_map_.find(last_parms_id_);
             return (data != context_data_map_.end()) ?
                 data->second : std::shared_ptr<ContextData>{ nullptr };
         }
@@ -428,12 +436,12 @@ namespace seal
         */
         inline auto parameters_set() const
         {
-            return context_data_first() ?
-                context_data_first()->qualifiers_.parameters_set : false;
+            return first_context_data() ?
+                first_context_data()->qualifiers_.parameters_set : false;
         }
 
         /**
-        Returns a parms_id_type corresponding to the set of encryption parameters 
+        Returns a parms_id_type corresponding to the set of encryption parameters
         that are used for keys.
         */
         inline auto &key_parms_id() const noexcept
@@ -445,18 +453,30 @@ namespace seal
         Returns a parms_id_type corresponding to the first encryption parameters
         that are used for data.
         */
-        inline auto &parms_id_first() const noexcept
+        inline auto &first_parms_id() const noexcept
         {
-            return parms_id_first_;
+            return first_parms_id_;
         }
 
         /**
         Returns a parms_id_type corresponding to the last encryption parameters
         that are used for data.
         */
-        inline auto &parms_id_last() const noexcept
+        inline auto &last_parms_id() const noexcept
         {
-            return parms_id_last_;
+            return last_parms_id_;
+        }
+
+        /**
+        Returns whether the coefficient modulus supports keyswitching. In practice,
+        support for keyswitching is required by Evaluator::relinearize,
+        Evaluator::apply_galois, and all rotation and conjugation operations. For
+        keyswitching to be available, the coefficient modulus parameter must consist
+        of at least two prime number factors.
+        */
+        inline bool using_keyswitching() const noexcept
+        {
+            return using_keyswitching_;
         }
 
     private:
@@ -475,11 +495,14 @@ namespace seal
         @param[in] parms The encryption parameters
         @param[in] expand_mod_chain Determines whether the modulus switching chain
         should be created
+        @param[in] enforce_he_std_security Determines whether a minimum of 128-bit
+        security level according to HomomorphicEncryption.org security standard
+        should be enforced
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
         SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-            MemoryPoolHandle pool);
+            bool enforce_he_std_security, MemoryPoolHandle pool);
 
         ContextData validate(EncryptionParameters parms);
 
@@ -495,11 +518,21 @@ namespace seal
 
         parms_id_type key_parms_id_;
 
-        parms_id_type parms_id_first_;
+        parms_id_type first_parms_id_;
 
-        parms_id_type parms_id_last_;
+        parms_id_type last_parms_id_;
 
         std::unordered_map<
             parms_id_type, std::shared_ptr<const ContextData>> context_data_map_{};
+
+        /**
+        Is HomomorphicEncryption.org security standard enforced?
+        */
+        bool enforce_he_std_security_;
+
+        /**
+        Is keyswitching supported by the encryption parameters?
+        */
+        bool using_keyswitching_;
     };
 }

@@ -131,7 +131,7 @@ namespace SEALTest
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus({ coeff_modulus });
         parms.set_random_generator(factory);
-        auto context = SEALContext::Create(parms);
+        auto context = SEALContext::Create(parms, false, false);
 
         ASSERT_EQ(0, CustomRandomEngine::count());
 

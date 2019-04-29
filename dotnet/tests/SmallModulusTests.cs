@@ -6,6 +6,7 @@ using Microsoft.Research.SEAL;
 using System;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
 
 namespace SEALNetTest
 {
@@ -22,6 +23,7 @@ namespace SEALNetTest
             Assert.AreEqual(0ul, sm.Value);
             Assert.AreEqual(0, sm.BitCount);
             Assert.AreEqual(1ul, sm.UInt64Count);
+            Assert.IsFalse(sm.IsPrime);
         }
 
         [TestMethod]
@@ -33,6 +35,7 @@ namespace SEALNetTest
             Assert.IsFalse(sm.IsZero);
             Assert.AreEqual(5ul, sm.Value);
             Assert.AreEqual(3, sm.BitCount);
+            Assert.IsTrue(sm.IsPrime);
 
             // Value is exactly 62 bits
             SmallModulus sm2 = new SmallModulus(0x3FFFFFFFFFFFFFFFul);
@@ -42,6 +45,16 @@ namespace SEALNetTest
             Assert.AreEqual(0x3FFFFFFFFFFFFFFFul, sm2.Value);
             Assert.AreEqual(62, sm2.BitCount);
             Assert.AreEqual(1ul, sm2.UInt64Count);
+            Assert.IsFalse(sm2.IsPrime);
+
+            SmallModulus sm3 = new SmallModulus(0xF00000F000079ul);
+
+            Assert.IsNotNull(sm3);
+            Assert.IsFalse(sm3.IsZero);
+            Assert.AreEqual(0xF00000F000079ul, sm3.Value);
+            Assert.AreEqual(52, sm3.BitCount);
+            Assert.AreEqual(1ul, sm3.UInt64Count);
+            Assert.IsTrue(sm3.IsPrime);
         }
 
         [TestMethod]
@@ -87,18 +100,22 @@ namespace SEALNetTest
 
             Assert.IsFalse(sm1.IsZero);
             Assert.AreEqual(456ul, sm1.Value);
+            Assert.IsFalse(sm1.IsPrime);
             Assert.IsTrue(sm2.IsZero);
             Assert.AreEqual(0ul, sm2.Value);
+            Assert.IsFalse(sm2.IsPrime);
 
             sm2.Set(sm1);
 
             Assert.IsFalse(sm2.IsZero);
             Assert.AreEqual(456ul, sm2.Value);
+            Assert.IsFalse(sm2.IsPrime);
 
-            sm2.Set(value: 123);
+            sm2.Set(value: 65537ul);
 
             Assert.IsFalse(sm2.IsZero);
-            Assert.AreEqual(123ul, sm2.Value);
+            Assert.AreEqual(65537ul, sm2.Value);
+            Assert.IsTrue(sm2.IsPrime);
         }
 
         [TestMethod]
@@ -131,6 +148,14 @@ namespace SEALNetTest
             Assert.AreNotEqual(0ul, ratio.Item1);
             Assert.AreNotEqual(0ul, ratio.Item2);
             Assert.AreNotEqual(0ul, ratio.Item3);
+
+            sm.Set(0xF00000F000079ul);
+            ratio = sm.ConstRatio;
+
+            Assert.IsNotNull(ratio);
+            Assert.AreEqual(1224979096621368355ul, ratio.Item1);
+            Assert.AreEqual(4369ul, ratio.Item2);
+            Assert.AreEqual(1144844808538997ul, ratio.Item3);
         }
 
         [TestMethod]
@@ -150,11 +175,13 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadTest()
         {
-            SmallModulus sm1 = new SmallModulus(0x12345ul);
+            SmallModulus sm1 = new SmallModulus(65537ul);
             SmallModulus sm2 = new SmallModulus();
 
             Assert.AreNotSame(sm1, sm2);
             Assert.AreNotEqual(sm1, sm2);
+            Assert.AreNotEqual(sm1.IsPrime, sm2.IsPrime);
+
 
             using (MemoryStream stream = new MemoryStream())
             {
@@ -172,6 +199,29 @@ namespace SEALNetTest
             Assert.AreEqual(sm1.ConstRatio.Item1, sm2.ConstRatio.Item1);
             Assert.AreEqual(sm1.ConstRatio.Item2, sm2.ConstRatio.Item2);
             Assert.AreEqual(sm1.ConstRatio.Item3, sm2.ConstRatio.Item3);
+            Assert.AreEqual(sm1.IsPrime, sm2.IsPrime);
+        }
+
+        [TestMethod]
+        public void GeneratePrimesTest()
+        {
+            SmallModulus sm = DefaultParams.SmallMods30Bit(0);
+            Assert.IsTrue(sm.IsPrime);
+            sm.Set(DefaultParams.SmallMods30Bit(0).Value * DefaultParams.SmallMods30Bit(1).Value);
+            Assert.IsFalse(sm.IsPrime);
+
+            List<SmallModulus> primes = (List<SmallModulus>)SmallModulus.GetPrimes(50, 8, 1 << 16);
+
+            Assert.AreEqual(primes.Count, 8);
+            for (int i = 0; i < primes.Count; i++)
+            {
+                if (i != 0)
+                {
+                    Assert.IsTrue(primes[i].Value < primes[i - 1].Value);
+                }
+                Assert.AreEqual(primes[i].BitCount, 50);
+                Assert.IsTrue(primes[i].IsPrime);
+            }
         }
 
         [TestMethod]
@@ -188,33 +238,16 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => sm.Load(null));
             Assert.ThrowsException<ArgumentException>(() => sm.Load(ms_empty));
 
-            MemoryStream ms = new MemoryStream();
-            using (BinaryWriter writer = new BinaryWriter(ms, Encoding.UTF8, leaveOpen: true))
-            {
-                // Bit count
-                writer.Write(16);
-                // Uint64 count
-                writer.Write(1ul);
-                // Value that does not match bit count
-                writer.Write(0x123456789ABCDul);
-            }
-
-            ms.Seek(offset: 0, loc: SeekOrigin.Begin);
-            Assert.ThrowsException<InvalidOperationException>(() => sm.Load(ms));
-
-            ms = new MemoryStream();
-            using (BinaryWriter writer = new BinaryWriter(ms, Encoding.UTF8, leaveOpen: true))
-            {
-                // Bit count
-                writer.Write(16);
-                // UInt64 count that does not match value
-                writer.Write(2ul);
-                // Value
-                writer.Write(0xFABCul);
-            }
-
-            ms.Seek(offset: 0, loc: SeekOrigin.Begin);
-            Assert.ThrowsException<InvalidOperationException>(() => sm.Load(ms));
+            IEnumerable<SmallModulus> primes = null;
+            Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(-1, 1, 1));
+            Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(0, 1, 1));
+            primes = SmallModulus.GetPrimes(2, 1, 1);
+            Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(30, 0, 1));
+            Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(30, 1, 0));
+            primes = SmallModulus.GetPrimes(30, 1, 1);
+            Assert.ThrowsException<InvalidOperationException>(() => primes = SmallModulus.GetPrimes(5, 10, 1));
+            primes = SmallModulus.GetPrimes(50, 10, 1);
+            Assert.AreEqual(((List<SmallModulus>)primes).Count, 10);
         }
     }
 }

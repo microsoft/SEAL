@@ -32,10 +32,10 @@ namespace seal
 
             // Are the parameters valid for given plaintext? This check is slightly
             // non-trivial because we need to consider both the case where key_parms_id
-            // equals parms_id_first, and cases where they are different.
+            // equals first_parms_id, and cases where they are different.
             auto context_data_ptr = context->get_context_data(in.parms_id());
             if (!context_data_ptr ||
-                context_data_ptr->chain_index() > context->context_data_first()->chain_index())
+                context_data_ptr->chain_index() > context->first_context_data()->chain_index())
             {
                 return false;
             }
@@ -50,7 +50,7 @@ namespace seal
         }
         else
         {
-            auto &parms = context->context_data_first()->parms();
+            auto &parms = context->first_context_data()->parms();
             if (parms.scheme() != scheme_type::BFV)
             {
                 return false;
@@ -78,10 +78,10 @@ namespace seal
 
         // Are the parameters valid for given ciphertext? This check is slightly
         // non-trivial because we need to consider both the case where key_parms_id
-        // equals parms_id_first, and cases where they are different.
+        // equals first_parms_id, and cases where they are different.
         auto context_data_ptr = context->get_context_data(in.parms_id());
         if (!context_data_ptr ||
-            context_data_ptr->chain_index() > context->context_data_first()->chain_index())
+            context_data_ptr->chain_index() > context->first_context_data()->chain_index())
         {
             return false;
         }
@@ -251,7 +251,7 @@ namespace seal
         }
         else
         {
-            auto &parms = context->context_data_first()->parms();
+            auto &parms = context->first_context_data()->parms();
             uint64_t modulus = parms.plain_modulus().value();
             const Plaintext::pt_coeff_type *ptr = in.data();
             auto size = in.coeff_count();

@@ -71,8 +71,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a copy of the underlying Ciphertext
+        /// Returns the underlying Ciphertext.
         /// </summary>
+        /// <remarks>
+        /// Returns the underlying Ciphertext. The returned Ciphertext is valid
+        /// only as long as the PublicKey is valid and not changed.
+        /// </remarks>
         public Ciphertext Data
         {
             get
@@ -86,13 +90,13 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the PublicKey to an output stream.
         /// </summary>
-        ///
         /// <remarks>
         /// Saves the PublicKey to an output stream. The output is in binary format and
         /// not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the PublicKey to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the PublicKey could not be written to stream</exception>
         public void Save(Stream stream)
         {
             if (null == stream)
@@ -103,13 +107,17 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Loads a PublicKey from an input stream overwriting the current PublicKey.
+        /// </summary>
+        /// <remarks>
+        /// Loads a PublicKey from an input stream overwriting the current PublicKey.
         /// No checking of the validity of the PublicKey data against encryption
         /// parameters is performed. This function should not be used unless the
         /// PublicKey comes from a fully trusted source.
-        /// </summary>
+        /// </remarks>
         /// <param name="stream">The stream to load the PublicKey from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if a valid PublicKey could not be read from stream</exception>
+        /// <exception cref="ArgumentException">if PublicKey could not be read from
+        /// stream</exception>
         public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
@@ -120,16 +128,15 @@ namespace Microsoft.Research.SEAL
 
 
         /// <summary>
-        /// Loads a PublicKey from an input stream overwriting the current
-        /// PublicKey.
+        /// Loads a PublicKey from an input stream overwriting the current PublicKey.
         /// </summary>
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the PublicKey from</param>
         /// <exception cref="ArgumentNullException">if either context or stream are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded PublicKey is invalid for the
-        /// context</exception>
+        /// <exception cref="ArgumentException">if PublicKey could not be read from
+        /// stream or is invalid for the context</exception>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -138,7 +145,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             UnsafeLoad(stream);
-
             if (!ValCheck.IsValidFor(this, context))
             {
                 throw new ArgumentException("PublicKey data is invalid for the context");
@@ -146,7 +152,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a reference to parmsId.
+        /// Returns a copy of ParmsId.
         /// </summary>
         public ParmsId ParmsId
         {

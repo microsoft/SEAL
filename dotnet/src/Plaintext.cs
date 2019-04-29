@@ -10,13 +10,16 @@ using System.Text;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
+    /// Class to store a plaintext element.
+    /// </summary>
+    /// <remarks>
+    /// <para>
     /// Class to store a plaintext element. The data for the plaintext is
     /// a polynomial with coefficients modulo the plaintext modulus. The degree
     /// of the plaintext polynomial must be one less than the degree of the
     /// polynomial modulus. The backing array always allocates one 64-bit word
     /// per each coefficient of the polynomial.
-    /// </summary>
-    /// <remarks>
+    /// </para>
     /// <para>
     /// Memory Management
     /// The coefficient count of a plaintext refers to the number of word-size
@@ -42,7 +45,7 @@ namespace Microsoft.Research.SEAL
     /// structure storing the plaintext not being thread-safe.
     /// </para>
     /// </remarks>
-    /// <seealso cref="Ciphertext">see Ciphertext for the class that stores ciphertexts.</seealso>
+    /// <seealso cref="Ciphertext">See Ciphertext for the class that stores ciphertexts.</seealso>
     public class Plaintext : NativeObject, IEquatable<Plaintext>
     {
         /// <summary>
@@ -54,7 +57,7 @@ namespace Microsoft.Research.SEAL
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            NativeMethods.Plaintext_Create(poolPtr, out IntPtr ptr);
+            NativeMethods.Plaintext_Create1(poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -72,7 +75,7 @@ namespace Microsoft.Research.SEAL
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            NativeMethods.Plaintext_Create(coeffCount, poolPtr, out IntPtr ptr);
+            NativeMethods.Plaintext_Create2(coeffCount, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -88,12 +91,11 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if capacity is less than coeffCount</exception>
         /// <exception cref="ArgumentException">if coeffCount is negative</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Plaintext(ulong capacity, ulong coeffCount,
-                    MemoryPoolHandle pool = null)
+        public Plaintext(ulong capacity, ulong coeffCount, MemoryPoolHandle pool = null)
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            NativeMethods.Plaintext_Create(capacity, coeffCount, poolPtr, out IntPtr ptr);
+            NativeMethods.Plaintext_Create3(capacity, coeffCount, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -133,8 +135,37 @@ namespace Microsoft.Research.SEAL
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
-            NativeMethods.Plaintext_Create(hexPoly, poolPtr, out IntPtr ptr);
+            NativeMethods.Plaintext_Create4(hexPoly, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs a new plaintext by copying a given one.
+        /// </summary>
+        /// <param name="copy">The plaintext to copy from</param>
+        /// <exception cref="ArgumentNullException">if copy is null</exception>
+        public Plaintext(Plaintext copy)
+        {
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            NativeMethods.Plaintext_Create5(copy.NativePtr, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs a new plaintext by copying a given one.
+        /// </summary>
+        /// <param name="copy">The plaintext to copy from</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if either copy or pool are null</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Plaintext(Plaintext copy, MemoryPoolHandle pool) : this(pool)
+        {
+            if (null == copy)
+                throw new ArgumentNullException(nameof(copy));
+
+            Set(copy);
         }
 
         /// <summary>
@@ -288,9 +319,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Sets the plaintext polynomial coefficients to zero starting at a given index.
+        /// Sets the plaintext polynomial coefficients to zero starting at a given
+        /// index.
         /// </summary>
-        ///
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
         /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
         public void SetZero(ulong startCoeff)
@@ -318,7 +349,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Gets/set the value of a given coefficient of the plaintext polynomial.
         /// </summary>
-        ///
         /// <param name="coeffIndex">The index of the coefficient in the plaintext polynomial</param>
         /// <exception cref="ArgumentOutOfRangeException">if coeffIndex is not within [0, CoeffCount)</exception>
         public ulong this[ulong coeffIndex]
@@ -447,31 +477,36 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Saves the plaintext to an output stream.
         /// </summary>
-        ///
         /// <remarks>
-        /// Saves the plaintext to an output stream. The output is in binary format and not human-readable.
-        /// The output stream must have the "binary" flag set.
+        /// Saves the plaintext to an output stream. The output is in binary format
+        /// and not human-readable. The output stream must have the "binary" flag set.
         /// </remarks>
         /// <param name="stream">The stream to save the plaintext to</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <seealso cref="Load(SEALContext, Stream)">See Load() to load a saved plaintext.</seealso>
+        /// <exception cref="ArgumentException">if the plaintext could not be written
+        /// to stream</exception>
         public void Save(Stream stream)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
-            // First the ParmsId
-            ParmsId.Save(stream);
-
-            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            try
             {
-                writer.Write(Scale);
-                writer.Write(CoeffCount);
-                for (ulong i = 0; i < CoeffCount; i++)
+                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    ulong data = this[i];
-                    writer.Write(data);
+                    ParmsId.Save(stream);
+                    writer.Write(Scale);
+                    writer.Write(CoeffCount);
+                    for (ulong i = 0; i < CoeffCount; i++)
+                    {
+                        ulong data = this[i];
+                        writer.Write(data);
+                    }
                 }
+            }
+            catch (IOException ex)
+            {
+                throw new ArgumentException("Could not write KSwitchKeys", ex);
             }
         }
 
@@ -483,7 +518,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="stream">The stream to load the plaintext from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if a valid plaintext could not be read from stream</exception>
+        /// <exception cref="ArgumentException">if a plaintext could not be read from
+        /// stream</exception>
         public void UnsafeLoad(Stream stream)
         {
             if (null == stream)
@@ -491,25 +527,23 @@ namespace Microsoft.Research.SEAL
 
             try
             {
-                ParmsId parms = new ParmsId();
-                parms.Load(stream);
-                ParmsId = parms;
-
-                using (BinaryReader reader = new BinaryReader(stream))
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
                 {
+                    ParmsId parms = new ParmsId();
+                    parms.Load(stream);
+
                     double scale = reader.ReadDouble();
                     ulong coeffCount = reader.ReadUInt64();
 
-                    Scale = scale;
-
                     ulong[] newData = new ulong[coeffCount];
-
                     for (ulong i = 0; i < coeffCount; i++)
                     {
                         newData[i] = reader.ReadUInt64();
                     }
 
                     NativeMethods.Plaintext_SwapData(NativePtr, coeffCount, newData);
+                    ParmsId = parms;
+                    Scale = scale;
                 }
             }
             catch (EndOfStreamException ex)
@@ -531,9 +565,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if either context or stream are null</exception>
         /// <exception cref="ArgumentException">if the context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if the loaded plaintext is invalid, or it is
-        /// invalid for the context</exception>
-        /// <seealso cref="Save(Stream)">See Save() to save a plaintext.</seealso>
+        /// <exception cref="ArgumentException">if a plaintext could not be read from
+        /// stream or is invalid for the context</exception>
         public void Load(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -542,7 +575,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             UnsafeLoad(stream);
-
             if (!ValCheck.IsValidFor(this, context))
             {
                 throw new ArgumentException("Plaintext data is invalid for context");
@@ -562,8 +594,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a copy of parmsId. The parmsId must remain zero
-        /// unless the plaintext polynomial is in NTT form.
+        /// Returns a copy of ParmsId. The ParmsId must remain zero unless the
+        /// plaintext polynomial is in NTT form.
         /// </summary>
         /// <seealso cref="EncryptionParameters">see EncryptionParameters for more
         /// information about parmsId.</seealso>
@@ -615,11 +647,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns whether or not the plaintext has the same semantic value as a given plaintext.
+        /// Returns whether or not the plaintext has the same semantic value as a given
+        /// plaintext.
         /// </summary>
         /// <remarks>
-        /// Returns whether or not the plaintext has the same semantic value as a given plaintext. Leading
-        /// zero coefficients are ignored by the comparison.
+        /// Returns whether or not the plaintext has the same semantic value as a given
+        /// plaintext. Leading zero coefficients are ignored by the comparison.
         /// </remarks>
         /// <param name="obj">The object to compare against</param>
         public override bool Equals(object obj)
@@ -629,11 +662,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns whether or not the plaintext has the same semantic value as a given plaintext.
+        /// Returns whether or not the plaintext has the same semantic value as a given
+        /// plaintext.
         /// </summary>
         /// <remarks>
-        /// Returns whether or not the plaintext has the same semantic value as a given plaintext. Leading
-        /// zero coefficients are ignored by the comparison.
+        /// Returns whether or not the plaintext has the same semantic value as a given
+        /// plaintext. Leading zero coefficients are ignored by the comparison.
         /// </remarks>
         /// <param name="other">The plaintext to compare against</param>
         public bool Equals(Plaintext other)

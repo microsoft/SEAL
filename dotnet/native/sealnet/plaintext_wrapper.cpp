@@ -119,6 +119,17 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create4(char *hexPoly, void *memoryPool
     return E_UNEXPECTED;
 }
 
+SEALNETNATIVE HRESULT SEALCALL Plaintext_Create5(void *copy, void **plaintext)
+{
+    Plaintext *copyptr = FromVoid<Plaintext>(copy);
+    IfNullRet(copyptr, E_POINTER);
+    IfNullRet(plaintext, E_POINTER);
+
+    Plaintext *plain = new Plaintext(*copyptr);
+    *plaintext = plain;
+    return S_OK;
+}
+
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Set1(void *thisptr, void *assign)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
@@ -455,10 +466,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SwapData(void *thisptr, uint64_t count,
 
     IntArray<uint64_t> new_array(plain->pool());
     new_array.resize(count);
-    for (uint64_t i = 0; i < count; i++)
-    {
-        new_array[i] = new_data[i];
-    }
+    copy_n(new_data, count, new_array.begin());
 
     Plaintext::PlaintextPrivateHelper::swap_data(plain, new_array);
     return S_OK;

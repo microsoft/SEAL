@@ -136,8 +136,3 @@ namespace seal
 #ifndef SEAL_MSB_INDEX_UINT64
 #define SEAL_MSB_INDEX_UINT64(result, value) get_msb_index_generic(result, value)
 #endif
-
-// HomomorphicEncryption.org security tables only support dimensions up to 32768
-#ifdef SEAL_ENFORCE_HE_STD_SECURITY
-    static_assert(SEAL_POLY_MOD_DEGREE_MAX <= 32768, "SEAL_POLY_MOD_DEGREE_MAX too large");
-#endif

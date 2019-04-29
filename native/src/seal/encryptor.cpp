@@ -90,8 +90,8 @@ namespace seal
 
             // Zero encryption without modulus switching
             Ciphertext temp(pool);
-            encrypt_zero_asymmetric(public_key_, temp, context_, prev_parms_id,
-                random, is_ntt_form, pool);
+            encrypt_zero_asymmetric(public_key_, context_, prev_parms_id,
+                random, is_ntt_form, temp, pool);
             if (temp.is_ntt_form() != is_ntt_form)
             {
                 throw invalid_argument("NTT form mismatch");
@@ -119,12 +119,17 @@ namespace seal
                     coeff_mod_count,
                     destination.data(j));
             }
+
             destination.is_ntt_form() = is_ntt_form;
+
+            // Need to set the scale here since encrypt_zero_asymmetric only sets
+            // it for temp
+            destination.scale() = temp.scale();
         }
         else
         {
-            encrypt_zero_asymmetric(public_key_, destination, context_,
-                parms_id, random, is_ntt_form, pool);
+            encrypt_zero_asymmetric(public_key_, context_,
+                parms_id, random, is_ntt_form, destination, pool);
         }
     }
 
@@ -151,13 +156,13 @@ namespace seal
                 throw invalid_argument("plain cannot be in NTT form");
             }
 
-            encrypt_zero(context_->parms_id_first(), destination);
+            encrypt_zero(context_->first_parms_id(), destination);
 
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
             preencrypt(plain.data(),
                 plain.coeff_count(),
-                *context_->context_data_first(),
+                *context_->first_context_data(),
                 destination.data());
         }
         else if (scheme == scheme_type::CKKS)

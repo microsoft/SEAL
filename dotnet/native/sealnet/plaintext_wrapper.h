@@ -21,6 +21,8 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coe
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Create4(char *hexPoly, void *memoryPoolHandle, void **plaintext);
 
+SEALNETNATIVE HRESULT SEALCALL Plaintext_Create5(void *copy, void **plaintext);
+
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Set1(void *thisptr, void *assign);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Set2(void *thisptr, char *hex_poly);

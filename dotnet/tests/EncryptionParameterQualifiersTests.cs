@@ -12,15 +12,16 @@ namespace SEALNetTest
         [TestMethod]
         public void PropertiesTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
 
-            Assert.IsTrue(context.ContextDataFirst.Qualifiers.ParametersSet);
-            Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingBatching);
-            Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingFastPlainLift);
-            Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingFFT);
-            Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingHEStdSecurity);
-            Assert.IsFalse(context.ContextDataFirst.Qualifiers.UsingDescendingModulusChain);
-            Assert.IsTrue(context.ContextDataFirst.Qualifiers.UsingNTT);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.ParametersSet);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingBatching);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingFastPlainLift);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingFFT);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(context.FirstContextData.Qualifiers.UsingDescendingModulusChain);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingNTT);
+            Assert.IsTrue(context.UsingKeySwitching);
 
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
@@ -28,17 +29,18 @@ namespace SEALNetTest
                 CoeffModulus = DefaultParams.CoeffModulus128(4096)
             };
 
-            SEALContext context2 = SEALContext.Create(parms);
+            SEALContext context2 = new SEALContext(parms);
 
-            Assert.IsTrue(context2.ContextDataFirst.Qualifiers.ParametersSet);
-            Assert.IsTrue(context2.ContextDataFirst.Qualifiers.UsingBatching);
-            Assert.IsFalse(context2.ContextDataFirst.Qualifiers.UsingFastPlainLift);
-            Assert.IsTrue(context2.ContextDataFirst.Qualifiers.UsingFFT);
-            Assert.IsTrue(context2.ContextDataFirst.Qualifiers.UsingHEStdSecurity);
-            Assert.IsFalse(context.ContextDataFirst.Qualifiers.UsingDescendingModulusChain);
-            Assert.IsTrue(context2.ContextDataFirst.Qualifiers.UsingNTT);
+            Assert.IsTrue(context2.FirstContextData.Qualifiers.ParametersSet);
+            Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingBatching);
+            Assert.IsFalse(context2.FirstContextData.Qualifiers.UsingFastPlainLift);
+            Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingFFT);
+            Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(context.FirstContextData.Qualifiers.UsingDescendingModulusChain);
+            Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingNTT);
+            Assert.IsTrue(context.UsingKeySwitching);
 
-            EncryptionParameterQualifiers qualifiers = new EncryptionParameterQualifiers(context2.ContextDataFirst.Qualifiers);
+            EncryptionParameterQualifiers qualifiers = new EncryptionParameterQualifiers(context2.FirstContextData.Qualifiers);
 
             Assert.IsNotNull(qualifiers);
             Assert.IsTrue(qualifiers.ParametersSet);
@@ -46,14 +48,14 @@ namespace SEALNetTest
             Assert.IsFalse(qualifiers.UsingFastPlainLift);
             Assert.IsTrue(qualifiers.UsingFFT);
             Assert.IsTrue(qualifiers.UsingHEStdSecurity);
-            Assert.IsFalse(qualifiers.UsingDescendingModulusChain);
+            Assert.IsTrue(qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(qualifiers.UsingNTT);
         }
 
         [TestMethod]
         public void ExceptionsTest()
         {
-            EncryptionParameterQualifiers epq1 = GlobalContext.Context.ContextDataFirst.Qualifiers;
+            EncryptionParameterQualifiers epq1 = GlobalContext.BFVContext.FirstContextData.Qualifiers;
             EncryptionParameterQualifiers epq2 = null;
 
             Assert.ThrowsException<ArgumentNullException>(() => epq2 = new EncryptionParameterQualifiers(null));

@@ -660,7 +660,7 @@ namespace SEALNetExamples
             We can verify that batching is indeed enabled by looking at the encryption
             parameter qualifiers created by SEALContext.
             */
-            EncryptionParameterQualifiers qualifiers = context.ContextDataFirst.Qualifiers;
+            EncryptionParameterQualifiers qualifiers = context.FirstContextData.Qualifiers;
             Console.WriteLine($"Batching enabled: {qualifiers.UsingBatching.ToString()}");
 
             KeyGenerator keygen = new KeyGenerator(context);
@@ -929,7 +929,7 @@ namespace SEALNetExamples
             chain index is bigger, i.e. it is earlier in the chain.
             */
             SEALContext.ContextData contextData;
-            for (contextData = context.ContextDataFirst; null != contextData; contextData = contextData.NextContextData)
+            for (contextData = context.FirstContextData; null != contextData; contextData = contextData.NextContextData)
             {
                 Console.WriteLine($"Chain index: {contextData.ChainIndex}");
                 Console.WriteLine($"ParmsId: {contextData.Parms.ParmsId}");
@@ -956,7 +956,7 @@ namespace SEALNetExamples
             switches to the next set down the chain, whereas ModSwitchTo(...) switches
             to a parameter set down the chain corresponding to a given ParmsId.
             */
-            contextData = context.ContextDataFirst;
+            contextData = context.FirstContextData;
             while (null != contextData.NextContextData)
             {
                 Console.WriteLine($"Chain index: {contextData.ChainIndex}");
@@ -1055,7 +1055,7 @@ namespace SEALNetExamples
             We can check that indeed the modulus switching chain has not been created.
             The following loop should execute only once.
             */
-            for (contextData = context.ContextDataFirst; null != contextData; contextData = contextData.NextContextData)
+            for (contextData = context.FirstContextData; null != contextData; contextData = contextData.NextContextData)
             {
                 Console.WriteLine($"Chain index: {contextData.ChainIndex}");
                 Console.WriteLine($"ParmsId: {contextData.Parms.ParmsId}");
@@ -1100,7 +1100,7 @@ namespace SEALNetExamples
                 Stopwatch timer;
                 Utilities.PrintParameters(context);
 
-                EncryptionParameters parameters = context.ContextDataFirst.Parms;
+                EncryptionParameters parameters = context.FirstContextData.Parms;
                 SmallModulus plainModulus = parameters.PlainModulus;
                 ulong polyModulusDegree = parameters.PolyModulusDegree;
 
@@ -1133,7 +1133,7 @@ namespace SEALNetExamples
                 allocation size. The key generation can also take a significant amount
                 of time, as can be observed from the print-out.
                 */
-                if (!context.ContextDataFirst.Qualifiers.UsingBatching)
+                if (!context.FirstContextData.Qualifiers.UsingBatching)
                 {
                     Console.WriteLine("Given encryption parameters do not support batching.");
                     return;
@@ -2050,7 +2050,7 @@ namespace SEALNetExamples
                 }
 
                 Utilities.PrintParameters(context);
-                EncryptionParameters parms = context.ContextDataFirst.Parms;
+                EncryptionParameters parms = context.FirstContextData.Parms;
                 ulong polyModulusDegree = parms.PolyModulusDegree;
 
                 Console.Write("Generating secret/public keys: ");
@@ -2067,7 +2067,7 @@ namespace SEALNetExamples
                 timer.Stop();
                 Console.WriteLine($"Done [{timer.Elapsed.TotalMilliseconds * 1000} microseconds]");
 
-                if (!context.ContextDataFirst.Qualifiers.UsingBatching)
+                if (!context.FirstContextData.Qualifiers.UsingBatching)
                 {
                     Console.WriteLine("Given encryption parameters do not support batching.");
                     return;

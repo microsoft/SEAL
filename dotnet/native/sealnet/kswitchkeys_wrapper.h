@@ -23,7 +23,7 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Set(void *thisptr, void *assign);
 
 SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Size(void *thisptr, uint64_t *size);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_GetKeyCount(void *thisptr, uint64_t *key_count);
+SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_RawSize(void *thisptr, uint64_t *key_count);
 
 SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **key_list);
 

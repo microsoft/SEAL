@@ -68,3 +68,5 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateColumns(void *thisptr, void *encr
 SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool);
 
 SEALNETNATIVE HRESULT SEALCALL Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
+
+SEALNETNATIVE HRESULT SEALCALL Evaluator_ContextUsingKeySwitching(void *thisptr, bool *using_keyswitching);

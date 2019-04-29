@@ -25,7 +25,7 @@ namespace SEALNetTest
         [TestMethod]
         public void CreateNonEmptyTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys();
@@ -42,7 +42,7 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keyGen = new KeyGenerator(context);
 
             GaloisKeys keys = keyGen.GaloisKeys();
@@ -95,7 +95,7 @@ namespace SEALNetTest
         [TestMethod]
         public void SetTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys();
@@ -117,7 +117,7 @@ namespace SEALNetTest
         [TestMethod]
         public void KeyTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys();
@@ -145,7 +145,7 @@ namespace SEALNetTest
         [TestMethod]
         public void KeyEltTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys(galoisElts: new ulong[] { 1, 3 });
@@ -166,7 +166,9 @@ namespace SEALNetTest
                 PolyModulusDegree = 64,
                 CoeffModulus = new List<SmallModulus>() {  DefaultParams.SmallMods60Bit(0) }
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                enforceHEStdSecurity: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys(steps: new int[] { 1, 2, 3 });
@@ -193,7 +195,7 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             GaloisKeys keys = new GaloisKeys();
 
             Assert.ThrowsException<ArgumentNullException>(() => keys = new GaloisKeys(null));

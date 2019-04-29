@@ -41,7 +41,7 @@ namespace SEALNetExamples
                 throw new ArgumentNullException("context is not set");
             }
 
-            SEALContext.ContextData contextData = context.ContextDataFirst;
+            SEALContext.ContextData contextData = context.FirstContextData;
 
             /*
             Which scheme are we using?

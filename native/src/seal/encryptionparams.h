@@ -55,12 +55,14 @@ namespace seal
 
     @par parms_id
     The EncryptionParameters class maintains at all times a 256-bit SHA-3 hash of
-    the currently set encryption parameters. This hash acts as a unique identifier
-    of the encryption parameters and is used by all further objects created for
-    these encryption parameters. The parms_id is not intended to be directly modified
-    by the user but is used internally for pre-computation data lookup and input
-    validity checks. In modulus switching the user can use the parms_id to map the
-    chain of encryption parameters.
+    the currently set encryption parameters called the parms_id. This hash acts as
+    a unique identifier of the encryption parameters and is used by all further
+    objects created for these encryption parameters. The parms_id is not intended
+    to be directly modified by the user but is used internally for pre-computation
+    data lookup and input validity checks. In modulus switching the user can use
+    the parms_id to keep track of the chain of encryption parameters. The parms_id
+    is not exposed in the public API of EncryptionParameters, but can be accessed
+    through the SEALContext::ContextData class once the SEALContext has been created.
 
     @par Thread Safety
     In general, reading from EncryptionParameters is thread-safe, while mutating
@@ -417,8 +419,12 @@ namespace std
         std::size_t operator()(
             const seal::parms_id_type &parms_id) const
         {
-            return std::accumulate(parms_id.begin(), parms_id.end(), std::size_t(0),
-                [](std::size_t acc, std::uint64_t curr) { return acc ^ curr; });
+            std::uint64_t hash = 17;
+            hash = 31 * hash + parms_id[0];
+            hash = 31 * hash + parms_id[1];
+            hash = 31 * hash + parms_id[2];
+            hash = 31 * hash + parms_id[3];
+            return static_cast<std::size_t>(hash);
         }
     };
 }

@@ -14,7 +14,7 @@ namespace SEALNetTest
         [TestMethod]
         public void CreateTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
             Assert.IsNotNull(keygen);
@@ -37,7 +37,7 @@ namespace SEALNetTest
         [TestMethod]
         public void Create2Test()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen1 = new KeyGenerator(context);
             Encryptor encryptor1 = new Encryptor(context, keygen1.PublicKey);
             Decryptor decryptor1 = new Decryptor(context, keygen1.SecretKey);
@@ -83,9 +83,28 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void KeyCopyTest()
+        {
+            SEALContext context = GlobalContext.BFVContext;
+            PublicKey pk = null;
+            SecretKey sk = null;
+
+            using (KeyGenerator keygen = new KeyGenerator(context))
+            {
+                pk = keygen.PublicKey;
+                sk = keygen.SecretKey;
+            }
+
+            ParmsId parmsIdPK = pk.ParmsId;
+            ParmsId parmsIdSK = sk.ParmsId;
+            Assert.AreEqual(parmsIdPK, parmsIdSK);
+            Assert.AreEqual(parmsIdPK, context.KeyParmsId);
+        }
+
+        [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.Context;
+            SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             SecretKey secret = new SecretKey();
             List<ulong> elts = new List<ulong> { 16385 };

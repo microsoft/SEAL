@@ -38,7 +38,7 @@ namespace Microsoft.Research.SEAL
                 IntPtr[] coeffArray = new IntPtr[length];
                 NativeMethods.DefParams_CoeffModulus128(polyModulusDegree, ref length, coeffArray);
 
-                result = new List<SmallModulus>((int)length);
+                result = new List<SmallModulus>(checked((int)length));
                 foreach (IntPtr sm in coeffArray)
                 {
                     result.Add(new SmallModulus(sm));
@@ -81,7 +81,7 @@ namespace Microsoft.Research.SEAL
                 IntPtr[] coeffArray = new IntPtr[length];
                 NativeMethods.DefParams_CoeffModulus192(polyModulusDegree, ref length, coeffArray);
 
-                result = new List<SmallModulus>((int)length);
+                result = new List<SmallModulus>(checked((int)length));
                 foreach (IntPtr sm in coeffArray)
                 {
                     result.Add(new SmallModulus(sm));
@@ -124,7 +124,7 @@ namespace Microsoft.Research.SEAL
                 IntPtr[] coeffArray = new IntPtr[length];
                 NativeMethods.DefParams_CoeffModulus256(polyModulusDegree, ref length, coeffArray);
 
-                result = new List<SmallModulus>((int)length);
+                result = new List<SmallModulus>(checked((int)length));
                 foreach (IntPtr sm in coeffArray)
                 {
                     result.Add(new SmallModulus(sm));

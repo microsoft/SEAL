@@ -43,13 +43,13 @@ namespace Microsoft.Research.SEAL
     /// </para>
     /// <para>
     /// Managing Lifetime
-    /// Internally, the MemoryPoolHandle wraps a shared pointer pointing to
+    /// Internally, the MemoryPoolHandle wraps a C++ shared pointer pointing to
     /// a memory pool class. Thus, as long as a MemoryPoolHandle pointing to
     /// a particular memory pool exists, the pool stays alive. Classes such as
     /// Evaluator and Ciphertext store their own local copies of a MemoryPoolHandle
     /// to guarantee that the pool stays alive as long as the managing object
     /// itself stays alive. The global memory pool is implemented as a global
-    /// std::shared_ptr to a memory pool class, and is thus expected to stay
+    /// C++ std::shared_ptr to a memory pool class, and is thus expected to stay
     /// alive for the entire duration of the program execution. Note that it can
     /// be problematic to create other global objects that use the memory pool
     /// e.g. in their constructor, as one would have to ensure the initialization
@@ -185,6 +185,34 @@ namespace Microsoft.Research.SEAL
                 try
                 {
                     NativeMethods.MemoryPoolHandle_AllocByteCount(NativePtr, out ulong count);
+                    return count;
+                }
+                catch (COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                        throw new InvalidOperationException("MemoryPoolHandle is uninitialized", ex);
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the number of MemoryPoolHandle objects sharing this memory pool.
+        /// </summary>
+        /// <remarks>
+        /// Returns the number of MemoryPoolHandle objects sharing this memory pool.
+        /// The function only reveals the use-count for custom memory pools, and not
+        /// for the global pool or the thread-local(global) pool, for which it will
+        /// always return 0.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">if the MemoryPoolHandle is uninitialized</exception>
+        public long UseCount
+        {
+            get
+            {
+                try
+                {
+                    NativeMethods.MemoryPoolHandle_UseCount(NativePtr, out long count);
                     return count;
                 }
                 catch (COMException ex)

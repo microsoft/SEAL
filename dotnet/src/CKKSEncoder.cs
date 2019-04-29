@@ -154,12 +154,7 @@ namespace Microsoft.Research.SEAL
         public void Encode(IEnumerable<double> values, double scale,
             Plaintext destination, MemoryPoolHandle pool = null)
         {
-            if (null == values)
-                throw new ArgumentNullException(nameof(values));
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            Encode(values, context_.ParmsIdFirst, scale, destination, pool);
+            Encode(values, context_.FirstParmsId, scale, destination, pool);
         }
 
         /// <summary>
@@ -182,12 +177,7 @@ namespace Microsoft.Research.SEAL
         public void Encode(IEnumerable<Complex> values, double scale,
             Plaintext destination, MemoryPoolHandle pool = null)
         {
-            if (null == values)
-                throw new ArgumentNullException(nameof(values));
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            Encode(values, context_.ParmsIdFirst, scale, destination, pool);
+            Encode(values, context_.FirstParmsId, scale, destination, pool);
         }
 
         /// <summary>
@@ -218,7 +208,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-
             NativeMethods.CKKSEncoder_Encode(NativePtr, value, parmsId.Block, scale, destination.NativePtr, poolPtr);
         }
 
@@ -240,10 +229,7 @@ namespace Microsoft.Research.SEAL
         public void Encode(double value, double scale, Plaintext destination,
             MemoryPoolHandle pool = null)
         {
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            Encode(value, context_.ParmsIdFirst, scale, destination, pool);
+            Encode(value, context_.FirstParmsId, scale, destination, pool);
         }
 
         /// <summary>
@@ -273,7 +259,6 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-
             NativeMethods.CKKSEncoder_Encode(NativePtr, value.Real, value.Imaginary, parmsId.Block, scale, destination.NativePtr, poolPtr);
         }
 
@@ -295,10 +280,7 @@ namespace Microsoft.Research.SEAL
         public void Encode(Complex value, double scale, Plaintext destination,
             MemoryPoolHandle pool = null)
         {
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            Encode(value, context_.ParmsIdFirst, scale, destination, pool);
+            Encode(value, context_.FirstParmsId, scale, destination, pool);
         }
 
         /// <summary>
@@ -330,10 +312,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if destination is null</exception>
         public void Encode(long value, Plaintext destination)
         {
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            Encode(value, context_.ParmsIdFirst, destination);
+            Encode(value, context_.FirstParmsId, destination);
         }
 
         /// <summary>

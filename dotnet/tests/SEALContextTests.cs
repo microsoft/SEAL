@@ -16,8 +16,8 @@ namespace SEALNetTest
             EncryptionParameters encParams1 = new EncryptionParameters(SchemeType.BFV);
             EncryptionParameters encParams2 = new EncryptionParameters(SchemeType.CKKS);
 
-            SEALContext context1 = SEALContext.Create(encParams1);
-            SEALContext context2 = SEALContext.Create(encParams2);
+            SEALContext context1 = new SEALContext(encParams1);
+            SEALContext context2 = new SEALContext(encParams2);
 
             Assert.IsNotNull(context1);
             Assert.IsNotNull(context2);
@@ -25,11 +25,11 @@ namespace SEALNetTest
             Assert.IsFalse(context1.ParametersSet);
             Assert.IsFalse(context2.ParametersSet);
 
-            Assert.AreNotSame(context1.ParmsIdFirst, context1.ParmsIdLast);
-            Assert.AreEqual(context1.ParmsIdFirst, context1.ParmsIdLast);
+            Assert.AreNotSame(context1.FirstParmsId, context1.LastParmsId);
+            Assert.AreEqual(context1.FirstParmsId, context1.LastParmsId);
 
-            SEALContext.ContextData data1 = context2.ContextDataFirst;
-            SEALContext.ContextData data2 = context2.GetContextData(context2.ParmsIdFirst);
+            SEALContext.ContextData data1 = context2.FirstContextData;
+            SEALContext.ContextData data2 = context2.GetContextData(context2.FirstParmsId);
 
             Assert.AreNotSame(data1, data2);
             ulong[] totalCoeffMod1 = data1.TotalCoeffModulus;
@@ -62,7 +62,9 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 6),
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: true,
+                enforceHEStdSecurity: false);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -79,7 +81,9 @@ namespace SEALNetTest
             Assert.IsTrue(qualifiers.UsingFastPlainLift);
             Assert.IsTrue(qualifiers.UsingFFT);
             Assert.IsTrue(qualifiers.UsingNTT);
-            Assert.IsTrue(qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(qualifiers.UsingHEStdSecurity);
+            Assert.IsTrue(qualifiers.UsingDescendingModulusChain);
+            Assert.IsTrue(context.UsingKeySwitching);
 
             ulong[] cdpm = data.CoeffDivPlainModulus;
             Assert.AreEqual(3, cdpm.Length);
@@ -121,7 +125,9 @@ namespace SEALNetTest
                 PolyModulusDegree = 2 * (ulong)slotSize,
                 CoeffModulus = coeffModulus
             };
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms,
+                expandModChain: true,
+                enforceHEStdSecurity: false);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -161,25 +167,27 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 20)
             };
 
-            SEALContext context1 = SEALContext.Create(parms);
+            SEALContext context1 = new SEALContext(parms,
+                expandModChain: true,
+                enforceHEStdSecurity: false);
 
             // By default there is a chain
             SEALContext.ContextData contextData = context1.KeyContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
-            contextData = context1.ContextDataFirst;
+            contextData = context1.FirstContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNotNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
 
             // This should not create a chain
-            SEALContext context2 = SEALContext.Create(parms, expandModChain: false);
+            SEALContext context2 = new SEALContext(parms, expandModChain: false);
             contextData = context2.KeyContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNull(contextData.PrevContextData);
             Assert.IsNotNull(contextData.NextContextData);
-            contextData = context2.ContextDataFirst;
+            contextData = context2.FirstContextData;
             Assert.IsNotNull(contextData);
             Assert.IsNotNull(contextData.PrevContextData);
             Assert.IsNull(contextData.NextContextData);

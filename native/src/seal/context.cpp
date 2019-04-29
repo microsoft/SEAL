@@ -70,15 +70,6 @@ namespace seal
         context_data.total_coeff_modulus_bit_count_ = get_significant_bit_count_uint(
             context_data.total_coeff_modulus_.get(), coeff_mod_count);
 
-        // Check whether the coefficient modulus consists of a set of primes that
-        // are in decreasing order
-        context_data.qualifiers_.using_descending_modulus_chain = true;
-        for (size_t i = 0; i < coeff_mod_count - 1; i++)
-        {
-            context_data.qualifiers_.using_descending_modulus_chain
-                &= (coeff_modulus[i].value() < coeff_modulus[i + 1].value());
-        }
-
         // Check polynomial modulus degree and create poly_modulus
         size_t poly_modulus_degree = parms.poly_modulus_degree();
         int coeff_count_power = get_power_of_two(poly_modulus_degree);
@@ -119,27 +110,29 @@ namespace seal
         {
             // Not secure according to HomomorphicEncryption.org security standard
             context_data.qualifiers_.using_he_std_security = false;
-#ifdef SEAL_ENFORCE_HE_STD_SECURITY
-            // Parameters are not valid
-            context_data.qualifiers_.parameters_set = false;
-            return context_data;
-#endif
+            if (enforce_he_std_security_)
+            {
+                // Parameters are not valid
+                context_data.qualifiers_.parameters_set = false;
+                return context_data;
+            }
         }
 
         // Check if the parameters are secure according to HomomorphicEncryption.org
         // security standard
-        if (util::global_variables::
-            max_secure_coeff_modulus_bit_count.count(poly_modulus_degree) &&
+        if (!util::global_variables::
+            max_secure_coeff_modulus_bit_count.count(poly_modulus_degree) ||
             (context_data.total_coeff_modulus_bit_count_ > util::global_variables::
                 max_secure_coeff_modulus_bit_count.at(poly_modulus_degree)))
         {
             // Not secure according to HomomorphicEncryption.org security standard
             context_data.qualifiers_.using_he_std_security = false;
-#ifdef SEAL_ENFORCE_HE_STD_SECURITY
-            // Parameters are not valid
-            context_data.qualifiers_.parameters_set = false;
-            return context_data;
-#endif
+            if (enforce_he_std_security_)
+            {
+                // Parameters are not valid
+                context_data.qualifiers_.parameters_set = false;
+                return context_data;
+            }
         }
 
         // Can we use NTT with coeff_modulus?
@@ -311,12 +304,21 @@ namespace seal
             return context_data;
         }
 
+        // Check whether the coefficient modulus consists of a set of primes that
+        // are in decreasing order
+        context_data.qualifiers_.using_descending_modulus_chain = true;
+        for (size_t i = 0; i < coeff_mod_count - 1; i++)
+        {
+            context_data.qualifiers_.using_descending_modulus_chain
+                &= (coeff_modulus[i].value() > coeff_modulus[i + 1].value());
+        }
+
         // Done with validation and pre-computations
         return context_data;
     }
 
     parms_id_type SEALContext::create_next_context_data(
-            const parms_id_type &prev_parms_id)
+        const parms_id_type &prev_parms_id)
     {
         // Create the next set of parameters by removing last modulus
         auto next_parms = context_data_map_.at(prev_parms_id)->parms_;
@@ -352,7 +354,8 @@ namespace seal
     }
 
     SEALContext::SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-        MemoryPoolHandle pool) : pool_(move(pool))
+        bool enforce_he_std_security, MemoryPoolHandle pool)
+        : pool_(move(pool)), enforce_he_std_security_(enforce_he_std_security)
     {
         if (!pool_)
         {
@@ -374,31 +377,34 @@ namespace seal
             make_shared<const ContextData>(validate(parms))));
         key_parms_id_ = parms.parms_id();
 
-        // Then create data_parms_id_head_ if the parameters are valid and there is
+        // Then create first_parms_id_ if the parameters are valid and there is
         // more than one modulus in coeff_modulus. This is equivalent to expanding
-        // the chain by one step. Otherwise, set data_parms_id_head_ to equal
+        // the chain by one step. Otherwise, we set first_parms_id_ to equal
         // key_parms_id_.
         if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set ||
             parms.coeff_modulus().size() == 1)
         {
-            parms_id_first_ = key_parms_id_;
+            first_parms_id_ = key_parms_id_;
         }
         else
         {
             auto next_parms_id = create_next_context_data(key_parms_id_);
-            parms_id_first_ = (next_parms_id == parms_id_zero) ?
+            first_parms_id_ = (next_parms_id == parms_id_zero) ?
                 key_parms_id_ : next_parms_id;
         }
 
-        // Set the data tail to point to data head
-        parms_id_last_ = parms_id_first_;
+        // Set last_parms_id_ to point to first_parms_id_
+        last_parms_id_ = first_parms_id_;
+
+        // Check if keyswitching is available
+        using_keyswitching_ = (first_parms_id_ != key_parms_id_);
 
         // If modulus switching chain is to be created, compute the remaining
         // parameter sets as long as they are valid to use (parameters_set == true)
         if (expand_mod_chain &&
-            context_data_map_.at(parms_id_first_)->qualifiers_.parameters_set)
+            context_data_map_.at(first_parms_id_)->qualifiers_.parameters_set)
         {
-            auto prev_parms_id = parms_id_first_;
+            auto prev_parms_id = first_parms_id_;
             while (context_data_map_.at(prev_parms_id)->parms().coeff_modulus().size() > 1)
             {
                 auto next_parms_id = create_next_context_data(prev_parms_id);
@@ -407,7 +413,7 @@ namespace seal
                     break;
                 }
                 prev_parms_id = next_parms_id;
-                parms_id_last_ = next_parms_id;
+                last_parms_id_ = next_parms_id;
             }
         }
 

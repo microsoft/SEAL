@@ -27,7 +27,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_CoeffModulus128(uint64_t polyModulusDeg
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
 
-    BuildCoeffPointers(coeffs128, length, coeffs);
+    BuildSmallModulusPointers(coeffs128, length, coeffs);
     return S_OK;
 }
 
@@ -45,7 +45,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_CoeffModulus192(uint64_t polyModulusDeg
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
 
-    BuildCoeffPointers(coeffs192, length, coeffs);
+    BuildSmallModulusPointers(coeffs192, length, coeffs);
     return S_OK;
 }
 
@@ -63,7 +63,7 @@ SEALNETNATIVE HRESULT SEALCALL DefParams_CoeffModulus256(uint64_t polyModulusDeg
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
 
-    BuildCoeffPointers(coeffs256, length, coeffs);
+    BuildSmallModulusPointers(coeffs256, length, coeffs);
     return S_OK;
 }
 

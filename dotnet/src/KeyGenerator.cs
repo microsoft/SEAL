@@ -10,10 +10,13 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
+    /// Generates matching secret key and public key.
+    /// </summary>
+    /// <remarks>
     /// Generates matching secret key and public key. An existing KeyGenerator can
     /// also at any time be used to generate relinearization keys and Galois keys.
     /// Constructing a KeyGenerator requires only a SEALContext.
-    /// </summary>
+    /// </remarks>
     /// <see cref="EncryptionParameters">see EncryptionParameters for more details on encryption parameters.</see>
     /// <see cref="SEAL.SecretKey">see SecretKey for more details on secret key.</see>
     /// <see cref="SEAL.PublicKey">see PublicKey for more details on public key.</see>
@@ -24,7 +27,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Creates a KeyGenerator initialized with the specified SEALContext.
         /// </summary>
-        ///
         /// <remarks>
         /// Creates a KeyGenerator initialized with the specified <see cref="SEALContext" />.
         /// Dynamically allocated member variables are allocated from the global memory pool.
@@ -44,11 +46,15 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Creates an KeyGenerator instance initialized with the specified
+        /// SEALContext and specified previously secret key.
+        /// </summary>
+        /// <remarks>
+        /// Creates an KeyGenerator instance initialized with the specified
         /// SEALContext and specified previously secret key. This can e.g. be used
         /// to increase the number of relinearization keys from what had earlier
         /// been generated, or to generate Galois keys in case they had not been
         /// generated earlier.
-        /// </summary>
+        /// </remarks>
         /// <param name="context">The SEALContext</param>
         /// <param name="secretKey">A previously generated secret key</param>
         /// <exception cref="ArgumentNullException">if either context or secretKey are null</exception>
@@ -68,11 +74,15 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Creates an KeyGenerator instance initialized with the specified
+        /// SEALContext and specified previously secret and public keys.
+        /// </summary>
+        /// <remarks>
+        /// Creates an KeyGenerator instance initialized with the specified
         /// SEALContext and specified previously secret and public keys. This can
         /// e.g. be used to increase the number of relinearization keys from what
         /// had earlier been generated, or to generate Galois keys in case they
         /// had not been generated earlier.
-        /// </summary>
+        /// </remarks>
         /// <param name="context">The SEALContext</param>
         /// <param name="secretKey">A previously generated secret key</param>
         /// <param name="publicKey">A previously generated public key</param>
@@ -101,7 +111,7 @@ namespace Microsoft.Research.SEAL
             get
             {
                 NativeMethods.KeyGenerator_PublicKey(NativePtr, out IntPtr pubKeyPtr);
-                PublicKey pubKey = new PublicKey(pubKeyPtr, owned: false);
+                PublicKey pubKey = new PublicKey(pubKeyPtr);
                 return pubKey;
             }
         }
@@ -114,7 +124,7 @@ namespace Microsoft.Research.SEAL
             get
             {
                 NativeMethods.KeyGenerator_SecretKey(NativePtr, out IntPtr secretKeyPtr);
-                SecretKey secretKey = new SecretKey(secretKeyPtr, owned: false);
+                SecretKey secretKey = new SecretKey(secretKeyPtr);
                 return secretKey;
             }
         }
@@ -177,14 +187,16 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Generates and returns Galois keys. This function creates specific Galois
-        /// keys that can be used to apply specific Galois automorphisms on encrypted
-        /// data. The user needs to give as input a vector of desired Galois rotation
-        /// step counts, where negative step counts correspond to rotations to the
-        /// right and positive step counts correspond to rotations to the left.
-        /// A step count of zero can be used to indicate a column rotation in the BFV
-        /// scheme complex conjugation in the CKKS scheme.
+        /// Generates and returns Galois keys.
         /// </summary>
+        /// <remarks>
+        /// This function creates specific Galois keys that can be used to apply specific
+        /// Galois automorphisms on encrypted data. The user needs to give as input
+        /// a vector of desired Galois rotation step counts, where negative step counts
+        /// correspond to rotations to the right and positive step counts correspond to
+        /// rotations to the left. A step count of zero can be used to indicate a column
+        /// rotation in the BFV scheme complex conjugation in the CKKS scheme.
+        /// </remarks>
         /// <param name="steps">The rotation step counts for which to generate keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not

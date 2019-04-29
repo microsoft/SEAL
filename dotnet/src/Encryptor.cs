@@ -77,8 +77,56 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-
             NativeMethods.Encryptor_Encrypt(NativePtr, plain.NativePtr, destination.NativePtr, poolHandle);
+        }
+
+        /// <summary>
+        /// Encrypts a zero plaintext and stores the result in the destination parameter.
+        /// </summary>
+        /// <remarks>
+        /// Encrypts a zero plaintext and stores the result in the destination parameter.
+        /// The encryption parameters for the resulting ciphertext correspond to the given
+        /// parmsId. Dynamic memory allocations in the process are allocated from the memory
+        /// pool pointed to by the given MemoryPoolHandle.
+        /// </remarks>
+        /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
+        /// <param name="destination">The ciphertext to overwrite with the encrypted plaintext</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if either parmsId or destination are null</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public void EncryptZero(ParmsId parmsId, Ciphertext destination, MemoryPoolHandle pool = null)
+        {
+            if (null == parmsId)
+                throw new ArgumentNullException(nameof(parmsId));
+            if (null == destination)
+                throw new ArgumentNullException(nameof(destination));
+
+            IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Encryptor_EncryptZero1(NativePtr, parmsId.Block, destination.NativePtr, poolHandle);
+        }
+
+        /// <summary>
+        /// Encrypts a zero plaintext and stores the result in the destination parameter.
+        /// </summary>
+        /// <remarks>
+        /// Encrypts a zero plaintext and stores the result in the destination parameter.
+        /// The encryption parameters for the resulting ciphertext correspond to the
+        /// highest(data) level in the modulus switching chain. Dynamic memory allocations
+        /// in the process are allocated from the memory pool pointed to by the given
+        /// MemoryPoolHandle.
+        /// </remarks>
+        /// <param name="destination">The ciphertext to overwrite with the encrypted plaintext</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if destination is null</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public void EncryptZero(Ciphertext destination, MemoryPoolHandle pool = null)
+        {
+            if (null == destination)
+                throw new ArgumentNullException(nameof(destination));
+
+            IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Encryptor_EncryptZero2(NativePtr, destination.NativePtr, poolHandle);
         }
 
         /// <summary>

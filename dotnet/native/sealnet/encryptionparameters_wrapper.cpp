@@ -109,7 +109,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_GetCoeffModulus(void *thisptr, uint64_t
     IfNullRet(params, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    BuildCoeffPointers(params->coeff_modulus(), length, coeffs);
+    BuildSmallModulusPointers(params->coeff_modulus(), length, coeffs);
     return S_OK;
 }
 

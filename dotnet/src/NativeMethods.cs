@@ -7,6 +7,7 @@ using System.Text;
 
 namespace Microsoft.Research.SEAL
 {
+    [Guid("A7AAD62F-3A48-4188-B6C3-523C294CFDAD")]
     static class NativeMethods
     {
         private const string sealnetnative = "sealnetnative";
@@ -220,6 +221,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void SmallModulus_IsZero(IntPtr thisptr, out bool isZero);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SmallModulus_IsPrime(IntPtr thisptr, out bool isPrime);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SmallModulus_Value(IntPtr thisptr, out ulong value);
 
         [DllImport(sealnetnative, PreserveSig = false)]
@@ -245,6 +249,13 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, EntryPoint = "SmallModulus_Equals2", PreserveSig = false)]
         internal static extern void SmallModulus_Equals(IntPtr thisptr, ulong other, out bool result);
+
+        [DllImport(sealnetnative, EntryPoint = "SmallModulus_GetPrimes", PreserveSig = false)]
+        internal static extern void SmallModulus_GetPrimes(
+            int bitSize,
+            ulong count,
+            ulong nttSize,
+            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] primeArray);
 
         #endregion
 
@@ -346,7 +357,11 @@ namespace Microsoft.Research.SEAL
         #region SEALContext methods
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_Create(IntPtr encryptionParams, bool expandModChain, out IntPtr context);
+        internal static extern void SEALContext_Create(
+            IntPtr encryptionParams,
+            bool expandModChain,
+            bool enforceHEStdSecurity,
+            out IntPtr context);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_Destroy(IntPtr thisptr);
@@ -355,10 +370,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void SEALContext_KeyParmsId(IntPtr thisptr, ulong[] parmsId);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_ParmsIdFirst(IntPtr thisptr, ulong[] parmsId);
+        internal static extern void SEALContext_FirstParmsId(IntPtr thisptr, ulong[] parmsId);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_ParmsIdLast(IntPtr thisptr, ulong[] parmsId);
+        internal static extern void SEALContext_LastParmsId(IntPtr thisptr, ulong[] parmsId);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_ParametersSet(IntPtr thisptr, out bool paramsSet);
@@ -367,13 +382,16 @@ namespace Microsoft.Research.SEAL
         internal static extern void SEALContext_KeyContextData(IntPtr thisptr, out IntPtr contextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_ContextDataFirst(IntPtr thisptr, out IntPtr contextData);
+        internal static extern void SEALContext_FirstContextData(IntPtr thisptr, out IntPtr contextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_ContextDataLast(IntPtr thisptr, out IntPtr contextData);
+        internal static extern void SEALContext_LastContextData(IntPtr thisptr, out IntPtr contextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SEALContext_GetContextData(IntPtr thisptr, ulong[] parmsId, out IntPtr contextData);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SEALContext_UsingKeySwitching(IntPtr thisptr, out bool usingKeySwitching);
 
         #endregion
 
@@ -506,6 +524,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Evaluator_ComplexConjugate(IntPtr thisptr, IntPtr encrypted, IntPtr galoisKeys, IntPtr destination, IntPtr pool);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Evaluator_ContextUsingKeySwitching(IntPtr thisptr, out bool usingKeySwitching);
+
         #endregion
 
         #region Ciphertext methods
@@ -610,17 +631,20 @@ namespace Microsoft.Research.SEAL
 
         #region Plaintext methods
 
-        [DllImport(sealnetnative, EntryPoint = "Plaintext_Create1", PreserveSig = false)]
-        internal static extern void Plaintext_Create(IntPtr memoryPoolHandle, out IntPtr plainText);
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Create1(IntPtr memoryPoolHandle, out IntPtr plainText);
 
-        [DllImport(sealnetnative, EntryPoint = "Plaintext_Create2", PreserveSig = false)]
-        internal static extern void Plaintext_Create(ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Create2(ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
 
-        [DllImport(sealnetnative, EntryPoint = "Plaintext_Create3", PreserveSig = false)]
-        internal static extern void Plaintext_Create(ulong capacity, ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Create3(ulong capacity, ulong coeffCount, IntPtr memoryPoolHandle, out IntPtr plainText);
 
-        [DllImport(sealnetnative, EntryPoint = "Plaintext_Create4", PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void Plaintext_Create(string hexPoly, IntPtr memoryPoolHandle, out IntPtr plainText);
+        [DllImport(sealnetnative, PreserveSig = false, CharSet = CharSet.Ansi)]
+        internal static extern void Plaintext_Create4(string hexPoly, IntPtr memoryPoolHandle, out IntPtr plainText);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Create5(IntPtr copy, out IntPtr plainText);
 
         [DllImport(sealnetnative, EntryPoint = "Plaintext_Set1", PreserveSig = false)]
         internal static extern void Plaintext_Set(IntPtr thisptr, IntPtr assign);
@@ -726,7 +750,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void KSwitchKeys_ClearDataAndReserve(IntPtr thisptr, ulong size);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KSwitchKeys_GetKeyCount(IntPtr thisptr, out ulong keyCount);
+        internal static extern void KSwitchKeys_RawSize(IntPtr thisptr, out ulong keyCount);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KSwitchKeys_GetKeyList(IntPtr thisptr, ulong index, ref ulong count, IntPtr[] key_list);
@@ -908,6 +932,9 @@ namespace Microsoft.Research.SEAL
         internal static extern void MemoryPoolHandle_AllocByteCount(IntPtr thisptr, out ulong count);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void MemoryPoolHandle_UseCount(IntPtr thisptr, out long count);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void MemoryPoolHandle_IsInitialized(IntPtr thisptr, out bool initialized);
 
         [DllImport(sealnetnative, PreserveSig = false)]
@@ -922,6 +949,12 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_Encrypt(IntPtr thisptr, IntPtr plaintext, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptZero1(IntPtr thisptr, ulong[] parmsId, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptZero2(IntPtr thisptr, IntPtr destination, IntPtr poolHandle);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_Destroy(IntPtr thisptr);
