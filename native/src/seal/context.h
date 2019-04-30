@@ -89,7 +89,7 @@ namespace seal
         Tells whether the encryption parameters are secure based on the standard parameters
         from HomomorphicEncryption.org security standard.
         */
-        bool using_he_std_security;
+        bool using_hes;
 
     private:
         EncryptionParameterQualifiers() :
@@ -99,7 +99,7 @@ namespace seal
             using_batching(false),
             using_fast_plain_lift(false),
             using_descending_modulus_chain(false),
-            using_he_std_security(false)
+            using_hes(false)
         {
         }
 
@@ -368,18 +368,18 @@ namespace seal
         @param[in] parms The encryption parameters
         @param[in] expand_mod_chain Determines whether the modulus switching chain
         should be created
-        @param[in] enforce_he_std_security Determines whether a minimum of 128-bit
-        security level according to HomomorphicEncryption.org security standard
-        should be enforced
+        @param[in] enforce_hes Determines whether a minimum of 128-bit security
+        level according to HomomorphicEncryption.org security standard should be
+        enforced
         */
         static auto Create(const EncryptionParameters &parms,
-            bool expand_mod_chain = true, bool enforce_he_std_security = true)
+            bool expand_mod_chain = true, bool enforce_hes = true)
         {
             return std::shared_ptr<SEALContext>(
                 new SEALContext(
                     parms,
                     expand_mod_chain,
-                    enforce_he_std_security,
+                    enforce_hes,
                     MemoryManager::GetPool())
                 );
         }
@@ -495,14 +495,14 @@ namespace seal
         @param[in] parms The encryption parameters
         @param[in] expand_mod_chain Determines whether the modulus switching chain
         should be created
-        @param[in] enforce_he_std_security Determines whether a minimum of 128-bit
-        security level according to HomomorphicEncryption.org security standard
-        should be enforced
+        @param[in] enforce_hes Determines whether a minimum of 128-bit security
+        level according to HomomorphicEncryption.org security standard should be
+        enforced
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
         SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-            bool enforce_he_std_security, MemoryPoolHandle pool);
+            bool enforce_hes, MemoryPoolHandle pool);
 
         ContextData validate(EncryptionParameters parms);
 
@@ -528,7 +528,7 @@ namespace seal
         /**
         Is HomomorphicEncryption.org security standard enforced?
         */
-        bool enforce_he_std_security_;
+        bool enforce_hes_;
 
         /**
         Is keyswitching supported by the encryption parameters?

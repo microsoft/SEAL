@@ -64,7 +64,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -81,7 +81,7 @@ namespace SEALNetTest
             Assert.IsTrue(qualifiers.UsingFastPlainLift);
             Assert.IsTrue(qualifiers.UsingFFT);
             Assert.IsTrue(qualifiers.UsingNTT);
-            Assert.IsFalse(qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(qualifiers.UsingHES);
             Assert.IsTrue(qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context.UsingKeySwitching);
 
@@ -127,7 +127,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -169,7 +169,7 @@ namespace SEALNetTest
 
             SEALContext context1 = new SEALContext(parms,
                 expandModChain: true,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             // By default there is a chain
             SEALContext.ContextData contextData = context1.KeyContextData;

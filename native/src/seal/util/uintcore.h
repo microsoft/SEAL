@@ -272,7 +272,7 @@ namespace seal
             }
 #endif
             value += uint64_count - 1;
-            for (; *value == 0 && uint64_count; uint64_count--)
+            for (; uint64_count && !*value; uint64_count--)
             {
                 value--;
             }

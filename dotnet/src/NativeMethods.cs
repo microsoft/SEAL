@@ -202,7 +202,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void EPQ_UsingDescendingModulusChain(IntPtr thisptr, out bool usingDescendingModulusChain);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void EPQ_UsingHEStdSecurity(IntPtr thisptr, out bool usingHEStdSecurity);
+        internal static extern void EPQ_UsingHES(IntPtr thisptr, out bool usingHES);
 
         #endregion
 
@@ -360,7 +360,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void SEALContext_Create(
             IntPtr encryptionParams,
             bool expandModChain,
-            bool enforceHEStdSecurity,
+            bool enforceHES,
             out IntPtr context);
 
         [DllImport(sealnetnative, PreserveSig = false)]

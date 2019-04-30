@@ -24,7 +24,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -43,7 +43,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -62,7 +62,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -82,7 +82,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -102,7 +102,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -122,7 +122,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -144,7 +144,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(key_qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_TRUE(context->using_keyswitching());
         }
 
@@ -164,7 +164,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -184,7 +184,7 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -206,7 +206,7 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(key_qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_TRUE(context->using_keyswitching());
         }
 
@@ -228,11 +228,11 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(key_qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_TRUE(context->using_keyswitching());
         }
 
-        // Parameters not OK due to too small poly_modulus_degree and enforce_he_std_security
+        // Parameters not OK due to too small poly_modulus_degree and enforce_hes
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 137, 193 });
         parms.set_plain_modulus(73);
@@ -242,11 +242,11 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, true);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
-        // Parameters not OK due to too small noise_standard_deviation and enforce_he_std_security
+        // Parameters not OK due to too small noise_standard_deviation and enforce_hes
         parms.set_poly_modulus_degree(1024);
         parms.set_coeff_modulus({ 137, 193 });
         parms.set_plain_modulus(73);
@@ -256,11 +256,11 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, true);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
-        // Parameters not OK due to too large coeff_modulus and enforce_he_std_security
+        // Parameters not OK due to too large coeff_modulus and enforce_hes
         parms.set_poly_modulus_degree(2048);
         parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
         parms.set_plain_modulus(73);
@@ -270,7 +270,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, true);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
 
@@ -288,7 +288,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
             ASSERT_TRUE(qualifiers.using_descending_modulus_chain);
-            ASSERT_TRUE(key_qualifiers.using_he_std_security);
+            ASSERT_TRUE(key_qualifiers.using_hes);
             ASSERT_TRUE(context->using_keyswitching());
         }
 
@@ -306,7 +306,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
             ASSERT_TRUE(key_qualifiers.using_descending_modulus_chain);
-            ASSERT_FALSE(qualifiers.using_he_std_security);
+            ASSERT_FALSE(qualifiers.using_hes);
             ASSERT_TRUE(context->using_keyswitching());
         }
 
@@ -323,7 +323,7 @@ namespace SEALTest
             ASSERT_TRUE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
             ASSERT_TRUE(qualifiers.using_descending_modulus_chain);
-            ASSERT_TRUE(qualifiers.using_he_std_security);
+            ASSERT_TRUE(qualifiers.using_hes);
             ASSERT_FALSE(context->using_keyswitching());
         }
     }

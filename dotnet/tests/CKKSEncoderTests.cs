@@ -25,7 +25,7 @@ namespace SEALNetTest
             parms.CoeffModulus = coeffModulus;
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
 
             int slots = 16;
             Plaintext plain = new Plaintext();
@@ -61,7 +61,7 @@ namespace SEALNetTest
             parms.CoeffModulus = coeffModulus;
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             Plaintext plain = new Plaintext();
@@ -95,7 +95,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             Plaintext plain = new Plaintext();
@@ -125,7 +125,7 @@ namespace SEALNetTest
             parms.CoeffModulus = coeffModulus;
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             List<Complex> values = new List<Complex>(slots);
@@ -166,7 +166,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             CKKSEncoder encoder = new CKKSEncoder(context);
             Plaintext plain = new Plaintext();
 
@@ -197,7 +197,7 @@ namespace SEALNetTest
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             CKKSEncoder encoder = new CKKSEncoder(context);
             List<double> vald = new List<double>();
             List<double> vald_null = null;

@@ -168,7 +168,7 @@ namespace SEALNetTest
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHEStdSecurity: false);
+                enforceHES: false);
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys(steps: new int[] { 1, 2, 3 });

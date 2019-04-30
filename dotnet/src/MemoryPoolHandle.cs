@@ -121,9 +121,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a MemoryPoolHandle pointing to the thread-local memory pool. Note
-        /// that the thread-local memory pool cannot be used to communicate across
-        /// different threads.
+        /// Returns a MemoryPoolHandle pointing to the thread-local memory pool.
         /// </summary>
         public static MemoryPoolHandle ThreadLocal()
         {
@@ -146,81 +144,49 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the number of different allocation sizes. This function returns
-        /// the number of different allocation sizes the memory pool pointed to by
-        /// the current MemoryPoolHandle has made. For example, if the memory pool has
-        /// only allocated two allocations of sizes 128 KB, this function returns 1.
-        /// If it has instead allocated one allocation of size 64 KB and one of 128 KB,
-        /// this functions returns 2.
+        /// Returns the number of different allocation sizes.
         /// </summary>
-        /// <exception cref="InvalidOperationException">if the MemoryPoolHandle is uninitialized</exception>
+        /// <remarks>
+        /// This function returns the number of different allocation sizes the memory
+        /// pool pointed to by the current MemoryPoolHandle has made. For example,
+        /// if the memory pool has only allocated two allocations of sizes 128 KB,
+        /// this function returns 1. If it has instead allocated one allocation of
+        /// size 64 KB and one of 128 KB, this functions returns 2.
+        /// </remarks>
         public ulong PoolCount
         {
             get
             {
-                try
-                {
-                    NativeMethods.MemoryPoolHandle_PoolCount(NativePtr, out ulong count);
-                    return count;
-                }
-                catch(COMException ex)
-                {
-                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                        throw new InvalidOperationException("MemoryPoolHandle is uninitialized", ex);
-                    throw;
-                }
+                NativeMethods.MemoryPoolHandle_PoolCount(NativePtr, out ulong count);
+                return count;
             }
         }
 
         /// <summary>
-        /// Returns the size of allocated memory. This functions returns the total
-        /// amount of memory (in bytes) allocated by the memory pool pointed to by
-        /// the current MemoryPoolHandle.
+        /// Returns the size of allocated memory.
         /// </summary>
-        /// <exception cref="InvalidOperationException">if the MemoryPoolHandle is uninitialized</exception>
+        /// <remarks>
+        /// This functions returns the total amount of memory (in bytes) allocated
+        /// by the memory pool pointed to by the current MemoryPoolHandle.
+        /// </remarks>
         public ulong AllocByteCount
         {
             get
             {
-                try
-                {
-                    NativeMethods.MemoryPoolHandle_AllocByteCount(NativePtr, out ulong count);
-                    return count;
-                }
-                catch (COMException ex)
-                {
-                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                        throw new InvalidOperationException("MemoryPoolHandle is uninitialized", ex);
-                    throw;
-                }
+                NativeMethods.MemoryPoolHandle_AllocByteCount(NativePtr, out ulong count);
+                return count;
             }
         }
 
         /// <summary>
         /// Returns the number of MemoryPoolHandle objects sharing this memory pool.
         /// </summary>
-        /// <remarks>
-        /// Returns the number of MemoryPoolHandle objects sharing this memory pool.
-        /// The function only reveals the use-count for custom memory pools, and not
-        /// for the global pool or the thread-local(global) pool, for which it will
-        /// always return 0.
-        /// </remarks>
-        /// <exception cref="InvalidOperationException">if the MemoryPoolHandle is uninitialized</exception>
         public long UseCount
         {
             get
             {
-                try
-                {
-                    NativeMethods.MemoryPoolHandle_UseCount(NativePtr, out long count);
-                    return count;
-                }
-                catch (COMException ex)
-                {
-                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                        throw new InvalidOperationException("MemoryPoolHandle is uninitialized", ex);
-                    throw;
-                }
+                NativeMethods.MemoryPoolHandle_UseCount(NativePtr, out long count);
+                return count;
             }
         }
 

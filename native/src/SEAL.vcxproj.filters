@@ -123,6 +123,9 @@
     <ClInclude Include="seal\util\common.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+	<ClInclude Include="seal\util\config.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
     <ClInclude Include="seal\util\defines.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>

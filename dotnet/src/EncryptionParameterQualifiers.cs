@@ -172,11 +172,11 @@ namespace Microsoft.Research.SEAL
         /// Tells whether the encryption parameters are secure based on the standard parameters
         /// from HomomorphicEncryption.org security standard.
         /// </summary>
-        public bool UsingHEStdSecurity
+        public bool UsingHES
         {
             get
             {
-                NativeMethods.EPQ_UsingHEStdSecurity(NativePtr, out bool result);
+                NativeMethods.EPQ_UsingHES(NativePtr, out bool result);
                 return result;
             }
         }

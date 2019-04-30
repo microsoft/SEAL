@@ -21,7 +21,7 @@ namespace seal
 
         namespace global_variables
         {
-            extern std::unique_ptr<MemoryPool> const global_memory_pool;
+            extern std::shared_ptr<MemoryPool> const global_memory_pool;
 
 /*
 For .NET Framework wrapper support (C++/CLI) we need to
@@ -30,7 +30,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
     (2) disable thread-safe memory pools.
 */
 #ifndef _M_CEE
-            extern thread_local std::unique_ptr<MemoryPool> const tls_memory_pool;
+            extern thread_local std::shared_ptr<MemoryPool> const tls_memory_pool;
 #endif
             /**
             HomomorphicEncryption.org security tables provide an upper bound for the bit-length

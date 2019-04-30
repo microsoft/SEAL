@@ -102,15 +102,15 @@ namespace seal
 
         // Assume parameters are secure according to HomomorphicEncryption.org
         // security standard
-        context_data.qualifiers_.using_he_std_security = true;
+        context_data.qualifiers_.using_hes = true;
 
         // Check if the noise_standard_deviation is less than the default value
         if (parms.noise_standard_deviation() <
             util::global_variables::default_noise_standard_deviation)
         {
             // Not secure according to HomomorphicEncryption.org security standard
-            context_data.qualifiers_.using_he_std_security = false;
-            if (enforce_he_std_security_)
+            context_data.qualifiers_.using_hes = false;
+            if (enforce_hes_)
             {
                 // Parameters are not valid
                 context_data.qualifiers_.parameters_set = false;
@@ -126,8 +126,8 @@ namespace seal
                 max_secure_coeff_modulus_bit_count.at(poly_modulus_degree)))
         {
             // Not secure according to HomomorphicEncryption.org security standard
-            context_data.qualifiers_.using_he_std_security = false;
-            if (enforce_he_std_security_)
+            context_data.qualifiers_.using_hes = false;
+            if (enforce_hes_)
             {
                 // Parameters are not valid
                 context_data.qualifiers_.parameters_set = false;
@@ -354,8 +354,8 @@ namespace seal
     }
 
     SEALContext::SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-        bool enforce_he_std_security, MemoryPoolHandle pool)
-        : pool_(move(pool)), enforce_he_std_security_(enforce_he_std_security)
+        bool enforce_hes, MemoryPoolHandle pool)
+        : pool_(move(pool)), enforce_hes_(enforce_hes)
     {
         if (!pool_)
         {

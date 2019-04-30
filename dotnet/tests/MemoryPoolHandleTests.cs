@@ -11,26 +11,6 @@ namespace SEALNetTest
     public class MemoryPoolHandleTests
     {
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void PoolCountUninitializedTest()
-        {
-            MemoryPoolHandle handle = new MemoryPoolHandle();
-            Assert.IsFalse(handle.IsInitialized);
-            ulong count = handle.PoolCount;
-            Assert.AreEqual(0ul, count);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void AllocByteCountUninitializedTest()
-        {
-            MemoryPoolHandle handle = new MemoryPoolHandle();
-            Assert.IsFalse(handle.IsInitialized);
-            ulong count = handle.AllocByteCount;
-            Assert.AreEqual(0ul, count);
-        }
-
-        [TestMethod]
         public void CreateTest()
         {
             MemoryPoolHandle handle = MemoryManager.GetPool();
