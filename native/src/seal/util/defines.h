@@ -40,20 +40,6 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #define SEAL_CIPHERTEXT_SIZE_MIN 2
 #define SEAL_CIPHERTEXT_SIZE_MAX 32768
 
-// Use std::byte as byte type
-#if defined(SEAL_USE_STD_BYTE)
-#include <cstddef>
-namespace seal
-{
-    using SEAL_BYTE = std::byte;
-}
-#else
-namespace seal
-{
-    enum class SEAL_BYTE : unsigned char {};
-}
-#endif
-
 // Detect compiler
 #define SEAL_COMPILER_MSVC 1
 #define SEAL_COMPILER_CLANG 2
@@ -81,6 +67,20 @@ namespace seal
 #define SEAL_DEBUG_V true
 #else
 #define SEAL_DEBUG_V false
+#endif
+
+// Use std::byte as byte type
+#ifdef SEAL_USE_STD_BYTE
+#include <cstddef>
+namespace seal
+{
+    using SEAL_BYTE = std::byte;
+}
+#else
+namespace seal
+{
+    enum class SEAL_BYTE : unsigned char {};
+}
 #endif
 
 // Use `if constexpr' from C++17
