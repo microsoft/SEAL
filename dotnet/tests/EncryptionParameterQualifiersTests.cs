@@ -18,7 +18,7 @@ namespace SEALNetTest
             Assert.IsTrue(context.FirstContextData.Qualifiers.UsingBatching);
             Assert.IsTrue(context.FirstContextData.Qualifiers.UsingFastPlainLift);
             Assert.IsTrue(context.FirstContextData.Qualifiers.UsingFFT);
-            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingHEStdSecurity);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingHES);
             Assert.IsFalse(context.FirstContextData.Qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context.FirstContextData.Qualifiers.UsingNTT);
             Assert.IsTrue(context.UsingKeySwitching);
@@ -35,7 +35,7 @@ namespace SEALNetTest
             Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingBatching);
             Assert.IsFalse(context2.FirstContextData.Qualifiers.UsingFastPlainLift);
             Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingFFT);
-            Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingHEStdSecurity);
+            Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingHES);
             Assert.IsFalse(context.FirstContextData.Qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingNTT);
             Assert.IsTrue(context.UsingKeySwitching);
@@ -47,7 +47,7 @@ namespace SEALNetTest
             Assert.IsTrue(qualifiers.UsingBatching);
             Assert.IsFalse(qualifiers.UsingFastPlainLift);
             Assert.IsTrue(qualifiers.UsingFFT);
-            Assert.IsTrue(qualifiers.UsingHEStdSecurity);
+            Assert.IsTrue(qualifiers.UsingHES);
             Assert.IsTrue(qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(qualifiers.UsingNTT);
         }

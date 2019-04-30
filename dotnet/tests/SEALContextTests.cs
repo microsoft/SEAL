@@ -81,7 +81,7 @@ namespace SEALNetTest
             Assert.IsTrue(qualifiers.UsingFastPlainLift);
             Assert.IsTrue(qualifiers.UsingFFT);
             Assert.IsTrue(qualifiers.UsingNTT);
-            Assert.IsFalse(qualifiers.UsingHEStdSecurity);
+            Assert.IsFalse(qualifiers.UsingHES);
             Assert.IsTrue(qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context.UsingKeySwitching);
 

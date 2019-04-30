@@ -102,14 +102,14 @@ namespace seal
 
         // Assume parameters are secure according to HomomorphicEncryption.org
         // security standard
-        context_data.qualifiers_.using_he_std_security = true;
+        context_data.qualifiers_.using_hes = true;
 
         // Check if the noise_standard_deviation is less than the default value
         if (parms.noise_standard_deviation() <
             util::global_variables::default_noise_standard_deviation)
         {
             // Not secure according to HomomorphicEncryption.org security standard
-            context_data.qualifiers_.using_he_std_security = false;
+            context_data.qualifiers_.using_hes = false;
             if (enforce_hes_)
             {
                 // Parameters are not valid
@@ -126,7 +126,7 @@ namespace seal
                 max_secure_coeff_modulus_bit_count.at(poly_modulus_degree)))
         {
             // Not secure according to HomomorphicEncryption.org security standard
-            context_data.qualifiers_.using_he_std_security = false;
+            context_data.qualifiers_.using_hes = false;
             if (enforce_hes_)
             {
                 // Parameters are not valid

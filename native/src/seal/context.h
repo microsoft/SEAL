@@ -89,7 +89,7 @@ namespace seal
         Tells whether the encryption parameters are secure based on the standard parameters
         from HomomorphicEncryption.org security standard.
         */
-        bool using_he_std_security;
+        bool using_hes;
 
     private:
         EncryptionParameterQualifiers() :
@@ -99,7 +99,7 @@ namespace seal
             using_batching(false),
             using_fast_plain_lift(false),
             using_descending_modulus_chain(false),
-            using_he_std_security(false)
+            using_hes(false)
         {
         }
 
