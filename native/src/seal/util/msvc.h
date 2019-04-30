@@ -26,10 +26,11 @@
 
 #endif
 
+// In Visual Studio redefine std::byte (SEAL_BYTE)
+#undef SEAL_USE_STD_BYTE
+
 // Are we compiling with C++17 or newer
 #if (__cplusplus >= 201703L)
-// Use std::byte
-#define SEAL_USE_STD_BYTE
 
 // Use std::shared_mutex only when not using /clr
 #ifndef _M_CEE
@@ -44,7 +45,6 @@
 // Use [[maybe_unused]]
 #define SEAL_USE_MAYBE_UNUSED
 #else
-#undef SEAL_USE_STD_BYTE
 #undef SEAL_USE_SHARED_MUTEX
 #undef SEAL_USE_IF_CONSTEXPR
 #undef SEAL_USE_MAYBE_UNUSED
