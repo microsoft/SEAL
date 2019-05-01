@@ -346,7 +346,7 @@ namespace SEALTest
         TEST(MemoryPoolTests, TestMemoryPoolST)
         {
             {
-                MemoryPoolMT pool;
+                MemoryPoolST pool;
                 ASSERT_TRUE(0LL == pool.pool_count());
 
                 Pointer<uint64_t> pointer{ pool.get_for_byte_count(bytes_per_uint64 * 0) };
@@ -404,7 +404,7 @@ namespace SEALTest
                 ASSERT_TRUE(4LL == pool.pool_count());
             }
             {
-                MemoryPoolMT pool;
+                MemoryPoolST pool;
                 ASSERT_TRUE(0LL == pool.pool_count());
 
                 Pointer<int> pointer{ pool.get_for_byte_count(4 * 0) };
@@ -462,7 +462,7 @@ namespace SEALTest
                 ASSERT_TRUE(4LL == pool.pool_count());
             }
             {
-                MemoryPoolMT pool;
+                MemoryPoolST pool;
                 ASSERT_TRUE(0LL == pool.pool_count());
 
                 Pointer<SEAL_BYTE> pointer = pool.get_for_byte_count(0);
@@ -515,7 +515,7 @@ namespace SEALTest
 
         TEST(MemoryPoolTests, PointerTestsST)
         {
-            MemoryPool &pool = *global_variables::global_memory_pool;
+            MemoryPoolST pool;
             {
                 Pointer<uint64_t> p1;
                 ASSERT_FALSE(p1.is_set());
@@ -617,7 +617,7 @@ namespace SEALTest
                 allocation[0] = 0x1234567812345678;
                 allocation[1] = 0x8765432187654321;
 
-                MemoryPoolMT pool;
+                MemoryPoolST pool;
                 Pointer<uint64_t> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
                 ASSERT_TRUE(p1.is_set());
                 ASSERT_TRUE(p1.get() == allocation.get());
@@ -636,7 +636,7 @@ namespace SEALTest
                 allocation[0] = 0x234567812345678;
                 allocation[1] = 0x765432187654321;
 
-                MemoryPoolMT pool;
+                MemoryPoolST pool;
                 Pointer<int64_t> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
                 ASSERT_TRUE(p1.is_set());
                 ASSERT_TRUE(p1.get() == allocation.get());
@@ -655,7 +655,7 @@ namespace SEALTest
                 allocation[0] = 0x123;
                 allocation[1] = 0x876;
 
-                MemoryPoolMT pool;
+                MemoryPoolST pool;
                 Pointer<int> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
                 ASSERT_TRUE(p1.is_set());
                 ASSERT_TRUE(p1.get() == allocation.get());
