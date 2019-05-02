@@ -189,7 +189,6 @@ void example_basic_bfv()
     /*
     Print the parameters that we have chosen.
     */
-    // \todo A better print_parameters, make it more visible.
     print_parameters(context);
 
     /*

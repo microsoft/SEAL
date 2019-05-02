@@ -39,6 +39,7 @@ namespace seal
                     0x3fffffff000001
                 } },
 
+// \todo make the first one extra large
                 /*
                 Polynomial modulus: 1x^4096 + 1
                 Modulus count: 3
