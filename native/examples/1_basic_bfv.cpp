@@ -155,6 +155,7 @@ void example_basic_bfv()
     to generate an desired amount of small primes for 128-bit security level for
     one polynomial modulus degree.
 
+    \todo Need to update this line.
     In this example we use the default coefficient modulus for a 128-bit security
     level. Concretely, this coefficient modulus consists of only one 54-bit prime
     factor: 0x3fffffff000001.
@@ -177,7 +178,7 @@ void example_basic_bfv()
     form log2(plain_modulus) + (other terms).
     The plaintext modulus does not exist in CKKS, which is shown in later examples.
     */
-    parms.set_plain_modulus(512);
+    parms.set_plain_modulus(256);
 
     /*
     Now that all parameters are set, we are ready to construct a SEALContext
@@ -223,6 +224,7 @@ void example_basic_bfv()
 
     /*
     We evaluate the polynomial 2x^4+4x^3+4x^2+4x+2 over an encrypted x = 6.
+    Constant coefficients are considered as plaintext inputs.
     The computation is done modulo the plaintext modulus 512.
     
     This examples is simple, easy to understand, but rather impractical.
@@ -344,7 +346,7 @@ void example_basic_bfv()
     cout << "\tSize of 2(x^2+1)(x+1)^2: " << encrypted_result.size() << endl;
     cout << "\tNoise budget in 2(x^2+1)(x+1)^2: "
         << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
-    cout << "STOP: Decryption is incorrect since noise budget is zero." << endl;
+    cout << "NOTE: Decryption can be incorrect if noise budget is zero." << endl;
     cout << endl;
 
     /*
@@ -440,6 +442,7 @@ void example_basic_bfv()
     cout << "Done" << endl;
     cout << "\tNoise budget in 2(x^2+1)(x+1)^2: "
         << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
+    cout << "NOTE: Notice the increase in noise budget." << endl;
 
     /*
     Since we still have noise budget left, decryption works correctly. For x=6,
@@ -447,7 +450,7 @@ void example_basic_bfv()
     result is reduced modulo 512. Therefore the expected output should be 42 or
     0x2A.
     */
-    cout << "   Decrypting 2(x^2+1)(x+1)^2: ";
+    cout << "-- Decrypting 2(x^2+1)(x+1)^2: ";
     decryptor.decrypt(encrypted_result, decrypted_result);
     cout << "Done (2(x^2+1)(x+1)^2 = 0x" << decrypted_result.to_string() << ")" << endl;
     cout << endl;
