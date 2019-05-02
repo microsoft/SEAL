@@ -9,6 +9,15 @@ project(SEALExamples VERSION 3.3.0 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 
 add_executable(sealexamples examples.cpp)
+target_sources(sealexamples
+    PRIVATE
+        1_basic_bfv.cpp
+        2_basic_encoders.cpp
+        3_basic_ckks.cpp
+        4_rotation.cpp
+        5_levels.cpp
+        6_performance.cpp
+)
 
 # Import Microsoft SEAL
 find_package(SEAL 3.3.0 EXACT REQUIRED)

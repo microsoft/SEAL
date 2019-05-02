@@ -207,11 +207,11 @@ namespace seal
             std::vector<SmallModulus> temp;
             if (count_large)
             {
-                destination = get_primes(bit_size_large, count_large, poly_modulus_degree);
+                destination = SmallModulus::GetPrimes(bit_size_large, count_large, poly_modulus_degree);
             }
             if (count_small)
             {
-                temp = get_primes(bit_size_small, count_small, poly_modulus_degree);
+                temp = SmallModulus::GetPrimes(bit_size_small, count_small, poly_modulus_degree);
                 destination.insert(destination.end(), temp.begin(), temp.end());
             }
             std::rotate(destination.begin(), destination.begin() + 1, destination.end());

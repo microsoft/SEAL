@@ -102,7 +102,7 @@ namespace seal
         }
         if (!is_metadata_valid_for(encrypted2, context_))
         {
-            throw invalid_argument("encrypted1 is not valid for encryption parameters");
+            throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
         if (encrypted1.parms_id() != encrypted2.parms_id())
         {
