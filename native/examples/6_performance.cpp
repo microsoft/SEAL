@@ -669,7 +669,6 @@ void example_ckks_performance_custom()
     if (!(cin >> degree))
     {
         cout << "Invalid option." << endl;
-        cout << endl << "Run example: ";
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         return;
@@ -705,6 +704,7 @@ void example_performance_test()
         cout << " 0. Exit" << endl;
 
         int selection = 0;
+        cout << endl << "Run example: ";
         if (!(cin >> selection))
         {
             cout << "Invalid option." << endl;
