@@ -46,7 +46,7 @@ namespace seal
 
             ReaderWriterLocker &operator =(const ReaderWriterLocker &assign) = delete;
 
-            std::shared_mutex rw_lock_mutex_;
+            std::shared_mutex rw_lock_mutex_{};
         };
     }
 }
