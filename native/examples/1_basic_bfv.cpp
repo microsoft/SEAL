@@ -155,10 +155,9 @@ void example_basic_bfv()
     to generate an desired amount of small primes for 128-bit security level for
     one polynomial modulus degree.
 
-    \todo Need to update this line.
     In this example we use the default coefficient modulus for a 128-bit security
-    level. Concretely, this coefficient modulus consists of only one 54-bit prime
-    factor: 0x3fffffff000001.
+    level. Concretely, this coefficient modulus consists of two 36-bit and one
+    37-bit prime factors: 0xffffee001, 0xffffc4001, 0x1ffffe0001.
     */
     parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
 
