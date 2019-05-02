@@ -225,7 +225,7 @@ void example_basic_bfv()
     /*
     We evaluate the polynomial 2x^4+4x^3+4x^2+4x+2 over an encrypted x = 6.
     Constant coefficients are considered as plaintext inputs.
-    The computation is done modulo the plaintext modulus 512.
+    The computation is done modulo the plaintext modulus 256.
     
     This examples is simple, easy to understand, but rather impractical.
     Microsoft SEAL comes with two basic encoders for the BFV scheme:
@@ -446,8 +446,8 @@ void example_basic_bfv()
 
     /*
     Since we still have noise budget left, decryption works correctly. For x=6,
-    2(x^2+1)(x+1)^2 = 3626. Since the plaintext modulus is set to 512, this
-    result is reduced modulo 512. Therefore the expected output should be 42 or
+    2(x^2+1)(x+1)^2 = 3626. Since the plaintext modulus is set to 256, this
+    result is reduced modulo 256. Therefore the expected output should be 42 or
     0x2A.
     */
     cout << "-- Decrypting 2(x^2+1)(x+1)^2: ";
