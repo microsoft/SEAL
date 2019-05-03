@@ -185,8 +185,8 @@ void example_basic_ckks()
         << " bits" << endl;
 
     /*
-    Since both encrypted_x3 and encrypted_x1_coeff3 now have the same scale and
-    use same encryption parameters, we can multiply them together. We write the
+    Since encrypted_x3 and encrypted_x1_coeff3 have the same exact scale and use
+    the same encryption parameters, we can multiply them together. We write the
     result to encrypted_x3.
     */
     cout << "-- Computing (PI*x)*x^2: ";
@@ -216,6 +216,17 @@ void example_basic_ckks()
     Now we would hope to compute the sum of all three terms. However, there is
     a serious problem: the encryption parameters used by all three terms are
     different due to modulus switching from rescaling.
+
+    Homomorphic addition and subtraction naturally require that the scales of
+    the inputs are the same, but also that the encryption parameters (parms_id)
+    are the same. Note that a scale or parms_id mismatch would make
+    Evaluator::add_plain(..) throw an exception.
+
+    Another difference to the BFV scheme is that in CKKS also plaintexts are
+    linked to specific parameter sets: they carry the corresponding parms_id.
+    An overload of CKKSEncoder::encode(...) allows the caller to specify which
+    parameter set in the modulus switching chain (identified by parms_id) should
+    be used to encode the plaintext. This is important as we will see later.
     */
     cout << endl << "Parameters used by all three terms are different:" << endl;
     cout << "\tModulus chain index for encrypted_x3: "
@@ -276,9 +287,11 @@ void example_basic_ckks()
 
     /*
     We still have a problem with mismatching encryption parameters. This is easy
-    to fix by using traditional modulus switching (no rescaling). Note that we
-    use here the Evaluator::mod_switch_to_inplace(...) function to switch to
-    encryption parameters down the chain with a specific parms_id.
+    to fix by using traditional modulus switching (no rescaling). CKKS supports
+    modulus switching just like the BFV scheme. We can switch away parts of the
+    coefficient modulus. Note that we use here the
+    Evaluator::mod_switch_to_inplace(...) function to switch to encryption
+    parameters down the chain with a specific parms_id.
     */
     cout << "-- Matching parms_id: ";
     evaluator.mod_switch_to_inplace(encrypted_x1, encrypted_x3.parms_id());
@@ -316,4 +329,14 @@ void example_basic_ckks()
         true_result.push_back((3.14159265 * x * x + 0.4)* x + 1);
     }
     print_vector(true_result, 3, 7);
+
+    /*
+    We can also rotate an encrypted vector (see example_rotation_ckks).
+
+    We did not show any computations on complex numbers in these examples, but
+    the CKKSEncoder would allow us to have done that just as easily. Additions
+    and multiplications behave just as one would expect. It is also possible
+    to complex conjugate the values in a ciphertext by using the functions
+    Evaluator::complex_conjugate[_inplace](...).
+    */
 }

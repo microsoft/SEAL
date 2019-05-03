@@ -9,4 +9,8 @@ using namespace seal;
 void example_levels()
 {
     print_example_banner("Example: Levels");
+
+    /*
+    In this examples we describe the concept of levels in BFV and CKKS. `parms_id`
+    */
 }
