@@ -6,7 +6,7 @@
 using namespace std;
 using namespace seal;
 
-void bfv_performance_test(std::shared_ptr<SEALContext> context)
+void bfv_performance_test(shared_ptr<SEALContext> context)
 {
     chrono::high_resolution_clock::time_point time_start, time_end;
 
@@ -307,7 +307,7 @@ void bfv_performance_test(std::shared_ptr<SEALContext> context)
     cout.flush();
 }
 
-void ckks_performance_test(std::shared_ptr<SEALContext> context)
+void ckks_performance_test(shared_ptr<SEALContext> context)
 {
     chrono::high_resolution_clock::time_point time_start, time_end;
 

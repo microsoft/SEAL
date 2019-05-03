@@ -135,7 +135,7 @@ void example_batch_encoder()
     If N denotes the degree of the polynomial modulus, and T the plaintext
     modulus, then batching is automatically enabled for the BFV scheme when T is
     a prime number congruent to 1 modulo 2*N.
-    
+
     In batching the plaintexts are viewed as matrices of size 2-by-(N/2) with
     each element an integer modulo T. Homomorphic operations act element-wise
     between encrypted matrices, allowing the user to obtain speeds-ups of
@@ -146,7 +146,7 @@ void example_batch_encoder()
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(8192);
     parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(8192));
-    
+
     /*
     Note that 40961 is a prime number and 2*4096 divides 40960, so batching will
     automatically be enabled for these parameters.

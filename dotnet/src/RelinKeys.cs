@@ -88,7 +88,7 @@ namespace Microsoft.Research.SEAL
         public bool HasKey(ulong keyPower)
         {
             ulong index = GetIndex(keyPower);
-            return (ulong)Data.LongCount() > index && 
+            return (ulong)Data.LongCount() > index &&
                 Data.ElementAt(checked((int)index)).Count() != 0;
         }
 

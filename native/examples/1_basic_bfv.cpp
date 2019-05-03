@@ -225,7 +225,7 @@ void example_basic_bfv()
     We evaluate the polynomial 2x^4+4x^3+4x^2+4x+2 over an encrypted x = 6.
     Constant coefficients are considered as plaintext inputs.
     The computation is done modulo the plaintext modulus 256.
-    
+
     This examples is simple, easy to understand, but rather impractical.
     Microsoft SEAL comes with two basic encoders for the BFV scheme:
         - IntegerEncoder
@@ -375,7 +375,7 @@ void example_basic_bfv()
     size M >= 2 back to size 2, we actually need M-2 relinearization keys.
     Attempting to relinearize a too large ciphertext with too few
     relinearization keys will result in an exception being thrown.
-    
+
     Relinearization is used both in the BFV and the CKKS schemes but in this
     example (for the sake of simplicity) we focus on BFV. We repeat our
     computation, but this time we relinearize after every multiplication.

@@ -101,10 +101,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="1_basic_bfv.cpp" />
+    <ClCompile Include="2_basic_encoders.cpp" />
+    <ClCompile Include="3_basic_ckks.cpp" />
+    <ClCompile Include="4_rotation.cpp" />
+    <ClCompile Include="5_levels.cpp" />
+    <ClCompile Include="6_performance.cpp" />
     <ClCompile Include="examples.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="examples.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

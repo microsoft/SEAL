@@ -16,7 +16,7 @@ void example_basic_ckks()
     equidistant points in the interval [0, 1]. The challenges we encounter will
     be related to matching scales and encryption parameters when adding together
     terms of different degrees in the polynomial evaluation.
-    
+
     We start by setting up an environment similar to what we had in previously.
     */
     EncryptionParameters parms(scheme_type::CKKS);
@@ -52,10 +52,10 @@ void example_basic_ckks()
 
     /*
     The strategy to choose parameters is demonstrated below.
-    
+
     We choose a 60-bit prime as the first element of coeff_modulus.
     This will give us the least risk of overflow at the decryption level.
-    
+
     We choose another 60-bit prime as the last element of coeff_modulus.
     This almost eleminates the noise introduced by relinearization and rotation.
 
@@ -71,7 +71,7 @@ void example_basic_ckks()
     */
     double scale = pow(2.0, 40);
 
-    /* 
+    /*
     We choose the rest primes for rescaling and stablizing scales. Since the
     polynomial has degree 3, it has a multiplicative depth of 2. Based on the
     number of multiplicative levels (2), we choose two primes. Based on the size
@@ -100,7 +100,7 @@ void example_basic_ckks()
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
-    
+
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
@@ -166,7 +166,7 @@ void example_basic_ckks()
     parameters) than encrypted_x1, which prevents us from multiplying them
     together to compute x^3. We could simply switch encrypted_x1 down to the
     next parameters in the modulus switching chain.
-    
+
     Since we still need to multiply the x^3 term with PI (plain_coeff3),
     we instead compute PI*x first and multiply that with x^2 to obtain PI*x^3.
     This product poses no problems since both inputs are at the same scale and
@@ -303,7 +303,7 @@ void example_basic_ckks()
     vector<double> result;
     encoder.decode(plain_result, result);
     cout << "Done" << endl;
-    
+
     cout << endl;
     cout << "Computed result of PI*x^3 + 0.4x + 1:" << endl;
     print_vector(result, 3, 7);
