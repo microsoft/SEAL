@@ -28,7 +28,7 @@ namespace seal
         except that the maximum prime is set to the last position;
         if coeff_modulus_count is not given, returns the default coefficients
         modulus for this degree.
-        
+
         The polynomial modulus and the coefficient modulus obtained in this way should
         provide approdimately 128 bits of security against the best known attacks,
         assuming the standard deviation of the noise distribution is left to its default
@@ -58,30 +58,31 @@ namespace seal
             else
             {
                 // \todo make the first one extra large
-                std::size_t total_coeff_modulus_bit_count = util::global_variables::
+                int total_coeff_modulus_bit_count = util::global_variables::
                     max_secure_coeff_modulus_bit_count.at(poly_modulus_degree);
-                std::size_t bit_size_small = total_coeff_modulus_bit_count / coeff_modulus_count;
-                std::size_t bit_size_large = bit_size_small + 1;
-                std::size_t count_large = total_coeff_modulus_bit_count -
-                    bit_size_small * coeff_modulus_count;
-                std::size_t count_small = coeff_modulus_count - count_large;
+                int bit_size_small = total_coeff_modulus_bit_count / 
+                    util::safe_cast<int>(coeff_modulus_count);
+                int bit_size_large = util::add_safe(bit_size_small, 1);
+                std::size_t bit_count_large = 
+                    static_cast<std::size_t>(total_coeff_modulus_bit_count) -
+                    static_cast<std::size_t>(bit_size_small) * coeff_modulus_count;
+                std::size_t bit_count_small = coeff_modulus_count - bit_count_large;
 
                 std::vector<SmallModulus> destination;
                 std::vector<SmallModulus> temp;
-                if (count_large)
+                if (bit_count_large)
                 {
-                    destination = SmallModulus::GetPrimes(bit_size_large, count_large,
+                    destination = SmallModulus::GetPrimes(bit_size_large, bit_count_large,
                         poly_modulus_degree);
                 }
-                if (count_small)
+                if (bit_count_small)
                 {
-                    temp = SmallModulus::GetPrimes(bit_size_small, count_small,
+                    temp = SmallModulus::GetPrimes(bit_size_small, bit_count_small,
                         poly_modulus_degree);
                     destination.insert(destination.end(), temp.begin(), temp.end());
                 }
                 std::rotate(destination.begin(), destination.begin() + 1, destination.end());
             }
-            
         }
 
         /**
@@ -213,7 +214,7 @@ namespace seal
         The rules are:
         put the maximum prime to the last (minimize noise growth in switch_key),
         sort the rest in decreasing order (remove modular reductions in ModSwitch).
-        
+
         @param[in] coeff_modulus The coeff_modulus vector to sort.
         */
         inline static void sort_coeff_modulus(std::vector<SmallModulus> &coeff_modulus)
