@@ -46,21 +46,17 @@ void example_rotation_bfv()
 
     /*
     First we use BatchEncoder to compose the matrix into a plaintext.
-    */
-    Plaintext plain_matrix;
-    cout << "-- Encoding plaintext matrix: ";
-    batch_encoder.encode(pod_matrix, plain_matrix);
-    cout << "Done" <<endl;
-
-    /*
     Next we encrypt the plaintext as usual.
     */
+    Plaintext plain_matrix;
+    cout << "-- Encoding and encrypting: ";
+    batch_encoder.encode(pod_matrix, plain_matrix);
     Ciphertext encrypted_matrix;
-    cout << "-- Encrypting: ";
     encryptor.encrypt(plain_matrix, encrypted_matrix);
     cout << "Done" << endl;
     cout << "\tNoise budget in fresh encryption: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << endl;
 
     /*
     Rotation requires galois keys.
@@ -68,40 +64,50 @@ void example_rotation_bfv()
     GaloisKeys gal_keys = keygen.galois_keys();
 
     /*
-    Now rotate the rows to the left 3 steps, decrypt, decompose, and print.
+    Now rotate the rows to the left 3 steps, decrypt, decode, and print.
     */
+    cout << "-- Rotating rows 3 steps left: ";
     evaluator.rotate_rows_inplace(encrypted_matrix, 3, gal_keys);
-    cout << "-- Rotated rows 3 steps left: " << endl;
+    cout << "Done" << endl;
     Plaintext plain_result;
-    decryptor.decrypt(encrypted_matrix, plain_result);
-    batch_encoder.decode(plain_result, pod_matrix);
-    print_matrix(pod_matrix, row_size);
     cout << "\tNoise budget after rotation: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << "   Decrypting and decoding: ";
+    decryptor.decrypt(encrypted_matrix, plain_result);
+    batch_encoder.decode(plain_result, pod_matrix);
+    cout << "Done" << endl;
+    print_matrix(pod_matrix, row_size);
     cout << endl;
 
     /*
-    Rotate columns (swap rows), decrypt, decompose, and print.
+    Rotate columns (swap rows), decrypt, decode, and print.
     */
+    cout << "-- Rotating columns: ";
     evaluator.rotate_columns_inplace(encrypted_matrix, gal_keys);
-    cout << "-- Rotated columns: " << endl;
-    decryptor.decrypt(encrypted_matrix, plain_result);
-    batch_encoder.decode(plain_result, pod_matrix);
-    print_matrix(pod_matrix, row_size);
+    cout << "Done" << endl;
     cout << "\tNoise budget after rotation: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
     cout << endl;
-
-    /*
-    Rotate rows to the right 4 steps, decrypt, decompose, and print.
-    */
-    evaluator.rotate_rows_inplace(encrypted_matrix, -4, gal_keys);
-    cout << "-- Rotated rows 4 steps right: " << endl;
+    cout << "   Decrypting and decoding: ";
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
+    cout << "Done" << endl;
     print_matrix(pod_matrix, row_size);
+    cout << endl;
+
+    /*
+    Rotate rows to the right 4 steps, decrypt, decode, and print.
+    */
+    cout << "-- Rotating rows 4 steps right: " << endl;
+    evaluator.rotate_rows_inplace(encrypted_matrix, -4, gal_keys);
+    cout << "Done" << endl;
     cout << "\tNoise budget after rotation: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << "   Decrypting and decoding: ";
+    decryptor.decrypt(encrypted_matrix, plain_result);
+    batch_encoder.decode(plain_result, pod_matrix);
+    cout << "Done" << endl;
+    print_matrix(pod_matrix, row_size);
 
     /*
     We can see that rotation does not consume noise budget.
@@ -148,19 +154,32 @@ void example_rotation_ckks()
     cout << "Input vector: " << endl;
     print_vector(input, 3, 7);
 
+    /*
+    Choosing the scale will be explained in example_basic_ckks.
+    */
     auto scale = pow(2.0, 50);
+
+    cout << "-- Encoding and encrypting: ";
     Plaintext plain;
     ckks_encoder.encode(input, scale, plain);
     Ciphertext encrypted;
     encryptor.encrypt(plain, encrypted);
+    cout << "Done" << endl;
 
     Ciphertext rotated;
+    cout << "-- Rotating 2 steps left: ";
     evaluator.rotate_vector(encrypted, 2, gal_keys, rotated);
+    cout << "Done" << endl;
+    cout << "   Decrypting and decoding: ";
     decryptor.decrypt(rotated, plain);
     vector<double> result;
     ckks_encoder.decode(plain, result);
-    cout << "Rotated:" << endl;
+    cout << "Done" << endl;
     print_vector(result, 3, 7);
+
+    /*
+    We cannot print noise budget. Noise grows in CKKS similarly to that in BFV.
+    */
 }
 
 void example_rotation()
