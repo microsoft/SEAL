@@ -2687,7 +2687,7 @@ namespace seal
                 else
                 {
                     // Reduce modulus only if needed
-                    if (key_modulus[i].value() > key_modulus[index].value())
+                    if (key_modulus[i].value() <= key_modulus[index].value())
                     {
                         set_uint_uint(
                             local_small_poly_0.get(),
