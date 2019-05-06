@@ -60,10 +60,10 @@ namespace seal
                 // \todo make the first one extra large
                 int total_coeff_modulus_bit_count = util::global_variables::
                     max_secure_coeff_modulus_bit_count.at(poly_modulus_degree);
-                int bit_size_small = total_coeff_modulus_bit_count / 
+                int bit_size_small = total_coeff_modulus_bit_count /
                     util::safe_cast<int>(coeff_modulus_count);
                 int bit_size_large = util::add_safe(bit_size_small, 1);
-                std::size_t bit_count_large = 
+                std::size_t bit_count_large =
                     static_cast<std::size_t>(total_coeff_modulus_bit_count) -
                     static_cast<std::size_t>(bit_size_small) * coeff_modulus_count;
                 std::size_t bit_count_small = coeff_modulus_count - bit_count_large;
