@@ -255,8 +255,8 @@ void example_basic_bfv()
     Plaintexts in the BFV scheme are polynomials of degree less than the degree
     of the polynomial modulus, and coefficients integers modulo the plaintext
     modulus. For reader with background in ring theory, the plaintext space is
-    the polynomial quotient ring Z_t[X]/(X^N + 1), where N is poly_modulus_degree
-    and t is plain_modulus.
+    the polynomial quotient ring Z_T[X]/(X^N + 1), where N is poly_modulus_degree
+    and T is plain_modulus.
 
     To get started, we create a plaintext containing the constant 6. For the
     plaintext element we use a constructor that takes the desired polynomial as

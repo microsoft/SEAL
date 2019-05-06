@@ -12,30 +12,33 @@ void example_basic_ckks()
 
     /*
     In this example we demonstrate evaluating a polynomial function
-    PI*x^3 + 0.4*x + 1 on encrypted floating-point input data x for 4096
+
+        PI*x^3 + 0.4x + 1
+
+    on encrypted floating-point input data x for a set of 4096
     equidistant points in the interval [0, 1]. The challenges we encounter will
     be related to matching scales and encryption parameters when adding together
     terms of different degrees in the polynomial evaluation.
 
-    We start by setting up an environment similar to what we had in previously.
+    We start by setting up the CKKS scheme.
     */
     EncryptionParameters parms(scheme_type::CKKS);
 
     /*
-    As shown in the example CKKS Encoder, a multiplication in CKKS causes the
-    scale of ciphertexts doubled. The scale must not get too close to the total
-    size of coeff_modulus. We can rescale the ciphertext to stablize the scale
-    expansion. More precisely, suppose the scale before rescaling is S, the last
-    prime in the current coeff_modulus vector is P, the scale after rescaling is
-    2S-P.
+    As shown in the CKKS encoder example, a multiplication in CKKS causes the
+    scale in ciphertexts to double. The scale must not get too close to the total
+    size of coeff_modulus, which can be achieved by rescaling the ciphertext to
+    stablize the scale expansion. More precisely, suppose that the scale in a CKKS
+    ciphertext is S, and the last prime in the current coeff_modulus vector is P.
+    Then rescaling changes the scale to S/P.
 
-    Naturally we would like to set the initial scale S and primes P_i in
-    coeff_modulus involved in rescaling very close to each other, so that
-    ciphertexts have scale S before multiplication, 2S after multiplication, and
-    2S-P_i that approximately equals to S after rescaling. In this way, we
-    stablize the scale in ciphertexts to be close to S. Generally for a circuit
-    of depth D, we needs to rescale D times, i.e. removing D primes from
-    coeff_modulus.
+    We would like to set the initial scale S and primes P_i in the coeff_modulus
+    very close to each other. If ciphertexts have scale S before multiplication,
+    they have scale S^2 after multiplication, and S^2/P_i after rescaling. If all
+    P_i are close to S, then S^2/P_i is close to S again. In this way, we stablize
+    the scale in ciphertexts to be close to S. Generally for a circuit of depth D,
+    we need to rescale D times, i.e., we need to be able to remove D primes from
+    the coefficient modulus.
 
     Once we have only one prime left in coeff_modulus, the prime must be larger
     than S by a few bits to preserve the pre-decimal-point value of plaintexts.

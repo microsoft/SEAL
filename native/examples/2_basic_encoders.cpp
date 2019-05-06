@@ -13,7 +13,7 @@ void example_integer_encoder()
     /*
     [IntegerEncoder] (BFV specific)
 
-    The IntegerEncoder encodes integers to plaintext polynomials as follows.
+    The IntegerEncoder encodes integers to BFV plaintext polynomials as follows.
     First, a binary expansion of the integer is computed. Next, a polynomial is
     created with the bits as coefficients. For example, the integer
 
@@ -63,11 +63,13 @@ void example_integer_encoder()
     Decryptor decryptor(context, secret_key);
 
     /*
-    IntegerEncoding requires IntegerEncoder.
+    We create the IntegerEncoder.
     */
     IntegerEncoder encoder(context);
+
     /*
-    We start by encoding two integers as plaintext polynomials.
+    First, encode two integers as plaintext polynomials. Note that encoding is
+    not encryption: at this point nothing is encrypted.
     */
     int value1 = 5;
     Plaintext plain1 = encoder.encode(value1);
@@ -80,7 +82,7 @@ void example_integer_encoder()
         << " (plain2)" << endl;
 
     /*
-    Encrypting the encoded values is easy.
+    Now we can encrypt the plaintext polynomials.
     */
     Ciphertext encrypted1, encrypted2;
     cout << "-- Encrypting plain1: ";
@@ -97,10 +99,6 @@ void example_integer_encoder()
 
     /*
     As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2.
-    Most basic arithmetic operations come as in-place two-argument versions that
-    overwrite the first argument with the result, and as three-argument versions
-    taking as separate destination parameter. In most cases the in-place variants
-    are slightly faster.
     */
     cout << "-- Computing (-encrypted1 + encrypted2) * encrypted2: ";
     evaluator.negate_inplace(encrypted1);
@@ -133,15 +131,16 @@ void example_batch_encoder()
     [BatchEncoder] (BFV specific)
 
     If N denotes the degree of the polynomial modulus, and T the plaintext
-    modulus, then batching is automatically enabled for the BFV scheme when T is
-    a prime number congruent to 1 modulo 2*N.
+    modulus, then batching is automatically enabled for the BFV scheme when T
+    is a prime number congruent to 1 modulo 2*N.
 
-    In batching the plaintexts are viewed as matrices of size 2-by-(N/2) with
-    each element an integer modulo T. Homomorphic operations act element-wise
-    between encrypted matrices, allowing the user to obtain speeds-ups of
-    several orders of magnitude in naively vectorizable computations. Thus, in
-    more complicated computations this is likely to be by far the most important
-    and useful encoder.
+    Batching allows the BFV plaintext polynomial to be viewed as a 2-by-(N/2)
+    matrix, with each element an integer modulo T. In the matrix view, homomorphic
+    operations act element-wise on encrypted matrices, allowing the user to obtain
+    speeds-ups of several orders of magnitude in fully vectorizable computations.
+    Thus, in all but the simplest computations, batching should be the preferred
+    method to use, and when used properly will result in implementations that far
+    outperform anything done with the IntegerEncoder.
     */
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(8192);
@@ -172,14 +171,13 @@ void example_batch_encoder()
     Decryptor decryptor(context, secret_key);
 
     /*
-    Batching is done through an instance of the BatchEncoder class so need to
-    construct one.
+    Batching is done through an instance of the BatchEncoder class.
     */
     BatchEncoder batch_encoder(context);
 
     /*
-    The total number of batching `slots' is poly_modulus_degree. The matrices
-    we encrypt are of size 2-by-(slot_count / 2).
+    The total number of batching `slots' equals the degree of the polynomial
+    modulus. The matrices we encrypt will be of size 2-by-(slot_count / 2).
     */
     size_t slot_count = batch_encoder.slot_count();
     size_t row_size = slot_count / 2;
@@ -187,8 +185,8 @@ void example_batch_encoder()
 
     /*
     The matrix plaintext is simply given to BatchEncoder as a flattened vector
-    of numbers of size slot_count. The first row_size numbers form the first row,
-    and the rest form the second row. Here we create the following matrix:
+    of numbers. The first `row_size' many numbers form the first row, and the
+    rest form the second row. Here we create the following matrix:
 
         [ 0,  1,  2,  3,  0,  0, ...,  0 ]
         [ 4,  5,  6,  7,  0,  0, ...,  0 ]
@@ -208,7 +206,7 @@ void example_batch_encoder()
     print_matrix(pod_matrix, row_size);
 
     /*
-    First we use BatchEncoder to compose the matrix into a plaintext.
+    First we use BatchEncoder to encode the matrix into a plaintext polynomial.
     */
     Plaintext plain_matrix;
     cout << "-- Encoding plaintext matrix: ";
@@ -216,7 +214,7 @@ void example_batch_encoder()
     cout << "Done" <<endl;
 
     /*
-    We can instantly decode to verify the correctness.
+    We can instantly decode to verify correctness of the encoding.
     */
     vector<uint64_t> pod_result;
     cout << "   Decoding plaintext matrix: ";
@@ -226,7 +224,7 @@ void example_batch_encoder()
     print_matrix(pod_result, row_size);
 
     /*
-    Next we encrypt the plaintext as usual.
+    Next we encrypt the encoded plaintext.
     */
     Ciphertext encrypted_matrix;
     cout << "-- Encrypting: ";
@@ -243,7 +241,7 @@ void example_batch_encoder()
         [ 1,  2,  1,  2,  1,  2, ..., 2 ]
         [ 1,  2,  1,  2,  1,  2, ..., 2 ]
 
-    and compose it into a plaintext.
+    and encode it into a plaintext.
     */
     vector<uint64_t> pod_matrix2;
     for (size_t i = 0; i < slot_count; i++)
@@ -257,8 +255,8 @@ void example_batch_encoder()
     print_matrix(pod_matrix2, row_size);
 
     /*
-    We now add the second (plaintext) matrix to the encrypted one using another
-    new operation -- plain addition -- and square the sum.
+    We now add the second (plaintext) matrix to the encrypted matrix, and square
+    the sum.
     */
     cout << "-- Adding and squaring: ";
     evaluator.add_plain_inplace(encrypted_matrix, plain_matrix2);
@@ -293,16 +291,15 @@ void example_ckks_encoder()
 
     /*
     In this example we demonstrate the encoder for the Cheon-Kim-Kim-Song (CKKS)
-    scheme for encrypting and computing on floating point numbers.
-    For full details on the CKKS scheme, we refer the reader to
-    https://eprint.iacr.org/2016/421.
+    scheme for encrypting and computing on floating point numbers. For full
+    details on the CKKS scheme, we refer to https://eprint.iacr.org/2016/421.
     For better performance, Microsoft SEAL implements the "FullRNS" optimization
-    for CKKS described in https://eprint.iacr.org/2018/931.
+    for CKKS, as described in https://eprint.iacr.org/2018/931.
     */
+
     /*
     We start by creating encryption parameters for the CKKS scheme. One major
-    difference to the BFV scheme is that the CKKS scheme does not use the
-    plain_modulus parameter.
+    difference to the BFV scheme is that CKKS does not use the plain_modulus.
     */
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(8192);
@@ -331,12 +328,11 @@ void example_ckks_encoder()
 
     /*
     To create CKKS plaintexts we need a special encoder: we cannot create them
-    directly from polynomials. Note that the IntegerEncoder, FractionalEncoder,
-    and BatchEncoder cannot be used with the CKKS scheme. The CKKS scheme allows
-    encryption and approximate computation on vectors of real or complex numbers
-    which the CKKSEncoder converts into Plaintext objects. At a high level this
-    looks a lot like BatchEncoder for the BFV scheme, but the theory behind it
-    is different.
+    directly from polynomials. Note that the IntegerEncoder and BatchEncoder
+    cannot be used with the CKKS scheme. The CKKS scheme allows encryption and
+    approximate computation on vectors of real or complex numbers, which the
+    CKKSEncoder converts into Plaintext objects. At a high level this looks a lot
+    like BatchEncoder for the BFV scheme, but the theory behind it is different.
     */
     CKKSEncoder encoder(context);
 
@@ -359,17 +355,17 @@ void example_ckks_encoder()
     print_vector(input);
 
     /*
-    Now we encode it with CKKSEncoder. The floating-point coefficients of input
+    Now we encode it with CKKSEncoder. The floating-point coefficients of `input'
     will be scaled up by the parameter `scale'; this is necessary since even in
-    the CKKS scheme the plaintexts are polynomials with integer coefficients.
-    It is instructive to think of the scale as determining the bit-precision of
-    the encoding; naturally it will also affect the precision of the result.
+    the CKKS scheme the plaintexts are polynomials with integer coefficients. It
+    is instructive to think of the scale as determining the bit-precision of the
+    encoding; naturally it will also affect the precision of the result.
 
-    In CKKS the message is stored modulo coeff_modulus (in BFV it is stored
-    modulo plain_modulus), so the scale must not get too close to the total size
-    of coeff_modulus. In this case our coeff_modulus is quite large (218 bits)
-    so we have little to worry about in this regard. For this example a 50-bit
-    scale is more than enough.
+    In CKKS the message is stored modulo coeff_modulus (in BFV it is stored modulo
+    plain_modulus), so the scale must not get too close to the total size of
+    coeff_modulus. In this case our coeff_modulus is quite large (218 bits) so we
+    have little to worry about in this regard. For this example a 50-bit scale is
+    more than enough.
     */
     Plaintext plain;
     double scale = pow(2.0, 50);
@@ -378,7 +374,7 @@ void example_ckks_encoder()
     cout << "Done" << endl;
 
     /*
-    We can instantly decode to check the correctness.
+    We can instantly decode to check the correctness of encoding.
     */
     vector<double> output;
     cout << "   Decoding input vector: ";
