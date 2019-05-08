@@ -57,7 +57,6 @@ namespace seal
             }
             else
             {
-                // \todo make the first one extra large
                 int total_coeff_modulus_bit_count = util::global_variables::
                     max_secure_coeff_modulus_bit_count.at(poly_modulus_degree);
                 int bit_size_small = total_coeff_modulus_bit_count /

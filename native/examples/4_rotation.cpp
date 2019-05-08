@@ -111,6 +111,58 @@ void example_rotation_bfv()
 
     /*
     We can see that rotation does not consume noise budget.
+    This is the benefit of using an extra coeff_modulus which is explained in
+    example `levels`. We can briefly demonstrate the effect of wrongly setting
+    EncryptionParameters.
+
+    If the last prime passed to coeff_modulus is smaller than other primes,
+    rotation and relinearization will introduce noise.
+    We replace the last two primes to ensure coefficient modulus has the same
+    size as before.
+    */
+    cout << "Resetting primes in encryption parameters" << endl;
+    auto coeff_modulus = context->key_context_data()->parms().coeff_modulus();
+    coeff_modulus.pop_back();
+    coeff_modulus.pop_back();
+    coeff_modulus.push_back(SmallModulus::GetPrimes(60, 1, 8192)[0]);
+    coeff_modulus.push_back(SmallModulus::GetPrimes(28, 1, 8192)[0]);
+    parms.set_coeff_modulus(coeff_modulus);
+    context = SEALContext::Create(parms);
+    print_parameters(context);
+
+    /*
+    Every step is the same.
+    */
+    KeyGenerator keygen2(context);
+    public_key = keygen2.public_key();
+    secret_key = keygen2.secret_key();
+    relin_keys = keygen2.relin_keys();
+    Encryptor encryptor2(context, public_key);
+    Evaluator evaluator2(context);
+    Decryptor decryptor2(context, secret_key);
+    BatchEncoder batch_encoder2(context);
+    gal_keys = keygen2.galois_keys();
+
+    pod_matrix[0] = 0ULL;
+    pod_matrix[1] = 1ULL;
+    pod_matrix[2] = 2ULL;
+    pod_matrix[3] = 3ULL;
+    pod_matrix[row_size] = 4ULL;
+    pod_matrix[row_size + 1] = 5ULL;
+    pod_matrix[row_size + 2] = 6ULL;
+    pod_matrix[row_size + 3] = 7ULL;
+
+    batch_encoder2.encode(pod_matrix, plain_matrix);
+    encryptor2.encrypt(plain_matrix, encrypted_matrix);
+    cout << "-- Rotating rows 3 steps left: ";
+    evaluator2.rotate_rows_inplace(encrypted_matrix, 3, gal_keys);
+    cout << "Done" << endl;
+    cout << "\tNoise budget after rotation: "
+        << decryptor2.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    
+    /*
+    We can see now there is a significant noise growth introduced in rotation.
+    It is similar in relinearization.
     */
 }
 

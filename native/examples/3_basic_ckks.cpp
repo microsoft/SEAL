@@ -151,7 +151,7 @@ void example_basic_ckks()
     cout << "Done (encrypted x)" << endl;
 
     /*
-    To compute x^3 we first compute x^2, relinearize, and rescale.
+    To compute x^3 we first compute x^2, relinearize.
     */
     Ciphertext encrypted_x3;
     cout << "-- Computing x^2 and relinearizing: ";
@@ -160,6 +160,20 @@ void example_basic_ckks()
     cout << "Done (x^2)" << endl;
     cout << "\tScale of x^2 before rescale: " << log2(encrypted_x3.scale())
         << " bits" << endl;
+
+    /*
+    The true power of CKKS is that it allows the scale to be switched down
+    (`rescaling') without changing the encrypted values.
+
+    Certainly one can scale floating-point numbers to integers, encrypt them,
+    keep track of the scale, and operate on them by just using BFV. The problem
+    with this approach is that the scale quickly grows larger than the size of
+    the coefficient modulus, preventing further computations.
+
+    After each square, the scale in ciphertext doubles. If we are to perform a
+    higher power of x, soon the scale will grow larger than coefficient modulus.
+    We performan `rescaling` to mitigate this issue.
+    */
     evaluator.rescale_to_next_inplace(encrypted_x3);
     cout << "\tScale of x^2  after rescale: " << log2(encrypted_x3.scale())
         << " bits" << endl;
@@ -263,8 +277,8 @@ void example_basic_ckks()
     old_fmt.copyfmt(cout);
     cout << fixed << setprecision(10);
     cout << "\tExact scale in PI*x^3: " << encrypted_x3.scale() << endl;
-    cout << "\tExact scale in 0.4*x: " << encrypted_x1.scale() << endl;
-    cout << "\tExact scale in 1: " << plain_coeff0.scale() << endl;
+    cout << "\tExact scale in  0.4*x: " << encrypted_x1.scale() << endl;
+    cout << "\tExact scale in      1: " << plain_coeff0.scale() << endl;
     cout << endl;
     cout.copyfmt(old_fmt);
 

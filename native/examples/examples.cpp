@@ -11,14 +11,20 @@ int main()
 #ifdef SEAL_VERSION
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
 #endif
+
     while (true)
     {
-        cout << "\nSEAL Examples:" << endl << endl;
-        cout << " 1. Basic BFV" << endl;
-        cout << " 2. Basic Encoders" << endl;
-        cout << " 3. Basic CKKS" << endl;
-        cout << " 4. Rotation" << endl;
-        cout << " 5. Levels" << endl;
+        cout << endl;
+        cout << "***********************************************************" << endl;
+        cout << "* The following examples should be executed while reading *" << endl;
+        cout << "* comments in associated files in `natice/examples/`.     *" << endl;
+        cout << "***********************************************************" << endl;
+        cout << endl << "SEAL Examples:" << endl << endl;
+        cout << " 1. Basic BFV (see `1_basic_bfv.cpp`)" << endl;
+        cout << " 2. Basic Encoders (see `2_basic_encoders.cpp`)" << endl;
+        cout << " 3. Basic CKKS (see `3_basic_ckks.cpp`)" << endl;
+        cout << " 4. Rotation (see `4_rotation.cpp`)" << endl;
+        cout << " 5. Levels (see `5_levels.cpp`)" << endl;
         cout << " 6. Performance Test" << endl;
         cout << " 0. Exit" << endl;
 
