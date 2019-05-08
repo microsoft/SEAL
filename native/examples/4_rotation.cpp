@@ -119,13 +119,8 @@ void example_rotation_ckks()
     print_example_banner("Rotation CKKS");
 
     /*
-    We show how to apply vector rotations on the encrypted data. This
-    is very similar to how matrix rotations work in the BFV scheme. We try this
-    with three sizes of Galois keys. In some cases it is desirable for memory
-    reasons to create Galois keys that support only specific rotations. This can
-    be done by passing to KeyGenerator::galois_keys(...) a vector of signed
-    integers specifying the desired rotation step counts. Here we create Galois
-    keys that only allow cyclic rotation by a single step (at a time) to the left.
+    We show how to apply vector rotations on the encrypted data. This is very
+    similar to how matrix rotations work in the BFV scheme.
     */
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(8192);
@@ -146,7 +141,8 @@ void example_rotation_ckks()
     size_t slot_count = ckks_encoder.slot_count();
     vector<double> input;
     input.reserve(slot_count);
-    double curr_point = 0, step_size = 1.0 / (static_cast<double>(slot_count) - 1);
+    double curr_point = 0;
+    double step_size = 1.0 / (static_cast<double>(slot_count) - 1);
     for (size_t i = 0; i < slot_count; i++, curr_point += step_size)
     {
         input.push_back(curr_point);
@@ -176,10 +172,6 @@ void example_rotation_ckks()
     ckks_encoder.decode(plain, result);
     cout << "Done" << endl;
     print_vector(result, 3, 7);
-
-    /*
-    We cannot print noise budget. Noise grows in CKKS similarly to that in BFV.
-    */
 }
 
 void example_rotation()

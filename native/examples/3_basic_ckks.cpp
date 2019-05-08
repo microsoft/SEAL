@@ -13,12 +13,12 @@ void example_basic_ckks()
     /*
     In this example we demonstrate evaluating a polynomial function
 
-        PI*x^3 + 0.4x + 1
+        PI*x^3 + 0.4*x + 1
 
-    on encrypted floating-point input data x for a set of 4096
-    equidistant points in the interval [0, 1]. The challenges we encounter will
-    be related to matching scales and encryption parameters when adding together
-    terms of different degrees in the polynomial evaluation.
+    on encrypted floating-point input data x for a set of 4096 equidistant points
+    in the interval [0, 1]. We encounter challenges related to matching scales
+    and encryption parameters when computing on terms of different degrees in the
+    polynomial evaluation.
 
     We start by setting up the CKKS scheme.
     */
@@ -30,7 +30,11 @@ void example_basic_ckks()
     size of coeff_modulus, which can be achieved by rescaling the ciphertext to
     stablize the scale expansion. More precisely, suppose that the scale in a CKKS
     ciphertext is S, and the last prime in the current coeff_modulus vector is P.
-    Then rescaling changes the scale to S/P.
+    Then rescaling changes the scale to S/P. In addition to changing the scale,
+    rescaling also removes one (the last one) of the primes in the coefficient
+    modulus, hence limiting future computational capabilities. Eventually no more
+    primes can be removed, at which point the computational (multiplicative)
+    capabilities have come to an end.
 
     We would like to set the initial scale S and primes P_i in the coeff_modulus
     very close to each other. If ciphertexts have scale S before multiplication,
@@ -41,65 +45,64 @@ void example_basic_ckks()
     the coefficient modulus.
 
     Once we have only one prime left in coeff_modulus, the prime must be larger
-    than S by a few bits to preserve the pre-decimal-point value of plaintexts.
-    This prime is the first prime in coeff_modulus when we set up encryption
-    parameters.
+    than S by a few bits to preserve the pre-decimal-point value of the plaintext.
+    This last prime will appear as the first prime in coeff_modulus when we set
+    up encryption parameters, because rescaling always removes the last prime from
+    the coefficient modulus.
 
-    The last prime in coeff_modulus used to set up encryption parameters is
-    reserved for another purpose (to be explained in example Levels). It needs
-    to be at least the same size of the largest other primes in coeff_modulus.
+    The very last prime in the coeff_modulus set in encryption parameters has
+    a special purpose that is explained in example `Levels'. Ideally it would be
+    at least equal in size to the largest of the other primes in coeff_modulus.
 
-    It is advised to choose larger primes for more noise budget (conceptually
-    speaking).
+    Therefore, the strategy to choose parameters for CKKS is roughly as follows:
+
+        (1) Choose a 60-bit prime as the first prime in coeff_modulus. This will
+        give us the highest precision when decrypting;
+        (2) Choose another 60-bit prime as the last element of coeff_modulus;
+        (3) Choose intermediate primes to be roughly of equal size (but distinct).
+
+    Microsoft SEAL provides a method to generate prime numbers of the right form,
+    given a bit-size and a desired poly_modulus_degree. Here we generate two 
+    60-bit primes.
     */
+    size_t poly_modulus_degree = 8192;
+    vector<SmallModulus> primes = 
+        SmallModulus::GetPrimes(60, 2, poly_modulus_degree);
 
     /*
-    The strategy to choose parameters is demonstrated below.
-
-    We choose a 60-bit prime as the first element of coeff_modulus.
-    This will give us the least risk of overflow at the decryption level.
-
-    We choose another 60-bit prime as the last element of coeff_modulus.
-    This almost eleminates the noise introduced by relinearization and rotation.
-
-    Microsoft SEAL provides a method that generates a number of NTT-supportive
-    prime numbers for a given bit size and NTT size.
-    */
-    vector<SmallModulus> primes = SmallModulus::GetPrimes(60, 2, 8192);
-
-    /*
-    We choose the initial scale to be 2.0^40. This gives us 20-bit precision
-    before decimal point and enough (roughly 10-bit ~ 20-bit) precision after
+    We choose the initial scale to be 2.0^40. This gives us 20 bits of precision
+    before the decimal point and enough (roughly 10-20 bits) precision after the
     decimal point.
     */
     double scale = pow(2.0, 40);
 
     /*
-    We choose the rest primes for rescaling and stablizing scales. Since the
+    We choose the remaining primes for rescaling and stablizing scales. Since the
     polynomial has degree 3, it has a multiplicative depth of 2. Based on the
-    number of multiplicative levels (2), we choose two primes. Based on the size
-    of the initial scale, we choose each prime to be 40-bit. The sizes of primes
-    have no effect on performance. The number of primes does.
+    number of multiplicative levels (2), we need at least two primes. Based on the
+    size of the initial scale, we choose each prime to be 40 bits. The sizes of
+    the primes have no effect on performance, but the number of primes does.
     */
-    vector<SmallModulus> primes_40 = SmallModulus::GetPrimes(40, 2, 8192);
+    vector<SmallModulus> primes_40 = 
+        SmallModulus::GetPrimes(40, 2, poly_modulus_degree);
     primes.insert(primes.begin() + 1, primes_40.begin(), primes_40.end());
 
     /*
     After all, we have 60 * 2 + 40 * 2 = 200 bits coefficient modulus. We choose
-    polynomial_modulus_degree as 8192 for 128-bit security in the Security
+    poly_modulus_degree as 8192 for 128 bits of security in the Security
     Standard Draft available at http://HomomorphicEncryption.org.
 
     If we choose a larger initial scale:
         - [Pro] More precision after decimal point.
         - [Con] Less precision before decimal point.
-        - [Con] A larger polynomial_modulus_degree, e.g. 50-bit scale requires
-                polynomial_modulus_degree = 16384.
+        - [Con] A larger poly_modulus_degree, e.g., 50-bit scale requires
+                poly_modulus_degree = 16384.
     If we choose a smaller initial scale:
-        - [Pro] More precisions before decimal point.
-        - [Con] Less precisions after decimal point.
+        - [Pro] More precision before decimal point.
+        - [Con] Less precision after decimal point.
     */
     parms.set_coeff_modulus(primes);
-    parms.set_poly_modulus_degree(8192);
+    parms.set_poly_modulus_degree(poly_modulus_degree);
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -165,7 +168,7 @@ void example_basic_ckks()
         << " bits" << endl;
 
     /*
-    Now encrypted_x3 is at a different level (i.e. has different encryption
+    Now encrypted_x3 is at a different level (i.e., has different encryption
     parameters) than encrypted_x1, which prevents us from multiplying them
     together to compute x^3. We could simply switch encrypted_x1 down to the
     next parameters in the modulus switching chain.

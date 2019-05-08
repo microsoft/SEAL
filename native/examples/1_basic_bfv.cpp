@@ -12,22 +12,20 @@ void example_basic_bfv()
 
     /*
     In this example, we demonstrate performing simple computations (a polynomial
-    evaluation) on encrypted integers.
+    evaluation) on encrypted integers. Microsoft SEAL implements two encryption
+    schemes:
 
-    Microsoft SEAL implements two encryption schemes:
-        - the Brakerski/Fan-Vercauteren (BFV) scheme and
-        - the Cheon-Kim-Kim-Song (CKKS) scheme.
+        (1) Brakerski/Fan-Vercauteren (BFV) scheme and
+        (2) Cheon-Kim-Kim-Song (CKKS) scheme.
+
     We use the BFV scheme in this example as it is far easier to understand and
-    to use than CKKS. The public interfaces of BFV and CKKS differ very little
-    in Microsoft SEAL. For more details on the basics of the BFV scheme, we
-    refer the reader to the original paper https://eprint.iacr.org/2012/144.
-    To achieve good performance, Microsoft SEAL implements the "FullRNS"
-    optimization as described in https://eprint.iacr.org/2016/510. This
-    optimization is invisible to the user and has no security implications. We
-    will discuss the CKKS scheme in later examples.
-    */
+    to use than CKKS. For more details on the basics of the BFV scheme, we refer
+    the reader to the original paper https://eprint.iacr.org/2012/144. To achieve
+    good performance, Microsoft SEAL implements the "FullRNS" optimization as
+    described in https://eprint.iacr.org/2016/510. This optimization is invisible
+    to the user and has no security implications. We will discuss the CKKS scheme
+    in later examples.
 
-    /*
     The first task is to set up an instance of the EncryptionParameters class.
     It is critical to understand how the different parameters behave, how they
     affect the encryption scheme, performance, and the security level. There are
@@ -68,15 +66,15 @@ void example_basic_bfv()
     EncryptionParameters parms(scheme_type::BFV);
 
     /*
-    The first parameter we set is the degree of the polynomial modulus. This must
-    be a positive power of 2, representing the degree of a power-of-2 cyclotomic
-    polynomial; it is not necessary to understand what this means. The polynomial
-    modulus degree should be thought of mainly affecting the security level of the
-    scheme: larger degree makes the scheme more secure. Larger degree also makes
-    ciphertext sizes larger, and consequently all operations slower. Recommended
-    degrees are 1024, 2048, 4096, 8192, 16384, 32768, but it is also possible to
-    go beyond this range. In this example we use a relatively small polynomial
-    modulus.
+    The first parameter we set is the degree of the `polynomial modulus'. This
+    must be a positive power of 2, representing the degree of a power-of-2
+    cyclotomic polynomial; it is not necessary to understand what this means.
+    Larger degree makes ciphertext sizes larger and all operations slower, but
+    enables more complicated encrypted computations. Recommended degrees are
+    1024, 2048, 4096, 8192, 16384, 32768, but it is also possible to go beyond
+    this range. In this example we use a relatively small polynomial modulus;
+    anything smaller than this will enable only extremely restricted encrypted
+    computations.
     */
     parms.set_poly_modulus_degree(4096);
 
@@ -84,30 +82,23 @@ void example_basic_bfv()
     Next we set the [ciphertext] coefficient modulus (coeff_modulus). The size
     of the coefficient modulus should be thought of as the most significant
     factor in determining the noise budget in a freshly encrypted ciphertext:
-    bigger means more noise budget, which is desirable. On the other hand,
-    a larger coefficient modulus lowers the security level of the scheme. Thus,
-    if a large noise budget is required for complicated computations, a large
-    coefficient modulus needs to be used, and the reduction in the security
-    level must be countered by simultaneously increasing the polynomial modulus.
-    Overall, this will result in worse performance per operation.
+    bigger means more noise budget, which is desirable. On the other hand, the
+    poly_modulus_degree determines an upper bound on the bit-length of the
+    coeff_modulus; these upper bounds can be found in seal/util/hestdparms.h
+    in the macro `SEAL_HE_STD_PARMS_128_TC':
+    
+        poly_modulus_degree | max coeff_modulus bit-length
+        --------------------------------------------------------
+        1024                | 27
+        2048                | 54
+        4096                | 109
+        8192                | 218
+        16384               | 438
+        32768               | 881
 
-    From the above comments the user should remember that the degree of the
-    polynomial modulus along with the coefficient modulus determine how secure
-    the encryption scheme is, and that these two parameters control a delicate
-    balance of functionality, performance, and security. Estimating the security
-    of a specific set of parameters is challenging and requires the help of an
-    expert in homomorphic encryption.
-
-    To make matter easier, http://HomomorphicEncryption.org maintains a list of
-    standardized bounds for the largest possible coefficient modulus per each
-    choice of degree for the polynomial modulus. This list provides parameters
-    guaranteeing 128-bit, 192-bit, and 256-bit security levels. This means that
-    breaking the scheme should take at least 2^128, 2^192, or 2^256 operations,
-    respectively, if instantiated with such parameters. We also note that 2^128
-    operations is already far beyond what can be computed today, or in any
-    conceivable near future. To protect the users against accidentally setting
-    up insecure parameters, Microsoft SEAL by default enforces a security level
-    of at least 128 bits.
+    Microsoft SEAL will not allow you to set up the scheme in an insecure way
+    by default. Therefore, a larger poly_modulus_degree is needed for enabling
+    more encrypted computation capabilities.
 
     Microsoft SEAL also provides an easy way of selecting the coefficient modulus
     after the degree of the polynomial modulus is selected. These default moduli
@@ -117,9 +108,9 @@ void example_basic_bfv()
         DefaultParams::coeff_modulus_192(std::size_t poly_modulus_degree)
         DefaultParams::coeff_modulus_256(std::size_t poly_modulus_degree)
 
-    for 128-bit, 192-bit, and 256-bit security levels, respectively. The integer
-    parameter is the degree of the polynomial modulus, and no other value should
-    ever be used in place of it, or else any security guarantees will be lost.
+    for 128-bit, 192-bit, and 256-bit security levels. We note that a 128-bit
+    security level is considered to be already extremely secure and far beyond
+    what is considered feasible 
 
     In Microsoft SEAL the coefficient modulus is a positive composite number --
     a product of distinct primes of size up to 60 bits. When we talk about the

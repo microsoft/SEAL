@@ -31,11 +31,10 @@ void example_levels()
     parameters is changed.
 
     Each set of encryption parameters involve unique precomputation which are
-    stored in a SEALContext::ContextData object. Its 'parms_id' is used to
-    identify and access this object in a SEALContext object. A SEALContext
-    object contains a chain of SEALContext::ContextData objects each of which
-    contains the precomputed data for the encryption parameters at a
-    corresponding level.
+    stored in a SEALContext::ContextData object. Its `parms_id' is used to
+    identify and access this object in a SEALContext object. The SEALContext
+    contains a chain of SEALContext::ContextData objects each of which contains
+    the precomputed data for the encryption parameters at the corresponding level.
     */
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(8192);

@@ -108,6 +108,9 @@
     <ClInclude Include="seal\smallmodulus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="seal\valcheck.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="seal\util\aes.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -123,9 +126,6 @@
     <ClInclude Include="seal\util\common.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-	<ClInclude Include="seal\util\config.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="seal\util\defines.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -136,6 +136,9 @@
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\util\hash.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\hestdparms.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\util\locks.h">
@@ -182,9 +185,6 @@
     </ClInclude>
     <ClInclude Include="seal\util\uintcore.h">
       <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\valcheck.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -236,6 +236,9 @@
     <ClCompile Include="seal\smallmodulus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="seal\valcheck.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="seal\util\aes.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -283,9 +286,6 @@
     </ClCompile>
     <ClCompile Include="seal\util\uintcore.cpp">
       <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\valcheck.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

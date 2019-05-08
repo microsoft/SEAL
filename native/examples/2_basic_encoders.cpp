@@ -356,7 +356,7 @@ void example_ckks_encoder()
 
     /*
     Now we encode it with CKKSEncoder. The floating-point coefficients of `input'
-    will be scaled up by the parameter `scale'; this is necessary since even in
+    will be scaled up by the parameter `scale'. This is necessary since even in
     the CKKS scheme the plaintexts are polynomials with integer coefficients. It
     is instructive to think of the scale as determining the bit-precision of the
     encoding; naturally it will also affect the precision of the result.
