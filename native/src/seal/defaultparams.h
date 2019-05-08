@@ -81,6 +81,8 @@ namespace seal
                     destination.insert(destination.end(), temp.begin(), temp.end());
                 }
                 std::rotate(destination.begin(), destination.begin() + 1, destination.end());
+
+                return destination;
             }
         }
 
