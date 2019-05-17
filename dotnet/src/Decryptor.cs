@@ -52,6 +52,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(context));
             if (null == secretKey)
                 throw new ArgumentNullException(nameof(secretKey));
+            if (!context.ParametersSet)
+                throw new ArgumentException("Encryption parameters are not set correctly");
+            if (!ValCheck.IsValidFor(secretKey, context))
+                throw new ArgumentException("Secret key is not valid for encryption parameters");
 
             NativeMethods.Decryptor_Create(context.NativePtr, secretKey.NativePtr, out IntPtr ptr);
             NativePtr = ptr;

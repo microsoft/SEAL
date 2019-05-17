@@ -20,9 +20,9 @@ namespace seal
 
             uint64_t poly_modulus_degree64 = static_cast<uint64_t>(parms.poly_modulus_degree());
             uint64_t coeff_mod_count64 = static_cast<uint64_t>(parms.coeff_modulus().size());
-            auto scheme = parms.scheme();
+            uint8_t scheme = static_cast<uint8_t>(parms.scheme());
 
-            stream.write(reinterpret_cast<const char*>(&scheme), sizeof(scheme_type));
+            stream.write(reinterpret_cast<const char*>(&scheme), sizeof(uint8_t));
             stream.write(reinterpret_cast<const char*>(&poly_modulus_degree64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
             for (const auto &mod : parms.coeff_modulus())
@@ -30,12 +30,10 @@ namespace seal
                 mod.save(stream);
             }
             // CKKS does not use plain_modulus
-            if (scheme == scheme_type::BFV)
+            if (parms.scheme() == scheme_type::BFV)
             {
                 parms.plain_modulus().save(stream);
             }
-            double noise_standard_deviation = parms.noise_standard_deviation();
-            stream.write(reinterpret_cast<const char*>(&noise_standard_deviation), sizeof(double));
         }
         catch (const exception &)
         {
@@ -53,8 +51,8 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             // Read the scheme identifier
-            scheme_type scheme;
-            stream.read(reinterpret_cast<char*>(&scheme), sizeof(scheme_type));
+            uint8_t scheme;
+            stream.read(reinterpret_cast<char*>(&scheme), sizeof(uint8_t));
 
             // This constructor will throw if scheme is invalid
             EncryptionParameters parms(scheme);
@@ -87,24 +85,19 @@ namespace seal
             // Read the plain_modulus
             SmallModulus plain_modulus;
             // CKKS does not use plain_modulus
-            if (scheme == scheme_type::BFV)
+            if (parms.scheme() == scheme_type::BFV)
             {
                 plain_modulus.load(stream);
             }
-
-            // Read noise_standard_deviation
-            double noise_standard_deviation;
-            stream.read(reinterpret_cast<char*>(&noise_standard_deviation), sizeof(double));
 
             // Supposedly everything worked so set the values of member variables
             parms.set_poly_modulus_degree(safe_cast<size_t>(poly_modulus_degree64));
             parms.set_coeff_modulus(coeff_modulus);
             // CKKS does not use plain_modulus
-            if (scheme == scheme_type::BFV)
+            if (parms.scheme() == scheme_type::BFV)
             {
                 parms.set_plain_modulus(plain_modulus);
             }
-            parms.set_noise_standard_deviation(noise_standard_deviation);
 
             stream.exceptions(old_except_mask);
             return parms;
@@ -129,8 +122,7 @@ namespace seal
             size_t(1),  // scheme
             size_t(1),  // poly_modulus_degree
             coeff_mod_count,
-            plain_modulus_.uint64_count(),
-            size_t(1) // noise_standard_deviation
+            plain_modulus_.uint64_count()
         );
 
         auto param_data(allocate_uint(total_uint64_count, pool_));
@@ -149,8 +141,6 @@ namespace seal
 
         set_uint_uint(plain_modulus_.data(), plain_modulus_.uint64_count(), param_data_ptr);
         param_data_ptr += plain_modulus_.uint64_count();
-
-        memcpy(param_data_ptr++, &noise_standard_deviation_, sizeof(double));
 
         HashFunction::sha3_hash(param_data.get(), total_uint64_count, parms_id_);
 

@@ -11,18 +11,16 @@ namespace Microsoft.Research.SEAL
     /// </summary>
     ///
     /// <remarks>
-    /// Stores a set of attributes (qualifiers) of a set of encryption parameters. These
-    /// parameters are mainly used internally in various parts of the library, e.g., to
-    /// determine which algorithmic optimizations the current support. The qualifiers are
-    /// automatically created by the <see cref="SEALContext" /> class, silently passed
-    /// on to classes such as <see cref="Encryptor" />, <see cref="Evaluator" />, and
-    /// <see cref="Decryptor" />, and the only way to change them is by changing the
-    /// encryption parameters themselves. In other words, a user will never have to create
-    /// their own instance of EncryptionParameterQualifiers, and in most cases never have
-    /// to worry about them at all.
+    /// Stores a set of attributes (qualifiers) of a set of encryption parameters.
+    /// These parameters are mainly used internally in various parts of the library,
+    /// e.g., to determine which algorithmic optimizations the current support.
+    /// The qualifiers are automatically created by the <see cref="SEALContext" />
+    /// class, silently passed on to classes such as <see cref="Encryptor" />,
+    /// <see cref="Evaluator" />, and <see cref="Decryptor" />, and the only way
+    /// to change them is by changing the encryption parameters themselves. In
+    /// other words, a user will never have to create their own instance of this
+    /// class, and in most cases never have to worry about it at all.
     /// </remarks>
-    /// <seealso>See EncryptionParameters.GetQualifiers() for obtaining the
-    /// EncryptionParameterQualifiers corresponding to a certain parameter set.</seealso>
     public class EncryptionParameterQualifiers : NativeObject
     {
         /// <summary>

@@ -148,6 +148,16 @@ namespace seal
         }
 
         /**
+        Compares a SmallModulus value to an unsigned integer.
+
+        @param[in] compare The unsigned integer to compare against
+        */
+        inline bool operator ==(std::uint64_t compare) const noexcept
+        {
+            return value_ == compare;
+        }
+
+        /**
         Compares two SmallModulus instances.
 
         @param[in] compare The SmallModulus to compare against
@@ -158,33 +168,53 @@ namespace seal
         }
 
         /**
+        Compares a SmallModulus value to an unsigned integer.
+
+        @param[in] compare The unsigned integer to compare against
+        */
+        inline bool operator !=(std::uint64_t compare) const noexcept
+        {
+            return value_ != compare;
+        }
+
+        /**
         Compares two SmallModulus instances.
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator <(const SmallModulus &compare) const
+        inline bool operator <(const SmallModulus &compare) const noexcept
         {
             return value_ < compare.value_;
         }
 
         /**
+        Compares a SmallModulus value to an unsigned integer.
+
+        @param[in] compare The unsigned integer to compare against
+        */
+        inline bool operator <(std::uint64_t compare) const noexcept
+        {
+            return value_ < compare;
+        }
+
+        /**
         Compares two SmallModulus instances.
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator <=(const SmallModulus &compare) const
+        inline bool operator <=(const SmallModulus &compare) const noexcept
         {
             return value_ <= compare.value_;
         }
 
         /**
-        Compares two SmallModulus instances.
+        Compares a SmallModulus value to an unsigned integer.
 
-        @param[in] compare The SmallModulus to compare against
+        @param[in] compare The unsigned integer to compare against
         */
-        inline bool operator >(const SmallModulus &compare) const
+        inline bool operator <=(std::uint64_t compare) const noexcept
         {
-            return value_ > compare.value_;
+            return value_ <= compare;
         }
 
         /**
@@ -192,9 +222,39 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator >=(const SmallModulus &compare) const
+        inline bool operator >(const SmallModulus &compare) const noexcept
+        {
+            return value_ > compare.value_;
+        }
+
+        /**
+        Compares a SmallModulus value to an unsigned integer.
+
+        @param[in] compare The unsigned integer to compare against
+        */
+        inline bool operator >(std::uint64_t compare) const noexcept
+        {
+            return value_ > compare;
+        }
+
+        /**
+        Compares two SmallModulus instances.
+
+        @param[in] compare The SmallModulus to compare against
+        */
+        inline bool operator >=(const SmallModulus &compare) const noexcept
         {
             return value_ >= compare.value_;
+        }
+
+        /**
+        Compares a SmallModulus value to an unsigned integer.
+
+        @param[in] compare The unsigned integer to compare against
+        */
+        inline bool operator >=(std::uint64_t compare) const noexcept
+        {
+            return value_ >= compare;
         }
 
         /**
@@ -230,18 +290,14 @@ namespace seal
         @throws std::invalid_argument if count or ntt_size is zero
         @throws std::logic_error if enough qualifying primes cannot be found
         */
-        static std::vector<SmallModulus> GetPrimes(int bit_size, std::size_t count,
-            std::size_t ntt_size);
+        //static std::vector<SmallModulus> GetPrimes(int bit_size, std::size_t count,
+        //    std::size_t ntt_size);
+
+        //static std::vector<SmallModulus> BuildCoeffModulus(
+        //    std::size_t poly_modulus_degree, std::vector<int> bit_sizes);
 
     private:
         void set_value(std::uint64_t value);
-
-        /**
-        Returns true if value is a prime based on Miller-Rabin primality test.
-
-        @param[in] num_rounds The number of rounds of testing to be performed
-        */
-        bool is_prime_internal(std::size_t num_rounds = 40) const;
 
         std::uint64_t value_ = 0;
 

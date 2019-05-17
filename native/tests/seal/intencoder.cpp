@@ -4,7 +4,6 @@
 #include "gtest/gtest.h"
 #include "seal/intencoder.h"
 #include "seal/context.h"
-#include "seal/defaultparams.h"
 #include <cstdint>
 #include <cstddef>
 

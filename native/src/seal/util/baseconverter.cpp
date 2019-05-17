@@ -16,7 +16,6 @@
 #include "seal/util/smallntt.h"
 #include "seal/util/globals.h"
 #include "seal/smallmodulus.h"
-#include "seal/defaultparams.h"
 
 using namespace std;
 

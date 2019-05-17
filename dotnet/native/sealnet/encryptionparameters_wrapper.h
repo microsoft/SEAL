@@ -13,7 +13,7 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Create1(int scheme, void **enc_params);
+SEALNETNATIVE HRESULT SEALCALL EncParams_Create1(uint8_t scheme, void **enc_params);
 
 SEALNETNATIVE HRESULT SEALCALL EncParams_Create2(void *copy, void **enc_params);
 
@@ -29,7 +29,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_GetCoeffModulus(void *thisptr, uint64_t
 
 SEALNETNATIVE HRESULT SEALCALL EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coeffs);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_GetScheme(void *thisptr, int *scheme);
+SEALNETNATIVE HRESULT SEALCALL EncParams_GetScheme(void *thisptr, uint8_t *scheme);
 
 SEALNETNATIVE HRESULT SEALCALL EncParams_GetParmsId(void *thisptr, uint64_t *parms_id);
 
@@ -38,11 +38,5 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_GetPlainModulus(void *thisptr, void **p
 SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus1(void *thisptr, void *modulus);
 
 SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus2(void *thisptr, uint64_t plainModulus);
-
-SEALNETNATIVE HRESULT SEALCALL EncParams_NoiseStandardDeviation(void *thisptr, double *nsd);
-
-SEALNETNATIVE HRESULT SEALCALL EncParams_SetNoiseStandardDeviation(void *thisptr, double nsd);
-
-SEALNETNATIVE HRESULT SEALCALL EncParams_NoiseMaxDeviation(void *thisptr, double *nmd);
 
 SEALNETNATIVE HRESULT SEALCALL EncParams_Equals(void *thisptr, void *otherptr, bool *result);

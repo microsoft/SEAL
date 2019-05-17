@@ -173,6 +173,30 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void CompareToTest()
+        {
+            SmallModulus sminv = null;
+            SmallModulus sm0 = new SmallModulus();
+            SmallModulus sm2 = new SmallModulus(2);
+            SmallModulus sm5 = new SmallModulus(5);
+            SmallModulus smbig = new SmallModulus(0xFFFFFFF);
+            Assert.AreEqual(1, sm0.CompareTo(sminv));
+            Assert.AreEqual(0, sm0.CompareTo(sm0));
+            Assert.AreEqual(-1, sm2.CompareTo(sm5));
+            Assert.AreEqual(-1, sm2.CompareTo(smbig));
+            Assert.AreEqual(1, sm2.CompareTo(sminv));
+            Assert.AreEqual(0, sm5.CompareTo(sm5));
+            Assert.AreEqual(0, smbig.CompareTo(smbig));
+            Assert.AreEqual(1, smbig.CompareTo(sm0));
+            Assert.AreEqual(1, smbig.CompareTo(sm5));
+            Assert.AreEqual(1, smbig.CompareTo(sminv));
+            Assert.AreEqual(-1, sm5.CompareTo(6));
+            Assert.AreEqual(0, sm5.CompareTo(5));
+            Assert.AreEqual(1, sm5.CompareTo(4));
+            Assert.AreEqual(1, sm5.CompareTo(0));
+        }
+
+        [TestMethod]
         public void SaveLoadTest()
         {
             SmallModulus sm1 = new SmallModulus(65537ul);

@@ -12,7 +12,7 @@ void example_rotation_bfv()
 
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(8192));
+    parms.set_coeff_modulus(CoeffModulus::Default(8192));
     parms.set_plain_modulus(65537);
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -159,7 +159,7 @@ void example_rotation_bfv()
     cout << "Done" << endl;
     cout << "\tNoise budget after rotation: "
         << decryptor2.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
-    
+
     /*
     We can see now there is a significant noise growth introduced in rotation.
     It is similar in relinearization.

@@ -50,7 +50,7 @@ void example_integer_encoder()
     */
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
+    parms.set_coeff_modulus(CoeffModulus::Default(4096));
     parms.set_plain_modulus(512);
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -144,7 +144,7 @@ void example_batch_encoder()
     */
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(8192));
+    parms.set_coeff_modulus(CoeffModulus::Default(8192));
 
     /*
     Note that 40961 is a prime number and 2*4096 divides 40960, so batching will
@@ -303,7 +303,7 @@ void example_ckks_encoder()
     */
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(8192));
+    parms.set_coeff_modulus(CoeffModulus::Default(8192));
 
     /*
     We create the SEALContext as usual and print the parameters.

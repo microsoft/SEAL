@@ -262,7 +262,7 @@ namespace Microsoft.Research.SEAL
         #region EncryptionParameters methods
 
         [DllImport(sealnetnative, EntryPoint = "EncParams_Create1", PreserveSig = false)]
-        internal static extern void EncParams_Create(int scheme, out IntPtr encParams);
+        internal static extern void EncParams_Create(byte scheme, out IntPtr encParams);
 
         [DllImport(sealnetnative, EntryPoint = "EncParams_Create2", PreserveSig = false)]
         internal static extern void EncParams_Create(IntPtr copy, out IntPtr encParams);
@@ -292,7 +292,7 @@ namespace Microsoft.Research.SEAL
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void EncParams_GetScheme(IntPtr thisptr, out int scheme);
+        internal static extern void EncParams_GetScheme(IntPtr thisptr, out byte scheme);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EncParams_GetParmsId(IntPtr thisptr, ulong[] parmsId);
@@ -305,15 +305,6 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, EntryPoint = "EncParams_SetPlainModulus2", PreserveSig = false)]
         internal static extern void EncParams_SetPlainModulus(IntPtr thisptr, ulong plainModulus);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void EncParams_NoiseStandardDeviation(IntPtr thisptr, out double nsd);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void EncParams_SetNoiseStandardDeviation(IntPtr thisptr, double nsd);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void EncParams_NoiseMaxDeviation(IntPtr thisptr, out double nmd);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EncParams_Equals(IntPtr thisptr, IntPtr otherptr, out bool result);
@@ -1045,10 +1036,7 @@ namespace Microsoft.Research.SEAL
         #region IntegerEncoder methods
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void IntegerEncoder_Create1(IntPtr context, out IntPtr encoder);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void IntegerEncoder_Create2(IntPtr copy, out IntPtr encoder);
+        internal static extern void IntegerEncoder_Create(IntPtr context, out IntPtr encoder);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void IntegerEncoder_Destroy(IntPtr thisptr);

@@ -15,17 +15,17 @@
 
 namespace seal
 {
+    /**
+    Describes the type of encryption scheme to be used.
+    */
     enum class scheme_type : std::uint8_t
     {
+        // Brakerski/Fan-Vercauteren scheme
         BFV = 0x1,
+
+        // Cheon-Kim-Kim-Song scheme
         CKKS = 0x2
     };
-
-    inline bool is_valid_scheme(scheme_type scheme) noexcept
-    {
-        return (scheme == scheme_type::BFV) ||
-            (scheme == scheme_type::CKKS);
-    }
 
     /**
     The data type to store unique identifiers of encryption parameters.
@@ -83,11 +83,21 @@ namespace seal
         Creates an empty set of encryption parameters. At a minimum, the user needs
         to specify the parameters poly_modulus, coeff_modulus, and plain_modulus
         for the parameters to be usable.
+        */
+        EncryptionParameters(scheme_type scheme) : scheme_(scheme)
+        {
+            compute_parms_id();
+        }
+
+        /**
+        Creates an empty set of encryption parameters. At a minimum, the user needs
+        to specify the parameters poly_modulus, coeff_modulus, and plain_modulus
+        for the parameters to be usable.
 
         @throws std::invalid_argument if scheme is not supported
         @see scheme_type for the supported schemes
         */
-        EncryptionParameters(scheme_type scheme)
+        EncryptionParameters(std::uint8_t scheme)
         {
             // Check that a valid scheme is given
             if (!is_valid_scheme(scheme))
@@ -95,7 +105,7 @@ namespace seal
                 throw std::invalid_argument("unsupported scheme");
             }
 
-            scheme_ = scheme;
+            scheme_ = static_cast<scheme_type>(scheme);
             compute_parms_id();
         }
 
@@ -222,34 +232,6 @@ namespace seal
         }
 
         /**
-        Sets the standard deviation of the noise distribution used for error
-        sampling. This parameter directly affects the security level of the scheme.
-        However, it should not be necessary for most users to change this parameter
-        from its default value.
-
-        @param[in] noise_standard_deviation The new standard deviation
-        @throws std::invalid_argument if noise_standard_deviation is negative or
-        too large
-        */
-        inline void set_noise_standard_deviation(double noise_standard_deviation)
-        {
-            if (std::signbit(noise_standard_deviation) ||
-                (noise_standard_deviation > std::numeric_limits<double>::max() /
-                util::global_variables::noise_distribution_width_multiplier))
-            {
-                throw std::invalid_argument("noise_standard_deviation is invalid");
-            }
-
-            noise_standard_deviation_ = noise_standard_deviation;
-            noise_max_deviation_ =
-                util::global_variables::noise_distribution_width_multiplier *
-                noise_standard_deviation_;
-
-            // Re-compute the parms_id
-            compute_parms_id();
-        }
-
-        /**
         Sets the random number generator factory to use for encryption. By default,
         the random generator is set to UniformRandomGeneratorFactory::default_factory().
         Setting this value allows a user to specify a custom random number generator
@@ -293,24 +275,6 @@ namespace seal
         inline const SmallModulus &plain_modulus() const noexcept
         {
             return plain_modulus_;
-        }
-
-        /**
-        Returns the currently set standard deviation of the noise distribution.
-        */
-        inline double noise_standard_deviation() const noexcept
-        {
-            return noise_standard_deviation_;
-        }
-
-        /**
-        Returns the currently set maximum deviation of the noise distribution.
-        This value cannot be directly controlled by the user, and is automatically
-        set to be an appropriate multiple of the noise_standard_deviation parameter.
-        */
-        inline double noise_max_deviation() const noexcept
-        {
-            return noise_max_deviation_;
         }
 
         /**
@@ -375,6 +339,16 @@ namespace seal
 
     private:
         /**
+        Helper function to determine whether given std::uint8_t represents a valid
+        value for scheme_type.
+        */
+        constexpr bool is_valid_scheme(std::uint8_t scheme) noexcept
+        {
+            return (scheme == static_cast<std::uint8_t>(scheme_type::BFV) ||
+                (scheme == static_cast<std::uint8_t>(scheme_type::CKKS)));
+        }
+
+        /**
         Returns the parms_id of the current parameters. This function is intended
         for internal use.
         */
@@ -392,13 +366,6 @@ namespace seal
         std::size_t poly_modulus_degree_ = 0;
 
         std::vector<SmallModulus> coeff_modulus_{};
-
-        double noise_standard_deviation_ =
-            util::global_variables::default_noise_standard_deviation;
-
-        double noise_max_deviation_ =
-            util::global_variables::noise_distribution_width_multiplier *
-            util::global_variables::default_noise_standard_deviation;
 
         std::shared_ptr<UniformRandomGeneratorFactory> random_generator_{ nullptr };
 

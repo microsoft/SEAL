@@ -84,8 +84,15 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     /*
     Print the size of the true (product) coefficient modulus.
     */
-    std::cout << "|   coeff_modulus size: "
-        << context_data.total_coeff_modulus_bit_count() << " (";
+    if (context_data.parms().scheme() == seal::scheme_type::BFV)
+    {
+        std::cout << "|   coeff_modulus size: ";
+    }
+    else
+    {
+        std::cout << "\\   coeff_modulus size: ";
+    }
+    std::cout << context_data.total_coeff_modulus_bit_count() << " (";
     auto coeff_modulus = context_data.parms().coeff_modulus();
     std::size_t coeff_mod_count = coeff_modulus.size();
     for (std::size_t i = 0; i < coeff_mod_count - 1; i++)
@@ -104,8 +111,6 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
             parms().plain_modulus().value() << std::endl;
     }
 
-    std::cout << "\\   noise_standard_deviation: " << context_data.
-        parms().noise_standard_deviation() << std::endl;
     std::cout << std::endl;
 }
 

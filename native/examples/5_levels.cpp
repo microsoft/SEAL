@@ -108,7 +108,7 @@ void example_levels()
         else
         {
             cout << endl;
-        }        
+        }
         cout << "\tparms_id: " << context_data->parms_id() << endl;
         cout << "\tcoeff_modulus primes: ";
         cout << hex;
@@ -236,7 +236,7 @@ void example_levels()
 
     Also the lost noise budget is actually not as issue at all, if we do things
     right, as we will see below.
-    
+
     First we recreate the original ciphertext (with the largest parameters) and
     perform some simple computations on it.
     */
@@ -258,7 +258,7 @@ void example_levels()
     evaluator.mod_switch_to_next_inplace(encrypted);
     cout << "\tNoise budget after modulus switching: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-    
+
     /*
     This means that there is no harm at all in dropping some of the coefficient
     modulus after doing enough computations. In some cases one might want to

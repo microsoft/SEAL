@@ -12,9 +12,9 @@ using System.Text;
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
-    /// Scheme for the Encryption Parameters
+    /// Describes the type of encryption scheme to be used.
     /// </summary>
-    public enum SchemeType
+    public enum SchemeType : byte
     {
         /// <summary>
         /// Brakerski/Fan-Vercauteren scheme
@@ -84,10 +84,26 @@ namespace Microsoft.Research.SEAL
         /// <see cref="PlainModulus"/> for the parameters to be valid.
         /// </remarks>
         /// <param name="scheme">Scheme for the encryption parameters</param>
-        /// <exception cref="ArgumentException">if given scheme is not available</exception>
         public EncryptionParameters(SchemeType scheme)
         {
-            NativeMethods.EncParams_Create((int)scheme, out IntPtr ptr);
+            NativeMethods.EncParams_Create((byte)scheme, out IntPtr ptr);
+            NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Creates an empty encryption parameters.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// Creates an empty encryption parameters. At a minimum, the user needs to specify
+        /// the parameters <see cref="PolyModulusDegree"/>, <see cref="CoeffModulus"/>, and
+        /// <see cref="PlainModulus"/> for the parameters to be valid.
+        /// </remarks>
+        /// <param name="scheme">Scheme for the encryption parameters</param>
+        /// <exception cref="System.ArgumentException">if scheme is not supported</exception>
+        public EncryptionParameters(byte scheme)
+        {
+            NativeMethods.EncParams_Create(scheme, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -266,52 +282,13 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Get/Set the standard deviation of the noise distribution used for error sampling.
-        /// </summary>
-        /// <remarks>
-        /// This parameter directly affects the security level of the scheme. However, it should not be
-        /// necessary for most users to change this parameter from its default value.
-        /// </remarks>
-        /// <exception cref="ArgumentException">when setting, if value is negative or too large.</exception>
-        public double NoiseStandardDeviation
-        {
-            get
-            {
-                NativeMethods.EncParams_NoiseStandardDeviation(NativePtr, out double nsd);
-                return nsd;
-            }
-            set
-            {
-                NativeMethods.EncParams_SetNoiseStandardDeviation(NativePtr, value);
-            }
-        }
-
-        /// <summary>
-        /// Returns the currently set maximum deviation of the noise distribution.
-        /// </summary>
-        ///
-        /// <remarks>
-        /// Returns the currently set maximum deviation of the noise distribution. This value
-        /// cannot be directly controlled by the user, and is automatically set to be an
-        /// appropriate multiple of the NoiseStandardDeviation parameter.
-        /// </remarks>
-        public double NoiseMaxDeviation
-        {
-            get
-            {
-                NativeMethods.EncParams_NoiseMaxDeviation(NativePtr, out double nmd);
-                return nmd;
-            }
-        }
-
-        /// <summary>
         /// Returns the encryption scheme type.
         /// </summary>
         public SchemeType Scheme
         {
             get
             {
-                NativeMethods.EncParams_GetScheme(NativePtr, out int scheme);
+                NativeMethods.EncParams_GetScheme(NativePtr, out byte scheme);
                 return (SchemeType)scheme;
             }
         }
@@ -337,7 +314,7 @@ namespace Microsoft.Research.SEAL
             {
                 using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    writer.Write((int)parms.Scheme);
+                    writer.Write((byte)parms.Scheme);
                     writer.Write(parms.PolyModulusDegree);
 
                     List<SmallModulus> coeffModulus = new List<SmallModulus>(parms.CoeffModulus);
@@ -351,7 +328,6 @@ namespace Microsoft.Research.SEAL
                     {
                         parms.PlainModulus.Save(writer.BaseStream);
                     }
-                    writer.Write(parms.NoiseStandardDeviation);
                 }
             }
             catch (IOException ex)
@@ -380,7 +356,7 @@ namespace Microsoft.Research.SEAL
 
                 using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
                 {
-                    SchemeType scheme = (SchemeType)reader.ReadInt32();
+                    byte scheme = reader.ReadByte();
                     parms = new EncryptionParameters(scheme);
 
                     parms.PolyModulusDegree = reader.ReadUInt64();
@@ -396,14 +372,12 @@ namespace Microsoft.Research.SEAL
 
                     parms.CoeffModulus = coeffModulus;
 
-                    if (scheme == SchemeType.BFV)
+                    if (parms.Scheme == SchemeType.BFV)
                     {
                         SmallModulus plainModulus = new SmallModulus();
                         plainModulus.Load(reader.BaseStream);
                         parms.PlainModulus = plainModulus;
                     }
-
-                    parms.NoiseStandardDeviation = reader.ReadDouble();
                 }
 
                 return parms;

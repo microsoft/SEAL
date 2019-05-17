@@ -62,6 +62,14 @@ namespace Microsoft.Research.SEAL
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
+            if (!context.ParametersSet)
+                throw new ArgumentException("Encryption parameters are not set correctly");
+
+            SEALContext.ContextData contextData = context.FirstContextData;
+            if (contextData.Parms.Scheme != SchemeType.BFV)
+                throw new ArgumentException("Unsupported scheme");
+            if (!contextData.Qualifiers.UsingBatching)
+                throw new ArgumentException("Encryption parameters are not valid for batching");
 
             NativeMethods.BatchEncoder_Create(context.NativePtr, out IntPtr ptr);
             NativePtr = ptr;

@@ -26,7 +26,9 @@ namespace Microsoft.Research.SEAL
     /// </remarks>
     /// <seealso cref="EncryptionParameters">See EncryptionParameters for a description
     /// of the encryption parameters.</seealso>
-    public class SmallModulus : NativeObject, IEquatable<SmallModulus>, IEquatable<ulong>
+    public class SmallModulus : NativeObject,
+        IEquatable<SmallModulus>, IEquatable<ulong>,
+        IComparable<SmallModulus>, IComparable<ulong>
     {
         /// <summary>Creates a SmallModulus instance.</summary>
         /// <remarks>
@@ -292,6 +294,35 @@ namespace Microsoft.Research.SEAL
         {
             NativeMethods.SmallModulus_Equals(NativePtr, other, out bool result);
             return result;
+        }
+
+        #endregion
+
+        #region IComparable<SmallModulus> methods
+
+        /// <summary>
+        /// Compares two SmallModulus instances.
+        /// </summary>
+        /// <param name="compare">The SmallModulus to compare against</param>
+        public int CompareTo(SmallModulus compare)
+        {
+            if (null == compare)
+                return 1;
+
+            return Value.CompareTo(compare.Value);
+        }
+
+        #endregion
+
+        #region IComparable<ulong> methods
+
+        /// <summary>
+        /// Compares a SmallModulus value to an unsigned integer.
+        /// </summary>
+        /// <param name="compare">The unsigned integer to compare against</param>
+        public int CompareTo(ulong compare)
+        {
+            return Value.CompareTo(compare);
         }
 
         #endregion

@@ -10,8 +10,8 @@ using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(NumberTheoryTest, GCD)
         {
             ASSERT_EQ(1ULL, gcd(1, 1));
@@ -90,5 +90,22 @@ namespace SEALTest
             ASSERT_TRUE(try_mod_inverse(input, modulus, result));
             ASSERT_EQ(result, 5ULL);
         }
-   }
+
+        TEST(NumberTheoryTest, IsPrime)
+        {
+            ASSERT_FALSE(is_prime(0));
+            ASSERT_TRUE(is_prime(2));
+            ASSERT_TRUE(is_prime(3));
+            ASSERT_FALSE(is_prime(4));
+            ASSERT_TRUE(is_prime(5));
+            ASSERT_FALSE(is_prime(221));
+            ASSERT_TRUE(is_prime(65537));
+            ASSERT_FALSE(is_prime(65536));
+            ASSERT_TRUE(is_prime(59399));
+            ASSERT_TRUE(is_prime(72307));
+            ASSERT_FALSE(is_prime(72307ULL * 59399ULL));
+            ASSERT_TRUE(is_prime(36893488147419103ULL));
+            ASSERT_FALSE(is_prime(36893488147419107ULL));
+        }
+    }
 }

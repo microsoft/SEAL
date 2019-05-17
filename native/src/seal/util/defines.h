@@ -22,7 +22,7 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 
 // Bounds for bit-length of user-defined coefficient moduli
 #define SEAL_USER_MOD_BIT_COUNT_MAX 60
-#define SEAL_USER_MOD_BIT_COUNT_MIN 1
+#define SEAL_USER_MOD_BIT_COUNT_MIN 2
 
 // Bounds for number of coefficient moduli
 #define SEAL_COEFF_MOD_COUNT_MAX 62
@@ -33,12 +33,12 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #define SEAL_POLY_MOD_DEGREE_MIN 2
 
 // Bounds for the plaintext modulus
-#define SEAL_PLAIN_MOD_MIN 2
-#define SEAL_PLAIN_MOD_MAX (std::uint64_t(1) << SEAL_USER_MOD_BIT_COUNT_MAX) - 1
+#define SEAL_PLAIN_MOD_MIN SEAL_USER_MOD_BIT_COUNT_MIN
+#define SEAL_PLAIN_MOD_MAX SEAL_USER_MOD_BIT_COUNT_MAX
 
 // Upper bound on the size of a ciphertext
 #define SEAL_CIPHERTEXT_SIZE_MIN 2
-#define SEAL_CIPHERTEXT_SIZE_MAX 32768
+#define SEAL_CIPHERTEXT_SIZE_MAX 16
 
 // Detect compiler
 #define SEAL_COMPILER_MSVC 1

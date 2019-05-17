@@ -39,6 +39,8 @@ namespace Microsoft.Research.SEAL
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
+            if (!context.ParametersSet)
+                throw new ArgumentException("Encryption parameters are not set correctly");
 
             NativeMethods.KeyGenerator_Create(context.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
@@ -67,6 +69,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(context));
             if (null == secretKey)
                 throw new ArgumentNullException(nameof(secretKey));
+            if (!context.ParametersSet)
+                throw new ArgumentException("Encryption parameters are not set correctly");
+            if (!ValCheck.IsValidFor(secretKey, context))
+                throw new ArgumentException("Secret key is not valid for encryption parameters");
 
             NativeMethods.KeyGenerator_Create(context.NativePtr, secretKey.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
@@ -98,6 +104,12 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(secretKey));
             if (null == publicKey)
                 throw new ArgumentNullException(nameof(publicKey));
+            if (!context.ParametersSet)
+                throw new ArgumentException("Encryption parameters are not set correctly");
+            if (!ValCheck.IsValidFor(secretKey, context))
+                throw new ArgumentException("Secret key is not valid for encryption parameters");
+            if (!ValCheck.IsValidFor(publicKey, context))
+                throw new ArgumentException("Public key is not valid for encryption parameters");
 
             NativeMethods.KeyGenerator_Create(context.NativePtr, secretKey.NativePtr, publicKey.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
@@ -133,6 +145,7 @@ namespace Microsoft.Research.SEAL
         /// Generates and returns the specified number of relinearization keys.
         /// </summary>
         /// <param name="count">The number of relinearization keys to generate</param>
+        /// <exception cref="ArgumentException">if count is zero or too large</exception>
         public RelinKeys RelinKeys(ulong count = 1)
         {
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, count, out IntPtr relinKeysPtr);

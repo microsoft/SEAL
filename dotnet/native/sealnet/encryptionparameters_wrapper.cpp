@@ -29,14 +29,13 @@ namespace seal
     };
 }
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Create1(int scheme, void **enc_params)
+SEALNETNATIVE HRESULT SEALCALL EncParams_Create1(uint8_t scheme, void **enc_params)
 {
     IfNullRet(enc_params, E_POINTER);
 
     try
     {
-        scheme_type schemetype = static_cast<scheme_type>(scheme);
-        EncryptionParameters *params = new EncryptionParameters(schemetype);
+        EncryptionParameters *params = new EncryptionParameters(scheme);
         *enc_params = params;
         return S_OK;
     }
@@ -138,13 +137,13 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_SetCoeffModulus(void *thisptr, uint64_t
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_GetScheme(void *thisptr, int *scheme)
+SEALNETNATIVE HRESULT SEALCALL EncParams_GetScheme(void *thisptr, uint8_t *scheme)
 {
     EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
     IfNullRet(scheme, E_POINTER);
 
-    *scheme = static_cast<int>(params->scheme());
+    *scheme = static_cast<uint8_t>(params->scheme());
     return S_OK;
 }
 
@@ -207,42 +206,6 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus2(void *thisptr, uint64_
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
-}
-
-SEALNETNATIVE HRESULT SEALCALL EncParams_NoiseStandardDeviation(void *thisptr, double *nsd)
-{
-    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
-    IfNullRet(params, E_POINTER);
-    IfNullRet(nsd, E_POINTER);
-
-    *nsd = params->noise_standard_deviation();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL EncParams_SetNoiseStandardDeviation(void *thisptr, double nsd)
-{
-    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
-    IfNullRet(params, E_POINTER);
-
-    try
-    {
-        params->set_noise_standard_deviation(nsd);
-        return S_OK;
-    }
-    catch (const invalid_argument&)
-    {
-        return E_INVALIDARG;
-    }
-}
-
-SEALNETNATIVE HRESULT SEALCALL EncParams_NoiseMaxDeviation(void *thisptr, double *nmd)
-{
-    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
-    IfNullRet(params, E_POINTER);
-    IfNullRet(nmd, E_POINTER);
-
-    *nmd = params->noise_max_deviation();
-    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL EncParams_Equals(void *thisptr, void *otherptr, bool *result)

@@ -12,7 +12,7 @@
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Create1(void *context, void **encoder)
+SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Create(void *context, void **encoder)
 {
     const auto& sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -28,17 +28,6 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Create1(void *context, void **enco
     {
         return E_INVALIDARG;
     }
-}
-
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Create2(void *copy, void **encoder)
-{
-    IntegerEncoder *intenc = FromVoid<IntegerEncoder>(copy);
-    IfNullRet(intenc, E_POINTER);
-    IfNullRet(encoder, E_POINTER);
-
-    IntegerEncoder *newEnc = new IntegerEncoder(*intenc);
-    *encoder = newEnc;
-    return S_OK;
 }
 
 SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Destroy(void *thisptr)

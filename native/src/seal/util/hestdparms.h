@@ -1,70 +1,102 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#pragma once 
+#pragma once
 
 /**
-Largest allowed bit counts for coeff_modulus based on the security estimates from 
-HomomorphicEncryption.org security standard. Microsoft SEAL always samples the secret key 
-from a ternary {-1, 0, 1} distribution. These tables are used to enforce a minimum 
-security level when constructing a SEALContext. SEAL_HE_STD_PARMS_128_TC (below) 
-is used for this purpose by default, but this can easily be changed by editing 
-seal/util/globals.h if, e.g., higher than 128-bit or post-quantum security levels 
-should be enforced.
+Largest allowed bit counts for coeff_modulus based on the security estimates from
+HomomorphicEncryption.org security standard. Microsoft SEAL samples the secret key
+from a ternary {-1, 0, 1} distribution.
 */
 // Ternary secret; 128 bits classical security
-#define SEAL_HE_STD_PARMS_128_TC                \
-    { std::size_t(1024),    27     },           \
-    { std::size_t(2048),    54     },           \
-    { std::size_t(4096),    109    },           \
-    { std::size_t(8192),    218    },           \
-    { std::size_t(16384),   438    },           \
-    { std::size_t(32768),   881    }
+constexpr int SEAL_HE_STD_PARMS_128_TC(std::size_t poly_modulus_degree) noexcept
+{
+    switch (poly_modulus_degree)
+    {
+        case std::size_t(1024):      return 27;
+        case std::size_t(2048):      return 54;
+        case std::size_t(4096):      return 109;
+        case std::size_t(8192):      return 218;
+        case std::size_t(16384):     return 438;
+        case std::size_t(32768):     return 881;
+    }
+    return 0;
+}
 
 // Ternary secret; 192 bits classical security
-#define SEAL_HE_STD_PARMS_192_TC                \
-    { std::size_t(1024),    19     },           \
-    { std::size_t(2048),    37     },           \
-    { std::size_t(4096),    75     },           \
-    { std::size_t(8192),    152    },           \
-    { std::size_t(16384),   305    },           \
-    { std::size_t(32768),   611    }
+constexpr int SEAL_HE_STD_PARMS_192_TC(std::size_t poly_modulus_degree) noexcept
+{
+    switch (poly_modulus_degree)
+    {
+        case std::size_t(1024):      return 19;
+        case std::size_t(2048):      return 37;
+        case std::size_t(4096):      return 75;
+        case std::size_t(8192):      return 152;
+        case std::size_t(16384):     return 305;
+        case std::size_t(32768):     return 611;
+    }
+    return 0;
+}
 
 // Ternary secret; 256 bits classical security
-#define SEAL_HE_STD_PARMS_256_TC                \
-    { std::size_t(1024),    14     },           \
-    { std::size_t(2048),    29     },           \
-    { std::size_t(4096),    58     },           \
-    { std::size_t(8192),    118    },           \
-    { std::size_t(16384),   237    },           \
-    { std::size_t(32768),   476    }
+constexpr int SEAL_HE_STD_PARMS_256_TC(std::size_t poly_modulus_degree) noexcept
+{
+    switch (poly_modulus_degree)
+    {
+        case std::size_t(1024):      return 14;
+        case std::size_t(2048):      return 29;
+        case std::size_t(4096):      return 58;
+        case std::size_t(8192):      return 118;
+        case std::size_t(16384):     return 237;
+        case std::size_t(32768):     return 476;
+    }
+    return 0;
+}
 
 // Ternary secret; 128 bits quantum security
-#define SEAL_HE_STD_PARMS_128_TQ                \
-    { std::size_t(1024),    25     },           \
-    { std::size_t(2048),    51     },           \
-    { std::size_t(4096),    101    },           \
-    { std::size_t(8192),    202    },           \
-    { std::size_t(16384),   411    },           \
-    { std::size_t(32768),   827    }
+constexpr int SEAL_HE_STD_PARMS_128_TQ(std::size_t poly_modulus_degree) noexcept
+{
+    switch (poly_modulus_degree)
+    {
+        case std::size_t(1024):      return 25;
+        case std::size_t(2048):      return 51;
+        case std::size_t(4096):      return 101;
+        case std::size_t(8192):      return 202;
+        case std::size_t(16384):     return 411;
+        case std::size_t(32768):     return 827;
+    }
+    return 0;
+}
 
 // Ternary secret; 192 bits quantum security
-#define SEAL_HE_STD_PARMS_192_TQ                \
-    { std::size_t(1024),    17     },           \
-    { std::size_t(2048),    35     },           \
-    { std::size_t(4096),    70     },           \
-    { std::size_t(8192),    141    },           \
-    { std::size_t(16384),   284    },           \
-    { std::size_t(32768),   571    }
+constexpr int SEAL_HE_STD_PARMS_192_TQ(std::size_t poly_modulus_degree) noexcept
+{
+    switch (poly_modulus_degree)
+    {
+        case std::size_t(1024):      return 17;
+        case std::size_t(2048):      return 35;
+        case std::size_t(4096):      return 70;
+        case std::size_t(8192):      return 141;
+        case std::size_t(16384):     return 284;
+        case std::size_t(32768):     return 571;
+    }
+    return 0;
+}
 
 // Ternary secret; 256 bits quantum security
-#define SEAL_HE_STD_PARMS_256_TQ                \
-    { std::size_t(1024),    13     },           \
-    { std::size_t(2048),    27     },           \
-    { std::size_t(4096),    54     },           \
-    { std::size_t(8192),    109    },           \
-    { std::size_t(16384),   220    },           \
-    { std::size_t(32768),   443    }
+constexpr int SEAL_HE_STD_PARMS_256_TQ(std::size_t poly_modulus_degree) noexcept
+{
+    switch (poly_modulus_degree)
+    {
+        case std::size_t(1024):      return 13;
+        case std::size_t(2048):      return 27;
+        case std::size_t(4096):      return 54;
+        case std::size_t(8192):      return 109;
+        case std::size_t(16384):     return 220;
+        case std::size_t(32768):     return 443;
+    }
+    return 0;
+}
 
 // Standard deviation for error distribution
-#define SEAL_HE_STD_PARMS_ERROR_STD_DEV 3.20
+constexpr double SEAL_HE_STD_PARMS_ERROR_STD_DEV = 3.20;

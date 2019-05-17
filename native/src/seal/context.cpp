@@ -7,7 +7,6 @@
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/numth.h"
-#include "seal/defaultparams.h"
 #include <utility>
 #include <stdexcept>
 
@@ -36,9 +35,9 @@ namespace seal
         size_t coeff_mod_count = coeff_modulus.size();
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            // Coeff moduli must be at least 2 and at most USER_MODULO_BOUND bits
+            // Check coefficient moduli bounds
             if (coeff_modulus[i].value() >> SEAL_USER_MOD_BIT_COUNT_MAX ||
-                coeff_modulus[i].value() < (uint64_t(1) << SEAL_USER_MOD_BIT_COUNT_MIN))
+                !(coeff_modulus[i].value() >> (SEAL_USER_MOD_BIT_COUNT_MIN - 1)))
             {
                 context_data.qualifiers_.parameters_set = false;
                 return context_data;
@@ -91,43 +90,17 @@ namespace seal
         // Polynomial modulus X^(2^k) + 1 is guaranteed at this point
         context_data.qualifiers_.using_fft = true;
 
-        // Verify that noise_standard_deviation is positive
-        if (parms.noise_standard_deviation() < 0 ||
-            parms.noise_max_deviation() < 0)
-        {
-            // Parameters are not valid
-            context_data.qualifiers_.parameters_set = false;
-            return context_data;
-        }
-
-        // Assume parameters are secure according to HomomorphicEncryption.org
-        // security standard
-        context_data.qualifiers_.using_hes = true;
-
-        // Check if the noise_standard_deviation is less than the default value
-        if (parms.noise_standard_deviation() <
-            util::global_variables::default_noise_standard_deviation)
-        {
-            // Not secure according to HomomorphicEncryption.org security standard
-            context_data.qualifiers_.using_hes = false;
-            if (enforce_hes_)
-            {
-                // Parameters are not valid
-                context_data.qualifiers_.parameters_set = false;
-                return context_data;
-            }
-        }
+        // Assume parameters satisfy desired security level
+        context_data.qualifiers_.sec_level = sec_level_;
 
         // Check if the parameters are secure according to HomomorphicEncryption.org
         // security standard
-        if (!util::global_variables::
-            max_secure_coeff_modulus_bit_count.count(poly_modulus_degree) ||
-            (context_data.total_coeff_modulus_bit_count_ > util::global_variables::
-                max_secure_coeff_modulus_bit_count.at(poly_modulus_degree)))
+        if (context_data.total_coeff_modulus_bit_count_ >
+            CoeffModulus::MaxBitCount(poly_modulus_degree, sec_level_))
         {
             // Not secure according to HomomorphicEncryption.org security standard
-            context_data.qualifiers_.using_hes = false;
-            if (enforce_hes_)
+            context_data.qualifiers_.sec_level = sec_level_type::none;
+            if (sec_level_ != sec_level_type::none)
             {
                 // Parameters are not valid
                 context_data.qualifiers_.parameters_set = false;
@@ -154,8 +127,8 @@ namespace seal
         if (parms.scheme() == scheme_type::BFV)
         {
             // Plain modulus must be at least 2 and at most 60 bits
-            if (plain_modulus.value() < SEAL_PLAIN_MOD_MIN ||
-                plain_modulus.value() > SEAL_PLAIN_MOD_MAX)
+            if (plain_modulus.value() >> SEAL_PLAIN_MOD_MAX ||
+                !(plain_modulus.value() >> (SEAL_PLAIN_MOD_MIN - 1)))
             {
                 context_data.qualifiers_.parameters_set = false;
                 return context_data;
@@ -354,8 +327,8 @@ namespace seal
     }
 
     SEALContext::SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-        bool enforce_hes, MemoryPoolHandle pool)
-        : pool_(move(pool)), enforce_hes_(enforce_hes)
+        sec_level_type sec_level, MemoryPoolHandle pool)
+        : pool_(move(pool)), sec_level_(sec_level)
     {
         if (!pool_)
         {

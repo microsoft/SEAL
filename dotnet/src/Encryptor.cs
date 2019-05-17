@@ -51,6 +51,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(context));
             if (null == publicKey)
                 throw new ArgumentNullException(nameof(publicKey));
+            if (!context.ParametersSet)
+                throw new ArgumentException("Encryption parameters are not set correctly");
+            if (!ValCheck.IsValidFor(publicKey, context))
+                throw new ArgumentException("Public key is not valid for encryption parameters");
 
             NativeMethods.Encryptor_Create(context.NativePtr, publicKey.NativePtr, out IntPtr ptr);
             NativePtr = ptr;

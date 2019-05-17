@@ -15,7 +15,7 @@ void example_basic_bfv()
     evaluation) on encrypted integers. Microsoft SEAL implements two encryption
     schemes:
 
-        (1) Brakerski/Fan-Vercauteren (BFV) scheme and
+        (1) Brakerski/Fan-Vercauteren (BFV) scheme;
         (2) Cheon-Kim-Kim-Song (CKKS) scheme.
 
     We use the BFV scheme in this example as it is far easier to understand and
@@ -86,7 +86,7 @@ void example_basic_bfv()
     poly_modulus_degree determines an upper bound on the bit-length of the
     coeff_modulus; these upper bounds can be found in seal/util/hestdparms.h
     in the macro `SEAL_HE_STD_PARMS_128_TC':
-    
+
         poly_modulus_degree | max coeff_modulus bit-length
         --------------------------------------------------------
         1024                | 27
@@ -110,7 +110,7 @@ void example_basic_bfv()
 
     for 128-bit, 192-bit, and 256-bit security levels. We note that a 128-bit
     security level is considered to be already extremely secure and far beyond
-    what is considered feasible 
+    what is considered feasible
 
     In Microsoft SEAL the coefficient modulus is a positive composite number --
     a product of distinct primes of size up to 60 bits. When we talk about the
@@ -159,7 +159,7 @@ void example_basic_bfv()
     level. Concretely, this coefficient modulus consists of two 36-bit and one
     37-bit prime factors: 0xffffee001, 0xffffc4001, 0x1ffffe0001.
     */
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
+    parms.set_coeff_modulus(CoeffModulus::Default(4096));
 
     /*
     The plaintext modulus can be any positive integer, even though here we take

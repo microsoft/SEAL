@@ -62,12 +62,12 @@ void example_basic_ckks()
         (3) Choose intermediate primes to be roughly of equal size (but distinct).
 
     Microsoft SEAL provides a method to generate prime numbers of the right form,
-    given a bit-size and a desired poly_modulus_degree. Here we generate two 
+    given a bit-size and a desired poly_modulus_degree. Here we generate two
     60-bit primes.
     */
     size_t poly_modulus_degree = 8192;
-    vector<SmallModulus> primes = 
-        SmallModulus::GetPrimes(60, 2, poly_modulus_degree);
+    vector<SmallModulus> primes = CoeffModulus::Custom(
+        poly_modulus_degree, { 60, 40, 40, 60 });
 
     /*
     We choose the initial scale to be 2.0^40. This gives us 20 bits of precision
@@ -83,9 +83,9 @@ void example_basic_ckks()
     size of the initial scale, we choose each prime to be 40 bits. The sizes of
     the primes have no effect on performance, but the number of primes does.
     */
-    vector<SmallModulus> primes_40 = 
-        SmallModulus::GetPrimes(40, 2, poly_modulus_degree);
-    primes.insert(primes.begin() + 1, primes_40.begin(), primes_40.end());
+    //vector<SmallModulus> primes_40 =
+    //    SmallModulus::GetPrimes(40, 2, poly_modulus_degree);
+    //primes.insert(primes.begin() + 1, primes_40.begin(), primes_40.end());
 
     /*
     After all, we have 60 * 2 + 40 * 2 = 200 bits coefficient modulus. We choose

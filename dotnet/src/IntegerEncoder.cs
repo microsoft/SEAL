@@ -42,23 +42,15 @@ namespace Microsoft.Research.SEAL
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
+            if (!context.ParametersSet)
+                throw new ArgumentException("Encryption parameters are not set correctly");
 
-            NativeMethods.IntegerEncoder_Create1(context.NativePtr, out IntPtr encoderPtr);
+            SEALContext.ContextData contextData = context.FirstContextData;
+            if (contextData.Parms.Scheme != SchemeType.BFV)
+                throw new ArgumentException("Unsupported scheme");
+
+            NativeMethods.IntegerEncoder_Create(context.NativePtr, out IntPtr encoderPtr);
             NativePtr = encoderPtr;
-        }
-
-        /// <summary>
-        /// Creates a copy of a IntegerEncoder.
-        /// </summary>
-        /// <param name="copy">The IntegerEncoder to copy from</param>
-        /// <exception cref="ArgumentNullException">if copy is null</exception>
-        public IntegerEncoder(IntegerEncoder copy)
-        {
-            if (null == copy)
-                throw new ArgumentNullException(nameof(copy));
-
-            NativeMethods.IntegerEncoder_Create2(copy.NativePtr, out IntPtr ptr);
-            NativePtr = ptr;
         }
 
         /// <summary>

@@ -4,8 +4,8 @@
 #include "gtest/gtest.h"
 #include "seal/batchencoder.h"
 #include "seal/context.h"
-#include "seal/defaultparams.h"
 #include "seal/keygenerator.h"
+#include "seal/coeffmod.h"
 #include <vector>
 #include <ctime>
 
@@ -19,10 +19,10 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(64);
-        parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
+        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60 }));
         parms.set_plain_modulus(257);
 
-        auto context = SEALContext::Create(parms, false, false);
+        auto context = SEALContext::Create(parms, false, sec_level_type::none);
         ASSERT_TRUE(context->first_context_data()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);
@@ -72,10 +72,10 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(64);
-        parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
+        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60 }));
         parms.set_plain_modulus(257);
 
-        auto context = SEALContext::Create(parms, false, false);
+        auto context = SEALContext::Create(parms, false, sec_level_type::none);
         ASSERT_TRUE(context->first_context_data()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);
@@ -125,10 +125,10 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(64);
-        parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
+        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60 }));
         parms.set_plain_modulus(257);
 
-        auto context = SEALContext::Create(parms, false, false);
+        auto context = SEALContext::Create(parms, false, sec_level_type::none);
         ASSERT_TRUE(context->first_context_data()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);

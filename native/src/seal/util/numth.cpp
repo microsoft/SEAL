@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include <random>
 #include "seal/util/numth.h"
 #include "seal/util/uintcore.h"
+#include "seal/util/uintarithsmallmod.h"
 
 using namespace std;
 
@@ -146,6 +148,151 @@ namespace seal
                 }
             }
             throw logic_error("failed to decompose input");
+        }
+
+        bool is_prime(const SmallModulus &modulus, size_t num_rounds)
+        {
+            uint64_t value = modulus.value();
+            // First check the simplest cases.
+            if (value < 2)
+            {
+                return false;
+            }
+            if (2 == value)
+            {
+                return true;
+            }
+            if (0 == (value & 0x1))
+            {
+                return false;
+            }
+            if (3 == value)
+            {
+                return true;
+            }
+            if (0 == (value % 3))
+            {
+                return false;
+            }
+            if (5 == value)
+            {
+                return true;
+            }
+            if (0 == (value % 5))
+            {
+                return false;
+            }
+            if (7 == value)
+            {
+                return true;
+            }
+            if (0 == (value % 7))
+            {
+                return false;
+            }
+            if (11 == value)
+            {
+                return true;
+            }
+            if (0 == (value % 11))
+            {
+                return false;
+            }
+            if (13 == value)
+            {
+                return true;
+            }
+            if (0 == (value % 13))
+            {
+                return false;
+            }
+
+            // Second, Miller-Rabin test.
+            // Find r and odd d that satisfy value = 2^r * d + 1.
+            uint64_t d = value - 1;
+            uint64_t r = 0;
+            while (0 == (d & 0x1))
+            {
+                d >>= 1;
+                r++;
+            }
+            if (r == 0)
+            {
+                return false;
+            }
+
+            // 1) Pick a = 2, check a^(value - 1).
+            // 2) Pick a randomly from [3, value - 1], check a^(value - 1).
+            // 3) Repeat 2) for another num_rounds - 2 times.
+            random_device rand;
+            uniform_int_distribution<unsigned long long> dist(3, value - 1);
+            for (size_t i = 0; i < num_rounds; i++)
+            {
+                uint64_t a = i ? dist(rand) : 2;
+                uint64_t x = exponentiate_uint_mod(a, d, modulus);
+                if (x == 1 || x == value - 1)
+                {
+                    continue;
+                }
+                uint64_t count = 0;
+                do
+                {
+                    x = multiply_uint_uint_mod(x, x, modulus);
+                    count++;
+                } while (x != value - 1 && count < r - 1);
+                if (x != value - 1)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        vector<SmallModulus> get_primes(size_t ntt_size, int bit_size, size_t count)
+        {
+            if (!count)
+            {
+                throw invalid_argument("count must be positive");
+            }
+            if (!ntt_size)
+            {
+                throw invalid_argument("ntt_size must be positive");
+            }
+            if (bit_size >= 63 || bit_size <= 1)
+            {
+                throw invalid_argument("bit_size is invalid");
+            }
+
+            vector<SmallModulus> destination;
+            uint64_t factor = mul_safe(uint64_t(2), safe_cast<uint64_t>(ntt_size));
+
+            // Start with 2^bit_size - 2 * ntt_size + 1
+            uint64_t value = uint64_t(0x1) << bit_size;
+            try
+            {
+                value = sub_safe(value, factor) + 1;
+            }
+            catch (const out_of_range &)
+            {
+                throw logic_error("failed to find enough qualifying primes");
+            }
+
+            uint64_t lower_bound = uint64_t(0x1) << (bit_size - 1);
+            while (count > 0 && value > lower_bound)
+            {
+                SmallModulus new_mod(value);
+                if (new_mod.is_prime())
+                {
+                    destination.emplace_back(move(new_mod));
+                    count--;
+                }
+                value -= factor;
+            }
+            if (count > 0)
+            {
+                throw logic_error("failed to find enough qualifying primes");
+            }
+            return destination;
         }
     }
 }

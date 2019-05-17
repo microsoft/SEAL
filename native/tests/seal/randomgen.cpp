@@ -124,14 +124,13 @@ namespace SEALTest
         EncryptionParameters parms(scheme_type::BFV);
         uint64_t coeff_modulus;
         SmallModulus plain_modulus;
-        parms.set_noise_standard_deviation(3.20);
         coeff_modulus = 0xFFFFFFFFC001;
         plain_modulus = 1 << 6;
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus({ coeff_modulus });
         parms.set_random_generator(factory);
-        auto context = SEALContext::Create(parms, false, false);
+        auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
         ASSERT_EQ(0, CustomRandomEngine::count());
 

@@ -46,6 +46,12 @@ namespace Microsoft.Research.SEAL
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
+            if (!context.ParametersSet)
+                throw new ArgumentException("Encryption parameters are not set correctly");
+
+            SEALContext.ContextData contextData = context.FirstContextData;
+            if (contextData.Parms.Scheme != SchemeType.CKKS)
+                throw new ArgumentException("Unsupported scheme");
 
             NativeMethods.CKKSEncoder_Create(context.NativePtr, out IntPtr ptr);
             NativePtr = ptr;

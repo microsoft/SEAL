@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <vector>
 #include <tuple>
+#include "seal/smallmodulus.h"
 #include "seal/util/common.h"
 
 namespace seal
@@ -134,5 +135,15 @@ namespace seal
             const std::vector<std::uint64_t> &baby_steps,
             const std::vector<std::uint64_t> &giant_steps)
             -> std::pair<std::size_t, std::size_t>;
+
+        bool is_prime(const SmallModulus &modulus, std::size_t num_rounds = 40);
+
+        std::vector<SmallModulus> get_primes(std::size_t ntt_size, int bit_size,
+            std::size_t count);
+
+        inline SmallModulus get_prime(std::size_t ntt_size, int bit_size)
+        {
+            return get_primes(ntt_size, bit_size, 1)[0];
+        }
     }
 }

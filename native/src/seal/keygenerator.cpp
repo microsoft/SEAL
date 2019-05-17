@@ -53,10 +53,9 @@ namespace seal
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (!is_valid_for(secret_key, context_) ||
-            secret_key.parms_id() != context_->key_parms_id())
+        if (!is_valid_for(secret_key, context_))
         {
-            throw invalid_argument("secret_key is not valid for encryption parameters");
+            throw invalid_argument("secret key is not valid for encryption parameters");
         }
 
         // Set the secret key
@@ -80,15 +79,13 @@ namespace seal
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (!is_valid_for(secret_key, context_) ||
-            secret_key.parms_id() != context_->key_parms_id())
+        if (!is_valid_for(secret_key, context_))
         {
-            throw invalid_argument("secret_key is not valid for encryption parameters");
+            throw invalid_argument("secret key is not valid for encryption parameters");
         }
-        if (!is_valid_for(public_key, context_) ||
-            public_key.parms_id() != context_->key_parms_id())
+        if (!is_valid_for(public_key, context_))
         {
-            throw invalid_argument("public_key is not valid for encryption parameters");
+            throw invalid_argument("public key is not valid for encryption parameters");
         }
 
         // Extract encryption parameters.
@@ -196,6 +193,10 @@ namespace seal
         if (!sk_generated_)
         {
             throw logic_error("cannot generate relinearization keys for unspecified secret key");
+        }
+        if (!count || count > SEAL_CIPHERTEXT_SIZE_MAX - 2)
+        {
+            throw invalid_argument("invalid count");
         }
 
         // Extract encryption parameters.

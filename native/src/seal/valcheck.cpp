@@ -179,7 +179,7 @@ namespace seal
             return false;
         }
 
-        // Are the parameters valid for given relinearization keyd?
+        // Are the parameters valid for given relinearization keys?
         if (in.parms_id() != context->key_parms_id())
         {
             return false;
@@ -205,8 +205,12 @@ namespace seal
         const RelinKeys &in,
         shared_ptr<const SEALContext> context)
     {
+        // Check that the size is within bounds.
+        bool size_check = !in.size() ||
+            (in.size() <= SEAL_CIPHERTEXT_SIZE_MAX - 2 &&
+                in.size() >= SEAL_CIPHERTEXT_SIZE_MIN - 2);
         return is_metadata_valid_for(
-            static_cast<const KSwitchKeys &>(in), move(context));
+            static_cast<const KSwitchKeys &>(in), move(context)) && size_check;
     }
 
     bool is_metadata_valid_for(
@@ -384,7 +388,7 @@ namespace seal
             return false;
         }
 
-        // Are the parameters valid for given relinearization keyd?
+        // Are the parameters valid for given relinearization keys?
         if (in.parms_id() != context->key_parms_id())
         {
             return false;

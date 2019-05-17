@@ -54,9 +54,6 @@
     <ClInclude Include="seal\decryptor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\defaultparams.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="seal\encryptionparams.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -186,6 +183,9 @@
     <ClInclude Include="seal\util\uintcore.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="seal\coeffmod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\batchencoder.cpp">
@@ -286,6 +286,9 @@
     </ClCompile>
     <ClCompile Include="seal\util\uintcore.cpp">
       <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\coeffmod.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

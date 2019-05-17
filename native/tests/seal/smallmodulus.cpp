@@ -3,7 +3,6 @@
 
 #include "gtest/gtest.h"
 #include "seal/smallmodulus.h"
-#include "seal/defaultparams.h"
 
 using namespace seal;
 using namespace std;
@@ -68,6 +67,36 @@ namespace SEALTest
         ASSERT_TRUE(mod.is_prime());
     }
 
+    TEST(SmallModulusTest, CompareSmallModulus)
+    {
+        SmallModulus sm0;
+        SmallModulus sm2(2);
+        SmallModulus sm5(5);
+        ASSERT_FALSE(sm0 < sm0);
+        ASSERT_TRUE(sm0 == sm0);
+        ASSERT_TRUE(sm0 <= sm0);
+        ASSERT_TRUE(sm0 >= sm0);
+        ASSERT_FALSE(sm0 > sm0);
+
+        ASSERT_FALSE(sm5 < sm5);
+        ASSERT_TRUE(sm5 == sm5);
+        ASSERT_TRUE(sm5 <= sm5);
+        ASSERT_TRUE(sm5 >= sm5);
+        ASSERT_FALSE(sm5 > sm5);
+
+        ASSERT_FALSE(sm5 < sm2);
+        ASSERT_FALSE(sm5 == sm2);
+        ASSERT_FALSE(sm5 <= sm2);
+        ASSERT_TRUE(sm5 >= sm2);
+        ASSERT_TRUE(sm5 > sm2);
+
+        ASSERT_TRUE(sm5 < 6);
+        ASSERT_FALSE(sm5 == 6);
+        ASSERT_TRUE(sm5 <= 6);
+        ASSERT_FALSE(sm5 >= 6);
+        ASSERT_FALSE(sm5 > 6);
+    }
+
     TEST(SmallModulusTest, SaveLoadSmallModulus)
     {
         stringstream stream;
@@ -117,28 +146,5 @@ namespace SEALTest
         ASSERT_EQ(mod2.const_ratio()[1], mod.const_ratio()[1]);
         ASSERT_EQ(mod2.const_ratio()[2], mod.const_ratio()[2]);
         ASSERT_EQ(mod2.is_prime(), mod.is_prime());
-    }
-
-    TEST(SmallModulusTest, GeneratePrimes)
-    {
-        SmallModulus mod;
-        mod = DefaultParams::small_mods_30bit(0);
-        ASSERT_TRUE(mod.is_prime());
-
-        mod = DefaultParams::small_mods_30bit(0).value() *
-            DefaultParams::small_mods_30bit(1).value();
-        ASSERT_FALSE(mod.is_prime());
-
-        vector<SmallModulus> primes = SmallModulus::GetPrimes(50, 8, size_t(1) << 16);
-        ASSERT_EQ(primes.size(), 8);
-        for (size_t i = 0; i < primes.size(); i++)
-        {
-            if (i)
-            {
-                ASSERT_TRUE(primes[i].value() < primes[i - 1].value());
-            }
-            ASSERT_EQ(primes[i].bit_count(), 50);
-            ASSERT_TRUE(primes[i].is_prime());
-        }
     }
 }

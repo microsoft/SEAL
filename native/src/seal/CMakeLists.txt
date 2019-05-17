@@ -7,6 +7,7 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/coeffmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/context.cpp
         ${CMAKE_CURRENT_LIST_DIR}/decryptor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/intencoder.cpp
@@ -27,10 +28,10 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/batchencoder.h
         ${CMAKE_CURRENT_LIST_DIR}/biguint.h
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext.h
-        ${CMAKE_CURRENT_LIST_DIR}/ckks.h		
+        ${CMAKE_CURRENT_LIST_DIR}/ckks.h
+        ${CMAKE_CURRENT_LIST_DIR}/coeffmod.h
         ${CMAKE_CURRENT_LIST_DIR}/context.h
         ${CMAKE_CURRENT_LIST_DIR}/decryptor.h
-        ${CMAKE_CURRENT_LIST_DIR}/defaultparams.h
         ${CMAKE_CURRENT_LIST_DIR}/intencoder.h
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.h
         ${CMAKE_CURRENT_LIST_DIR}/encryptor.h

@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/rlwe.h"
 #include "seal/randomtostd.h"
+#include "seal/util/rlwe.h"
 #include "seal/util/common.h"
 #include "seal/util/clipnormal.h"
 #include "seal/util/polycore.h"
 #include "seal/util/smallntt.h"
 #include "seal/util/polyarithsmallmod.h"
+#include "seal/util/globals.h"
 
 using namespace std;
 
@@ -62,16 +63,16 @@ namespace seal
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
 
-            if (are_close(parms.noise_standard_deviation(), 0.0) ||
-                are_close(parms.noise_max_deviation(), 0.0))
+            if (are_close(global_variables::noise_max_deviation, 0.0))
             {
                 set_zero_poly(coeff_count, coeff_mod_count, poly);
                 return;
             }
 
             RandomToStandardAdapter engine(random);
-            ClippedNormalDistribution dist(0, parms.noise_standard_deviation(),
-                parms.noise_max_deviation());
+            ClippedNormalDistribution dist(
+                0, global_variables::noise_standard_deviation,
+                global_variables::noise_max_deviation);
             for (size_t i = 0; i < coeff_count; i++)
             {
                 int64_t noise = static_cast<int64_t>(dist(engine));

@@ -45,20 +45,6 @@ namespace seal
         IntegerEncoder(std::shared_ptr<SEALContext> context);
 
         /**
-        Creates a copy of a IntegerEncoder.
-
-        @param[in] copy The IntegerEncoder to copy from
-        */
-        IntegerEncoder(const IntegerEncoder &copy) = default;
-
-        /**
-        Creates a new IntegerEncoder by moving an old one.
-
-        @param[in] source The IntegerEncoder to move from
-        */
-        IntegerEncoder(IntegerEncoder &&source) = default;
-
-        /**
         Destroys the IntegerEncoder.
         */
         ~IntegerEncoder() = default;
@@ -232,6 +218,10 @@ namespace seal
         }
 
     private:
+        IntegerEncoder(const IntegerEncoder &copy) = delete;
+
+        IntegerEncoder(IntegerEncoder &&source) = delete;
+
         IntegerEncoder &operator =(const IntegerEncoder &assign) = delete;
 
         IntegerEncoder &operator =(IntegerEncoder &&assign) = delete;

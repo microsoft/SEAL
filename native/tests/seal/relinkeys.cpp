@@ -6,7 +6,7 @@
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/util/uintcore.h"
-#include "seal/defaultparams.h"
+#include "seal/coeffmod.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -19,11 +19,11 @@ namespace SEALTest
         stringstream stream;
         {
             EncryptionParameters parms(scheme_type::BFV);
-            parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(1 << 6);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
-            auto context = SEALContext::Create(parms, false, false);
+            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60 }));
+
+            auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             RelinKeys keys;
@@ -75,11 +75,11 @@ namespace SEALTest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            parms.set_noise_standard_deviation(3.20);
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(1 << 6);
-            parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0), DefaultParams::small_mods_50bit(0) });
-            auto context = SEALContext::Create(parms, false, false);
+            parms.set_coeff_modulus(CoeffModulus::Custom(256, { 60, 50 }));
+
+            auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             RelinKeys keys;
