@@ -92,12 +92,12 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_UsingDescendingModulusChain(void *thisptr, bo
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingHES(void *thisptr, bool *using_hes)
+SEALNETNATIVE HRESULT SEALCALL EPQ_SecLevel(void *thisptr, int *sec_level)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
-    IfNullRet(using_hes, E_POINTER);
+    IfNullRet(sec_level, E_POINTER);
 
-    *using_hes = epq->using_hes;
+    *sec_level = static_cast<int>(epq->sec_level);
     return S_OK;
 }

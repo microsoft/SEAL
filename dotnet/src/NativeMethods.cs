@@ -202,7 +202,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void EPQ_UsingDescendingModulusChain(IntPtr thisptr, out bool usingDescendingModulusChain);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void EPQ_UsingHES(IntPtr thisptr, out bool usingHES);
+        internal static extern void EPQ_SecLevel(IntPtr thisptr, out int secLevel);
 
         #endregion
 
@@ -249,13 +249,6 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, EntryPoint = "SmallModulus_Equals2", PreserveSig = false)]
         internal static extern void SmallModulus_Equals(IntPtr thisptr, ulong other, out bool result);
-
-        [DllImport(sealnetnative, EntryPoint = "SmallModulus_GetPrimes", PreserveSig = false)]
-        internal static extern void SmallModulus_GetPrimes(
-            int bitSize,
-            ulong count,
-            ulong nttSize,
-            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] primeArray);
 
         #endregion
 
@@ -311,37 +304,24 @@ namespace Microsoft.Research.SEAL
 
         #endregion
 
-        #region DefaultParams methods
+        #region CoeffModulus methods
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_CoeffModulus128(
+        internal static extern void CoeffModulus_MaxBitCount(ulong polyModulusDegree, int secLevel, out int bitCount);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void CoeffModulus_Default(
+            ulong polyModulusDegree, 
+            int secLevel,
+            ref ulong length, 
+            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffArray);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void CoeffModulus_Custom(
             ulong polyModulusDegree,
-            ref ulong length,
-            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_CoeffModulus192(
-            ulong polyModulusDegree,
-            ref ulong length,
-            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_CoeffModulus256(
-            ulong polyModulusDegree,
-            ref ulong length,
-            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffs);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_SmallMods60Bit(ulong index, out IntPtr smallModulus);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_SmallMods50Bit(ulong index, out IntPtr smallModulus);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_SmallMods40Bit(ulong index, out IntPtr smallModulus);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void DefParams_SmallMods30Bit(ulong index, out IntPtr smallModulus);
+            ulong length,
+            int[] bitSizes,
+            [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffArray);
 
         #endregion
 
@@ -351,7 +331,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void SEALContext_Create(
             IntPtr encryptionParams,
             bool expandModChain,
-            bool enforceHES,
+            int secLevel,
             out IntPtr context);
 
         [DllImport(sealnetnative, PreserveSig = false)]

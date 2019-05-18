@@ -334,47 +334,5 @@ namespace Microsoft.Research.SEAL
         {
             NativeMethods.SmallModulus_Destroy(NativePtr);
         }
-
-        /// <summary>
-        /// Returns in decreasing order a vector of the largest prime numbers of a given
-        /// length that all support NTTs of a given size.
-        /// </summary>
-        ///
-        /// <remarks>
-        /// Returns in decreasing order a vector of the largest prime numbers of a given
-        /// length that all support NTTs of a given size. More precisely, the generated
-        /// primes are all congruent to 1 modulo 2 * ntt_size.Typically, the user might
-        /// call this function by passing poly_modulus_degree as ntt_size if the primes
-        /// are to be used as a coefficient modulus primes for encryption parameters.
-        /// </remarks>
-        /// <param name="bitSize">the bit-size of primes to be generated, no less than 2 and
-        /// no larger than 62</param>
-        /// <param name="count">The total number of primes to be generated</param>
-        /// <param name="nttSize">The size of NTT that should be supported</param>
-        /// <exception cref="ArgumentException">if bitSize is less than 2</exception>
-        /// <exception cref="ArgumentException">if count or nttSize is zero</exception>
-        /// <exception cref="InvalidOperationException">if enough qualifying primes cannot be found</exception>
-        public static IEnumerable<SmallModulus> GetPrimes(int bitSize, ulong count, ulong nttSize)
-        {
-            List<SmallModulus> result = new List<SmallModulus>(checked((int)count));
-
-            try
-            {
-                IntPtr[] primeArray = new IntPtr[count];
-                NativeMethods.SmallModulus_GetPrimes(bitSize, count, nttSize, primeArray);
-                foreach (IntPtr prime in primeArray)
-                {
-                    result.Add(new SmallModulus(prime));
-                }
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Failed to find enough qualifying primes", ex);
-                throw;
-            }
-
-            return result;
-        }
     }
 }

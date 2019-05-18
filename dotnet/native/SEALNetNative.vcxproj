@@ -100,13 +100,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="sealnet\coeffmodulus_wrapper.h" />
     <ClInclude Include="sealnet\contextdata_wrapper.h" />
     <ClInclude Include="sealnet\batchencoder_wrapper.h" />
     <ClInclude Include="sealnet\biguint_wrapper.h" />
     <ClInclude Include="sealnet\ciphertext_wrapper.h" />
     <ClInclude Include="sealnet\ckksencoder_wrapper.h" />
     <ClInclude Include="sealnet\decryptor_wrapper.h" />
-    <ClInclude Include="sealnet\defaultparams_wrapper.h" />
     <ClInclude Include="sealnet\defines.h" />
     <ClInclude Include="sealnet\intencoder_wrapper.h" />
     <ClInclude Include="sealnet\encryptionparameterqualifiers_wrapper.h" />
@@ -130,12 +130,12 @@
     <ClInclude Include="sealnet\valcheck_wrapper.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="sealnet\coeffmodulus_wrapper.cpp" />
     <ClCompile Include="sealnet\contextdata_wrapper.cpp" />
     <ClCompile Include="sealnet\batchencoder_wrapper.cpp" />
     <ClCompile Include="sealnet\ciphertext_wrapper.cpp" />
     <ClCompile Include="sealnet\ckksencoder_wrapper.cpp" />
     <ClCompile Include="sealnet\decryptor_wrapper.cpp" />
-    <ClCompile Include="sealnet\defaultparams_wrapper.cpp" />
     <ClCompile Include="sealnet\dllmain.cpp" />
     <ClCompile Include="sealnet\biguint_wrapper.cpp" />
     <ClCompile Include="sealnet\intencoder_wrapper.cpp" />

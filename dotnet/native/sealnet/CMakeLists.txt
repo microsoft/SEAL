@@ -7,9 +7,9 @@ target_sources(sealnetnative
         ${CMAKE_CURRENT_LIST_DIR}/biguint_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ckksencoder_wrapper.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/coeffmodulus_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/contextdata_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/decryptor_wrapper.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/defaultparams_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparameterqualifiers_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparameters_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptor_wrapper.cpp

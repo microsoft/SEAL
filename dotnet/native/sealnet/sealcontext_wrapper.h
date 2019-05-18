@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams,
-    bool expand_mod_chain, bool enforce_hes, void **context);
+    bool expand_mod_chain, int sec_level, void **context);
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_Destroy(void *thisptr);
 

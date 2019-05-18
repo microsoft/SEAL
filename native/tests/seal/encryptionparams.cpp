@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "seal/encryptionparams.h"
-#include "seal/coeffmod.h"
+#include "seal/coeffmodulus.h"
 #include "seal/util/numth.h"
 
 using namespace seal;

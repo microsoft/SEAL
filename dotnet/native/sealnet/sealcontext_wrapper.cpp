@@ -26,13 +26,14 @@ namespace sealnet
 }
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams,
-    bool expand_mod_chain, bool enforce_hes, void **context)
+    bool expand_mod_chain, int sec_level, void **context)
 {
     EncryptionParameters *encParams = FromVoid<EncryptionParameters>(encryptionParams);
     IfNullRet(encParams, E_POINTER);
     IfNullRet(context, E_POINTER);
 
-    auto result = SEALContext::Create(*encParams, expand_mod_chain, enforce_hes);
+    sec_level_type security_level = static_cast<sec_level_type>(sec_level);
+    auto result = SEALContext::Create(*encParams, expand_mod_chain, security_level);
     pointer_store_[result.get()] = result;
 
     *context = result.get();

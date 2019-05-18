@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <numeric>
 #include <algorithm>
-#include "seal/coeffmod.h"
+#include "seal/coeffmodulus.h"
 #include "seal/util/numth.h"
 #include "seal/util/common.h"
 

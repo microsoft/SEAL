@@ -8,7 +8,7 @@
 #include <memory>
 #include "seal/encryptionparams.h"
 #include "seal/memorymanager.h"
-#include "seal/coeffmod.h"
+#include "seal/coeffmodulus.h"
 #include "seal/util/smallntt.h"
 #include "seal/util/baseconverter.h"
 #include "seal/util/pointer.h"

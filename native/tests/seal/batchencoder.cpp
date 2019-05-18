@@ -5,7 +5,7 @@
 #include "seal/batchencoder.h"
 #include "seal/context.h"
 #include "seal/keygenerator.h"
-#include "seal/coeffmod.h"
+#include "seal/coeffmodulus.h"
 #include <vector>
 #include <ctime>
 

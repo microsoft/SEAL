@@ -167,15 +167,15 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Tells whether the encryption parameters are secure based on the standard parameters
-        /// from HomomorphicEncryption.org security standard.
+        /// Tells whether the encryption parameters are secure based on the standard
+        /// parameters from HomomorphicEncryption.org security standard.
         /// </summary>
-        public bool UsingHES
+        public SecLevelType SecLevel
         {
             get
             {
-                NativeMethods.EPQ_UsingHES(NativePtr, out bool result);
-                return result;
+                NativeMethods.EPQ_SecLevel(NativePtr, out int result);
+                return (SecLevelType)result;
             }
         }
 

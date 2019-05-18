@@ -223,8 +223,8 @@ namespace Microsoft.Research.SEAL
             try
             {
                 int[] stepsArr = steps.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, (ulong)stepsArr.Length, stepsArr, out IntPtr galoisKeys);
-                return new GaloisKeys(galoisKeys);
+                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, (ulong)stepsArr.Length, stepsArr, out IntPtr galoisKeysPtr);
+                return new GaloisKeys(galoisKeysPtr);
             }
             catch (COMException ex)
             {

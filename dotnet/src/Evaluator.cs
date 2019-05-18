@@ -170,7 +170,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="encrypted1">The first ciphertext to add</param>
         /// <param name="encrypted2">The second ciphertext to add</param>
         /// <param name="destination">The ciphertext to overwrite with the addition result</param>
-        /// <exception cref="ArgumentNullException">If either encrypted1, encrypted2 or destination are null</exception>
+        /// <exception cref="ArgumentNullException">if either encrypted1, encrypted2 or destination are null</exception>
         /// <exception cref="ArgumentException">if encrypted1 or encrypted2 is not valid for
         /// the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted1 and encrypted2 are in different

@@ -38,5 +38,3 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, uint64_t l
 SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals1(void *thisptr, void *other, bool *result);
 
 SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals2(void *thisptr, uint64_t other, bool *result);
-
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_GetPrimes(int bit_size, uint64_t count, uint64_t ntt_size, void **prime_array);
