@@ -23,19 +23,15 @@ namespace SEALNetTest
         [TestMethod]
         public void NegateTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Assert.IsTrue(context.ParametersSet);
@@ -72,19 +68,15 @@ namespace SEALNetTest
         [TestMethod]
         public void AddTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -130,19 +122,15 @@ namespace SEALNetTest
         [TestMethod]
         public void AddPlainTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -177,19 +165,15 @@ namespace SEALNetTest
         [TestMethod]
         public void AddManyTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -216,19 +200,15 @@ namespace SEALNetTest
         [TestMethod]
         public void SubTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -269,19 +249,15 @@ namespace SEALNetTest
         [TestMethod]
         public void SubPlainTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -317,19 +293,15 @@ namespace SEALNetTest
         [TestMethod]
         public void MultiplyTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -372,21 +344,15 @@ namespace SEALNetTest
         [TestMethod]
         public void MultiplyManyTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -421,20 +387,15 @@ namespace SEALNetTest
         [TestMethod]
         public void MultiplyPlainTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -498,20 +459,15 @@ namespace SEALNetTest
         [TestMethod]
         public void SquareTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -549,21 +505,15 @@ namespace SEALNetTest
         [TestMethod]
         public void ExponentiateTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2),
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -613,20 +563,15 @@ namespace SEALNetTest
         [TestMethod]
         public void ApplyGaloisTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 8,
                 PlainModulus = new SmallModulus(257),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys(galoisElts: new ulong[] { 1ul, 3ul, 5ul, 15ul });
 
@@ -721,21 +666,15 @@ namespace SEALNetTest
         [TestMethod]
         public void TransformPlainToNTTTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2),
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             Evaluator evaluator = new Evaluator(context);
 
             Plaintext plain = new Plaintext("0");
@@ -762,20 +701,15 @@ namespace SEALNetTest
         [TestMethod]
         public void TransformEncryptedToNTTTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -820,21 +754,15 @@ namespace SEALNetTest
         [TestMethod]
         public void ModSwitchToNextTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods30Bit(0),
-                DefaultParams.SmallMods30Bit(1),
-                DefaultParams.SmallMods30Bit(2)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -865,22 +793,15 @@ namespace SEALNetTest
         [TestMethod]
         public void ModSwitchToTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods30Bit(0),
-                DefaultParams.SmallMods30Bit(1),
-                DefaultParams.SmallMods30Bit(2),
-                DefaultParams.SmallMods30Bit(3),
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 30, 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
@@ -937,24 +858,17 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 1024,
-                CoeffModulus = new List<SmallModulus>()
-                {
-                    DefaultParams.SmallMods40Bit(0),
-                    DefaultParams.SmallMods40Bit(1),
-                    DefaultParams.SmallMods40Bit(2),
-                    DefaultParams.SmallMods40Bit(3),
-                    DefaultParams.SmallMods40Bit(4)
-                }
+                CoeffModulus = CoeffModulus.Custom(1024, new int[] { 40, 40, 40, 40, 40 })
             };
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             CKKSEncoder encoder = new CKKSEncoder(context);
             KeyGenerator keygen = new KeyGenerator(context);
             SecretKey secretKey = keygen.SecretKey;
             PublicKey publicKey = keygen.PublicKey;
-            RelinKeys relinKeys = keygen.RelinKeys(60);
+            RelinKeys relinKeys = keygen.RelinKeys();
 
             Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
@@ -1016,20 +930,15 @@ namespace SEALNetTest
         [TestMethod]
         public void RotateMatrixTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 8,
                 PlainModulus = new SmallModulus(257),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
 
@@ -1096,21 +1005,15 @@ namespace SEALNetTest
         [TestMethod]
         public void RelinearizeTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
             RelinKeys relinKeys = keygen.RelinKeys(count: 3);
 
@@ -1152,21 +1055,14 @@ namespace SEALNetTest
         public void RotateVectorTest()
         {
             int slotSize = 4;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2),
-                DefaultParams.SmallMods40Bit(3)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 2 * (ulong)slotSize,
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
 
@@ -1222,21 +1118,14 @@ namespace SEALNetTest
         public void ComplexConjugateTest()
         {
             int slotSize = 4;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2),
-                DefaultParams.SmallMods40Bit(3)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 2 * (ulong)slotSize,
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
 
@@ -1280,12 +1169,11 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = new List<SmallModulus>() {
-                    DefaultParams.SmallMods40Bit(0), DefaultParams.SmallMods40Bit(1) }
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             Evaluator evaluator = null;
             Assert.ThrowsException<ArgumentNullException>(() => evaluator = new Evaluator(null));

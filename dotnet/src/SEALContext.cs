@@ -65,7 +65,7 @@ namespace Microsoft.Research.SEAL
         /// enforced according to HomomorphicEncryption.org security standard</param>
         /// <exception cref="ArgumentNullException">if parms is null</exception>
         public SEALContext(EncryptionParameters parms,
-            bool expandModChain = true, SecLevelType secLevel = SecLevelType.b128)
+            bool expandModChain = true, SecLevelType secLevel = SecLevelType.TC128)
         {
             if (null == parms)
                 throw new ArgumentNullException(nameof(parms));

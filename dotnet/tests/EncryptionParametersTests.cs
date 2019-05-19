@@ -73,8 +73,7 @@ namespace SEALNetTest
             Assert.IsNotNull(coeffs);
             Assert.AreEqual(0, coeffs.Count);
 
-            coeffs = new List<SmallModulus>(DefaultParams.CoeffModulus128(4096));
-            encParams.CoeffModulus = coeffs;
+            encParams.CoeffModulus = CoeffModulus.Default(4096);
 
             List<SmallModulus> newCoeffs = new List<SmallModulus>(encParams.CoeffModulus);
             Assert.IsNotNull(newCoeffs);
@@ -89,11 +88,7 @@ namespace SEALNetTest
         {
             TestDelegate save_load_test = delegate(SchemeType scheme)
             {
-                List<SmallModulus> coeffModulus = new List<SmallModulus>
-                {
-                    DefaultParams.SmallMods40Bit(0),
-                    DefaultParams.SmallMods40Bit(1)
-                };
+                List<SmallModulus> coeffModulus = (List<SmallModulus>)CoeffModulus.Custom(8, new int[] { 40, 40 });
                 EncryptionParameters parms = new EncryptionParameters(scheme)
                 {
                     PolyModulusDegree = 8,
@@ -126,8 +121,6 @@ namespace SEALNetTest
                 Assert.AreNotSame(coeffModulus[1], loadedCoeffModulus[1]);
                 Assert.AreEqual(coeffModulus[0], loadedCoeffModulus[0]);
                 Assert.AreEqual(coeffModulus[1], loadedCoeffModulus[1]);
-                Assert.AreEqual(parms.NoiseMaxDeviation, loaded.NoiseMaxDeviation, delta: 0.001);
-                Assert.AreEqual(parms.NoiseStandardDeviation, loaded.NoiseStandardDeviation, delta: 0.001);
             };
             save_load_test(SchemeType.BFV);
             save_load_test(SchemeType.CKKS);
@@ -140,11 +133,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 8,
                 PlainModulus = new SmallModulus(257),
-                CoeffModulus = new List<SmallModulus>()
-                {
-                    DefaultParams.SmallMods40Bit(0),
-                    DefaultParams.SmallMods40Bit(1)
-                }
+                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40 })
             };
 
             EncryptionParameters parms2 = new EncryptionParameters(SchemeType.CKKS);

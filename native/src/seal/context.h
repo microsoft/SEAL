@@ -374,7 +374,7 @@ namespace seal
         enforced according to HomomorphicEncryption.org security standard
         */
         static auto Create(const EncryptionParameters &parms,
-            bool expand_mod_chain = true, sec_level_type sec_level = sec_level_type::b128)
+            bool expand_mod_chain = true, sec_level_type sec_level = sec_level_type::tc128)
         {
             return std::shared_ptr<SEALContext>(
                 new SEALContext(

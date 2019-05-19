@@ -233,21 +233,14 @@ namespace SEALNetTest
         [TestMethod]
         public void ScaleTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>()
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2),
-                DefaultParams.SmallMods40Bit(3)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
-                CoeffModulus = coeffModulus,
-                PolyModulusDegree = 8
+                PolyModulusDegree = 8,
+                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
             GaloisKeys galoisKeys = keygen.GaloisKeys();
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);

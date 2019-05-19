@@ -227,28 +227,6 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void GeneratePrimesTest()
-        {
-            SmallModulus sm = DefaultParams.SmallMods30Bit(0);
-            Assert.IsTrue(sm.IsPrime);
-            sm.Set(DefaultParams.SmallMods30Bit(0).Value * DefaultParams.SmallMods30Bit(1).Value);
-            Assert.IsFalse(sm.IsPrime);
-
-            List<SmallModulus> primes = (List<SmallModulus>)SmallModulus.GetPrimes(50, 8, 1 << 16);
-
-            Assert.AreEqual(primes.Count, 8);
-            for (int i = 0; i < primes.Count; i++)
-            {
-                if (i != 0)
-                {
-                    Assert.IsTrue(primes[i].Value < primes[i - 1].Value);
-                }
-                Assert.AreEqual(primes[i].BitCount, 50);
-                Assert.IsTrue(primes[i].IsPrime);
-            }
-        }
-
-        [TestMethod]
         public void ExceptionsTest()
         {
             SmallModulus sm = new SmallModulus(0x12345ul);
@@ -261,17 +239,6 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => sm.Save(null));
             Assert.ThrowsException<ArgumentNullException>(() => sm.Load(null));
             Assert.ThrowsException<ArgumentException>(() => sm.Load(ms_empty));
-
-            IEnumerable<SmallModulus> primes = null;
-            Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(-1, 1, 1));
-            Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(0, 1, 1));
-            primes = SmallModulus.GetPrimes(2, 1, 1);
-            Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(30, 0, 1));
-            Assert.ThrowsException<ArgumentException>(() => primes = SmallModulus.GetPrimes(30, 1, 0));
-            primes = SmallModulus.GetPrimes(30, 1, 1);
-            Assert.ThrowsException<InvalidOperationException>(() => primes = SmallModulus.GetPrimes(5, 10, 1));
-            primes = SmallModulus.GetPrimes(50, 10, 1);
-            Assert.AreEqual(((List<SmallModulus>)primes).Count, 10);
         }
     }
 }

@@ -228,7 +228,7 @@ namespace SEALTest
         parms.set_plain_modulus(73);
         parms.set_random_generator(nullptr);
         {
-            auto context = SEALContext::Create(parms, false, sec_level_type::b128);
+            auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
             ASSERT_EQ(sec_level_type::none, qualifiers.sec_level);
@@ -237,11 +237,11 @@ namespace SEALTest
 
         // Parameters not OK due to too large coeff_modulus and enforce_hes
         parms.set_poly_modulus_degree(2048);
-        parms.set_coeff_modulus(CoeffModulus::Default(4096, sec_level_type::b128));
+        parms.set_coeff_modulus(CoeffModulus::Default(4096, sec_level_type::tc128));
         parms.set_plain_modulus(73);
         parms.set_random_generator(nullptr);
         {
-            auto context = SEALContext::Create(parms, false, sec_level_type::b128);
+            auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set);
             ASSERT_EQ(sec_level_type::none, qualifiers.sec_level);
@@ -253,7 +253,7 @@ namespace SEALTest
         parms.set_coeff_modulus({ 0xffffee001, 0xffffc4001 });
         parms.set_plain_modulus(73);
         {
-            auto context = SEALContext::Create(parms, false, sec_level_type::b128);
+            auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
             auto key_qualifiers = context->key_context_data()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
@@ -262,7 +262,7 @@ namespace SEALTest
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_TRUE(qualifiers.using_fast_plain_lift);
             ASSERT_TRUE(qualifiers.using_descending_modulus_chain);
-            ASSERT_EQ(sec_level_type::b128, qualifiers.sec_level);
+            ASSERT_EQ(sec_level_type::tc128, qualifiers.sec_level);
             ASSERT_TRUE(context->using_keyswitching());
         }
 

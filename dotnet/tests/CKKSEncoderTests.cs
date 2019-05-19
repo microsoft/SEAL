@@ -17,15 +17,10 @@ namespace SEALNetTest
         {
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
             parms.PolyModulusDegree = 64;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>(4);
-            coeffModulus.Add(DefaultParams.SmallMods40Bit(0));
-            coeffModulus.Add(DefaultParams.SmallMods40Bit(1));
-            coeffModulus.Add(DefaultParams.SmallMods40Bit(2));
-            coeffModulus.Add(DefaultParams.SmallMods40Bit(3));
-            parms.CoeffModulus = coeffModulus;
+            parms.CoeffModulus = CoeffModulus.Custom(64, new int[] { 40, 40, 40, 40 });
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             int slots = 16;
             Plaintext plain = new Plaintext();
@@ -53,15 +48,10 @@ namespace SEALNetTest
             int slots = 32;
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
             parms.PolyModulusDegree = (ulong)slots * 2;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>(4);
-            coeffModulus.Add(DefaultParams.SmallMods40Bit(0));
-            coeffModulus.Add(DefaultParams.SmallMods40Bit(1));
-            coeffModulus.Add(DefaultParams.SmallMods40Bit(2));
-            coeffModulus.Add(DefaultParams.SmallMods40Bit(3));
-            parms.CoeffModulus = coeffModulus;
+            parms.CoeffModulus = CoeffModulus.Custom(64, new int[] { 40, 40, 40, 40 });
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             Plaintext plain = new Plaintext();
@@ -84,18 +74,12 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = new List<SmallModulus>()
-                {
-                    DefaultParams.SmallMods40Bit(0),
-                    DefaultParams.SmallMods40Bit(1),
-                    DefaultParams.SmallMods40Bit(2),
-                    DefaultParams.SmallMods40Bit(3)
-                }
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40, 40, 40, 40 })
             };
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             Plaintext plain = new Plaintext();
@@ -117,15 +101,10 @@ namespace SEALNetTest
             int slots = 32;
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
             parms.PolyModulusDegree = (ulong)slots * 2;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>(4);
-            coeffModulus.Add(DefaultParams.SmallMods60Bit(0));
-            coeffModulus.Add(DefaultParams.SmallMods60Bit(1));
-            coeffModulus.Add(DefaultParams.SmallMods60Bit(2));
-            coeffModulus.Add(DefaultParams.SmallMods60Bit(3));
-            parms.CoeffModulus = coeffModulus;
+            parms.CoeffModulus = CoeffModulus.Custom((ulong)slots * 2, new int[] { 60, 60, 60, 60 });
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             List<Complex> values = new List<Complex>(slots);
@@ -157,16 +136,12 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = new List<SmallModulus>()
-                {
-                    DefaultParams.SmallMods30Bit(0),
-                    DefaultParams.SmallMods30Bit(1)
-                }
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 30, 30 })
             };
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             CKKSEncoder encoder = new CKKSEncoder(context);
             Plaintext plain = new Plaintext();
 
@@ -188,16 +163,12 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = new List<SmallModulus>()
-                {
-                    DefaultParams.SmallMods30Bit(0),
-                    DefaultParams.SmallMods30Bit(1)
-                }
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 30, 30 })
             };
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             CKKSEncoder encoder = new CKKSEncoder(context);
             List<double> vald = new List<double>();
             List<double> vald_null = null;

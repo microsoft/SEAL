@@ -50,28 +50,21 @@ namespace SEALNetTest
         [TestMethod]
         public void SEALContextParamsTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods30Bit(0),
-                DefaultParams.SmallMods30Bit(1),
-                DefaultParams.SmallMods30Bit(2)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(128, new int[] { 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
 
             EncryptionParameters parms2 = data.Parms;
             Assert.AreEqual(parms.PolyModulusDegree, parms2.PolyModulusDegree);
-            Assert.AreEqual(parms.NoiseStandardDeviation, parms2.NoiseStandardDeviation);
 
             EncryptionParameterQualifiers qualifiers = data.Qualifiers;
             Assert.IsNotNull(qualifiers);
@@ -81,8 +74,8 @@ namespace SEALNetTest
             Assert.IsTrue(qualifiers.UsingFastPlainLift);
             Assert.IsTrue(qualifiers.UsingFFT);
             Assert.IsTrue(qualifiers.UsingNTT);
-            Assert.IsFalse(qualifiers.UsingHES);
-            Assert.IsTrue(qualifiers.UsingDescendingModulusChain);
+            Assert.AreEqual(SecLevelType.None, qualifiers.SecLevel);
+            Assert.IsFalse(qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context.UsingKeySwitching);
 
             ulong[] cdpm = data.CoeffDivPlainModulus;
@@ -113,21 +106,14 @@ namespace SEALNetTest
         public void SEALContextCKKSParamsTest()
         {
             int slotSize = 4;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2),
-                DefaultParams.SmallMods40Bit(3)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 2 * (ulong)slotSize,
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -163,13 +149,13 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 4096,
-                CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 4096),
+                CoeffModulus = CoeffModulus.Default(polyModulusDegree: 4096),
                 PlainModulus = new SmallModulus(1 << 20)
             };
 
             SEALContext context1 = new SEALContext(parms,
                 expandModChain: true,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             // By default there is a chain
             SEALContext.ContextData contextData = context1.KeyContextData;

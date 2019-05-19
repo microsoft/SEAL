@@ -16,14 +16,12 @@ namespace SEALNetTest
         {
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             parms.PolyModulusDegree = 64;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>();
-            coeffModulus.Add(DefaultParams.SmallMods60Bit(0));
-            parms.CoeffModulus = coeffModulus;
+            parms.CoeffModulus = CoeffModulus.Custom(64, new int[]{ 60 });
             parms.PlainModulus = new SmallModulus(257);
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -91,14 +89,12 @@ namespace SEALNetTest
         {
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             parms.PolyModulusDegree = 64;
-            List<SmallModulus> coeffModulus = new List<SmallModulus>();
-            coeffModulus.Add(DefaultParams.SmallMods60Bit(0));
-            parms.CoeffModulus = coeffModulus;
+            parms.CoeffModulus = CoeffModulus.Custom(64, new int[] { 60 });
             parms.PlainModulus = new SmallModulus(257);
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -164,20 +160,16 @@ namespace SEALNetTest
         [TestMethod]
         public void EncodeInPlaceTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>()
-            {
-                DefaultParams.SmallMods60Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = coeffModulus,
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 60 }),
                 PlainModulus = new SmallModulus(257)
             };
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             BatchEncoder encoder = new BatchEncoder(context);
 
@@ -207,22 +199,15 @@ namespace SEALNetTest
         [TestMethod]
         public void SchemeIsCKKSTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2),
-                DefaultParams.SmallMods40Bit(3)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 8,
-                CoeffModulus = coeffModulus
+                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40, 40, 40 })
             };
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
 
             Assert.ThrowsException<ArgumentException>(() =>
             {
@@ -233,20 +218,16 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            List<SmallModulus> coeffModulus = new List<SmallModulus>()
-            {
-                DefaultParams.SmallMods60Bit(0)
-            };
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = coeffModulus,
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 60 }),
                 PlainModulus = new SmallModulus(257)
             };
 
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             BatchEncoder enc = new BatchEncoder(context);
             List<ulong> valu = new List<ulong>();
             List<ulong> valu_null = null;

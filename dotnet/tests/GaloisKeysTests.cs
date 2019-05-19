@@ -164,11 +164,11 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = new List<SmallModulus>() {  DefaultParams.SmallMods60Bit(0) }
+                CoeffModulus = CoeffModulus.Custom(64, new int[] { 60 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
-                enforceHES: false);
+                secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
             GaloisKeys keys = keygen.GaloisKeys(steps: new int[] { 1, 2, 3 });

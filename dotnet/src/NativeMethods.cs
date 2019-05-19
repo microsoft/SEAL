@@ -311,9 +311,9 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void CoeffModulus_Default(
-            ulong polyModulusDegree, 
+            ulong polyModulusDegree,
             int secLevel,
-            ref ulong length, 
+            ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffArray);
 
         [DllImport(sealnetnative, PreserveSig = false)]

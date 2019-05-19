@@ -15,7 +15,7 @@ namespace Microsoft.Research.SEAL
     /// <remarks>
     /// Represents a standard security level according to the HomomorphicEncryption.org
     /// security standard. The value SecLevelType.None signals that no standard
-    /// security level should be imposed. The value SecLevelType.b128 provides
+    /// security level should be imposed. The value SecLevelType.TC128 provides
     /// a very high level of security and is the default security level enforced by
     /// Microsoft SEAL when constructing a SEALContext object. Normal users should not
     /// have to specify the security level explicitly anywhere.
@@ -25,22 +25,22 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// No security level specified.
         /// </summary>
-        none = 0,
+        None = 0,
 
         /// <summary>
         /// 128-bit security level according to HomomorphicEncryption.org standard.
         /// </summary>
-        b128 = 128,
+        TC128 = 128,
 
         /// <summary>
         /// 192-bit security level according to HomomorphicEncryption.org standard.
         /// </summary>
-        b192 = 192,
+        TC192 = 192,
 
         /// <summary>
         /// 256-bit security level according to HomomorphicEncryption.org standard.
         /// </summary>
-        b256 = 256
+        TC256 = 256
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.Research.SEAL
     /// a mismatching value for the PolyModulusDegree.
     /// </para>
     /// <para>
-    /// The default value SecLevelType.b128 provides a very high level of security
+    /// The default value SecLevelType.TC128 provides a very high level of security
     /// and is the default security level enforced by Microsoft SEAL when constructing
     /// a SEALContext object. Normal users should not have to specify the security
     /// level explicitly anywhere.
@@ -97,8 +97,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if polyModulusDegree is not
         /// a power-of-two or is too large</exception>
         /// <exception cref="ArgumentException">if secLevel is SecLevelType.None</exception>
-        static IEnumerable<SmallModulus> Default(
-            ulong polyModulusDegree, SecLevelType secLevel = SecLevelType.b128)
+        static public IEnumerable<SmallModulus> Default(
+            ulong polyModulusDegree, SecLevelType secLevel = SecLevelType.TC128)
         {
             List<SmallModulus> result = null;
 
@@ -132,11 +132,11 @@ namespace Microsoft.Research.SEAL
         /// encryption parameter</param>
         /// <param name="bitSizes">The bit-lengths of the primes to be generated</param>
         /// <exception cref="ArgumentException">if polyModulusDegree is not
-        /// a power-of-two or is too large</exception>        
+        /// a power-of-two or is too large</exception>
         /// <exception cref="ArgumentException">if bit_sizes is too large or if its
         /// elements are out of boundse</exception>
         /// <exception cref="InvalidOperationException">if not enough primes could be found</exception>
-        static IEnumerable<SmallModulus> Custom(
+        static public IEnumerable<SmallModulus> Custom(
             ulong polyModulusDegree, IEnumerable<int> bitSizes)
         {
             if (null == bitSizes)

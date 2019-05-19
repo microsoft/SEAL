@@ -14,7 +14,7 @@ namespace seal
     /**
     Represents a standard security level according to the HomomorphicEncryption.org
     security standard. The value sec_level_type::none signals that no standard
-    security level should be imposed. The value sec_level_type::b128 provides
+    security level should be imposed. The value sec_level_type::tc128 provides
     a very high level of security and is the default security level enforced by
     Microsoft SEAL when constructing a SEALContext object. Normal users should not
     have to specify the security level explicitly anywhere.
@@ -29,17 +29,17 @@ namespace seal
         /**
         128-bit security level according to HomomorphicEncryption.org standard.
         */
-        b128 = 128,
+        tc128 = 128,
 
         /**
         192-bit security level according to HomomorphicEncryption.org standard.
         */
-        b192 = 192,
+        tc192 = 192,
 
         /**
         256-bit security level according to HomomorphicEncryption.org standard.
         */
-        b256 = 256
+        tc256 = 256
     };
 
     /**
@@ -48,7 +48,7 @@ namespace seal
     guarantees are lost if the output is used with encryption parameters with
     a mismatching value for the poly_modulus_degree.
 
-    The default value sec_level_type::b128 provides a very high level of security
+    The default value sec_level_type::tc128 provides a very high level of security
     and is the default security level enforced by Microsoft SEAL when constructing
     a SEALContext object. Normal users should not have to specify the security
     level explicitly anywhere.
@@ -73,13 +73,13 @@ namespace seal
         {
             switch (sec_level)
             {
-            case sec_level_type::b128:
+            case sec_level_type::tc128:
                 return SEAL_HE_STD_PARMS_128_TC(poly_modulus_degree);
 
-            case sec_level_type::b192:
+            case sec_level_type::tc192:
                 return SEAL_HE_STD_PARMS_192_TC(poly_modulus_degree);
 
-            case sec_level_type::b256:
+            case sec_level_type::tc256:
                 return SEAL_HE_STD_PARMS_256_TC(poly_modulus_degree);
 
             case sec_level_type::none:
@@ -108,7 +108,7 @@ namespace seal
         */
         static std::vector<SmallModulus> Default(
             std::size_t poly_modulus_degree,
-            sec_level_type sec_level = sec_level_type::b128);
+            sec_level_type sec_level = sec_level_type::tc128);
 
         /**
         Returns a custom coefficient modulus suitable for use with the specified

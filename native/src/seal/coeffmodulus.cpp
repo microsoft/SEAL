@@ -28,15 +28,15 @@ namespace seal
 
         switch (sec_level)
         {
-        case sec_level_type::b128:
+        case sec_level_type::tc128:
             return global_variables::default_coeff_modulus_128.
                 at(poly_modulus_degree);
 
-        case sec_level_type::b192:
+        case sec_level_type::tc192:
             return global_variables::default_coeff_modulus_192.
                 at(poly_modulus_degree);
 
-        case sec_level_type::b256:
+        case sec_level_type::tc256:
             return global_variables::default_coeff_modulus_256.
                 at(poly_modulus_degree);
 
