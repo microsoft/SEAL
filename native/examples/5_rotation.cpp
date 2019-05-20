@@ -17,7 +17,7 @@ void example_rotation_bfv()
 
     EncryptionParameters parms(scheme_type::BFV);
 
-    int poly_modulus_degree = 8192;
+    size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 20));
@@ -136,7 +136,7 @@ void example_rotation_ckks()
     */
     EncryptionParameters parms(scheme_type::CKKS);
 
-    int poly_modulus_degree = 8192;
+    size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
 

@@ -44,7 +44,7 @@ void example_levels()
     */
     EncryptionParameters parms(scheme_type::BFV);
 
-    int poly_modulus_degree = 8192;
+    size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
 
     /*

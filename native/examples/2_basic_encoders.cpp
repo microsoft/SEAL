@@ -70,7 +70,7 @@ void example_integer_encoder()
     such as the BatchEncoder or the CKKSEncoder.
     */
     EncryptionParameters parms(scheme_type::BFV);
-    int poly_modulus_degree = 4096;
+    size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
 
@@ -170,7 +170,7 @@ void example_batch_encoder()
     anything done with the IntegerEncoder.
     */
     EncryptionParameters parms(scheme_type::BFV);
-    int poly_modulus_degree = 8192;
+    size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
 
@@ -351,7 +351,7 @@ void example_ckks_encoder()
     */
     EncryptionParameters parms(scheme_type::CKKS);
 
-    int poly_modulus_degree = 8192;
+    size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
 

@@ -41,19 +41,19 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
 
-        /*
-        Generate Galois keys. In larger examples the Galois keys can use
-        a significant amount of memory, which can be a problem in constrained
-        systems. The user should try enabling some of the larger runs of the
-        test (see below) and to observe their effect on the memory pool
-        allocation size. The key generation can also take a significant amount
-        of time, as can be observed from the print-out.
-        */
         if (!context->key_context_data()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;
         }
+
+        /*
+        Generate Galois keys. In larger examples the Galois keys can use a lot of
+        memory, which can be a problem in constrained systems. The user should
+        try some of the larger runs of the test and observe their effect on the
+        memory pool allocation size. The key generation can also take a long time,
+        as can be observed from the print-out.
+        */
         cout << "Generating Galois keys: ";
         time_start = chrono::high_resolution_clock::now();
         gal_keys = keygen.galois_keys();
@@ -104,11 +104,10 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     {
         /*
         [Batching]
-        There is nothing unusual here. We batch our random plaintext matrix
-        into the polynomial. The user can try changing the decomposition bit
-        count to something smaller to see the effect. Note how the plaintext
-        we create is of the exactly right size so unnecessary reallocations
-        are avoided.
+        There is nothing unusual here. We batch our random plaintext matrix into
+        the polynomial. The user can try changing the decomposition bit count to
+        something smaller to see the effect. Note how the plaintext we create is
+        of the exactly right size so unnecessary reallocations are avoided.
         */
         Plaintext plain(curr_parms.poly_modulus_degree(), 0);
         time_start = chrono::high_resolution_clock::now();
@@ -134,9 +133,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Encryption]
-        We make sure our ciphertext is already allocated and large enough to
-        hold the encryption with these encryption parameters. We encrypt our
-        random batched matrix here.
+        We make sure our ciphertext is already allocated and large enough to hold
+        the encryption with these encryption parameters. We encrypt our random
+        batched matrix here.
         */
         Ciphertext encrypted(context);
         time_start = chrono::high_resolution_clock::now();
@@ -179,9 +178,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Multiply]
-        We multiply two ciphertexts of size 2. Since the size of the result
-        will be 3, and will overwrite the first argument, we reserve first
-        enough memory to avoid reallocating during multiplication.
+        We multiply two ciphertexts of size 2. Since the size of the result will
+        be 3, and will overwrite the first argument, we reserve first enough
+        memory to avoid reallocating during multiplication.
         */
         encrypted1.reserve(3);
         time_start = chrono::high_resolution_clock::now();
@@ -192,9 +191,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Multiply Plain]
-        We multiply a ciphertext of size 2 with a random plaintext. Recall
-        that multiply_plain does not change the size of the ciphertext so we
-        use encrypted2 here, which still has size 2.
+        We multiply a ciphertext of size 2 with a random plaintext. Recall that
+        multiply_plain does not change the size of the ciphertext so we use
+        encrypted2 here, which still has size 2.
         */
         time_start = chrono::high_resolution_clock::now();
         evaluator.multiply_plain_inplace(encrypted2, plain);
@@ -204,8 +203,8 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Square]
-        We continue to use the size 2 ciphertext encrypted2. Now we square
-        it; this should be faster than generic homomorphic multiplication.
+        We continue to use the size 2 ciphertext encrypted2. Now we square it;
+        this should be faster than generic homomorphic multiplication.
         */
         time_start = chrono::high_resolution_clock::now();
         evaluator.square_inplace(encrypted2);
@@ -217,10 +216,10 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         {
             /*
             [Relinearize]
-            Time to get back to encrypted1; at this point it still has size 3.
-            We now relinearize it back to size 2. Since the allocation is
-            currently big enough to contain a ciphertext of size 3, no costly
-            reallocations are needed in the process.
+            Time to get back to encrypted1; at this point it still has size 3. We
+            now relinearize it back to size 2. Since the allocation is currently
+            big enough to contain a ciphertext of size 3, no costly reallocations
+            are needed in the process.
             */
             time_start = chrono::high_resolution_clock::now();
             evaluator.relinearize_inplace(encrypted1, relin_keys);
@@ -241,7 +240,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
             /*
             [Rotate Rows Random]
-            We rotate matrix rows by a random number of steps. This is more
+            We rotate matrix rows by a random number of steps. This is much more
             expensive than rotating by just one step.
             */
             size_t row_size = batch_encoder.slot_count() / 2;
@@ -339,6 +338,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
             cout << "Given encryption parameters do not support batching." << endl;
             return;
         }
+
         cout << "Generating Galois keys: ";
         time_start = chrono::high_resolution_clock::now();
         gal_keys = keygen.galois_keys();
@@ -389,7 +389,10 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         */
         Plaintext plain(curr_parms.poly_modulus_degree() *
             curr_parms.coeff_modulus().size(), 0);
-        // Choose the square root of the last prime so that it is within bounds.
+        /*
+        For scale we use the square root of the last coeff_modulus prime from
+        curr_parms.
+        */
         double scale = sqrt(static_cast<double>(curr_parms.coeff_modulus().back().value()));
         time_start = chrono::high_resolution_clock::now();
         ckks_encoder.encode(pod_vector,
@@ -572,7 +575,7 @@ void example_bfv_performance_default()
     print_example_banner("BFV Performance Test with Degrees: 4096, 8192, and 16384");
 
     EncryptionParameters parms(scheme_type::BFV);
-    int poly_modulus_degree = 4096;
+    size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     parms.set_plain_modulus(786433);
@@ -605,7 +608,7 @@ void example_bfv_performance_default()
 
 void example_bfv_performance_custom()
 {
-    int poly_modulus_degree = 0;
+    size_t poly_modulus_degree = 0;
     cout << endl << "Set poly_modulus_degree (1024, 2048, 4096, 8192, 16384, or 32768): ";
     if (!(cin >> poly_modulus_degree))
     {
@@ -644,7 +647,7 @@ void example_ckks_performance_default()
     print_example_banner("CKKS Performance Test with Degrees: 4096, 8192, and 16384");
 
     EncryptionParameters parms(scheme_type::CKKS);
-    int poly_modulus_degree = 4096;
+    size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
@@ -673,7 +676,7 @@ void example_ckks_performance_default()
 
 void example_ckks_performance_custom()
 {
-    int poly_modulus_degree = 0;
+    size_t poly_modulus_degree = 0;
     cout << endl << "Set ring degree (1024, 2048, 4096, 8192, 16384, or 32768): ";
     if (!(cin >> poly_modulus_degree))
     {
