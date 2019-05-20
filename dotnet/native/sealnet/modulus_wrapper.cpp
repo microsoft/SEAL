@@ -7,7 +7,7 @@
 
 // SEALNet
 #include "sealnet/stdafx.h"
-#include "sealnet/coeffmodulus_wrapper.h"
+#include "sealnet/modulus_wrapper.h"
 #include "sealnet/utilities.h"
 
 // SEAL
