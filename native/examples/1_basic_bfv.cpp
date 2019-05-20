@@ -67,25 +67,30 @@ void example_basic_bfv()
 
     /*
     The first parameter we set is the degree of the `polynomial modulus'. This
-    must be a positive power of 2, representing the degree of a power-of-2
+    must be a positive power of 2, representing the degree of a power-of-two
     cyclotomic polynomial; it is not necessary to understand what this means.
-    Larger degree makes ciphertext sizes larger and all operations slower, but
-    enables more complicated encrypted computations. Recommended degrees are
-    1024, 2048, 4096, 8192, 16384, 32768, but it is also possible to go beyond
-    this range. In this example we use a relatively small polynomial modulus;
+
+    Larger poly_modulus_degree makes ciphertext sizes larger and all operations
+    slower, but enables more complicated encrypted computations. Recommended
+    values are 1024, 2048, 4096, 8192, 16384, 32768, but it is also possible
+    to go beyond this range. 
+    
+    In this example we use a relatively small polynomial modulus;
     anything smaller than this will enable only extremely restricted encrypted
     computations.
     */
-    parms.set_poly_modulus_degree(4096);
+    size_t poly_modulus_degree = 4096;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
 
     /*
-    Next we set the [ciphertext] coefficient modulus (coeff_modulus). The size
-    of the coefficient modulus should be thought of as the most significant
-    factor in determining the noise budget in a freshly encrypted ciphertext:
-    bigger means more noise budget, which is desirable. On the other hand, the
-    poly_modulus_degree determines an upper bound on the bit-length of the
-    coeff_modulus; these upper bounds can be found in seal/util/hestdparms.h
-    in the macro `SEAL_HE_STD_PARMS_128_TC':
+    Next we set the [ciphertext] `coefficient modulus' (coeff_modulus). This
+    parameter is a large integer, which is a product of distinct prime numbers,
+    each up to 60 bits in size. It is represented as a vector of these prime
+    numbers, each represented by an instance of the SmallModulus class.
+
+    A larger coeff_modulus implies a larger noise budget, hence more encrypted
+    computation capabilities. However, an upper bound for the total bit-length
+    of the coeff_modulus is determined by the poly_modulus_degree, as follows:
 
         poly_modulus_degree | max coeff_modulus bit-length
         --------------------------------------------------------
@@ -96,84 +101,44 @@ void example_basic_bfv()
         16384               | 438
         32768               | 881
 
-    Microsoft SEAL will not allow you to set up the scheme in an insecure way
-    by default. Therefore, a larger poly_modulus_degree is needed for enabling
-    more encrypted computation capabilities.
+    These numbers can also be found in native/src/seal/util/hestdparms.h encoded
+    in the function SEAL_HE_STD_PARMS_128_TC, and can also be obtained from the
+    function 
+        
+        CoeffModulus::MaxBitCount(poly_modulus_degree).
+    
+    For example, if poly_modulus_degree is 4096, the coeff_modulus could consist
+    of three 36-bit primes (108 bits).
 
-    Microsoft SEAL also provides an easy way of selecting the coefficient modulus
-    after the degree of the polynomial modulus is selected. These default moduli
-    can be accessed through the functions
+    Microsoft SEAL comes with helper functions for selecting the coeff_modulus.
+    For new users the easiest way is to simply use
+        
+        CoeffModulus::Default(poly_modulus_degree),
 
-        DefaultParams::coeff_modulus_128(std::size_t poly_modulus_degree)
-        DefaultParams::coeff_modulus_192(std::size_t poly_modulus_degree)
-        DefaultParams::coeff_modulus_256(std::size_t poly_modulus_degree)
+    which returns std::vector<SmallModulus> consisting of a generally good choice
+    for the given poly_modulus_degree. In later examples we will use the function
 
-    for 128-bit, 192-bit, and 256-bit security levels. We note that a 128-bit
-    security level is considered to be already extremely secure and far beyond
-    what is considered feasible
+        CoeffModulus::Custom(poly_modulus_degree, { ... })
 
-    In Microsoft SEAL the coefficient modulus is a positive composite number --
-    a product of distinct primes of size up to 60 bits. When we talk about the
-    size of the coefficient modulus we mean the bit length of the product of the
-    primes. The small primes are represented by instances of the SmallModulus
-    class, so for example DefaultParams::coeff_modulus_128(std::size_t) returns
-    a vector of SmallModulus instances.
-
-    In some cases expert users may want to customize their coefficient modulus.
-    Since Microsoft SEAL uses the Number Theoretic Transform (NTT) for polynomial
-    multiplications modulo the factors of the coefficient modulus, the factors
-    need to be prime numbers congruent to 1 modulo 2*poly_modulus_degree. We have
-    generated a list of such prime numbers of various sizes that the user can
-    easily access through the functions
-
-        DefaultParams::small_mods_60bit(std::size_t poly_modulus_degree)
-        DefaultParams::small_mods_50bit(std::size_t poly_modulus_degree)
-        DefaultParams::small_mods_40bit(std::size_t poly_modulus_degree)
-        DefaultParams::small_mods_30bit(std::size_t poly_modulus_degree)
-
-    each of which gives access to an array of primes of the denoted size. These
-    primes are located in the source file seal/util/globals.cpp. For still more
-    flexible prime selection, we have added a prime generation method
-
-        SmallModulus::GetPrimes(
-            int bit_size, std::size_t count, std::size_t ntt_size)
-
-    that returns the largest `count' many primes with `bit_size' bits, supporting
-    NTTs of size `ntt_size'. The parameter `ntt_size' should always be the degree
-    of the polynomial modulus.
-
-    Performance is mainly determined by the degree of the polynomial modulus, and
-    the number of prime factors in the coefficient modulus; hence in some cases
-    it can be important to use as few prime factors in the coefficient modulus
-    as possible. However, there are scenarios demonstrated in these examples,
-    where a user should instead choose more small primes than what the default
-    parameters provide. The function
-
-        DefaultParams::coeff_modulus_128(
-            std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
-
-    can be used to generate a desired number of small primes for 128-bit security
-    level for a given degree of the polynomial modulus.
-
-    In this example we use the default coefficient modulus for a 128-bit security
-    level. Concretely, this coefficient modulus consists of two 36-bit and one
-    37-bit prime factors: 0xffffee001, 0xffffc4001, 0x1ffffe0001.
+    to obtain customized primes for the coeff_modulus, and will explain reasons
+    for doing so.
     */
-    parms.set_coeff_modulus(CoeffModulus::Default(4096));
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
 
     /*
     The plaintext modulus can be any positive integer, even though here we take
     it to be a power of two. In fact, in many cases one might instead want it
     to be a prime number; we will see this in later examples. The plaintext
     modulus determines the size of the plaintext data type and the consumption
-    of noise budget in homomorphic (encrypted) multiplications. Thus, it is
-    essential to try to keep the plaintext data type as small as possible for
-    best performance. The noise budget in a freshly encrypted ciphertext is
+    of noise budget in multiplications. Thus, it is essential to try to keep the
+    plaintext data type as small as possible for best performance. The noise
+    budget in a freshly encrypted ciphertext is
 
         ~ log2(coeff_modulus/plain_modulus) (bits)
 
     and the noise budget consumption in a homomorphic multiplication is of the
     form log2(plain_modulus) + (other terms).
+    
     The plaintext modulus is specific to the BFV scheme, and cannot be set when
     using the CKKS scheme.
     */
@@ -201,8 +166,8 @@ void example_basic_bfv()
 
     We are now ready to generate the secret and public keys. For this purpose
     we need an instance of the KeyGenerator class. Constructing a KeyGenerator
-    automatically generates the public and secret key, which can then be read to
-    local variables.
+    automatically generates the public and secret key, which can immediately be
+    read to local variables.
     */
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
@@ -235,17 +200,15 @@ void example_basic_bfv()
 
     over an encrypted x = 6. The coefficients of the polynomial can be considered
     as plaintext inputs, as we will see below. The computation is done modulo the
-    plaintext modulus 256.
+    plain_modulus 256.
 
     While this examples is simple and easy to understand, it does not have much
     practical value. In later examples we will demonstrate how to compute more
-    efficiently on encrypted integers and real numbers.
-    */
+    efficiently on encrypted integers and real or complex numbers.
 
-    /*
     Plaintexts in the BFV scheme are polynomials of degree less than the degree
     of the polynomial modulus, and coefficients integers modulo the plaintext
-    modulus. For reader with background in ring theory, the plaintext space is
+    modulus. For readers with background in ring theory, the plaintext space is
     the polynomial quotient ring Z_T[X]/(X^N + 1), where N is poly_modulus_degree
     and T is plain_modulus.
 
@@ -270,9 +233,9 @@ void example_basic_bfv()
     /*
     In Microsoft SEAL, a valid ciphertext consists of two or more polynomials
     whose coefficients are integers modulo the product of the primes in the
-    coefficient modulus. The number of polynomials in a ciphertext is called its
-    `size' and is given by Ciphertext::size(). A freshly encrypted ciphertext
-    always has size 2.
+    coeff_modulus. The number of polynomials in a ciphertext is called its `size'
+    and is given by Ciphertext::size(). A freshly encrypted ciphertext always
+    has size 2.
     */
     cout << "\tSize of freshly encrypted x: " << encrypted_x.size() << endl;
 
@@ -293,41 +256,39 @@ void example_basic_bfv()
 
     /*
     When using Microsoft SEAL, it is typically advantageous to compute in a way
-    that minimizes the longest chain of sequential homomorphic multiplications.
-    In other words, homomorphic computations are best evaluated in a way that
-    minimizes the multiplicative depth. This is because the total noise budget
-    consumption is proportional to the multiplicative depth. Therefore, in this
-    example it is advantageous to factorize the polynomial as
+    that minimizes the longest chain of sequential multiplications. In other
+    words, encrypted computations are best evaluated in a way that minimizes
+    the multiplicative depth of the computation, because the total noise budget
+    consumption is proportional to the multiplicative depth. For example, for
+    our example computation it is advantageous to factorize the polynomial as
 
-        2x^4 + 4x^3 + 4x^2 + 4x + 2 = 2(x + 1)^2 * (x^2 + 1),
+        2x^4 + 4x^3 + 4x^2 + 4x + 2 = 2(x + 1)^2 * (x^2 + 1)
 
     to obtain a simple depth 2 representation. Thus, we compute (x + 1)^2 and
     (x^2 + 1) separately, before multiplying them, and multiplying by 2.
-    */
 
-    /*
     First, we compute x^2 and add a plaintext "1". We can clearly see from the
     print-out that multiplication has consumed a lot of noise budget. The user
-    can change the plain_modulus parameter to see its effect on the rate of noise
+    can vary the plain_modulus parameter to see its effect on the rate of noise
     budget consumption.
     */
     cout << "-- Computing x^2+1: ";
-    Ciphertext x_square_plus_one;
-    evaluator.square(encrypted_x, x_square_plus_one);
+    Ciphertext x_squared_plus_one;
+    evaluator.square(encrypted_x, x_squared_plus_one);
     Plaintext plain_one("1");
-    evaluator.add_plain_inplace(x_square_plus_one, plain_one);
+    evaluator.add_plain_inplace(x_squared_plus_one, plain_one);
     cout << "Done" << endl;
 
     /*
-    Homomorphic multiplication results in the output ciphertext growing in size.
+    Encrypted multiplication results in the output ciphertext growing in size.
     More precisely, if the input ciphertexts have size M and N, then the output
     ciphertext after homomorphic multiplication will have size M+N-1. In this
-    case we perform squaring to observe this growth (also observe noise budget
-    consumption).
+    case we perform a squaring, and observe both size growth and noise budget
+    consumption.
     */
-    cout << "\tSize of x^2+1: " << x_square_plus_one.size() << endl;
+    cout << "\tSize of x^2+1: " << x_squared_plus_one.size() << endl;
     cout << "\tNoise budget in x^2+1: "
-        << decryptor.invariant_noise_budget(x_square_plus_one) << " bits" << endl;
+        << decryptor.invariant_noise_budget(x_squared_plus_one) << " bits" << endl;
 
     /*
     It does not matter that the size has grown -- decryption works as usual, as
@@ -335,30 +296,31 @@ void example_basic_bfv()
     */
     Plaintext decrypted_result;
     cout << "   Decrypting x^2+1: ";
-    decryptor.decrypt(x_square_plus_one, decrypted_result);
+    decryptor.decrypt(x_squared_plus_one, decrypted_result);
     cout << "Done (x^2+1 = 0x" << decrypted_result.to_string() << ")" << endl;
 
     /*
     Next, we compute (x + 1)^2.
     */
     cout << "-- Computing (x+1)^2: ";
-    Ciphertext x_plus_one_square;
-    evaluator.add_plain(encrypted_x, plain_one, x_plus_one_square);
-    evaluator.square_inplace(x_plus_one_square);
+    Ciphertext x_plus_one_squared;
+    evaluator.add_plain(encrypted_x, plain_one, x_plus_one_squared);
+    evaluator.square_inplace(x_plus_one_squared);
     cout << "Done" << endl;
-    cout << "\tSize of (x+1)^2: " << x_plus_one_square.size() << endl;
+    cout << "\tSize of (x+1)^2: " << x_plus_one_squared.size() << endl;
     cout << "\tNoise budget in (x+1)^2: "
-        << decryptor.invariant_noise_budget(x_plus_one_square) << " bits" << endl;
+        << decryptor.invariant_noise_budget(x_plus_one_squared)
+        << " bits" << endl;
     cout << "   Decrypting (x+1)^2: ";
-    decryptor.decrypt(x_plus_one_square, decrypted_result);
+    decryptor.decrypt(x_plus_one_squared, decrypted_result);
     cout << "Done ((x+1)^2 = 0x" << decrypted_result.to_string() << ")" << endl;
 
     /*
-    Finally, we multiply (x^2 + 1), (x + 1)^2, and 2.
+    Finally, we multiply (x^2 + 1) * (x + 1)^2 * 2.
     */
     cout << "-- Computing 2(x^2+1)(x+1)^2: ";
     Ciphertext encrypted_result;
-    evaluator.multiply(x_square_plus_one, x_plus_one_square, encrypted_result);
+    evaluator.multiply(x_squared_plus_one, x_plus_one_squared, encrypted_result);
     Plaintext plain_two("2");
     evaluator.multiply_plain_inplace(encrypted_result, plain_two);
     cout << "Done" << endl;
@@ -370,11 +332,11 @@ void example_basic_bfv()
 
     /*
     Noise budget has reached 0, which means that decryption cannot be expected to
-    give the correct result. This is because both ciphertexts x_square_plus_one
-    and x_plus_one_square consist of 3 polynomials due to the previous squaring
+    give the correct result. This is because both ciphertexts x_squared_plus_one
+    and x_plus_one_squared consist of 3 polynomials due to the previous squaring
     operations, and homomorphic operations on large ciphertexts consume much more
-    noise than computations on small ciphertexts. Computing on smaller ciphertexts
-    is also computationally significantly cheaper.
+    noise budget than computations on small ciphertexts. Computing on smaller
+    ciphertexts is also computationally significantly cheaper.
 
     `Relinearization' is an operation that reduces the size of a ciphertext after
     multiplication back to the initial size, 2. Thus, relinearizing one or both
@@ -382,70 +344,62 @@ void example_basic_bfv()
     impact on both noise growth and performance, even though relinearization has
     a significant computational cost itself.
 
-    Relinearization requires a special type of relinearization key, which can be
-    thought of as a kind of public key. Relinerization keys can easily be created
-    with the KeyGenerator. To relinearize a ciphertext of size M >= 2 back to
-    size 2, we actually need M-2 relinearization keys. Attempting to relinearize
-    a too large ciphertext with too few relinearization keys will result in an
-    exception being thrown.
+    Relinearization requires a special `relinearization key', which can be thought
+    of as a kind of public key. Relinerization keys can easily be created with the
+    KeyGenerator. To relinearize a ciphertext of size M >= 2 back to size 2, we
+    actually need M-2 relinearization keys. Attempting to relinearize a too large
+    ciphertext with too few relinearization keys will result in an exception being
+    thrown. It is common to relinearize after every multiplication, in which case
+    ciphertexts never reach size bigger than 3, and only a single relinearization
+    key is needed.
 
     Relinearization is used similarly in both the BFV and the CKKS schemes, but
     in this example we continue using BFV. We repeat our computation from before,
     but this time relinearize after every multiplication.
 
-    Microsoft SEAL has implements a very efficient relinearization algorithm,
-    making it computationally efficient and almost free in terms of noise budget
-    consumption. For these reasons, relinearizing after every multiplication is
-    a generally recommended approach. Note that in doing so, our ciphertexts will
-    only ever reach size 3; hence it suffices to generate a single relinearization
-    key.
-    */
-
-    /*
-    We use KeyGenerator::relin_keys to create a single relinearization key.
-    Another overload of the function would take the number of relinearization keys
-    as an argument, but since we decided to relinearize after every multiplication,
-    one key is all we need.
+    We use KeyGenerator::relin_keys() to create a single relinearization key.
+    This function accepts optionally the number of relinearization keys to be
+    generated.
     */
     cout << "-- Generating relinearization keys: ";
     auto relin_keys = keygen.relin_keys();
     cout << "Done" << endl;
 
     /*
-    Now repeat the computation and relinearize after each multiplication.
+    We now repeat the computation relinearizing after each multiplication.
     */
     cout << "-- Computing x^2: ";
-    evaluator.square(encrypted_x, x_square_plus_one);
+    evaluator.square(encrypted_x, x_squared_plus_one);
     cout << "Done" << endl;
-    cout << "\tSize of x^2: " << x_square_plus_one.size() << endl;
+    cout << "\tSize of x^2: " << x_squared_plus_one.size() << endl;
     cout << "-- Relinearizing x^2: ";
-    evaluator.relinearize_inplace(x_square_plus_one, relin_keys);
+    evaluator.relinearize_inplace(x_squared_plus_one, relin_keys);
     cout << "Done" << endl;
     cout << "\tSize of x^2 (after relinearization): "
-        << x_square_plus_one.size() << endl;
+        << x_squared_plus_one.size() << endl;
     cout << "-- Computing x^2+1: ";
-    evaluator.add_plain_inplace(x_square_plus_one, plain_one);
+    evaluator.add_plain_inplace(x_squared_plus_one, plain_one);
     cout << "Done" << endl;
     cout << "\tNoise budget in x^2+1: "
-        << decryptor.invariant_noise_budget(x_square_plus_one) << " bits" << endl;
+        << decryptor.invariant_noise_budget(x_squared_plus_one) << " bits" << endl;
 
     cout << "-- Computing x+1: ";
-    evaluator.add_plain(encrypted_x, plain_one, x_plus_one_square);
+    evaluator.add_plain(encrypted_x, plain_one, x_plus_one_squared);
     cout << "Done" << endl;
     cout << "-- Computing (x+1)^2: ";
-    evaluator.square_inplace(x_plus_one_square);
+    evaluator.square_inplace(x_plus_one_squared);
     cout << "Done" << endl;
-    cout << "\tSize of (x+1)^2: " << x_plus_one_square.size() << endl;
+    cout << "\tSize of (x+1)^2: " << x_plus_one_squared.size() << endl;
     cout << "-- Relinearizing (x+1)^2: ";
-    evaluator.relinearize_inplace(x_plus_one_square, relin_keys);
+    evaluator.relinearize_inplace(x_plus_one_squared, relin_keys);
     cout << "Done" << endl;
     cout << "\tSize of (x+1)^2 (after relinearization): "
-        << x_plus_one_square.size() << endl;
+        << x_plus_one_squared.size() << endl;
     cout << "\tNoise budget in (x+1)^2: "
-        << decryptor.invariant_noise_budget(x_plus_one_square) << " bits" << endl;
+        << decryptor.invariant_noise_budget(x_plus_one_squared) << " bits" << endl;
 
     cout << "-- Computing (x^2+1)(x+1)^2: ";
-    evaluator.multiply(x_square_plus_one, x_plus_one_square, encrypted_result);
+    evaluator.multiply(x_squared_plus_one, x_plus_one_squared, encrypted_result);
     cout << "Done" << endl;
     cout << "\tSize of (x^2+1)(x+1)^2: " << encrypted_result.size() << endl;
     cout << "-- Relinearizing (x^2+1)(x+1)^2: ";
@@ -461,8 +415,8 @@ void example_basic_bfv()
     cout << "NOTE: Notice the increase in remaining noise budget." << endl;
 
     /*
-    Relinearization clearly improved our noise consumption. Since we still have
-    noise budget left, decryption should work correctly.
+    Relinearization clearly improved our noise consumption. We clearly have noise
+    budget left, so we can expect the correct answer when decrypting.
     */
     cout << "-- Decrypting 2(x^2+1)(x+1)^2: ";
     decryptor.decrypt(encrypted_result, decrypted_result);

@@ -16,50 +16,54 @@ void example_basic_ckks()
         PI*x^3 + 0.4*x + 1
 
     on encrypted floating-point input data x for a set of 4096 equidistant points
-    in the interval [0, 1]. We encounter challenges related to matching scales
-    and encryption parameters when computing on terms of different degrees in the
-    polynomial evaluation.
+    in the interval [0, 1]. This example demonstrates many of the main features
+    of the CKKS scheme, but also the challenges in using it.
 
     We start by setting up the CKKS scheme.
     */
     EncryptionParameters parms(scheme_type::CKKS);
 
     /*
-    As shown in the CKKS encoder example, a multiplication in CKKS causes the
-    scale in ciphertexts to double. The scale must not get too close to the total
-    size of coeff_modulus, which can be achieved by rescaling the ciphertext to
-    stablize the scale expansion. More precisely, suppose that the scale in a CKKS
-    ciphertext is S, and the last prime in the current coeff_modulus vector is P.
-    Then rescaling changes the scale to S/P. In addition to changing the scale,
-    rescaling also removes one (the last one) of the primes in the coefficient
-    modulus, hence limiting future computational capabilities. Eventually no more
-    primes can be removed, at which point the computational (multiplicative)
-    capabilities have come to an end.
+    We saw in `2_basic_encoders.cpp' that multiplication in CKKS causes scales
+    in ciphertexts to grow. The scale of any ciphertext must not get too close
+    to the total size of coeff_modulus, or else the ciphertext simply runs out of
+    room to store the scaled-up plaintext. The CKKS scheme provides a `rescale'
+    functionality that can reduce the scale, and stablize the scale expansion.
 
-    We would like to set the initial scale S and primes P_i in the coeff_modulus
+    Rescaling is a kind of modulus switch operation (recall `3_levels.cpp').
+    As modulus switching, it removes the last of the primes from coeff_modulus,
+    but as a side-effect it scales down the ciphertext by the removed prime.
+    Usually we want to have perfect control over how the scales are changed,
+    which is why for the CKKS scheme it is more common to use carefully selected
+    primes for the coeff_modulus.
+
+    More precisely, suppose that the scale in a CKKS ciphertext is S, and the
+    last prime in the current coeff_modulus (for the ciphertext) is P. Rescaling
+    to the next level changes the scale to S/P, and removes the prime P from the
+    coeff_modulus, as usual in modulus switching. The number of primes limits
+    how many rescalings can be done, and thus limits the multiplicative depth of
+    the computation.
+
+    It is possible to choose the initial scale freely. One good strategy can be
+    to is to set the initial scale S and primes P_i in the coeff_modulus to be
     very close to each other. If ciphertexts have scale S before multiplication,
     they have scale S^2 after multiplication, and S^2/P_i after rescaling. If all
-    P_i are close to S, then S^2/P_i is close to S again. In this way, we stablize
-    the scale in ciphertexts to be close to S. Generally for a circuit of depth D,
-    we need to rescale D times, i.e., we need to be able to remove D primes from
-    the coefficient modulus.
+    P_i are close to S, then S^2/P_i is close to S again. This way we stablize the
+    scales to be close to S throughout the computation. Generally, for a circuit
+    of depth D, we need to rescale D times, i.e., we need to be able to remove D
+    primes from the coefficient modulus. Once we have only one prime left in the
+    coeff_modulus, the remaining prime must be larger than S by a few bits to
+    preserve the pre-decimal-point value of the plaintext.
 
-    Once we have only one prime left in coeff_modulus, the prime must be larger
-    than S by a few bits to preserve the pre-decimal-point value of the plaintext.
-    This last prime will appear as the first prime in coeff_modulus when we set
-    up encryption parameters, because rescaling always removes the last prime from
-    the coefficient modulus.
-
-    The very last prime in the coeff_modulus set in encryption parameters has
-    a special purpose that is explained in example `Levels'. Ideally it would be
-    at least equal in size to the largest of the other primes in coeff_modulus.
-
-    Therefore, the strategy to choose parameters for CKKS is roughly as follows:
+    Therefore, a generally good strategy is to choose parameters for the CKKS
+    scheme as follows:
 
         (1) Choose a 60-bit prime as the first prime in coeff_modulus. This will
-        give us the highest precision when decrypting;
-        (2) Choose another 60-bit prime as the last element of coeff_modulus;
-        (3) Choose intermediate primes to be roughly of equal size (but distinct).
+            give the highest precision when decrypting;
+        (2) Choose another 60-bit prime as the last element of coeff_modulus, as
+            this will be used as the special prime and should be as large as the
+            largest of the other primes;
+        (3) Choose the intermediate primes to be close to each other.
 
     Microsoft SEAL provides a method to generate prime numbers of the right form,
     given a bit-size and a desired poly_modulus_degree. Here we generate two

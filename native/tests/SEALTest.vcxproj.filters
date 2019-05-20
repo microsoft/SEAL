@@ -142,7 +142,7 @@
     <ClCompile Include="seal\testrunner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\coeffmod.cpp">
+    <ClCompile Include="seal\modulus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

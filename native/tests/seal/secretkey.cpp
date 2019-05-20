@@ -5,7 +5,7 @@
 #include "seal/secretkey.h"
 #include "seal/context.h"
 #include "seal/keygenerator.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 
 using namespace seal;
 using namespace std;

@@ -22,9 +22,9 @@ int main()
         cout << endl << "SEAL Examples:" << endl << endl;
         cout << " 1. Basic BFV (see `1_basic_bfv.cpp`)" << endl;
         cout << " 2. Basic Encoders (see `2_basic_encoders.cpp`)" << endl;
-        cout << " 3. Basic CKKS (see `3_basic_ckks.cpp`)" << endl;
-        cout << " 4. Rotation (see `4_rotation.cpp`)" << endl;
-        cout << " 5. Levels (see `5_levels.cpp`)" << endl;
+        cout << " 3. Levels (see `3_levels.cpp`)" << endl;
+        cout << " 4. Basic CKKS (see `4_basic_ckks.cpp`)" << endl;
+        cout << " 5. Rotation (see `5_rotation.cpp`)" << endl;
         cout << " 6. Performance Test" << endl;
         cout << " 0. Exit" << endl;
 

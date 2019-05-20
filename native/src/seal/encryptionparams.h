@@ -226,9 +226,6 @@ namespace seal
         inline void set_plain_modulus(std::uint64_t plain_modulus)
         {
             set_plain_modulus(SmallModulus(plain_modulus));
-
-            // Re-compute the parms_id
-            compute_parms_id();
         }
 
         /**

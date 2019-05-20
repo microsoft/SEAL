@@ -6,7 +6,7 @@
 #include "seal/biguint.h"
 #include "seal/ciphertext.h"
 #include "seal/ckks.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 #include "seal/context.h"
 #include "seal/decryptor.h"
 #include "seal/intencoder.h"

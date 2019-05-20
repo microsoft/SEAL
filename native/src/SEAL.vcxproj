@@ -15,7 +15,7 @@
     <ClInclude Include="seal\biguint.h" />
     <ClInclude Include="seal\ciphertext.h" />
     <ClInclude Include="seal\ckks.h" />
-    <ClInclude Include="seal\coeffmodulus.h" />
+    <ClInclude Include="seal\modulus.h" />
     <ClInclude Include="seal\context.h" />
     <ClInclude Include="seal\decryptor.h" />
     <ClInclude Include="seal\encryptionparams.h" />
@@ -67,7 +67,7 @@
     <ClCompile Include="seal\biguint.cpp" />
     <ClCompile Include="seal\ciphertext.cpp" />
     <ClCompile Include="seal\ckks.cpp" />
-    <ClCompile Include="seal\coeffmodulus.cpp" />
+    <ClCompile Include="seal\modulus.cpp" />
     <ClCompile Include="seal\context.cpp" />
     <ClCompile Include="seal\decryptor.cpp" />
     <ClCompile Include="seal\encryptionparams.cpp" />

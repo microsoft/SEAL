@@ -9,7 +9,7 @@
 #include "seal/batchencoder.h"
 #include "seal/ckks.h"
 #include "seal/intencoder.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 #include <cstdint>
 #include <cstddef>
 #include <ctime>

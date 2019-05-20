@@ -182,8 +182,9 @@ namespace Microsoft.Research.SEAL
         ///     of distinct prime numbers, and is represented by a list of <see cref="SmallModulus" />
         ///     objects. The coefficient modulus directly affects the size of ciphertext elements,
         ///     the amount of computation that the scheme can perform (bigger is better), and the
-        ///     security level (bigger is worse). In Microsoft SEAL each of the prime numbers in the coefficient
-        ///     modulus must be at most 60 bits, and must be congruent to 1 modulo 2*degree(PolyModulus).
+        ///     security level (bigger is worse). In Microsoft SEAL each of the prime numbers in
+        ///     the coefficient modulus must be at most 60 bits, and must be congruent to 1 modulo
+        ///     2*degree(PolyModulus).
         /// </remarks>
         /// <exception cref="ArgumentNullException">if the value being set is null</exception>
         /// <exception cref="ArgumentException">if the value being set is invalid</exception>
@@ -225,10 +226,10 @@ namespace Microsoft.Research.SEAL
         ///     Sets the plaintext modulus parameter. The plaintext modulus is an integer modulus
         ///     represented by the <see cref="SmallModulus" /> class. The plaintext modulus determines
         ///     the largest coefficient that plaintext polynomials can represent. It also affects the
-        ///     amount of computation that the scheme can perform (bigger is worse). In Microsoft SEAL the
-        ///     plaintext modulus can be at most 60 bits long, but can otherwise be any integer. Note,
-        ///     however, that some features (e.g. batching) require the plaintext modulus to be of
-        ///     a particular form.
+        ///     amount of computation that the scheme can perform (bigger is worse). In Microsoft SEAL
+        ///     the plaintext modulus can be at most 60 bits long, but can otherwise be any integer.
+        ///     Note, however, that some features (e.g. batching) require the plaintext modulus to be
+        ///     of a particular form.
         /// </remarks>
         /// <exception cref="ArgumentNullException">if the value being set is null</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
@@ -256,15 +257,18 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Sets the plaintext modulus parameter. The plaintext modulus is an integer modulus
-        /// represented by the SmallModulus class. This method instead takes a UInt64
-        /// and automatically creates the SmallModulus object. The plaintext modulus determines
-        /// the largest coefficient that plaintext polynomials can represent. It also affects the
-        /// amount of computation that the scheme can perform (bigger is worse). In Microsoft SEAL the
-        /// plaintext modulus can be at most 60 bits long, but can otherwise be any integer. Note,
-        /// however, that some features (e.g. batching) require the plaintext modulus to be of
-        /// a particular form.
+        /// Sets the plaintext modulus parameter.
         /// </summary>
+        /// <remarks>
+        /// Sets the plaintext modulus parameter. The plaintext modulus is an integer modulus
+        /// represented by the <see cref="SmallModulus" /> class. This method instead takes
+        /// a UInt64 and automatically creates the SmallModulus object. The plaintext modulus
+        /// determines the largest coefficient that plaintext polynomials can represent. It also
+        /// affects the amount of computation that the scheme can perform (bigger is worse). In
+        /// Microsoft SEAL the plaintext modulus can be at most 60 bits long, but can otherwise
+        /// be any integer. Note, however, that some features (e.g. batching) require the
+        /// plaintext modulus to be of a particular form.
+        /// </remarks>
         /// <param name="plainModulus">The new plaintext modulus</param>
         /// <exception cref="InvalidOperationException">if scheme is not CKKS</exception>
         public void SetPlainModulus(ulong plainModulus)

@@ -5,7 +5,7 @@
 #include "seal/ckks.h"
 #include "seal/context.h"
 #include "seal/keygenerator.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 #include <vector>
 #include <ctime>
 

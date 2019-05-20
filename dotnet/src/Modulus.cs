@@ -71,7 +71,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="polyModulusDegree">The value of the PolyModulusDegree
         /// encryption parameter</param>
         /// <param name="secLevel">The desired standard security level</param>
-        static public int MaxBitCount(ulong polyModulusDegree, SecLevelType secLevel)
+        static public int MaxBitCount(ulong polyModulusDegree, SecLevelType secLevel = SecLevelType.TC128)
         {
             NativeMethods.CoeffModulus_MaxBitCount(polyModulusDegree, (int)secLevel, out int result);
             return result;
@@ -133,9 +133,9 @@ namespace Microsoft.Research.SEAL
         /// <param name="bitSizes">The bit-lengths of the primes to be generated</param>
         /// <exception cref="ArgumentException">if polyModulusDegree is not
         /// a power-of-two or is too large</exception>
-        /// <exception cref="ArgumentException">if bit_sizes is too large or if its
-        /// elements are out of boundse</exception>
-        /// <exception cref="InvalidOperationException">if not enough primes could be found</exception>
+        /// <exception cref="ArgumentException">if bitSizes is too large or if its
+        /// elements are out of bounds</exception>
+        /// <exception cref="InvalidOperationException">if not enough suitable primes could be found</exception>
         static public IEnumerable<SmallModulus> Custom(
             ulong polyModulusDegree, IEnumerable<int> bitSizes)
         {
@@ -166,6 +166,49 @@ namespace Microsoft.Research.SEAL
             }
 
             return result;
+        }
+    }
+
+    /// <summary>
+    /// This class contains static methods for creating a plaintext modulus easily.
+    /// </summary>
+    public static class PlainModulus
+    {
+        /// <summary>
+        /// Creates a prime number SmallModulus for use as PlainModulus encryption
+        /// parameter that supports batching with a given PolyModulusDegree.
+        /// </summary>
+        /// <param name="polyModulusDegree">The value of the PolyModulusDegree
+        /// encryption parameter</param>
+        /// <param name="bitSize">The bit-length of the prime to be generated</param>
+        /// <exception cref="ArgumentException">if polyModulusDegree is not
+        /// a power-of-two or is too large</exception>
+        /// <exception cref="ArgumentException">if bitSize is out of bounds</exception>
+        /// <exception cref="InvalidOperationException">if a suitable prime could not be found</exception>
+        static public SmallModulus Batching(ulong polyModulusDegree, int bitSize)
+        {
+            return CoeffModulus.Custom(
+                polyModulusDegree,
+                new int[] { bitSize }).First();
+        }
+
+        /// <summary>
+        /// Creates several prime number SmallModulus elements that can be used as
+        /// PlainModulus encryption parameters, each supporting batching with a given
+        /// PolyModulusDegree.
+        /// </summary>
+        /// <param name="polyModulusDegree">The value of the PolyModulusDegree
+        /// encryption parameter</param>
+        /// <param name="bitSizes">The bit-lengths of the primes to be generated</param>
+        /// <exception cref="ArgumentException">if polyModulusDegree is not
+        /// a power-of-two or is too large</exception>
+        /// <exception cref="ArgumentException">if bitSizes is too large or if its
+        /// elements are out of bounds</exception>
+        /// <exception cref="InvalidOperationException">if not enough suitable primes could be found</exception>
+        static public IEnumerable<SmallModulus> Batching(
+            ulong polyModulusDegree, IEnumerable<int> bitSizes)
+        {
+            return CoeffModulus.Custom(polyModulusDegree, bitSizes);
         }
     }
 }

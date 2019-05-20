@@ -6,12 +6,45 @@
 using namespace std;
 using namespace seal;
 
+/*
+In `1_basic_bfv.cpp' we showed how to perform a very simple computation using the
+BFV scheme. The computation was performed modulo the plain_modulus parameter, and
+utilized only one coefficient from a BFV plaintext polynomial. This approach has
+two notable problems:
+
+    (1) Practical applications typically use integer or real number arithmetic,
+        not modular arithmetic;
+    (2) We used only one coefficient of the plaintext polynomial. This is really
+        wasteful, as the plaintext polynomial is large and will in any case be
+        encrypted in its entirety.
+
+For (1), one may ask why not just increase the plain_modulus parameter until no
+overflow occurs, and the computations behave as in integer arithmetic. The problem
+is that increasing plain_modulus increases noise budget consumption, and decreases
+the initial noise budget too.
+
+In these examples we will discuss other ways of laying out data into plaintext
+elements (encoding) that allow more computations without data type overflow, and
+can allow the full plaintext polynomial to be utilized.
+*/
+void example_basic_encoders()
+{
+    print_example_banner("Example: Basic Encoders");
+
+    /*
+    Run all encoder examples.
+    */
+    example_integer_encoder();
+    example_batch_encoder();
+    example_ckks_encoder();
+}
+
 void example_integer_encoder()
 {
     print_example_banner("Integer Encoder");
 
     /*
-    [IntegerEncoder] (BFV specific)
+    [IntegerEncoder] (For BFV scheme only)
 
     The IntegerEncoder encodes integers to BFV plaintext polynomials as follows.
     First, a binary expansion of the integer is computed. Next, a polynomial is
@@ -44,13 +77,21 @@ void example_integer_encoder()
     multiplications.
 
     The IntegerEncoder is easy to understand and use for simple computations,
-    and can be a good starting point to learning Microsoft SEAL. However,
-    advanced users will probably prefer more efficient approaches, such as the
-    BatchEncoder or the CKKSEncoder.
+    and can be a good tool to experiment with for users new to Microsoft SEAL.
+    However, advanced users will probably prefer more efficient approaches,
+    such as the BatchEncoder or the CKKSEncoder.
     */
     EncryptionParameters parms(scheme_type::BFV);
-    parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(CoeffModulus::Default(4096));
+    int poly_modulus_degree = 4096;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+
+    /*
+    There is no hidden logic behind our choice of the plain_modulus. The only
+    thing that matters is that the plaintext polynomial coefficients will not
+    exceed this value at any point during our computation; otherwise the result
+    will be incorrect.
+    */
     parms.set_plain_modulus(512);
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -63,13 +104,13 @@ void example_integer_encoder()
     Decryptor decryptor(context, secret_key);
 
     /*
-    We create the IntegerEncoder.
+    We create an IntegerEncoder.
     */
     IntegerEncoder encoder(context);
 
     /*
-    First, encode two integers as plaintext polynomials. Note that encoding is
-    not encryption: at this point nothing is encrypted.
+    First, we encode two integers as plaintext polynomials. Note that encoding
+    is not encryption: at this point nothing is encrypted.
     */
     int value1 = 5;
     Plaintext plain1 = encoder.encode(value1);
@@ -113,7 +154,8 @@ void example_integer_encoder()
     cout << "Done" << endl;
 
     /*
-    Print the result plaintext polynomial.
+    Print the result plaintext polynomial. The coefficients are not even close
+    to exceeding our plain_modulus, 512.
     */
     cout << "\tPlaintext polynomial: " << plain_result.to_string() << endl;
 
@@ -128,29 +170,29 @@ void example_batch_encoder()
     print_example_banner("Batch Encoder");
 
     /*
-    [BatchEncoder] (BFV specific)
+    [BatchEncoder] (For BFV scheme only)
 
-    If N denotes the degree of the polynomial modulus, and T the plaintext
-    modulus, then batching is automatically enabled for the BFV scheme when T
-    is a prime number congruent to 1 modulo 2*N.
-
-    Batching allows the BFV plaintext polynomial to be viewed as a 2-by-(N/2)
-    matrix, with each element an integer modulo T. In the matrix view, homomorphic
-    operations act element-wise on encrypted matrices, allowing the user to obtain
-    speeds-ups of several orders of magnitude in fully vectorizable computations.
-    Thus, in all but the simplest computations, batching should be the preferred
-    method to use, and when used properly will result in implementations that far
-    outperform anything done with the IntegerEncoder.
+    Let N denote the poly_modulus_degree and T denote the plain_modulus. Batching
+    allows the BFV plaintext polynomials to be viewed as 2-by-(N/2) matrices, with
+    each element an integer modulo T. In the matrix view, encrypted operations act
+    element-wise on encrypted matrices, allowing the user to obtain speeds-ups of
+    several orders of magnitude in fully vectorizable computations. Thus, in all
+    but the simplest computations, batching should be the preferred method to use
+    with BFV, and when used properly will result in implementations outperforming
+    anything done with the IntegerEncoder.
     */
     EncryptionParameters parms(scheme_type::BFV);
-    parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(CoeffModulus::Default(8192));
+    int poly_modulus_degree = 8192;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
 
     /*
-    Note that 40961 is a prime number and 2*4096 divides 40960, so batching will
-    automatically be enabled for these parameters.
+    To enable batching, we need to set the plain_modulus to be a prime number
+    congruent to 1 modulo 2*poly_modulus_degree. Microsoft SEAL provides a helper
+    method for finding such a prime. In this example we create a 16-bit prime
+    that supports batching.
     */
-    parms.set_plain_modulus(65537);
+    parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 16));
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -176,8 +218,9 @@ void example_batch_encoder()
     BatchEncoder batch_encoder(context);
 
     /*
-    The total number of batching `slots' equals the degree of the polynomial
-    modulus. The matrices we encrypt will be of size 2-by-(slot_count / 2).
+    The total number of batching `slots' equals the poly_modulus_degree, N, and
+    these slots are organized into 2-by-(N/2) matrices that can be encrypted and
+    computed on. Each slot contains an integer modulo plain_modulus.
     */
     size_t slot_count = batch_encoder.slot_count();
     size_t row_size = slot_count / 2;
@@ -214,7 +257,8 @@ void example_batch_encoder()
     cout << "Done" <<endl;
 
     /*
-    We can instantly decode to verify correctness of the encoding.
+    We can instantly decode to verify correctness of the encoding. Note that no
+    encryption or decryption has yet taken place.
     */
     vector<uint64_t> pod_result;
     cout << "   Decoding plaintext matrix: ";
@@ -283,6 +327,17 @@ void example_batch_encoder()
     cout << "Done" << endl;
     cout << "\tResult plaintext matrix:" << endl;
     print_matrix(pod_result, row_size);
+
+    /*
+    Batching allows us to efficiently use the full plaintext polynomial when the
+    desired encrypted computation is highly parallelizable. However, it has not
+    solved the other problem mentioned in the beginning of this file: each slot
+    holds only an integer modulo plain_modulus, and unless plain_modulus is very
+    large, we can quickly encounter data type overflow and get unexpected results
+    when integer computations are desired. Note that overflow cannot be detected
+    in encrypted form. The CKKS scheme (and the CKKSEncoder) addresses the data
+    type overflow issue, but at the cost of yielding only approximate results.
+    */
 }
 
 void example_ckks_encoder()
@@ -290,20 +345,27 @@ void example_ckks_encoder()
     print_example_banner("CKKS Encoder");
 
     /*
-    In this example we demonstrate the encoder for the Cheon-Kim-Kim-Song (CKKS)
-    scheme for encrypting and computing on floating point numbers. For full
-    details on the CKKS scheme, we refer to https://eprint.iacr.org/2016/421.
-    For better performance, Microsoft SEAL implements the "FullRNS" optimization
-    for CKKS, as described in https://eprint.iacr.org/2018/931.
-    */
+    [CKKSEncoder] (For CKKS scheme only)
 
-    /*
-    We start by creating encryption parameters for the CKKS scheme. One major
-    difference to the BFV scheme is that CKKS does not use the plain_modulus.
+    In this example we demonstrate the Cheon-Kim-Kim-Song (CKKS) scheme for
+    computing on encrypted real or complex numbers. For full details on the
+    CKKS scheme, we refer to https://eprint.iacr.org/2016/421. For improved
+    performance, Microsoft SEAL implements the "FullRNS" optimization for CKKS,
+    as described in https://eprint.iacr.org/2018/931.
+
+    We start by creating encryption parameters for the CKKS scheme. There are
+    two important differences compared to the BFV scheme:
+
+        (1) CKKS does not use the plain_modulus encryption parameter;
+        (2) Selecting the coeff_modulus in a specific way can be very important
+            when using the CKKS scheme. We will explain this further in the file
+            `basic_ckks.cpp'. In this example we use CoeffModulus::Default(...).
     */
     EncryptionParameters parms(scheme_type::CKKS);
-    parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(CoeffModulus::Default(8192));
+
+    int poly_modulus_degree = 8192;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
 
     /*
     We create the SEALContext as usual and print the parameters.
@@ -327,20 +389,20 @@ void example_ckks_encoder()
     Decryptor decryptor(context, secret_key);
 
     /*
-    To create CKKS plaintexts we need a special encoder: we cannot create them
-    directly from polynomials. Note that the IntegerEncoder and BatchEncoder
-    cannot be used with the CKKS scheme. The CKKS scheme allows encryption and
-    approximate computation on vectors of real or complex numbers, which the
-    CKKSEncoder converts into Plaintext objects. At a high level this looks a lot
-    like BatchEncoder for the BFV scheme, but the theory behind it is different.
+    To create CKKS plaintexts we need a special encoder: there is no other way
+    to create them. The IntegerEncoder and BatchEncoder cannot be used with the
+    CKKS scheme. The CKKSEncoder encodes vectors of real or complex numbers into
+    Plaintext objects, which can subsequently be encrypted. At a high level this
+    looks a lot like what BatchEncoder does for the BFV scheme, but the theory
+    behind it is completely different.
     */
     CKKSEncoder encoder(context);
 
     /*
     In CKKS the number of slots is poly_modulus_degree / 2 and each slot encodes
-    one complex (or real) number. This should be contrasted with BatchEncoder in
+    one real or complex number. This should be contrasted with BatchEncoder in
     the BFV scheme, where the number of slots is equal to poly_modulus_degree
-    and they are arranged into a 2-by-(poly_modulus_degree / 2) matrix.
+    and they are arranged into a matrix with two rows.
     */
     size_t slot_count = encoder.slot_count();
     cout << "Number of slots: " << slot_count << endl;
@@ -357,18 +419,19 @@ void example_ckks_encoder()
     /*
     Now we encode it with CKKSEncoder. The floating-point coefficients of `input'
     will be scaled up by the parameter `scale'. This is necessary since even in
-    the CKKS scheme the plaintexts are polynomials with integer coefficients. It
-    is instructive to think of the scale as determining the bit-precision of the
-    encoding; naturally it will also affect the precision of the result.
+    the CKKS scheme the plaintext elements are fundamentally polynomials with
+    integer coefficients. It is instructive to think of the scale as determining
+    the bit-precision of the encoding; naturally it will affect the precision of
+    the result.
 
     In CKKS the message is stored modulo coeff_modulus (in BFV it is stored modulo
     plain_modulus), so the scale must not get too close to the total size of
     coeff_modulus. In this case our coeff_modulus is quite large (218 bits) so we
-    have little to worry about in this regard. For this example a 50-bit scale is
-    more than enough.
+    have little to worry about in this regard. For this simple example a 30-bit
+    scale is more than enough.
     */
     Plaintext plain;
-    double scale = pow(2.0, 50);
+    double scale = pow(2.0, 30);
     cout << "-- Encoding input vector: ";
     encoder.encode(input, scale, plain);
     cout << "Done" << endl;
@@ -392,10 +455,10 @@ void example_ckks_encoder()
     cout << "Done" << endl;
 
     /*
-    Basic operations on the ciphertexts are still easy to do. Here we square
-    the ciphertext, decrypt, decode, and print the result. We note also that
-    decoding returns a vector of full size (poly_modulus_degree / 2); this is
-    because of the implicit zero-padding mentioned above.
+    Basic operations on the ciphertexts are still easy to do. Here we square the
+    ciphertext, decrypt, decode, and print the result. We note also that decoding
+    returns a vector of full size (poly_modulus_degree / 2); this is because of
+    the implicit zero-padding mentioned above.
     */
     cout << "-- Squaring: ";
     evaluator.square_inplace(encrypted);
@@ -406,7 +469,7 @@ void example_ckks_encoder()
 
     /*
     We notice that the scale in the result has increased. In fact, it is now the
-    square of the original scale (2^50).
+    square of the original scale: 2^60.
     */
     cout << "\tScale in squared input: " << encrypted.scale()
         << " (" << log2(encrypted.scale()) << " bits)" << endl;
@@ -419,15 +482,11 @@ void example_ckks_encoder()
     cout << "Done" << endl;
     cout << "\tSquared input: " << endl;
     print_vector(output);
-}
 
-void example_basic_encoders()
-{
-  print_example_banner("Example: Basic Encoders");
-
-  example_integer_encoder();
-
-  example_batch_encoder();
-
-  example_ckks_encoder();
+    /*
+    The CKKS scheme allows the scale to be reduced between encrypted computations.
+    This is a fundamental and critical feature that makes CKKS very powerful and
+    flexible. We will discuss it in great detail in `4_basic_ckks.cpp' and later
+    in `5_levels.cpp'.
+    */
 }

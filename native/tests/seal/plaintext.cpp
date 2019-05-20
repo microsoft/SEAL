@@ -7,7 +7,7 @@
 #include "seal/evaluator.h"
 #include "seal/context.h"
 #include "seal/memorymanager.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 #include "seal/ckks.h"
 
 using namespace seal;

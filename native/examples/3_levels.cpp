@@ -11,73 +11,103 @@ void example_levels()
     print_example_banner("Example: Levels");
 
     /*
-    In this examples we describe the concept of levels in BFV and CKKS and the
+    In this examples we describe the concept of `levels' in BFV and CKKS and the
     related objects that represent them in Microsoft SEAL.
 
-    In applications built with homomorphic encryption, the multiplicative depth
-    of an application or a circuit is very critical. First, multiplications
-    contribute a lot to noise growth. Second, a relinearization is generally
-    required after multiplications and it is costly (see example_basic_bfv).
-    Third, in CKKS after each multiplication the scale in a ciphertext needs to
-    be adjusted. Fourth, with modulus switching ciphertexts at different
-    multiplicative levels have different ring structure (coefficient modulus).
-    Therefore, keeping track of levels in homomorphic evaluation is necessary
-    and benificial to performance.
+    In Microsoft SEAL a set of encryption parameters (excluding the random number
+    generator) is identified uniquely by a SHA-3 hash of the parameters. This
+    hash is called the `parms_id' and can be easily accessed and printed at any
+    time. The hash will change as soon as any of the parameters is changed.
 
-    In Microsoft SEAL a particular set of encryption parameters (excluding the
-    random number generator) is identified uniquely by a SHA-3 hash of the
-    parameters. This hash is called the `parms_id' and can be easily accessed
-    and printed at any time. The hash will change as soon as any of the relevant
-    parameters is changed.
-
-    Each set of encryption parameters involve unique precomputation which are
-    stored in a SEALContext::ContextData object. Its `parms_id' is used to
-    identify and access this object in a SEALContext object. The SEALContext
-    contains a chain of SEALContext::ContextData objects each of which contains
-    the precomputed data for the encryption parameters at the corresponding level.
-    */
-    EncryptionParameters parms(scheme_type::BFV);
-    parms.set_poly_modulus_degree(8192);
-
-    /*
-    For a given polynomial modulus degree, we may choose a number of primes as
-    long as they pass validity check.
-    */
-    vector<SmallModulus> primes = SmallModulus::GetPrimes(40, 5, 8192);
-    parms.set_coeff_modulus(primes);
-    parms.set_plain_modulus(1 << 20);
-
-    /*
-    Create the context that has a chain of encryption parameters.
-    */
-    auto context = SEALContext::Create(parms);
-    print_parameters(context);
-
-    /*
-    When SEALContext is created from a given EncryptionParameters instance,
-    Microsoft SEAL automatically creates a so-called "modulus switching chain",
+    When a SEALContext is created from a given EncryptionParameters instance,
+    Microsoft SEAL automatically creates a so-called `modulus switching chain',
     which is a chain of other encryption parameters derived from the original set.
     The parameters in the modulus switching chain are the same as the original
     parameters with the exception that size of the coefficient modulus is
     decreasing going down the chain. More precisely, each parameter set in the
     chain attempts to remove the last coefficient modulus prime from the
     previous set; this continues until the parameter set is no longer valid
-    (e.g. plain_modulus is larger than the remaining coeff_modulus). It is easy
+    (e.g., plain_modulus is larger than the remaining coeff_modulus). It is easy
     to walk through the chain and access all the parameter sets. Additionally,
     each parameter set in the chain has a `chain_index' that indicates its
     position in the chain so that the last set has index 0. We say that a set
     of encryption parameters, or an object carrying those encryption parameters,
     is at a higher level in the chain than another set of parameters if its the
-    chain index is bigger, i.e. it is earlier in the chain.
+    chain index is bigger, i.e., it is earlier in the chain.
 
-    The chain starts with 'key_context_data()' that has the full list of primes.
-    This intance of EncryptionParameters (including the last prime) are reserved
-    for key generation and noise reduction in Microsoft SEAL.
-    Ciphertexts, plaintexts, and evaluation start with the next in chain
-    accessible via 'first_context_data()'.
+    Each set of parameters in the chain involves unique precomputations performed
+    when the SEALContext is created, and stored in a SEALContext::ContextData
+    object. The chain is basically a linked list of SEALContext::ContextData
+    objects, and can easily be accessed through the SEALContext at any time. Each
+    node can be identified by the parms_id of its specific encryption parameters
+    (poly_modulus_degree remains the same but coeff_modulus varies).
+    */
+    EncryptionParameters parms(scheme_type::BFV);
+
+    int poly_modulus_degree = 8192;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+
+    /*
+    In this example we use a custom coeff_modulus, consisting of 5 primes of
+    sizes 50, 30, 30, 50, and 50 bits. Note that this is still OK according to
+    the explanation in `1_basic_bfv.cpp'. Indeed,
+
+        CoeffModulus::MaxBitCount(poly_modulus_degree)
+
+    returns 218 (less than 50+30+30+50+50=210).
+
+    Due to the modulus switching chain, the order of the 5 primes is significant.
+    The last prime has a special meaning and we call it the `special prime'. Thus,
+    the first parameter set in the modulus switching chain is the only one that
+    involves the special prime. All key objects, such as SecretKey, are created
+    at this highest level. All data objects, such as Ciphertext, can be only at
+    lower levels. The special modulus should be as large as the largest of the
+    other primes in the coeff_modulus, although this is not a strict requirement.
+
+              special prime +---------+
+                                      |
+                                      v
+    coeff_modulus: { 50, 30, 30, 50, 50 }  +---+  Level 4 (all keys; `key level')
+                                               |
+                                               |
+        coeff_modulus: { 50, 30, 30, 50 }  +---+  Level 3 (highest `data level')
+                                               |
+                                               |
+            coeff_modulus: { 50, 30, 30 }  +---+  Level 2
+                                               |
+                                               |
+                coeff_modulus: { 50, 30 }  +---+  Level 1
+                                               |
+                                               |
+                    coeff_modulus: { 50 }  +---+  Level 0 (lowest level)
+    */
+    parms.set_coeff_modulus(CoeffModulus::Custom(
+        poly_modulus_degree, { 50, 30, 30, 50, 50 }));
+
+    /*
+    In this example the plain_modulus does not play much of a role; we choose
+    some reasonable value.
+    */
+    parms.set_plain_modulus(1 << 20);
+
+    auto context = SEALContext::Create(parms);
+    print_parameters(context);
+
+    /*
+    There are convenience method for accessing the SEALContext::ContextData for
+    some of the most important levels:
+    
+        SEALContext::key_context_data(): access to key level ContextData
+        SEALContext::first_context_data(): access to highest data level ContextData
+        SEALContext::last_context_data(): access to lowest level ContextData
+    
+    We iterate over the chain and print the parms_id for each set of parameters.
     */
     cout << "Printing the modulus switching chain:" << endl;
 
+    /*
+    First print the key level parameter information.
+    */
     auto context_data = context->key_context_data();
     cout << "----- Level (chain index): " << context_data->chain_index();
     cout << " ...... key_context_data()" << endl;
@@ -92,6 +122,9 @@ void example_levels()
     cout << "\\" << endl;
     cout << " \\-->";
 
+    /*
+    Next iterate over the remaining (data) levels.
+    */
     size_t level = context_data->parms().coeff_modulus().size() - 1;
     for(context_data = context->first_context_data(); context_data;
         context_data = context_data->next_context_data())
@@ -123,46 +156,8 @@ void example_levels()
     cout << " End of chain reached" << endl << endl;
 
     /*
-    To demonstrate that a particular set of encryption parameters is identified
-    uniquely by a hash 'parms_id'. We manually removes the last prime and create
-    a new set of encryption parameters that are the same with the encryption
-    parameters in 'context->first_context_data()'.
+    We create some keys and check that indeed they appear at the highest level.
     */
-    cout << "Create a new context with new encryption parameters" << endl;
-    primes.pop_back();
-    parms.set_coeff_modulus(primes);
-    auto context2 = SEALContext::Create(parms);
-    cout << "-- 'first_context_data' in previous context: " << endl;
-    context_data = context->first_context_data();
-    cout << "\tchain index: " << context_data->chain_index() << endl;
-    cout << "\tparms_id: " << context_data->parms_id() << endl;
-    cout << "\tcoeff_modulus primes: ";
-    cout << hex;
-    for(const auto &prime : context_data->parms().coeff_modulus())
-    {
-        cout << prime.value() << " ";
-    }
-    cout << endl << "-- 'key_context_data' in this context: " << endl;
-    context_data = context2->key_context_data();
-    cout << "\tchain index: " << context_data->chain_index() << endl;
-    cout << "\tparms_id: " << context_data->parms_id() << endl;
-    cout << "\tcoeff_modulus primes: ";
-    cout << hex;
-    for(const auto &prime : context_data->parms().coeff_modulus())
-    {
-        cout << prime.value() << " ";
-    }
-    cout << endl << "They are identical." << endl << endl << endl;
-
-    /*
-    All keys and ciphertext, and in the CKKS also plaintexts, carry the parms_id
-    for the encryption parameters they are created with, allowing Microsoft SEAL
-    to quickly determine whether the objects are valid for use and compatible
-    for homomorphic computations. Microsoft SEAL takes care of managing, and
-    verifying the parms_id for all objects so the user should have no reason to
-    change it by hand.
-    */
-    cout << "Refer to the printed modulus switching chain: " << endl;
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
@@ -173,14 +168,13 @@ void example_levels()
     cout << "-- parms_id of relin_keys:  " << relin_keys.parms_id() << endl;
     cout << "-- parms_id of galois_keys: " << galois_keys.parms_id() << endl;
 
-
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
 
     /*
-    Note how in the BFV scheme plaintexts do not carry the parms_id, but
-    ciphertexts do.
+    In the BFV scheme plaintexts do not carry a parms_id, but ciphertexts do. Note
+    how the freshly encrypted ciphertext is at the highest data level.
     */
     Plaintext plain("1x^3 + 2x^2 + 3x^1 + 4");
     Ciphertext encrypted;
@@ -188,13 +182,12 @@ void example_levels()
     cout << "-- parms_id of plain: " << plain.parms_id() << " (not set)" << endl;
     cout << "-- parms_id of encrypted:   " << encrypted.parms_id() << endl << endl;
 
-    cout << "Keys are at at a higher level than ciphertexts." << endl << endl;
-
     /*
-    Modulus switching changes the ciphertext parameters to any set down the
-    chain from the current one. The function mod_switch_to_next(...) always
-    switches to the next set down the chain, whereas mod_switch_to(...) switches
-    to a parameter set down the chain corresponding to a given parms_id.
+    `Modulus switching' is a technique of changing the ciphertext parameters down
+    in the chain. The function Evaluator::mod_switch_to_next always switches to
+    the next level down the chain, whereas Evaluator::mod_switch_to switches to
+    a parameter set down the chain corresponding to a given parms_id. However, it
+    is impossible to switch up in the chain.
     */
     cout << "Effects of modulus switching: " << endl;
     context_data = context->first_context_data();
@@ -220,7 +213,7 @@ void example_levels()
 
     /*
     At this point it is hard to see any benefit in doing this: we lost a huge
-    amount of noise budget (i.e. computational power) at each switch and seemed
+    amount of noise budget (i.e., computational power) at each switch and seemed
     to get nothing in return. Decryption still works.
     */
     decryptor.decrypt(encrypted, plain);
@@ -229,7 +222,7 @@ void example_levels()
     /*
     However, there is a hidden benefit: the size of the ciphertext depends
     linearly on the number of primes in the coefficient modulus. Thus, if there
-    is no need or intention to perform any more computations on a given
+    is no need or intention to perform any further computations on a given
     ciphertext, we might as well switch it down to the smallest (last) set of
     parameters in the chain before sending it back to the secret key holder for
     decryption.
@@ -237,10 +230,9 @@ void example_levels()
     Also the lost noise budget is actually not as issue at all, if we do things
     right, as we will see below.
 
-    First we recreate the original ciphertext (with the largest parameters) and
-    perform some simple computations on it.
+    First we recreate the original ciphertext and perform some computations.
     */
-    cout << "More efficient computation with moudlus switching: " << endl;
+    cout << "More efficient computation with modulus switching: " << endl;
     encryptor.encrypt(plain, encrypted);
     cout << "\tNoise budget before squaring: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
@@ -264,8 +256,8 @@ void example_levels()
     modulus after doing enough computations. In some cases one might want to
     switch to a lower level slightly earlier, actually sacrificing some of the
     noise budget in the process, to gain computational performance from having
-    a smaller coefficient modulus. We see from the print-out that that the next
-    modulus switch should be done ideally when the noise budget reaches 81 bits.
+    smaller parameters. We see from the print-out that the next modulus switch
+    should be done ideally when the noise budget is down to around 81 bits.
     */
     evaluator.square_inplace(encrypted);
     evaluator.relinearize_inplace(encrypted, relin_keys);
@@ -279,7 +271,7 @@ void example_levels()
     At this point the ciphertext still decrypts correctly, has very small size,
     and the computation was as efficient as possible. Note that the decryptor
     can be used to decrypt a ciphertext at any level in the modulus switching
-    chain as long as the secret key is at a higher level in the same chain.
+    chain.
     */
     decryptor.decrypt(encrypted, plain);
     cout << "Decryption of fourth power: " << endl;
@@ -288,15 +280,14 @@ void example_levels()
     /*
     In BFV modulus switching is not necessary and in some cases the user might
     not want to create the modulus switching chain, except for the highest two
-    levels. This can be done by passing a bool `false' to the
-    SEALContext::Create(...) function as follows.
+    levels. This can be done by passing a bool `false' to SEALContext::Create.
     */
     context = SEALContext::Create(parms, false);
 
     /*
     We can check that indeed the modulus switching chain has been created only
-    for the highest two levels (keys and fresh ciphertexts).
-    The following loop should execute only once.
+    for the highest two levels (key level and highest data level). The following
+    loop should execute only once.
     */
     cout << "-----";
     for (context_data = context->key_context_data(); context_data;

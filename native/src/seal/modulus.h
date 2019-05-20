@@ -69,7 +69,8 @@ namespace seal
         @param[in] sec_level The desired standard security level
         */
         static constexpr int MaxBitCount(
-            std::size_t poly_modulus_degree, sec_level_type sec_level) noexcept
+            std::size_t poly_modulus_degree,
+            sec_level_type sec_level = sec_level_type::tc128) noexcept
         {
             switch (sec_level)
             {
@@ -124,10 +125,60 @@ namespace seal
         or is too large
         @throws std::invalid_argument if bit_sizes is too large or if its elements
         are out of bounds
-        @throws std::logic_error if not enough primes could be found
+        @throws std::logic_error if not enough suitable primes could be found
         */
         static std::vector<SmallModulus> Custom(
             std::size_t poly_modulus_degree,
             std::vector<int> bit_sizes);
+    };
+
+    /**
+    This class contains static methods for creating a plaintext modulus easily.
+    */
+    class PlainModulus
+    {
+    public:
+        PlainModulus() = delete;
+
+        /**
+        Creates a prime number SmallModulus for use as plain_modulus encryption
+        parameter that supports batching with a given poly_modulus_degree.
+
+        @param[in] poly_modulus_degree The value of the poly_modulus_degree
+        encryption parameter
+        @param[in] bit_size The bit-length of the prime to be generated
+        @throws std::invalid_argument if poly_modulus_degree is not a power-of-two
+        or is too large
+        @throws std::invalid_argument if bit_size is out of bounds
+        @throws std::logic_error if a suitable prime could not be found
+        */
+        static inline SmallModulus Batching(
+            std::size_t poly_modulus_degree,
+            int bit_size)
+        {
+            return CoeffModulus::Custom(poly_modulus_degree, { bit_size })[0];
+        }
+
+
+        /**
+        Creates several prime number SmallModulus elements that can be used as
+        plain_modulus encryption parameters, each supporting batching with a given
+        poly_modulus_degree.
+
+        @param[in] poly_modulus_degree The value of the poly_modulus_degree
+        encryption parameter
+        @param[in] bit_sizes The bit-lengths of the primes to be generated
+        @throws std::invalid_argument if poly_modulus_degree is not a power-of-two
+        or is too large
+        @throws std::invalid_argument if bit_sizes is too large or if its elements
+        are out of bounds
+        @throws std::logic_error if not enough suitable primes could be found
+        */
+        static inline std::vector<SmallModulus> Batching(
+            std::size_t poly_modulus_degree,
+            std::vector<int> bit_sizes)
+        {
+            return CoeffModulus::Custom(poly_modulus_degree, bit_sizes);
+        }
     };
 }

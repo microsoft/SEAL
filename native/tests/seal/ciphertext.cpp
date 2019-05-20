@@ -7,7 +7,7 @@
 #include "seal/keygenerator.h"
 #include "seal/encryptor.h"
 #include "seal/memorymanager.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 
 using namespace seal;
 using namespace seal::util;

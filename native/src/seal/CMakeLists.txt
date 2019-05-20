@@ -7,7 +7,6 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/coeffmodulus.cpp
         ${CMAKE_CURRENT_LIST_DIR}/context.cpp
         ${CMAKE_CURRENT_LIST_DIR}/decryptor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/intencoder.cpp
@@ -17,6 +16,7 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator.cpp
         ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/modulus.cpp
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
@@ -29,7 +29,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/biguint.h
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext.h
         ${CMAKE_CURRENT_LIST_DIR}/ckks.h
-        ${CMAKE_CURRENT_LIST_DIR}/coeffmodulus.h
+        ${CMAKE_CURRENT_LIST_DIR}/modulus.h
         ${CMAKE_CURRENT_LIST_DIR}/context.h
         ${CMAKE_CURRENT_LIST_DIR}/decryptor.h
         ${CMAKE_CURRENT_LIST_DIR}/intencoder.h
@@ -41,6 +41,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator.h
         ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.h
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager.h
+        ${CMAKE_CURRENT_LIST_DIR}/modulus.h
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.h
         ${CMAKE_CURRENT_LIST_DIR}/publickey.h
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.h

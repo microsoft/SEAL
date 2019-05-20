@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "seal/context.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 
 using namespace seal;
 using namespace std;

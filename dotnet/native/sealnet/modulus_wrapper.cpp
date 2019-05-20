@@ -11,7 +11,7 @@
 #include "sealnet/utilities.h"
 
 // SEAL
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 
 using namespace std;
 using namespace seal;

@@ -70,7 +70,7 @@ namespace SEALNetExamples
 
             /*
             The first parameter we set is the degree of the polynomial modulus. This must
-            be a positive power of 2, representing the degree of a power-of-2 cyclotomic
+            be a positive power of 2, representing the degree of a power-of-two cyclotomic
             polynomial; it is not necessary to understand what this means. The polynomial
             modulus degree should be thought of mainly affecting the security level of the
             scheme: larger degree makes the scheme more secure. Larger degree also makes

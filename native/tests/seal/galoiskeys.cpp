@@ -6,7 +6,7 @@
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/util/uintcore.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 #include <vector>
 
 using namespace seal;

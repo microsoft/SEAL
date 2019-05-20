@@ -23,16 +23,16 @@
     <ClCompile Include="2_basic_encoders.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="3_basic_ckks.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="4_rotation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="5_levels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="6_performance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="3_levels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="4_basic_ckks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="5_rotation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

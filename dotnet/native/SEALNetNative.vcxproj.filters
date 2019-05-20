@@ -102,7 +102,7 @@
     <ClInclude Include="sealnet\kswitchkeys_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sealnet\coeffmodulus_wrapper.h">
+    <ClInclude Include="sealnet\modulus_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -185,7 +185,7 @@
     <ClCompile Include="sealnet\kswitchkeys_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sealnet\coeffmodulus_wrapper.cpp">
+    <ClCompile Include="sealnet\modulus_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

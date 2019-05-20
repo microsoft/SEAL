@@ -7,7 +7,6 @@ target_sources(sealnetnative
         ${CMAKE_CURRENT_LIST_DIR}/biguint_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ckksencoder_wrapper.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/coeffmodulus_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/contextdata_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/decryptor_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparameterqualifiers_wrapper.cpp
@@ -20,6 +19,7 @@ target_sources(sealnetnative
         ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/memorypoolhandle_wrapper.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/modulus_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/plaintext_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/publickey_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/relinkeys_wrapper.cpp

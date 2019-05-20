@@ -13,9 +13,9 @@ target_sources(sealexamples
     PRIVATE
         1_basic_bfv.cpp
         2_basic_encoders.cpp
-        3_basic_ckks.cpp
-        4_rotation.cpp
-        5_levels.cpp
+        3_levels.cpp
+        4_basic_ckks.cpp
+        5_rotation.cpp
         6_performance.cpp
 )
 

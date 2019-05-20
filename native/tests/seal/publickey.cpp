@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "seal/publickey.h"
 #include "seal/context.h"
-#include "seal/coeffmodulus.h"
+#include "seal/modulus.h"
 #include "seal/keygenerator.h"
 
 using namespace seal;
