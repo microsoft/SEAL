@@ -19,13 +19,15 @@ int main()
         cout << "| The following examples should be executed while reading |" << endl;
         cout << "| comments in associated files in native/examples/.       |" << endl;
         cout << "+---------------------------------------------------------+" << endl;
-        cout << endl << "SEAL Examples:" << endl << endl;
-        cout << " 1. Basic BFV" << setw(30) << ": 1_basic_bfv.cpp" << endl;
-        cout << " 2. Basic Encoders" << setw(30) << ": 2_basic_encoders.cpp" << endl;
-        cout << " 3. Levels" << setw(30) << ": 3_levels.cpp" << endl;
-        cout << " 4. Basic CKKS" << setw(30) << ": 4_basic_ckks.cpp" << endl;
-        cout << " 5. Rotation" << setw(30) << ": 5_rotation.cpp" << endl;
-        cout << " 6. Performance Test" << setw(30) << ": 6_performance.cpp" << endl;
+        cout << endl;
+        cout << left;
+        cout << setw(25) << " Example:" << setw(25) << "Source file:" << endl << endl;
+        cout << setw(25) << " 1. Basic BFV" << setw(25) << "1_basic_bfv.cpp" << endl;
+        cout << setw(25) << " 2. Basic Encoders" << setw(25) << "2_basic_encoders.cpp" << endl;
+        cout << setw(25) << " 3. Levels" << setw(25) << "3_levels.cpp" << endl;
+        cout << setw(25) << " 4. Basic CKKS" << setw(25) << "4_basic_ckks.cpp" << endl;
+        cout << setw(25) << " 5. Rotation" << setw(25) << "5_rotation.cpp" << endl;
+        cout << setw(25) << " 6. Performance Test" << setw(25) << "6_performance.cpp" << endl;
         cout << " 0. Exit" << endl;
 
         /*
