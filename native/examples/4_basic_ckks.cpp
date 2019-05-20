@@ -65,48 +65,23 @@ void example_basic_ckks()
             largest of the other primes;
         (3) Choose the intermediate primes to be close to each other.
 
-    Microsoft SEAL provides a method to generate prime numbers of the right form,
-    given a bit-size and a desired poly_modulus_degree. Here we generate two
-    60-bit primes.
+    We use CoeffModulus::Custom to generate primes of the appropriate size. Note
+    that our coeff_modulus is 200 bits total, which is below the bound for our
+    poly_modulus_degree: CoeffModulus::MaxBitCount(8192) returns 218.
     */
     size_t poly_modulus_degree = 8192;
-    vector<SmallModulus> primes = CoeffModulus::Custom(
-        poly_modulus_degree, { 60, 40, 40, 60 });
-
-    /*
-    We choose the initial scale to be 2.0^40. This gives us 20 bits of precision
-    before the decimal point and enough (roughly 10-20 bits) precision after the
-    decimal point.
-    */
-    double scale = pow(2.0, 40);
-
-    /*
-    We choose the remaining primes for rescaling and stablizing scales. Since the
-    polynomial has degree 3, it has a multiplicative depth of 2. Based on the
-    number of multiplicative levels (2), we need at least two primes. Based on the
-    size of the initial scale, we choose each prime to be 40 bits. The sizes of
-    the primes have no effect on performance, but the number of primes does.
-    */
-    //vector<SmallModulus> primes_40 =
-    //    SmallModulus::GetPrimes(40, 2, poly_modulus_degree);
-    //primes.insert(primes.begin() + 1, primes_40.begin(), primes_40.end());
-
-    /*
-    After all, we have 60 * 2 + 40 * 2 = 200 bits coefficient modulus. We choose
-    poly_modulus_degree as 8192 for 128 bits of security in the Security
-    Standard Draft available at http://HomomorphicEncryption.org.
-
-    If we choose a larger initial scale:
-        - [Pro] More precision after decimal point.
-        - [Con] Less precision before decimal point.
-        - [Con] A larger poly_modulus_degree, e.g., 50-bit scale requires
-                poly_modulus_degree = 16384.
-    If we choose a smaller initial scale:
-        - [Pro] More precision before decimal point.
-        - [Con] Less precision after decimal point.
-    */
-    parms.set_coeff_modulus(primes);
     parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Custom(
+        poly_modulus_degree, { 60, 40, 40, 60 }));
+
+    /*
+    We choose the initial scale to be 2^40. At the last level, this leaves us
+    60-40=20 bits of precision before the decimal point, and enough (roughly
+    10-20 bits) of precision after the decimal point. Since our intermediate
+    primes are 40 bits (in fact, they are very close to 2^40), we can achieve
+    scale stabilization as described above.
+    */
+    double scale = pow(2, 40);
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -137,9 +112,8 @@ void example_basic_ckks()
     cout << "Evaluating polynomial PI*x^3 + 0.4x + 1 ..." << endl;
 
     /*
-    We create plaintext elements for PI, 0.4, and 1, using an overload of
-    CKKSEncoder::encode(...) that encodes the given floating-point value to
-    every slot in the vector.
+    We create plaintexts for PI, 0.4, and 1 using an overload of CKKSEncoder::encode
+    that encodes the given floating-point value to every slot in the vector.
     */
     Plaintext plain_coeff3;
     encoder.encode(3.14159265, scale, plain_coeff3);
@@ -158,7 +132,8 @@ void example_basic_ckks()
     cout << "Done (encrypted x)" << endl;
 
     /*
-    To compute x^3 we first compute x^2, relinearize.
+    To compute x^3 we first compute x^2 and relinearize. However, the scale has
+    now grown to 2^80.
     */
     Ciphertext encrypted_x3;
     cout << "-- Computing x^2 and relinearizing: ";
@@ -169,34 +144,22 @@ void example_basic_ckks()
         << " bits" << endl;
 
     /*
-    The true power of CKKS is that it allows the scale to be switched down
-    (`rescaling') without changing the encrypted values.
-
-    Certainly one can scale floating-point numbers to integers, encrypt them,
-    keep track of the scale, and operate on them by just using BFV. The problem
-    with this approach is that the scale quickly grows larger than the size of
-    the coefficient modulus, preventing further computations.
-
-    After each square, the scale in ciphertext doubles. If we are to perform a
-    higher power of x, soon the scale will grow larger than coefficient modulus.
-    We performan `rescaling` to mitigate this issue.
+    Now rescale; in addition to a modulus switch, the scale is reduced down by
+    a factor equal to the prime that was switched away (40-bit prime). Hence, the
+    new scale should be close to 2^40. Note, however, that the scale is not equal
+    to 2^40: this is because the 40-bit prime is only close to 2^40.
     */
     evaluator.rescale_to_next_inplace(encrypted_x3);
-    cout << "\tScale of x^2  after rescale: " << log2(encrypted_x3.scale())
+    cout << "\tScale of x^2 after rescale: " << log2(encrypted_x3.scale())
         << " bits" << endl;
 
     /*
-    Now encrypted_x3 is at a different level (i.e., has different encryption
-    parameters) than encrypted_x1, which prevents us from multiplying them
-    together to compute x^3. We could simply switch encrypted_x1 down to the
-    next parameters in the modulus switching chain.
-
-    Since we still need to multiply the x^3 term with PI (plain_coeff3),
-    we instead compute PI*x first and multiply that with x^2 to obtain PI*x^3.
-    This product poses no problems since both inputs are at the same scale and
-    use the same encryption parameters. We rescale afterwards to change the
-    scale back to 40 bits, which will also drop the coefficient modulus down to
-    120 bits.
+    Now encrypted_x3 is at a different level than encrypted_x1, which prevents us
+    from multiplying them to compute x^3. We could simply switch encrypted_x1 to
+    the next parameters in the modulus switching chain. However, since we still
+    need to multiply the x^3 term with PI (plain_coeff3), we instead compute PI*x
+    first and multiply that with x^2 to obtain PI*x^3. To this end, we compute
+    PI*x and rescale it back from scale 2^80 to something close to 2^40.
     */
     cout << "-- Computing PI*x: ";
     Ciphertext encrypted_x1_coeff3;
@@ -205,13 +168,15 @@ void example_basic_ckks()
     cout << "\tScale of PI*x before rescale: " << log2(encrypted_x1_coeff3.scale())
         << " bits" << endl;
     evaluator.rescale_to_next_inplace(encrypted_x1_coeff3);
-    cout << "\tScale of PI*x  after rescale: " << log2(encrypted_x1_coeff3.scale())
+    cout << "\tScale of PI*x after rescale: " << log2(encrypted_x1_coeff3.scale())
         << " bits" << endl;
 
     /*
     Since encrypted_x3 and encrypted_x1_coeff3 have the same exact scale and use
     the same encryption parameters, we can multiply them together. We write the
-    result to encrypted_x3.
+    result to encrypted_x3, relinearize, and rescale. Note that again the scale
+    is something close to 2^40, but not exactly 2^40 due to yet another scaling
+    by a prime. We are down to the last level in the modulus switching chain.
     */
     cout << "-- Computing (PI*x)*x^2: ";
     evaluator.multiply_inplace(encrypted_x3, encrypted_x1_coeff3);
@@ -241,16 +206,9 @@ void example_basic_ckks()
     a serious problem: the encryption parameters used by all three terms are
     different due to modulus switching from rescaling.
 
-    Homomorphic addition and subtraction naturally require that the scales of
-    the inputs are the same, but also that the encryption parameters (parms_id)
-    are the same. Note that a scale or parms_id mismatch would make
-    Evaluator::add_plain(..) throw an exception.
-
-    Another difference to the BFV scheme is that in CKKS also plaintexts are
-    linked to specific parameter sets: they carry the corresponding parms_id.
-    An overload of CKKSEncoder::encode(...) allows the caller to specify which
-    parameter set in the modulus switching chain (identified by parms_id) should
-    be used to encode the plaintext. This is important as we will see later.
+    Encrypted addition and subtraction require that the scales of the inputs are
+    the same, and also that the encryption parameters (parms_id) match. If there
+    is a mismatch, Evaluator will throw an exception.
     */
     cout << endl << "Parameters used by all three terms are different:" << endl;
     cout << "\tModulus chain index for encrypted_x3: "
@@ -263,21 +221,21 @@ void example_basic_ckks()
 
     /*
     Let us carefully consider what the scales are at this point. We denote the
-    primes in coeff_modulus as q0, q1, q2, q3 (order matters here). q3 is not
-    used in rescaling. All fresh encodings start with a scale equal to 2.0^80.
-    After the computations above the scales in ciphertexts are:
+    primes in coeff_modulus as P_0, P_1, P_2, P_3, in this order. P_3 is used as
+    the special modulus and is not involved in rescalings. After the computations
+    above the scales in ciphertexts are:
 
-          - Product x^2 has scale 2.0^80;
-          - Product PI*x has scale 2.0^80;
-          - Rescaling both of these by q2 results in scale 2.0^80/q2;
-          - Product PI*x^3 has scale (2.0^80/q2)^2;
-        - Rescaling by q1 results in scale (2.0^80/q2)^2/q1;
-          - Product 0.4*x has scale 2.0^80;
-        - Rescaling q2 results in scale 2.0^80/q2;
-        - The contant term 1 has 2.0^40;
+        - Product x^2 has scale 2^80 and is at level 2;
+        - Product PI*x has scale 2^80/P_2 and is at level 2;
+        - We rescaled both down to scale 2^80/P2 and level 1;
+        - Product PI*x^3 has scale (2^80/P_2)^2;
+        - We rescaled it down to scale (2^80/P_2)^2/P_1 and level 0;
+        - Product 0.4*x has scale 2^80;
+        - We rescaled it down to scale 2^80/P_2 and level 1;
+        - The contant term 1 has scale 2^40 and is at level 2.
 
-    Although the scales of all three terms are approximately 2.0^40, their exact
-    values are different.
+    Although the scales of all three terms are approximately 2^40, their exact
+    values are different, hence they cannot be added together.
     */
     cout << endl << "The exact scales of all three terms are different:" << endl;
     ios old_fmt(nullptr);
@@ -290,36 +248,34 @@ void example_basic_ckks()
     cout.copyfmt(old_fmt);
 
     /*
-    There are many ways to fix this problem about scales. Since q2 and q1 are
-    really close to 2.0^40, we can simply "lie" to Microsoft SEAL and set the
-    scales to be the same. For example, changing the scale of PI*x^3 to 2.0^40
-    simply means that we scale the value of PI*x^3 by 2.0^120/q2/q2/q1 which is
-    very close to 1. This should not result in any noticeable error.
+    There are many ways to fix this problem. Since P_2 and P_1 are really close
+    to 2^40, we can simply "lie" to Microsoft SEAL and set the scales to be the
+    same. For example, changing the scale of PI*x^3 to 2^40 simply means that we
+    scale the value of PI*x^3 by 2^120/(P_2^2*P_1), which is very close to 1.
+    This should not result in any noticeable error.
 
-    Another option would be to encode 1 with scale 2.0^80/q2, perform a
-    multiply_plain with 0.4*x, and finally rescale. In this case we would
-    additionally make sure to encode 1 with appropriate encryption parameters
-    (parms_id).
+    Another option would be to encode 1 with scale 2^80/P_2, do a multiply_plain
+    with 0.4*x, and finally rescale. In this case we would need to additionally
+    make sure to encode 1 with appropriate encryption parameters (parms_id).
 
     In this example we will use the first (simplest) approach and simply change
-    the scale of PI*x^3 and 0.4*x to 2.0^40.
+    the scale of PI*x^3 and 0.4*x to 2^40.
     */
-    cout << "-- Matching scales: ";
-    encrypted_x3.scale() = plain_coeff0.scale();
-    encrypted_x1.scale() = plain_coeff0.scale();
-    cout << "Done (2.0^40)" << endl;
+    cout << "-- Normalizing scales: ";
+    encrypted_x3.scale() = pow(2.0, 40);
+    encrypted_x1.scale() = pow(2.0, 40);
+    cout << "Done (2^40)" << endl;
 
     /*
     We still have a problem with mismatching encryption parameters. This is easy
     to fix by using traditional modulus switching (no rescaling). CKKS supports
-    modulus switching just like the BFV scheme. We can switch away parts of the
-    coefficient modulus. Note that we use here the
-    Evaluator::mod_switch_to_inplace(...) function to switch to encryption
-    parameters down the chain with a specific parms_id.
+    modulus switching just like the BFV scheme, allowing us to switch away parts
+    of the coefficient modulus when it is simply not needed.
     */
-    cout << "-- Matching parms_id: ";
-    evaluator.mod_switch_to_inplace(encrypted_x1, encrypted_x3.parms_id());
-    evaluator.mod_switch_to_inplace(plain_coeff0, encrypted_x3.parms_id());
+    cout << "-- Normalizing encryption parameters: ";
+    parms_id_type last_parms_id = encrypted_x3.parms_id();
+    evaluator.mod_switch_to_inplace(encrypted_x1, last_parms_id);
+    evaluator.mod_switch_to_inplace(plain_coeff0, last_parms_id);
     cout << "Done" << endl;
 
     /*
@@ -355,12 +311,8 @@ void example_basic_ckks()
     print_vector(true_result, 3, 7);
 
     /*
-    We can also rotate an encrypted vector (see example_rotation_ckks).
-
-    We did not show any computations on complex numbers in these examples, but
+    While we did not show any computations on complex numbers in these examples,
     the CKKSEncoder would allow us to have done that just as easily. Additions
-    and multiplications behave just as one would expect. It is also possible
-    to complex conjugate the values in a ciphertext by using the functions
-    Evaluator::complex_conjugate[_inplace](...).
+    and multiplications of complex numbers behave just as one would expect.
     */
 }

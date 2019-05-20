@@ -572,20 +572,23 @@ void example_bfv_performance_default()
     print_example_banner("BFV Performance Test with Degrees: 4096, 8192, and 16384");
 
     EncryptionParameters parms(scheme_type::BFV);
-    parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
+    int poly_modulus_degree = 4096;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     parms.set_plain_modulus(786433);
     bfv_performance_test(SEALContext::Create(parms));
 
     cout << endl;
-    parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(8192));
+    poly_modulus_degree = 8192;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     parms.set_plain_modulus(786433);
     bfv_performance_test(SEALContext::Create(parms));
 
     cout << endl;
-    parms.set_poly_modulus_degree(16384);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(16384));
+    poly_modulus_degree = 16384;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     parms.set_plain_modulus(786433);
     bfv_performance_test(SEALContext::Create(parms));
 
@@ -593,37 +596,39 @@ void example_bfv_performance_default()
     Comment out the following to run the biggest example.
     */
     // cout << endl;
-    // parms.set_poly_modulus_degree(32768);
-    // parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(32768));
+    // poly_modulus_degree = 32768;
+    // parms.set_poly_modulus_degree(poly_modulus_degree);
+    // parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     // parms.set_plain_modulus(786433);
     // bfv_performance_test(SEALContext::Create(parms));
 }
 
 void example_bfv_performance_custom()
 {
-    int degree = 0;
-    cout << endl << "Set ring degree (1024, 2048, 4096, 8192, 16384, or 32768): ";
-    if (!(cin >> degree))
+    int poly_modulus_degree = 0;
+    cout << endl << "Set poly_modulus_degree (1024, 2048, 4096, 8192, 16384, or 32768): ";
+    if (!(cin >> poly_modulus_degree))
     {
         cout << "Invalid option." << endl;
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         return;
     }
-    if (degree < 1024 || degree > 32768 || (degree & (degree - 1)) != 0)
+    if (poly_modulus_degree < 1024 || poly_modulus_degree > 32768 ||
+        (poly_modulus_degree & (poly_modulus_degree - 1)) != 0)
     {
         cout << "Invalid option." << endl;
         return;
     }
 
     string banner = "BFV Performance Test with Degrees: ";
-    banner += to_string(degree);
+    banner += to_string(poly_modulus_degree);
     print_example_banner(banner);
 
     EncryptionParameters parms(scheme_type::BFV);
-    parms.set_poly_modulus_degree(degree);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(degree));
-    if (degree == 1024)
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    if (poly_modulus_degree == 1024)
     {
         parms.set_plain_modulus(12289);
     }
@@ -639,56 +644,64 @@ void example_ckks_performance_default()
     print_example_banner("CKKS Performance Test with Degrees: 4096, 8192, and 16384");
 
     EncryptionParameters parms(scheme_type::CKKS);
-    parms.set_poly_modulus_degree(4096);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(4096));
+    int poly_modulus_degree = 4096;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
 
     cout << endl;
-    parms.set_poly_modulus_degree(8192);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(8192));
+    poly_modulus_degree = 8192;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
 
     cout << endl;
-    parms.set_poly_modulus_degree(16384);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(16384));
+    poly_modulus_degree = 16384;
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
 
     /*
     Comment out the following to run the biggest example.
     */
     // cout << endl;
-    // parms.set_poly_modulus_degree(32768);
-    // parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(32768));
+    // poly_modulus_degree = 32768;
+    // parms.set_poly_modulus_degree(poly_modulus_degree);
+    // parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     // ckks_performance_test(SEALContext::Create(parms));
 }
 
 void example_ckks_performance_custom()
 {
-    int degree = 0;
+    int poly_modulus_degree = 0;
     cout << endl << "Set ring degree (1024, 2048, 4096, 8192, 16384, or 32768): ";
-    if (!(cin >> degree))
+    if (!(cin >> poly_modulus_degree))
     {
         cout << "Invalid option." << endl;
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         return;
     }
-    if (degree < 1024 || degree > 32768 || (degree & (degree - 1)) != 0)
+    if (poly_modulus_degree < 1024 || poly_modulus_degree > 32768 ||
+        (poly_modulus_degree & (poly_modulus_degree - 1)) != 0)
     {
         cout << "Invalid option." << endl;
         return;
     }
 
     string banner = "CKKS Performance Test with Degrees: ";
-    banner += to_string(degree);
+    banner += to_string(poly_modulus_degree);
     print_example_banner(banner);
 
     EncryptionParameters parms(scheme_type::CKKS);
-    parms.set_poly_modulus_degree(degree);
-    parms.set_coeff_modulus(DefaultParams::coeff_modulus_128(degree));
+    parms.set_poly_modulus_degree(poly_modulus_degree);
+    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
 }
 
+/*
+Prints a sub-menu to select the performance test.
+*/
 void example_performance_test()
 {
     print_example_banner("Example: Performance Test");

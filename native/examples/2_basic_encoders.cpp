@@ -27,18 +27,6 @@ In these examples we will discuss other ways of laying out data into plaintext
 elements (encoding) that allow more computations without data type overflow, and
 can allow the full plaintext polynomial to be utilized.
 */
-void example_basic_encoders()
-{
-    print_example_banner("Example: Basic Encoders");
-
-    /*
-    Run all encoder examples.
-    */
-    example_integer_encoder();
-    example_batch_encoder();
-    example_ckks_encoder();
-}
-
 void example_integer_encoder()
 {
     print_example_banner("Integer Encoder");
@@ -189,10 +177,10 @@ void example_batch_encoder()
     /*
     To enable batching, we need to set the plain_modulus to be a prime number
     congruent to 1 modulo 2*poly_modulus_degree. Microsoft SEAL provides a helper
-    method for finding such a prime. In this example we create a 16-bit prime
+    method for finding such a prime. In this example we create a 20-bit prime
     that supports batching.
     */
-    parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 16));
+    parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 20));
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -359,7 +347,7 @@ void example_ckks_encoder()
         (1) CKKS does not use the plain_modulus encryption parameter;
         (2) Selecting the coeff_modulus in a specific way can be very important
             when using the CKKS scheme. We will explain this further in the file
-            `basic_ckks.cpp'. In this example we use CoeffModulus::Default(...).
+            `basic_ckks.cpp'. In this example we use CoeffModulus::Default.
     */
     EncryptionParameters parms(scheme_type::CKKS);
 
@@ -489,4 +477,16 @@ void example_ckks_encoder()
     flexible. We will discuss it in great detail in `4_basic_ckks.cpp' and later
     in `5_levels.cpp'.
     */
+}
+
+void example_basic_encoders()
+{
+    print_example_banner("Example: Basic Encoders");
+
+    /*
+    Run all encoder examples.
+    */
+    example_integer_encoder();
+    example_batch_encoder();
+    example_ckks_encoder();
 }

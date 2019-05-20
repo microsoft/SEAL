@@ -15,17 +15,17 @@ int main()
     while (true)
     {
         cout << endl;
-        cout << "***********************************************************" << endl;
-        cout << "* The following examples should be executed while reading *" << endl;
-        cout << "* comments in associated files in `natice/examples/`.     *" << endl;
-        cout << "***********************************************************" << endl;
+        cout << "+---------------------------------------------------------+" << endl;
+        cout << "| The following examples should be executed while reading |" << endl;
+        cout << "| comments in associated files in native/examples/.       |" << endl;
+        cout << "+---------------------------------------------------------+" << endl;
         cout << endl << "SEAL Examples:" << endl << endl;
-        cout << " 1. Basic BFV (see `1_basic_bfv.cpp`)" << endl;
-        cout << " 2. Basic Encoders (see `2_basic_encoders.cpp`)" << endl;
-        cout << " 3. Levels (see `3_levels.cpp`)" << endl;
-        cout << " 4. Basic CKKS (see `4_basic_ckks.cpp`)" << endl;
-        cout << " 5. Rotation (see `5_rotation.cpp`)" << endl;
-        cout << " 6. Performance Test" << endl;
+        cout << " 1. Basic BFV" << setw(30) << ": 1_basic_bfv.cpp" << endl;
+        cout << " 2. Basic Encoders" << setw(30) << ": 2_basic_encoders.cpp" << endl;
+        cout << " 3. Levels" << setw(30) << ": 3_levels.cpp" << endl;
+        cout << " 4. Basic CKKS" << setw(30) << ": 4_basic_ckks.cpp" << endl;
+        cout << " 5. Rotation" << setw(30) << ": 5_rotation.cpp" << endl;
+        cout << " 6. Performance Test" << setw(30) << ": 6_performance.cpp" << endl;
         cout << " 0. Exit" << endl;
 
         /*
