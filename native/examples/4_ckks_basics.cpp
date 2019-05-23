@@ -6,9 +6,9 @@
 using namespace std;
 using namespace seal;
 
-void example_basic_ckks()
+void example_ckks_basics()
 {
-    print_example_banner("Example: Basic CKKS");
+    print_example_banner("Example: CKKS Basics");
 
     /*
     In this example we demonstrate evaluating a polynomial function
@@ -24,7 +24,7 @@ void example_basic_ckks()
     EncryptionParameters parms(scheme_type::CKKS);
 
     /*
-    We saw in `2_basic_encoders.cpp' that multiplication in CKKS causes scales
+    We saw in `2_encoders.cpp' that multiplication in CKKS causes scales
     in ciphertexts to grow. The scale of any ciphertext must not get too close
     to the total size of coeff_modulus, or else the ciphertext simply runs out of
     room to store the scaled-up plaintext. The CKKS scheme provides a `rescale'

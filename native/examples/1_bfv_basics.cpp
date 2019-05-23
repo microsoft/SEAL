@@ -6,9 +6,9 @@
 using namespace std;
 using namespace seal;
 
-void example_basic_bfv()
+void example_bfv_basics()
 {
-    print_example_banner("Example: Basic BFV");
+    print_example_banner("Example: BFV Basics");
 
     /*
     In this example, we demonstrate performing simple computations (a polynomial

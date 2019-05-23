@@ -16,11 +16,11 @@
 #include <limits>
 #include "seal/seal.h"
 
-void example_basic_bfv();
+void example_bfv_basics();
 
-void example_basic_encoders();
+void example_encoders();
 
-void example_basic_ckks();
+void example_ckks_basics();
 
 void example_rotation();
 
@@ -188,7 +188,7 @@ inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
     std::cout << "    [";
     for (std::size_t i = 0; i < print_size; i++)
     {
-        std::cout << std::setw(3) << matrix[i] << ",";
+        std::cout << std::setw(3) << std::right << matrix[i] << ",";
     }
     std::cout << std::setw(3) << " ...,";
     for (std::size_t i = row_size - print_size; i < row_size; i++)

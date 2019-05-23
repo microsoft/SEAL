@@ -50,7 +50,7 @@ void example_levels()
     /*
     In this example we use a custom coeff_modulus, consisting of 5 primes of
     sizes 50, 30, 30, 50, and 50 bits. Note that this is still OK according to
-    the explanation in `1_basic_bfv.cpp'. Indeed,
+    the explanation in `1_bfv_basics.cpp'. Indeed,
 
         CoeffModulus::MaxBitCount(poly_modulus_degree)
 

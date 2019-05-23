@@ -22,10 +22,10 @@ int main()
         cout << endl;
         cout << left;
         cout << setw(25) << " Example:" << setw(25) << "Source file:" << endl << endl;
-        cout << setw(25) << " 1. Basic BFV" << setw(25) << "1_basic_bfv.cpp" << endl;
-        cout << setw(25) << " 2. Basic Encoders" << setw(25) << "2_basic_encoders.cpp" << endl;
+        cout << setw(25) << " 1. BFV Basics" << setw(25) << "1_bfv_basics.cpp" << endl;
+        cout << setw(25) << " 2. Encoders" << setw(25) << "2_encoders.cpp" << endl;
         cout << setw(25) << " 3. Levels" << setw(25) << "3_levels.cpp" << endl;
-        cout << setw(25) << " 4. Basic CKKS" << setw(25) << "4_basic_ckks.cpp" << endl;
+        cout << setw(25) << " 4. CKKS Basics" << setw(25) << "4_ckks_basics.cpp" << endl;
         cout << setw(25) << " 5. Rotation" << setw(25) << "5_rotation.cpp" << endl;
         cout << setw(25) << " 6. Performance Test" << setw(25) << "6_performance.cpp" << endl;
         cout << " 0. Exit" << endl;
@@ -52,15 +52,15 @@ int main()
         switch (selection)
         {
         case 1:
-            example_basic_bfv();
+            example_bfv_basics();
             break;
 
         case 2:
-            example_basic_encoders();
+            example_encoders();
             break;
 
         case 3:
-            example_basic_ckks();
+            example_ckks_basics();
             break;
 
         case 4:

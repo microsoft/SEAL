@@ -11,10 +11,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 add_executable(sealexamples examples.cpp)
 target_sources(sealexamples
     PRIVATE
-        1_basic_bfv.cpp
-        2_basic_encoders.cpp
+        1_bfv_basics.cpp
+        2_encoders.cpp
         3_levels.cpp
-        4_basic_ckks.cpp
+        4_ckks_basics.cpp
         5_rotation.cpp
         6_performance.cpp
 )

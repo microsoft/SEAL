@@ -7,7 +7,7 @@ using namespace std;
 using namespace seal;
 
 /*
-In `1_basic_bfv.cpp' we showed how to perform a very simple computation using the
+In `1_bfv_basics.cpp' we showed how to perform a very simple computation using the
 BFV scheme. The computation was performed modulo the plain_modulus parameter, and
 utilized only one coefficient from a BFV plaintext polynomial. This approach has
 two notable problems:
@@ -347,7 +347,7 @@ void example_ckks_encoder()
         (1) CKKS does not use the plain_modulus encryption parameter;
         (2) Selecting the coeff_modulus in a specific way can be very important
             when using the CKKS scheme. We will explain this further in the file
-            `basic_ckks.cpp'. In this example we use CoeffModulus::Default.
+            `ckks_basics.cpp'. In this example we use CoeffModulus::Default.
     */
     EncryptionParameters parms(scheme_type::CKKS);
 
@@ -474,14 +474,14 @@ void example_ckks_encoder()
     /*
     The CKKS scheme allows the scale to be reduced between encrypted computations.
     This is a fundamental and critical feature that makes CKKS very powerful and
-    flexible. We will discuss it in great detail in `4_basic_ckks.cpp' and later
+    flexible. We will discuss it in great detail in `4_ckks_basics.cpp' and later
     in `5_levels.cpp'.
     */
 }
 
-void example_basic_encoders()
+void example_encoders()
 {
-    print_example_banner("Example: Basic Encoders");
+    print_example_banner("Example: Encoders");
 
     /*
     Run all encoder examples.
