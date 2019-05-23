@@ -14,21 +14,19 @@ int main()
 
     while (true)
     {
-        cout << endl;
         cout << "+---------------------------------------------------------+" << endl;
         cout << "| The following examples should be executed while reading |" << endl;
         cout << "| comments in associated files in native/examples/.       |" << endl;
         cout << "+---------------------------------------------------------+" << endl;
-        cout << endl;
-        cout << left;
-        cout << setw(25) << " Example:" << setw(25) << "Source file:" << endl << endl;
-        cout << setw(25) << " 1. BFV Basics" << setw(25) << "1_bfv_basics.cpp" << endl;
-        cout << setw(25) << " 2. Encoders" << setw(25) << "2_encoders.cpp" << endl;
-        cout << setw(25) << " 3. Levels" << setw(25) << "3_levels.cpp" << endl;
-        cout << setw(25) << " 4. CKKS Basics" << setw(25) << "4_ckks_basics.cpp" << endl;
-        cout << setw(25) << " 5. Rotation" << setw(25) << "5_rotation.cpp" << endl;
-        cout << setw(25) << " 6. Performance Test" << setw(25) << "6_performance.cpp" << endl;
-        cout << " 0. Exit" << endl;
+        cout << "|          Examples          |        Source Files        |" << endl;
+        cout << "+----------------------------+----------------------------+" << endl;
+        cout << "| 1. BFV Basics              | 1_bfv_basics.cpp           |" << endl;
+        cout << "| 2. Encoders                | 2_encoders.cpp             |" << endl;
+        cout << "| 3. Levels                  | 3_levels.cpp               |" << endl;
+        cout << "| 4. CKKS Basics             | 4_ckks_basics.cpp          |" << endl;
+        cout << "| 5. Rotation                | 5_rotation.cpp             |" << endl;
+        cout << "| 6. Performance Test        | 6_performance.cpp          |" << endl;
+        cout << "+----------------------------+----------------------------+" << endl;
 
         /*
         Print how much memory we have allocated from the current memory pool.
@@ -36,18 +34,44 @@ int main()
         MemoryManager class can be used to change it. Most users should have
         little or no reason to touch the memory allocation system.
         */
-        cout << "\nTotal memory allocated from the current memory pool: "
-            << (MemoryManager::GetPool().alloc_byte_count() >> 20) << " MB" << endl;
+        cout << endl;
+        size_t mega_bytes = MemoryManager::GetPool().alloc_byte_count() >> 20;
+        if (mega_bytes < 1000)
+        {
+            cout << "[ " << setw(7) << right << mega_bytes;
+        }
+        else if (mega_bytes < 1000000)
+        {
+            cout << "[ " << setw(3) << right << mega_bytes / 1000;
+            cout << "," << setw(3) << right << mega_bytes % 1000;
+        }
+
+        cout << " MB]" << " Total allocation from the current memory pool" << endl;
 
         int selection = 0;
-        cout << endl << "Run example: ";
-        if (!(cin >> selection))
+        bool invalid = true;
+        do
         {
-            cout << "Invalid option." << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            continue;
-        }
+            cout << endl << "> Run example (1 ~ 6) or exit (0): ";
+            if (!(cin >> selection))
+            {
+                invalid = false;
+            }
+            else if (selection < 0 || selection > 6)
+            {
+                invalid = false;
+            }
+            else
+            {
+                invalid = true;
+            }
+            if (!invalid)
+            {
+                cout << "  [Beep~~] Invalid option: type 0 ~ 6" << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+        } while (!invalid);
 
         switch (selection)
         {
@@ -77,9 +101,6 @@ int main()
 
         case 0:
             return 0;
-
-        default:
-            cout << "Invalid option." << endl;
         }
     }
 

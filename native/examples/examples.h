@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <vector>
 #include <string>
@@ -107,7 +108,7 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     */
     if (context_data.parms().scheme() == seal::scheme_type::BFV)
     {
-        std::cout << "|   plain_modulus: " << context_data.
+        std::cout << "\\   plain_modulus: " << context_data.
             parms().plain_modulus().value() << std::endl;
     }
 
