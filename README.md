@@ -1,22 +1,14 @@
 # Microsoft SEAL
 
-Microsoft SEAL is an easy-to-use homomorphic encryption library developed by researchers in
-the Cryptography Research group at Microsoft Research. Microsoft SEAL is written in modern
-standard C++ and has no external dependencies, making it easy to compile and run in many
-different environments.
+Microsoft SEAL is an easy-to-use open-source homomorphic encryption library developed by researchers in the Cryptography Research group at Microsoft Research. Microsoft SEAL is written in modern standard C++ and has no external dependencies, making it easy to compile and run in many different environments.
 
 For more information about the Microsoft SEAL project, see [http://sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-## License
-
-Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
-
 # Contents
 - [Introduction](#introduction)
+  - [Core Concepts](#core-concepts)
   - [Homomorphic Encryption](#homomorphic-encryption)
-  - [Programming with Microsoft SEAL](#programming-with-microsoft-seal)
-  - [BFV and CKKS](#bfv-and-ckks)
-  - [What is Feasible](#what-is-feasible)
+  - [Microsoft SEAL](#microsoft-seal-1)
 - [Installing Microsoft SEAL](#installing-microsoft-seal)
   - [Windows](#windows)
   - [Linux and macOS](#linux-and-macos)
@@ -26,27 +18,33 @@ Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
 - [Examples](#examples-4)
 - [Contributing](#contributing)
 - [Citing Microsoft SEAL](#citing-microsoft-seal)
+- [License](#license)
 
 # Introduction
+## Core Concepts
+Most encryption schemes consist of three functionalities: key generation, encryption, and decryption. Symmetric-key encryption schemes use the same secret key both for encryption and decryption; public-key encryption schemes use a separate public key for encryption, and a secret key for decryption. Therefore, public-key encryption schemes allow anyone who knows the public key to encrypt data, but only those who know the secret key can decrypt and read the data. Symmetric-key encryption can be used for efficiently encrypting very large amounts of data, and enables secure outsourced cloud storage. Public-key encryption is a fundamental concept that enables secure online communication today, but is typically much less efficient than symmetric-key encryption.
+
+While traditional symmetric- and public-key encryption can be used for secure storage and communication, any outsourced computation will necessarily require such encryption layers to be removed before computation can take place. Therefore, cloud services providing outsourced computation capabilities must have access to the secret keys, and implement access policies to prevent unauthorized employees from getting access to these keys.
+
 ## Homomorphic Encryption
-Homomorphic encryption refers to encryption schemes that allow computations to be done on encrypted data, without requiring a secret key. The results of such encrypted computations remain encrypted, and can be only decrypted with the secret key. Multiple homomorphic encryption schemes with different capabilities and trade-offs have been invented over the past decade.
+Homomorphic encryption refers to encryption schemes that allow the cloud to compute directly on the encrypted data, without requiring the data to be decrypted first. The results of such encrypted computations remain encrypted, and can be only decrypted with the secret key (by the data owner). Multiple homomorphic encryption schemes with different capabilities and trade-offs have been invented over the past decade; most of these are public-key encryption schemes, although the public-key functionality may not always be needed.
 
-There are multiple scenarios where homomorphic encryption can make sense, such as encrypted cloud storage with outsourced computation, where a cloud service wishes to both store encrypted data and perform simple computations on it, without requiring the data to be decrypted first. However, the cloud service will only find an encrypted result, and only the data owner who hold the secret key can read the result.
+Homomorphic encryption is not a generic technology: only some computations on encrypted data are possible. It also comes with a substantial performance overhead, so computations that are already very costly to perform on unencrypted data are likely to be infeasible on encrypted data. Moreover, data encrypted with homomorphic encryption is many times larger than unencrypted data, so it may not make sense to encrypt, e.g., entire large databases with this technology. Instead, meaningful use-cases are in scenarios where strict privacy requirements prohibit unencrypted cloud computation altogether, but the computations themselves are fairly lightweight. 
 
-Homomorphic encryption is not a generic technology, and has a substantial performance overhead. Computations that are already heavy to perform on unencrypted data are likely to be infeasible on encrypted data. Moreover, data encrypted with homomorphic encryption is many times larger than unencrypted data, so one would never encrypt, e.g., entire large databases with homomorphic encryption. Instead, meaningful use-cases are in scenarios where strict privacy requirements prohibit unencrypted cloud computation altogether, but the computations themselves are fairly lightweight. For scenarios involving multiple private data owners homomorphic encryption is probably not the right choice. Also, homomorphic encryption cannot allow a cloud service to draw insights from encrypted customer data: all results will remain encrypted and can only be decrypted with the secret keys of the customers.
+Typically, homomorphic encryption schemes have a single secret key which is held by the data owner. For scenarios where multiple different private data owners wish to engage in collaborative computation homomorphic encryption is probably not a reasonable solution.
 
-## Programming with Microsoft SEAL
-Microsoft SEAL allows (preferably low-degree) polynomials to be evaluated on encrypted integers or real numbers. Non-polynomial operations such as comparison, sorting, or regular expressions, are not feasible to evaluate on encrypted data using Microsoft SEAL.
+Homomorphic encryption cannot be used to enable data scientist to circumvent GDPR. For example, there is no way for a cloud service to use homomorphic encryption to draw insights from encrypted customer data. Instead, results of encrypted computations remain encrypted and can only be decrypted by the owner of the data, e.g., a cloud service customer.
 
-It is not always easy or straightfoward to translate an unencrypted computation into a computation on encrypted data, for example, it is not possible to branch on encrypted data. The library can have a steep learning curve and may require learning many homomorphic encryption specific concepts, even though in the end the API is not too complicated. Even if a user is able to program a specific computation using Microsoft SEAL, the difference between efficient and inefficient implementations can be several orders of magnitude, and it can be hard for a new user to know if their computation is inherently challenging to perform using Microsoft SEAL, or if the implementation is simply not good.
+## Microsoft SEAL
+Microsoft SEAL is a homomorphic encryption library that allows additions and multiplications to be performed on encrypted integers or real numbers. Other operations, such as encrypted comparison, sorting, or regular expressions, are in most cases not feasible to evaluate on encrypted data using this technology.
 
-## BFV and CKKS
+It is not always easy or straightfoward to translate an unencrypted computation into a computation on encrypted data, for example, it is not possible to branch on encrypted data. Microsoft SEAL itself has a steep learning curve and requires the user to understand many homomorphic encryption specific concepts, even though in the end the API is not too complicated. Even if a user is able to program and run a specific computation using Microsoft SEAL, the difference between efficient and inefficient implementations can be several orders of magnitude, and it can be hard for new users to know how to improve the performance of their computation.
+
 Microsoft SEAL comes with two different homomorphic encryption schemes with very different properties. The BFV scheme allows modular arithmetic to be performed on encrypted integers. The CKKS scheme allow additions and multiplications on encrypted real or complex numbers, but yields only approximate results.
 
 In applications such a summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances on encrypted locations, approximate computations are not an issue, and CKKS is going to be by far the best choice. For applications where exact values are necessary, the BFV scheme is the only choice.
 
-## What is Feasible
-Some encrypted computations can be done with Microsoft SEAL very efficiently, such as encrypted sums and averages. It is possible to evaluate some feed-forward neural networks on encrypted inputs, and we have even created a privacy-preserving [fitness tracker](https://github.com/Microsoft/SEAL-Demo) for Android that computes workout statistics on encrypted GPS data stored in the cloud, and performs simple workout classifications on encrypted data, without requiring all of the workout data to be stored on the phone. It is also possible to implement an efficient privacy-preserving key-value store where the serves does not learn which key is queried, or the value it sends back as the response.
+Some encrypted computations can be done with Microsoft SEAL very efficiently, such as encrypted sums and averages. It is possible to evaluate some feed-forward neural networks on encrypted inputs, and we have even created a privacy-preserving [fitness tracker](https://github.com/Microsoft/SEAL-Demo) for Android that computes workout statistics on encrypted GPS data stored in the cloud, and performs simple workout classifications on encrypted data, without requiring all of the workout data to be stored on the phone.
 
 # Installing Microsoft SEAL
 
@@ -402,3 +400,7 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
 	    note = {Microsoft Research, Redmond, WA.},
 	    key = {SEAL}
     }
+
+## License
+
+Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
