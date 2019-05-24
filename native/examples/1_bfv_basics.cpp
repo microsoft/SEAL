@@ -12,19 +12,7 @@ void example_bfv_basics()
 
     /*
     In this example, we demonstrate performing simple computations (a polynomial
-    evaluation) on encrypted integers. Microsoft SEAL implements two encryption
-    schemes:
-
-        (1) Brakerski/Fan-Vercauteren (BFV) scheme;
-        (2) Cheon-Kim-Kim-Song (CKKS) scheme.
-
-    We use the BFV scheme in this example as it is far easier to understand and
-    to use than CKKS. For more details on the basics of the BFV scheme, we refer
-    the reader to the original paper https://eprint.iacr.org/2012/144. To achieve
-    good performance, Microsoft SEAL implements the "FullRNS" optimization as
-    described in https://eprint.iacr.org/2016/510. This optimization is invisible
-    to the user and has no security implications. We will discuss the CKKS scheme
-    in later examples.
+    evaluation) on encrypted integers using the BFV encryption scheme.
 
     The first task is to set up an instance of the EncryptionParameters class.
     It is critical to understand how the different parameters behave, how they
@@ -34,17 +22,6 @@ void example_bfv_basics()
         - poly_modulus_degree (degree of polynomial modulus);
         - coeff_modulus ([ciphertext] coefficient modulus);
         - plain_modulus (plaintext modulus, only for the BFV scheme).
-
-    A fourth parameter -- noise_standard_deviation -- has a default value 3.20
-    and should not be necessary to modify unless the user has a specific reason
-    to do so and has an in-depth understanding of the security implications.
-
-    A fifth parameter -- random_generator -- can be set to use customized random
-    number generators. By default, Microsoft SEAL uses hardware-based AES in
-    counter mode for pseudo-randomness, with a random key generated using
-    std::random_device. If the AES-NI instruction set is not available, all
-    randomness is generated from std::random_device. Most users should have
-    little reason to change this behavior.
 
     The BFV scheme cannot perform arbitrary computations on encrypted data.
     Instead, each ciphertext has a specific quantity called the `invariant noise
