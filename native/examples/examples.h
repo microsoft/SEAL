@@ -21,11 +21,11 @@ void example_bfv_basics();
 
 void example_encoders();
 
+void example_levels();
+
 void example_ckks_basics();
 
 void example_rotation();
-
-void example_levels();
 
 void example_performance_test();
 
