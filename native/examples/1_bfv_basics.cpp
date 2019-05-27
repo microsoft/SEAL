@@ -69,14 +69,16 @@ void example_bfv_basics()
     computation capabilities. However, an upper bound for the total bit-length
     of the coeff_modulus is determined by the poly_modulus_degree, as follows:
 
-        poly_modulus_degree | max coeff_modulus bit-length
-        --------------------------------------------------------
-        1024                | 27
-        2048                | 54
-        4096                | 109
-        8192                | 218
-        16384               | 438
-        32768               | 881
+        +----------------------------------------------------+
+        | poly_modulus_degree | max coeff_modulus bit-length |
+        +---------------------+------------------------------+
+        | 1024                | 27                           |
+        | 2048                | 54                           |
+        | 4096                | 109                          |
+        | 8192                | 218                          |
+        | 16384               | 438                          |
+        | 32768               | 881                          |
+        +---------------------+------------------------------+
 
     These numbers can also be found in native/src/seal/util/hestdparms.h encoded
     in the function SEAL_HE_STD_PARMS_128_TC, and can also be obtained from the
