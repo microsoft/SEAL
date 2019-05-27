@@ -125,8 +125,11 @@ See `native/examples/CMakeLists.txt` for how to link Microsoft SEAL with your ow
 
 #### Unit tests
 
-To build the unit tests, make sure you have the Google Test library `libgtest-dev`
-installed. Then do:
+To build the unit tests you will need the [GoogleTest](https://github.com/google/googletest) framework, which is included in Microsoft SEAL as a git submodule. To download the GoogleTest source files, do:
+````
+git submodule update --init
+````
+This needs to be executed only one, and can be skipped if Microsoft SEAL was cloned with `git --recurse-submodules`. To build the tests, do:
 ````
 cd native/tests
 cmake .
@@ -165,8 +168,11 @@ See `native/examples/CMakeLists.txt` for how to link Microsoft SEAL with your ow
 
 #### Unit tests
 
-To build the unit tests, make sure you have the Google Test library `libgtest-dev`
-installed. Then do:
+To build the unit tests you will need the [GoogleTest](https://github.com/google/googletest) framework, which is included in Microsoft SEAL as a git submodule. To download the GoogleTest source files, do:
+````
+git submodule update --init
+````
+This needs to be executed only one, and can be skipped if Microsoft SEAL was cloned with `git --recurse-submodules`. Then do:
 ````
 cd native/tests
 cmake -DCMAKE_PREFIX_PATH=~/mylibs .
