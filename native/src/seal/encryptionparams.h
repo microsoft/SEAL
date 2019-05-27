@@ -409,8 +409,12 @@ namespace std
         std::size_t operator()(
             const seal::parms_id_type &parms_id) const
         {
-            return std::accumulate(parms_id.begin(), parms_id.end(), std::size_t(0),
-                [](std::size_t acc, std::uint64_t curr) { return acc ^ curr; });
+            std::uint64_t result = 17;
+            result = 31 * result + parms_id[0];
+            result = 31 * result + parms_id[1];
+            result = 31 * result + parms_id[2];
+            result = 31 * result + parms_id[3];
+            return static_cast<std::size_t>(result);
         }
     };
 }

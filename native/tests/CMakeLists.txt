@@ -17,14 +17,16 @@ if(SEAL_ENFORCE_HE_STD_SECURITY)
     message(FATAL_ERROR "Microsoft SEAL is configured with SEAL_ENFORCE_HE_STD_SECURITY which is incompatible with unit tests")
 endif()
 
-# Import Google target_link_libraries
-find_library(GTEST gtest)
-if(NOT GTEST)
-    message(FATAL_ERROR "Failed to find Google Test library required for unit tests")
-endif()
-
-# Link Microsoft SEAL
-target_link_libraries(sealtest SEAL::seal ${GTEST})
-
 # Add source files
 add_subdirectory(seal)
+
+# Only build GTest
+option(BUILD_GMOCK OFF)
+option(INSTALL_GTEST OFF)
+mark_as_advanced(BUILD_GMOCK INSTALL_GTEST)
+
+# Add GTest
+add_subdirectory(thirdparty/googletest)
+
+# Link Microsoft SEAL and GTest
+target_link_libraries(sealtest SEAL::seal gtest)
