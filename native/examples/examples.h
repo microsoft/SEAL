@@ -76,23 +76,16 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     default:
         throw std::invalid_argument("unsupported scheme");
     }
-
-    std::cout << "/ Encryption parameters:" << std::endl;
-    std::cout << "|   scheme: " << scheme_name << std::endl;
-    std::cout << "|   poly_modulus_degree: " <<
+    std::cout << "     /" << std::endl;
+    std::cout << "    | Encryption parameters:" << std::endl;
+    std::cout << "    |   scheme: " << scheme_name << std::endl;
+    std::cout << "    |   poly_modulus_degree: " <<
         context_data.parms().poly_modulus_degree() << std::endl;
 
     /*
     Print the size of the true (product) coefficient modulus.
     */
-    if (context_data.parms().scheme() == seal::scheme_type::BFV)
-    {
-        std::cout << "|   coeff_modulus size: ";
-    }
-    else
-    {
-        std::cout << "\\   coeff_modulus size: ";
-    }
+    std::cout << "    |   coeff_modulus size: ";
     std::cout << context_data.total_coeff_modulus_bit_count() << " (";
     auto coeff_modulus = context_data.parms().coeff_modulus();
     std::size_t coeff_mod_count = coeff_modulus.size();
@@ -108,11 +101,11 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     */
     if (context_data.parms().scheme() == seal::scheme_type::BFV)
     {
-        std::cout << "\\   plain_modulus: " << context_data.
+        std::cout << "    |   plain_modulus: " << context_data.
             parms().plain_modulus().value() << std::endl;
     }
 
-    std::cout << std::endl;
+    std::cout << "     \\" << std::endl;
 }
 
 /*
@@ -210,3 +203,14 @@ inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
     }
     std::cout << std::endl;
 };
+
+/*
+Helper function: Print line number.
+*/
+inline void print_line(int line_number)
+{
+//    std::cout << "=== Line " << std::setw(3) << line_number << ": " << s << " ===" << std::endl;
+    //std::cout << std::string(1, '#');
+    std::cout << "Line " << std::setw(3) << line_number << " --> ";
+    //std::cout << std::string(1, '==>') << " ";// << std::endl;
+}

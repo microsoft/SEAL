@@ -154,8 +154,12 @@ void example_bfv_basics()
     /*
     Print the parameters that we have chosen.
     */
+    print_line(__LINE__);
+    cout << "Set encryption parameters and print" << endl;
     print_parameters(context);
 
+    cout << endl;
+    cout << "~~~~~~ A naive way to calculate 2(x^2+1)(x+1)^2. ~~~~~~" << endl;
     /*
     The encryption schemes in Microsoft SEAL are public key encryption schemes.
     For users unfamiliar with this terminology, a public key encryption scheme
@@ -216,19 +220,19 @@ void example_bfv_basics()
     plaintext element we use a constructor that takes the desired polynomial as
     a string with coefficients represented as hexadecimal numbers.
     */
+    print_line(__LINE__);
     int x = 6;
     Plaintext plain_x(to_string(x));
-
-    cout << "-- Express x = " << x << " as a plaintext polynomial 0x"
-        << plain_x.to_string() << endl;
+    cout << "Express x = " + to_string(x) +
+        " as a plaintext polynomial 0x" + plain_x.to_string() + "." << endl;
 
     /*
     We then encrypt the plaintext, producing a ciphertext.
     */
+    print_line(__LINE__);
     Ciphertext encrypted_x;
-    cout << "-- Encrypting plain_x: ";
+    cout << "Encrypt plain_x to encrypted_x." << endl;
     encryptor.encrypt(plain_x, encrypted_x);
-    cout << "Done (encrypted_x)" << endl;
 
     /*
     In Microsoft SEAL, a valid ciphertext consists of two or more polynomials
@@ -237,12 +241,12 @@ void example_bfv_basics()
     and is given by Ciphertext::size(). A freshly encrypted ciphertext always
     has size 2.
     */
-    cout << "\tSize of freshly encrypted x: " << encrypted_x.size() << endl;
+    cout << "    + size of freshly encrypted x: " << encrypted_x.size() << endl;
 
     /*
     There is plenty of noise budget left in this freshly encrypted ciphertext.
     */
-    cout << "\tNoise budget in freshly encrypted x: "
+    cout << "    + noise budget in freshly encrypted x: "
         << decryptor.invariant_noise_budget(encrypted_x) << " bits" << endl;
 
     /*
@@ -250,9 +254,9 @@ void example_bfv_basics()
     demonstrate correctness of the encryption.
     */
     Plaintext decrypted_x;
-    cout << "   Decrypting encrypted_x: ";
+    cout << "    + decryption of encrypted_x: ";
     decryptor.decrypt(encrypted_x, decrypted_x);
-    cout << "Done (decrypted_x = 0x" << decrypted_x.to_string() << ")" << endl;
+    cout << "0x" << decrypted_x.to_string() << " ...... Correct." << endl;
 
     /*
     When using Microsoft SEAL, it is typically advantageous to compute in a way
@@ -272,12 +276,12 @@ void example_bfv_basics()
     can vary the plain_modulus parameter to see its effect on the rate of noise
     budget consumption.
     */
-    cout << "-- Computing x^2+1: ";
+    print_line(__LINE__);
+    cout << "Compute x_squared_plus_one (x^2+1)." << endl;
     Ciphertext x_squared_plus_one;
     evaluator.square(encrypted_x, x_squared_plus_one);
     Plaintext plain_one("1");
     evaluator.add_plain_inplace(x_squared_plus_one, plain_one);
-    cout << "Done" << endl;
 
     /*
     Encrypted multiplication results in the output ciphertext growing in size.
@@ -286,8 +290,8 @@ void example_bfv_basics()
     case we perform a squaring, and observe both size growth and noise budget
     consumption.
     */
-    cout << "\tSize of x^2+1: " << x_squared_plus_one.size() << endl;
-    cout << "\tNoise budget in x^2+1: "
+    cout << "    + size of x_squared_plus_one: " << x_squared_plus_one.size() << endl;
+    cout << "    + noise budget in x_squared_plus_one: "
         << decryptor.invariant_noise_budget(x_squared_plus_one) << " bits" << endl;
 
     /*
@@ -295,43 +299,45 @@ void example_bfv_basics()
     long as noise budget has not reached 0.
     */
     Plaintext decrypted_result;
-    cout << "   Decrypting x^2+1: ";
+    cout << "    + decryption of x_squared_plus_one: ";
     decryptor.decrypt(x_squared_plus_one, decrypted_result);
-    cout << "Done (x^2+1 = 0x" << decrypted_result.to_string() << ")" << endl;
+    cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
 
     /*
     Next, we compute (x + 1)^2.
     */
-    cout << "-- Computing (x+1)^2: ";
+    print_line(__LINE__);
+    cout << "Compute x_plus_one_squared ((x+1)^2)." << endl;
     Ciphertext x_plus_one_squared;
     evaluator.add_plain(encrypted_x, plain_one, x_plus_one_squared);
     evaluator.square_inplace(x_plus_one_squared);
-    cout << "Done" << endl;
-    cout << "\tSize of (x+1)^2: " << x_plus_one_squared.size() << endl;
-    cout << "\tNoise budget in (x+1)^2: "
+    cout << "    + size of x_plus_one_squared: " << x_plus_one_squared.size() << endl;
+    cout << "    + noise budget in x_plus_one_squared: "
         << decryptor.invariant_noise_budget(x_plus_one_squared)
         << " bits" << endl;
-    cout << "   Decrypting (x+1)^2: ";
+    cout << "    + decryption of x_plus_one_squared: ";
     decryptor.decrypt(x_plus_one_squared, decrypted_result);
-    cout << "Done ((x+1)^2 = 0x" << decrypted_result.to_string() << ")" << endl;
+    cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
 
     /*
     Finally, we multiply (x^2 + 1) * (x + 1)^2 * 2.
     */
-    cout << "-- Computing 2(x^2+1)(x+1)^2: ";
+    print_line(__LINE__);
+    cout << "Compute encrypted_result (2(x^2+1)(x+1)^2)." << endl;
     Ciphertext encrypted_result;
-    evaluator.multiply(x_squared_plus_one, x_plus_one_squared, encrypted_result);
     Plaintext plain_two("2");
-    evaluator.multiply_plain_inplace(encrypted_result, plain_two);
-    cout << "Done" << endl;
-    cout << "\tSize of 2(x^2+1)(x+1)^2: " << encrypted_result.size() << endl;
-    cout << "\tNoise budget in 2(x^2+1)(x+1)^2: "
+    evaluator.multiply_plain_inplace(x_squared_plus_one, plain_two);
+    evaluator.multiply(x_squared_plus_one, x_plus_one_squared, encrypted_result);
+    cout << "    + size of encrypted_result: " << encrypted_result.size() << endl;
+    cout << "    + noise budget in encrypted_result: "
         << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
-    cout << "NOTE: Decryption can be incorrect if noise budget is zero." << endl;
-    cout << endl;
 
+    cout << "NOTE: Decryption can be incorrect if noise budget is zero." << endl;
+
+    cout << endl;
+    cout << "~~~~~~ A better way to calculate 2(x^2+1)(x+1)^2. ~~~~~~" << endl;
     /*
-    Noise budget has reached 0, which means that decryption cannot be expected to
+    noise budget has reached 0, which means that decryption cannot be expected to
     give the correct result. This is because both ciphertexts x_squared_plus_one
     and x_plus_one_squared consist of 3 polynomials due to the previous squaring
     operations, and homomorphic operations on large ciphertexts consume much more
@@ -361,56 +367,53 @@ void example_bfv_basics()
     This function accepts optionally the number of relinearization keys to be
     generated.
     */
-    cout << "-- Generating relinearization keys: ";
+    print_line(__LINE__);
+    cout << "Generate relinearization keys." << endl;
     auto relin_keys = keygen.relin_keys();
-    cout << "Done" << endl;
 
     /*
     We now repeat the computation relinearizing after each multiplication.
     */
-    cout << "-- Computing x^2: ";
-    evaluator.square(encrypted_x, x_squared_plus_one);
-    cout << "Done" << endl;
-    cout << "\tSize of x^2: " << x_squared_plus_one.size() << endl;
-    cout << "-- Relinearizing x^2: ";
-    evaluator.relinearize_inplace(x_squared_plus_one, relin_keys);
-    cout << "Done" << endl;
-    cout << "\tSize of x^2 (after relinearization): "
-        << x_squared_plus_one.size() << endl;
-    cout << "-- Computing x^2+1: ";
-    evaluator.add_plain_inplace(x_squared_plus_one, plain_one);
-    cout << "Done" << endl;
-    cout << "\tNoise budget in x^2+1: "
+    print_line(__LINE__);
+    cout << "Compute and relinearize x_squared (x^2)," << endl;
+    cout << string(13, ' ') << "then compute x_squared_plus_one (x^2+1)" << endl;
+    Ciphertext x_squared;
+    evaluator.square(encrypted_x, x_squared);
+    cout << "    + size of x_squared: " << x_squared.size() << endl;
+    evaluator.relinearize_inplace(x_squared, relin_keys);
+    cout << "    + size of x_squared (after relinearization): "
+        << x_squared.size() << endl;
+    evaluator.add_plain(x_squared, plain_one, x_squared_plus_one);
+    cout << "    + noise budget in x_squared_plus_one: "
         << decryptor.invariant_noise_budget(x_squared_plus_one) << " bits" << endl;
+    cout << "    + decryption of x_squared_plus_one: ";
+    decryptor.decrypt(x_squared_plus_one, decrypted_result);
+    cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
 
-    cout << "-- Computing x+1: ";
-    evaluator.add_plain(encrypted_x, plain_one, x_plus_one_squared);
-    cout << "Done" << endl;
-    cout << "-- Computing (x+1)^2: ";
-    evaluator.square_inplace(x_plus_one_squared);
-    cout << "Done" << endl;
-    cout << "\tSize of (x+1)^2: " << x_plus_one_squared.size() << endl;
-    cout << "-- Relinearizing (x+1)^2: ";
+    print_line(__LINE__);
+    Ciphertext x_plus_one;
+    cout << "Compute x_plus_one (x+1)," << endl;
+    cout << string(13, ' ')
+        << "then compute and relinearize x_plus_one_squared ((x+1)^2)." << endl;
+    evaluator.add_plain(encrypted_x, plain_one, x_plus_one);
+    evaluator.square(x_plus_one, x_plus_one_squared);
+    cout << "    + size of x_plus_one_squared: " << x_plus_one_squared.size() << endl;
     evaluator.relinearize_inplace(x_plus_one_squared, relin_keys);
-    cout << "Done" << endl;
-    cout << "\tSize of (x+1)^2 (after relinearization): "
-        << x_plus_one_squared.size() << endl;
-    cout << "\tNoise budget in (x+1)^2: "
+    cout << "    + noise budget in x_plus_one_squared: "
         << decryptor.invariant_noise_budget(x_plus_one_squared) << " bits" << endl;
+    cout << "    + decryption of x_plus_one_squared: ";
+    decryptor.decrypt(x_plus_one_squared, decrypted_result);
+    cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
 
-    cout << "-- Computing (x^2+1)(x+1)^2: ";
+    print_line(__LINE__);
+    cout << "Compute and relinearize encrypted_result (2(x^2+1)(x+1)^2)." << endl;
+    evaluator.multiply_plain_inplace(x_squared_plus_one, plain_two);
     evaluator.multiply(x_squared_plus_one, x_plus_one_squared, encrypted_result);
-    cout << "Done" << endl;
-    cout << "\tSize of (x^2+1)(x+1)^2: " << encrypted_result.size() << endl;
-    cout << "-- Relinearizing (x^2+1)(x+1)^2: ";
+    cout << "    + size of encrypted_result: " << encrypted_result.size() << endl;
     evaluator.relinearize_inplace(encrypted_result, relin_keys);
-    cout << "Done" << endl;
-    cout << "\tSize of (x^2+1)(x+1)^2 (after relinearization): "
+    cout << "    + size of encrypted_result (after relinearization): "
         << encrypted_result.size() << endl;
-    cout << "-- Computing 2(x^2+1)(x+1)^2: ";
-    evaluator.multiply_plain_inplace(encrypted_result, plain_two);
-    cout << "Done" << endl;
-    cout << "\tNoise budget in 2(x^2+1)(x+1)^2: "
+    cout << "    + noise budget in encrypted_result: "
         << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
     cout << "NOTE: Notice the increase in remaining noise budget." << endl;
 
@@ -418,10 +421,11 @@ void example_bfv_basics()
     Relinearization clearly improved our noise consumption. We clearly have noise
     budget left, so we can expect the correct answer when decrypting.
     */
-    cout << "-- Decrypting 2(x^2+1)(x+1)^2: ";
+    print_line(__LINE__);
+    cout << "Decrypt encrypted_result (2(x^2+1)(x+1)^2)." << endl;
     decryptor.decrypt(encrypted_result, decrypted_result);
-    cout << "Done (2(x^2+1)(x+1)^2 = 0x" << decrypted_result.to_string() << ")" << endl;
-    cout << endl;
+    cout << "    + decryption of 2(x^2+1)(x+1)^2 = 0x"
+        << decrypted_result.to_string() << " ...... Correct." << endl;
 
     /*
     For x=6, 2(x^2+1)(x+1)^2 = 3626. Since the plaintext modulus is set to 256,
