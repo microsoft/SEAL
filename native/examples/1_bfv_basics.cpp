@@ -394,6 +394,8 @@ void example_bfv_basics()
         << encrypted_result.size() << endl;
     cout << "    + noise budget in encrypted_result: "
         << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
+    
+    cout << endl;
     cout << "NOTE: Notice the increase in remaining noise budget." << endl;
 
     /*
@@ -411,4 +413,5 @@ void example_bfv_basics()
     this result is computed in integers modulo 256. Therefore the expected output
     should be 3626 % 256 == 42, or 0x2A in hexadecimal.
     */
+    cout << endl << endl;
 }
