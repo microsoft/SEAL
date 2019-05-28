@@ -125,7 +125,6 @@ void example_levels()
     /*
     Next iterate over the remaining (data) levels.
     */
-    size_t level = context_data->parms().coeff_modulus().size() - 1;
     for(context_data = context->first_context_data(); context_data;
         context_data = context_data->next_context_data())
     {

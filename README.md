@@ -1,28 +1,50 @@
 # Microsoft SEAL
 
-Microsoft SEAL is an easy-to-use homomorphic encryption library developed by researchers in 
-the Cryptography Research group at Microsoft Research. Microsoft SEAL is written in modern 
-standard C++ and has no external dependencies, making it easy to compile and run in many 
-different environments.
+Microsoft SEAL is an easy-to-use open-source homomorphic encryption library developed by researchers in the Cryptography Research group at Microsoft Research. Microsoft SEAL is written in modern standard C++ and has no external dependencies, making it easy to compile and run in many different environments.
 
 For more information about the Microsoft SEAL project, see [http://sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-# License
-
-Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
-
 # Contents
-- [Building and Using Microsoft SEAL](#building-and-using-microsoft-seal)
+- [Introduction](#introduction)
+  - [Core Concepts](#core-concepts)
+  - [Homomorphic Encryption](#homomorphic-encryption)
+  - [Microsoft SEAL](#microsoft-seal-1)
+- [Installing Microsoft SEAL](#installing-microsoft-seal)
   - [Windows](#windows)
   - [Linux and macOS](#linux-and-macos)
-- [Building and Using Microsoft SEAL for .NET](#building-and-using-microsoft-seal-for-.net)
+- [Installing Microsoft SEAL for .NET](#installing-microsoft-seal-for-.net)
   - [Windows](#windows-1)
   - [Linux and macOS](#linux-and-macos-1)
-- [Documentation](#documentation)
+- [Examples](#examples-4)
 - [Contributing](#contributing)
 - [Citing Microsoft SEAL](#citing-microsoft-seal)
+- [License](#license)
 
-# Building and Using Microsoft SEAL 
+# Introduction
+## Core Concepts
+Most encryption schemes consist of three functionalities: key generation, encryption, and decryption. Symmetric-key encryption schemes use the same secret key both for encryption and decryption; public-key encryption schemes use a separate public key for encryption, and a secret key for decryption. Therefore, public-key encryption schemes allow anyone who knows the public key to encrypt data, but only those who know the secret key can decrypt and read the data. Symmetric-key encryption can be used for efficiently encrypting very large amounts of data, and enables secure outsourced cloud storage. Public-key encryption is a fundamental concept that enables secure online communication today, but is typically much less efficient than symmetric-key encryption.
+
+While traditional symmetric- and public-key encryption can be used for secure storage and communication, any outsourced computation will necessarily require such encryption layers to be removed before computation can take place. Therefore, cloud services providing outsourced computation capabilities must have access to the secret keys, and implement access policies to prevent unauthorized employees from getting access to these keys.
+
+## Homomorphic Encryption
+Homomorphic encryption refers to encryption schemes that allow the cloud to compute directly on the encrypted data, without requiring the data to be decrypted first. The results of such encrypted computations remain encrypted, and can be only decrypted with the secret key (by the data owner). Multiple homomorphic encryption schemes with different capabilities and trade-offs have been invented over the past decade; most of these are public-key encryption schemes, although the public-key functionality may not always be needed.
+
+Homomorphic encryption is not a generic technology: only some computations on encrypted data are possible. It also comes with a substantial performance overhead, so computations that are already very costly to perform on unencrypted data are likely to be infeasible on encrypted data. Moreover, data encrypted with homomorphic encryption is many times larger than unencrypted data, so it may not make sense to encrypt, e.g., entire large databases with this technology. Instead, meaningful use-cases are in scenarios where strict privacy requirements prohibit unencrypted cloud computation altogether, but the computations themselves are fairly lightweight. 
+
+Typically, homomorphic encryption schemes have a single secret key which is held by the data owner. For scenarios where multiple different private data owners wish to engage in collaborative computation homomorphic encryption is probably not a reasonable solution.
+
+Homomorphic encryption cannot be used to enable data scientist to circumvent GDPR. For example, there is no way for a cloud service to use homomorphic encryption to draw insights from encrypted customer data. Instead, results of encrypted computations remain encrypted and can only be decrypted by the owner of the data, e.g., a cloud service customer.
+
+## Microsoft SEAL
+Microsoft SEAL is a homomorphic encryption library that allows additions and multiplications to be performed on encrypted integers or real numbers. Other operations, such as encrypted comparison, sorting, or regular expressions, are in most cases not feasible to evaluate on encrypted data using this technology. Therefore, only specific privacy-critical cloud computation parts of programs should be implemented with Microsoft SEAL.
+
+Some encrypted computations can be done with Microsoft SEAL very efficiently, such as encrypted sums, averages, and high-dimensional dot products. It is possible to evaluate some feed-forward neural networks on encrypted inputs, and we have even created a privacy-preserving [fitness tracker](https://github.com/Microsoft/SEAL-Demo) for Android that computes workout statistics on encrypted GPS data and performs simple workout intensity classifications on encrypted data in the cloud.
+
+It is not always easy or straightfoward to translate an unencrypted computation into a computation on encrypted data, for example, it is not possible to branch on encrypted data. Microsoft SEAL itself has a steep learning curve and requires the user to understand many homomorphic encryption specific concepts, even though in the end the API is not too complicated. Even if a user is able to program and run a specific computation using Microsoft SEAL, the difference between efficient and inefficient implementations can be several orders of magnitude, and it can be hard for new users to know how to improve the performance of their computation.
+
+Microsoft SEAL comes with two different homomorphic encryption schemes with very different properties. The BFV scheme allows modular arithmetic to be performed on encrypted integers. The CKKS scheme allow additions and multiplications on encrypted real or complex numbers, but yields only approximate results. In applications such a summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances of encrypted locations CKKS is going to be by far the best choice. For applications where exact values are necessary, the BFV scheme is the only choice.
+
+# Installing Microsoft SEAL
 
 ## Windows
 
@@ -33,7 +55,7 @@ used to conveniently build the library, examples, and unit tests.
 
 You can easily switch from Visual Studio build configuration menu whether Microsoft SEAL should be
 built in `Debug` mode (no optimizations) or in `Release` mode. Please note that `Debug`
-mode should not be used except for debugging SEAL itself, as the performance will be 
+mode should not be used except for debugging SEAL itself, as the performance will be
 orders of magnitude worse than in `Release` mode.
 
 #### Library
@@ -50,30 +72,30 @@ This results in an executable `sealexamples.exe` to be created in `native\bin\$(
 
 #### Unit tests
 
-The unit tests require the Google Test framework to be installed. The appropriate 
-NuGet package is already listed in `native\tests\packages.config`, so once you attempt to build 
-the SEALTest project `native\tests\SEALTest.vcxproj` from `SEAL.sln` Visual Studio will 
+The unit tests require the Google Test framework to be installed. The appropriate
+NuGet package is already listed in `native\tests\packages.config`, so once you attempt to build
+the SEALTest project `native\tests\SEALTest.vcxproj` from `SEAL.sln` Visual Studio will
 automatically download and install it for you.
 
 ## Linux and macOS
 
-Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.10). 
-A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed. In macOS the 
+Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.10).
+A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed. In macOS the
 Xcode toolchain (>= 9.3) will work.
 
-In macOS you will need CMake with command line tools. For this, you can either 
+In macOS you will need CMake with command line tools. For this, you can either
 1. install the cmake package with [Homebrew](https://brew.sh), or
 2. download CMake directly from [https://cmake.org/download](https://cmake.org/download) and [enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
 
-Below we give instructions for how to configure, build, and install SEAL either 
+Below we give instructions for how to configure, build, and install SEAL either
 system-wide (global install), or for a single user (local install). A system-wide
 install requires elevated (root) privileges.
 
 #### Debug and Release builds
 
-You can easily switch from CMake configuration options whether Microsoft SEAL should be built in 
-`Debug` mode (no optimizations) or in `Release` mode. Please note that `Debug` mode should not 
-be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude 
+You can easily switch from CMake configuration options whether Microsoft SEAL should be built in
+`Debug` mode (no optimizations) or in `Release` mode. Please note that `Debug` mode should not
+be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude
 worse than in `Release` mode.
 
 ### Global install
@@ -98,13 +120,16 @@ make
 cd ../..
 ````
 
-After completing the above steps the `sealexamples` executable can be found in `native/bin/`. 
+After completing the above steps the `sealexamples` executable can be found in `native/bin/`.
 See `native/examples/CMakeLists.txt` for how to link Microsoft SEAL with your own project using CMake.
 
 #### Unit tests
 
-To build the unit tests, make sure you have the Google Test library `libgtest-dev`
-installed. Then do: 
+To build the unit tests you will need the [GoogleTest](https://github.com/google/googletest) framework, which is included in Microsoft SEAL as a git submodule. To download the GoogleTest source files, do:
+````
+git submodule update --init
+````
+This needs to be executed only one, and can be skipped if Microsoft SEAL was cloned with `git --recurse-submodules`. To build the tests, do:
 ````
 cd native/tests
 cmake .
@@ -112,7 +137,7 @@ make
 cd ../..
 ````
 
-After completing these steps the `sealtest` executable can be found in `native/bin/`. All unit 
+After completing these steps the `sealtest` executable can be found in `native/bin/`. All unit
 tests should pass successfully.
 
 ### Local install
@@ -128,7 +153,7 @@ make install
 cd ../..
 ````
 
-#### Examples 
+#### Examples
 
 To build the examples do:
 ````
@@ -138,13 +163,16 @@ make
 cd ../..
 ````
 
-After completing the above steps the `sealexamples` executable can be found in `native/bin/`. 
+After completing the above steps the `sealexamples` executable can be found in `native/bin/`.
 See `native/examples/CMakeLists.txt` for how to link Microsoft SEAL with your own project using CMake.
 
 #### Unit tests
 
-To build the unit tests, make sure you have the Google Test library `libgtest-dev`
-installed. Then do:
+To build the unit tests you will need the [GoogleTest](https://github.com/google/googletest) framework, which is included in Microsoft SEAL as a git submodule. To download the GoogleTest source files, do:
+````
+git submodule update --init
+````
+This needs to be executed only one, and can be skipped if Microsoft SEAL was cloned with `git --recurse-submodules`. Then do:
 ````
 cd native/tests
 cmake -DCMAKE_PREFIX_PATH=~/mylibs .
@@ -152,10 +180,10 @@ make
 cd ../..
 ````
 
-After completing these steps the `sealtest` executable can be found in `native/bin/`. All unit 
+After completing these steps the `sealtest` executable can be found in `native/bin/`. All unit
 tests should pass successfully.
 
-# Building and Using Microsoft SEAL for .NET
+# Installing Microsoft SEAL for .NET
 
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL
 for use in .NET development.
@@ -168,16 +196,16 @@ to build the .NET assembly, a backing native shared library, .NET examples, and 
 #### Native library
 
 Microsoft SEAL for .NET requires a native library that is invoked by the managed .NET library.
-Build the SEALNetNative project `dotnet\native\SEALNetNative.vcxproj` from `SEAL.sln`. 
-Building SEALNetNative results in the dynamic library `sealnetnative.dll` to be created 
-in `dotnet\lib\$(Platform)\$(Configuration)`. This library is meant to be used only by the 
-.NET library, not by end users, and needs to be present in the same directory as your 
+Build the SEALNetNative project `dotnet\native\SEALNetNative.vcxproj` from `SEAL.sln`.
+Building SEALNetNative results in the dynamic library `sealnetnative.dll` to be created
+in `dotnet\lib\$(Platform)\$(Configuration)`. This library is meant to be used only by the
+.NET library, not by end users, and needs to be present in the same directory as your
 executable when developing a .NET application.
 
 #### .NET library
 
-Once you have built the shared native library (see above), build the SEALNet project 
-`dotnet\src\SEALNet.csproj` from `SEAL.sln`. Building SEALNet results in the assembly 
+Once you have built the shared native library (see above), build the SEALNet project
+`dotnet\src\SEALNet.csproj` from `SEAL.sln`. Building SEALNet results in the assembly
 `SEALNet.dll` to be created in `dotnet\lib\$(Configuration)\netstandard2.0`. This
 is the assembly you can reference in your application.
 
@@ -216,19 +244,19 @@ or for [installing in macOS](https://dotnet.microsoft.com/download?initial-os=ma
 
 ### Local use of shared native library
 
-If you only intend to run the examples and unit tests provided with Microsoft SEAL, 
-you do not need to install the native shared library, you only need to compile it. 
-The SEALNetExamples and SEALNetTest projects take care of copying the native shared 
+If you only intend to run the examples and unit tests provided with Microsoft SEAL,
+you do not need to install the native shared library, you only need to compile it.
+The SEALNetExamples and SEALNetTest projects take care of copying the native shared
 library to the appropriate assembly output directory.
 
 To compile the native shared library you will need to:
 1. Compile Microsoft SEAL as a static or shared library with Position-Independent Code (PIC);
 2. Compile native shared library.
 
-The instructions for compiling Microsoft SEAL are similar to the instructions described 
-[above](#linux-and-macos) for a global or local install. Make sure the CMake configuration 
-option `SEAL_LIB_BUILD_TYPE` is set to either `Static_PIC` (default) or `Shared`. Assuming 
-Microsoft SEAL was built and installed globally using the default CMake configuration 
+The instructions for compiling Microsoft SEAL are similar to the instructions described
+[above](#linux-and-macos) for a global or local install. Make sure the CMake configuration
+option `SEAL_LIB_BUILD_TYPE` is set to either `Static_PIC` (default) or `Shared`. Assuming
+Microsoft SEAL was built and installed globally using the default CMake configuration
 options, we can immediately use it to compile the shared native library required for .NET:
 ````
 cd dotnet/native
@@ -264,8 +292,8 @@ cd dotnet/examples
 dotnet run
 cd ../..
 ````
-As mentioned before, the .NET project will copy the shared native library to the assembly 
-output directory. You can use the `dotnet` parameter `--configuration <Debug|Release>` to 
+As mentioned before, the .NET project will copy the shared native library to the assembly
+output directory. You can use the `dotnet` parameter `--configuration <Debug|Release>` to
 run either `Debug` or `Release` versions of the examples.
 
 #### Unit tests
@@ -285,10 +313,10 @@ To use Microsoft SEAL for .NET in your own application you need to:
 1. add a reference in your project to `SEALNet.dll`;
 2. ensure the native shared library is available for your application when run. The easiest way to ensure this is to copy `libsealnetnative.so` to the same directory where your application's executable is located.
 
-In Linux or macOS, if you have root access to the system, you have the option to install the 
+In Linux or macOS, if you have root access to the system, you have the option to install the
 native shared library globally. Then your application will always be able to find and load it.
 
-Assuming Microsoft SEAL is build and installed globally, you can install the shared native 
+Assuming Microsoft SEAL is build and installed globally, you can install the shared native
 library globally as follows:
 ````
 cd dotnet/native
@@ -298,33 +326,36 @@ sudo make install
 cd ../..
 ````
 
-# Documentation
+# Examples
+Microsoft SEAL comes with code examples with detailed comments. These comments are aimed to teach most of the concepts a developer will need to know to use the library efficiently and securely, and the associated code snippets will show how the core operations are performed. The examples are available (and identical) both in C++ and C#. The C++ examples are divided into multiple .cpp files in SEAL/native/examples/ as follows:
 
-The code-base contains extensive and thoroughly commented examples that should 
-serve as a self-contained introduction to using Microsoft SEAL (see `native/examples/examples.cpp` or `dotnet/examples/Examples.cs`). 
-In addition, the header files contain detailed comments for the public API.
-
-For requests, bug reports and technical questions, please see [Issues.md](Issues.md).
+  - `examples.cpp`: the test runner application;
+  - `bfv_basics.cpp`: shows how to perform encrypted modular arithmetic using the BFV scheme;
+  - `encoders.cpp`: shows how to encode more complex data into Microsoft SEAL plaintext objects;
+  - `levels.cpp`: explains the concept of levels in Microsoft SEAL. This is conceptual material that will be necessary to understand for using the CKKS scheme;
+  - `ckks_basics.cpp`: shows how to use the CKKS scheme for computing on encrypted real numbers;
+  - `rotation.cpp`: shows how to perform cyclic rotations on encrypted vectors using the BFV and CKKS schemes;
+  - `performance.cpp`: performance tests for Microsoft SEAL.
 
 # Contributing
 
-This project welcomes contributions and suggestions. Most contributions require you 
+This project welcomes contributions and suggestions. Most contributions require you
 to agree to a Contributor License Agreement (CLA) declaring that you have the right to,
-and actually do, grant us the rights to use your contribution. For details, visit 
+and actually do, grant us the rights to use your contribution. For details, visit
 https://cla.microsoft.com.
 
-When you submit a pull request, a CLA-bot will automatically determine whether you need 
-to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow 
-the instructions provided by the bot. You will only need to do this once across all 
+When you submit a pull request, a CLA-bot will automatically determine whether you need
+to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow
+the instructions provided by the bot. You will only need to do this once across all
 repos using our CLA.
 
 Pull requests must be submitted to the branch called `contrib`.
 
-This project has adopted the 
+This project has adopted the
 [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the 
-[Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) 
-or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional 
+For more information see the
+[Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
+or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional
 questions or comments.
 
 # Citing Microsoft SEAL
@@ -373,3 +404,7 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
 	    note = {Microsoft Research, Redmond, WA.},
 	    key = {SEAL}
     }
+
+## License
+
+Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).

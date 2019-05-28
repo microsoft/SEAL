@@ -383,12 +383,12 @@ namespace std
         std::size_t operator()(
             const seal::parms_id_type &parms_id) const
         {
-            std::uint64_t hash = 17;
-            hash = 31 * hash + parms_id[0];
-            hash = 31 * hash + parms_id[1];
-            hash = 31 * hash + parms_id[2];
-            hash = 31 * hash + parms_id[3];
-            return static_cast<std::size_t>(hash);
+            std::uint64_t result = 17;
+            result = 31 * result + parms_id[0];
+            result = 31 * result + parms_id[1];
+            result = 31 * result + parms_id[2];
+            result = 31 * result + parms_id[3];
+            return static_cast<std::size_t>(result);
         }
     };
 }

@@ -46,7 +46,7 @@ int main()
             cout << "," << setw(3) << right << mega_bytes % 1000;
         }
 
-        cout << " MB]" << " Total allocation from the current memory pool" << endl;
+        cout << " MB]" << " Total allocation from the memory pool" << endl;
 
         int selection = 0;
         bool invalid = true;
@@ -84,15 +84,15 @@ int main()
             break;
 
         case 3:
-            example_ckks_basics();
+            example_levels();
             break;
 
         case 4:
-            example_rotation();
+            example_ckks_basics();
             break;
 
         case 5:
-            example_levels();
+            example_rotation();
             break;
 
         case 6:

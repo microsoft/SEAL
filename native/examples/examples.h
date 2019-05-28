@@ -21,11 +21,11 @@ void example_bfv_basics();
 
 void example_encoders();
 
+void example_levels();
+
 void example_ckks_basics();
 
 void example_rotation();
-
-void example_levels();
 
 void example_performance_test();
 
@@ -37,10 +37,10 @@ inline void print_example_banner(std::string title)
     if (!title.empty())
     {
         std::size_t title_length = title.length();
-        std::size_t banner_length = title_length + 2 + 2 * 10;
-        std::string banner_top(banner_length, '*');
+        std::size_t banner_length = title_length + 2 * 10;
+        std::string banner_top = "+" + std::string(banner_length - 2, '-') + "+";
         std::string banner_middle =
-            std::string(10, '*') + " " + title + " " + std::string(10, '*');
+            "|" + std::string(9, ' ') + title + std::string(9, ' ') + "|";
 
         std::cout << std::endl
             << banner_top << std::endl

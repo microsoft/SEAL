@@ -255,7 +255,6 @@ namespace SEALTest
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
-            auto key_qualifiers = context->key_context_data()->qualifiers();
             ASSERT_TRUE(qualifiers.parameters_set);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);

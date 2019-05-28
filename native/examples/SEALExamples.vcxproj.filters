@@ -17,22 +17,22 @@
     <ClCompile Include="examples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="1_basic_bfv.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="2_basic_encoders.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="6_performance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="3_levels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="4_basic_ckks.cpp">
+    <ClCompile Include="5_rotation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="5_rotation.cpp">
+    <ClCompile Include="1_bfv_basics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="2_encoders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="4_ckks_basics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

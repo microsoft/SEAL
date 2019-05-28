@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(SEALTest VERSION 3.3.0 LANGUAGES CXX)
+project(SEALTest LANGUAGES CXX)
 
 # Executable will be in ../bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
@@ -13,14 +13,16 @@ add_executable(sealtest seal/testrunner.cpp)
 # Import Microsoft SEAL
 find_package(SEAL 3.3.0 EXACT REQUIRED)
 
-# Import Google target_link_libraries
-find_library(GTEST gtest)
-if(NOT GTEST)
-    message(FATAL_ERROR "Failed to find Google Test library required for unit tests")
-endif()
-
-# Link Microsoft SEAL
-target_link_libraries(sealtest SEAL::seal ${GTEST})
-
 # Add source files
 add_subdirectory(seal)
+
+# Only build GTest
+option(BUILD_GMOCK OFF)
+option(INSTALL_GTEST OFF)
+mark_as_advanced(BUILD_GMOCK INSTALL_GTEST)
+
+# Add GTest
+add_subdirectory(thirdparty/googletest)
+
+# Link Microsoft SEAL and GTest
+target_link_libraries(sealtest SEAL::seal gtest)
