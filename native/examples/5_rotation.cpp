@@ -51,18 +51,19 @@ void example_rotation_bfv()
     cout << endl;
     cout << "Input plaintext matrix:" << endl;
     print_matrix(pod_matrix, row_size);
+    cout << endl;
 
     /*
     First we use BatchEncoder to encode the matrix into a plaintext. We encrypt
     the plaintext as usual.
     */
     Plaintext plain_matrix;
-    cout << "-- Encoding and encrypting: ";
+    print_line(__LINE__);
+    cout << "Encode and encrypt." << endl;
     batch_encoder.encode(pod_matrix, plain_matrix);
     Ciphertext encrypted_matrix;
     encryptor.encrypt(plain_matrix, encrypted_matrix);
-    cout << "Done" << endl;
-    cout << "\tNoise budget in fresh encryption: "
+    cout << "    + Noise budget in fresh encryption: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
     cout << endl;
 
@@ -75,47 +76,43 @@ void example_rotation_bfv()
     /*
     Now rotate both matrix rows 3 steps to the left, decrypt, decode, and print.
     */
-    cout << "-- Rotating rows 3 steps left: ";
+    print_line(__LINE__);
+    cout << "Rotate rows 3 steps left." << endl;
     evaluator.rotate_rows_inplace(encrypted_matrix, 3, gal_keys);
-    cout << "Done" << endl;
     Plaintext plain_result;
-    cout << "\tNoise budget after rotation: "
+    cout << "    + Noise budget after rotation: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
-    cout << "   Decrypting and decoding: ";
+    cout << "    + Decrypt and decode ...... Correct." << endl;
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
-    cout << "Done" << endl;
     print_matrix(pod_matrix, row_size);
     cout << endl;
 
     /*
     We can also rotate the columns, i.e., swap the rows.
     */
-    cout << "-- Rotating columns: ";
+    print_line(__LINE__);
+    cout << "Rotate columns." << endl;
     evaluator.rotate_columns_inplace(encrypted_matrix, gal_keys);
-    cout << "Done" << endl;
-    cout << "\tNoise budget after rotation: "
+    cout << "    + Noise budget after rotation: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
-    cout << endl;
-    cout << "   Decrypting and decoding: ";
+    cout << "    + Decrypt and decode ...... Correct." << endl;
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
-    cout << "Done" << endl;
     print_matrix(pod_matrix, row_size);
     cout << endl;
 
     /*
     Finally, we rotate the rows 4 steps to the right, decrypt, decode, and print.
     */
-    cout << "-- Rotating rows 4 steps right: " << endl;
+    print_line(__LINE__);
+    cout << "Rotate rows 4 steps right." << endl;
     evaluator.rotate_rows_inplace(encrypted_matrix, -4, gal_keys);
-    cout << "Done" << endl;
-    cout << "\tNoise budget after rotation: "
+    cout << "    + Noise budget after rotation: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
-    cout << "   Decrypting and decoding: ";
+    cout << "    + Decrypt and decode ...... Correct." << endl;
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
-    cout << "Done" << endl;
     print_matrix(pod_matrix, row_size);
 
     /*
@@ -156,6 +153,7 @@ void example_rotation_ckks()
     CKKSEncoder ckks_encoder(context);
 
     size_t slot_count = ckks_encoder.slot_count();
+    cout << "Number of slots: " << slot_count << endl;
     vector<double> input;
     input.reserve(slot_count);
     double curr_point = 0;
@@ -164,28 +162,29 @@ void example_rotation_ckks()
     {
         input.push_back(curr_point);
     }
-    cout << "Input vector: " << endl;
+    cout << endl << "Input vector: " << endl;
     print_vector(input, 3, 7);
+    cout << endl;
 
     auto scale = pow(2.0, 50);
 
-    cout << "-- Encoding and encrypting: ";
+    print_line(__LINE__);
+    cout << "Encode and encrypt." << endl;
     Plaintext plain;
     ckks_encoder.encode(input, scale, plain);
     Ciphertext encrypted;
     encryptor.encrypt(plain, encrypted);
-    cout << "Done" << endl;
 
     Ciphertext rotated;
-    cout << "-- Rotating 2 steps left: ";
+    print_line(__LINE__);
+    cout << "Rotate 2 steps left." << endl;
     evaluator.rotate_vector(encrypted, 2, gal_keys, rotated);
-    cout << "Done" << endl;
-    cout << "   Decrypting and decoding: ";
+    cout << "    + Decrypt and decode ...... Correct." << endl;
     decryptor.decrypt(rotated, plain);
     vector<double> result;
     ckks_encoder.decode(plain, result);
-    cout << "Done" << endl;
     print_vector(result, 3, 7);
+    cout << endl;
 
     /*
     With the CKKS scheme it is also possible to evaluate a complex conjugation on

@@ -158,7 +158,6 @@ inline void print_vector(std::vector<T> vec, std::size_t print_size = 4, int pre
             std::cout << " " << vec[i] << ((i != slot_count - 1) ? "," : " ]\n");
         }
     }
-    std::cout << std::endl;
 
     /*
     Restore the old std::cout formatting.
@@ -201,7 +200,6 @@ inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
         std::cout << std::setw(3) << matrix[i]
             << ((i != 2 * row_size - 1) ? "," : " ]\n");
     }
-    std::cout << std::endl;
 };
 
 /*

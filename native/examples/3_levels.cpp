@@ -103,7 +103,8 @@ void example_levels()
 
     We iterate over the chain and print the parms_id for each set of parameters.
     */
-    cout << "Printing the modulus switching chain:" << endl;
+    print_line(__LINE__);
+    cout << "Print the modulus switching chain." << endl;
 
     /*
     First print the key level parameter information.
@@ -162,10 +163,12 @@ void example_levels()
     auto secret_key = keygen.secret_key();
     auto relin_keys = keygen.relin_keys();
     auto galois_keys = keygen.galois_keys();
-    cout << "-- parms_id of public_key:  " << public_key.parms_id() << endl;
-    cout << "-- parms_id of secret_key:  " << secret_key.parms_id() << endl;
-    cout << "-- parms_id of relin_keys:  " << relin_keys.parms_id() << endl;
-    cout << "-- parms_id of galois_keys: " << galois_keys.parms_id() << endl;
+    print_line(__LINE__);
+    cout << "Print the parameter IDs of generated elements." << endl;
+    cout << "    + public_key:  " << public_key.parms_id() << endl;
+    cout << "    + secret_key:  " << secret_key.parms_id() << endl;
+    cout << "    + relin_keys:  " << relin_keys.parms_id() << endl;
+    cout << "    + galois_keys: " << galois_keys.parms_id() << endl;
 
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
@@ -178,8 +181,8 @@ void example_levels()
     Plaintext plain("1x^3 + 2x^2 + 3x^1 + 4");
     Ciphertext encrypted;
     encryptor.encrypt(plain, encrypted);
-    cout << "-- parms_id of plain: " << plain.parms_id() << " (not set)" << endl;
-    cout << "-- parms_id of encrypted:   " << encrypted.parms_id() << endl << endl;
+    cout << "    + plain:       " << plain.parms_id() << " (not set in BFV)" << endl;
+    cout << "    + encrypted:   " << encrypted.parms_id() << endl << endl;
 
     /*
     `Modulus switching' is a technique of changing the ciphertext parameters down
@@ -188,7 +191,8 @@ void example_levels()
     a parameter set down the chain corresponding to a given parms_id. However, it
     is impossible to switch up in the chain.
     */
-    cout << "Effects of modulus switching: " << endl;
+    print_line(__LINE__);
+    cout << "Perform modulus switching on encrypted and print." << endl;
     context_data = context->first_context_data();
     cout << "-----";
     while(context_data->next_context_data())
@@ -215,8 +219,11 @@ void example_levels()
     amount of noise budget (i.e., computational power) at each switch and seemed
     to get nothing in return. Decryption still works.
     */
+    print_line(__LINE__);
+    cout << "Decrypt still works after modulus switching." << endl;
     decryptor.decrypt(encrypted, plain);
-    cout << "Decryption: " << plain.to_string() << endl << endl;
+    cout << "    + Decryption of encrypted: " << plain.to_string();
+    cout << " ...... Correct." << endl << endl;
 
     /*
     However, there is a hidden benefit: the size of the ciphertext depends
@@ -231,13 +238,15 @@ void example_levels()
 
     First we recreate the original ciphertext and perform some computations.
     */
-    cout << "More efficient computation with modulus switching: " << endl;
+    cout << "Computation is more efficient with modulus switching." << endl;
+    print_line(__LINE__);
+    cout << "Compute the fourth power." << endl;
     encryptor.encrypt(plain, encrypted);
-    cout << "\tNoise budget before squaring: "
+    cout << "    + Noise budget before squaring:         "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
     evaluator.square_inplace(encrypted);
     evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "\tNoise budget after squaring: "
+    cout << "    + Noise budget after squaring:          "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
     /*
@@ -247,7 +256,7 @@ void example_levels()
     no effect at all on the noise budget.
     */
     evaluator.mod_switch_to_next_inplace(encrypted);
-    cout << "\tNoise budget after modulus switching: "
+    cout << "    + Noise budget after modulus switching: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
     /*
@@ -260,10 +269,10 @@ void example_levels()
     */
     evaluator.square_inplace(encrypted);
     evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "\tNoise budget after squaring: "
+    cout << "    + Noise budget after squaring:          "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
     evaluator.mod_switch_to_next_inplace(encrypted);
-    cout << "\tNoise budget after modulus switching: "
+    cout << "    + Noise budget after modulus switching: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
     /*
@@ -273,8 +282,8 @@ void example_levels()
     chain.
     */
     decryptor.decrypt(encrypted, plain);
-    cout << "Decryption of fourth power: " << endl;
-    cout << "\t" << plain.to_string() << endl << endl;
+    cout << "    + Decryption of fourth power (hexadecimal) ...... Correct. " << endl;
+    cout << "    " << plain.to_string() << endl << endl;
 
     /*
     In BFV modulus switching is not necessary and in some cases the user might
@@ -288,6 +297,9 @@ void example_levels()
     for the highest two levels (key level and highest data level). The following
     loop should execute only once.
     */
+    cout << "Optionally disable modulus switching chain expansion." << endl;
+    print_line(__LINE__);
+    cout << "Print the modulus switching chain." << endl;
     cout << "-----";
     for (context_data = context->key_context_data(); context_data;
         context_data = context_data->next_context_data())

@@ -96,7 +96,7 @@ void example_ckks_basics()
 
     CKKSEncoder encoder(context);
     size_t slot_count = encoder.slot_count();
-    cout << "Number of slots: " << slot_count << endl;
+    cout << "Number of slots: " << slot_count << endl << endl;
 
     vector<double> input;
     input.reserve(slot_count);
@@ -108,6 +108,7 @@ void example_ckks_basics()
     }
     cout << "Input vector: " << endl;
     print_vector(input, 3, 7);
+    cout << endl;
 
     cout << "Evaluating polynomial PI*x^3 + 0.4x + 1 ..." << endl;
 
@@ -123,24 +124,22 @@ void example_ckks_basics()
     encoder.encode(1.0, scale, plain_coeff0);
 
     Plaintext plain_x;
-    cout << "-- Encoding input vector: ";
+    print_line(__LINE__);
+    cout << "Encode input vectors." << endl;
     encoder.encode(input, scale, plain_x);
-    cout << "Done (plain x)" << endl;
     Ciphertext encrypted_x1;
-    cout << "-- Encrypting input vector: ";
     encryptor.encrypt(plain_x, encrypted_x1);
-    cout << "Done (encrypted x)" << endl;
 
     /*
     To compute x^3 we first compute x^2 and relinearize. However, the scale has
     now grown to 2^80.
     */
     Ciphertext encrypted_x3;
-    cout << "-- Computing x^2 and relinearizing: ";
+    print_line(__LINE__);
+    cout << "Compute x^2 and relinearize: " << endl;
     evaluator.square(encrypted_x1, encrypted_x3);
     evaluator.relinearize_inplace(encrypted_x3, relin_keys);
-    cout << "Done (x^2)" << endl;
-    cout << "\tScale of x^2 before rescale: " << log2(encrypted_x3.scale())
+    cout << "    + Scale of x^2 before rescale: " << log2(encrypted_x3.scale())
         << " bits" << endl;
 
     /*
@@ -149,8 +148,10 @@ void example_ckks_basics()
     new scale should be close to 2^40. Note, however, that the scale is not equal
     to 2^40: this is because the 40-bit prime is only close to 2^40.
     */
+    print_line(__LINE__);
+    cout << "Rescale x^2." << endl;
     evaluator.rescale_to_next_inplace(encrypted_x3);
-    cout << "\tScale of x^2 after rescale: " << log2(encrypted_x3.scale())
+    cout << "    + Scale of x^2 after rescale: " << log2(encrypted_x3.scale())
         << " bits" << endl;
 
     /*
@@ -161,14 +162,14 @@ void example_ckks_basics()
     first and multiply that with x^2 to obtain PI*x^3. To this end, we compute
     PI*x and rescale it back from scale 2^80 to something close to 2^40.
     */
-    cout << "-- Computing PI*x: ";
+    print_line(__LINE__);
+    cout << "Compute and rescale PI*x." << endl;
     Ciphertext encrypted_x1_coeff3;
     evaluator.multiply_plain(encrypted_x1, plain_coeff3, encrypted_x1_coeff3);
-    cout << "Done (PI*x)" << endl;
-    cout << "\tScale of PI*x before rescale: " << log2(encrypted_x1_coeff3.scale())
+    cout << "    + Scale of PI*x before rescale: " << log2(encrypted_x1_coeff3.scale())
         << " bits" << endl;
     evaluator.rescale_to_next_inplace(encrypted_x1_coeff3);
-    cout << "\tScale of PI*x after rescale: " << log2(encrypted_x1_coeff3.scale())
+    cout << "    + Scale of PI*x after rescale: " << log2(encrypted_x1_coeff3.scale())
         << " bits" << endl;
 
     /*
@@ -178,27 +179,27 @@ void example_ckks_basics()
     is something close to 2^40, but not exactly 2^40 due to yet another scaling
     by a prime. We are down to the last level in the modulus switching chain.
     */
-    cout << "-- Computing (PI*x)*x^2: ";
+    print_line(__LINE__);
+    cout << "Compute, relinearize, and rescale (PI*x)*x^2" << endl;
     evaluator.multiply_inplace(encrypted_x3, encrypted_x1_coeff3);
     evaluator.relinearize_inplace(encrypted_x3, relin_keys);
-    cout << "Done (PI*x^3)" << endl;
-    cout << "\tScale of PI*x^3 before rescale: " << log2(encrypted_x3.scale())
+    cout << "    + Scale of PI*x^3 before rescale: " << log2(encrypted_x3.scale())
         << " bits" << endl;
     evaluator.rescale_to_next_inplace(encrypted_x3);
-    cout << "\tScale of PI*x^3 after rescale: " << log2(encrypted_x3.scale())
+    cout << "    + Scale of PI*x^3 after rescale: " << log2(encrypted_x3.scale())
         << " bits" << endl;
 
     /*
     Next we compute the degree one term. All this requires is one multiply_plain
     with plain_coeff1. We overwrite encrypted_x1 with the result.
     */
-    cout << "-- Computing 0.4*x: ";
+    print_line(__LINE__);
+    cout << "Compute and rescale 0.4*x" << endl;
     evaluator.multiply_plain_inplace(encrypted_x1, plain_coeff1);
-    cout << "Done (0.4*x)" << endl;
-    cout << "\tScale of 0.4*x before rescale: " << log2(encrypted_x1.scale())
+    cout << "    + Scale of 0.4*x before rescale: " << log2(encrypted_x1.scale())
         << " bits" << endl;
     evaluator.rescale_to_next_inplace(encrypted_x1);
-    cout << "\tScale of 0.4*x after rescale: " << log2(encrypted_x1.scale())
+    cout << "    + Scale of 0.4*x after rescale: " << log2(encrypted_x1.scale())
         << " bits" << endl;
 
     /*
@@ -210,12 +211,14 @@ void example_ckks_basics()
     the same, and also that the encryption parameters (parms_id) match. If there
     is a mismatch, Evaluator will throw an exception.
     */
-    cout << endl << "Parameters used by all three terms are different:" << endl;
-    cout << "\tModulus chain index for encrypted_x3: "
+    cout  << endl;
+    print_line(__LINE__);
+    cout << "Parameters used by all three terms are different." << endl;
+    cout << "    + Modulus chain index for encrypted_x3: "
         << context->get_context_data(encrypted_x3.parms_id())->chain_index() << endl;
-    cout << "\tModulus chain index for encrypted_x1: "
+    cout << "    + Modulus chain index for encrypted_x1: "
         << context->get_context_data(encrypted_x1.parms_id())->chain_index() << endl;
-    cout << "\tModulus chain index for plain_coeff0: "
+    cout << "    + Modulus chain index for plain_coeff0: "
         << context->get_context_data(plain_coeff0.parms_id())->chain_index() << endl;
     cout << endl;
 
@@ -237,13 +240,14 @@ void example_ckks_basics()
     Although the scales of all three terms are approximately 2^40, their exact
     values are different, hence they cannot be added together.
     */
-    cout << endl << "The exact scales of all three terms are different:" << endl;
+    print_line(__LINE__);
+    cout << "The exact scales of all three terms are different:" << endl;
     ios old_fmt(nullptr);
     old_fmt.copyfmt(cout);
     cout << fixed << setprecision(10);
-    cout << "\tExact scale in PI*x^3: " << encrypted_x3.scale() << endl;
-    cout << "\tExact scale in  0.4*x: " << encrypted_x1.scale() << endl;
-    cout << "\tExact scale in      1: " << plain_coeff0.scale() << endl;
+    cout << "    + Exact scale in PI*x^3: " << encrypted_x3.scale() << endl;
+    cout << "    + Exact scale in  0.4*x: " << encrypted_x1.scale() << endl;
+    cout << "    + Exact scale in      1: " << plain_coeff0.scale() << endl;
     cout << endl;
     cout.copyfmt(old_fmt);
 
@@ -261,10 +265,10 @@ void example_ckks_basics()
     In this example we will use the first (simplest) approach and simply change
     the scale of PI*x^3 and 0.4*x to 2^40.
     */
-    cout << "-- Normalizing scales: ";
+    print_line(__LINE__);
+    cout << "Normalize scales to 2^40." << endl;
     encrypted_x3.scale() = pow(2.0, 40);
     encrypted_x1.scale() = pow(2.0, 40);
-    cout << "Done (2^40)" << endl;
 
     /*
     We still have a problem with mismatching encryption parameters. This is easy
@@ -272,36 +276,28 @@ void example_ckks_basics()
     modulus switching just like the BFV scheme, allowing us to switch away parts
     of the coefficient modulus when it is simply not needed.
     */
-    cout << "-- Normalizing encryption parameters: ";
+    print_line(__LINE__);
+    cout << "Normalize encryption parameters to the lowest level." << endl;
     parms_id_type last_parms_id = encrypted_x3.parms_id();
     evaluator.mod_switch_to_inplace(encrypted_x1, last_parms_id);
     evaluator.mod_switch_to_inplace(plain_coeff0, last_parms_id);
-    cout << "Done" << endl;
 
     /*
     All three ciphertexts are now compatible and can be added.
     */
-    cout << "-- Computing PI*x^3 + 0.4*x + 1: ";
+    print_line(__LINE__);
+    cout << "Compute PI*x^3 + 0.4*x + 1." << endl;
     Ciphertext encrypted_result;
     evaluator.add(encrypted_x3, encrypted_x1, encrypted_result);
     evaluator.add_plain_inplace(encrypted_result, plain_coeff0);
-    cout << "Done (PI*x^3 + 0.4*x + 1)" << endl;
 
     /*
     We decrypt, decode, and print the result.
     */
     Plaintext plain_result;
-    cout << "-- Decrypting and decoding: ";
-    decryptor.decrypt(encrypted_result, plain_result);
-    vector<double> result;
-    encoder.decode(plain_result, result);
-    cout << "Done" << endl;
-
-    cout << endl;
-    cout << "Computed result of PI*x^3 + 0.4x + 1:" << endl;
-    print_vector(result, 3, 7);
-
-    cout << "Expected result of PI*x^3 + 0.4x + 1:" << endl;
+    print_line(__LINE__);
+    cout << "Decrypt and decode PI*x^3 + 0.4x + 1." << endl;
+    cout << "    + Expected result:" << endl;
     vector<double> true_result;
     for (size_t i = 0; i < input.size(); i++)
     {
@@ -309,6 +305,12 @@ void example_ckks_basics()
         true_result.push_back((3.14159265 * x * x + 0.4)* x + 1);
     }
     print_vector(true_result, 3, 7);
+    decryptor.decrypt(encrypted_result, plain_result);
+    vector<double> result;
+    encoder.decode(plain_result, result);
+    cout << "    + Computed result ...... Correct." << endl;
+    print_vector(result, 3, 7);
+    cout << endl;
 
     /*
     While we did not show any computations on complex numbers in these examples,
