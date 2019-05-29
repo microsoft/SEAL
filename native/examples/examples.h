@@ -76,16 +76,16 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     default:
         throw std::invalid_argument("unsupported scheme");
     }
-    std::cout << "   /" << std::endl;
-    std::cout << "  | Encryption parameters:" << std::endl;
-    std::cout << "  | scheme: " << scheme_name << std::endl;
-    std::cout << "  | poly_modulus_degree: " <<
+    std::cout << " /" << std::endl;
+    std::cout << "| Encryption parameters:" << std::endl;
+    std::cout << "| scheme: " << scheme_name << std::endl;
+    std::cout << "| poly_modulus_degree: " <<
         context_data.parms().poly_modulus_degree() << std::endl;
 
     /*
     Print the size of the true (product) coefficient modulus.
     */
-    std::cout << "  | coeff_modulus size: ";
+    std::cout << "| coeff_modulus size: ";
     std::cout << context_data.total_coeff_modulus_bit_count() << " (";
     auto coeff_modulus = context_data.parms().coeff_modulus();
     std::size_t coeff_mod_count = coeff_modulus.size();
@@ -101,11 +101,11 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     */
     if (context_data.parms().scheme() == seal::scheme_type::BFV)
     {
-        std::cout << "  | plain_modulus: " << context_data.
+        std::cout << "| plain_modulus: " << context_data.
             parms().plain_modulus().value() << std::endl;
     }
 
-    std::cout << "   \\" << std::endl;
+    std::cout << " \\" << std::endl;
 }
 
 /*

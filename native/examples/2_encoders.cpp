@@ -354,8 +354,8 @@ void example_ckks_encoder()
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree,
-        vector<int>(40, 5)));
+    parms.set_coeff_modulus(CoeffModulus::Create(
+        poly_modulus_degree, { 40, 40, 40, 40, 40 }));
 
     /*
     We create the SEALContext as usual and print the parameters.
