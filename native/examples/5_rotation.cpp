@@ -19,7 +19,7 @@ void example_rotation_bfv()
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 20));
 
     auto context = SEALContext::Create(parms);
@@ -138,7 +138,8 @@ void example_rotation_ckks()
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree,
+        vector<int>(40, 5)));
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);

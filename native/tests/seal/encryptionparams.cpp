@@ -36,7 +36,7 @@ namespace SEALTest
             ASSERT_TRUE(parms.poly_modulus_degree() == 2);
             ASSERT_TRUE(parms.random_generator() == UniformRandomGeneratorFactory::default_factory());
 
-            parms.set_coeff_modulus(CoeffModulus::Custom(2, { 30, 40, 50 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(2, { 30, 40, 50 }));
             if (scheme == scheme_type::BFV)
                 parms.set_plain_modulus(2);
             parms.set_poly_modulus_degree(128);
@@ -65,7 +65,7 @@ namespace SEALTest
     {
         auto scheme = scheme_type::BFV;
         EncryptionParameters parms1(scheme);
-        parms1.set_coeff_modulus(CoeffModulus::Custom(64, { 30 }));
+        parms1.set_coeff_modulus(CoeffModulus::Create(64, { 30 }));
         if (scheme == scheme_type::BFV)
             parms1.set_plain_modulus(1 << 6);
         parms1.set_poly_modulus_degree(64);
@@ -77,12 +77,12 @@ namespace SEALTest
         EncryptionParameters parms3(scheme);
         parms3 = parms2;
         ASSERT_TRUE(parms3 == parms2);
-        parms3.set_coeff_modulus(CoeffModulus::Custom(64, { 32 }));
+        parms3.set_coeff_modulus(CoeffModulus::Create(64, { 32 }));
         ASSERT_FALSE(parms3 == parms2);
 
         parms3 = parms2;
         ASSERT_TRUE(parms3 == parms2);
-        parms3.set_coeff_modulus(CoeffModulus::Custom(64, { 30, 30 }));
+        parms3.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
         ASSERT_FALSE(parms3 == parms2);
 
         parms3 = parms2;
@@ -108,7 +108,7 @@ namespace SEALTest
 
         parms3 = parms2;
         parms3.set_coeff_modulus({ 2 });
-        parms3.set_coeff_modulus(CoeffModulus::Custom(64, { 50 }));
+        parms3.set_coeff_modulus(CoeffModulus::Create(64, { 50 }));
         parms3.set_coeff_modulus(parms2.coeff_modulus());
         ASSERT_TRUE(parms3 == parms2);
     }
@@ -120,7 +120,7 @@ namespace SEALTest
         auto scheme = scheme_type::BFV;
         EncryptionParameters parms(scheme);
         EncryptionParameters parms2(scheme);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 30 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 30 }));
         if (scheme == scheme_type::BFV)
             parms.set_plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
@@ -132,7 +132,7 @@ namespace SEALTest
         ASSERT_TRUE(parms.poly_modulus_degree() == parms2.poly_modulus_degree());
         ASSERT_TRUE(parms == parms2);
 
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 30, 60, 60 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 60, 60 }));
 
         if (scheme == scheme_type::BFV)
             parms.set_plain_modulus(1 << 30);

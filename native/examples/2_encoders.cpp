@@ -72,7 +72,7 @@ void example_integer_encoder()
     EncryptionParameters parms(scheme_type::BFV);
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
 
     /*
     There is no hidden logic behind our choice of the plain_modulus. The only
@@ -172,7 +172,7 @@ void example_batch_encoder()
     EncryptionParameters parms(scheme_type::BFV);
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
 
     /*
     To enable batching, we need to set the plain_modulus to be a prime number
@@ -347,13 +347,15 @@ void example_ckks_encoder()
         (1) CKKS does not use the plain_modulus encryption parameter;
         (2) Selecting the coeff_modulus in a specific way can be very important
             when using the CKKS scheme. We will explain this further in the file
-            `ckks_basics.cpp'. In this example we use CoeffModulus::Default.
+            `ckks_basics.cpp'. In this example we use CoeffModulus::Create to
+            generate 5 40-bit prime numbers.
     */
     EncryptionParameters parms(scheme_type::CKKS);
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree,
+        vector<int>(40, 5)));
 
     /*
     We create the SEALContext as usual and print the parameters.

@@ -577,21 +577,21 @@ void example_bfv_performance_default()
     EncryptionParameters parms(scheme_type::BFV);
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
     bfv_performance_test(SEALContext::Create(parms));
 
     cout << endl;
     poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
     bfv_performance_test(SEALContext::Create(parms));
 
     cout << endl;
     poly_modulus_degree = 16384;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
     bfv_performance_test(SEALContext::Create(parms));
 
@@ -601,7 +601,7 @@ void example_bfv_performance_default()
     // cout << endl;
     // poly_modulus_degree = 32768;
     // parms.set_poly_modulus_degree(poly_modulus_degree);
-    // parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    // parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     // parms.set_plain_modulus(786433);
     // bfv_performance_test(SEALContext::Create(parms));
 }
@@ -630,7 +630,7 @@ void example_bfv_performance_custom()
 
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     if (poly_modulus_degree == 1024)
     {
         parms.set_plain_modulus(12289);
@@ -646,22 +646,24 @@ void example_ckks_performance_default()
 {
     print_example_banner("CKKS Performance Test with Degrees: 4096, 8192, and 16384");
 
+    // It is not recommended to use BFVDefault primes in CKKS. However, for performance
+    // test, BFVDefault primes are good enough.
     EncryptionParameters parms(scheme_type::CKKS);
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
 
     cout << endl;
     poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
 
     cout << endl;
     poly_modulus_degree = 16384;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
 
     /*
@@ -670,7 +672,7 @@ void example_ckks_performance_default()
     // cout << endl;
     // poly_modulus_degree = 32768;
     // parms.set_poly_modulus_degree(poly_modulus_degree);
-    // parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    // parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     // ckks_performance_test(SEALContext::Create(parms));
 }
 
@@ -698,7 +700,7 @@ void example_ckks_performance_custom()
 
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     ckks_performance_test(SEALContext::Create(parms));
 }
 

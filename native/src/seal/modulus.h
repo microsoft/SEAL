@@ -96,9 +96,10 @@ namespace seal
         level when using a given poly_modulus_degree, according to the
         HomomorphicEncryption.org security standard. Note that all security
         guarantees are lost if the output is used with encryption parameters with
-        a mismatching value for the poly_modulus_degree. The default parameters
-        work well with the BFV scheme, but will usually not be optimal when using
-        the CKKS scheme.
+        a mismatching value for the poly_modulus_degree.
+        
+        The BFV default parameters work well with the BFV scheme, but will usually
+        not be optimal when using the CKKS scheme.
 
         @param[in] poly_modulus_degree The value of the poly_modulus_degree
         encryption parameter
@@ -107,7 +108,7 @@ namespace seal
         or is too large
         @throws std::invalid_argument if sec_level is sec_level_type::none
         */
-        static std::vector<SmallModulus> Default(
+        static std::vector<SmallModulus> BFVDefault(
             std::size_t poly_modulus_degree,
             sec_level_type sec_level = sec_level_type::tc128);
 
@@ -127,7 +128,7 @@ namespace seal
         are out of bounds
         @throws std::logic_error if not enough suitable primes could be found
         */
-        static std::vector<SmallModulus> Custom(
+        static std::vector<SmallModulus> Create(
             std::size_t poly_modulus_degree,
             std::vector<int> bit_sizes);
     };
@@ -156,7 +157,7 @@ namespace seal
             std::size_t poly_modulus_degree,
             int bit_size)
         {
-            return CoeffModulus::Custom(poly_modulus_degree, { bit_size })[0];
+            return CoeffModulus::Create(poly_modulus_degree, { bit_size })[0];
         }
 
 
@@ -178,7 +179,7 @@ namespace seal
             std::size_t poly_modulus_degree,
             std::vector<int> bit_sizes)
         {
-            return CoeffModulus::Custom(poly_modulus_degree, bit_sizes);
+            return CoeffModulus::Create(poly_modulus_degree, bit_sizes);
         }
     };
 }

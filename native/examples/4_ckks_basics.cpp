@@ -65,13 +65,13 @@ void example_ckks_basics()
             largest of the other primes;
         (3) Choose the intermediate primes to be close to each other.
 
-    We use CoeffModulus::Custom to generate primes of the appropriate size. Note
+    We use CoeffModulus::Create to generate primes of the appropriate size. Note
     that our coeff_modulus is 200 bits total, which is below the bound for our
     poly_modulus_degree: CoeffModulus::MaxBitCount(8192) returns 218.
     */
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Custom(
+    parms.set_coeff_modulus(CoeffModulus::Create(
         poly_modulus_degree, { 60, 40, 40, 60 }));
 
     /*

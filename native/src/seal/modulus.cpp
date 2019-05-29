@@ -14,7 +14,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    vector<SmallModulus> CoeffModulus::Default(
+    vector<SmallModulus> CoeffModulus::BFVDefault(
         size_t poly_modulus_degree, sec_level_type sec_level)
     {
         if (!MaxBitCount(poly_modulus_degree, sec_level))
@@ -45,7 +45,7 @@ namespace seal
         }
     }
 
-    vector<SmallModulus> CoeffModulus::Custom(
+    vector<SmallModulus> CoeffModulus::Create(
         size_t poly_modulus_degree, vector<int> bit_sizes)
     {
         if (poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX ||

@@ -27,7 +27,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
 
@@ -81,7 +81,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
 
@@ -161,7 +161,7 @@ namespace SEALTest
             //adding two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 30, 30, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
@@ -199,7 +199,7 @@ namespace SEALTest
             //adding two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -260,7 +260,7 @@ namespace SEALTest
             //adding two random vectors 100 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -325,7 +325,7 @@ namespace SEALTest
             //adding two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 30, 30, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -364,7 +364,7 @@ namespace SEALTest
             //adding two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -423,7 +423,7 @@ namespace SEALTest
             //adding two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -482,7 +482,7 @@ namespace SEALTest
             //adding two random vectors 50 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -546,7 +546,7 @@ namespace SEALTest
             //adding two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 30, 30, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -585,7 +585,7 @@ namespace SEALTest
             //adding two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -644,7 +644,7 @@ namespace SEALTest
             //adding two random vectors 100 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -707,7 +707,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -767,7 +767,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -822,7 +822,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -877,7 +877,7 @@ namespace SEALTest
             SmallModulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -943,7 +943,7 @@ namespace SEALTest
             SmallModulus plain_modulus((1ULL << 20) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 30, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -973,7 +973,7 @@ namespace SEALTest
             SmallModulus plain_modulus((1ULL << 40) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 30, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1007,7 +1007,7 @@ namespace SEALTest
             SmallModulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1073,7 +1073,7 @@ namespace SEALTest
             SmallModulus plain_modulus((1ULL << 60) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60, 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1139,7 +1139,7 @@ namespace SEALTest
             SmallModulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1205,7 +1205,7 @@ namespace SEALTest
             SmallModulus plain_modulus(1 << 8);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1233,7 +1233,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40, 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40 }));
 
         auto context = SEALContext::Create(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -1306,7 +1306,7 @@ namespace SEALTest
             //multiplying two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 30, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1343,7 +1343,7 @@ namespace SEALTest
             //multiplying two random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1401,7 +1401,7 @@ namespace SEALTest
             //multiplying two random vectors
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1464,7 +1464,7 @@ namespace SEALTest
             //multiplying two random vectors by an integer
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 40 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1521,7 +1521,7 @@ namespace SEALTest
             //multiplying two random vectors by an integer
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1578,7 +1578,7 @@ namespace SEALTest
             //multiplying two random vectors by a double
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1636,7 +1636,7 @@ namespace SEALTest
             //multiplying two random vectors by a double
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1699,7 +1699,7 @@ namespace SEALTest
             //multiplying two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1762,7 +1762,7 @@ namespace SEALTest
             //multiplying two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1825,7 +1825,7 @@ namespace SEALTest
             //multiplying two random vectors 50 times
             size_t slot_size = 2;
             parms.set_poly_modulus_degree(8);
-            parms.set_coeff_modulus(CoeffModulus::Custom(8, { 60, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(8, { 60, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1893,7 +1893,7 @@ namespace SEALTest
             //squaring two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1949,7 +1949,7 @@ namespace SEALTest
             //squaring two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 60, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -2005,7 +2005,7 @@ namespace SEALTest
             //squaring two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -2066,7 +2066,7 @@ namespace SEALTest
             //multiplying two random vectors 100 times
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2,
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2,
                 { 30, 30, 30, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
@@ -2136,7 +2136,7 @@ namespace SEALTest
             //multiplying two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus(CoeffModulus::Custom(128, { 30, 30, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             auto next_parms_id = context->first_context_data()->
@@ -2205,7 +2205,7 @@ namespace SEALTest
             //multiplying two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus(CoeffModulus::Custom(128, { 60, 60, 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(128, { 60, 60, 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -2333,7 +2333,7 @@ namespace SEALTest
             //squaring two random vectors 100 times
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 50, 50, 50 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 50, 50, 50 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             auto next_parms_id = context->first_context_data()->
@@ -2393,7 +2393,7 @@ namespace SEALTest
             //squaring two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus(CoeffModulus::Custom(128, { 50, 50, 50 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(128, { 50, 50, 50 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             auto next_parms_id = context->first_context_data()->
@@ -2457,7 +2457,7 @@ namespace SEALTest
             //modulo switching without rescaling for random vectors
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(
+            parms.set_coeff_modulus(CoeffModulus::Create(
                 slot_size * 2, { 60, 60, 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
@@ -2514,7 +2514,7 @@ namespace SEALTest
             //modulo switching without rescaling for random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(
+            parms.set_coeff_modulus(CoeffModulus::Create(
                 slot_size * 2, { 40, 40, 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
@@ -2571,7 +2571,7 @@ namespace SEALTest
             //modulo switching without rescaling for random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40, 40, 40, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             auto next_parms_id = context->first_context_data()->
@@ -2631,7 +2631,7 @@ namespace SEALTest
             //multiplication and addition without rescaling for random vectors
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 50, 50, 50 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 50, 50, 50 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             auto next_parms_id = context->first_context_data()->
@@ -2715,7 +2715,7 @@ namespace SEALTest
             //multiplication and addition without rescaling for random vectors
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus(CoeffModulus::Custom(128, { 50, 50, 50 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(128, { 50, 50, 50 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             auto next_parms_id = context->first_context_data()->
@@ -2803,7 +2803,7 @@ namespace SEALTest
             // maximal number of slots
             size_t slot_size = 4;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 40, 40, 40, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 40, 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -2878,7 +2878,7 @@ namespace SEALTest
         {
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40, 40, 40, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -2959,7 +2959,7 @@ namespace SEALTest
             // maximal number of slots
             size_t slot_size = 4;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Custom(slot_size * 2, { 40, 40, 40, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 40, 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -3038,7 +3038,7 @@ namespace SEALTest
         {
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Custom(64, { 40, 40, 40, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -3122,7 +3122,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 8);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3184,7 +3184,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3266,7 +3266,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3310,7 +3310,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3391,7 +3391,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
 
         auto context = SEALContext::Create(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3464,7 +3464,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3506,7 +3506,7 @@ namespace SEALTest
         SmallModulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3573,7 +3573,7 @@ namespace SEALTest
         SmallModulus plain_modulus(257);
         parms.set_poly_modulus_degree(8);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(8, { 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3651,7 +3651,7 @@ namespace SEALTest
         SmallModulus plain_modulus(257);
         parms.set_poly_modulus_degree(8);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(8, { 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3720,7 +3720,7 @@ namespace SEALTest
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 30, 30, 30, 30 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30 }));
 
         auto context = SEALContext::Create(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
@@ -3811,7 +3811,7 @@ namespace SEALTest
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Custom(128, { 30, 30, 30, 30 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30 }));
 
         auto context = SEALContext::Create(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);

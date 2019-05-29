@@ -20,7 +20,7 @@ namespace SEALTest
         EncryptionParameters parms(scheme_type::BFV);
 
         parms.set_poly_modulus_degree(2);
-        parms.set_coeff_modulus(CoeffModulus::Custom(2, { 30 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
         parms.set_plain_modulus(2);
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
@@ -95,7 +95,7 @@ namespace SEALTest
         stringstream stream;
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(2);
-        parms.set_coeff_modulus(CoeffModulus::Custom(2, { 30 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
         parms.set_plain_modulus(2);
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
@@ -109,7 +109,7 @@ namespace SEALTest
         ASSERT_FALSE(ctxt2.is_ntt_form());
 
         parms.set_poly_modulus_degree(1024);
-        parms.set_coeff_modulus(CoeffModulus::Default(1024));
+        parms.set_coeff_modulus(CoeffModulus::BFVDefault(1024));
         parms.set_plain_modulus(0xF0F0);
         context = SEALContext::Create(parms, false);
         KeyGenerator keygen(context);

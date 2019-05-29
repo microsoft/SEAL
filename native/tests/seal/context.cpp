@@ -237,7 +237,7 @@ namespace SEALTest
 
         // Parameters not OK due to too large coeff_modulus and enforce_hes
         parms.set_poly_modulus_degree(2048);
-        parms.set_coeff_modulus(CoeffModulus::Default(4096, sec_level_type::tc128));
+        parms.set_coeff_modulus(CoeffModulus::BFVDefault(4096, sec_level_type::tc128));
         parms.set_plain_modulus(73);
         parms.set_random_generator(nullptr);
         {
@@ -285,7 +285,7 @@ namespace SEALTest
 
         // Parameters OK; using batching; no keyswitching
         parms.set_poly_modulus_degree(2048);
-        parms.set_coeff_modulus(CoeffModulus::Custom(2048, { 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(2048, { 40 }));
         parms.set_plain_modulus(65537);
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);

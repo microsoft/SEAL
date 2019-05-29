@@ -81,7 +81,7 @@ void example_levels()
                                                |
                     coeff_modulus: { 50 }  +---+  Level 0 (lowest level)
     */
-    parms.set_coeff_modulus(CoeffModulus::Custom(
+    parms.set_coeff_modulus(CoeffModulus::Create(
         poly_modulus_degree, { 50, 30, 30, 50, 50 }));
 
     /*

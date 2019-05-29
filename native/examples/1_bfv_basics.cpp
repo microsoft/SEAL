@@ -92,17 +92,17 @@ void example_bfv_basics()
     Microsoft SEAL comes with helper functions for selecting the coeff_modulus.
     For new users the easiest way is to simply use
 
-        CoeffModulus::Default(poly_modulus_degree),
+        CoeffModulus::BFVDefault(poly_modulus_degree),
 
     which returns std::vector<SmallModulus> consisting of a generally good choice
     for the given poly_modulus_degree. In later examples we will use the function
 
-        CoeffModulus::Custom(poly_modulus_degree, { ... })
+        CoeffModulus::Create(poly_modulus_degree, { ... })
 
     to obtain customized primes for the coeff_modulus, and will explain reasons
     for doing so.
     */
-    parms.set_coeff_modulus(CoeffModulus::Default(poly_modulus_degree));
+    parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
 
     /*
     The plaintext modulus can be any positive integer, even though here we take

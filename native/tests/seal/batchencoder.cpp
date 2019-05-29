@@ -19,7 +19,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(64);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
         parms.set_plain_modulus(257);
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
@@ -72,7 +72,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(64);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
         parms.set_plain_modulus(257);
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
@@ -125,7 +125,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(64);
-        parms.set_coeff_modulus(CoeffModulus::Custom(64, { 60 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
         parms.set_plain_modulus(257);
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
