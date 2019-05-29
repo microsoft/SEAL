@@ -142,13 +142,11 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Generates and returns the specified number of relinearization keys.
+        /// Generates and returns relinearization keys.
         /// </summary>
-        /// <param name="count">The number of relinearization keys to generate</param>
-        /// <exception cref="ArgumentException">if count is zero or too large</exception>
-        public RelinKeys RelinKeys(ulong count = 1)
+        public RelinKeys RelinKeys()
         {
-            NativeMethods.KeyGenerator_RelinKeys(NativePtr, count, out IntPtr relinKeysPtr);
+            NativeMethods.KeyGenerator_RelinKeys(NativePtr, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr);
         }
 

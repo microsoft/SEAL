@@ -28,37 +28,7 @@ namespace SEALTest
 
             RelinKeys keys;
             RelinKeys test_keys;
-            keys = keygen.relin_keys(1);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
-                {
-                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
-                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
-                }
-            }
-
-            keys = keygen.relin_keys(2);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
-                {
-                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
-                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
-                }
-            }
-
-            keys = keygen.relin_keys(5);
+            keys = keygen.relin_keys();
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
@@ -84,37 +54,7 @@ namespace SEALTest
 
             RelinKeys keys;
             RelinKeys test_keys;
-            keys = keygen.relin_keys(1);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
-                {
-                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
-                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
-                }
-            }
-
-            keys = keygen.relin_keys(2);
-            keys.save(stream);
-            test_keys.load(context, stream);
-            ASSERT_EQ(keys.size(), test_keys.size());
-            ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
-            for (size_t j = 0; j < test_keys.size(); j++)
-            {
-                for (size_t i = 0; i < test_keys.key(j + 2).size(); i++)
-                {
-                    ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
-                    ASSERT_EQ(keys.key(j + 2)[i].data().uint64_count(), test_keys.key(j + 2)[i].data().uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(), keys.key(j + 2)[i].data().uint64_count()));
-                }
-            }
-
-            keys = keygen.relin_keys(5);
+            keys = keygen.relin_keys();
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());

@@ -50,8 +50,8 @@ void example_bfv_basics()
     Larger poly_modulus_degree makes ciphertext sizes larger and all operations
     slower, but enables more complicated encrypted computations. Recommended
     values are 1024, 2048, 4096, 8192, 16384, 32768, but it is also possible
-    to go beyond this range. 
-    
+    to go beyond this range.
+
     In this example we use a relatively small polynomial modulus;
     anything smaller than this will enable only extremely restricted encrypted
     computations.
@@ -82,16 +82,16 @@ void example_bfv_basics()
 
     These numbers can also be found in native/src/seal/util/hestdparms.h encoded
     in the function SEAL_HE_STD_PARMS_128_TC, and can also be obtained from the
-    function 
-        
+    function
+
         CoeffModulus::MaxBitCount(poly_modulus_degree).
-    
+
     For example, if poly_modulus_degree is 4096, the coeff_modulus could consist
     of three 36-bit primes (108 bits).
 
     Microsoft SEAL comes with helper functions for selecting the coeff_modulus.
     For new users the easiest way is to simply use
-        
+
         CoeffModulus::Default(poly_modulus_degree),
 
     which returns std::vector<SmallModulus> consisting of a generally good choice
@@ -117,7 +117,7 @@ void example_bfv_basics()
 
     and the noise budget consumption in a homomorphic multiplication is of the
     form log2(plain_modulus) + (other terms).
-    
+
     The plaintext modulus is specific to the BFV scheme, and cannot be set when
     using the CKKS scheme.
     */
@@ -394,7 +394,7 @@ void example_bfv_basics()
         << encrypted_result.size() << endl;
     cout << "    + noise budget in encrypted_result: "
         << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
-    
+
     cout << endl;
     cout << "NOTE: Notice the increase in remaining noise budget." << endl;
 

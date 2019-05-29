@@ -13,18 +13,19 @@ namespace Microsoft.Research.SEAL
     /// <remarks>
     /// <para>
     /// Slot Rotations
-    /// Galois keys are used together with batching (<see cref="BatchEncoder"/>). If the polynomial modulus
-    /// is a polynomial of degree N, in batching the idea is to view a plaintext polynomial as
-    /// a 2-by-(N/2) matrix of integers modulo plaintext modulus. Normal homomorphic computations
-    /// operate on such encrypted matrices element (slot) wise. However, special rotation
-    /// operations allow us to also rotate the matrix rows cyclically in either direction, and
-    /// rotate the columns (swap the rows). These operations require the Galois keys.
+    /// Galois keys are used together with batching (<see cref="BatchEncoder"/>). If the
+    /// polynomial modulus is a polynomial of degree N, in batching the idea is to view
+    /// a plaintext polynomial as a 2-by-(N/2) matrix of integers modulo plaintext modulus.
+    /// Normal homomorphic computations operate on such encrypted matrices element (slot)
+    /// wise. However, special rotation operations allow us to also rotate the matrix rows
+    /// cyclically in either direction, and rotate the columns (swap the rows). These
+    /// operations require the Galois keys.
     /// </para>
     /// <para>
     /// Thread Safety
     /// In general, reading from GaloisKeys is thread-safe as long as no other thread is
-    /// concurrently mutating it. This is due to the underlying data structure storing the
-    /// Galois keys not being thread-safe.
+    /// concurrently mutating it. This is due to the underlying data structure storing
+    /// the Galois keys not being thread-safe.
     /// </para>
     /// </remarks>
     /// <see cref="SecretKey">see SecretKey for the class that stores the secret key.</see>

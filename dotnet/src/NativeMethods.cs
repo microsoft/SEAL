@@ -762,7 +762,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void KeyGenerator_Destroy(IntPtr thisptr);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, ulong count, out IntPtr relinKeys);
+        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, out IntPtr relinKeys);
 
         [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys1", PreserveSig = false)]
         internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, out IntPtr galoisKeys);

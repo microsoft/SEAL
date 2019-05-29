@@ -34,7 +34,7 @@ namespace Microsoft.Research.SEAL
     /// exponentiation, and multiplication and addition of several ciphertexts for convenience.
     /// in many cases some of the inputs to a computation are plaintext elements rather than
     /// ciphertexts. For this we provide fast "plain" operations: plain addition, plain subtraction,
-    /// aand plain multiplication.
+    /// and plain multiplication.
     /// </para>
     /// <para>
     /// Relinearization

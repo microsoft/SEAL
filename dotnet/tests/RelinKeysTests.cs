@@ -50,10 +50,10 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            RelinKeys keys = keygen.RelinKeys(count: 2);
+            RelinKeys keys = keygen.RelinKeys();
 
             Assert.IsNotNull(keys);
-            Assert.AreEqual(2ul, keys.Size);
+            Assert.AreEqual(1ul, keys.Size);
 
             RelinKeys other = new RelinKeys();
             MemoryPoolHandle handle = other.Pool;
@@ -64,13 +64,11 @@ namespace SEALNetTest
             using (MemoryStream ms = new MemoryStream())
             {
                 keys.Save(ms);
-
                 ms.Seek(offset: 0, loc: SeekOrigin.Begin);
-
                 other.Load(context, ms);
             }
 
-            Assert.AreEqual(2ul, other.Size);
+            Assert.AreEqual(1ul, other.Size);
             Assert.IsTrue(ValCheck.IsMetadataValidFor(other, context));
             Assert.IsTrue(handle.AllocByteCount > 0ul);
 
@@ -108,12 +106,10 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            RelinKeys relinKeys = keygen.RelinKeys(count: 3);
+            RelinKeys relinKeys = keygen.RelinKeys();
 
             Assert.IsTrue(relinKeys.HasKey(2));
-            Assert.IsTrue(relinKeys.HasKey(3));
-            Assert.IsTrue(relinKeys.HasKey(4));
-            Assert.IsFalse(relinKeys.HasKey(5));
+            Assert.IsFalse(relinKeys.HasKey(3));
 
             Assert.ThrowsException<ArgumentException>(() => relinKeys.Key(0));
             Assert.ThrowsException<ArgumentException>(() => relinKeys.Key(1));
@@ -121,17 +117,6 @@ namespace SEALNetTest
             List<PublicKey> key1 = new List<PublicKey>(relinKeys.Key(2));
             Assert.AreEqual(4, key1.Count);
             Assert.AreEqual(5ul, key1[0].Data.CoeffModCount);
-            Assert.AreEqual(5ul, key1[1].Data.CoeffModCount);
-
-            List<PublicKey> key2 = new List<PublicKey>(relinKeys.Key(3));
-            Assert.AreEqual(4, key2.Count);
-            Assert.AreEqual(5ul, key2[0].Data.CoeffModCount);
-            Assert.AreEqual(5ul, key2[1].Data.CoeffModCount);
-
-            List<PublicKey> key3 = new List<PublicKey>(relinKeys.Key(4));
-            Assert.AreEqual(4, key3.Count);
-            Assert.AreEqual(5ul, key3[0].Data.CoeffModCount);
-            Assert.AreEqual(5ul, key3[1].Data.CoeffModCount);
         }
 
         [TestMethod]

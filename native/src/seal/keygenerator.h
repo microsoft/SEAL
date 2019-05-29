@@ -83,12 +83,12 @@ namespace seal
         const PublicKey &public_key() const;
 
         /**
-        Generates and returns the specified number of relinearization keys.
-
-        @param[in] count The number of relinearization keys to generate
-        @throws std::invalid_argument if count is zero or too large
+        Generates and returns relinearization keys.
         */
-        RelinKeys relin_keys(std::size_t count = 1);
+        inline RelinKeys relin_keys()
+        {
+            return relin_keys(1);
+        }
 
         /**
         Generates and returns Galois keys. This function creates specific Galois
@@ -171,6 +171,14 @@ namespace seal
         void generate_one_kswitch_key(
             const uint64_t *new_key,
             std::vector<PublicKey> &destination);
+
+        /**
+        Generates and returns the specified number of relinearization keys.
+
+        @param[in] count The number of relinearization keys to generate
+        @throws std::invalid_argument if count is zero or too large
+        */
+        RelinKeys relin_keys(std::size_t count);
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);

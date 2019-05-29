@@ -17,16 +17,26 @@ namespace seal
     Class to store relinearization keys.
 
     @par Relinearization
-    Concretely, a relinearization key corresponding to a power K of the secret
-    key can be used in the relinearization operation to change a ciphertext of size
-    K+1 to size K. Recall that the smallest possible size for a ciphertext is 2,
-    so the first relinearization key is corresponds to the square of the secret
-    key. The second relinearization key corresponds to the cube of the secret key,
-    and so on. For example, to relinearize a ciphertext of size 7 back to size 2,
-    one would need 5 relinearization keys, although it is hard to imagine a situation
-    where it makes sense to have size 7 ciphertexts, as operating on such objects
-    would be very slow. Most commonly only one relinearization key is needed, and
-    relinearization is performed after every multiplication.
+    Freshly encrypted ciphertexts have a size of 2, and multiplying ciphertexts
+    of sizes K and L results in a ciphertext of size K+L-1. Unfortunately, this
+    growth in size slows down further multiplications and increases noise growth.
+    Relinearization is an operation that has no semantic meaning, but it reduces
+    the size of ciphertexts back to 2. Microsoft SEAL can only relinearize size 3
+    ciphertexts back to size 2, so if the ciphertexts grow larger than size 3,
+    there is no way to reduce their size. Relinearization requires an instance of
+    RelinKeys to be created by the secret key owner and to be shared with the
+    evaluator. Note that plain multiplication is fundamentally different from
+    normal multiplication and does not result in ciphertext size growth.
+
+    @par When to Relinearize
+    Typically, one should always relinearize after each multiplications. However,
+    in some cases relinearization should be postponed as late as possible due to
+    its computational cost. For example, suppose the computation involves several
+    homomorphic multiplications followed by a sum of the results. In this case it
+    makes sense to not relinearize each product, but instead add them first and
+    only then relinearize the sum. This is particularly important when using the
+    CKKS scheme, where relinearization is much more computationally costly than
+    multiplications and additions.
 
     @par Thread Safety
     In general, reading from RelinKeys is thread-safe as long as no other thread

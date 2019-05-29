@@ -1237,7 +1237,7 @@ namespace SEALTest
 
         auto context = SEALContext::Create(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
-        RelinKeys rlk = keygen.relin_keys(3);
+        RelinKeys rlk = keygen.relin_keys();
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
@@ -1258,6 +1258,7 @@ namespace SEALTest
 
         encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
+        evaluator.relinearize_inplace(encrypted, rlk);
         evaluator.square_inplace(encrypted);
         evaluator.relinearize_inplace(encrypted, rlk);
         decryptor.decrypt(encrypted, plain2);
@@ -1272,6 +1273,7 @@ namespace SEALTest
 
         encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
+        evaluator.relinearize_inplace(encrypted, rlk);
         evaluator.square_inplace(encrypted);
         evaluator.relinearize_inplace(encrypted, rlk);
         decryptor.decrypt(encrypted, plain2);
@@ -2212,7 +2214,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys(2);
+            RelinKeys rlk = keygen.relin_keys();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2298,6 +2300,7 @@ namespace SEALTest
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
+                evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.multiply_inplace(encrypted1, encrypted2);
 
                 // Scale down by two levels
@@ -3190,7 +3193,7 @@ namespace SEALTest
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
-        RelinKeys rlk = keygen.relin_keys(4);
+        RelinKeys rlk = keygen.relin_keys();
 
         Ciphertext encrypted1, encrypted2, encrypted3, encrypted4, product;
         Plaintext plain;
@@ -3272,7 +3275,7 @@ namespace SEALTest
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
-        RelinKeys rlk = keygen.relin_keys(4);
+        RelinKeys rlk = keygen.relin_keys();
 
         Ciphertext encrypted;
         Plaintext plain;

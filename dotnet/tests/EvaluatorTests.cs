@@ -1015,7 +1015,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            RelinKeys relinKeys = keygen.RelinKeys(count: 3);
+            RelinKeys relinKeys = keygen.RelinKeys();
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
@@ -1038,6 +1038,7 @@ namespace SEALNetTest
             plain1.Set("1x^10 + 2");
             encryptor.Encrypt(plain1, encrypted1);
             evaluator.SquareInplace(encrypted1);
+            evaluator.RelinearizeInplace(encrypted1, relinKeys);
             evaluator.SquareInplace(encrypted1);
             evaluator.Relinearize(encrypted1, relinKeys, encrypted2);
             decryptor.Decrypt(encrypted2, plain2);

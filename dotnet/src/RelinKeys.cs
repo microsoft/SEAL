@@ -13,17 +13,27 @@ namespace Microsoft.Research.SEAL
     /// <remarks>
     /// <para>
     /// Relinearization
-    /// Concretely, a relinearization key corresponding to a power K of the secret
-    /// key can be used in the relinearization operation to change a ciphertext of
-    /// size K+1 to size K. Recall that the smallest possible size for a ciphertext
-    /// is 2, so the first relinearization key is corresponds to the square of the
-    /// secret key. The second relinearization key corresponds to the cube of the
-    /// secret key, and so on. For example, to relinearize a ciphertext of size 7
-    /// back to size 2, one would need 5 relinearization keys, although it is hard
-    /// to imagine a situation where it makes sense to have size 7 ciphertexts, as
-    /// operating on such objects would be very slow. Most commonly only one
-    /// relinearization key is needed, and relinearization is performed after every
-    /// multiplication.
+    /// Freshly encrypted ciphertexts have a size of 2, and multiplying ciphertexts
+    /// of sizes K and L results in a ciphertext of size K+L-1. Unfortunately, this
+    /// growth in size slows down further multiplications and increases noise growth.
+    /// Relinearization is an operation that has no semantic meaning, but it reduces
+    /// the size of ciphertexts back to 2. Microsoft SEAL can only relinearize size 3
+    /// ciphertexts back to size 2, so if the ciphertexts grow larger than size 3,
+    /// there is no way to reduce their size. Relinearization requires an instance of
+    /// RelinKeys to be created by the secret key owner and to be shared with the
+    /// evaluator. Note that plain multiplication is fundamentally different from
+    /// normal multiplication and does not result in ciphertext size growth.
+    /// </para>
+    /// <para>
+    /// When to Relinearize
+    /// Typically, one should always relinearize after each multiplications. However,
+    /// in some cases relinearization should be postponed as late as possible due to
+    /// its computational cost.For example, suppose the computation involves several
+    /// homomorphic multiplications followed by a sum of the results. In this case it
+    /// makes sense to not relinearize each product, but instead add them first and
+    /// only then relinearize the sum. This is particularly important when using the
+    /// CKKS scheme, where relinearization is much more computationally costly than
+    /// multiplications and additions.
     /// </para>
     /// <para>
     /// Thread Safety
@@ -67,9 +77,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the index of a relinearization key in the backing KSwitchKeys instance
-        /// that corresponds to the given secret key power, assuming that it exists in the
-        /// backing KSwitchKeys.
+        /// Returns the index of a relinearization key in the backing KSwitchKeys
+        /// instance that corresponds to the given secret key power, assuming that
+        /// it exists in the backing KSwitchKeys.
         /// </summary>
         /// <param name="keyPower">The power of the secret key</param>
         /// <exception cref="ArgumentException">if keyPower is less than 2</exception>
@@ -80,8 +90,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns whether a relinearization key corresponding to a given Galois key
-        /// element exists.
+        /// Returns whether a relinearization key corresponding to a given secret
+        /// key power exists.
         /// </summary>
         /// <param name="keyPower">The power of the secret key</param>
         /// <exception cref="ArgumentException">if keyPower is less than 2</exception>
@@ -96,9 +106,9 @@ namespace Microsoft.Research.SEAL
         /// Returns a specified relinearization key.
         /// </summary>
         /// <remarks>
-        /// Returns a specified relinearization key. The returned relinearization key
-        /// corresponds to the given power of the secret key and is valid only as long
-        /// as the RelinKeys is valid.
+        /// Returns a specified relinearization key. The returned relinearization
+        /// key corresponds to the given power of the secret key and is valid only
+        /// as long as the RelinKeys is valid.
         /// </remarks>
         /// <param name="keyPower">The power of the secret key</param>
         /// <exception cref="ArgumentException">if the key corresponding to keyPower

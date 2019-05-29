@@ -88,7 +88,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, uint64_t count, void **relin_keys)
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, void **relin_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -96,7 +96,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, uint64_t co
 
     try
     {
-        RelinKeys *relinKeys = new RelinKeys(keygen->relin_keys(safe_cast<size_t>(count)));
+        RelinKeys *relinKeys = new RelinKeys(keygen->relin_keys());
         *relin_keys = relinKeys;
         return S_OK;
     }

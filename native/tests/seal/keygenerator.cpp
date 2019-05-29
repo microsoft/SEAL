@@ -38,21 +38,6 @@ namespace SEALTest
                 }
             }
 
-            evk = keygen.relin_keys(2);
-            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
-            ASSERT_EQ(1ULL, evk.key(2).size());
-            ASSERT_EQ(1ULL, evk.key(3).size());
-            for (size_t j = 0; j < evk.size(); j++)
-            {
-                for (size_t i = 0; i < evk.key(j + 2).size(); i++)
-                {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
-                    {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
-                    }
-                }
-            }
-
             GaloisKeys galks = keygen.galois_keys();
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_EQ(1ULL, galks.key(3).size());
@@ -95,22 +80,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            RelinKeys evk = keygen.relin_keys(2);
-            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
-            ASSERT_EQ(2ULL, evk.key(2).size());
-            ASSERT_EQ(2ULL, evk.key(3).size());
-            for (size_t j = 0; j < evk.size(); j++)
-            {
-                for (size_t i = 0; i < evk.key(j + 2).size(); i++)
-                {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
-                    {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
-                    }
-                }
-            }
-
-            evk = keygen.relin_keys();
+            RelinKeys evk = keygen.relin_keys();
             ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
             ASSERT_EQ(2ULL, evk.key(2).size());
             for (size_t j = 0; j < evk.size(); j++)
@@ -225,22 +195,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            RelinKeys evk = keygen.relin_keys(2);
-            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
-            ASSERT_EQ(2ULL, evk.key(2).size());
-            ASSERT_EQ(2ULL, evk.key(3).size());
-            for (size_t j = 0; j < evk.size(); j++)
-            {
-                for (size_t i = 0; i < evk.key(j + 2).size(); i++)
-                {
-                    for (size_t k = 0; k < evk.key(j + 2)[i].data().size(); k++)
-                    {
-                        ASSERT_FALSE(is_zero_poly(evk.key(j + 2)[i].data().data(k), evk.key(j + 2)[i].data().poly_modulus_degree(), evk.key(j + 2)[i].data().coeff_mod_count()));
-                    }
-                }
-            }
-
-            evk = keygen.relin_keys();
+            RelinKeys evk = keygen.relin_keys();
             ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
             ASSERT_EQ(2ULL, evk.key(2).size());
             for (size_t j = 0; j < evk.size(); j++)

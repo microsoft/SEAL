@@ -96,11 +96,11 @@ void example_levels()
     /*
     There are convenience method for accessing the SEALContext::ContextData for
     some of the most important levels:
-    
+
         SEALContext::key_context_data(): access to key level ContextData
         SEALContext::first_context_data(): access to highest data level ContextData
         SEALContext::last_context_data(): access to lowest level ContextData
-    
+
     We iterate over the chain and print the parms_id for each set of parameters.
     */
     cout << "Printing the modulus switching chain:" << endl;

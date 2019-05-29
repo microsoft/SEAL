@@ -14,57 +14,65 @@ namespace Microsoft.Research.SEAL
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Represents an unsigned integer with a specified bit width. BigUInts are mutable and able to be resized.
-    /// The bit count for a BigUInt (which can be read with <see cref="BitCount"/>) is set initially by the
-    /// constructor and can be resized either explicitly with the <see cref="Resize(int)"/> function or implicitly
-    /// with an assignment operation (e.g., one of the Set() functions). A rich set of unsigned integer operations
-    /// are provided by the BigUInt class, including comparison, traditional arithmetic (addition, subtraction,
-    /// multiplication, division), and modular arithmetic functions.
+    /// Represents an unsigned integer with a specified bit width. BigUInts are mutable
+    /// and able to be resized. The bit count for a BigUInt (which can be read with
+    /// <see cref="BitCount"/>) is set initially by the constructor and can be resized
+    /// either explicitly with the <see cref="Resize(int)"/> function or implicitly
+    /// with an assignment operation (e.g., one of the Set() functions). A rich set
+    /// of unsigned integer operations are provided by the BigUInt class, including
+    /// comparison, traditional arithmetic (addition, subtraction, multiplication,
+    /// division), and modular arithmetic functions.
     /// </para>
-    ///
     /// <para>
-    /// The backing array for a BigUInt stores its unsigned integer value as a contiguous System.UInt64 array.
-    /// Each System.UInt64 in the array sequentially represents 64-bits of the integer value, with the least
-    /// significant quad-word storing the lower 64-bits and the order of the bits for each quad word dependent
-    /// on the architecture's System.UInt64 representation. The size of the array equals the bit count of the
-    /// BigUInt (which can be read with <see cref="BitCount"/>) rounded up to the next System.UInt64 boundary
-    /// (i.e., rounded up to the next 64-bit boundary). The <see cref="UInt64Count"/> property returns the number
-    /// of System.UInt64 in the backing array. The <see cref="Data(ulong)"/> method returns an element of the
-    /// System.UInt64 array. Additionally, the index property allows accessing the individual bytes of
-    /// the integer value in a platform-independent way - for example, reading the third byte will always return
-    /// bits 16-24 of the BigUInt value regardless of the platform being little-endian or big-endian.
+    /// The backing array for a BigUInt stores its unsigned integer value as a contiguous
+    /// System.UInt64 array. Each System.UInt64 in the array sequentially represents
+    /// 64-bits of the integer value, with the least significant quad-word storing the
+    /// lower 64-bits and the order of the bits for each quad word dependent on the
+    /// architecture's System.UInt64 representation. The size of the array equals the bit
+    /// count of the BigUInt (which can be read with <see cref="BitCount"/>) rounded up
+    /// to the next System.UInt64 boundary (i.e., rounded up to the next 64-bit boundary).
+    /// The <see cref="UInt64Count"/> property returns the number of System.UInt64 in the
+    /// backing array. The <see cref="Data(ulong)"/> method returns an element of the
+    /// System.UInt64 array. Additionally, the index property allows accessing the
+    /// individual bytes of the integer value in a platform-independent way - for example,
+    /// reading the third byte will always return bits 16-24 of the BigUInt value
+    /// regardless of the platform being little-endian or big-endian.
     /// </para>
-    ///
     /// <para>
-    /// Both the copy constructor and the Set function allocate more memory for the backing array when needed,
-    /// i.e. when the source BigUInt has a larger backing array than the destination. Conversely, when the destination
-    /// backing array is already large enough, the data is only copied and the unnecessary higher order bits are set
-    /// to zero. When new memory has to be allocated, only the significant bits of the source BigUInt are taken into
-    /// account. This is is important, because it avoids unnecessary zero bits to be included in the destination,
-    /// which in some cases could accumulate and result in very large unnecessary allocations. However, sometimes
-    /// it is necessary to preserve the original size, even if some of the leading bits are zero. For this purpose
-    /// BigUInt contains functions <see cref="DuplicateFrom"/> and <see cref="DuplicateTo"/>, which create an exact
+    /// Both the copy constructor and the Set function allocate more memory for the
+    /// backing array when needed, i.e. when the source BigUInt has a larger backing
+    /// array than the destination. Conversely, when the destination backing array is
+    /// already large enough, the data is only copied and the unnecessary higher order
+    /// bits are set to zero. When new memory has to be allocated, only the significant
+    /// bits of the source BigUInt are taken into account. This is is important, because
+    /// it avoids unnecessary zero bits to be included in the destination, which in some
+    /// cases could accumulate and result in very large unnecessary allocations. However,
+    /// sometimes it is necessary to preserve the original size, even if some of the
+    /// leading bits are zero. For this purpose BigUInt contains functions
+    /// <see cref="DuplicateFrom"/> and <see cref="DuplicateTo"/>, which create an exact
     /// copy of the source BigUInt.
     /// </para>
-    ///
     /// <para>
-    /// An aliased BigUInt (which can be determined with <see cref="IsAlias"/>) is a special type of BigUInt that
-    /// does not manage its underlying System.UInt64 pointer used to store the value. An aliased BigUInt supports
-    /// most of the same operations as a non-aliased BigUInt, including reading and writing the value, however
-    /// an aliased BigUInt does not internally allocate or deallocate its backing array and, therefore, does not
-    /// support resizing. Any attempt, either explicitly or implicitly, to resize the BigUInt will result in an
-    /// exception being thrown. Aliased BigUInt's are only created internally. Aliasing is useful in cases where
-    /// it is desirable to not have each BigUInt manage its own memory allocation and/or to prevent unnecessary
-    /// copying.
+    /// An aliased BigUInt (which can be determined with <see cref="IsAlias"/>) is
+    /// a special type of BigUInt that does not manage its underlying System.UInt64
+    /// pointer used to store the value. An aliased BigUInt supports most of the same
+    /// operations as a non-aliased BigUInt, including reading and writing the value,
+    /// however an aliased BigUInt does not internally allocate or deallocate its backing
+    /// array and, therefore, does not support resizing. Any attempt, either explicitly
+    /// or implicitly, to resize the BigUInt will result in an exception being thrown.
+    /// Aliased BigUInt's are only created internally. Aliasing is useful in cases where
+    /// it is desirable to not have each BigUInt manage its own memory allocation and/or
+    /// to prevent unnecessary copying.
     /// </para>
-    ///
     /// <para>
-    /// In general, reading a BigUInt is thread-safe while mutating is not. Specifically, the backing array may be
-    /// freed whenever a resize occurs or the BigUInt is destroyed. When it is known that a resize will not occur,
-    /// concurrent reading and mutating will not inherently fail but it is possible for a read to see a partially
-    /// updated value from a concurrent write. A non-aliased BigUInt allocates its backing array from the global
-    /// (thread-safe) memory pool. Consequently, creating or resizing a large number of BigUInt can result in a
-    /// performance loss due to thread contention.
+    /// In general, reading a BigUInt is thread-safe while mutating is not. Specifically,
+    /// the backing array may be freed whenever a resize occurs or the BigUInt is
+    /// destroyed. When it is known that a resize will not occur, concurrent reading and
+    /// mutating will not inherently fail but it is possible for a read to see a partially
+    /// updated value from a concurrent write. A non-aliased BigUInt allocates its backing
+    /// array from the global (thread-safe) memory pool. Consequently, creating or
+    /// resizing a large number of BigUInt can result in a performance loss due to thread
+    /// contention.
     /// </para>
     /// </remarks>
     public class BigUInt : NativeObject, IEquatable<BigUInt>, IComparable<BigUInt>
