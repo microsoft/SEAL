@@ -102,55 +102,58 @@ void example_integer_encoder()
     */
     int value1 = 5;
     Plaintext plain1 = encoder.encode(value1);
-    cout << "-- Encoded " << value1 << " as polynomial " << plain1.to_string()
-        << " (plain1)" << endl;
+    print_line(__LINE__);
+    cout << "Encode " << value1 << " as polynomial " << plain1.to_string()
+        << " (plain1)," << endl;
 
     int value2 = -7;
     Plaintext plain2 = encoder.encode(value2);
-    cout << "-- Encoded " << value2 << " as polynomial " << plain2.to_string()
-        << " (plain2)" << endl;
+    cout << string(13, ' ') << "encode " << value2 << " as polynomial " << plain2.to_string()
+        << " (plain2)." << endl;
 
     /*
     Now we can encrypt the plaintext polynomials.
     */
     Ciphertext encrypted1, encrypted2;
-    cout << "-- Encrypting plain1: ";
+    print_line(__LINE__);
+    cout << "Encrypt plain1 to encrypted1 and plain2 to encrypted2." << endl;
     encryptor.encrypt(plain1, encrypted1);
-    cout << "Done (encrypted1)" << endl;
-    cout << "\tNoise budget in encrypted1: "
-        << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
-
-    cout << "-- Encrypting plain2: ";
     encryptor.encrypt(plain2, encrypted2);
-    cout << "Done (encrypted2)" << endl;
-    cout << "\tNoise budget in encrypted2: "
+    cout << "    + Noise budget in encrypted1: "
+        << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
+    cout << "    + Noise budget in encrypted2: "
         << decryptor.invariant_noise_budget(encrypted2) << " bits" << endl;
 
     /*
     As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2.
     */
-    cout << "-- Computing (-encrypted1 + encrypted2) * encrypted2: ";
+    encryptor.encrypt(plain2, encrypted2);
+    Ciphertext encrypted_result;
+    print_line(__LINE__);
+    cout << "Compute encrypted_result = (-encrypted1 + encrypted2) * encrypted2." << endl;
     evaluator.negate_inplace(encrypted1);
     evaluator.add_inplace(encrypted1, encrypted2);
     evaluator.multiply_inplace(encrypted1, encrypted2);
-    cout << "Done" << endl;
-    cout << "\tNoise budget in (-encrypted1 + encrypted2) * encrypted2: "
+    cout << "    + Noise budget in encrypted_result: "
         << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
     Plaintext plain_result;
-    cout << "-- Decrypting result: ";
+    print_line(__LINE__);
+    cout << "Decrypt encrypted_result to plain_result." << endl;
     decryptor.decrypt(encrypted1, plain_result);
-    cout << "Done" << endl;
 
     /*
     Print the result plaintext polynomial. The coefficients are not even close
     to exceeding our plain_modulus, 512.
     */
-    cout << "\tPlaintext polynomial: " << plain_result.to_string() << endl;
+    cout << "    + Plaintext polynomial: " << plain_result.to_string() << endl;
 
     /*
     Decode to obtain an integer result.
     */
-    cout << "\tDecoded integer: " << encoder.decode_int32(plain_result) << endl;
+    print_line(__LINE__);
+    cout << "Decode plain_result." << endl;
+    cout << "    + Decoded integer: " << encoder.decode_int32(plain_result);
+    cout << "...... Correct." << endl;
 }
 
 void example_batch_encoder()
@@ -240,29 +243,27 @@ void example_batch_encoder()
     First we use BatchEncoder to encode the matrix into a plaintext polynomial.
     */
     Plaintext plain_matrix;
-    cout << "-- Encoding plaintext matrix: ";
+    print_line(__LINE__);
+    cout << "Encode plaintext matrix: " << endl;
     batch_encoder.encode(pod_matrix, plain_matrix);
-    cout << "Done" <<endl;
 
     /*
     We can instantly decode to verify correctness of the encoding. Note that no
     encryption or decryption has yet taken place.
     */
     vector<uint64_t> pod_result;
-    cout << "   Decoding plaintext matrix: ";
+    cout << "    + Decode plaintext matrix ...... Correct." << endl;
     batch_encoder.decode(plain_matrix, pod_result);
-    cout << " Done." <<endl;
-    cout << "\tPlaintext matrix:" << endl;
     print_matrix(pod_result, row_size);
 
     /*
     Next we encrypt the encoded plaintext.
     */
     Ciphertext encrypted_matrix;
-    cout << "-- Encrypting: ";
+    print_line(__LINE__);
+    cout << "Encrypt plain_matrix to encrypted_matrix." << endl;
     encryptor.encrypt(plain_matrix, encrypted_matrix);
-    cout << "Done" << endl;
-    cout << "\tNoise budget in fresh encryption: "
+    cout << "    + Noise budget in encrypted_matrix: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
 
     /*
@@ -290,30 +291,27 @@ void example_batch_encoder()
     We now add the second (plaintext) matrix to the encrypted matrix, and square
     the sum.
     */
-    cout << "-- Adding and squaring: ";
+    print_line(__LINE__);
+    cout << "Sum, square, and relinearize." << endl;
     evaluator.add_plain_inplace(encrypted_matrix, plain_matrix2);
     evaluator.square_inplace(encrypted_matrix);
     evaluator.relinearize_inplace(encrypted_matrix, relin_keys);
-    cout << "Done" << endl;
 
     /*
     How much noise budget do we have left?
     */
-    cout << "\tNoise budget in result: "
+    cout << "    + Noise budget in result: "
         << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
 
     /*
     We decrypt and decompose the plaintext to recover the result as a matrix.
     */
     Plaintext plain_result;
-    cout << "-- Decrypting result: ";
+    print_line(__LINE__);
+    cout << "Decrypt and decode result." << endl;
     decryptor.decrypt(encrypted_matrix, plain_result);
-    cout << "Done" << endl;
-
-    cout << "-- Decoding result: ";
     batch_encoder.decode(plain_result, pod_result);
-    cout << "Done" << endl;
-    cout << "\tResult plaintext matrix:" << endl;
+    cout << "    + Result plaintext matrix ...... Correct." << endl;
     print_matrix(pod_result, row_size);
 
     /*
@@ -405,6 +403,7 @@ void example_ckks_encoder()
     cout << endl;
     cout << "Input vector: " << endl;
     print_vector(input);
+    cout << endl;
 
     /*
     Now we encode it with CKKSEncoder. The floating-point coefficients of `input'
@@ -422,27 +421,25 @@ void example_ckks_encoder()
     */
     Plaintext plain;
     double scale = pow(2.0, 30);
-    cout << "-- Encoding input vector: ";
+    print_line(__LINE__);
+    cout << "Encode input vector." << endl;
     encoder.encode(input, scale, plain);
-    cout << "Done" << endl;
 
     /*
     We can instantly decode to check the correctness of encoding.
     */
     vector<double> output;
-    cout << "   Decoding input vector: ";
+    cout << "    + Decode input vector ...... Correct." << endl;
     encoder.decode(plain, output);
-    cout << "Done" << endl;
-    cout << "\tDecoded input vector: " << endl;
     print_vector(input);
 
     /*
     The vector is encrypted the same was as in BFV.
     */
     Ciphertext encrypted;
-    cout << "-- Encrypting input vector: ";
+    print_line(__LINE__);
+    cout << "Encrypt input vector, square, and relinearize." << endl;
     encryptor.encrypt(plain, encrypted);
-    cout << "Done" << endl;
 
     /*
     Basic operations on the ciphertexts are still easy to do. Here we square the
@@ -450,28 +447,23 @@ void example_ckks_encoder()
     returns a vector of full size (poly_modulus_degree / 2); this is because of
     the implicit zero-padding mentioned above.
     */
-    cout << "-- Squaring: ";
     evaluator.square_inplace(encrypted);
-    cout << "Done" << endl;
-    cout << "-- Relinearizing: ";
     evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "Done" << endl;
 
     /*
     We notice that the scale in the result has increased. In fact, it is now the
     square of the original scale: 2^60.
     */
-    cout << "\tScale in squared input: " << encrypted.scale()
+    cout << "    + Scale in squared input: " << encrypted.scale()
         << " (" << log2(encrypted.scale()) << " bits)" << endl;
 
-    cout << "-- Decrypting: ";
+    print_line(__LINE__);
+    cout << "Decrypt and decode." << endl;
     decryptor.decrypt(encrypted, plain);
-    cout << "Done" << endl;
-    cout << "-- Decoding: ";
     encoder.decode(plain, output);
-    cout << "Done" << endl;
-    cout << "\tSquared input: " << endl;
+    cout << "    + Result vector ...... Correct." << endl;
     print_vector(output);
+    cout << endl;
 
     /*
     The CKKS scheme allows the scale to be reduced between encrypted computations.
