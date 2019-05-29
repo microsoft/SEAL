@@ -26,7 +26,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 4096,
-                CoeffModulus = CoeffModulus.Default(4096)
+                CoeffModulus = CoeffModulus.BFVDefault(4096)
             };
 
             SEALContext context2 = new SEALContext(parms);

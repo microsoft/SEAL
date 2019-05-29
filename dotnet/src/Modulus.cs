@@ -78,18 +78,22 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns a default coefficient modulus that guarantees a given security
-        /// level when using a given PolyModulusDegree, according to the
-        /// HomomorphicEncryption.org security standard.
+        /// Returns a default coefficient modulus for the BFV scheme that guarantees
+        /// a given security level when using a given PolyModulusDegree, according
+        /// to the HomomorphicEncryption.org security standard.
         /// </summary>
         /// <remarks>
-        /// Returns a default coefficient modulus that guarantees a given security
-        /// level when using a given PolyModulusDegree, according to the
-        /// HomomorphicEncryption.org security standard. Note that all security
+        /// <para>
+        /// Returns a default coefficient modulus for the BFV scheme that guarantees
+        /// a given security level when using a given PolyModulusDegree, according
+        /// to the HomomorphicEncryption.org security standard. Note that all security
         /// guarantees are lost if the output is used with encryption parameters with
-        /// a mismatching value for the PolyModulusDegree. The default parameters
-        /// work well with the BFV scheme, but will usually not be optimal when using
-        /// the CKKS scheme.
+        /// a mismatching value for the PolyModulusDegree. 
+        /// </para>
+        /// <para>
+        /// The coefficient modulus returned by this function will not perform well
+        /// if used with the CKKS scheme.
+        /// </para>
         /// </remarks>
         /// <param name="polyModulusDegree">The value of the PolyModulusDegree
         /// encryption parameter</param>
@@ -97,16 +101,16 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if polyModulusDegree is not
         /// a power-of-two or is too large</exception>
         /// <exception cref="ArgumentException">if secLevel is SecLevelType.None</exception>
-        static public IEnumerable<SmallModulus> Default(
+        static public IEnumerable<SmallModulus> BFVDefault(
             ulong polyModulusDegree, SecLevelType secLevel = SecLevelType.TC128)
         {
             List<SmallModulus> result = null;
 
             ulong length = 0;
-            NativeMethods.CoeffModulus_Default(polyModulusDegree, (int)secLevel, ref length, null);
+            NativeMethods.CoeffModulus_BFVDefault(polyModulusDegree, (int)secLevel, ref length, null);
 
             IntPtr[] coeffArray = new IntPtr[length];
-            NativeMethods.CoeffModulus_Default(polyModulusDegree, (int)secLevel, ref length, coeffArray);
+            NativeMethods.CoeffModulus_BFVDefault(polyModulusDegree, (int)secLevel, ref length, coeffArray);
 
             result = new List<SmallModulus>(checked((int)length));
             foreach (IntPtr sm in coeffArray)
@@ -136,7 +140,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if bitSizes is too large or if its
         /// elements are out of bounds</exception>
         /// <exception cref="InvalidOperationException">if not enough suitable primes could be found</exception>
-        static public IEnumerable<SmallModulus> Custom(
+        static public IEnumerable<SmallModulus> Create(
             ulong polyModulusDegree, IEnumerable<int> bitSizes)
         {
             if (null == bitSizes)
@@ -151,7 +155,7 @@ namespace Microsoft.Research.SEAL
 
                 IntPtr[] coeffArray = new IntPtr[length];
 
-                NativeMethods.CoeffModulus_Custom(polyModulusDegree, (ulong)length, bitSizesArr, coeffArray);
+                NativeMethods.CoeffModulus_Create(polyModulusDegree, (ulong)length, bitSizesArr, coeffArray);
 
                 result = new List<SmallModulus>(length);
                 foreach (IntPtr sm in coeffArray)
@@ -187,7 +191,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if a suitable prime could not be found</exception>
         static public SmallModulus Batching(ulong polyModulusDegree, int bitSize)
         {
-            return CoeffModulus.Custom(
+            return CoeffModulus.Create(
                 polyModulusDegree,
                 new int[] { bitSize }).First();
         }
@@ -208,7 +212,7 @@ namespace Microsoft.Research.SEAL
         static public IEnumerable<SmallModulus> Batching(
             ulong polyModulusDegree, IEnumerable<int> bitSizes)
         {
-            return CoeffModulus.Custom(polyModulusDegree, bitSizes);
+            return CoeffModulus.Create(polyModulusDegree, bitSizes);
         }
     }
 }

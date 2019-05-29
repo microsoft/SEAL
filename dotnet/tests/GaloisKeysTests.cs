@@ -164,7 +164,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 60 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 60 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,

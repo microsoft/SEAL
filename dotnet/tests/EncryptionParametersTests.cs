@@ -73,7 +73,7 @@ namespace SEALNetTest
             Assert.IsNotNull(coeffs);
             Assert.AreEqual(0, coeffs.Count);
 
-            encParams.CoeffModulus = CoeffModulus.Default(4096);
+            encParams.CoeffModulus = CoeffModulus.BFVDefault(4096);
 
             List<SmallModulus> newCoeffs = new List<SmallModulus>(encParams.CoeffModulus);
             Assert.IsNotNull(newCoeffs);
@@ -88,7 +88,7 @@ namespace SEALNetTest
         {
             TestDelegate save_load_test = delegate(SchemeType scheme)
             {
-                List<SmallModulus> coeffModulus = (List<SmallModulus>)CoeffModulus.Custom(8, new int[] { 40, 40 });
+                List<SmallModulus> coeffModulus = (List<SmallModulus>)CoeffModulus.Create(8, new int[] { 40, 40 });
                 EncryptionParameters parms = new EncryptionParameters(scheme)
                 {
                     PolyModulusDegree = 8,
@@ -133,7 +133,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 8,
                 PlainModulus = new SmallModulus(257),
-                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40 })
+                CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
             };
 
             EncryptionParameters parms2 = new EncryptionParameters(SchemeType.CKKS);

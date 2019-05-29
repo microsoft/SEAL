@@ -19,7 +19,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -47,7 +47,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,

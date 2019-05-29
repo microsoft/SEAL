@@ -310,14 +310,14 @@ namespace Microsoft.Research.SEAL
         internal static extern void CoeffModulus_MaxBitCount(ulong polyModulusDegree, int secLevel, out int bitCount);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void CoeffModulus_Default(
+        internal static extern void CoeffModulus_BFVDefault(
             ulong polyModulusDegree,
             int secLevel,
             ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffArray);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void CoeffModulus_Custom(
+        internal static extern void CoeffModulus_Create(
             ulong polyModulusDegree,
             ulong length,
             int[] bitSizes,

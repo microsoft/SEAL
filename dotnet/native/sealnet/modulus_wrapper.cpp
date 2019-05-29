@@ -26,7 +26,7 @@ SEALNETNATIVE HRESULT SEALCALL CoeffModulus_MaxBitCount(uint64_t poly_modulus_de
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL CoeffModulus_Default(uint64_t poly_modulus_degree, int sec_level, uint64_t *length, void **coeffs)
+SEALNETNATIVE HRESULT SEALCALL CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level, uint64_t *length, void **coeffs)
 {
     IfNullRet(length, E_POINTER);
 
@@ -35,7 +35,7 @@ SEALNETNATIVE HRESULT SEALCALL CoeffModulus_Default(uint64_t poly_modulus_degree
 
     try
     {
-        result = CoeffModulus::Default(poly_modulus_degree, security_level);
+        result = CoeffModulus::BFVDefault(poly_modulus_degree, security_level);
     }
     catch (const invalid_argument&)
     {
@@ -46,7 +46,7 @@ SEALNETNATIVE HRESULT SEALCALL CoeffModulus_Default(uint64_t poly_modulus_degree
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL CoeffModulus_Custom(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs)
+SEALNETNATIVE HRESULT SEALCALL CoeffModulus_Create(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs)
 {
     IfNullRet(bit_sizes, E_POINTER);
     IfNullRet(coeffs, E_POINTER);
@@ -57,7 +57,7 @@ SEALNETNATIVE HRESULT SEALCALL CoeffModulus_Custom(uint64_t poly_modulus_degree,
 
     try
     {
-        result = CoeffModulus::Custom(poly_modulus_degree, bit_sizes_vec);
+        result = CoeffModulus::Create(poly_modulus_degree, bit_sizes_vec);
     }
     catch (const invalid_argument&)
     {

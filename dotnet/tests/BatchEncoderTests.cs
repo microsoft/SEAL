@@ -16,7 +16,7 @@ namespace SEALNetTest
         {
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             parms.PolyModulusDegree = 64;
-            parms.CoeffModulus = CoeffModulus.Custom(64, new int[]{ 60 });
+            parms.CoeffModulus = CoeffModulus.Create(64, new int[]{ 60 });
             parms.PlainModulus = new SmallModulus(257);
 
             SEALContext context = new SEALContext(parms,
@@ -89,7 +89,7 @@ namespace SEALNetTest
         {
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             parms.PolyModulusDegree = 64;
-            parms.CoeffModulus = CoeffModulus.Custom(64, new int[] { 60 });
+            parms.CoeffModulus = CoeffModulus.Create(64, new int[] { 60 });
             parms.PlainModulus = new SmallModulus(257);
 
             SEALContext context = new SEALContext(parms,
@@ -163,7 +163,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 60 }),
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 60 }),
                 PlainModulus = new SmallModulus(257)
             };
 
@@ -202,7 +202,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 8,
-                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40, 40, 40 })
             };
 
             SEALContext context = new SEALContext(parms,
@@ -221,7 +221,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 60 }),
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 60 }),
                 PlainModulus = new SmallModulus(257)
             };
 

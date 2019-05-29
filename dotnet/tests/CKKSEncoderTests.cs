@@ -17,7 +17,7 @@ namespace SEALNetTest
         {
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
             parms.PolyModulusDegree = 64;
-            parms.CoeffModulus = CoeffModulus.Custom(64, new int[] { 40, 40, 40, 40 });
+            parms.CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40, 40, 40 });
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
                 secLevel: SecLevelType.None);
@@ -48,7 +48,7 @@ namespace SEALNetTest
             int slots = 32;
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
             parms.PolyModulusDegree = (ulong)slots * 2;
-            parms.CoeffModulus = CoeffModulus.Custom(64, new int[] { 40, 40, 40, 40 });
+            parms.CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40, 40, 40 });
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
                 secLevel: SecLevelType.None);
@@ -74,7 +74,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40, 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40, 40, 40 })
             };
 
             SEALContext context = new SEALContext(parms,
@@ -101,7 +101,7 @@ namespace SEALNetTest
             int slots = 32;
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
             parms.PolyModulusDegree = (ulong)slots * 2;
-            parms.CoeffModulus = CoeffModulus.Custom((ulong)slots * 2, new int[] { 60, 60, 60, 60 });
+            parms.CoeffModulus = CoeffModulus.Create((ulong)slots * 2, new int[] { 60, 60, 60, 60 });
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
                 secLevel: SecLevelType.None);
@@ -136,7 +136,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 30, 30 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 30, 30 })
             };
 
             SEALContext context = new SEALContext(parms,
@@ -163,7 +163,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 64,
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 30, 30 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 30, 30 })
             };
 
             SEALContext context = new SEALContext(parms,

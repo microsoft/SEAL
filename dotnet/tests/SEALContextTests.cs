@@ -54,7 +54,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 30, 30, 30 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
@@ -109,7 +109,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 2 * (ulong)slotSize,
-                CoeffModulus = CoeffModulus.Custom(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
@@ -149,7 +149,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 4096,
-                CoeffModulus = CoeffModulus.Default(polyModulusDegree: 4096),
+                CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree: 4096),
                 PlainModulus = new SmallModulus(1 << 20)
             };
 

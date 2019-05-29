@@ -27,7 +27,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -72,7 +72,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -126,7 +126,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -169,7 +169,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -204,7 +204,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -253,7 +253,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -297,7 +297,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -348,7 +348,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -391,7 +391,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -463,7 +463,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -509,7 +509,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -567,7 +567,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 8,
                 PlainModulus = new SmallModulus(257),
-                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40 })
+                CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -670,7 +670,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -705,7 +705,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -758,7 +758,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 30, 30, 30 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
@@ -797,7 +797,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 30, 30, 30, 30 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: true,
@@ -858,7 +858,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 1024,
-                CoeffModulus = CoeffModulus.Custom(1024, new int[] { 40, 40, 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(1024, new int[] { 40, 40, 40, 40, 40 })
             };
 
             SEALContext context = new SEALContext(parms,
@@ -934,7 +934,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 8,
                 PlainModulus = new SmallModulus(257),
-                CoeffModulus = CoeffModulus.Custom(8, new int[] { 40, 40 })
+                CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -1009,7 +1009,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 128,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(128, new int[] { 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -1059,7 +1059,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 2 * (ulong)slotSize,
-                CoeffModulus = CoeffModulus.Custom(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -1122,7 +1122,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = 2 * (ulong)slotSize,
-                CoeffModulus = CoeffModulus.Custom(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
+                CoeffModulus = CoeffModulus.Create(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,
@@ -1170,7 +1170,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 64,
                 PlainModulus = new SmallModulus(1 << 6),
-                CoeffModulus = CoeffModulus.Custom(64, new int[] { 40, 40 })
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
                 expandModChain: false,

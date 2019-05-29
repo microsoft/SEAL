@@ -92,14 +92,14 @@ namespace seal
         }
 
         /**
-        Returns a default coefficient modulus that guarantees a given security
-        level when using a given poly_modulus_degree, according to the
-        HomomorphicEncryption.org security standard. Note that all security
+        Returns a default coefficient modulus for the BFV scheme that guarantees
+        a given security level when using a given poly_modulus_degree, according
+        to the HomomorphicEncryption.org security standard. Note that all security
         guarantees are lost if the output is used with encryption parameters with
         a mismatching value for the poly_modulus_degree.
-        
-        The BFV default parameters work well with the BFV scheme, but will usually
-        not be optimal when using the CKKS scheme.
+
+        The coefficient modulus returned by this function will not perform well
+        if used with the CKKS scheme.
 
         @param[in] poly_modulus_degree The value of the poly_modulus_degree
         encryption parameter
