@@ -11,14 +11,13 @@ int main()
 #ifdef SEAL_VERSION
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
 #endif
-
     while (true)
     {
         cout << "+---------------------------------------------------------+" << endl;
         cout << "| The following examples should be executed while reading |" << endl;
         cout << "| comments in associated files in native/examples/.       |" << endl;
         cout << "+---------------------------------------------------------+" << endl;
-        cout << "|          Examples          |        Source Files        |" << endl;
+        cout << "| Examples                   | Source Files               |" << endl;
         cout << "+----------------------------+----------------------------+" << endl;
         cout << "| 1. BFV Basics              | 1_bfv_basics.cpp           |" << endl;
         cout << "| 2. Encoders                | 2_encoders.cpp             |" << endl;

@@ -719,7 +719,7 @@ void example_performance_test()
         cout << " 2. BFV with a custom degree" << endl;
         cout << " 3. CKKS with default degrees" << endl;
         cout << " 4. CKKS with a custom degree" << endl;
-        cout << " 0. Exit" << endl;
+        cout << " 0. Back to main menu" << endl;
 
         int selection = 0;
         cout << endl << "Run example: ";
@@ -750,6 +750,7 @@ void example_performance_test()
             break;
 
         case 0:
+            cout << endl;
             return;
 
         default:

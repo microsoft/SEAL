@@ -413,5 +413,5 @@ void example_bfv_basics()
     this result is computed in integers modulo 256. Therefore the expected output
     should be 3626 % 256 == 42, or 0x2A in hexadecimal.
     */
-    cout << endl << endl;
+    cout << endl;
 }
