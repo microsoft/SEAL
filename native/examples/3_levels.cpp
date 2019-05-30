@@ -29,7 +29,7 @@ void example_levels()
     previous set; this continues until the parameter set is no longer valid
     (e.g., plain_modulus is larger than the remaining coeff_modulus). It is easy
     to walk through the chain and access all the parameter sets. Additionally,
-    each parameter set in the chain has a `chain_index' that indicates its
+    each parameter set in the chain has a `chain index' that indicates its
     position in the chain so that the last set has index 0. We say that a set
     of encryption parameters, or an object carrying those encryption parameters,
     is at a higher level in the chain than another set of parameters if its the
@@ -110,10 +110,10 @@ void example_levels()
     First print the key level parameter information.
     */
     auto context_data = context->key_context_data();
-    cout << "----- Level (chain index): " << context_data->chain_index();
+    cout << "----> Level (chain index): " << context_data->chain_index();
     cout << " ...... key_context_data()" << endl;
-    cout << "\tparms_id: " << context_data->parms_id() << endl;
-    cout << "\tcoeff_modulus primes: ";
+    cout << "      parms_id: " << context_data->parms_id() << endl;
+    cout << "      coeff_modulus primes: ";
     cout << hex;
     for(const auto &prime : context_data->parms().coeff_modulus())
     {
@@ -126,15 +126,15 @@ void example_levels()
     /*
     Next iterate over the remaining (data) levels.
     */
-    for(context_data = context->first_context_data(); context_data;
-        context_data = context_data->next_context_data())
+    context_data = context->first_context_data();
+    while (context_data)
     {
         cout << " Level (chain index): " << context_data->chain_index();
-        if (context_data == context->first_context_data())
+        if (context_data->parms_id() == context->first_parms_id())
         {
             cout << " ...... first_context_data()" << endl;
         }
-        else if (context_data == context->last_context_data())
+        else if (context_data->parms_id() == context->last_parms_id())
         {
             cout << " ...... last_context_data()" << endl;
         }
@@ -142,8 +142,8 @@ void example_levels()
         {
             cout << endl;
         }
-        cout << "\tparms_id: " << context_data->parms_id() << endl;
-        cout << "\tcoeff_modulus primes: ";
+        cout << "      parms_id: " << context_data->parms_id() << endl;
+        cout << "      coeff_modulus primes: ";
         cout << hex;
         for(const auto &prime : context_data->parms().coeff_modulus())
         {
@@ -152,6 +152,11 @@ void example_levels()
         cout << dec << endl;
         cout << "\\" << endl;
         cout << " \\-->";
+
+        /*
+        Step forward in the chain.
+        */
+        context_data = context_data->next_context_data();
     }
     cout << " End of chain reached" << endl << endl;
 
@@ -194,12 +199,12 @@ void example_levels()
     print_line(__LINE__);
     cout << "Perform modulus switching on encrypted and print." << endl;
     context_data = context->first_context_data();
-    cout << "-----";
+    cout << "---->";
     while(context_data->next_context_data())
     {
         cout << " Level (chain index): " << context_data->chain_index() << endl;
-        cout << "\tparms_id of encrypted: " << encrypted.parms_id() << endl;
-        cout << "\tNoise budget at this level: "
+        cout << "      parms_id of encrypted: " << encrypted.parms_id() << endl;
+        cout << "      Noise budget at this level: "
             << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
         cout << "\\" << endl;
         cout << " \\-->";
@@ -207,8 +212,8 @@ void example_levels()
         context_data = context_data->next_context_data();
     }
     cout << " Level (chain index): " << context_data->chain_index() << endl;
-    cout << "\tparms_id of encrypted: " << encrypted.parms_id() << endl;
-    cout << "\tNoise budget at this level: "
+    cout << "      parms_id of encrypted: " << encrypted.parms_id() << endl;
+    cout << "      Noise budget at this level: "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
     cout << "\\" << endl;
     cout << " \\-->";
@@ -282,7 +287,7 @@ void example_levels()
     chain.
     */
     decryptor.decrypt(encrypted, plain);
-    cout << "    + Decryption of fourth power (hexadecimal) ...... Correct. " << endl;
+    cout << "    + Decryption of fourth power (hexadecimal) ...... Correct." << endl;
     cout << "    " << plain.to_string() << endl << endl;
 
     /*
@@ -300,13 +305,13 @@ void example_levels()
     cout << "Optionally disable modulus switching chain expansion." << endl;
     print_line(__LINE__);
     cout << "Print the modulus switching chain." << endl;
-    cout << "-----";
+    cout << "---->";
     for (context_data = context->key_context_data(); context_data;
         context_data = context_data->next_context_data())
     {
         cout << " Level (chain index): " << context_data->chain_index() << endl;
-        cout << "\tparms_id: " << context_data->parms_id() << endl;
-        cout << "\tcoeff_modulus primes: ";
+        cout << "      parms_id: " << context_data->parms_id() << endl;
+        cout << "      coeff_modulus primes: ";
         cout << hex;
         for (const auto &prime : context_data->parms().coeff_modulus())
         {
