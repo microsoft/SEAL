@@ -34,17 +34,16 @@ int main()
         little or no reason to touch the memory allocation system.
         */
         cout << endl;
-        size_t mega_bytes = MemoryManager::GetPool().alloc_byte_count() >> 20;
-        if (mega_bytes < 1000)
+        size_t megabytes = MemoryManager::GetPool().alloc_byte_count() >> 20;
+        if (megabytes < 1000)
         {
-            cout << "[ " << setw(7) << right << mega_bytes;
+            cout << "[ " << setw(7) << right << megabytes;
         }
-        else if (mega_bytes < 1000000)
+        else if (megabytes < 1000000)
         {
-            cout << "[ " << setw(3) << right << mega_bytes / 1000;
-            cout << "," << setw(3) << right << mega_bytes % 1000;
+            cout << "[ " << setw(3) << right << megabytes / 1000;
+            cout << "," << setw(3) << right << megabytes % 1000;
         }
-
         cout << " MB]" << " Total allocation from the memory pool" << endl;
 
         int selection = 0;

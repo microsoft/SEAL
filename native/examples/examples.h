@@ -15,6 +15,8 @@
 #include <mutex>
 #include <memory>
 #include <limits>
+#include <algorithm>
+#include <numeric>
 #include "seal/seal.h"
 
 void example_bfv_basics();
@@ -76,8 +78,7 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     default:
         throw std::invalid_argument("unsupported scheme");
     }
-    std::cout << " /" << std::endl;
-    std::cout << "| Encryption parameters:" << std::endl;
+    std::cout << "/ Encryption parameters:" << std::endl;
     std::cout << "| scheme: " << scheme_name << std::endl;
     std::cout << "| poly_modulus_degree: " <<
         context_data.parms().poly_modulus_degree() << std::endl;
@@ -105,7 +106,7 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
             parms().plain_modulus().value() << std::endl;
     }
 
-    std::cout << " \\" << std::endl;
+    std::cout << "\\" << std::endl;
 }
 
 /*

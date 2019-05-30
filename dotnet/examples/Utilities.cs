@@ -5,6 +5,7 @@ using Microsoft.Research.SEAL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace SEALNetExamples
 {
@@ -18,9 +19,10 @@ namespace SEALNetExamples
             if (!string.IsNullOrEmpty(title))
             {
                 int titleLength = title.Length;
-                int bannerLength = titleLength + 2 + 2 * 10;
-                string bannerTop = new string('*', bannerLength);
-                string bannerMiddle = new string('*', 10) + " " + title + " " + new string('*', 10);
+                int bannerLength = titleLength + 2 * 10;
+                string bannerTop = "+" + new string('-', bannerLength - 2) + "+";
+                string bannerMiddle =
+                    "|" + new string(' ', 9) + title + new string(' ', 9) + "|";
 
                 Console.WriteLine();
                 Console.WriteLine(bannerTop);
@@ -40,8 +42,7 @@ namespace SEALNetExamples
             {
                 throw new ArgumentNullException("context is not set");
             }
-
-            SEALContext.ContextData contextData = context.FirstContextData;
+            SEALContext.ContextData contextData = context.KeyContextData;
 
             /*
             Which scheme are we using?
@@ -61,29 +62,40 @@ namespace SEALNetExamples
 
             Console.WriteLine($"/ Encryption parameters:");
             Console.WriteLine($"| Scheme: {schemeName}");
-            Console.WriteLine($"| PolyModulusDegree: {contextData.Parms.PolyModulusDegree}");
+            Console.WriteLine("| PolyModulusDegree: {0}",
+                contextData.Parms.PolyModulusDegree);
 
             /*
             Print the size of the true (product) coefficient modulus.
             */
-            Console.WriteLine($"| CoeffModulus size: {contextData.TotalCoeffModulusBitCount} bits");
+            Console.WriteLine("| CoeffModulus size: {0} (",
+                contextData.TotalCoeffModulusBitCount);
+            List<SmallModulus> coeffModulus = 
+                (List<SmallModulus>)contextData.Parms.CoeffModulus;
+            for (int i = 0; i < coeffModulus.Count - 1; i++)
+            {
+                Console.Write($"{coeffModulus[i].BitCount} + ");
+            }
+            Console.Write($"{coeffModulus.Last().BitCount} bits)");
 
             /*
-            For the BFV scheme print the plain_modulus parameter.
+            For the BFV scheme print the PlainModulus parameter.
             */
             if (contextData.Parms.Scheme == SchemeType.BFV)
             {
-                Console.WriteLine($"| PlainModulus: {contextData.Parms.PlainModulus.Value}");
+                Console.WriteLine("| PlainModulus: {0}",
+                    contextData.Parms.PlainModulus.Value);
             }
 
-            Console.WriteLine($"\\ NoiseStandardDeviation: {contextData.Parms.NoiseStandardDeviation}");
-            Console.WriteLine();
+            Console.WriteLine("\\");
         }
 
         /// <summary>
-        /// Helper function: Print the first and last printSize elements of a 2 row matrix
+        /// Helper function: Print the first and last printSize elements
+        /// of a 2 row matrix.
         /// </summary>
-        public static void PrintMatrix(IEnumerable<ulong> matrixPar, int rowSize, int printSize = 5)
+        public static void PrintMatrix(IEnumerable<ulong> matrixPar,
+            int rowSize, int printSize = 5)
         {
             ulong[] matrix = matrixPar.ToArray();
             Console.WriteLine();
@@ -165,6 +177,11 @@ namespace SEALNetExamples
             }
 
             Console.WriteLine();
+        }
+
+        public static void PrintLine([CallerLineNumber] int lineNumber = 0)
+        {
+            Console.Write("Line {0,3} --> ", lineNumber);
         }
     }
 }

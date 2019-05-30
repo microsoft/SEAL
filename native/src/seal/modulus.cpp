@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <numeric>
-#include <algorithm>
 #include "seal/modulus.h"
 #include "seal/util/numth.h"
 #include "seal/util/common.h"

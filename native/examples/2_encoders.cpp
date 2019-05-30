@@ -135,7 +135,7 @@ void example_integer_encoder()
     evaluator.add_inplace(encrypted1, encrypted2);
     evaluator.multiply_inplace(encrypted1, encrypted2);
     cout << "    + Noise budget in encrypted_result: "
-        << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
+        << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
     Plaintext plain_result;
     print_line(__LINE__);
     cout << "Decrypt encrypted_result to plain_result." << endl;
@@ -244,7 +244,7 @@ void example_batch_encoder()
     */
     Plaintext plain_matrix;
     print_line(__LINE__);
-    cout << "Encode plaintext matrix: " << endl;
+    cout << "Encode plaintext matrix:" << endl;
     batch_encoder.encode(pod_matrix, plain_matrix);
 
     /*
@@ -334,13 +334,9 @@ void example_ckks_encoder()
     [CKKSEncoder] (For CKKS scheme only)
 
     In this example we demonstrate the Cheon-Kim-Kim-Song (CKKS) scheme for
-    computing on encrypted real or complex numbers. For full details on the
-    CKKS scheme, we refer to https://eprint.iacr.org/2016/421. For improved
-    performance, Microsoft SEAL implements the "FullRNS" optimization for CKKS,
-    as described in https://eprint.iacr.org/2018/931.
-
-    We start by creating encryption parameters for the CKKS scheme. There are
-    two important differences compared to the BFV scheme:
+    computing on encrypted real or complex numbers. We start by creating
+    encryption parameters for the CKKS scheme. There are two important
+    differences compared to the BFV scheme:
 
         (1) CKKS does not use the plain_modulus encryption parameter;
         (2) Selecting the coeff_modulus in a specific way can be very important
@@ -431,7 +427,7 @@ void example_ckks_encoder()
     vector<double> output;
     cout << "    + Decode input vector ...... Correct." << endl;
     encoder.decode(plain, output);
-    print_vector(input);
+    print_vector(output);
 
     /*
     The vector is encrypted the same was as in BFV.
