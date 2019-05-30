@@ -22,16 +22,16 @@ For more information about the Microsoft SEAL project, see [http://sealcrypto.or
 
 # Introduction
 ## Core Concepts
-Most encryption schemes consist of three functionalities: key generation, encryption, and decryption. Symmetric-key encryption schemes use the same secret key both for encryption and decryption; public-key encryption schemes use a separate public key for encryption, and a secret key for decryption. Therefore, public-key encryption schemes allow anyone who knows the public key to encrypt data, but only those who know the secret key can decrypt and read the data. Symmetric-key encryption can be used for efficiently encrypting very large amounts of data, and enables secure outsourced cloud storage. Public-key encryption is a fundamental concept that enables secure online communication today, but is typically much less efficient than symmetric-key encryption.
+Most encryption schemes consist of three functionalities: key generation, encryption, and decryption. Symmetric-key encryption schemes use the same secret key for both encryption and decryption; public-key encryption schemes use separately a public key for encryption and a secret key for decryption. Therefore, public-key encryption schemes allow anyone who knows the public key to encrypt data, but only those who know the secret key can decrypt and read the data. Symmetric-key encryption can be used for efficiently encrypting very large amounts of data, and enables secure outsourced cloud storage. Public-key encryption is a fundamental concept that enables secure online communication today, but is typically much less efficient than symmetric-key encryption.
 
 While traditional symmetric- and public-key encryption can be used for secure storage and communication, any outsourced computation will necessarily require such encryption layers to be removed before computation can take place. Therefore, cloud services providing outsourced computation capabilities must have access to the secret keys, and implement access policies to prevent unauthorized employees from getting access to these keys.
 
 ## Homomorphic Encryption
 Homomorphic encryption refers to encryption schemes that allow the cloud to compute directly on the encrypted data, without requiring the data to be decrypted first. The results of such encrypted computations remain encrypted, and can be only decrypted with the secret key (by the data owner). Multiple homomorphic encryption schemes with different capabilities and trade-offs have been invented over the past decade; most of these are public-key encryption schemes, although the public-key functionality may not always be needed.
 
-Homomorphic encryption is not a generic technology: only some computations on encrypted data are possible. It also comes with a substantial performance overhead, so computations that are already very costly to perform on unencrypted data are likely to be infeasible on encrypted data. Moreover, data encrypted with homomorphic encryption is many times larger than unencrypted data, so it may not make sense to encrypt, e.g., entire large databases with this technology. Instead, meaningful use-cases are in scenarios where strict privacy requirements prohibit unencrypted cloud computation altogether, but the computations themselves are fairly lightweight. 
+Homomorphic encryption is not a generic technology: only some computations on encrypted data are possible. It also comes with a substantial performance overhead, so computations that are already very costly to perform on unencrypted data are likely to be infeasible on encrypted data. Moreover, data encrypted with homomorphic encryption is many times larger than unencrypted data, so it may not make sense to encrypt, e.g., entire large databases, with this technology. Instead, meaningful use-cases are in scenarios where strict privacy requirements prohibit unencrypted cloud computation altogether, but the computations themselves are fairly lightweight.
 
-Typically, homomorphic encryption schemes have a single secret key which is held by the data owner. For scenarios where multiple different private data owners wish to engage in collaborative computation homomorphic encryption is probably not a reasonable solution.
+Typically, homomorphic encryption schemes have a single secret key which is held by the data owner. For scenarios where multiple different private data owners wish to engage in collaborative computation, homomorphic encryption is probably not a reasonable solution.
 
 Homomorphic encryption cannot be used to enable data scientist to circumvent GDPR. For example, there is no way for a cloud service to use homomorphic encryption to draw insights from encrypted customer data. Instead, results of encrypted computations remain encrypted and can only be decrypted by the owner of the data, e.g., a cloud service customer.
 
@@ -129,7 +129,7 @@ To build the unit tests you will need the [GoogleTest](https://github.com/google
 ````
 git submodule update --init
 ````
-This needs to be executed only one, and can be skipped if Microsoft SEAL was cloned with `git --recurse-submodules`. To build the tests, do:
+This needs to be executed only once, and can be skipped if Microsoft SEAL was cloned with `git --recurse-submodules`. To build the tests, do:
 ````
 cd native/tests
 cmake .
@@ -327,15 +327,17 @@ cd ../..
 ````
 
 # Examples
-Microsoft SEAL comes with code examples with detailed comments. These comments are aimed to teach most of the concepts a developer will need to know to use the library efficiently and securely, and the associated code snippets will show how the core operations are performed. The examples are available (and identical) both in C++ and C#. The C++ examples are divided into multiple .cpp files in SEAL/native/examples/ as follows:
+Microsoft SEAL comes with code examples with detailed comments. These comments are aimed to teach most of the concepts that a developer will need to know to use the library efficiently and securely. And the associated code snippets will show how the core operations are performed. The examples are available (and identical) in C++ and C#. The C++ examples are divided into multiple .cpp files in SEAL/native/examples/ as follows:
 
-  - `examples.cpp`: the test runner application;
+  - `examples.cpp`: the example runner application;
   - `bfv_basics.cpp`: shows how to perform encrypted modular arithmetic using the BFV scheme;
   - `encoders.cpp`: shows how to encode more complex data into Microsoft SEAL plaintext objects;
-  - `levels.cpp`: explains the concept of levels in Microsoft SEAL. This is conceptual material that will be necessary to understand for using the CKKS scheme;
+  - `levels.cpp`: explains the concept of levels in Microsoft SEAL. This is a conceptual material that will be necessary to understand before using the CKKS scheme;
   - `ckks_basics.cpp`: shows how to use the CKKS scheme for computing on encrypted real numbers;
   - `rotation.cpp`: shows how to perform cyclic rotations on encrypted vectors using the BFV and CKKS schemes;
   - `performance.cpp`: performance tests for Microsoft SEAL.
+
+It is recommeded to read the comments and the code snippets along with command line printout from running an example. For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
 
 # Contributing
 

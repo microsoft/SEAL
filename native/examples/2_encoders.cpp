@@ -131,15 +131,15 @@ void example_integer_encoder()
     Ciphertext encrypted_result;
     print_line(__LINE__);
     cout << "Compute encrypted_result = (-encrypted1 + encrypted2) * encrypted2." << endl;
-    evaluator.negate_inplace(encrypted1);
-    evaluator.add_inplace(encrypted1, encrypted2);
-    evaluator.multiply_inplace(encrypted1, encrypted2);
+    evaluator.negate(encrypted1, encrypted_result);
+    evaluator.add_inplace(encrypted_result, encrypted2);
+    evaluator.multiply_inplace(encrypted_result, encrypted2);
     cout << "    + Noise budget in encrypted_result: "
         << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
     Plaintext plain_result;
     print_line(__LINE__);
     cout << "Decrypt encrypted_result to plain_result." << endl;
-    decryptor.decrypt(encrypted1, plain_result);
+    decryptor.decrypt(encrypted_result, plain_result);
 
     /*
     Print the result plaintext polynomial. The coefficients are not even close

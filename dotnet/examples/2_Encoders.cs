@@ -134,16 +134,16 @@ namespace SEALNetExamples
             Ciphertext encryptedResult = new Ciphertext();
             Utilities.PrintLine();
             Console.WriteLine("Compute encrypted_result = (-encrypted1 + encrypted2) * encrypted2.");
-            evaluator.NegateInplace(encrypted1);
-            evaluator.AddInplace(encrypted1, encrypted2);
-            evaluator.MultiplyInplace(encrypted1, encrypted2);
+            evaluator.Negate(encrypted1, encryptedResult);
+            evaluator.AddInplace(encryptedResult, encrypted2);
+            evaluator.MultiplyInplace(encryptedResult, encrypted2);
             Console.WriteLine("    + Noise budget in encryptedResult: {0} bits",
                 decryptor.InvariantNoiseBudget(encryptedResult));
 
             Plaintext plainResult = new Plaintext();
             Utilities.PrintLine();
             Console.WriteLine("Decrypt encrypted_result to plain_result.");
-            decryptor.Decrypt(encrypted1, plainResult);
+            decryptor.Decrypt(encryptedResult, plainResult);
 
             /*
             Print the result plaintext polynomial. The coefficients are not even close
