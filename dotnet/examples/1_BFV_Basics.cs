@@ -8,7 +8,7 @@ namespace SEALNetExamples
 {
     partial class Examples
     {
-        public static void ExampleBFVBasics()
+        private static void ExampleBFVBasics()
         {
             Utilities.PrintExampleBanner("Example: BFV Basics");
 

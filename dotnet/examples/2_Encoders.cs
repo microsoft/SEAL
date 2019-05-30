@@ -30,7 +30,7 @@ namespace SEALNetExamples
         elements (encoding) that allow more computations without data type overflow, and
         can allow the full plaintext polynomial to be utilized.
         */
-        public static void ExampleIntegerEncoder()
+        private static void ExampleIntegerEncoder()
         {
             Utilities.PrintExampleBanner("Integer Encoder");
 
@@ -473,7 +473,7 @@ namespace SEALNetExamples
             */
         }
 
-        public static void ExampleEncoders()
+        private static void ExampleEncoders()
         {
             Utilities.PrintExampleBanner("Example: Encoders");
 

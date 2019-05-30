@@ -141,7 +141,8 @@ namespace SEALNetExamples
         /// <summary>
         /// Helper function: Prints a vector of floating-point values.
         /// </summary>
-        public static void PrintVector<T>(IEnumerable<T> vec, int printSize = 4)
+        public static void PrintVector<T>(
+            IEnumerable<T> vec, int printSize = 4, int prec = 3)
         {
             T[] veca = vec.ToArray();
             int slotCount = veca.Length;
@@ -150,7 +151,7 @@ namespace SEALNetExamples
                 Console.Write("    [");
                 for (int i = 0; i < slotCount; i++)
                 {
-                    Console.Write(" {0:0.000}", veca[i]);
+                    Console.Write(" {0:0.prec}", veca[i]);
                     if (i != (slotCount - 1))
                         Console.Write(",");
                     else
@@ -163,7 +164,7 @@ namespace SEALNetExamples
                 Console.Write("    [");
                 for (int i = 0; i < printSize; i++)
                 {
-                    Console.Write(" {0:0.000},", veca[i]);
+                    Console.Write(" {0:0.prec},", veca[i]);
                 }
                 if (veca.Length > 2 * printSize)
                 {
@@ -171,7 +172,7 @@ namespace SEALNetExamples
                 }
                 for (int i = slotCount - printSize; i < slotCount; i++)
                 {
-                    Console.Write(", {0:0.000}", veca[i]);
+                    Console.Write(", {0:0.prec}", veca[i]);
                 }
                 Console.WriteLine(" ]");
             }

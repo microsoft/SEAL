@@ -3,413 +3,96 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Microsoft.Research.SEAL;
 
 namespace SEALNetExamples
 {
     partial class Examples
     {
-        private static void ExampleCKKSBasicsI()
+        private static void ExampleCKKSBasics()
         {
-            Utilities.PrintExampleBanner("Example: CKKS Basics ");
+            Utilities.PrintExampleBanner("Example: CKKS Basics");
 
             /*
-            In this example we demonstrate using the Cheon-Kim-Kim-Song (CKKS) scheme
-            for encrypting and computing on floating point numbers. For full details on
-            the CKKS scheme, we refer the reader to https://eprint.iacr.org/2016/421.
-            For better performance, Microsoft SEAL implements the "FullRNS" optimization for CKKS
-            described in https://eprint.iacr.org/2018/931.
-            */
+            In this example we demonstrate evaluating a polynomial function
 
-            /*
-            We start by creating encryption parameters for the CKKS scheme. One major
-            difference to the BFV scheme is that the CKKS scheme does not use the
-            PlainModulus parameter.
+                PI*x^3 + 0.4*x + 1
+
+            on encrypted floating-point input data x for a set of 4096 equidistant points
+            in the interval [0, 1]. This example demonstrates many of the main features
+            of the CKKS scheme, but also the challenges in using it.
+
+            We start by setting up the CKKS scheme.
             */
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
-            parms.PolyModulusDegree = 8192;
-            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192);
 
             /*
-            We create the SEALContext as usual and print the parameters.
+            We saw in `2_Encoders.cs' that multiplication in CKKS causes scales in
+            ciphertexts to grow. The scale of any ciphertext must not get too close to
+            the total size of CoeffModulus, or else the ciphertext simply runs out of
+            room to store the scaled-up plaintext. The CKKS scheme provides a `rescale'
+            functionality that can reduce the scale, and stabilize the scale expansion.
+
+            Rescaling is a kind of modulus switch operation (recall `3_Levels.cs').
+            As modulus switching, it removes the last of the primes from CoeffModulus,
+            but as a side-effect it scales down the ciphertext by the removed prime.
+            Usually we want to have perfect control over how the scales are changed,
+            which is why for the CKKS scheme it is more common to use carefully selected
+            primes for the CoeffModulus.
+
+            More precisely, suppose that the scale in a CKKS ciphertext is S, and the
+            last prime in the current CoeffModulus (for the ciphertext) is P. Rescaling
+            to the next level changes the scale to S/P, and removes the prime P from the
+            CoeffModulus, as usual in modulus switching. The number of primes limits
+            how many rescalings can be done, and thus limits the multiplicative depth of
+            the computation.
+
+            It is possible to choose the initial scale freely. One good strategy can be
+            to is to set the initial scale S and primes P_i in the CoeffModulus to be
+            very close to each other. If ciphertexts have scale S before multiplication,
+            they have scale S^2 after multiplication, and S^2/P_i after rescaling. If all
+            P_i are close to S, then S^2/P_i is close to S again. This way we stabilize the
+            scales to be close to S throughout the computation. Generally, for a circuit
+            of depth D, we need to rescale D times, i.e., we need to be able to remove D
+            primes from the coefficient modulus. Once we have only one prime left in the
+            coeff_modulus, the remaining prime must be larger than S by a few bits to
+            preserve the pre-decimal-point value of the plaintext.
+
+            Therefore, a generally good strategy is to choose parameters for the CKKS
+            scheme as follows:
+
+                (1) Choose a 60-bit prime as the first prime in CoeffModulus. This will
+                    give the highest precision when decrypting;
+                (2) Choose another 60-bit prime as the last element of CoeffModulus, as
+                    this will be used as the special prime and should be as large as the
+                    largest of the other primes;
+                (3) Choose the intermediate primes to be close to each other.
+
+            We use CoeffModulus.Create to generate primes of the appropriate size. Note
+            that our CoeffModulus is 200 bits total, which is below the bound for our
+            PolyModulusDegree: CoeffModulus.MaxBitCount(8192) returns 218.
             */
-            SEALContext context = SEALContext.Create(parms);
-            Utilities.PrintParameters(context);
+            ulong polyModulusDegree = 8192;
+            parms.PolyModulusDegree = polyModulusDegree;
+            parms.CoeffModulus = CoeffModulus.Create(
+                polyModulusDegree, new int[]{ 60, 40, 40, 60 });
 
             /*
-            Keys are created the same way as for the BFV scheme.
+            We choose the initial scale to be 2^40. At the last level, this leaves us
+            60-40=20 bits of precision before the decimal point, and enough (roughly
+            10-20 bits) of precision after the decimal point. Since our intermediate
+            primes are 40 bits (in fact, they are very close to 2^40), we can achieve
+            scale stabilization as described above.
             */
-            KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey publicKey = keygen.PublicKey;
-            SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
+            double scale = Math.Pow(2.0, 40);
 
-            /*
-            We also set up an Encryptor, Evaluator, and Decryptor as usual.
-            */
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Evaluator evaluator = new Evaluator(context);
-            Decryptor decryptor = new Decryptor(context, secretKey);
-
-            /*
-            To create CKKS plaintexts we need a special encoder: we cannot create them
-            directly from polynomials. Note that the IntegerEncoder, FractionalEncoder,
-            and BatchEncoder cannot be used with the CKKS scheme. The CKKS scheme allows
-            encryption and approximate computation on vectors of real or complex numbers
-            which the CKKSEncoder converts into Plaintext objects. At a high level this
-            looks a lot like BatchEncoder for the BFV scheme, but the theory behind it
-            is different.
-            */
-            CKKSEncoder encoder = new CKKSEncoder(context);
-
-            /*
-            In CKKS the number of slots is PolyModulusDegree / 2 and each slot encodes
-            one complex (or real) number. This should be contrasted with BatchEncoder in
-            the BFV scheme, where the number of slots is equal to PolyModulusDegree
-            and they are arranged into a 2-by-(PolyModulusDegree / 2) matrix.
-            */
-            ulong slotCount = encoder.SlotCount;
-            Console.WriteLine($"Number of slots: {slotCount}");
-
-            /*
-            We create a small vector to encode; the CKKSEncoder will implicitly pad it
-            with zeros to full size (PolyModulusDegree / 2) when encoding.
-            */
-            List<double> input = new List<double> { 0.0, 1.1, 2.2, 3.3 };
-            Console.WriteLine("Input vector: ");
-            Utilities.PrintVector(input);
-
-            /*
-            Now we encode it with CKKSEncoder. The floating-point coefficients of input
-            will be scaled up by the parameter `scale'; this is necessary since even in
-            the CKKS scheme the plaintexts are polynomials with integer coefficients.
-            It is instructive to think of the scale as determining the bit-precision of
-            the encoding; naturally it will also affect the precision of the result.
-
-            In CKKS the message is stored modulo CoeffModulus (in BFV it is stored
-            modulo PlainModulus), so the scale must not get too close to the total size
-            of CoeffModulus. In this case our CoeffModulus is quite large (218 bits)
-            so we have little to worry about in this regard. For this example a 60-bit
-            scale is more than enough.
-            */
-            Plaintext plain = new Plaintext();
-            double scale = Math.Pow(2.0, 60);
-            encoder.Encode(input, scale, plain);
-
-            /*
-            The vector is encrypted the same was as in BFV.
-            */
-            Ciphertext encrypted = new Ciphertext();
-            encryptor.Encrypt(plain, encrypted);
-
-            /*
-            Another difference to the BFV scheme is that in CKKS also plaintexts are
-            linked to specific parameter sets: they carry the corresponding ParmsId.
-            An overload of CKKSEncoder.Encode(...) allows the caller to specify which
-            parameter set in the modulus switching chain (identified by ParmsId) should
-            be used to encode the plaintext. This is important as we will see later.
-            */
-            Console.WriteLine($"ParmsId of plain: {plain.ParmsId}");
-            Console.WriteLine($"ParmsId of encrypted: {encrypted.ParmsId}");
-            Console.WriteLine();
-
-            /*
-            The ciphertexts will keep track of the scales in the underlying plaintexts.
-            The current scale in every plaintext and ciphertext is easy to access.
-            */
-            Console.WriteLine($"Scale in plain: {plain.Scale}");
-            Console.WriteLine($"Scale in encrypted: {encrypted.Scale}");
-            Console.WriteLine();
-
-            /*
-            Basic operations on the ciphertexts are still easy to do. Here we square
-            the ciphertext, decrypt, decode, and print the result. We note also that
-            decoding returns a vector of full size (PolyModulusDegree / 2); this is
-            because of the implicit zero-padding mentioned above.
-            */
-            evaluator.SquareInplace(encrypted);
-            evaluator.RelinearizeInplace(encrypted, relinKeys);
-            decryptor.Decrypt(encrypted, plain);
-            encoder.Decode(plain, input);
-            Console.WriteLine("Squared input:");
-            Utilities.PrintVector(input);
-
-            /*
-            We notice that the results are correct. We can also print the scale in the
-            result and observe that it has increased. In fact, it is now the square of
-            the original scale (2^60).
-            */
-            Console.WriteLine($"Scale in the square: {encrypted.Scale} ({(int)Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
-
-            /*
-            CKKS supports modulus switching just like the BFV scheme. We can switch
-            away parts of the coefficient modulus.
-            */
-            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
-            Console.WriteLine("Modulus switching...");
-            evaluator.ModSwitchToNextInplace(encrypted);
-            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
-            Console.WriteLine();
-
-            /*
-            At this point if we tried switching further Microsoft SEAL would throw an exception.
-            This is because the scale is 120 bits and after modulus switching we would
-            be down to a total CoeffModulus smaller than that, which is not enough to
-            contain the plaintext. We decrypt and decode, and observe that the result
-            is the same as before.
-            */
-            decryptor.Decrypt(encrypted, plain);
-            encoder.Decode(plain, input);
-            Console.WriteLine("Squared input:");
-            Utilities.PrintVector(input);
-
-            /*
-            In some cases it can be convenient to change the scale of a ciphertext by
-            hand. For example, multiplying the scale by a number effectively divides the
-            underlying plaintext by that number, and vice versa. The caveat is that the
-            resulting scale can be incompatible with the scales of other ciphertexts.
-            Here we divide the ciphertext by 3.
-            */
-            encrypted.Scale *= 3;
-            decryptor.Decrypt(encrypted, plain);
-            encoder.Decode(plain, input);
-            Console.WriteLine("Divided by 3:");
-            Utilities.PrintVector(input);
-
-            /*
-            Homomorphic addition and subtraction naturally require that the scales of
-            the inputs are the same, but also that the encryption parameters (ParmsId)
-            are the same. Here we add a plaintext to encrypted. Note that a scale or
-            ParmsId mismatch would make Evaluator.AddPlain(..) throw an exception;
-            there is no problem here since we encode the plaintext just-in-time with
-            exactly the right scale.
-            */
-            List<double> summand = new List<double> { 20.2, 30.3, 40.4, 50.5 };
-            Console.WriteLine("Plaintext summand:");
-            Utilities.PrintVector(summand);
-
-            /*
-            Get the ParmsId and scale from encrypted and do the addition.
-            */
-            Plaintext plainSummand = new Plaintext();
-            encoder.Encode(summand, encrypted.ParmsId, encrypted.Scale,
-                plainSummand);
-            evaluator.AddPlainInplace(encrypted, plainSummand);
-
-            /*
-            Decryption and decoding should give the correct result.
-            */
-            decryptor.Decrypt(encrypted, plain);
-            encoder.Decode(plain, input);
-            Console.WriteLine("Sum:");
-            Utilities.PrintVector(input);
-
-            /*
-            Note that we have not mentioned noise budget at all. In fact, CKKS does not
-            have a similar concept of a noise budget as BFV; instead, the homomorphic
-            encryption noise will overlap the low-order bits of the message. This is why
-            scaling is needed: the message must be moved to higher-order bits to protect
-            it from the noise. Still, it is difficult to completely decouple the noise
-            from the message itself; hence the noise/error budget cannot be exactly
-            measured from a ciphertext alone.
-            */
-        }
-
-        private static void ExampleCKKSBasicsII()
-        {
-            Utilities.PrintExampleBanner("Example: CKKS Basics II");
-
-            /*
-            The previous example did not really make it clear why CKKS is useful at all.
-            Certainly one can scale floating-point numbers to integers, encrypt them,
-            keep track of the scale, and operate on them by just using BFV. The problem
-            with this approach is that the scale quickly grows larger than the size of
-            the coefficient modulus, preventing further computations. The true power of
-            CKKS is that it allows the scale to be switched down (`rescaling') without
-            changing the encrypted values.
-
-            To demonstrate this, we start by setting up the same environment we had in
-            the previous example.
-            */
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
-            parms.PolyModulusDegree = 8192;
-            parms.CoeffModulus = DefaultParams.CoeffModulus128(polyModulusDegree: 8192);
-
-            SEALContext context = SEALContext.Create(parms);
+            SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
 
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
-
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Evaluator evaluator = new Evaluator(context);
-            Decryptor decryptor = new Decryptor(context, secretKey);
-
-            CKKSEncoder encoder = new CKKSEncoder(context);
-
-            ulong slotCount = encoder.SlotCount;
-            Console.WriteLine($"Number of slots: {slotCount}");
-
-            List<double> input = new List<double> { 0.0, 1.1, 2.2, 3.3 };
-            Console.WriteLine("Input vector:");
-            Utilities.PrintVector(input);
-
-            /*
-            We use a slightly smaller scale in this example.
-            */
-            Plaintext plain = new Plaintext();
-            double scale = Math.Pow(2.0, 60);
-            encoder.Encode(input, scale, plain);
-
-            Ciphertext encrypted = new Ciphertext();
-            encryptor.Encrypt(plain, encrypted);
-
-            /*
-            Print the scale and the ParmsId for encrypted.
-            */
-            Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
-            Console.WriteLine($"Scale in encrypted before squaring: {encrypted.Scale}");
-
-            /*
-            We did this already in the previous example: square encrypted and observe
-            the scale growth.
-            */
-            evaluator.SquareInplace(encrypted);
-            evaluator.RelinearizeInplace(encrypted, relinKeys);
-            Console.WriteLine($"Scale in encrypted after squaring: {encrypted.Scale} ({(int)Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
-            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
-            Console.WriteLine();
-
-            /*
-            Now, to prevent the scale from growing too large in subsequent operations,
-            we apply rescaling.
-            */
-            Console.WriteLine("Rescaling ...");
-            evaluator.RescaleToNextInplace(encrypted);
-            Console.WriteLine();
-
-            /*
-            Rescaling changes the coefficient modulus as modulus switching does. These
-            operations are in fact very closely related. Moreover, the scale indeed has
-            been significantly reduced: rescaling divides the scale by the coefficient
-            modulus prime that was switched away. Since our coefficient modulus in this
-            case consisted of the primes (see seal/utils/global.cpp)
-
-                0x7fffffff380001,  0x7ffffffef00001,
-                0x3fffffff000001,  0x3ffffffef40001,
-
-            the last of which is 54 bits, the bit-size of the scale was reduced by
-            precisely 54 bits. Finer granularity rescaling would require smaller primes
-            to be used, but this might lead to performance problems as the computational
-            cost of homomorphic operations and the size of ciphertexts depends linearly
-            on the number of primes in CoeffModulus.
-            */
-            Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
-            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({(int)Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
-            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
-            Console.WriteLine();
-
-            /*
-            We can even compute the fourth power of the input. Note that it is very
-            important to first relinearize and then rescale. Trying to do these two
-            operations in the opposite order will make Microsoft SEAL throw and exception.
-            */
-            Console.WriteLine("Squaring and rescaling ...");
-            Console.WriteLine();
-            evaluator.SquareInplace(encrypted);
-            evaluator.RelinearizeInplace(encrypted, relinKeys);
-            evaluator.RescaleToNextInplace(encrypted);
-
-            Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
-            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({(int)Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
-            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
-            Console.WriteLine();
-
-            /*
-            At this point our scale is 78 bits and the coefficient modulus is 110 bits.
-            This means that we cannot square the result anymore, but if we rescale once
-            more and then square, things should work out better. We cannot relinearize
-            with relin_keys at this point due to the large decomposition bit count we
-            used: the noise from relinearization would completely destroy our result
-            due to the small scale we are at.
-            */
-            Console.WriteLine("Rescaling and squaring (no relinearization) ...");
-            Console.WriteLine();
-            evaluator.RescaleToNextInplace(encrypted);
-            evaluator.SquareInplace(encrypted);
-
-            Console.WriteLine($"Chain index of (encryption parameters of) encrypted: {context.GetContextData(encrypted.ParmsId).ChainIndex}");
-            Console.WriteLine($"Scale in encrypted: {encrypted.Scale} ({(int)Math.Ceiling(Math.Log(encrypted.Scale, newBase: 2))} bits)");
-            Console.WriteLine($"Current CoeffModulus size: {context.GetContextData(encrypted.ParmsId).TotalCoeffModulusBitCount} bits");
-            Console.WriteLine();
-
-            /*
-            We decrypt, decode, and print the results.
-            */
-            decryptor.Decrypt(encrypted, plain);
-            List<double> result = new List<double>();
-            encoder.Decode(plain, result);
-            Console.WriteLine("Eighth powers:");
-            Utilities.PrintVector(result);
-
-            /*
-            We have gone pretty low in the scale at this point and can no longer expect
-            to get entirely accurate results. Still, our results are quite accurate.
-            */
-            List<double> preciseResult = new List<double>();
-            foreach (double d in input)
-            {
-                preciseResult.Add(Math.Pow(d, 8));
-            }
-            Console.WriteLine("Precise result:");
-            Utilities.PrintVector(preciseResult);
-        }
-
-        private static void ExampleCKKSBasicsIII()
-        {
-            Utilities.PrintExampleBanner("Example: CKKS Basics III");
-
-            /*
-            In this example we demonstrate evaluating a polynomial function on
-            floating-point input data. The challenges we encounter will be related to
-            matching scales and encryption parameters when adding together terms of
-            different degrees in the polynomial evaluation. We start by setting up an
-            environment similar to what we had in the above examples.
-            */
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
-            parms.PolyModulusDegree = 8192;
-
-            /*
-            In this example we decide to use four 40-bit moduli for more flexible
-            rescaling. Note that 4*40 bits = 160 bits, which is well below the size of
-            the default coefficient modulus (see seal/util/globals.cpp). It is always
-            more secure to use a smaller coefficient modulus while keeping the degree of
-            the polynomial modulus fixed. Since the CoeffMod128(8192) default 218-bit
-            coefficient modulus achieves already a 128-bit security level, this 160-bit
-            modulus must be much more secure.
-
-            We use the SmallMods40bit(int) function to get primes from a hard-coded
-            list of 40-bit prime numbers; it is important that all primes used for the
-            coefficient modulus are distinct.
-            */
-            parms.CoeffModulus = new List<SmallModulus>
-            {
-                DefaultParams.SmallMods40Bit(0),
-                DefaultParams.SmallMods40Bit(1),
-                DefaultParams.SmallMods40Bit(2),
-                DefaultParams.SmallMods40Bit(3)
-            };
-
-            SEALContext context = SEALContext.Create(parms);
-            Utilities.PrintParameters(context);
-
-            KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey publicKey = keygen.PublicKey;
-            SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys(decompositionBitCount: DefaultParams.DBCmax);
-
+            RelinKeys relinKeys = keygen.RelinKeys();
             Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
             Decryptor decryptor = new Decryptor(context, secretKey);
@@ -418,37 +101,22 @@ namespace SEALNetExamples
             ulong slotCount = encoder.SlotCount;
             Console.WriteLine($"Number of slots: {slotCount}");
             Console.WriteLine();
-
-            /*
-            In this example our goal is to evaluate the polynomial PI*x^3 + 0.4x + 1 on
-            an encrypted input x for 4096 equidistant points x in the interval [0, 1].
-            */
-            List<double> input = new List<double>();
-            input.Capacity = (int)slotCount;
+            
+            List<double> input = new List<double>((int)slotCount);
             double currPoint = 0, stepSize = 1.0 / (slotCount - 1);
             for (ulong i = 0; i < slotCount; i++, currPoint += stepSize)
             {
                 input.Add(currPoint);
             }
             Console.WriteLine("Input vector:");
-            Utilities.PrintVector(input, 3);
-            Console.WriteLine("Evaluating polynomial PI*x^3 + 0.4x + 1 ...");
+            Utilities.PrintVector(input, 3, 7);
             Console.WriteLine();
 
-            /*
-            Now encode and encrypt the input using the last of the CoeffModulus primes
-            as the scale for a reason that will become clear soon.
-            */
-            double scale = parms.CoeffModulus.Last().Value;
-            Plaintext plainX = new Plaintext();
-            encoder.Encode(input, scale, plainX);
-            Ciphertext encryptedX1 = new Ciphertext();
-            encryptor.Encrypt(plainX, encryptedX1);
+            Console.WriteLine("Evaluating polynomial PI*x^3 + 0.4x + 1 ...");
 
             /*
-            We create plaintext elements for PI, 0.4, and 1, using an overload of
-            CKKSEncoder.Encode(...) that encodes the given floating-point value to
-            every slot in the vector.
+            We create plaintexts for PI, 0.4, and 1 using an overload of CKKSEncoder.Encode
+            that encodes the given floating-point value to every slot in the vector.
             */
             Plaintext plainCoeff3 = new Plaintext(),
                       plainCoeff1 = new Plaintext(),
@@ -457,203 +125,198 @@ namespace SEALNetExamples
             encoder.Encode(0.4, scale, plainCoeff1);
             encoder.Encode(1.0, scale, plainCoeff0);
 
-            /*
-            To compute x^3 we first compute x^2, relinearize, and rescale.
-            */
-            Ciphertext encryptedX3 = new Ciphertext();
-            evaluator.Square(encryptedX1, encryptedX3);
-            evaluator.RelinearizeInplace(encryptedX3, relinKeys);
-            evaluator.RescaleToNextInplace(encryptedX3);
+            Plaintext xPlain = new Plaintext();
+            Utilities.PrintLine();
+            Console.WriteLine("Encode input vectors.");
+            encoder.Encode(input, scale, xPlain);
+            Ciphertext x1Encrypted = new Ciphertext();
+            encryptor.Encrypt(xPlain, x1Encrypted);
 
             /*
-            Now encrypted_x3 is at different encryption parameters than encrypted_x1,
-            preventing us from multiplying them together to compute x^3. We could simply
-            switch encryptedX1 down to the next parameters in the modulus switching
-            chain. Since we still need to multiply the x^3 term with PI (plainCoeff3),
-            we instead compute PI*x first and multiply that with x^2 to obtain PI*x^3.
-            This product poses no problems since both inputs are at the same scale and
-            use the same encryption parameters. We rescale afterwards to change the
-            scale back to 40 bits, which will also drop the coefficient modulus down to
-            120 bits.
+            To compute x^3 we first compute x^2 and relinearize. However, the scale has
+            now grown to 2^80.
             */
-            Ciphertext encryptedX1Coeff3 = new Ciphertext();
-            evaluator.MultiplyPlain(encryptedX1, plainCoeff3, encryptedX1Coeff3);
-            evaluator.RescaleToNextInplace(encryptedX1Coeff3);
+            Ciphertext x3Encrypted = new Ciphertext();
+            Utilities.PrintLine();
+            Console.WriteLine("Compute x^2 and relinearize:");
+            evaluator.Square(x1Encrypted, x3Encrypted);
+            evaluator.RelinearizeInplace(x3Encrypted, relinKeys);
+            Console.WriteLine("    + Scale of x^2 before rescale: {0} bits",
+                Math.Log(x3Encrypted.Scale, newBase: 2));
 
             /*
-            Since both encryptedX3 and encryptedX1Coeff3 now have the same scale and
-            use same encryption parameters, we can multiply them together. We write the
-            result to encryptedX3.
+            Now rescale; in addition to a modulus switch, the scale is reduced down by
+            a factor equal to the prime that was switched away (40-bit prime). Hence, the
+            new scale should be close to 2^40. Note, however, that the scale is not equal
+            to 2^40: this is because the 40-bit prime is only close to 2^40.
             */
-            evaluator.MultiplyInplace(encryptedX3, encryptedX1Coeff3);
-            evaluator.RelinearizeInplace(encryptedX3, relinKeys);
-            evaluator.RescaleToNextInplace(encryptedX3);
+            Utilities.PrintLine();
+            Console.WriteLine("Rescale x^2.");
+            evaluator.RescaleToNextInplace(x3Encrypted);
+            Console.WriteLine("    + Scale of x^2 after rescale: {0} bits",
+                Math.Log(x3Encrypted.Scale, newBase: 2));
+
+            /*
+            Now x3Encrypted is at a different level than x1Encrypted, which prevents us
+            from multiplying them to compute x^3. We could simply switch x1Encrypted to
+            the next parameters in the modulus switching chain. However, since we still
+            need to multiply the x^3 term with PI (plainCoeff3), we instead compute PI*x
+            first and multiply that with x^2 to obtain PI*x^3. To this end, we compute
+            PI*x and rescale it back from scale 2^80 to something close to 2^40.
+            */
+            Utilities.PrintLine();
+            Console.WriteLine("Compute and rescale PI*x.");
+            Ciphertext x1EncryptedCoeff3 = new Ciphertext();
+            evaluator.MultiplyPlain(x1Encrypted, plainCoeff3, x1EncryptedCoeff3);
+            Console.WriteLine("    + Scale of PI*x before rescale: {0} bits",
+                Math.Log(x1EncryptedCoeff3.Scale, newBase: 2));
+            evaluator.RescaleToNextInplace(x1EncryptedCoeff3);
+            Console.WriteLine("    + Scale of PI*x after rescale: {0} bits",
+                Math.Log(x1EncryptedCoeff3.Scale, newBase: 2));
+
+            /*
+            Since x3Encrypted and x1EncryptedCoeff3 have the same exact scale and use
+            the same encryption parameters, we can multiply them together. We write the
+            result to x3Encrypted, relinearize, and rescale. Note that again the scale
+            is something close to 2^40, but not exactly 2^40 due to yet another scaling
+            by a prime. We are down to the last level in the modulus switching chain.
+            */
+            Utilities.PrintLine();
+            Console.WriteLine("Compute, relinearize, and rescale (PI*x)*x^2.");
+            evaluator.MultiplyInplace(x3Encrypted, x1EncryptedCoeff3);
+            evaluator.RelinearizeInplace(x3Encrypted, relinKeys);
+            Console.WriteLine("    + Scale of PI*x^3 before rescale: {0} bits",
+                Math.Log(x3Encrypted.Scale, newBase: 2));
+            evaluator.RescaleToNextInplace(x3Encrypted);
+            Console.WriteLine("    + Scale of PI*x^3 after rescale: {0} bits",
+                Math.Log(x3Encrypted.Scale, newBase: 2));
 
             /*
             Next we compute the degree one term. All this requires is one MultiplyPlain
-            with plainCoeff1. We overwrite encryptedX1 with the result.
+            with plainCoeff1. We overwrite x1Encrypted with the result.
             */
-            evaluator.MultiplyPlainInplace(encryptedX1, plainCoeff1);
-            evaluator.RescaleToNextInplace(encryptedX1);
+            Utilities.PrintLine();
+            Console.WriteLine("Compute and rescale 0.4*x.");
+            evaluator.MultiplyPlainInplace(x1Encrypted, plainCoeff1);
+            Console.WriteLine("    + Scale of 0.4*x before rescale: {0} bits",
+                Math.Log(x1Encrypted.Scale, newBase: 2));
+            evaluator.RescaleToNextInplace(x1Encrypted);
+            Console.WriteLine("    + Scale of 0.4*x after rescale: {0} bits",
+                Math.Log(x1Encrypted.Scale, newBase: 2));
 
             /*
             Now we would hope to compute the sum of all three terms. However, there is
             a serious problem: the encryption parameters used by all three terms are
             different due to modulus switching from rescaling.
+
+            Encrypted addition and subtraction require that the scales of the inputs are
+            the same, and also that the encryption parameters (ParmsId) match. If there
+            is a mismatch, Evaluator will throw an exception.
             */
+            Console.WriteLine();
+            Utilities.PrintLine();
             Console.WriteLine("Parameters used by all three terms are different:");
-            Console.WriteLine($"Modulus chain index for encryptedX3: {context.GetContextData(encryptedX3.ParmsId).ChainIndex}");
-            Console.WriteLine($"Modulus chain index for encryptedX1: {context.GetContextData(encryptedX1.ParmsId).ChainIndex}");
-            Console.WriteLine($"Modulus chain index for plainCoeff0: {context.GetContextData(plainCoeff0.ParmsId).ChainIndex}");
+            Console.WriteLine("    + Modulus chain index for x3Encrypted: {0}",
+                context.GetContextData(x3Encrypted.ParmsId).ChainIndex);
+            Console.WriteLine("    + Modulus chain index for x1Encrypted: {0}",
+                context.GetContextData(x1Encrypted.ParmsId).ChainIndex);
+            Console.WriteLine("    + Modulus chain index for plainCoeff0: {0}",
+                context.GetContextData(plainCoeff0.ParmsId).ChainIndex);
             Console.WriteLine();
 
-
             /*
-            Let us carefully consider what the scales are at this point. If we denote
-            the primes in CoeffModulus as q1, q2, q3, q4 (order matters here), then all
-            fresh encodings start with a scale equal to q4 (this was a choice we made
-            above). After the computations above the scale in encryptedX3 is q4^2/q3:
+            Let us carefully consider what the scales are at this point. We denote the
+            primes in coeff_modulus as P_0, P_1, P_2, P_3, in this order. P_3 is used as
+            the special modulus and is not involved in rescalings. After the computations
+            above the scales in ciphertexts are:
 
-                * The product x^2 has scale q4^2;
-                * The produt PI*x has scale q4^2;
-                * Rescaling both of these by q4 (last prime) results in scale q4;
-                * Multiplication to obtain PI*x^3 raises the scale to q4^2;
-                * Rescaling by q3 (last prime) yields a scale of q4^2/q3.
+                - Product x^2 has scale 2^80 and is at level 2;
+                - Product PI*x has scale 2^80/P_2 and is at level 2;
+                - We rescaled both down to scale 2^80/P2 and level 1;
+                - Product PI*x^3 has scale (2^80/P_2)^2;
+                - We rescaled it down to scale (2^80/P_2)^2/P_1 and level 0;
+                - Product 0.4*x has scale 2^80;
+                - We rescaled it down to scale 2^80/P_2 and level 1;
+                - The contant term 1 has scale 2^40 and is at level 2.
 
-            The scale in both encryptedX1 and plainCoeff0 is just q4.
+            Although the scales of all three terms are approximately 2^40, their exact
+            values are different, hence they cannot be added together.
             */
-            Console.WriteLine("Scale in encryptedX3: {0:0.0000000000}", encryptedX3.Scale);
-            Console.WriteLine("Scale in encryptedX1: {0:0.0000000000}", encryptedX1.Scale);
-            Console.WriteLine("Scale in plainCoeff0: {0:0.0000000000}", plainCoeff0.Scale);
+            Utilities.PrintLine();
+            Console.WriteLine("The exact scales of all three terms are different:");
+            Console.WriteLine("Scale in PI*x^3: {0:0.0000000000}", x3Encrypted.Scale);
+            Console.WriteLine("Scale in  0.4*x: {0:0.0000000000}", x1Encrypted.Scale);
+            Console.WriteLine("Scale in      1 : {0:0.0000000000}", plainCoeff0.Scale);
             Console.WriteLine();
 
             /*
-            There are a couple of ways to fix this this problem. Since q4 and q3 are
-            really close to each other, we could simply "lie" to Microsoft SEAL and set
-            the scales to be the same. For example, changing the scale of encryptedX3 to
-            be q4 simply means that we scale the value of encryptedX3 by q4/q3 which is
-            very close to 1; this should not result in any noticeable error.
+            There are many ways to fix this problem. Since P_2 and P_1 are really close
+            to 2^40, we can simply "lie" to Microsoft SEAL and set the scales to be the
+            same. For example, changing the scale of PI*x^3 to 2^40 simply means that we
+            scale the value of PI*x^3 by 2^120/(P_2^2*P_1), which is very close to 1.
+            This should not result in any noticeable error.
 
-            Another option would be to encode 1 with scale q4, perform a MultiplyPlain
-            with encryptedX1, and finally rescale. In this case we would additionally
-            make sure to encode 1 with the appropriate encryption parameters (ParmsId).
-
-            A third option would be to initially encode plainCoeff1 with scale q4^2/q3.
-            Then, after multiplication with encrypted_x1 and rescaling, the result would
-            have scale q4^2/q3. Since encoding can be computationally costly, this may
-            not be a realistic option in some cases.
+            Another option would be to encode 1 with scale 2^80/P_2, do a MultiplyPlain
+            with 0.4*x, and finally rescale. In this case we would need to additionally
+            make sure to encode 1 with appropriate encryption parameters (ParmsId).
 
             In this example we will use the first (simplest) approach and simply change
-            the scale of encryptedX3.
+            the scale of PI*x^3 and 0.4*x to 2^40.
             */
-            encryptedX3.Scale = encryptedX1.Scale;
+            Utilities.PrintLine();
+            Console.WriteLine("Normalize scales to 2^40.");
+            x3Encrypted.Scale = Math.Pow(2.0, 40);
+            x1Encrypted.Scale = Math.Pow(2.0, 40);
 
             /*
             We still have a problem with mismatching encryption parameters. This is easy
-            to fix by using traditional modulus switching (no rescaling). Note that we
-            use here the Evaluator.ModSwitchToInplace(...) function to switch to
-            encryption parameters down the chain with a specific ParmsId.
+            to fix by using traditional modulus switching (no rescaling). CKKS supports
+            modulus switching just like the BFV scheme, allowing us to switch away parts
+            of the coefficient modulus when it is simply not needed.
             */
-            evaluator.ModSwitchToInplace(encryptedX1, encryptedX3.ParmsId);
-            evaluator.ModSwitchToInplace(plainCoeff0, encryptedX3.ParmsId);
+            Utilities.PrintLine();
+            Console.WriteLine("Normalize encryption parameters to the lowest level.");
+            ParmsId lastParmsId = x3Encrypted.ParmsId;
+            evaluator.ModSwitchToInplace(x1Encrypted, lastParmsId);
+            evaluator.ModSwitchToInplace(plainCoeff0, lastParmsId);
 
             /*
             All three ciphertexts are now compatible and can be added.
             */
+            Utilities.PrintLine();
+            Console.WriteLine("Compute PI*x^3 + 0.4*x + 1.");
             Ciphertext encryptedResult = new Ciphertext();
-            evaluator.Add(encryptedX3, encryptedX1, encryptedResult);
+            evaluator.Add(x3Encrypted, x1Encrypted, encryptedResult);
             evaluator.AddPlainInplace(encryptedResult, plainCoeff0);
 
             /*
-            Print the chain index and scale for encrypted_result.
+            First print the true result.
             */
-            Console.WriteLine($"Modulus chain index for encrypted_result: {context.GetContextData(encryptedResult.ParmsId).ChainIndex}");
-            Console.WriteLine("Scale in encryptedResult: {0:0.0000000000} ({1} bits)",
-                encryptedResult.Scale,
-                (int)Math.Ceiling(Math.Log(encryptedResult.Scale, newBase: 2)));
+            Plaintext plainResult = new Plaintext();
+            Utilities.PrintLine();
+            Console.WriteLine("Decrypt and decode PI * x ^ 3 + 0.4x + 1.");
+            Console.WriteLine("    + Expected result:");
+            List<double> trueResult = new List<double>(input.Count);
+            foreach (double x in input)
+            {
+                trueResult.Add((3.14159265 * x * x + 0.4) * x + 1);
+            }
+            Utilities.PrintVector(trueResult, 3, 7);
 
             /*
             We decrypt, decode, and print the result.
             */
-            Plaintext plainResult = new Plaintext();
             decryptor.Decrypt(encryptedResult, plainResult);
             List<double> result = new List<double>();
             encoder.Decode(plainResult, result);
-            Console.WriteLine("Result of PI*x^3 + 0.4x + 1:");
-            Utilities.PrintVector(result, 3);
+            Console.WriteLine("    + Computed result ...... Correct.");
+            Utilities.PrintVector(result, 3, 7);
 
             /*
-            At this point if we wanted to multiply encryptedResult one more time, the
-            other multiplicand would have to have scale less than 40 bits, otherwise
-            the scale would become larger than the CoeffModulus itself.
-            */
-            Console.WriteLine($"Current CoeffModulus size for encrypted_result: {context.GetContextData(encryptedResult.ParmsId).TotalCoeffModulusBitCount} bits");
-            Console.WriteLine();
-
-            /*
-            A very extreme case for multiplication is where we multiply a ciphertext
-            with a vector of values that are all the same integer. For example, let us
-            multiply encryptedResult by 7. In this case we do not need any scaling in
-            the multiplicand due to a different (much simpler) encoding process.
-            */
-            Plaintext plainIntegerScalar = new Plaintext();
-            encoder.Encode(7, encryptedResult.ParmsId, plainIntegerScalar);
-            evaluator.MultiplyPlainInplace(encryptedResult, plainIntegerScalar);
-
-            Console.WriteLine("Scale in plainIntegerScalar scale: {0:0.0000000000}", plainIntegerScalar.Scale);
-            Console.WriteLine("Scale in encryptedResult: {0:0.0000000000}", encryptedResult.Scale);
-
-            /*
-            We decrypt, decode, and print the result.
-            */
-            decryptor.Decrypt(encryptedResult, plainResult);
-            encoder.Decode(plainResult, result);
-            Console.WriteLine("Result of 7 * (PI*x^3 + 0.4x + 1):");
-            Utilities.PrintVector(result, 3);
-
-            /*
-            Finally, we show how to apply vector rotations on the encrypted data. This
-            is very similar to how matrix rotations work in the BFV scheme. We try this
-            with three sizes of Galois keys. In some cases it is desirable for memory
-            reasons to create Galois keys that support only specific rotations. This can
-            be done by passing to KeyGenerator.GaloisKeys(...) a vector of signed
-            integers specifying the desired rotation step counts. Here we create Galois
-            keys that only allow cyclic rotation by a single step (at a time) to the left.
-            */
-            GaloisKeys galKeys30 = keygen.GaloisKeys(decompositionBitCount: 30, steps: new int[] { 1 });
-            GaloisKeys galKeys15 = keygen.GaloisKeys(decompositionBitCount: 15, steps: new int[] { 1 });
-
-            Ciphertext rotatedResult = new Ciphertext();
-            evaluator.RotateVector(encryptedResult, 1, galKeys15, rotatedResult);
-            decryptor.Decrypt(rotatedResult, plainResult);
-            encoder.Decode(plainResult, result);
-            Console.WriteLine("Result rotated with dbc 15:");
-            Utilities.PrintVector(result, 3);
-
-            evaluator.RotateVector(encryptedResult, 1, galKeys30, rotatedResult);
-            decryptor.Decrypt(rotatedResult, plainResult);
-            encoder.Decode(plainResult, result);
-            Console.WriteLine("Result rotated with dbc 30:");
-            Utilities.PrintVector(result, 3);
-
-            /*
-            We notice that the using the smallest decomposition bit count introduces
-            the least amount of error in the result. The problem is that our scale at
-            this point is very small -- only 40 bits -- so a rotation with decomposition
-            bit count 30 or bigger already destroys most or all of the message bits.
-            Ideally rotations would be performed right after multiplications before any
-            rescaling takes place. This way the scale is as large as possible and the
-            additive noise coming from the rotation (or relinearization) will be totally
-            shadowed by the large scale, and subsequently scaled down by the following
-            rescaling. Of course this may not always be possible to arrange.
-
-            We did not show any computations on complex numbers in these examples, but
+            While we did not show any computations on complex numbers in these examples,
             the CKKSEncoder would allow us to have done that just as easily. Additions
-            and multiplications behave just as one would expect. It is also possible
-            to complex conjugate the values in a ciphertext by using the functions
-            Evaluator.ComplexConjugate[Inplace](...).
+            and multiplications of complex numbers behave just as one would expect.
             */
         }
-
     }
 }

@@ -133,7 +133,7 @@ inline void print_vector(std::vector<T> vec, std::size_t print_size = 4, int pre
 
     std::size_t slot_count = vec.size();
 
-    std::cout << std::fixed << std::setprecision(prec);// << std::endl;
+    std::cout << std::fixed << std::setprecision(prec);
     if(slot_count <= 2 * print_size)
     {
         std::cout << "    [";
