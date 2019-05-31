@@ -63,9 +63,6 @@ namespace seal
         sk_generated_ = true;
         generate_sk(sk_generated_);
 
-        // Initialize the secret_key_array
-        compute_secret_key_array(*context_->context_data(), 1);
-
         // Generate the public key
         generate_pk();
     }
@@ -97,6 +94,8 @@ namespace seal
         // Set the secret and public keys
         public_key_ = public_key;
         secret_key_ = secret_key;
+
+        generate_sk(true);
 
         // Secret key and public key are generated
         sk_generated_ = true;
@@ -138,9 +137,6 @@ namespace seal
             // Set the parms_id for secret key
             secret_key_.parms_id() = parms.parms_id();
         }
-
-        // Set the parms_id for secret key
-        secret_key_.parms_id() = context_data.parms().parms_id();
 
         // Secret key has been generated
         sk_generated_ = true;
