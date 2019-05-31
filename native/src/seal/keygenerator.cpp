@@ -61,6 +61,7 @@ namespace seal
         // Set the secret key
         secret_key_ = secret_key;
         sk_generated_ = true;
+        generate_sk(sk_generated_);
 
         // Generate the public key
         generate_pk();
@@ -101,18 +102,14 @@ namespace seal
         public_key_ = public_key;
         secret_key_ = secret_key;
 
-        // Set the secret_key_array to have size 1 (first power of secret) 
-        secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count,
-            secret_key_array_.get());
-        secret_key_array_size_ = 1;
+        generate_sk(true);
 
         // Secret key and public key are generated
         sk_generated_ = true;
         pk_generated_ = true;
     }
 
-    void KeyGenerator::generate_sk()
+    void KeyGenerator::generate_sk(bool is_initialized)
     {
         // Extract encryption parameters.
         auto &context_data = *context_->context_data();
@@ -121,22 +118,28 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
 
-        // Initialize secret key.
-        secret_key_ = SecretKey();
-        sk_generated_ = false;
-        secret_key_.data().resize(mul_safe(coeff_count, coeff_mod_count));
-
-        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
-
-        // Generate secret key
-        uint64_t *secret_key = secret_key_.data().data();
-        set_poly_coeffs_zero_one_negone(context_data, secret_key, random);
-
-        auto &small_ntt_tables = context_data.small_ntt_tables();
-        for (size_t i = 0; i < coeff_mod_count; i++)
+        if (!is_initialized)
         {
-            // Transform the secret s into NTT representation. 
-            ntt_negacyclic_harvey(secret_key + (i * coeff_count), small_ntt_tables[i]);
+            // Initialize secret key.
+            secret_key_ = SecretKey();
+            sk_generated_ = false;
+            secret_key_.data().resize(mul_safe(coeff_count, coeff_mod_count));
+
+            shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
+
+            // Generate secret key
+            uint64_t *secret_key = secret_key_.data().data();
+            set_poly_coeffs_zero_one_negone(context_data, secret_key, random);
+
+            auto &small_ntt_tables = context_data.small_ntt_tables();
+            for (size_t i = 0; i < coeff_mod_count; i++)
+            {
+                // Transform the secret s into NTT representation.
+                ntt_negacyclic_harvey(secret_key + (i * coeff_count), small_ntt_tables[i]);
+            }
+
+            // Set the parms_id for secret key
+            secret_key_.parms_id() = parms.parms_id();
         }
 
         // Set the secret_key_array to have size 1 (first power of secret) 
@@ -144,9 +147,6 @@ namespace seal
         set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count,
             secret_key_array_.get());
         secret_key_array_size_ = 1;
-
-        // Set the parms_id for secret key
-        secret_key_.parms_id() = parms.parms_id();
 
         // Secret key has been generated
         sk_generated_ = true;
