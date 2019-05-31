@@ -15,7 +15,7 @@ For more information about the Microsoft SEAL project, see [http://sealcrypto.or
 - [Installing Microsoft SEAL for .NET](#installing-microsoft-seal-for-.net)
   - [Windows](#windows-1)
   - [Linux and macOS](#linux-and-macos-1)
-- [Examples](#examples-4)
+- [Getting Started](#getting-started)
 - [Contributing](#contributing)
 - [Citing Microsoft SEAL](#citing-microsoft-seal)
 - [License](#license)
@@ -280,9 +280,10 @@ cd dotnet/src
 dotnet build
 cd ../..
 ````
-You can use the `dotnet` parameter `--configuration <Debug|Release>` to build either a `Debug` or `Release` version of the assembly.
-This will result in a `SEALNet.dll` assembly to be created in `dotnet/lib/$(Configuration)/netstandard2.0`. This
-assembly is the one you will want to reference in your own projects.
+You can use the `dotnet` parameter `--configuration <Debug|Release>` to build either
+a `Debug` or `Release` version of the assembly. This will result in a `SEALNet.dll`
+assembly to be created in `dotnet/lib/$(Configuration)/netstandard2.0`. This assembly
+is the one you will want to reference in your own projects.
 
 #### Examples
 
@@ -304,8 +305,9 @@ cd dotnet/tests
 dotnet test
 cd ../..
 ````
-All unit tests should pass. You can use the `dotnet` parameter `--configuration <Debug|Release>` to run `Debug` or `Relase` unit tests,
-and you can use `--verbosity detailed` to print the list of unit tests that are being run.
+All unit tests should pass. You can use the `dotnet` parameter `--configuration <Debug|Release>`
+to run `Debug` or `Relase` unit tests, and you can use `--verbosity detailed` to print the list
+of unit tests that are being run.
 
 ### Using Microsoft SEAL for .NET in your own application
 
@@ -326,18 +328,30 @@ sudo make install
 cd ../..
 ````
 
-# Examples
-Microsoft SEAL comes with code examples with detailed comments. These comments are aimed to teach most of the concepts that a developer will need to know to use the library efficiently and securely. And the associated code snippets will show how the core operations are performed. The examples are available (and identical) in C++ and C#. The C++ examples are divided into multiple .cpp files in SEAL/native/examples/ as follows:
+# Getting Started
+Using Microsoft SEAL will require the user to invest some time in learning fundamental
+concepts in homomorphic encryption. The code comes with heavily commented examples that
+are designed to gradually teach such concepts as well as demonstrate much of the API.
+The code examples are available (and identical) in C++ and C#, and are divided into
+several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows:
 
-  - `examples.cpp`: the example runner application;
-  - `bfv_basics.cpp`: shows how to perform encrypted modular arithmetic using the BFV scheme;
-  - `encoders.cpp`: shows how to encode more complex data into Microsoft SEAL plaintext objects;
-  - `levels.cpp`: explains the concept of levels in Microsoft SEAL. This is a conceptual material that will be necessary to understand before using the CKKS scheme;
-  - `ckks_basics.cpp`: shows how to use the CKKS scheme for computing on encrypted real numbers;
-  - `rotation.cpp`: shows how to perform cyclic rotations on encrypted vectors using the BFV and CKKS schemes;
-  - `performance.cpp`: performance tests for Microsoft SEAL.
+|C++                |C#                |Description                                                                 |
+|-------------------|------------------|----------------------------------------------------------------------------|
+|`examples.cpp`     |`Examples.cs`     |The example runner application                                              |
+|`1_bfv_basics.cpp` |`1_BFV_Basics.cs` |Encrypted modular arithmetic using the BFV scheme                           |
+|`2_encoders.cpp`   |`2_Encoders.cs`   |Encoding more complex data into Microsoft SEAL plaintext objects            |
+|`3_levels.cpp`     |`3_Levels.cs`     |Introduces the concept of levels; prerequisite for using the CKKS scheme    |
+|`4_ckks_basics.cpp`|`4_CKKS_Basics.cs`|Encrypted real number arithmetic using the CKKS scheme                      |
+|`5_rotation.cpp`   |`5_Rotation.cs`   |Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes|
+|`6_performance.cpp`|`6_Performance.cs`|Performance tests for Microsoft SEAL                                        |
 
-It is recommeded to read the comments and the code snippets along with command line printout from running an example. For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
+It is recommeded to read the comments and the code snippets along with command line printout
+from running an example. For easier navigation, command line printout provides the line number
+in the associated source file where the associated code snippets start.
+
+**WARNING: It is impossible to use Microsoft SEAL correctly after reading only the first few
+examples, or by simply re-using the code from the examples. Any developer attempting to do so
+will inevitably produce code that is incorrect or extremely slow.**
 
 # Contributing
 
