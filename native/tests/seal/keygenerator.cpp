@@ -8,6 +8,7 @@
 #include "seal/defaultparams.h"
 #include "seal/encryptor.h"
 #include "seal/decryptor.h"
+#include "seal/evaluator.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -514,10 +515,11 @@ namespace SEALTest
     TEST(KeyGeneratorTest, FVSecretKeyGeneration)
     {
         EncryptionParameters parms(scheme_type::BFV);
+        SmallModulus plain_modulus(1 << 6);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(plain_modulus);
+        parms.set_coeff_modulus({ DefaultParams::small_mods_40bit(0), DefaultParams::small_mods_40bit(1), DefaultParams::small_mods_40bit(2) });
         parms.set_noise_standard_deviation(3.20);
-        parms.set_poly_modulus_degree(64);
-        parms.set_plain_modulus(1 << 6);
-        parms.set_coeff_modulus({ DefaultParams::small_mods_60bit(0) });
         auto context = SEALContext::Create(parms);
         {
             KeyGenerator keygen(context);
@@ -525,7 +527,7 @@ namespace SEALTest
             auto sk = keygen.secret_key();
 
             KeyGenerator keygen2(context, sk);
-            auto sk2 = keygen.secret_key();
+            auto sk2 = keygen2.secret_key();
             auto pk2 = keygen2.public_key();
 
             ASSERT_EQ(sk.data().coeff_count(), sk2.data().coeff_count());
@@ -554,9 +556,32 @@ namespace SEALTest
             auto pk = keygen.public_key();
             auto sk = keygen.secret_key();
 
-            KeyGenerator keygen2(context, sk, pk);
-            auto sk2 = keygen.secret_key();
+            KeyGenerator keygen2(context, sk);
+            auto sk2 = keygen2.secret_key();
             auto pk2 = keygen2.public_key();
+            auto rlk2 = keygen2.relin_keys(60, 1);
+
+            Evaluator evaluator(context);
+            Encryptor encryptor(context, pk2);
+            Decryptor decryptor(context, sk);
+            Ciphertext ctxt;
+            Plaintext pt1("1x^10 + 2");
+            Plaintext pt2;
+            encryptor.encrypt(pt1, ctxt);
+            evaluator.square_inplace(ctxt);
+            evaluator.relinearize_inplace(ctxt, rlk2);
+            decryptor.decrypt(ctxt, pt2);
+            ASSERT_TRUE(pt2.to_string() == "1x^20 + 4x^10 + 4");
+        }
+        {
+            KeyGenerator keygen(context);
+            auto pk = keygen.public_key();
+            auto sk = keygen.secret_key();
+
+            KeyGenerator keygen2(context, sk, pk);
+            auto sk2 = keygen2.secret_key();
+            auto pk2 = keygen2.public_key();
+            auto rlk2 = keygen2.relin_keys(60, 1);
 
             ASSERT_EQ(sk.data().coeff_count(), sk2.data().coeff_count());
             for (size_t i = 0; i < sk.data().coeff_count(); i++)
@@ -569,6 +594,18 @@ namespace SEALTest
             {
                 ASSERT_EQ(pk.data()[i], pk2.data()[i]);
             }
+
+            Evaluator evaluator(context);
+            Encryptor encryptor(context, pk2);
+            Decryptor decryptor(context, sk);
+            Ciphertext ctxt;
+            Plaintext pt1("1x^10 + 2");
+            Plaintext pt2;
+            encryptor.encrypt(pt1, ctxt);
+            evaluator.square_inplace(ctxt);
+            evaluator.relinearize_inplace(ctxt, rlk2);
+            decryptor.decrypt(ctxt, pt2);
+            ASSERT_TRUE(pt2.to_string() == "1x^20 + 4x^10 + 4");
         }
     }
 }
