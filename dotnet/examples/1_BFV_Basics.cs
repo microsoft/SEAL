@@ -63,8 +63,9 @@ namespace SEALNetExamples
             /*
             Next we set the [ciphertext] `coefficient modulus' (CoeffModulus). This
             parameter is a large integer, which is a product of distinct prime numbers,
-            each up to 60 bits in size. It is represented as a vector of these prime
-            numbers, each represented by an instance of the SmallModulus class.
+            numbers, each represented by an instance of the SmallModulus class. The
+            bit-length of CoeffModulus means the sum of the bit-lengths of its prime
+            factors.
 
             A larger CoeffModulus implies a larger noise budget, hence more encrypted
             computation capabilities. However, an upper bound for the total bit-length
@@ -96,12 +97,7 @@ namespace SEALNetExamples
                 CoeffModulus.BFVDefault(polyModulusDegree),
 
             which returns IEnumerable<SmallModulus> consisting of a generally good choice
-            for the given PolyModulusDegree. In later examples we will use the function
-
-                CoeffModulus.Create(polyModulusDegree, new int[]{ ... })
-
-            to obtain customized primes for the CoeffModulus, and will explain reasons
-            for doing so.
+            for the given PolyModulusDegree.
             */
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
 
@@ -127,7 +123,7 @@ namespace SEALNetExamples
             /*
             Now that all parameters are set, we are ready to construct a SEALContext
             object. This is a heavy class that checks the validity and properties of the
-            parameters we just set and performs several important pre-computations.
+            parameters we just set.
             */
             SEALContext context = new SEALContext(parms);
 
@@ -408,7 +404,6 @@ namespace SEALNetExamples
             this result is computed in integers modulo 256. Therefore the expected output
             should be 3626 % 256 == 42, or 0x2A in hexadecimal.
             */
-            Console.WriteLine();
         }
     }
 }
