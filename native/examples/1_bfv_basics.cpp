@@ -330,7 +330,7 @@ void example_bfv_basics()
 
     Relinearization requires special `relinearization keys', which can be thought
     of as a kind of public key. Relinearization keys can easily be created with
-    the KeyGenerator. 
+    the KeyGenerator.
 
     Relinearization is used similarly in both the BFV and the CKKS schemes, but
     in this example we continue using BFV. We repeat our computation from before,

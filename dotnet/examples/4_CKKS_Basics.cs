@@ -101,7 +101,7 @@ namespace SEALNetExamples
             CKKSEncoder encoder = new CKKSEncoder(context);
             ulong slotCount = encoder.SlotCount;
             Console.WriteLine($"Number of slots: {slotCount}");
-            
+
             List<double> input = new List<double>((int)slotCount);
             double currPoint = 0, stepSize = 1.0 / (slotCount - 1);
             for (ulong i = 0; i < slotCount; i++, currPoint += stepSize)

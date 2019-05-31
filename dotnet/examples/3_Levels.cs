@@ -37,7 +37,7 @@ namespace SEALNetExamples
             is at a higher level in the chain than another set of parameters if its the
             chain index is bigger, i.e., it is earlier in the chain.
 
-            Each set of parameters in the chain involves unique precomputations performed
+            Each set of parameters in the chain involves unique pre-computations performed
             when the SEALContext is created, and stored in a SEALContext.ContextData
             object. The chain is basically a linked list of SEALContext.ContextData
             objects, and can easily be accessed through the SEALContext at any time. Each
