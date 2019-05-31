@@ -331,7 +331,7 @@ cd ../..
 # Getting Started
 Using Microsoft SEAL will require the user to invest some time in learning fundamental
 concepts in homomorphic encryption. The code comes with heavily commented examples that
-are designed to gradually teach such concepts as well as demonstrate much of the API.
+are designed to gradually teach such concepts as well as to demonstrate much of the API.
 The code examples are available (and identical) in C++ and C#, and are divided into
 several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows:
 
@@ -349,10 +349,10 @@ It is recommeded to read the comments and the code snippets along with command l
 from running an example. For easier navigation, command line printout provides the line number
 in the associated source file where the associated code snippets start.
 
-**WARNING: It is impossible to use Microsoft SEAL correctly after reading only the first few
-examples, or by simply re-using the code from the examples. Any developer attempting to do so
-will inevitably produce code that is incorrect or extremely slow.**
-
+**WARNING: It is impossible to use Microsoft SEAL correctly without reading all examples 
+or by simply re-using the code from examples. Any developer attempting to do so
+will inevitably produce code that is *vulnerable*, *malfunctioning*, or *extremely slow*.**
+*
 # Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you
