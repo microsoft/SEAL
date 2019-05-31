@@ -88,6 +88,7 @@ namespace SEALNetExamples
 
             SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
+            Console.WriteLine();
 
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
@@ -100,7 +101,6 @@ namespace SEALNetExamples
             CKKSEncoder encoder = new CKKSEncoder(context);
             ulong slotCount = encoder.SlotCount;
             Console.WriteLine($"Number of slots: {slotCount}");
-            Console.WriteLine();
             
             List<double> input = new List<double>((int)slotCount);
             double currPoint = 0, stepSize = 1.0 / (slotCount - 1);
@@ -110,7 +110,6 @@ namespace SEALNetExamples
             }
             Console.WriteLine("Input vector:");
             Utilities.PrintVector(input, 3, 7);
-            Console.WriteLine();
 
             Console.WriteLine("Evaluating polynomial PI*x^3 + 0.4x + 1 ...");
 
@@ -244,9 +243,9 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("The exact scales of all three terms are different:");
-            Console.WriteLine("Scale in PI*x^3: {0:0.0000000000}", x3Encrypted.Scale);
-            Console.WriteLine("Scale in  0.4*x: {0:0.0000000000}", x1Encrypted.Scale);
-            Console.WriteLine("Scale in      1 : {0:0.0000000000}", plainCoeff0.Scale);
+            Console.WriteLine("    + Exact scale in PI*x^3: {0:0.0000000000}", x3Encrypted.Scale);
+            Console.WriteLine("    + Exact scale in  0.4*x: {0:0.0000000000}", x1Encrypted.Scale);
+            Console.WriteLine("    + Exact scale in      1: {0:0.0000000000}", plainCoeff0.Scale);
             Console.WriteLine();
 
             /*

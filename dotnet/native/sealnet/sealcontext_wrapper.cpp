@@ -140,7 +140,7 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_GetContextData(void *thisptr, uint64_
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_UsingKeySwitching(void *thisptr, bool *using_keyswitching)
+SEALNETNATIVE HRESULT SEALCALL SEALContext_UsingKeyswitching(void *thisptr, bool *using_keyswitching)
 {
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);

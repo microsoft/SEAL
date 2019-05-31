@@ -362,7 +362,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void SEALContext_GetContextData(IntPtr thisptr, ulong[] parmsId, out IntPtr contextData);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SEALContext_UsingKeySwitching(IntPtr thisptr, out bool usingKeySwitching);
+        internal static extern void SEALContext_UsingKeyswitching(IntPtr thisptr, out bool usingKeySwitching);
 
         #endregion
 
@@ -496,7 +496,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Evaluator_ComplexConjugate(IntPtr thisptr, IntPtr encrypted, IntPtr galoisKeys, IntPtr destination, IntPtr pool);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void Evaluator_ContextUsingKeySwitching(IntPtr thisptr, out bool usingKeySwitching);
+        internal static extern void Evaluator_ContextUsingKeyswitching(IntPtr thisptr, out bool usingKeySwitching);
 
         #endregion
 

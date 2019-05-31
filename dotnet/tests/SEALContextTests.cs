@@ -76,7 +76,7 @@ namespace SEALNetTest
             Assert.IsTrue(qualifiers.UsingNTT);
             Assert.AreEqual(SecLevelType.None, qualifiers.SecLevel);
             Assert.IsFalse(qualifiers.UsingDescendingModulusChain);
-            Assert.IsTrue(context.UsingKeySwitching);
+            Assert.IsTrue(context.UsingKeyswitching);
 
             ulong[] cdpm = data.CoeffDivPlainModulus;
             Assert.AreEqual(3, cdpm.Length);

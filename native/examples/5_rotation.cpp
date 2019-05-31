@@ -13,7 +13,7 @@ it is possible to rotate the encrypted vectors cyclically.
 */
 void example_rotation_bfv()
 {
-    print_example_banner("Rotation in BFV");
+    print_example_banner("Example: Rotation / Rotation in BFV");
 
     EncryptionParameters parms(scheme_type::BFV);
 
@@ -24,6 +24,7 @@ void example_rotation_bfv()
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
+    cout << endl;
 
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
@@ -48,10 +49,8 @@ void example_rotation_bfv()
     pod_matrix[row_size + 2] = 6ULL;
     pod_matrix[row_size + 3] = 7ULL;
 
-    cout << endl;
     cout << "Input plaintext matrix:" << endl;
     print_matrix(pod_matrix, row_size);
-    cout << endl;
 
     /*
     First we use BatchEncoder to encode the matrix into a plaintext. We encrypt
@@ -86,7 +85,6 @@ void example_rotation_bfv()
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
     print_matrix(pod_matrix, row_size);
-    cout << endl;
 
     /*
     We can also rotate the columns, i.e., swap the rows.
@@ -100,7 +98,6 @@ void example_rotation_bfv()
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
     print_matrix(pod_matrix, row_size);
-    cout << endl;
 
     /*
     Finally, we rotate the rows 4 steps to the right, decrypt, decode, and print.
@@ -126,7 +123,7 @@ void example_rotation_bfv()
 
 void example_rotation_ckks()
 {
-    print_example_banner("Rotation in CKKS");
+    print_example_banner("Example: Rotation / Rotation in CKKS");
 
     /*
     Rotations in the CKKS scheme work very similarly to rotations in BFV.
@@ -140,6 +137,7 @@ void example_rotation_ckks()
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
+    cout << endl;
 
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
@@ -162,9 +160,8 @@ void example_rotation_ckks()
     {
         input.push_back(curr_point);
     }
-    cout << endl << "Input vector:" << endl;
+    cout << "Input vector:" << endl;
     print_vector(input, 3, 7);
-    cout << endl;
 
     auto scale = pow(2.0, 50);
 
@@ -184,7 +181,6 @@ void example_rotation_ckks()
     vector<double> result;
     ckks_encoder.decode(plain, result);
     print_vector(result, 3, 7);
-    cout << endl;
 
     /*
     With the CKKS scheme it is also possible to evaluate a complex conjugation on

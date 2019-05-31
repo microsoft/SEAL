@@ -28,7 +28,6 @@ namespace SEALNetExamples
                 Console.WriteLine(bannerTop);
                 Console.WriteLine(bannerMiddle);
                 Console.WriteLine(bannerTop);
-                Console.WriteLine();
             }
         }
 
@@ -60,15 +59,16 @@ namespace SEALNetExamples
                     throw new ArgumentException("unsupported scheme");
             }
 
-            Console.WriteLine($"/ Encryption parameters:");
-            Console.WriteLine($"| Scheme: {schemeName}");
-            Console.WriteLine("| PolyModulusDegree: {0}",
+            Console.WriteLine("/");
+            Console.WriteLine("| Encryption parameters:");
+            Console.WriteLine($"|   Scheme: {schemeName}");
+            Console.WriteLine("|   PolyModulusDegree: {0}",
                 contextData.Parms.PolyModulusDegree);
 
             /*
             Print the size of the true (product) coefficient modulus.
             */
-            Console.WriteLine("| CoeffModulus size: {0} (",
+            Console.Write("|   CoeffModulus size: {0} (",
                 contextData.TotalCoeffModulusBitCount);
             List<SmallModulus> coeffModulus = 
                 (List<SmallModulus>)contextData.Parms.CoeffModulus;
@@ -76,14 +76,14 @@ namespace SEALNetExamples
             {
                 Console.Write($"{coeffModulus[i].BitCount} + ");
             }
-            Console.Write($"{coeffModulus.Last().BitCount} bits)");
+            Console.WriteLine($"{coeffModulus.Last().BitCount}) bits");
 
             /*
             For the BFV scheme print the PlainModulus parameter.
             */
             if (contextData.Parms.Scheme == SchemeType.BFV)
             {
-                Console.WriteLine("| PlainModulus: {0}",
+                Console.WriteLine("|   PlainModulus: {0}",
                     contextData.Parms.PlainModulus.Value);
             }
 
@@ -144,14 +144,16 @@ namespace SEALNetExamples
         public static void PrintVector<T>(
             IEnumerable<T> vec, int printSize = 4, int prec = 3)
         {
+            string numFormat = string.Format("{{0:N{0}}}", prec);
             T[] veca = vec.ToArray();
             int slotCount = veca.Length;
+            Console.WriteLine();
             if (slotCount <= 2 * printSize)
             {
                 Console.Write("    [");
                 for (int i = 0; i < slotCount; i++)
                 {
-                    Console.Write(" {0:0.prec}", veca[i]);
+                    Console.Write(" " + string.Format(numFormat, veca[i]));
                     if (i != (slotCount - 1))
                         Console.Write(",");
                     else
@@ -164,7 +166,7 @@ namespace SEALNetExamples
                 Console.Write("    [");
                 for (int i = 0; i < printSize; i++)
                 {
-                    Console.Write(" {0:0.prec},", veca[i]);
+                    Console.Write(" "+ string.Format(numFormat, veca[i]) + ", ");
                 }
                 if (veca.Length > 2 * printSize)
                 {
@@ -172,11 +174,10 @@ namespace SEALNetExamples
                 }
                 for (int i = slotCount - printSize; i < slotCount; i++)
                 {
-                    Console.Write(", {0:0.prec}", veca[i]);
+                    Console.Write(", " + string.Format(numFormat, veca[i]));
                 }
                 Console.WriteLine(" ]");
             }
-
             Console.WriteLine();
         }
 

@@ -104,6 +104,7 @@ namespace SEALNetExamples
 
             We iterate over the chain and print the ParmsId for each set of parameters.
             */
+            Console.WriteLine();
             Utilities.PrintLine();
             Console.WriteLine("Print the modulus switching chain.");
 
@@ -111,7 +112,7 @@ namespace SEALNetExamples
             First print the key level parameter information.
             */
             SEALContext.ContextData contextData = context.KeyContextData;
-            Console.WriteLine("----> Level (chain index): {} ...... KeyContextData",
+            Console.WriteLine("----> Level (chain index): {0} ...... KeyContextData",
                 contextData.ChainIndex);
             Console.WriteLine($"      ParmsId: {contextData.ParmsId}");
             Console.Write("      CoeffModulus primes: ");
@@ -121,7 +122,7 @@ namespace SEALNetExamples
             }
             Console.WriteLine();
             Console.WriteLine("\\");
-            Console.WriteLine(" \\-->");
+            Console.Write(" \\--> ");
 
             /*
             Next iterate over the remaining (data) levels.
@@ -150,14 +151,14 @@ namespace SEALNetExamples
                 }
                 Console.WriteLine();
                 Console.WriteLine("\\");
-                Console.WriteLine(" \\-->");
+                Console.Write(" \\--> ");
 
                 /*
                 Step forward in the chain.
                 */
                 contextData = contextData.NextContextData;
             }
-            Console.WriteLine(" End of chain reached");
+            Console.WriteLine("End of chain reached");
             Console.WriteLine();
 
             /*
@@ -186,8 +187,9 @@ namespace SEALNetExamples
             Plaintext plain = new Plaintext("1x^3 + 2x^2 + 3x^1 + 4");
             Ciphertext encrypted = new Ciphertext();
             encryptor.Encrypt(plain, encrypted);
-            Console.WriteLine($"    + plain:       {plain.ParmsId} (not set in BFV)");
-            Console.WriteLine($"    + encrypted:   {encrypted.ParmsId}");
+            Console.WriteLine($"    + plain:      {plain.ParmsId} (not set in BFV)");
+            Console.WriteLine($"    + encrypted:  {encrypted.ParmsId}");
+            Console.WriteLine();
 
             /*
             `Modulus switching' is a technique of changing the ciphertext parameters down
@@ -199,25 +201,25 @@ namespace SEALNetExamples
             Utilities.PrintLine();
             Console.WriteLine("Perform modulus switching on encrypted and print.");
             contextData = context.FirstContextData;
-            Console.Write("---->");
+            Console.Write("----> ");
             while (null != contextData.NextContextData)
             {
                 Console.WriteLine($"Level (chain index): {contextData.ChainIndex}");
                 Console.WriteLine($"      ParmsId of encrypted: {contextData.ParmsId}");
-                Console.WriteLine($"      Noise budget at this level: {0} bits",
+                Console.WriteLine("      Noise budget at this level: {0} bits",
                     decryptor.InvariantNoiseBudget(encrypted));
                 Console.WriteLine("\\");
-                Console.WriteLine(" \\-->");
+                Console.Write(" \\--> ");
                 evaluator.ModSwitchToNextInplace(encrypted);
                 contextData = contextData.NextContextData;
             }
             Console.WriteLine($"Level (chain index): {contextData.ChainIndex}");
             Console.WriteLine($"      ParmsId of encrypted: {contextData.ParmsId}");
-            Console.WriteLine($"      Noise budget at this level: {0} bits",
+            Console.WriteLine("      Noise budget at this level: {0} bits",
                 decryptor.InvariantNoiseBudget(encrypted));
             Console.WriteLine("\\");
-            Console.WriteLine(" \\-->");
-            Console.WriteLine(" End of chain reached");
+            Console.Write(" \\--> ");
+            Console.WriteLine("End of chain reached");
             Console.WriteLine();
 
             /*
@@ -262,7 +264,7 @@ namespace SEALNetExamples
             no effect at all on the noise budget.
             */
             evaluator.ModSwitchToNextInplace(encrypted);
-            Console.WriteLine("Noise budget after modulus switching: {0} bits",
+            Console.WriteLine("    + Noise budget after modulus switching: {0} bits",
                 decryptor.InvariantNoiseBudget(encrypted));
 
 
@@ -308,7 +310,7 @@ namespace SEALNetExamples
             Console.WriteLine("Optionally disable modulus switching chain expansion.");
             Utilities.PrintLine();
             Console.WriteLine("Print the modulus switching chain.");
-            Console.Write("---->");
+            Console.Write("----> ");
             for (contextData = context.KeyContextData; null != contextData;
                 contextData = contextData.NextContextData)
             {
@@ -319,10 +321,11 @@ namespace SEALNetExamples
                 {
                     Console.Write($"{Utilities.ULongToString(prime.Value)} ");
                 }
+                Console.WriteLine();
                 Console.WriteLine("\\");
-                Console.WriteLine(" \\-->");
+                Console.Write(" \\--> ");
             }
-            Console.WriteLine(" End of chain reached");
+            Console.WriteLine("End of chain reached");
             Console.WriteLine();
 
             /*

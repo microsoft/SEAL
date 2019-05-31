@@ -473,7 +473,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(relinKeys));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
-            if (!ContextUsingKeySwitching)
+            if (!ContextUsingKeyswitching)
                 throw new InvalidOperationException("Keyswitching is not supported by the context");
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
@@ -889,7 +889,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(relinKeys));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
-            if (!ContextUsingKeySwitching)
+            if (!ContextUsingKeyswitching)
                 throw new InvalidOperationException("Keyswitching is not supported by the context");
 
             IntPtr[] encarray = encrypteds.Select(c => c.NativePtr).ToArray();
@@ -972,7 +972,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(relinKeys));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
-            if (!ContextUsingKeySwitching)
+            if (!ContextUsingKeyswitching)
                 throw new InvalidOperationException("Keyswitching is not supported by the context");
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
@@ -1415,7 +1415,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(galoisKeys));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
-            if (!ContextUsingKeySwitching)
+            if (!ContextUsingKeyswitching)
                 throw new InvalidOperationException("Keyswitching is not supported by the context");
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
@@ -1504,7 +1504,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(galoisKeys));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
-            if (!ContextUsingKeySwitching)
+            if (!ContextUsingKeyswitching)
                 throw new InvalidOperationException("Keyswitching is not supported by the context");
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
@@ -1586,7 +1586,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(galoisKeys));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
-            if (!ContextUsingKeySwitching)
+            if (!ContextUsingKeyswitching)
                 throw new InvalidOperationException("Keyswitching is not supported by the context");
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
@@ -1675,7 +1675,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(galoisKeys));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
-            if (!ContextUsingKeySwitching)
+            if (!ContextUsingKeyswitching)
                 throw new InvalidOperationException("Keyswitching is not supported by the context");
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
@@ -1753,7 +1753,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(galoisKeys));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
-            if (!ContextUsingKeySwitching)
+            if (!ContextUsingKeyswitching)
                 throw new InvalidOperationException("Keyswitching is not supported by the context");
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
@@ -1776,11 +1776,11 @@ namespace Microsoft.Research.SEAL
             NativeMethods.Evaluator_Destroy(NativePtr);
         }
 
-        internal bool ContextUsingKeySwitching
+        internal bool ContextUsingKeyswitching
         {
             get
             {
-                NativeMethods.Evaluator_ContextUsingKeySwitching(NativePtr, out bool result);
+                NativeMethods.Evaluator_ContextUsingKeyswitching(NativePtr, out bool result);
                 return result;
             }
         }

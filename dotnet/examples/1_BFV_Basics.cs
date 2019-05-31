@@ -362,7 +362,7 @@ namespace SEALNetExamples
                 decryptor.InvariantNoiseBudget(xSqPlusOne));
             Console.Write("    + decryption of xSqPlusOne: ");
             decryptor.Decrypt(xSqPlusOne, decryptedResult);
-            Console.WriteLine("0x{decryptedResult} ...... Correct.");
+            Console.WriteLine($"0x{decryptedResult} ...... Correct.");
 
             Utilities.PrintLine();
             Ciphertext xPlusOne = new Ciphertext();
@@ -377,7 +377,7 @@ namespace SEALNetExamples
                 decryptor.InvariantNoiseBudget(xPlusOneSq));
             Console.Write("    + decryption of xPlusOneSq: ");
             decryptor.Decrypt(xPlusOneSq, decryptedResult);
-            Console.WriteLine("0x{decryptedResult} ...... Correct.");
+            Console.WriteLine($"0x{decryptedResult} ...... Correct.");
 
             Utilities.PrintLine();
             Console.WriteLine("Compute and relinearize encryptedResult (2(x^2+1)(x+1)^2).");

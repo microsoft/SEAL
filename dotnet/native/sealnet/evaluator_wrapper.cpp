@@ -745,7 +745,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ComplexConjugate(void *thisptr, void *e
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ContextUsingKeySwitching(void *thisptr, bool *using_keyswitching)
+SEALNETNATIVE HRESULT SEALCALL Evaluator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);

@@ -11,14 +11,12 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     chrono::high_resolution_clock::time_point time_start, time_end;
 
     print_parameters(context);
-    auto &curr_parms = context->first_context_data()->parms();
-    auto &plain_modulus = curr_parms.plain_modulus();
-    size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
+    cout << endl;
 
-    /*
-    Set up keys. For both relinearization and rotations we use a large
-    decomposition bit count for best possible computational performance.
-    */
+    auto &parms = context->first_context_data()->parms();
+    auto &plain_modulus = parms.plain_modulus();
+    size_t poly_modulus_degree = parms.poly_modulus_degree();
+
     cout << "Generating secret/public keys: ";
     KeyGenerator keygen(context);
     cout << "Done" << endl;
@@ -92,9 +90,10 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     /*
     Populate a vector of values to batch.
     */
+    size_t slot_count = batch_encoder.slot_count();
     vector<uint64_t> pod_vector;
     random_device rd;
-    for (size_t i = 0; i < batch_encoder.slot_count(); i++)
+    for (size_t i = 0; i < slot_count; i++)
     {
         pod_vector.push_back(rd() % plain_modulus.value());
     }
@@ -104,12 +103,11 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     {
         /*
         [Batching]
-        There is nothing unusual here. We batch our random plaintext matrix into
-        the polynomial. The user can try changing the decomposition bit count to
-        something smaller to see the effect. Note how the plaintext we create is
-        of the exactly right size so unnecessary reallocations are avoided.
+        There is nothing unusual here. We batch our random plaintext matrix
+        into the polynomial. Note how the plaintext we create is of the exactly
+        right size so unnecessary reallocations are avoided.
         */
-        Plaintext plain(curr_parms.poly_modulus_degree(), 0);
+        Plaintext plain(parms.poly_modulus_degree(), 0);
         time_start = chrono::high_resolution_clock::now();
         batch_encoder.encode(pod_vector, plain);
         time_end = chrono::high_resolution_clock::now();
@@ -120,7 +118,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         [Unbatching]
         We unbatch what we just batched.
         */
-        vector<uint64_t> pod_vector2(batch_encoder.slot_count());
+        vector<uint64_t> pod_vector2(slot_count);
         time_start = chrono::high_resolution_clock::now();
         batch_encoder.decode(plain, pod_vector2);
         time_end = chrono::high_resolution_clock::now();
@@ -133,9 +131,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Encryption]
-        We make sure our ciphertext is already allocated and large enough to hold
-        the encryption with these encryption parameters. We encrypt our random
-        batched matrix here.
+        We make sure our ciphertext is already allocated and large enough
+        to hold the encryption with these encryption parameters. We encrypt
+        our random batched matrix here.
         */
         Ciphertext encrypted(context);
         time_start = chrono::high_resolution_clock::now();
@@ -161,8 +159,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Add]
-        We create two ciphertexts that are both of size 2, and perform a few
-        additions with them.
+        We create two ciphertexts and perform a few additions with them.
         */
         Ciphertext encrypted1(context);
         encryptor.encrypt(encoder.encode(i), encrypted1);
@@ -178,9 +175,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Multiply]
-        We multiply two ciphertexts of size 2. Since the size of the result will
-        be 3, and will overwrite the first argument, we reserve first enough
-        memory to avoid reallocating during multiplication.
+        We multiply two ciphertexts. Since the size of the result will be 3,
+        and will overwrite the first argument, we reserve first enough memory
+        to avoid reallocating during multiplication.
         */
         encrypted1.reserve(3);
         time_start = chrono::high_resolution_clock::now();
@@ -191,9 +188,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Multiply Plain]
-        We multiply a ciphertext of size 2 with a random plaintext. Recall that
+        We multiply a ciphertext with a random plaintext. Recall that
         multiply_plain does not change the size of the ciphertext so we use
-        encrypted2 here, which still has size 2.
+        encrypted2 here.
         */
         time_start = chrono::high_resolution_clock::now();
         evaluator.multiply_plain_inplace(encrypted2, plain);
@@ -203,8 +200,8 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
 
         /*
         [Square]
-        We continue to use the size 2 ciphertext encrypted2. Now we square it;
-        this should be faster than generic homomorphic multiplication.
+        We continue to use encrypted2. Now we square it; this should be
+        faster than generic homomorphic multiplication.
         */
         time_start = chrono::high_resolution_clock::now();
         evaluator.square_inplace(encrypted2);
@@ -216,10 +213,10 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         {
             /*
             [Relinearize]
-            Time to get back to encrypted1; at this point it still has size 3. We
-            now relinearize it back to size 2. Since the allocation is currently
-            big enough to contain a ciphertext of size 3, no costly reallocations
-            are needed in the process.
+            Time to get back to encrypted1. We now relinearize it back
+            to size 2. Since the allocation is currently big enough to
+            contain a ciphertext of size 3, no costly reallocations are
+            needed in the process.
             */
             time_start = chrono::high_resolution_clock::now();
             evaluator.relinearize_inplace(encrypted1, relin_keys);
@@ -311,8 +308,10 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     chrono::high_resolution_clock::time_point time_start, time_end;
 
     print_parameters(context);
-    auto &curr_parms = context->first_context_data()->parms();
-    size_t poly_modulus_degree = curr_parms.poly_modulus_degree();
+    cout << endl;
+
+    auto &parms = context->first_context_data()->parms();
+    size_t poly_modulus_degree = parms.poly_modulus_degree();
 
     cout << "Generating secret/public keys: ";
     KeyGenerator keygen(context);
@@ -386,17 +385,18 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     {
         /*
         [Encoding]
+        For scale we use the square root of the last coeff_modulus prime
+        from parms.
         */
-        Plaintext plain(curr_parms.poly_modulus_degree() *
-            curr_parms.coeff_modulus().size(), 0);
+        Plaintext plain(parms.poly_modulus_degree() *
+            parms.coeff_modulus().size(), 0);
         /*
-        For scale we use the square root of the last coeff_modulus prime from
-        curr_parms.
+
         */
-        double scale = sqrt(static_cast<double>(curr_parms.coeff_modulus().back().value()));
+        double scale = sqrt(static_cast<double>(
+            parms.coeff_modulus().back().value()));
         time_start = chrono::high_resolution_clock::now();
-        ckks_encoder.encode(pod_vector,
-            scale, plain);
+        ckks_encoder.encode(pod_vector, scale, plain);
         time_end = chrono::high_resolution_clock::now();
         time_encode_sum += chrono::duration_cast<
             chrono::microseconds>(time_end - time_start);
@@ -624,9 +624,8 @@ void example_bfv_performance_custom()
         return;
     }
 
-    string banner = "BFV Performance Test with Degrees: ";
-    banner += to_string(poly_modulus_degree);
-    print_example_banner(banner);
+    string banner = "BFV Performance Test with Degree: ";
+    print_example_banner(banner + to_string(poly_modulus_degree));
 
     EncryptionParameters parms(scheme_type::BFV);
     parms.set_poly_modulus_degree(poly_modulus_degree);
@@ -679,7 +678,7 @@ void example_ckks_performance_default()
 void example_ckks_performance_custom()
 {
     size_t poly_modulus_degree = 0;
-    cout << endl << "Set ring degree (1024, 2048, 4096, 8192, 16384, or 32768): ";
+    cout << endl << "Set poly_modulus_degree (1024, 2048, 4096, 8192, 16384, or 32768): ";
     if (!(cin >> poly_modulus_degree))
     {
         cout << "Invalid option." << endl;
@@ -694,9 +693,8 @@ void example_ckks_performance_custom()
         return;
     }
 
-    string banner = "CKKS Performance Test with Degrees: ";
-    banner += to_string(poly_modulus_degree);
-    print_example_banner(banner);
+    string banner = "CKKS Performance Test with Degree: ";
+    print_example_banner(banner + to_string(poly_modulus_degree));
 
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(poly_modulus_degree);
@@ -714,15 +712,15 @@ void example_performance_test()
     while (true)
     {
         cout << endl;
-        cout << "Select a scheme (and optionally a ring degree):" << endl;
-        cout << " 1. BFV with default degrees" << endl;
-        cout << " 2. BFV with a custom degree" << endl;
-        cout << " 3. CKKS with default degrees" << endl;
-        cout << " 4. CKKS with a custom degree" << endl;
-        cout << " 0. Back to main menu" << endl;
+        cout << "Select a scheme (and optionally poly_modulus_degree):" << endl;
+        cout << "  1. BFV with default degrees" << endl;
+        cout << "  2. BFV with a custom degree" << endl;
+        cout << "  3. CKKS with default degrees" << endl;
+        cout << "  4. CKKS with a custom degree" << endl;
+        cout << "  0. Back to main menu" << endl;
 
         int selection = 0;
-        cout << endl << "Run example: ";
+        cout << endl << "> Run performance test (1 ~ 4) or go back (0): ";
         if (!(cin >> selection))
         {
             cout << "Invalid option." << endl;

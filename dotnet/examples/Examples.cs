@@ -25,7 +25,6 @@ namespace SEALNetExamples
                 Console.WriteLine("| 5. Rotation                | 5_Rotation.cs              |");
                 Console.WriteLine("| 6. Performance Test        | 6_Performance.cs           |");
                 Console.WriteLine("+----------------------------+----------------------------+");
-                Console.WriteLine();
 
                 /*
                 Print how much memory we have allocated from the current memory pool.
@@ -34,22 +33,16 @@ namespace SEALNetExamples
                 little or no reason to touch the memory allocation system.
                 */
                 ulong megabytes = MemoryManager.GetPool().AllocByteCount >> 20;
-                if (megabytes < 1000)
-                {
-                    Console.Write($"[ {0,7}", megabytes);
-                }
-                else if (megabytes < 1000)
-                {
-                    Console.Write($"[ {0,3},{1,3}", megabytes / 1000, megabytes % 1000);
-                }
-                Console.WriteLine(" MB]" + " Total allocation from the memory pool");
+                Console.WriteLine("[{0,7} MB] Total allocation from the memory pool", megabytes);
 
                 ConsoleKeyInfo key;
                 do
                 {
-                    Console.WriteLine("> Run example (1 ~ 6) or exit (0): ");
+                    Console.WriteLine();
+                    Console.Write("> Run example (1 ~ 6) or exit (0): ");
                     key = Console.ReadKey();
-                } while (key.KeyChar < '0' || key.KeyChar > '9');
+                    Console.WriteLine();
+                } while (key.KeyChar < '0' || key.KeyChar > '6');
                 switch (key.Key)
                 {
                     case ConsoleKey.D1:

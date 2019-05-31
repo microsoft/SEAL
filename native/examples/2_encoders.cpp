@@ -29,7 +29,7 @@ can allow the full plaintext polynomial to be utilized.
 */
 void example_integer_encoder()
 {
-    print_example_banner("Integer Encoder");
+    print_example_banner("Example: Encoders / Integer Encoder");
 
     /*
     [IntegerEncoder] (For BFV scheme only)
@@ -83,6 +83,7 @@ void example_integer_encoder()
     parms.set_plain_modulus(512);
     auto context = SEALContext::Create(parms);
     print_parameters(context);
+    cout << endl;
 
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
@@ -158,7 +159,7 @@ void example_integer_encoder()
 
 void example_batch_encoder()
 {
-    print_example_banner("Batch Encoder");
+    print_example_banner("Example: Encoders / Batch Encoder");
 
     /*
     [BatchEncoder] (For BFV scheme only)
@@ -187,6 +188,7 @@ void example_batch_encoder()
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
+    cout << endl;
 
     /*
     We can verify that batching is indeed enabled by looking at the encryption
@@ -235,7 +237,6 @@ void example_batch_encoder()
     pod_matrix[row_size + 2] = 6ULL;
     pod_matrix[row_size + 3] = 7ULL;
 
-    cout << endl;
     cout << "Input plaintext matrix:" << endl;
     print_matrix(pod_matrix, row_size);
 
@@ -328,7 +329,7 @@ void example_batch_encoder()
 
 void example_ckks_encoder()
 {
-    print_example_banner("CKKS Encoder");
+    print_example_banner("Example: Encoders / CKKS Encoder");
 
     /*
     [CKKSEncoder] (For CKKS scheme only)
@@ -356,6 +357,7 @@ void example_ckks_encoder()
     */
     auto context = SEALContext::Create(parms);
     print_parameters(context);
+    cout << endl;
 
     /*
     Keys are created the same way as for the BFV scheme.
@@ -396,10 +398,8 @@ void example_ckks_encoder()
     with zeros to full size (poly_modulus_degree / 2) when encoding.
     */
     vector<double> input{ 0.0, 1.1, 2.2, 3.3 };
-    cout << endl;
     cout << "Input vector: " << endl;
     print_vector(input);
-    cout << endl;
 
     /*
     Now we encode it with CKKSEncoder. The floating-point coefficients of `input'
@@ -459,7 +459,6 @@ void example_ckks_encoder()
     encoder.decode(plain, output);
     cout << "    + Result vector ...... Correct." << endl;
     print_vector(output);
-    cout << endl;
 
     /*
     The CKKS scheme allows the scale to be reduced between encrypted computations.

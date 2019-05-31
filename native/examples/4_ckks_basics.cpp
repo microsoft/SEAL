@@ -85,6 +85,7 @@ void example_ckks_basics()
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
+    cout << endl;
 
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
@@ -96,7 +97,7 @@ void example_ckks_basics()
 
     CKKSEncoder encoder(context);
     size_t slot_count = encoder.slot_count();
-    cout << "Number of slots: " << slot_count << endl << endl;
+    cout << "Number of slots: " << slot_count << endl;
 
     vector<double> input;
     input.reserve(slot_count);
@@ -108,7 +109,6 @@ void example_ckks_basics()
     }
     cout << "Input vector: " << endl;
     print_vector(input, 3, 7);
-    cout << endl;
 
     cout << "Evaluating polynomial PI*x^3 + 0.4x + 1 ..." << endl;
 
@@ -312,7 +312,6 @@ void example_ckks_basics()
     encoder.decode(plain_result, result);
     cout << "    + Computed result ...... Correct." << endl;
     print_vector(result, 3, 7);
-    cout << endl;
 
     /*
     While we did not show any computations on complex numbers in these examples,

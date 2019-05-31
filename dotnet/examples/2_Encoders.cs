@@ -32,7 +32,7 @@ namespace SEALNetExamples
         */
         private static void ExampleIntegerEncoder()
         {
-            Utilities.PrintExampleBanner("Integer Encoder");
+            Utilities.PrintExampleBanner("Example: Encoders / Integer Encoder");
 
             /*
             [IntegerEncoder] (For BFV scheme only)
@@ -86,6 +86,7 @@ namespace SEALNetExamples
             parms.PlainModulus = new SmallModulus(512);
             SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
+            Console.WriteLine();
 
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
@@ -162,7 +163,7 @@ namespace SEALNetExamples
 
         private static void ExampleBatchEncoder()
         {
-            Utilities.PrintExampleBanner("Batch Encoder");
+            Utilities.PrintExampleBanner("Example: Encoders / Batch Encoder");
 
             /*
             [BatchEncoder] (For BFV scheme only)
@@ -191,6 +192,7 @@ namespace SEALNetExamples
 
             SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
+            Console.WriteLine();
 
             /*
             We can verify that batching is indeed enabled by looking at the encryption
@@ -239,7 +241,6 @@ namespace SEALNetExamples
             podMatrix[rowSize + 2] = 6;
             podMatrix[rowSize + 3] = 7;
 
-            Console.WriteLine();
             Console.WriteLine("Input plaintext matrix:");
             Utilities.PrintMatrix(podMatrix, (int)rowSize);
 
@@ -267,7 +268,7 @@ namespace SEALNetExamples
             Utilities.PrintLine();
             Console.WriteLine("Encrypt plainMatrix to encryptedMatrix.");
             encryptor.Encrypt(plainMatrix, encryptedMatrix);
-            Console.WriteLine($"    + Noise budget in encrypted_matrix: {0} bits",
+            Console.WriteLine("    + Noise budget in encryptedMatrix: {0} bits",
                 decryptor.InvariantNoiseBudget(encryptedMatrix));
 
             /*
@@ -304,7 +305,7 @@ namespace SEALNetExamples
             /*
             How much noise budget do we have left?
             */
-            Console.WriteLine($"    + Noise budget in result: {0} bits",
+            Console.WriteLine("    + Noise budget in result: {0} bits",
                 decryptor.InvariantNoiseBudget(encryptedMatrix));
 
             /*
@@ -332,7 +333,7 @@ namespace SEALNetExamples
 
         static private void ExampleCKKSEncoder()
         {
-            Utilities.PrintExampleBanner("CKKS Encoder");
+            Utilities.PrintExampleBanner("Example: Encoders / CKKS Encoder");
 
             /*
             [CKKSEncoder] (For CKKS scheme only)
@@ -360,6 +361,7 @@ namespace SEALNetExamples
             */
             SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
+            Console.WriteLine();
 
             /*
             Keys are created the same way as for the BFV scheme.
@@ -400,10 +402,8 @@ namespace SEALNetExamples
             with zeros to full size (PolyModulusDegree / 2) when encoding.
             */
             double[] input = new double[]{ 0.0, 1.1, 2.2, 3.3 };
-            Console.WriteLine();
             Console.WriteLine("Input vector: ");
             Utilities.PrintVector(input);
-            Console.WriteLine();
 
             /*
             Now we encode it with CKKSEncoder. The floating-point coefficients of `input'
@@ -463,7 +463,6 @@ namespace SEALNetExamples
             encoder.Decode(plain, output);
             Console.WriteLine("    + Result vector ...... Correct.");
             Utilities.PrintVector(output);
-            Console.WriteLine();
 
             /*
             The CKKS scheme allows the scale to be reduced between encrypted computations.

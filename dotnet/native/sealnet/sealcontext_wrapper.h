@@ -34,4 +34,4 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_LastContextData(void *thisptr, void *
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void **context_data);
 
-SEALNETNATIVE HRESULT SEALCALL SEALContext_UsingKeySwitching(void *thisptr, bool *using_keyswitching);
+SEALNETNATIVE HRESULT SEALCALL SEALContext_UsingKeyswitching(void *thisptr, bool *using_keyswitching);

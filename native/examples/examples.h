@@ -78,15 +78,16 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     default:
         throw std::invalid_argument("unsupported scheme");
     }
-    std::cout << "/ Encryption parameters:" << std::endl;
-    std::cout << "| scheme: " << scheme_name << std::endl;
-    std::cout << "| poly_modulus_degree: " <<
+    std::cout << "/" << std::endl;
+    std::cout << "| Encryption parameters :" << std::endl;
+    std::cout << "|   scheme: " << scheme_name << std::endl;
+    std::cout << "|   poly_modulus_degree: " <<
         context_data.parms().poly_modulus_degree() << std::endl;
 
     /*
     Print the size of the true (product) coefficient modulus.
     */
-    std::cout << "| coeff_modulus size: ";
+    std::cout << "|   coeff_modulus size: ";
     std::cout << context_data.total_coeff_modulus_bit_count() << " (";
     auto coeff_modulus = context_data.parms().coeff_modulus();
     std::size_t coeff_mod_count = coeff_modulus.size();
@@ -102,7 +103,7 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     */
     if (context_data.parms().scheme() == seal::scheme_type::BFV)
     {
-        std::cout << "| plain_modulus: " << context_data.
+        std::cout << "|   plain_modulus: " << context_data.
             parms().plain_modulus().value() << std::endl;
     }
 
@@ -114,8 +115,23 @@ Helper function: Prints the `parms_id' to std::ostream.
 */
 inline std::ostream &operator <<(std::ostream &stream, seal::parms_id_type parms_id)
 {
-    stream << std::hex << parms_id[0] << " " << parms_id[1] << " "
-        << parms_id[2] << " " << parms_id[3] << std::dec;
+    /*
+    Save the formatting information for std::cout.
+    */
+    std::ios old_fmt(nullptr);
+    old_fmt.copyfmt(std::cout);
+
+    stream << std::hex << std::setfill('0')
+        << std::setw(16) << parms_id[0] << " "
+        << std::setw(16) << parms_id[1] << " "
+        << std::setw(16) << parms_id[2] << " "
+        << std::setw(16) << parms_id[3] << " ";
+
+    /*
+    Restore the old std::cout formatting.
+    */
+    std::cout.copyfmt(old_fmt);
+
     return stream;
 }
 
@@ -134,6 +150,7 @@ inline void print_vector(std::vector<T> vec, std::size_t print_size = 4, int pre
     std::size_t slot_count = vec.size();
 
     std::cout << std::fixed << std::setprecision(prec);
+    std::cout << std::endl;
     if(slot_count <= 2 * print_size)
     {
         std::cout << "    [";
@@ -159,6 +176,7 @@ inline void print_vector(std::vector<T> vec, std::size_t print_size = 4, int pre
             std::cout << " " << vec[i] << ((i != slot_count - 1) ? "," : " ]\n");
         }
     }
+    std::cout << std::endl;
 
     /*
     Restore the old std::cout formatting.
@@ -179,6 +197,7 @@ inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
     */
     std::size_t print_size = 5;
 
+    std::cout << std::endl;
     std::cout << "    [";
     for (std::size_t i = 0; i < print_size; i++)
     {
@@ -201,6 +220,7 @@ inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
         std::cout << std::setw(3) << matrix[i]
             << ((i != 2 * row_size - 1) ? "," : " ]\n");
     }
+    std::cout << std::endl;
 };
 
 /*

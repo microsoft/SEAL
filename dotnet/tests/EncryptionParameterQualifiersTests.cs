@@ -21,7 +21,7 @@ namespace SEALNetTest
             Assert.AreEqual(SecLevelType.TC128, context.FirstContextData.Qualifiers.SecLevel);
             Assert.IsFalse(context.FirstContextData.Qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context.FirstContextData.Qualifiers.UsingNTT);
-            Assert.IsTrue(context.UsingKeySwitching);
+            Assert.IsTrue(context.UsingKeyswitching);
 
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
@@ -38,7 +38,7 @@ namespace SEALNetTest
             Assert.AreEqual(SecLevelType.TC128, context2.FirstContextData.Qualifiers.SecLevel);
             Assert.IsFalse(context.FirstContextData.Qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(context2.FirstContextData.Qualifiers.UsingNTT);
-            Assert.IsTrue(context.UsingKeySwitching);
+            Assert.IsTrue(context.UsingKeyswitching);
 
             EncryptionParameterQualifiers qualifiers = new EncryptionParameterQualifiers(context2.FirstContextData.Qualifiers);
 

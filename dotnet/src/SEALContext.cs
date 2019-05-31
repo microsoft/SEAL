@@ -203,11 +203,11 @@ namespace Microsoft.Research.SEAL
         /// For keyswitching to be available, the coefficient modulus parameter must
         /// consist of at least two prime number factors.
         /// </remarks>
-        public bool UsingKeySwitching
+        public bool UsingKeyswitching
         {
             get
             {
-                NativeMethods.SEALContext_UsingKeySwitching(NativePtr, out bool result);
+                NativeMethods.SEALContext_UsingKeyswitching(NativePtr, out bool result);
                 return result;
             }
         }

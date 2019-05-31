@@ -16,7 +16,7 @@ namespace SEALNetExamples
         */
         private static void ExampleRotationBFV()
         {
-            Utilities.PrintExampleBanner("Rotation in BFV");
+            Utilities.PrintExampleBanner("Example: Rotation / Rotation in BFV");
 
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
 
@@ -27,6 +27,7 @@ namespace SEALNetExamples
 
             SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
+            Console.WriteLine();
 
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
@@ -51,7 +52,6 @@ namespace SEALNetExamples
             podMatrix[rowSize + 2] = 6;
             podMatrix[rowSize + 3] = 7;
 
-            Console.WriteLine();
             Console.WriteLine("Input plaintext matrix:");
             Utilities.PrintMatrix(podMatrix, (int)rowSize);
             Console.WriteLine();
@@ -60,8 +60,8 @@ namespace SEALNetExamples
             First we use BatchEncoder to encode the matrix into a plaintext. We encrypt
             the plaintext as usual.
             */
-            Plaintext plainMatrix = new Plaintext();
             Utilities.PrintLine();
+            Plaintext plainMatrix = new Plaintext();
             Console.WriteLine("Encode and encrypt.");
             batchEncoder.Encode(podMatrix, plainMatrix);
             Ciphertext encryptedMatrix = new Ciphertext();
@@ -87,9 +87,9 @@ namespace SEALNetExamples
                 decryptor.InvariantNoiseBudget(encryptedMatrix));
             Console.WriteLine("    + Decrypt and decode ...... Correct.");
             decryptor.Decrypt(encryptedMatrix, plainResult);
-            batchEncoder.Decode(plainResult, podMatrix);
-            Utilities.PrintMatrix(podMatrix, (int)rowSize);
-            Console.WriteLine();
+            List<ulong> podResult = new List<ulong>();
+            batchEncoder.Decode(plainResult, podResult);
+            Utilities.PrintMatrix(podResult, (int)rowSize);
 
             /*
             We can also rotate the columns, i.e., swap the rows.
@@ -101,9 +101,8 @@ namespace SEALNetExamples
                 decryptor.InvariantNoiseBudget(encryptedMatrix));
             Console.WriteLine("    + Decrypt and decode ...... Correct.");
             decryptor.Decrypt(encryptedMatrix, plainResult);
-            batchEncoder.Decode(plainResult, podMatrix);
-            Utilities.PrintMatrix(podMatrix, (int)rowSize);
-            Console.WriteLine();
+            batchEncoder.Decode(plainResult, podResult);
+            Utilities.PrintMatrix(podResult, (int)rowSize);
 
             /*
             Finally, we rotate the rows 4 steps to the right, decrypt, decode, and print.
@@ -115,9 +114,8 @@ namespace SEALNetExamples
                 decryptor.InvariantNoiseBudget(encryptedMatrix));
             Console.WriteLine("    + Decrypt and decode ...... Correct.");
             decryptor.Decrypt(encryptedMatrix, plainResult);
-            batchEncoder.Decode(plainResult, podMatrix);
-            Utilities.PrintMatrix(podMatrix, (int)rowSize);
-            Console.WriteLine();
+            batchEncoder.Decode(plainResult, podResult);
+            Utilities.PrintMatrix(podResult, (int)rowSize);
 
             /*
             Note that rotations do not consume any noise budget. However, this is only
@@ -130,7 +128,7 @@ namespace SEALNetExamples
 
         private static void ExampleRotationCKKS()
         {
-            Utilities.PrintExampleBanner("Rotation in CKKS");
+            Utilities.PrintExampleBanner("Example: Rotation / Rotation in CKKS");
 
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
 
@@ -141,6 +139,7 @@ namespace SEALNetExamples
 
             SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
+            Console.WriteLine();
 
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
@@ -155,7 +154,6 @@ namespace SEALNetExamples
 
             ulong slotCount = ckksEncoder.SlotCount;
             Console.WriteLine($"Number of slots: {slotCount}");
-            Console.WriteLine();
 
             List<double> input = new List<double>((int)slotCount);
             double currPoint = 0, stepSize = 1.0 / (slotCount - 1);
@@ -165,7 +163,6 @@ namespace SEALNetExamples
             }
             Console.WriteLine("Input vector:");
             Utilities.PrintVector(input, 3, 7);
-            Console.WriteLine();
 
             double scale = Math.Pow(2.0, 50);
 
@@ -185,7 +182,6 @@ namespace SEALNetExamples
             List<double> result = new List<double>();
             ckksEncoder.Decode(plain, result);
             Utilities.PrintVector(result, 3, 7);
-            Console.WriteLine();
 
             /*
             With the CKKS scheme it is also possible to evaluate a complex conjugation on
@@ -194,7 +190,7 @@ namespace SEALNetExamples
             */
         }
 
-        public static void ExampleRotation()
+        private static void ExampleRotation()
         {
             Utilities.PrintExampleBanner("Example: Rotation");
 

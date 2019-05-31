@@ -92,6 +92,7 @@ void example_levels()
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
+    cout << endl;
 
     /*
     There are convenience method for accessing the SEALContext::ContextData for
