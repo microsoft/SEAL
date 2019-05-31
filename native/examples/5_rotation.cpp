@@ -13,7 +13,7 @@ it is possible to rotate the encrypted vectors cyclically.
 */
 void example_rotation_bfv()
 {
-    print_example_banner("Rotation BFV");
+    print_example_banner("Rotation in BFV");
 
     EncryptionParameters parms(scheme_type::BFV);
 
@@ -126,7 +126,7 @@ void example_rotation_bfv()
 
 void example_rotation_ckks()
 {
-    print_example_banner("Rotation CKKS");
+    print_example_banner("Rotation in CKKS");
 
     /*
     Rotations in the CKKS scheme work very similarly to rotations in BFV.
@@ -162,7 +162,7 @@ void example_rotation_ckks()
     {
         input.push_back(curr_point);
     }
-    cout << endl << "Input vector: " << endl;
+    cout << endl << "Input vector:" << endl;
     print_vector(input, 3, 7);
     cout << endl;
 
