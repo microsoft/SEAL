@@ -151,7 +151,7 @@ namespace seal
     {
     public:
         /**
-        Class to hold precomputation data for a given set of encryption parameters.
+        Class to hold pre-computation data for a given set of encryption parameters.
         */
         class ContextData
         {

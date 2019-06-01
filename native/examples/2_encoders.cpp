@@ -463,8 +463,8 @@ void example_ckks_encoder()
     /*
     The CKKS scheme allows the scale to be reduced between encrypted computations.
     This is a fundamental and critical feature that makes CKKS very powerful and
-    flexible. We will discuss it in great detail in `4_ckks_basics.cpp' and later
-    in `5_levels.cpp'.
+    flexible. We will discuss it in great detail in `3_levels.cpp' and later in
+    `4_ckks_basics.cpp'.
     */
 }
 

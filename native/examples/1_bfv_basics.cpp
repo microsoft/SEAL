@@ -62,7 +62,9 @@ void example_bfv_basics()
     Next we set the [ciphertext] `coefficient modulus' (coeff_modulus). This
     parameter is a large integer, which is a product of distinct prime numbers,
     each up to 60 bits in size. It is represented as a vector of these prime
-    numbers, each represented by an instance of the SmallModulus class.
+    numbers, each represented by an instance of the SmallModulus class. The
+    bit-length of coeff_modulus means the sum of the bit-lengths of its prime
+    factors.
 
     A larger coeff_modulus implies a larger noise budget, hence more encrypted
     computation capabilities. However, an upper bound for the total bit-length
@@ -94,12 +96,7 @@ void example_bfv_basics()
         CoeffModulus::BFVDefault(poly_modulus_degree),
 
     which returns std::vector<SmallModulus> consisting of a generally good choice
-    for the given poly_modulus_degree. In later examples we will use the function
-
-        CoeffModulus::Create(poly_modulus_degree, { ... })
-
-    to obtain customized primes for the coeff_modulus, and will explain reasons
-    for doing so.
+    for the given poly_modulus_degree.
     */
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
 
@@ -125,7 +122,7 @@ void example_bfv_basics()
     /*
     Now that all parameters are set, we are ready to construct a SEALContext
     object. This is a heavy class that checks the validity and properties of the
-    parameters we just set and performs several important pre-computations.
+    parameters we just set.
     */
     auto context = SEALContext::Create(parms);
 
@@ -333,7 +330,7 @@ void example_bfv_basics()
 
     Relinearization requires special `relinearization keys', which can be thought
     of as a kind of public key. Relinearization keys can easily be created with
-    the KeyGenerator. 
+    the KeyGenerator.
 
     Relinearization is used similarly in both the BFV and the CKKS schemes, but
     in this example we continue using BFV. We repeat our computation from before,
@@ -402,11 +399,11 @@ void example_bfv_basics()
     decryptor.decrypt(encrypted_result, decrypted_result);
     cout << "    + decryption of 2(x^2+1)(x+1)^2 = 0x"
         << decrypted_result.to_string() << " ...... Correct." << endl;
+    cout << endl;
 
     /*
     For x=6, 2(x^2+1)(x+1)^2 = 3626. Since the plaintext modulus is set to 256,
     this result is computed in integers modulo 256. Therefore the expected output
     should be 3626 % 256 == 42, or 0x2A in hexadecimal.
     */
-    cout << endl;
 }

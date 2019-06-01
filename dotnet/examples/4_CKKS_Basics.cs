@@ -101,7 +101,7 @@ namespace SEALNetExamples
             CKKSEncoder encoder = new CKKSEncoder(context);
             ulong slotCount = encoder.SlotCount;
             Console.WriteLine($"Number of slots: {slotCount}");
-            
+
             List<double> input = new List<double>((int)slotCount);
             double currPoint = 0, stepSize = 1.0 / (slotCount - 1);
             for (ulong i = 0; i < slotCount; i++, currPoint += stepSize)
@@ -230,7 +230,7 @@ namespace SEALNetExamples
             above the scales in ciphertexts are:
 
                 - Product x^2 has scale 2^80 and is at level 2;
-                - Product PI*x has scale 2^80/P_2 and is at level 2;
+                - Product PI*x has scale 2^80 and is at level 2;
                 - We rescaled both down to scale 2^80/P2 and level 1;
                 - Product PI*x^3 has scale (2^80/P_2)^2;
                 - We rescaled it down to scale (2^80/P_2)^2/P_1 and level 0;

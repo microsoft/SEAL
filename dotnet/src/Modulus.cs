@@ -88,7 +88,7 @@ namespace Microsoft.Research.SEAL
         /// a given security level when using a given PolyModulusDegree, according
         /// to the HomomorphicEncryption.org security standard. Note that all security
         /// guarantees are lost if the output is used with encryption parameters with
-        /// a mismatching value for the PolyModulusDegree. 
+        /// a mismatching value for the PolyModulusDegree.
         /// </para>
         /// <para>
         /// The coefficient modulus returned by this function will not perform well

@@ -227,8 +227,8 @@ void example_ckks_basics()
     above the scales in ciphertexts are:
 
         - Product x^2 has scale 2^80 and is at level 2;
-        - Product PI*x has scale 2^80/P_2 and is at level 2;
-        - We rescaled both down to scale 2^80/P2 and level 1;
+        - Product PI*x has scale 2^80 and is at level 2;
+        - We rescaled both down to scale 2^80/P_2 and level 1;
         - Product PI*x^3 has scale (2^80/P_2)^2;
         - We rescaled it down to scale (2^80/P_2)^2/P_1 and level 0;
         - Product 0.4*x has scale 2^80;

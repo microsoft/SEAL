@@ -467,8 +467,8 @@ namespace SEALNetExamples
             /*
             The CKKS scheme allows the scale to be reduced between encrypted computations.
             This is a fundamental and critical feature that makes CKKS very powerful and
-            flexible. We will discuss it in great detail in `4_CKKS_Basics.cs' and later
-            in `5_Levels.cs'.
+            flexible. We will discuss it in great detail in `3_Levels.cs' and later in
+            `4_CKKS_Basics.cs'.
             */
         }
 
