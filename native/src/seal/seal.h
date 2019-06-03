@@ -24,3 +24,7 @@
 #include "seal/relinkeys.h"
 #include "seal/secretkey.h"
 #include "seal/smallmodulus.h"
+
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+#endif

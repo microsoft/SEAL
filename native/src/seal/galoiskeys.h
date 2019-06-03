@@ -9,6 +9,10 @@
 #include "seal/ciphertext.h"
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
@@ -234,6 +238,30 @@ namespace seal
                 throw std::invalid_argument("GaloisKeys data is invalid");
             }
         }
+
+#ifdef EMSCRIPTEN
+        /**
+        Saves the GaloisKeys to a string. The output is in base64 format
+        and is human-readable.
+
+        @throws std::exception if the GaloisKeys could not be written to string
+        */
+        const std::string SaveToString();
+
+        /**
+        Loads a GaloisKeys from an input string overwriting the current GaloisKeys.
+        The loaded GaloisKeys is verified to be valid for the given SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] encoded The base64 string to load the GaloisKeys from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid GaloisKeys could not be read from stream
+        @throws std::invalid_argument if the loaded GaloisKeys is invalid for the
+        context
+        */
+        void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded);
+#endif
 
         /**
         Returns the currently used MemoryPoolHandle.

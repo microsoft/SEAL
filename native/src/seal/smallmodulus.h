@@ -8,6 +8,10 @@
 #include <array>
 #include "seal/util/uintcore.h"
 #include "seal/memorymanager.h"
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
@@ -166,6 +170,36 @@ namespace seal
         @throws std::exception if a valid SmallModulus could not be read from stream
         */
         void load(std::istream &stream);
+
+#ifdef EMSCRIPTEN
+        /**
+        Saves the SmallModulus to a string. The full state of the modulus is
+        serialized. The output is in base64 format and is human-readable.
+
+        @param[in] stream The stream to save the SmallModulus to
+        @throws std::exception if the SmallModulus could not be written to string
+        */
+        static std::string SaveToString(const SmallModulus &sm);
+
+
+        /**
+        Creates a SmallModulus from a base64 string.
+
+        @param[in] encoded The base64 string to load the SmallModulus from
+        @throws std::exception if a valid SmallModulus could not be read from string
+        */
+        static SmallModulus CreateFromString(const std::string &encoded);
+
+        /**
+        Loads a SmallModulus from a string representing an uint64 value.
+
+        @param[in] value The string (desired uint64) to load into the SmallModulus
+        @throws std::exception if a valid SmallModulus could not be read from string
+        */
+        void LoadFromString(const std::string &value);
+
+        std::string Value();
+#endif
 
     private:
         SmallModulus(std::uint64_t value, 

@@ -9,7 +9,10 @@
 #include "seal/ciphertext.h"
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
-
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 namespace seal
 {
     /**
@@ -232,6 +235,30 @@ namespace seal
                 throw std::invalid_argument("RelinKeys data is invalid");
             }
         }
+
+#ifdef EMSCRIPTEN
+        /**
+        Saves the RelinKeys to a string. The output is in base64 format
+        and is human-readable.
+
+        @throws std::exception if the RelinKeys could not be written to string
+        */
+        const std::string SaveToString();
+
+        /**
+        Loads a RelinKeys from an input string overwriting the current RelinKeys.
+        The loaded RelinKeys is verified to be valid for the given SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] encoded The base64 string to load the RelinKeys from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid RelinKeys could not be read from stream
+        @throws std::invalid_argument if the loaded RelinKeys is invalid for the
+        context
+        */
+        void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded);
+#endif
 
         /**
         Returns the currently used MemoryPoolHandle.

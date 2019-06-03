@@ -120,6 +120,32 @@ namespace seal
         }
     }
 
+#ifdef EMSCRIPTEN
+    std::string EncryptionParameters::SaveToString(const EncryptionParameters &ep)
+    {
+        std::ostringstream  buffer; // no growth specification necessary
+
+        // Write to the output stream
+        EncryptionParameters::Save(ep, buffer);
+
+        std::string contents = buffer.str();
+        size_t bufferSize = contents.size();
+
+        std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+        return encoded;
+    }
+
+    EncryptionParameters EncryptionParameters::CreateFromString(const std::string &encoded)
+    {
+        std::string decoded = base64_decode(encoded);
+        std::istringstream is(decoded);
+
+        // Create the Enc Parms from the input stream
+        EncryptionParameters ep = EncryptionParameters::Load(is);
+        return ep;
+    }
+#endif
+
     void EncryptionParameters::compute_parms_id()
     {
         size_t coeff_mod_count = coeff_modulus_.size();
