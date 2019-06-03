@@ -12,6 +12,10 @@
 #include "seal/smallmodulus.h"
 #include "seal/util/hash.h"
 #include "seal/memorymanager.h"
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
@@ -23,8 +27,8 @@ namespace seal
 
     inline bool is_valid_scheme(scheme_type scheme) noexcept
     {
-        return (scheme == scheme_type::BFV) || 
-            (scheme == scheme_type::CKKS); 
+        return (scheme == scheme_type::BFV) ||
+            (scheme == scheme_type::CKKS);
     }
 
     /**
@@ -63,7 +67,7 @@ namespace seal
     chain of encryption parameters.
 
     @par Thread Safety
-    In general, reading from EncryptionParameters is thread-safe, while mutating 
+    In general, reading from EncryptionParameters is thread-safe, while mutating
     is not.
 
     @warning Choosing inappropriate encryption parameters may lead to an encryption
@@ -76,8 +80,8 @@ namespace seal
     {
     public:
         /**
-        Creates an empty set of encryption parameters. At a minimum, the user needs 
-        to specify the parameters poly_modulus, coeff_modulus, and plain_modulus 
+        Creates an empty set of encryption parameters. At a minimum, the user needs
+        to specify the parameters poly_modulus, coeff_modulus, and plain_modulus
         for the parameters to be usable.
 
         @throw std::invalid_argument if scheme is not supported
@@ -125,10 +129,10 @@ namespace seal
 
         /**
         Sets the degree of the polynomial modulus parameter to the specified value.
-        The polynomial modulus directly affects the number of coefficients in 
-        plaintext polynomials, the size of ciphertext elements, the computational 
-        performance of the scheme (bigger is worse), and the security level (bigger 
-        is better). In Microsoft SEAL the degree of the polynomial modulus must be a power 
+        The polynomial modulus directly affects the number of coefficients in
+        plaintext polynomials, the size of ciphertext elements, the computational
+        performance of the scheme (bigger is worse), and the security level (bigger
+        is better). In Microsoft SEAL the degree of the polynomial modulus must be a power
         of 2 (e.g.  1024, 2048, 4096, 8192, 16384, or 32768).
 
         @param[in] poly_modulus_degree The new polynomial modulus degree
@@ -143,12 +147,12 @@ namespace seal
         }
 
         /**
-        Sets the coefficient modulus parameter. The coefficient modulus consists 
-        of a list of distinct prime numbers, and is represented by a vector of 
-        SmallModulus objects. The coefficient modulus directly affects the size 
-        of ciphertext elements, the amount of computation that the scheme can perform 
-        (bigger is better), and the security level (bigger is worse). In Microsoft SEAL each 
-        of the prime numbers in the coefficient modulus must be at most 60 bits, 
+        Sets the coefficient modulus parameter. The coefficient modulus consists
+        of a list of distinct prime numbers, and is represented by a vector of
+        SmallModulus objects. The coefficient modulus directly affects the size
+        of ciphertext elements, the amount of computation that the scheme can perform
+        (bigger is better), and the security level (bigger is worse). In Microsoft SEAL each
+        of the prime numbers in the coefficient modulus must be at most 60 bits,
         and must be congruent to 1 modulo 2*degree(poly_modulus).
 
         @param[in] coeff_modulus The new coefficient modulus
@@ -170,12 +174,12 @@ namespace seal
         }
 
         /**
-        Sets the plaintext modulus parameter. The plaintext modulus is an integer 
-        modulus represented by the SmallModulus class. The plaintext modulus 
-        determines the largest coefficient that plaintext polynomials can represent. 
-        It also affects the amount of computation that the scheme can perform 
-        (bigger is worse). In Microsoft SEAL the plaintext modulus can be at most 60 bits 
-        long, but can otherwise be any integer. Note, however, that some features 
+        Sets the plaintext modulus parameter. The plaintext modulus is an integer
+        modulus represented by the SmallModulus class. The plaintext modulus
+        determines the largest coefficient that plaintext polynomials can represent.
+        It also affects the amount of computation that the scheme can perform
+        (bigger is worse). In Microsoft SEAL the plaintext modulus can be at most 60 bits
+        long, but can otherwise be any integer. Note, however, that some features
         (e.g. batching) require the plaintext modulus to be of a particular form.
 
         @param[in] plain_modulus The new plaintext modulus
@@ -196,14 +200,14 @@ namespace seal
         }
 
         /**
-        Sets the plaintext modulus parameter. The plaintext modulus is an integer 
-        modulus represented by the SmallModulus class. This constructor instead 
-        takes a std::uint64_t and automatically creates the SmallModulus object. 
-        The plaintext modulus determines the largest coefficient that plaintext 
-        polynomials can represent. It also affects the amount of computation that 
-        the scheme can perform (bigger is worse). In Microsoft SEAL the plaintext modulus 
-        can be at most 60 bits long, but can otherwise be any integer. Note, 
-        however, that some features (e.g. batching) require the plaintext modulus 
+        Sets the plaintext modulus parameter. The plaintext modulus is an integer
+        modulus represented by the SmallModulus class. This constructor instead
+        takes a std::uint64_t and automatically creates the SmallModulus object.
+        The plaintext modulus determines the largest coefficient that plaintext
+        polynomials can represent. It also affects the amount of computation that
+        the scheme can perform (bigger is worse). In Microsoft SEAL the plaintext modulus
+        can be at most 60 bits long, but can otherwise be any integer. Note,
+        however, that some features (e.g. batching) require the plaintext modulus
         to be of a particular form.
 
         @param[in] plain_modulus The new plaintext modulus
@@ -218,18 +222,18 @@ namespace seal
         }
 
         /**
-        Sets the standard deviation of the noise distribution used for error 
-        sampling. This parameter directly affects the security level of the scheme. 
-        However, it should not be necessary for most users to change this parameter 
-        from its default value. 
+        Sets the standard deviation of the noise distribution used for error
+        sampling. This parameter directly affects the security level of the scheme.
+        However, it should not be necessary for most users to change this parameter
+        from its default value.
 
         @param[in] noise_standard_deviation The new standard deviation
-        @throw std::invalid_argument if noise_standard_deviation is negative or 
-        too large 
+        @throw std::invalid_argument if noise_standard_deviation is negative or
+        too large
         */
         inline void set_noise_standard_deviation(double noise_standard_deviation)
         {
-            if (std::signbit(noise_standard_deviation) || 
+            if (std::signbit(noise_standard_deviation) ||
                 (noise_standard_deviation > std::numeric_limits<double>::max() /
                 util::global_variables::noise_distribution_width_multiplier))
             {
@@ -246,10 +250,10 @@ namespace seal
         }
 
         /**
-        Sets the random number generator factory to use for encryption. By default, 
-        the random generator is set to UniformRandomGeneratorFactory::default_factory(). 
-        Setting this value allows a user to specify a custom random number generator 
-        source. 
+        Sets the random number generator factory to use for encryption. By default,
+        the random generator is set to UniformRandomGeneratorFactory::default_factory().
+        Setting this value allows a user to specify a custom random number generator
+        source.
 
         @param[in] random_generator Pointer to the random generator factory
         */
@@ -300,8 +304,8 @@ namespace seal
         }
 
         /**
-        Returns the currently set maximum deviation of the noise distribution. 
-        This value cannot be directly controlled by the user, and is automatically 
+        Returns the currently set maximum deviation of the noise distribution.
+        This value cannot be directly controlled by the user, and is automatically
         set to be an appropriate multiple of the noise_standard_deviation parameter.
         */
         inline double noise_max_deviation() const
@@ -318,9 +322,9 @@ namespace seal
         }
 
         /**
-        Compares a given set of encryption parameters to the current set of 
-        encryption parameters. The comparison is performed by comparing the 
-        parms_ids of the parameter sets rather than comparing the parameters 
+        Compares a given set of encryption parameters to the current set of
+        encryption parameters. The comparison is performed by comparing the
+        parms_ids of the parameter sets rather than comparing the parameters
         individually.
 
         @parms[in] other The EncryptionParameters to compare against
@@ -331,9 +335,9 @@ namespace seal
         }
 
         /**
-        Compares a given set of encryption parameters to the current set of 
-        encryption parameters. The comparison is performed by comparing 
-        parms_ids of the parameter sets rather than comparing the parameters 
+        Compares a given set of encryption parameters to the current set of
+        encryption parameters. The comparison is performed by comparing
+        parms_ids of the parameter sets rather than comparing the parameters
         individually.
 
         @parms[in] other The EncryptionParameters to compare against
@@ -353,12 +357,12 @@ namespace seal
         }
 
         /**
-        Saves EncryptionParameters to an output stream. The output is in binary 
-        format and is not human-readable. The output stream must have the "binary" 
+        Saves EncryptionParameters to an output stream. The output is in binary
+        format and is not human-readable. The output stream must have the "binary"
         flag set.
 
         @param[in] stream The stream to save the EncryptionParameters to
-        @throws std::exception if the EncryptionParameters could not be written 
+        @throws std::exception if the EncryptionParameters could not be written
         to stream
         */
         static void Save(const EncryptionParameters &parms, std::ostream &stream);
@@ -367,10 +371,33 @@ namespace seal
         Loads EncryptionParameters from an input stream.
 
         @param[in] stream The stream to load the EncryptionParameters from
-        @throws std::exception if valid EncryptionParameters could not be read 
+        @throws std::exception if valid EncryptionParameters could not be read
         from stream
         */
         static EncryptionParameters Load(std::istream &stream);
+
+#ifdef EMSCRIPTEN
+
+        /**
+        Saves EncryptionParameters to a stream. The output is in base64
+        format and is human-readable.
+
+        @param[in] stream The stream to save the EncryptionParameters to
+        @throws std::exception if the EncryptionParameters could not be written
+        to stream
+        */
+        static std::string SaveToString(const EncryptionParameters &ep);
+
+        /**
+        Create EncryptionParameters from a base64 string.
+
+        @param[in] encoded The base64 string to load the EncryptionParameters from
+        @throws std::exception if valid EncryptionParameters could not be read
+        from stream
+        */
+        static EncryptionParameters CreateFromString(const std::string &encoded);
+
+#endif
 
     private:
         void compute_parms_id();

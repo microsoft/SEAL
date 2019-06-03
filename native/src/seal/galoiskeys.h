@@ -9,6 +9,10 @@
 #include "seal/ciphertext.h"
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
@@ -20,22 +24,22 @@ namespace seal
     is a polynomial of degree N, in batching the idea is to view a plaintext polynomial as
     a 2-by-(N/2) matrix of integers modulo plaintext modulus. Normal homomorphic computations
     operate on such encrypted matrices element (slot) wise. However, special rotation
-    operations allow us to also rotate the matrix rows cyclically in either direction, and 
+    operations allow us to also rotate the matrix rows cyclically in either direction, and
     rotate the columns (swap the rows). These operations require the Galois keys.
 
     @par Decomposition Bit Count
     Decomposition bit count (dbc) is a parameter that describes a performance trade-off in
-    the rotation operation. Its function is exactly the same as in relinearization. Namely, 
+    the rotation operation. Its function is exactly the same as in relinearization. Namely,
     the polynomials in the ciphertexts (with large coefficients) get decomposed into a smaller
-    base 2^dbc, coefficient-wise. Each of the decomposition factors corresponds to a piece of 
-    data in the Galois keys, so the smaller the dbc is, the larger the Galois keys are. 
+    base 2^dbc, coefficient-wise. Each of the decomposition factors corresponds to a piece of
+    data in the Galois keys, so the smaller the dbc is, the larger the Galois keys are.
     Moreover, a smaller dbc results in less invariant noise budget being consumed in the
-    rotation operation. However, using a large dbc is much faster, and often one would want 
-    to optimize the dbc to be as large as possible for performance. The dbc is upper-bounded 
+    rotation operation. However, using a large dbc is much faster, and often one would want
+    to optimize the dbc to be as large as possible for performance. The dbc is upper-bounded
     by the value of 60, and lower-bounded by the value of 1.
 
     @par Thread Safety
-    In general, reading from GaloisKeys is thread-safe as long as no other thread is 
+    In general, reading from GaloisKeys is thread-safe as long as no other thread is
     concurrently mutating it. This is due to the underlying data structure storing the
     Galois keys not being thread-safe.
 
@@ -119,14 +123,14 @@ namespace seal
         }
 
         /**
-        Returns a const reference to a Galois key. The returned Galois key corresponds 
+        Returns a const reference to a Galois key. The returned Galois key corresponds
         to the given Galois element.
 
         @param[in] galois_elt The Galois element
         @throw std::invalid_argument if the key corresponding to galois_elt does not exist
         */
         inline auto &key(std::uint64_t galois_elt) const
-        {            
+        {
             if (!has_key(galois_elt))
             {
                 throw std::invalid_argument("requested key does not exist");
@@ -173,9 +177,9 @@ namespace seal
         }
 
         /**
-        Check whether the current GaloisKeys is valid for a given SEALContext. If 
-        the given SEALContext is not set, the encryption parameters are invalid, 
-        or the GaloisKeys data does not match the SEALContext, this function returns 
+        Check whether the current GaloisKeys is valid for a given SEALContext. If
+        the given SEALContext is not set, the encryption parameters are invalid,
+        or the GaloisKeys data does not match the SEALContext, this function returns
         false. Otherwise, returns true.
 
         @param[in] context The SEALContext
@@ -183,9 +187,9 @@ namespace seal
         bool is_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
 
         /**
-        Check whether the current GaloisKeys is valid for a given SEALContext. If 
-        the given SEALContext is not set, the encryption parameters are invalid, 
-        or the GaloisKeys data does not match the SEALContext, this function returns 
+        Check whether the current GaloisKeys is valid for a given SEALContext. If
+        the given SEALContext is not set, the encryption parameters are invalid,
+        or the GaloisKeys data does not match the SEALContext, this function returns
         false. Otherwise, returns true. This function only checks the metadata
         and not the Galois key data itself.
 
@@ -194,8 +198,8 @@ namespace seal
         bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const noexcept;
 
         /**
-        Saves the GaloisKeys instance to an output stream. The output is in binary 
-        format and not human-readable. The output stream must have the "binary" 
+        Saves the GaloisKeys instance to an output stream. The output is in binary
+        format and not human-readable. The output stream must have the "binary"
         flag set.
 
         @param[in] stream The stream to save the GaloisKeys to
@@ -206,7 +210,7 @@ namespace seal
         /**
         Loads a GaloisKeys from an input stream overwriting the current GaloisKeys.
         No checking of the validity of the GaloisKeys data against encryption
-        parameters is performed. This function should not be used unless the 
+        parameters is performed. This function should not be used unless the
         GaloisKeys comes from a fully trusted source.
 
         @param[in] stream The stream to load the GaloisKeys from
@@ -234,6 +238,30 @@ namespace seal
                 throw std::invalid_argument("GaloisKeys data is invalid");
             }
         }
+
+#ifdef EMSCRIPTEN
+        /**
+        Saves the GaloisKeys to a string. The output is in base64 format
+        and is human-readable.
+
+        @throws std::exception if the GaloisKeys could not be written to string
+        */
+        const std::string SaveToString();
+
+        /**
+        Loads a GaloisKeys from an input string overwriting the current GaloisKeys.
+        The loaded GaloisKeys is verified to be valid for the given SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] encoded The base64 string to load the GaloisKeys from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid GaloisKeys could not be read from stream
+        @throws std::invalid_argument if the loaded GaloisKeys is invalid for the
+        context
+        */
+        void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded);
+#endif
 
         /**
         Returns the currently used MemoryPoolHandle.

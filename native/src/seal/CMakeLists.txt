@@ -20,6 +20,10 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.cpp
         ${CMAKE_CURRENT_LIST_DIR}/relinkeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
+
+        # Emscripten
+        ${CMAKE_CURRENT_LIST_DIR}/base64.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/bindings.cpp
 )
 
 install(
@@ -47,6 +51,10 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/seal.h
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.h
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.h
+
+        # Emscripten
+        ${CMAKE_CURRENT_LIST_DIR}/base64.h
+
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal
 )

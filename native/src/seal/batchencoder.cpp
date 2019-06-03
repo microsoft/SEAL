@@ -406,6 +406,181 @@ namespace seal
                 static_cast<int64_t>(curr_value);
         }
     }
+
+#ifdef EMSCRIPTEN
+    void BatchEncoder::encode(const vector<uint32_t> &values_matrix,
+        Plaintext &destination)
+    {
+        auto &context_data = *context_->context_data();
+
+        // Validate input parameters
+        size_t values_matrix_size = values_matrix.size();
+        if (values_matrix_size > slots_)
+        {
+            throw logic_error("values_matrix size is too large");
+        }
+#ifdef SEAL_DEBUG
+        uint64_t modulus = context_data.parms().plain_modulus().value();
+        for (auto v : values_matrix)
+        {
+            // Validate the i-th input
+            if (v >= modulus)
+            {
+                throw invalid_argument("input value is larger than plain_modulus");
+            }
+        }
+#endif
+        // Set destination to full size
+        destination.resize(slots_);
+        destination.parms_id() = parms_id_zero;
+
+        // First write the values to destination coefficients.
+        // Read in top row, then bottom row.
+        for (size_t i = 0; i < values_matrix_size; i++)
+        {
+            *(destination.data() + matrix_reps_index_map_[i]) = values_matrix[i];
+        }
+        for (size_t i = values_matrix_size; i < slots_; i++)
+        {
+            *(destination.data() + matrix_reps_index_map_[i]) = 0;
+        }
+
+        // Transform destination using inverse of negacyclic NTT
+        // Note: We already performed bit-reversal when reading in the matrix
+        inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
+    }
+
+    void BatchEncoder::encode(const vector<int32_t> &values_matrix,
+        Plaintext &destination)
+    {
+        auto &context_data = *context_->context_data();
+        uint64_t modulus = context_data.parms().plain_modulus().value();
+
+        // Validate input parameters
+        size_t values_matrix_size = values_matrix.size();
+        if (values_matrix_size > slots_)
+        {
+            throw logic_error("values_matrix size is too large");
+        }
+#ifdef SEAL_DEBUG
+        uint64_t plain_modulus_div_two = modulus >> 1;
+        for (auto v : values_matrix)
+        {
+            // Validate the i-th input
+            if (unsigned_gt(llabs(v), plain_modulus_div_two))
+            {
+                throw invalid_argument("input value is larger than plain_modulus");
+            }
+        }
+#endif
+        // Set destination to full size
+        destination.resize(slots_);
+        destination.parms_id() = parms_id_zero;
+
+        // First write the values to destination coefficients.
+        // Read in top row, then bottom row.
+        for (size_t i = 0; i < values_matrix_size; i++)
+        {
+            *(destination.data() + matrix_reps_index_map_[i]) =
+                (values_matrix[i] < 0) ? (modulus + static_cast<uint64_t>(values_matrix[i])) :
+                    static_cast<uint64_t>(values_matrix[i]);
+        }
+        for (size_t i = values_matrix_size; i < slots_; i++)
+        {
+            *(destination.data() + matrix_reps_index_map_[i]) = 0;
+        }
+
+        // Transform destination using inverse of negacyclic NTT
+        // Note: We already performed bit-reversal when reading in the matrix
+        inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
+    }
+
+    void BatchEncoder::decode(const Plaintext &plain, vector<uint32_t> &destination,
+        MemoryPoolHandle pool)
+    {
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
+        if (plain.is_ntt_form())
+        {
+            throw invalid_argument("plain cannot be in NTT form");
+        }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
+
+        auto &context_data = *context_->context_data();
+
+        // Set destination size
+        destination.resize(slots_);
+
+        // Never include the leading zero coefficient (if present)
+        size_t plain_coeff_count = min(plain.coeff_count(), slots_);
+
+        auto temp_dest(allocate_uint(slots_, pool));
+
+        // Make a copy of poly
+        set_uint_uint(plain.data(), plain_coeff_count, temp_dest.get());
+        set_zero_uint(slots_ - plain_coeff_count, temp_dest.get() + plain_coeff_count);
+
+        // Transform destination using negacyclic NTT.
+        ntt_negacyclic_harvey(temp_dest.get(), *context_data.plain_ntt_tables());
+
+        // Read top row
+        for (size_t i = 0; i < slots_; i++)
+        {
+            destination[i] = temp_dest[matrix_reps_index_map_[i]];
+        }
+    }
+
+    void BatchEncoder::decode(const Plaintext &plain, vector<int32_t> &destination,
+        MemoryPoolHandle pool)
+    {
+        if (!plain.is_valid_for(context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
+        if (plain.is_ntt_form())
+        {
+            throw invalid_argument("plain cannot be in NTT form");
+        }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
+
+        auto &context_data = *context_->context_data();
+        uint64_t modulus = context_data.parms().plain_modulus().value();
+
+        // Set destination size
+        destination.resize(slots_);
+
+        // Never include the leading zero coefficient (if present)
+        size_t plain_coeff_count = min(plain.coeff_count(), slots_);
+
+        auto temp_dest(allocate_uint(slots_, pool));
+
+        // Make a copy of poly
+        set_uint_uint(plain.data(), plain_coeff_count, temp_dest.get());
+        set_zero_uint(slots_ - plain_coeff_count, temp_dest.get() + plain_coeff_count);
+
+        // Transform destination using negacyclic NTT.
+        ntt_negacyclic_harvey(temp_dest.get(), *context_data.plain_ntt_tables());
+
+        // Read top row, then bottom row
+        uint64_t plain_modulus_div_two = modulus >> 1;
+        for (size_t i = 0; i < slots_; i++)
+        {
+            uint64_t curr_value = temp_dest[matrix_reps_index_map_[i]];
+            destination[i] = (curr_value > plain_modulus_div_two) ?
+                (static_cast<int64_t>(curr_value) - static_cast<int64_t>(modulus)) :
+                static_cast<int64_t>(curr_value);
+        }
+    }
+#endif
+
 #ifdef SEAL_USE_MSGSL_SPAN
     void BatchEncoder::decode(const Plaintext &plain, gsl::span<uint64_t> destination,
         MemoryPoolHandle pool)

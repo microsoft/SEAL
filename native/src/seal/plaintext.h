@@ -15,36 +15,40 @@
 #include "seal/encryptionparams.h"
 #include "seal/intarray.h"
 #include "seal/context.h"
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
     /**
-    Class to store a plaintext element. The data for the plaintext is a polynomial 
-    with coefficients modulo the plaintext modulus. The degree of the plaintext 
-    polynomial must be one less than the degree of the polynomial modulus. The 
-    backing array always allocates one 64-bit word per each coefficient of the 
+    Class to store a plaintext element. The data for the plaintext is a polynomial
+    with coefficients modulo the plaintext modulus. The degree of the plaintext
+    polynomial must be one less than the degree of the polynomial modulus. The
+    backing array always allocates one 64-bit word per each coefficient of the
     polynomial.
 
     @par Memory Management
     The coefficient count of a plaintext refers to the number of word-size
-    coefficients in the plaintext, whereas its capacity refers to the number of 
+    coefficients in the plaintext, whereas its capacity refers to the number of
     word-size coefficients that fit in the current memory allocation. In high-
-    performance applications unnecessary re-allocations should be avoided by 
-    reserving enough memory for the plaintext to begin with either by providing 
-    the desired capacity to the constructor as an extra argument, or by calling 
-    the reserve function at any time. 
-     
-    When the scheme is scheme_type::BFV each coefficient of a plaintext is a 64-bit 
-    word, but when the scheme is scheme_type::CKKS the plaintext is by default 
-    stored in an NTT transformed form with respect to each of the primes in the 
-    coefficient modulus. Thus, the size of the allocation that is needed is the 
-    size of the coefficient modulus (number of primes) times the degree of the 
-    polynomial modulus. In addition, a valid CKKS plaintext also store the parms_id 
+    performance applications unnecessary re-allocations should be avoided by
+    reserving enough memory for the plaintext to begin with either by providing
+    the desired capacity to the constructor as an extra argument, or by calling
+    the reserve function at any time.
+
+    When the scheme is scheme_type::BFV each coefficient of a plaintext is a 64-bit
+    word, but when the scheme is scheme_type::CKKS the plaintext is by default
+    stored in an NTT transformed form with respect to each of the primes in the
+    coefficient modulus. Thus, the size of the allocation that is needed is the
+    size of the coefficient modulus (number of primes) times the degree of the
+    polynomial modulus. In addition, a valid CKKS plaintext also store the parms_id
     for the corresponding encryption parameters.
 
     @par Thread Safety
-    In general, reading from plaintext is thread-safe as long as no other thread 
-    is concurrently mutating it. This is due to the underlying data structure 
+    In general, reading from plaintext is thread-safe as long as no other thread
+    is concurrently mutating it. This is due to the underlying data structure
     storing the plaintext not being thread-safe.
 
     @see Ciphertext for the class that stores ciphertexts.
@@ -68,11 +72,11 @@ namespace seal
         }
 
         /**
-        Constructs a plaintext representing a constant polynomial 0. The coefficient 
-        count of the polynomial is set to the given value. The capacity is set to 
+        Constructs a plaintext representing a constant polynomial 0. The coefficient
+        count of the polynomial is set to the given value. The capacity is set to
         the same value.
 
-        @param[in] coeff_count The number of (zeroed) coefficients in the plaintext 
+        @param[in] coeff_count The number of (zeroed) coefficients in the plaintext
         polynomial
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if coeff_count is negative
@@ -85,11 +89,11 @@ namespace seal
         }
 
         /**
-        Constructs a plaintext representing a constant polynomial 0. The coefficient 
+        Constructs a plaintext representing a constant polynomial 0. The coefficient
         count of the polynomial and the capacity are set to the given values.
 
         @param[in] capacity The capacity
-        @param[in] coeff_count The number of (zeroed) coefficients in the plaintext 
+        @param[in] coeff_count The number of (zeroed) coefficients in the plaintext
         polynomial
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if capacity is less than coeff_count
@@ -106,7 +110,7 @@ namespace seal
         Constructs a plaintext from a given hexadecimal string describing the
         plaintext polynomial.
 
-        The string description of the polynomial must adhere to the format returned 
+        The string description of the polynomial must adhere to the format returned
         by to_string(),
         which is of the form "7FFx^3 + 1x^1 + 3" and summarized by the following
         rules:
@@ -152,7 +156,7 @@ namespace seal
         Plaintext(Plaintext &&source) = default;
 
         /**
-        Allocates enough memory to accommodate the backing array of a plaintext 
+        Allocates enough memory to accommodate the backing array of a plaintext
         with given capacity.
 
         @param[in] capacity The capacity
@@ -180,7 +184,7 @@ namespace seal
         }
 
         /**
-        Resets the plaintext. This function releases any memory allocated by the 
+        Resets the plaintext. This function releases any memory allocated by the
         plaintext, returning it to the memory pool.
         */
         inline void release() noexcept
@@ -191,9 +195,9 @@ namespace seal
         }
 
         /**
-        Resizes the plaintext to have a given coefficient count. The plaintext 
-        is automatically reallocated if the new coefficient count does not fit in 
-        the current capacity. 
+        Resizes the plaintext to have a given coefficient count. The plaintext
+        is automatically reallocated if the new coefficient count does not fit in
+        the current capacity.
 
         @param[in] coeff_count The number of coefficients in the plaintext polynomial
         @throws std::invalid_argument if coeff_count is negative
@@ -223,11 +227,11 @@ namespace seal
         Plaintext &operator =(Plaintext &&assign) = default;
 
         /**
-        Sets the value of the current plaintext to the polynomial represented by 
+        Sets the value of the current plaintext to the polynomial represented by
         the a given hexadecimal string.
 
-        The string description of the polynomial must adhere to the format returned 
-        by to_string(), which is of the form "7FFx^3 + 1x^1 + 3" and summarized 
+        The string description of the polynomial must adhere to the format returned
+        by to_string(), which is of the form "7FFx^3 + 1x^1 + 3" and summarized
         by the following rules:
         1. Terms are listed in order of strictly decreasing exponent
         2. Coefficient values are non-negative and in hexadecimal format (upper
@@ -242,7 +246,7 @@ namespace seal
         allowed
         8. Other than the +, no other terms should have whitespace
 
-        @param[in] hex_poly The formatted polynomial string specifying the plaintext 
+        @param[in] hex_poly The formatted polynomial string specifying the plaintext
         polynomial
         @throws std::invalid_argument if hex_poly does not adhere to the expected
         format
@@ -265,7 +269,7 @@ namespace seal
         }
 
         /**
-        Sets a given range of coefficients of a plaintext polynomial to zero; does 
+        Sets a given range of coefficients of a plaintext polynomial to zero; does
         nothing if length is zero.
 
         @param[in] start_coeff The index of the first coefficient to set to zero
@@ -338,7 +342,7 @@ namespace seal
         */
         inline gsl::span<const pt_coeff_type> data_span() const
         {
-            return gsl::span<const pt_coeff_type>(data_.cbegin(), 
+            return gsl::span<const pt_coeff_type>(data_.cbegin(),
                 static_cast<std::ptrdiff_t>(coeff_count()));
         }
 #endif
@@ -402,7 +406,7 @@ namespace seal
         }
 
         /**
-        Returns whether or not the plaintext has the same semantic value as a given 
+        Returns whether or not the plaintext has the same semantic value as a given
         plaintext. Leading zero coefficients are ignored by the comparison.
 
         @param[in] compare The plaintext to compare against
@@ -416,11 +420,11 @@ namespace seal
                 (!is_ntt_form() && !compare.is_ntt_form());
             return parms_id_compare
                 && (sig_coeff_count == sig_coeff_count_compare)
-                && std::equal(data_.cbegin(), 
+                && std::equal(data_.cbegin(),
                     data_.cbegin() + sig_coeff_count,
-                    compare.data_.cbegin(), 
+                    compare.data_.cbegin(),
                     compare.data_.cbegin() + sig_coeff_count)
-                && std::all_of(data_.cbegin() + sig_coeff_count, 
+                && std::all_of(data_.cbegin() + sig_coeff_count,
                     data_.cend(), util::is_zero<pt_coeff_type>)
                 && std::all_of(compare.data_.cbegin() + sig_coeff_count,
                     compare.data_.cend(), util::is_zero<pt_coeff_type>)
@@ -482,13 +486,13 @@ namespace seal
         The returned string is of the form "7FFx^3 + 1x^1 + 3" with a format
         summarized by the following:
         1. Terms are listed in order of strictly decreasing exponent
-        2. Coefficient values are non-negative and in hexadecimal format (hexadecimal 
+        2. Coefficient values are non-negative and in hexadecimal format (hexadecimal
         letters are in upper-case)
         3. Exponents are positive and in decimal format
-        4. Zero coefficient terms (including the constant term) are omitted unless 
+        4. Zero coefficient terms (including the constant term) are omitted unless
         the polynomial is exactly 0 (see rule 9)
         5. Term with the exponent value of one is written as x^1
-        6. Term with the exponent value of zero (the constant term) is written as 
+        6. Term with the exponent value of zero (the constant term) is written as
         just a hexadecimal number without x or exponent
         7. Terms are separated exactly by <space>+<space>
         8. Other than the +, no other terms have whitespace
@@ -506,9 +510,9 @@ namespace seal
         }
 
         /**
-        Check whether the current Plaintext is valid for a given SEALContext. If 
-        the given SEALContext is not set, the encryption parameters are invalid, 
-        or the Plaintext data does not match the SEALContext, this function returns 
+        Check whether the current Plaintext is valid for a given SEALContext. If
+        the given SEALContext is not set, the encryption parameters are invalid,
+        or the Plaintext data does not match the SEALContext, this function returns
         false. Otherwise, returns true.
 
         @param[in] context The SEALContext
@@ -516,9 +520,9 @@ namespace seal
         bool is_valid_for(std::shared_ptr<const SEALContext> context) const;
 
         /**
-        Check whether the current Plaintext is valid for a given SEALContext. If 
-        the given SEALContext is not set, the encryption parameters are invalid, 
-        or the Plaintext data does not match the SEALContext, this function returns 
+        Check whether the current Plaintext is valid for a given SEALContext. If
+        the given SEALContext is not set, the encryption parameters are invalid,
+        or the Plaintext data does not match the SEALContext, this function returns
         false. Otherwise, returns true. This function only checks the metadata
         and not the plaintext data itself.
 
@@ -527,7 +531,7 @@ namespace seal
         bool is_metadata_valid_for(std::shared_ptr<const SEALContext> context) const;
 
         /**
-        Saves the plaintext to an output stream. The output is in binary format 
+        Saves the plaintext to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
         @param[in] stream The stream to save the plaintext to
@@ -538,7 +542,7 @@ namespace seal
         /**
         Loads a plaintext from an input stream overwriting the current plaintext.
         No checking of the validity of the plaintext data against encryption
-        parameters is performed. This function should not be used unless the 
+        parameters is performed. This function should not be used unless the
         plaintext comes from a fully trusted source.
 
         @param[in] stream The stream to load the plaintext from
@@ -555,7 +559,7 @@ namespace seal
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
         @throws std::exception if a valid plaintext could not be read from stream
-        @throws std::invalid_argument if the loaded plaintext is invalid for the 
+        @throws std::invalid_argument if the loaded plaintext is invalid for the
         context
         */
         inline void load(std::shared_ptr<SEALContext> context,
@@ -568,6 +572,30 @@ namespace seal
             }
         }
 
+#ifdef EMSCRIPTEN
+        /**
+        Saves the plaintext to a string. The output is in base64 format
+        and is human-readable.
+
+        @throws std::exception if the plaintext could not be written to string
+        */
+        const std::string SaveToString();
+
+        /**
+        Loads a plaintext from an input string overwriting the current plaintext.
+        The loaded plaintext is verified to be valid for the given SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] encoded The base64 string to load the plaintext from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid plaintext could not be read from stream
+        @throws std::invalid_argument if the loaded plaintext is invalid for the
+        context
+        */
+        void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded);
+#endif
+
         /**
         Returns whether the plaintext is in NTT form.
         */
@@ -577,7 +605,7 @@ namespace seal
         }
 
         /**
-        Returns a reference to parms_id. The parms_id must remain zero unless the 
+        Returns a reference to parms_id. The parms_id must remain zero unless the
         plaintext polynomial is in NTT form.
 
         @see EncryptionParameters for more information about parms_id.
@@ -588,7 +616,7 @@ namespace seal
         }
 
         /**
-        Returns a const reference to parms_id. The parms_id must remain zero unless 
+        Returns a const reference to parms_id. The parms_id must remain zero unless
         the plaintext polynomial is in NTT form.
 
         @see EncryptionParameters for more information about parms_id.
@@ -599,8 +627,8 @@ namespace seal
         }
 
         /**
-        Returns a reference to the scale. This is only needed when using the CKKS 
-        encryption scheme. The user should have little or no reason to ever change 
+        Returns a reference to the scale. This is only needed when using the CKKS
+        encryption scheme. The user should have little or no reason to ever change
         the scale by hand.
         */
         inline auto &scale() noexcept
@@ -609,7 +637,7 @@ namespace seal
         }
 
         /**
-        Returns a constant reference to the scale. This is only needed when using 
+        Returns a constant reference to the scale. This is only needed when using
         the CKKS encryption scheme.
         */
         inline auto &scale() const noexcept

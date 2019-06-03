@@ -118,7 +118,7 @@ namespace seal
             }
 
             // Determine bit length of coefficient.
-            int coeff_bit_count = 
+            int coeff_bit_count =
                 get_hex_string_bit_count(hex_poly_ptr + pos, coeff_length);
             if (coeff_bit_count > assign_coeff_bit_count)
             {
@@ -236,7 +236,7 @@ namespace seal
         else
         {
             auto &parms = context->context_data()->parms();
-            uint64_t modulus = parms.plain_modulus().value(); 
+            uint64_t modulus = parms.plain_modulus().value();
             const pt_coeff_type *ptr = data();
             for (size_t k = 0; k < data_.size(); k++, ptr++)
             {
@@ -348,4 +348,30 @@ namespace seal
 
         stream.exceptions(old_except_mask);
     }
+#ifdef EMSCRIPTEN
+    const std::string Plaintext::SaveToString()
+    {
+        std::ostringstream buffer;
+
+        this->save(buffer);
+
+        std::string contents = buffer.str();
+        size_t bufferSize = contents.size();
+        std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+        return encoded;
+    }
+
+    void Plaintext::LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded)
+    {
+        std::string decoded = base64_decode(encoded);
+        std::istringstream is(decoded);
+
+        this->unsafe_load(is);
+
+        if (!is_valid_for(std::move(context)))
+        {
+            throw std::invalid_argument("PublicKey data is invalid");
+        }
+    }
+#endif
 }

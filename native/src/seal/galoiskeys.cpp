@@ -48,13 +48,13 @@ namespace seal
         {
             return false;
         }
-        
+
         // Check the data
         for (auto &a : keys_)
         {
             for (auto &b : a)
             {
-                if (!b.is_valid_for(context) || !b.is_ntt_form() || 
+                if (!b.is_valid_for(context) || !b.is_ntt_form() ||
                     b.parms_id() != parms_id_)
                 {
                     return false;
@@ -81,7 +81,7 @@ namespace seal
         {
             for (auto &b : a)
             {
-                if (!b.is_metadata_valid_for(context) || !b.is_ntt_form() || 
+                if (!b.is_metadata_valid_for(context) || !b.is_ntt_form() ||
                     b.parms_id() != parms_id_)
                 {
                     return false;
@@ -193,4 +193,31 @@ namespace seal
 
         stream.exceptions(old_except_mask);
     }
+
+#ifdef EMSCRIPTEN
+    const std::string GaloisKeys::SaveToString()
+    {
+        std::ostringstream buffer;
+
+        this->save(buffer);
+
+        std::string contents = buffer.str();
+        size_t bufferSize = contents.size();
+        std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+        return encoded;
+    }
+
+    void GaloisKeys::LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded)
+    {
+        std::string decoded = base64_decode(encoded);
+        std::istringstream is(decoded);
+
+        this->unsafe_load(is);
+
+        if (!is_valid_for(std::move(context)))
+        {
+            throw std::invalid_argument("GaloisKeys data is invalid");
+        }
+    }
+#endif
 }
