@@ -63,6 +63,9 @@ namespace seal
         sk_generated_ = true;
         generate_sk(sk_generated_);
 
+        // Initialize the secret_key_array
+        compute_secret_key_array(*context_->key_context_data(), 1);
+
         // Generate the public key
         generate_pk();
     }
@@ -91,22 +94,16 @@ namespace seal
             throw invalid_argument("public_key is not valid for encryption parameters");
         }
 
-        // Extract encryption parameters.
-        auto &context_data = *context_->context_data();
-        auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
-
         // Set the secret and public keys
         public_key_ = public_key;
         secret_key_ = secret_key;
 
-        generate_sk(true);
-
         // Secret key and public key are generated
         sk_generated_ = true;
         pk_generated_ = true;
+
+        // Initialize the secret_key_array
+        compute_secret_key_array(*context_->key_context_data(), 1);
     }
 
     void KeyGenerator::generate_sk(bool is_initialized)
@@ -142,14 +139,14 @@ namespace seal
             secret_key_.parms_id() = parms.parms_id();
         }
 
-        // Set the secret_key_array to have size 1 (first power of secret) 
-        secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count,
-            secret_key_array_.get());
-        secret_key_array_size_ = 1;
+        // Set the parms_id for secret key
+        secret_key_.parms_id() = context_data.parms_id();
 
         // Secret key has been generated
         sk_generated_ = true;
+
+        // Initialize the secret_key_array
+        compute_secret_key_array(context_data, 1);
     }
 
     void KeyGenerator::generate_pk()
@@ -427,7 +424,8 @@ namespace seal
             }
 
             // Rotate secret key for each coeff_modulus
-            auto rotated_secret_key(allocate_poly(coeff_count, coeff_mod_count, pool_));
+            auto rotated_secret_key(
+                allocate_poly(coeff_count, coeff_mod_count, pool_));
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 apply_galois_ntt(secret_key_.data().data() + (i * coeff_count),
@@ -734,6 +732,12 @@ namespace seal
     void KeyGenerator::compute_secret_key_array(
         const SEALContext::ContextData &context_data, size_t max_power)
     {
+#ifdef SEAL_DEBUG
+        if (max_power < 1)
+        {
+            throw invalid_argument("max_power must be at least 1");
+        }
+#endif
         // Extract encryption parameters.
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
@@ -762,8 +766,22 @@ namespace seal
         // Compute powers of secret key until max_power
         auto new_secret_key_array(allocate_poly(
             new_size * coeff_count, coeff_mod_count, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, 
-            coeff_mod_count, new_secret_key_array.get());
+
+        if (!old_size)
+        {
+            // If the old size is zero, then just read from secret_key_.
+            // This is the case when the secret key has just been created.
+            set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count,
+                new_secret_key_array.get());
+
+            old_size = 1;
+        }
+        else
+        {
+            // Otherwise copy from the existing array.
+            set_poly_poly(secret_key_array_.get(), old_size * coeff_count,
+                coeff_mod_count, new_secret_key_array.get());
+        }
 
         size_t poly_ptr_increment = coeff_count * coeff_mod_count;
         uint64_t *prev_poly_ptr = new_secret_key_array.get() + 
@@ -787,7 +805,6 @@ namespace seal
             prev_poly_ptr = next_poly_ptr;
             next_poly_ptr += poly_ptr_increment;
         }
-
 
         // Take writer lock to update array
         WriterLock writer_lock(secret_key_array_locker_.acquire_write());

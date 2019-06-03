@@ -512,6 +512,7 @@ namespace SEALTest
         }
     }
 
+<<<<<<< HEAD
     TEST(KeyGeneratorTest, FVSecretKeyGeneration)
     {
         EncryptionParameters parms(scheme_type::BFV);
