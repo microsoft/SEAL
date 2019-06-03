@@ -4,7 +4,8 @@
 
 ### Features
 
-In this version, we have significantly improved the usability of the CKKS scheme in Microsoft SEAL and many of these improvements apply to the BFV
+In this version, we have significantly improved the usability of the CKKS
+scheme in Microsoft SEAL and many of these improvements apply to the BFV
 scheme as well. Homomorphic operations that are based on key switching,
 i.e., relinearization and rotation, do not consume any noise budget (BFV)
 or impact accuracy (CKKS). The implementations of these operations are
@@ -16,7 +17,8 @@ the examples and comments in
 [native/examples/3_levels.cpp](native/examples/3_levels.cpp) (C++) or
 [dotnet/examples/3_Levels.cs](dotnet/examples/3_Levels.cs) (C#).
 
-The setup of `EncryptionParameters` has been made both easier and safer (see [API Changes](#api-changes) below).
+The setup of `EncryptionParameters` has been made both easier and safer
+(see [API Changes](#api-changes) below).
 
 The examples in [`native/examples/`](native/examples/) and
 [`dotnet/examples/`](dotnet/examples/) have been redesigned to better teach

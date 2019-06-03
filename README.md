@@ -1,8 +1,8 @@
 # Microsoft SEAL
 
-Microsoft SEAL is an easy-to-use open-source homomorphic encryption library developed by researchers in the Cryptography Research group at Microsoft Research. Microsoft SEAL is written in modern standard C++ and has no external dependencies, making it easy to compile and run in many different environments.
+Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorphic encryption library developed by the Cryptography Research group at Microsoft. Microsoft SEAL is written in modern standard C++ and has no external dependencies, making it easy to compile and run in many different environments. For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-For more information about the Microsoft SEAL project, see [http://sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
+This document pertains to Microsoft SEAL version 3.3.0. Users of previous versions of the library should look at the [list of changes](Changes.md).
 
 # Contents
 - [Introduction](#introduction)
@@ -18,7 +18,6 @@ For more information about the Microsoft SEAL project, see [http://sealcrypto.or
 - [Getting Started](#getting-started)
 - [Contributing](#contributing)
 - [Citing Microsoft SEAL](#citing-microsoft-seal)
-- [License](#license)
 
 # Introduction
 ## Core Concepts
@@ -383,7 +382,7 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
 	@misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.3)},
 	    howpublished = {\url{https://github.com/Microsoft/SEAL}},
-	    month = may,
+	    month = june,
 	    year = 2019,
 	    note = {Microsoft Research, Redmond, WA.},
 	    key = {SEAL}
@@ -420,7 +419,3 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
 	    note = {Microsoft Research, Redmond, WA.},
 	    key = {SEAL}
     }
-
-## License
-
-Microsoft SEAL is licensed under the MIT license; see [LICENSE](LICENSE).
