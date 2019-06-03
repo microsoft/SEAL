@@ -149,8 +149,12 @@ namespace seal
 
         /**
         Generates new secret key.
+
+        @param[in] is_initialized True if the secret_key_ has already been initialized so that only the
+         secret_key_array_ should be initialized (it may be the case, for instance, if the secret_key_
+         was provided in the constructor
         */
-        void generate_sk();
+        void generate_sk(bool is_initialized = false);
 
         /**
         Generates new public key matching to existing secret key.
