@@ -41,14 +41,10 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
 
-        // Allocate secret_key_ and copy over value
-        secret_key_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(secret_key.data().data(), coeff_count, coeff_mod_count,
-            secret_key_.get());
-
         // Set the secret_key_array to have size 1 (first power of secret)
+        // and copy over data
         secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(secret_key_.get(), coeff_count, coeff_mod_count,
+        set_poly_poly(secret_key.data().data(), coeff_count, coeff_mod_count,
             secret_key_array_.get());
         secret_key_array_size_ = 1;
     }
@@ -343,8 +339,11 @@ namespace seal
 
         // Need to extend the array
         // Compute powers of secret key until max_power
-        auto new_secret_key_array(allocate_poly(mul_safe(new_size, coeff_count),
-            coeff_mod_count, pool_));
+        auto new_secret_key_array(allocate_poly(
+            mul_safe(new_size, coeff_count), coeff_mod_count, pool_));
+        set_poly_poly(secret_key_array_.get(), old_size * coeff_count,
+            coeff_mod_count, new_secret_key_array.get());
+
         set_poly_poly(secret_key_array_.get(), mul_safe(old_size, coeff_count),
             coeff_mod_count, new_secret_key_array.get());
 

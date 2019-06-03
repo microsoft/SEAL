@@ -120,8 +120,6 @@ namespace seal
 
         std::shared_ptr<SEALContext> context_{ nullptr };
 
-        util::Pointer<std::uint64_t> secret_key_;
-
         std::size_t secret_key_array_size_ = 0;
 
         util::Pointer<std::uint64_t> secret_key_array_;
