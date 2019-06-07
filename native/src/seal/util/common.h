@@ -355,7 +355,8 @@ namespace seal
 
         constexpr std::uint64_t uint64_high_bit = std::uint64_t(1) << (bits_per_uint64 - 1);
 
-        inline constexpr std::uint32_t reverse_bits(std::uint32_t operand) noexcept
+		template<typename T, typename std::enable_if<sizeof(T) == 4 >::type * = nullptr>
+        inline constexpr T reverse_bits(T operand) noexcept
         {
             operand = (((operand & 0xaaaaaaaa) >> 1) | ((operand & 0x55555555) << 1));
             operand = (((operand & 0xcccccccc) >> 2) | ((operand & 0x33333333) << 2));
@@ -364,14 +365,15 @@ namespace seal
             return((operand >> 16) | (operand << 16));
         }
 
-        template<typename T, typename = std::enable_if<is_uint64_v<T>>>
-        inline constexpr T reverse_bits(T operand) noexcept
+		template<typename T, typename std::enable_if<sizeof(T) == 8 >::type * = nullptr>
+		inline constexpr T reverse_bits(T operand) noexcept
         {
             return static_cast<T>(reverse_bits(static_cast<std::uint32_t>(operand >> 32))) |
                 (static_cast<T>(reverse_bits(static_cast<std::uint32_t>(operand & T(0xFFFFFFFF)))) << 32);
         }
 
-        inline std::uint32_t reverse_bits(std::uint32_t operand, int bit_count)
+		template<typename T, typename std::enable_if<sizeof(T) == 4 >::type * = nullptr>
+        inline T reverse_bits(T operand, int bit_count)
         {
 #ifdef SEAL_DEBUG
             if (bit_count < 0 || bit_count > 32)
@@ -380,11 +382,11 @@ namespace seal
             }
 #endif
             // We need shift by 32 to return zero so convert to uint64_t in-between
-            return static_cast<std::uint32_t>(
+            return static_cast<T>(
                 (static_cast<std::uint64_t>(reverse_bits(operand)) >> (32 - bit_count)));
         }
 
-        template<typename T, typename = std::enable_if<is_uint64_v<T>>>
+		template<typename T, typename std::enable_if<sizeof(T) == 8 >::type * = nullptr>
         inline T reverse_bits(T operand, int bit_count)
         {
 #ifdef SEAL_DEBUG
