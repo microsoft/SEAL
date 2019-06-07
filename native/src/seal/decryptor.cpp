@@ -304,7 +304,6 @@ namespace seal
         }
 
         // Set destination parameters as in encrypted
-        //destination.parms_id() = last_parms_id;
         destination.parms_id() = encrypted.parms_id();
         destination.scale() = encrypted.scale();
     }
@@ -315,6 +314,10 @@ namespace seal
         if (max_power < 1)
         {
             throw invalid_argument("max_power must be at least 1");
+        }
+        if (!secret_key_array_size_ || !secret_key_array_)
+        {
+            throw logic_error("secret_key_array_ is uninitialized");
         }
 #endif
         // WARNING: This function must be called with the original context_data

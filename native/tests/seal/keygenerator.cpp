@@ -266,13 +266,13 @@ namespace SEALTest
 
         Encryptor encryptor(context, pk);
         Decryptor decryptor(context, sk);
-        Plaintext pt("2"), ptres;
+        Plaintext pt("1x^2 + 2"), ptres;
         Ciphertext ct;
         encryptor.encrypt(pt, ct);
         evaluator.square_inplace(ct);
         evaluator.relinearize_inplace(ct, rlk);
         decryptor.decrypt(ct, ptres);
-        ASSERT_EQ(Plaintext("4"), ptres);
+        ASSERT_EQ("1x^4 + 4x^2 + 4", ptres.to_string());
 
         KeyGenerator keygen2(context, sk);
         auto sk2 = keygen.secret_key();
@@ -287,13 +287,13 @@ namespace SEALTest
 
         Encryptor encryptor2(context, pk2);
         Decryptor decryptor2(context, sk2);
-        pt = "2";
+        pt = "1x^2 + 2";
         ptres.set_zero();
         encryptor.encrypt(pt, ct);
         evaluator.square_inplace(ct);
         evaluator.relinearize_inplace(ct, rlk2);
         decryptor.decrypt(ct, ptres);
-        ASSERT_EQ(Plaintext("4"), ptres);
+        ASSERT_EQ("1x^4 + 4x^2 + 4", ptres.to_string());
 
         KeyGenerator keygen3(context, sk2, pk2);
         auto sk3 = keygen3.secret_key();
@@ -312,12 +312,12 @@ namespace SEALTest
 
         Encryptor encryptor3(context, pk3);
         Decryptor decryptor3(context, sk3);
-        pt = "2";
+        pt = "1x^2 + 2";
         ptres.set_zero();
         encryptor.encrypt(pt, ct);
         evaluator.square_inplace(ct);
         evaluator.relinearize_inplace(ct, rlk3);
         decryptor.decrypt(ct, ptres);
-        ASSERT_EQ(Plaintext("4"), ptres);
+        ASSERT_EQ("1x^4 + 4x^2 + 4", ptres.to_string());
     }
 }
