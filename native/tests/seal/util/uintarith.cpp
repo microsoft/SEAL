@@ -1172,7 +1172,7 @@ namespace SEALTest
             ASSERT_EQ(0ULL, result);
             multiply_uint64_hw64(1ULL, 1ULL, &result);
             ASSERT_EQ(0ULL, result);
-            multiply_uint64_hw64(0x100000000ULL, 0xFAFABABAUL, &result);
+            multiply_uint64_hw64(0x100000000ULL, 0xFAFABABAULL, &result);
             ASSERT_EQ(0ULL, result);
             multiply_uint64_hw64(0x1000000000ULL, 0xFAFABABAULL, &result);
             ASSERT_EQ(0xFULL, result);
