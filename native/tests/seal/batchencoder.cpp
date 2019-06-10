@@ -115,7 +115,7 @@ namespace SEALTest
         {
             ASSERT_TRUE(short_plain_vec[i] == short_plain_vec2[i]);
         }
-        for (int i = 20; i < batch_encoder.slot_count(); i++)
+        for (int i = 20; i < static_cast<int>(batch_encoder.slot_count()); i++)
         {
             ASSERT_TRUE(0LL == short_plain_vec2[i]);
         }
