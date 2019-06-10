@@ -36,14 +36,6 @@ if not exist "%CMAKEPATH%" (
 
 echo Found CMake at %CMAKEPATH%
 
-cd %~dp0
-if not exist ".config" (
-	mkdir .config
-)
-cd .config
-
-echo Running CMake configuration in %cd%
-
 rem Identify Visual Studio version and set CMake generator accordingly.
 set CMAKEGEN=""
 if "%VSVERSION%"=="17.0" (
@@ -57,8 +49,16 @@ if "%VSVERSION%"=="17.0" (
 	exit 1
 )
 
+set CONFIGDIR=".config\%VSVERSION%"
+cd %~dp0
+if not exist %CONFIGDIR% (
+	mkdir %CONFIGDIR%
+)
+cd %CONFIGDIR%
+echo Running CMake configuration in %cd%
+
 rem Call CMake.
-"%CMAKEPATH%" ..	                            ^
+"%CMAKEPATH%" ..\..	                            ^
 	-G %CMAKEGEN%                               ^
 	-A x64                                      ^
 	-DALLOW_COMMAND_LINE_BUILD=1                ^
