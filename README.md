@@ -349,7 +349,7 @@ in the associated source file where the associated code snippets start.
 **WARNING: It is impossible to use Microsoft SEAL correctly without reading all examples 
 or by simply re-using the code from examples. Any developer attempting to do so
 will inevitably produce code that is *vulnerable*, *malfunctioning*, or *extremely slow*.**
-*
+
 # Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you
@@ -377,43 +377,44 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
 
 ### Version 3.3
 
-	@misc{sealcrypto,
+    @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.3)},
-	    howpublished = {\url{https://github.com/Microsoft/SEAL}},
-	    month = june,
-	    year = 2019,
-	    note = {Microsoft Research, Redmond, WA.},
-	    key = {SEAL}
-	}
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = june,
+        year = 2019,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
 
 ### Version 3.2
 
-	@misc{sealcrypto,
+    @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.2)},
-	    howpublished = {\url{https://github.com/Microsoft/SEAL}},
-	    month = feb,
-	    year = 2019,
-	    note = {Microsoft Research, Redmond, WA.},
-	    key = {SEAL}
-	}
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = feb,
+        year = 2019,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
 
 ### Version 3.1
 
-	@misc{sealcrypto,
+    @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.1)},
-	    howpublished = {\url{https://github.com/Microsoft/SEAL}},
-	    month = dec,
-	    year = 2018,
-	    note = {Microsoft Research, Redmond, WA.},
-	    key = {SEAL}
-	}
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = dec,
+        year = 2018,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
 
 ### Version 3.0
+
     @misc{sealcrypto,
-	    title = {{M}icrosoft {SEAL} (release 3.0)},
-	    howpublished = {\url{http://sealcrypto.org}},
-	    month = oct,
-	    year = 2018,
-	    note = {Microsoft Research, Redmond, WA.},
-	    key = {SEAL}
+        title = {{M}icrosoft {SEAL} (release 3.0)},
+        howpublished = {\url{http://sealcrypto.org}},
+        month = oct,
+        year = 2018,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
     }
