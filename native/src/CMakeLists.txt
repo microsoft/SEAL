@@ -125,6 +125,10 @@ option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 
+# Use zlib if available
+set(SEAL_USE_ZLIB_OPTION_STR "Use zlib for compressed serialization")
+option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
+
 # Check for intrin.h or x64intrin.h
 if(SEAL_USE_INTRIN)
     if(DEFINED MSVC)
@@ -299,35 +303,28 @@ endif()
 # Specific options depending on SEAL_USE_MSGSL
 set(SEAL_USE_MSGSL_SPAN_OPTION_STR "Use gsl::span")
 cmake_dependent_option(SEAL_USE_MSGSL_SPAN ${SEAL_USE_MSGSL_SPAN_OPTION_STR} ON "SEAL_USE_MSGSL" OFF)
+if(SEAL_USE_MSGSL_SPAN)
+    # Detect gsl::span
+    if(NOT msgsl_SPAN GREATER 0)
+        set(SEAL_USE_MSGSL_SPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_SPAN_OPTION_STR} FORCE)
+    endif()
+endif()
 
 set(SEAL_USE_MSGSL_MULTISPAN_OPTION_STR "Use gsl::multi_span")
 cmake_dependent_option(SEAL_USE_MSGSL_MULTISPAN ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} ON "SEAL_USE_MSGSL" OFF)
-
-if(SEAL_USE_MSGSL)
-    # Now check for individual classes
-    cmake_push_check_state(RESET)
-    set(CMAKE_REQUIRED_INCLUDES ${MSGSL_INCLUDE_DIR})
-    set(CMAKE_EXTRA_INCLUDE_FILES gsl/gsl)
-    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
-    set(CMAKE_REQUIRED_QUIET TRUE)
-
-    # Detect gsl::span
-    if(SEAL_USE_MSGSL_SPAN)
-        check_type_size("gsl::span<std::uint64_t>" MSGSL_SPAN LANGUAGE CXX)
-        if(NOT MSGSL_SPAN GREATER 0)
-            set(SEAL_USE_MSGSL_SPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_SPAN_OPTION_STR} FORCE)
-        endif()
-    endif()
-
+if(SEAL_USE_MSGSL_MULTISPAN)
     # Detect gsl::multi_span
-    if(SEAL_USE_MSGSL_MULTISPAN)
-        check_type_size("gsl::multi_span<std::uint64_t, 1, gsl::dynamic_range>" MSGSL_MULTISPAN LANGUAGE CXX)
-        if(NOT MSGSL_MULTISPAN GREATER 0)
-            set(SEAL_USE_MSGSL_MULTISPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} FORCE)
-        endif()
+    if(NOT msgsl_MULTISPAN GREATER 0)
+        set(SEAL_USE_MSGSL_MULTISPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} FORCE)
     endif()
+endif()
 
-    cmake_pop_check_state()
+# Try to find zlib if requested
+if(SEAL_USE_ZLIB)
+    find_package(ZLIB) 
+    if(NOT ZLIB_FOUND)
+        set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)
+    endif()
 endif()
 
 # Create library but add no source files yet
@@ -370,18 +367,17 @@ find_package(Threads REQUIRED)
 # Link Threads with seal
 target_link_libraries(seal PUBLIC Threads::Threads)
 
-# Create msgsl interface target
 if(SEAL_USE_MSGSL)
-    # Create interface target
-    add_library(msgsl INTERFACE)
-    set_target_properties(msgsl PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${MSGSL_INCLUDE_DIR})
-
     # Associate msgsl with export seal_export
     install(TARGETS msgsl EXPORT seal_export)
 
-    # Link with seal
+    # Link msgsl with seal
     target_link_libraries(seal PUBLIC msgsl)
+endif()
+
+if(SEAL_USE_ZLIB)
+    # Link ZLIB::ZLIB with seal
+    target_link_libraries(seal PRIVATE ZLIB::ZLIB)
 endif()
 
 # Associate seal to export seal_export

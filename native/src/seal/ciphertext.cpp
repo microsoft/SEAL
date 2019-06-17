@@ -3,6 +3,12 @@
 
 #include "seal/ciphertext.h"
 #include "seal/util/polycore.h"
+#include "seal/util/defines.h"
+
+#ifdef SEAL_USE_ZLIB
+#include <sstream>
+#include "seal/util/ztools.h"
+#endif
 
 using namespace std;
 using namespace seal::util;
@@ -129,7 +135,7 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
-    void Ciphertext::save(ostream &stream) const
+    void Ciphertext::save_internal(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -160,7 +166,22 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::unsafe_load(istream &stream)
+    void Ciphertext::save(ostream &stream) const
+    {
+#ifdef SEAL_USE_ZLIB
+        stringstream uncompressed_stream;
+        save_internal(uncompressed_stream);
+        uncompressed_stream.flush();
+        if (ztools::z_deflate_stream(uncompressed_stream, stream) != Z_OK)
+        {
+            throw runtime_error("stream deflate failed");
+        }
+#else
+        save_internal(stream);
+#endif
+    }
+
+    void Ciphertext::unsafe_load_internal(istream &stream)
     {
         Ciphertext new_data(data_.pool());
 
@@ -207,5 +228,19 @@ namespace seal
         stream.exceptions(old_except_mask);
 
         swap(*this, new_data);
+    }
+
+    void Ciphertext::unsafe_load(istream &stream)
+    {
+#ifdef SEAL_USE_ZLIB
+        stringstream uncompressed_stream;
+        if (ztools::z_inflate_stream(stream, uncompressed_stream) != Z_OK)
+        {
+            throw runtime_error("stream inflate failed");
+        }
+        unsafe_load_internal(uncompressed_stream);
+#else
+        unsafe_load_internal(stream);
+#endif
     }
 }

@@ -52,6 +52,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.h
         ${CMAKE_CURRENT_LIST_DIR}/uintcore.h
+        ${CMAKE_CURRENT_LIST_DIR}/ztools.h
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal/util
 )

@@ -655,6 +655,10 @@ namespace seal
         void resize_internal(size_type size, size_type poly_modulus_degree,
             size_type coeff_mod_count);
 
+        void save_internal(std::ostream &stream) const;
+
+        void unsafe_load_internal(std::istream &stream);
+
         parms_id_type parms_id_ = parms_id_zero;
 
         bool is_ntt_form_ = false;
