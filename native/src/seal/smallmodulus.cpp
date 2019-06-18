@@ -53,6 +53,53 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
+#ifdef EMSCRIPTEN
+    std::string SmallModulus::SaveToString(const SmallModulus &sm)
+    {
+        std::ostringstream  buffer; // no growth specification necessary
+
+        // Write to the output stream
+        sm.save(buffer);
+
+        std::string contents = buffer.str();
+        size_t bufferSize = contents.size();
+
+        std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+        return encoded;
+    }
+
+    SmallModulus SmallModulus::CreateFromString(const std::string &encoded)
+    {
+        std::string decoded = base64_decode(encoded);
+        std::istringstream is(decoded);
+
+        SmallModulus sm;
+        sm.load(is);
+        return sm;
+    }
+
+    void SmallModulus::LoadFromString(const std::string &encoded)
+    {
+        uint64_t value;
+        std::istringstream iss(encoded);
+        iss >> value;
+
+        set_value(value);
+    }
+
+    std::string SmallModulus::Value()
+    {
+        uint64_t value;
+        value = this->value();
+        std::ostringstream oss;
+        oss << value;
+
+        std::string intAsString;
+        intAsString = oss.str();
+        return intAsString;
+    }
+#endif
+
     void SmallModulus::set_value(uint64_t value)
     {
         if (value == 0)

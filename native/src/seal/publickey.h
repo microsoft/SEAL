@@ -91,6 +91,37 @@ namespace seal
             pk_.save(stream);
         }
 
+
+#ifdef EMSCRIPTEN
+        /**
+        Saves the PublicKey to a string. The output is in base64 format
+        and is human-readable.
+
+        @throws std::exception if the PublicKey could not be written to stream
+        */
+        inline const std::string SaveToString()
+        {
+            return pk_.SaveToString();
+        }
+
+        /**
+        Loads a PublicKey from an input string overwriting the current PublicKey.
+        The loaded PublicKey is verified to be valid for the given SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] encoded The base64 string to load the PublicKey from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid PublicKey could not be read from stream
+        @throws std::invalid_argument if the loaded PublicKey is invalid for the
+        context
+        */
+        inline void LoadFromString(std::shared_ptr<SEALContext> context,
+            const std::string &encoded)
+        {
+            pk_.LoadFromString(context, encoded);
+        }
+#endif
         /**
         Loads a PublicKey from an input stream overwriting the current PublicKey.
         No checking of the validity of the PublicKey data against encryption

@@ -156,6 +156,36 @@ namespace seal
             std::swap(*this, new_sk);
         }
 
+#ifdef EMSCRIPTEN
+        /**
+        Saves the SecretKey to a string. The output is in base64 format
+        and is human-readable.
+
+        @throws std::exception if the SecretKey could not be written to stream
+        */
+        inline const std::string SaveToString()
+        {
+            return sk_.SaveToString();
+        }
+
+        /**
+        Loads a SecretKey from an input string overwriting the current SecretKey.
+        The loaded SecretKey is verified to be valid for the given SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] encoded The base64 string to load the SecretKey from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid SecretKey could not be read from stream
+        @throws std::invalid_argument if the loaded SecretKey is invalid for the
+        context
+        */
+        inline void LoadFromString(std::shared_ptr<SEALContext> context,
+            const std::string &encoded)
+        {
+            sk_.LoadFromString(context, encoded);
+        }
+#endif
         /**
         Returns a reference to parms_id.
 

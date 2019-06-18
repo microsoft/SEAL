@@ -130,4 +130,31 @@ namespace seal
 
         swap(keys_, new_keys);
     }
+
+#ifdef EMSCRIPTEN
+    const std::string GaloisKeys::SaveToString()
+    {
+        std::ostringstream buffer;
+
+        this->save(buffer);
+
+        std::string contents = buffer.str();
+        size_t bufferSize = contents.size();
+        std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+        return encoded;
+    }
+
+    void GaloisKeys::LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded)
+    {
+        std::string decoded = base64_decode(encoded);
+        std::istringstream is(decoded);
+
+        this->unsafe_load(is);
+
+        if (!is_valid_for(std::move(context)))
+        {
+            throw std::invalid_argument("GaloisKeys data is invalid");
+        }
+    }
+#endif
 }

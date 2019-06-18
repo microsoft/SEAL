@@ -12,6 +12,10 @@
 #include "seal/smallmodulus.h"
 #include "seal/util/hash.h"
 #include "seal/memorymanager.h"
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
@@ -327,6 +331,29 @@ namespace seal
         from stream
         */
         static EncryptionParameters Load(std::istream &stream);
+
+#ifdef EMSCRIPTEN
+
+        /**
+        Saves EncryptionParameters to a stream. The output is in base64
+        format and is human-readable.
+
+        @param[in] stream The stream to save the EncryptionParameters to
+        @throws std::exception if the EncryptionParameters could not be written
+        to stream
+        */
+        static std::string SaveToString(const EncryptionParameters &ep);
+
+        /**
+        Create EncryptionParameters from a base64 string.
+
+        @param[in] encoded The base64 string to load the EncryptionParameters from
+        @throws std::exception if valid EncryptionParameters could not be read
+        from stream
+        */
+        static EncryptionParameters CreateFromString(const std::string &encoded);
+
+#endif
 
         /**
         Enables access to private members of seal::EncryptionParameters for .NET
