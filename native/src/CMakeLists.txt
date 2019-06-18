@@ -321,7 +321,7 @@ endif()
 
 # Try to find zlib if requested
 if(SEAL_USE_ZLIB)
-    find_package(ZLIB) 
+    find_package(ZLIB QUIET)
     if(NOT ZLIB_FOUND)
         set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)
     endif()
