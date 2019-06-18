@@ -372,25 +372,7 @@ namespace seal
 
         void populate_matrix_reps_index_map();
 
-        inline void reverse_bits(std::uint64_t *input)
-        {
-#ifdef SEAL_DEBUG
-            if (input == nullptr)
-            {
-                throw std::invalid_argument("input cannot be null");
-            }
-#endif
-            std::size_t coeff_count = context_->first_context_data()->parms().poly_modulus_degree();
-            int logn = util::get_power_of_two(coeff_count);
-            for (std::size_t i = 0; i < coeff_count; i++)
-            {
-                std::uint64_t reversed_i = util::reverse_bits(i, logn);
-                if (i < reversed_i)
-                {
-                    std::swap(input[i], input[reversed_i]);
-                }
-            }
-        }
+        void reverse_bits(std::uint64_t *input);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

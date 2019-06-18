@@ -94,6 +94,26 @@ namespace seal
         }
     }
 
+    void BatchEncoder::reverse_bits(uint64_t *input)
+    {
+#ifdef SEAL_DEBUG
+        if (input == nullptr)
+        {
+            throw invalid_argument("input cannot be null");
+        }
+#endif
+        size_t coeff_count = context_->first_context_data()->parms().poly_modulus_degree();
+        int logn = get_power_of_two(coeff_count);
+        for (size_t i = 0; i < coeff_count; i++)
+        {
+            uint64_t reversed_i = util::reverse_bits(i, logn);
+            if (i < reversed_i)
+            {
+                swap(input[i], input[reversed_i]);
+            }
+        }
+    }
+
     void BatchEncoder::encode(const vector<uint64_t> &values_matrix,
         Plaintext &destination)
     {

@@ -388,8 +388,16 @@ namespace seal
             }
             else SEAL_IF_CONSTEXPR (is_uint64_v<T>)
             {
+// Temporarily disable UB warnings when `if constexpr` is not available.
+#ifndef SEAL_USE_IF_CONSTEXPR
+#pragma warning(push)
+#pragma warning(disable: 4293)
+#endif
                 return static_cast<T>(reverse_bits(static_cast<std::uint32_t>(operand >> 32))) |
                     (static_cast<T>(reverse_bits(static_cast<std::uint32_t>(operand & T(0xFFFFFFFF)))) << 32);
+#ifndef SEAL_USE_IF_CONSTEXPR
+#pragma warning(pop)
+#endif
             }
         }
 
