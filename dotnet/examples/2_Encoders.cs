@@ -273,7 +273,7 @@ namespace SEALNetExamples
 
             /*
             Operating on the ciphertext results in homomorphic operations being performed
-            simultaneously in all 4096 slots (matrix elements). To illustrate this, we
+            simultaneously in all 8192 slots (matrix elements). To illustrate this, we
             form another plaintext matrix
 
                 [ 1,  2,  1,  2,  1,  2, ..., 2 ]
