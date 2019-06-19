@@ -179,7 +179,15 @@ namespace seal
 #endif
             return (value[uint64_count - 1] >> (bits_per_uint64 - 1)) != 0;
         }
-
+#ifndef SEAL_USE_MAYBE_UNUSED
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+#endif
         inline bool is_bit_set_uint(const std::uint64_t *value,
             std::size_t uint64_count SEAL_MAYBE_UNUSED, int bit_index)
         {
@@ -229,7 +237,13 @@ namespace seal
             value[static_cast<std::size_t>(uint64_index)] |=
                 std::uint64_t(1) << sub_bit_index;
         }
-
+#ifndef SEAL_USE_MAYBE_UNUSED
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
+#endif
         inline int get_significant_bit_count_uint(
             const std::uint64_t *value, std::size_t uint64_count)
         {
