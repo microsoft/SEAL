@@ -182,47 +182,55 @@ void printContext(shared_ptr<SEALContext> context)
     // Verify parameters
     if (!context)
     {
-        throw invalid_argument("context is not set");
+        throw std::invalid_argument("context is not set");
     }
     auto &context_data = *context->key_context_data();
 
     /*
     Which scheme are we using?
     */
-    string scheme_name;
+    std::string scheme_name;
     switch (context_data.parms().scheme())
     {
-    case scheme_type::BFV:
+    case seal::scheme_type::BFV:
         scheme_name = "BFV";
         break;
-    case scheme_type::CKKS:
+    case seal::scheme_type::CKKS:
         scheme_name = "CKKS";
         break;
     default:
-        throw invalid_argument("unsupported scheme");
+        throw std::invalid_argument("unsupported scheme");
     }
-
-    cout << "/ Encryption parameters:" << endl;
-    cout << "| scheme: " << scheme_name << endl;
-    cout << "| poly_modulus_degree: " <<
-        context_data.parms().poly_modulus_degree() << endl;
+    std::cout << "/" << std::endl;
+    std::cout << "| Encryption parameters :" << std::endl;
+    std::cout << "|   scheme: " << scheme_name << std::endl;
+    std::cout << "|   poly_modulus_degree: " <<
+        context_data.parms().poly_modulus_degree() << std::endl;
 
     /*
     Print the size of the true (product) coefficient modulus.
     */
-    cout << "| coeff_modulus size: " << context_data.
-        total_coeff_modulus_bit_count() << " bits" << endl;
+    std::cout << "|   coeff_modulus size: ";
+    std::cout << context_data.total_coeff_modulus_bit_count() << " (";
+    auto coeff_modulus = context_data.parms().coeff_modulus();
+    std::size_t coeff_mod_count = coeff_modulus.size();
+    for (std::size_t i = 0; i < coeff_mod_count - 1; i++)
+    {
+        std::cout << coeff_modulus[i].bit_count() << " + ";
+    }
+    std::cout << coeff_modulus.back().bit_count();
+    std::cout << ") bits" << std::endl;
 
     /*
     For the BFV scheme print the plain_modulus parameter.
     */
-    if (context_data.parms().scheme() == scheme_type::BFV)
+    if (context_data.parms().scheme() == seal::scheme_type::BFV)
     {
-        cout << "\\ plain_modulus: " << context_data.
-            parms().plain_modulus().value() << endl;
+        std::cout << "|   plain_modulus: " << context_data.
+            parms().plain_modulus().value() << std::endl;
     }
 
-    cout << endl;
+    std::cout << "\\" << std::endl;
 }
 
 EMSCRIPTEN_BINDINGS(bindings)
