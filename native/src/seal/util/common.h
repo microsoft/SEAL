@@ -390,13 +390,27 @@ namespace seal
             {
 // Temporarily disable UB warnings when `if constexpr` is not available.
 #ifndef SEAL_USE_IF_CONSTEXPR
+#if (SEAL_COMPILER == SEAL_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4293)
+#elif (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-count-overflow"
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshift-count-overflow"
+#endif
 #endif
                 return static_cast<T>(reverse_bits(static_cast<std::uint32_t>(operand >> 32))) |
                     (static_cast<T>(reverse_bits(static_cast<std::uint32_t>(operand & T(0xFFFFFFFF)))) << 32);
 #ifndef SEAL_USE_IF_CONSTEXPR
+#if (SEAL_COMPILER == SEAL_COMPILER_MSVC)
 #pragma warning(pop)
+#elif (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
 #endif
             }
         }
