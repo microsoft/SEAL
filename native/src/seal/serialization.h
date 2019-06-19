@@ -29,10 +29,13 @@ namespace seal
     
     class Serialization
     {
+    public:
         template<class T>
-        static void Save(const T &in, std::ostream &stream,
+        static std::streamoff Save(const T &in, std::ostream &stream,
             compr_mode_type compr_mode = compr_mode_type::none)
         {
+            std::streamoff out_size = 0;
+
             auto old_except_mask = stream.exceptions();
             try
             {
@@ -76,8 +79,8 @@ namespace seal
 
                 // Compute how many bytes were written
                 auto stream_end_pos = stream.tellp();
-                stream_size32 = util::safe_cast<std::uint32_t>(
-                    stream_end_pos - stream_start_pos);
+                out_size = stream_end_pos - stream_start_pos;
+                stream_size32 = util::safe_cast<std::uint32_t>(out_size);
 
                 // Go back to write the size
                 stream.seekp(stream_size_pos);
@@ -93,11 +96,15 @@ namespace seal
             }
 
             stream.exceptions(old_except_mask);
+
+            return out_size;
         }
 
         template<class T>
-        static void UnsafeLoad(std::istream &stream, T &out)
+        static std::streamoff UnsafeLoad(std::istream &stream, T &out)
         {
+            std::streamoff in_size = 0;
+
             auto old_except_mask = stream.exceptions();
             try
             {
@@ -114,8 +121,8 @@ namespace seal
                 // Next read the stream size
                 std::uint32_t stream_size32 = 0;
                 stream.read(reinterpret_cast<char*>(&stream_size32), sizeof(std::uint32_t));
-                std::istream::off_type stream_size =
-                    util::safe_cast<std::istream::off_type>(stream_size32);
+                std::streamoff stream_size =
+                    util::safe_cast<std::streamoff>(stream_size32);
 
                 switch (compr_mode)
                 {
@@ -130,7 +137,7 @@ namespace seal
 #ifdef SEAL_USE_ZLIB
                 case compr_mode_type::zlib:
                     {
-                        std::istream::off_type compr_size =
+                        std::streamoff compr_size =
                             stream_size - (stream.tellg() - stream_start_pos);
                         std::stringstream temp_stream;
                         if (util::ztools::z_inflate_stream(
@@ -138,13 +145,15 @@ namespace seal
                         {
                             throw std::runtime_error("stream deflate failed");
                         }
-                        out.load(temp_stream);
+                        out.unsafe_load(temp_stream);
                         break;
                     }
 #endif
                 default:
                     throw std::invalid_argument("unsupported compression mode");
                 }
+                
+                in_size = stream_size;
             }
             catch (const std::exception &)
             {
@@ -153,19 +162,26 @@ namespace seal
             }
 
             stream.exceptions(old_except_mask);
+
+            return in_size;
         }
 
         template<class T>
-        static void Load(std::shared_ptr<SEALContext> context,
+        static std::streamoff Load(std::shared_ptr<SEALContext> context,
             std::istream &stream, T &out)
         {
             T new_object;
-            UnsafeLoad(stream, new_object);
+            std::streamoff in_size = UnsafeLoad(stream, new_object);
             if (!is_valid_for(new_object, std::move(context)))
             {
                 throw std::invalid_argument("loaded object is invalid");
             }
             std::swap(out, new_object);
+
+            return in_size;
         }
+
+    private:
+        Serialization() = delete;
     };
 }

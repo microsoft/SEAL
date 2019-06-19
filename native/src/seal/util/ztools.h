@@ -18,20 +18,22 @@ namespace seal
             constexpr std::size_t buf_size = 16384;
 
             int z_deflate_stream(std::istream &in_stream,
-                std::istream::off_type in_size, std::ostream &out_stream)
+                std::streamoff in_size, std::ostream &out_stream)
             {
                 auto in_stream_start_pos = in_stream.tellg();
-                auto in_stream_end_pos = in_stream.seekg(0, in_stream.end);
+                in_stream.seekg(0, in_stream.end);
+                auto in_stream_end_pos = in_stream.tellg();
                 if (in_stream_end_pos - in_stream_start_pos < in_size)
                 {
                     return Z_ERRNO;
                 }
                 in_stream.seekg(in_stream_start_pos);
-                in_stream_end_pos = in_stream.seekg(in_size, in_stream.cur);
+                in_stream.seekg(in_size, in_stream.cur);
+                in_stream_end_pos = in_stream.tellg();
 
                 int result, flush;
                 int level = Z_DEFAULT_COMPRESSION; 
-                unsigned have;
+                std::size_t have;
 
                 unsigned char in[buf_size];
                 unsigned char out[buf_size];
@@ -49,7 +51,8 @@ namespace seal
                 do
                 {
                     if (!in_stream.read(reinterpret_cast<char*>(in),
-                        std::max(buf_size, in_stream_end_pos - in_stream.tellg())))
+                        std::max(static_cast<std::streamoff>(buf_size),
+                        in_stream_end_pos - in_stream.tellg())))
                     {
                         deflateEnd(&zstream);
                         return Z_ERRNO;
@@ -64,7 +67,7 @@ namespace seal
                         zstream.avail_out = buf_size;
                         zstream.next_out = out;
                         result = deflate(&zstream, flush);
-                        have = buf_size - zstream.avail_out;
+                        have = buf_size - static_cast<std::size_t>(zstream.avail_out);
 
                         if (!out_stream.write(reinterpret_cast<const char*>(out), have))
                         {
@@ -81,19 +84,21 @@ namespace seal
             }
 
             int z_inflate_stream(std::istream &in_stream,
-                std::istream::off_type in_size, std::ostream &out_stream)
+                std::streamoff in_size, std::ostream &out_stream)
             {
                 auto in_stream_start_pos = in_stream.tellg();
-                auto in_stream_end_pos = in_stream.seekg(0, in_stream.end);
+                in_stream.seekg(0, in_stream.end);
+                auto in_stream_end_pos = in_stream.tellg();
                 if (in_stream_end_pos - in_stream_start_pos < in_size)
                 {
                     return Z_ERRNO;
                 }
                 in_stream.seekg(in_stream_start_pos);
-                in_stream_end_pos = in_stream.seekg(in_size, in_stream.cur);
+                in_stream.seekg(in_size, in_stream.cur);
+                in_stream_end_pos = in_stream.tellg();
 
                 int result;
-                unsigned have;
+                std::size_t have;
 
                 unsigned char in[buf_size];
                 unsigned char out[buf_size];
@@ -113,7 +118,8 @@ namespace seal
                 do
                 {
                     if (!in_stream.read(reinterpret_cast<char*>(in),
-                        std::max(buf_size, in_stream_end_pos - in_stream.tellg())))
+                        std::max(static_cast<std::streamoff>(buf_size),
+                        in_stream_end_pos - in_stream.tellg())))
                     {
                         inflateEnd(&zstream);
                         return Z_ERRNO;
@@ -135,15 +141,17 @@ namespace seal
                         {
                         case Z_NEED_DICT:
                             result = Z_DATA_ERROR;
+                            /* fall through */
 
                         case Z_DATA_ERROR:
+                            /* fall through */
 
                         case Z_MEM_ERROR:
                             inflateEnd(&zstream);
                             return result;
                         }
 
-                        have = buf_size - zstream.avail_out;
+                        have = buf_size - static_cast<std::size_t>(zstream.avail_out);
 
                         if (!out_stream.write(reinterpret_cast<const char*>(out), have))
                         {
