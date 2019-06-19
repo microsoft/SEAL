@@ -227,12 +227,13 @@ namespace seal
         std::string decoded = base64_decode(encoded);
         std::istringstream is(decoded);
 
-        this->unsafe_load(is);
-
-        if (!is_valid_for(std::move(context)))
+        Ciphertext new_data(pool());
+        new_data.unsafe_load(is);
+        if (!is_valid_for(new_data, std::move(context)))
         {
-            throw std::invalid_argument("PublicKey data is invalid");
+            throw std::invalid_argument("ciphertext data is invalid");
         }
+        std::swap(*this, new_data);
     }
 #endif
 }

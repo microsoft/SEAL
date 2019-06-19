@@ -412,7 +412,7 @@ namespace seal
     void BatchEncoder::encode(const vector<uint32_t> &values_matrix,
         Plaintext &destination)
     {
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->first_context_data();
 
         // Validate input parameters
         size_t values_matrix_size = values_matrix.size();
@@ -454,7 +454,7 @@ namespace seal
     void BatchEncoder::encode(const vector<int32_t> &values_matrix,
         Plaintext &destination)
     {
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         // Validate input parameters
@@ -499,7 +499,7 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, vector<uint32_t> &destination,
         MemoryPoolHandle pool)
     {
-        if (!plain.is_valid_for(context_))
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -512,7 +512,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->first_context_data();
 
         // Set destination size
         destination.resize(slots_);
@@ -539,7 +539,7 @@ namespace seal
     void BatchEncoder::decode(const Plaintext &plain, vector<int32_t> &destination,
         MemoryPoolHandle pool)
     {
-        if (!plain.is_valid_for(context_))
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -552,7 +552,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->context_data();
+        auto &context_data = *context_->first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         // Set destination size

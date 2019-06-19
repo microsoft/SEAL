@@ -13,6 +13,10 @@
 #include <cstddef>
 #include <memory>
 #include <random>
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
@@ -165,7 +169,14 @@ namespace seal
         */
         inline const std::string SaveToString()
         {
-            return sk_.SaveToString();
+            std::ostringstream buffer;
+
+            this->save(buffer);
+
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
         }
 
         /**
@@ -183,7 +194,16 @@ namespace seal
         inline void LoadFromString(std::shared_ptr<SEALContext> context,
             const std::string &encoded)
         {
-            sk_.LoadFromString(context, encoded);
+            std::string decoded = base64_decode(encoded);
+            std::istringstream is(decoded);
+
+            SecretKey new_sk;
+            new_sk.unsafe_load(is);
+            if (!is_valid_for(new_sk, std::move(context)))
+            {
+                throw std::invalid_argument("SecretKey data is invalid");
+            }
+            std::swap(*this, new_sk);
         }
 #endif
         /**

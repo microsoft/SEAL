@@ -8,6 +8,10 @@
 #include "seal/ciphertext.h"
 #include "seal/context.h"
 #include "seal/valcheck.h"
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
@@ -101,7 +105,14 @@ namespace seal
         */
         inline const std::string SaveToString()
         {
-            return pk_.SaveToString();
+            std::ostringstream buffer;
+
+            this->save(buffer);
+
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
         }
 
         /**
@@ -119,7 +130,16 @@ namespace seal
         inline void LoadFromString(std::shared_ptr<SEALContext> context,
             const std::string &encoded)
         {
-            pk_.LoadFromString(context, encoded);
+            std::string decoded = base64_decode(encoded);
+            std::istringstream is(decoded);
+
+            PublicKey new_pk;
+            new_pk.unsafe_load(is);
+            if (!is_valid_for(new_pk, std::move(context)))
+            {
+                throw std::invalid_argument("PublicKey data is invalid");
+            }
+            std::swap(*this, new_pk);
         }
 #endif
         /**

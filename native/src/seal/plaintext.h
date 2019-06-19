@@ -578,7 +578,6 @@ namespace seal
             }
             std::swap(*this, new_data);
         }
-
 #ifdef EMSCRIPTEN
         /**
         Saves the plaintext to a string. The output is in base64 format
@@ -586,7 +585,17 @@ namespace seal
 
         @throws std::exception if the plaintext could not be written to string
         */
-        const std::string SaveToString();
+        inline const std::string SaveToString()
+        {
+            std::ostringstream buffer;
+
+            this->save(buffer);
+
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+        }
 
         /**
         Loads a plaintext from an input string overwriting the current plaintext.
@@ -600,9 +609,20 @@ namespace seal
         @throws std::invalid_argument if the loaded plaintext is invalid for the
         context
         */
-        void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded);
-#endif
+        inline void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded)
+        {
+            std::string decoded = base64_decode(encoded);
+            std::istringstream is(decoded);
 
+            Plaintext new_data(pool());
+            new_data.unsafe_load(is);
+            if (!is_valid_for(new_data, std::move(context)))
+            {
+                throw std::invalid_argument("Plaintext data is invalid");
+            }
+            std::swap(*this, new_data);
+        }
+#endif
         /**
         Returns whether the plaintext is in NTT form.
         */

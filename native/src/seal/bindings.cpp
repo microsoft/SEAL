@@ -184,7 +184,7 @@ void printContext(shared_ptr<SEALContext> context)
     {
         throw invalid_argument("context is not set");
     }
-    auto &context_data = *context->context_data();
+    auto &context_data = *context->key_context_data();
 
     /*
     Which scheme are we using?
@@ -218,12 +218,10 @@ void printContext(shared_ptr<SEALContext> context)
     */
     if (context_data.parms().scheme() == scheme_type::BFV)
     {
-        cout << "| plain_modulus: " << context_data.
+        cout << "\\ plain_modulus: " << context_data.
             parms().plain_modulus().value() << endl;
     }
 
-    cout << "\\ noise_standard_deviation: " << context_data.
-        parms().noise_standard_deviation() << endl;
     cout << endl;
 }
 
@@ -259,18 +257,35 @@ EMSCRIPTEN_BINDINGS(bindings)
         // .element(&Point2f::y)
         ;
 
-
-    class_<DefaultParams>("DefaultParams")
-        .class_function("coeffModulus128", &DefaultParams::coeff_modulus_128)
-        .class_function("coeffModulus192", &DefaultParams::coeff_modulus_192)
-        .class_function("coeffModulus256", &DefaultParams::coeff_modulus_256)
-        .class_function("smallMods60bit", &DefaultParams::small_mods_60bit)
-        .class_function("smallMods50bit", &DefaultParams::small_mods_50bit)
-        .class_function("smallMods40bit", &DefaultParams::small_mods_40bit)
-        .class_function("smallMods30bit", &DefaultParams::small_mods_30bit)
-        .class_function("dbcMax", &DefaultParams::dbc_max)
-        .class_function("dbcMin", &DefaultParams::dbc_min)
+    enum_<sec_level_type>("SecLevelType")
+        .value("none", sec_level_type::none)
+        .value("tc128", sec_level_type::tc128)
+        .value("tc192", sec_level_type::tc192)
+        .value("tc256", sec_level_type::tc256)
         ;
+
+    class_<CoeffModulus>("CoeffModulus")
+        .class_function("MaxBitCount", &CoeffModulus::MaxBitCount)
+        .class_function("BFVDefault", &CoeffModulus::BFVDefault)
+        .class_function("Create", &CoeffModulus::Create)
+        ;
+
+    class_<PlainModulus>("PlainModulus")
+        .class_function("Batching", select_overload<SmallModulus(std::size_t, int)>(&PlainModulus::Batching))
+        .class_function("BatchingVector", select_overload<std::vector<SmallModulus>(std::size_t, std::vector<int>)>(&PlainModulus::Batching))
+        ;
+
+//    class_<DefaultParams>("DefaultParams")
+//        .class_function("coeffModulus128", &DefaultParams::coeff_modulus_128)
+//        .class_function("coeffModulus192", &DefaultParams::coeff_modulus_192)
+//        .class_function("coeffModulus256", &DefaultParams::coeff_modulus_256)
+//        .class_function("smallMods60bit", &DefaultParams::small_mods_60bit)
+//        .class_function("smallMods50bit", &DefaultParams::small_mods_50bit)
+//        .class_function("smallMods40bit", &DefaultParams::small_mods_40bit)
+//        .class_function("smallMods30bit", &DefaultParams::small_mods_30bit)
+//        .class_function("dbcMax", &DefaultParams::dbc_max)
+//        .class_function("dbcMin", &DefaultParams::dbc_min)
+//        ;
 
     class_<SmallModulus>("SmallModulus")
         .constructor<>()
@@ -326,14 +341,28 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("complexConjugate", &Evaluator::complex_conjugate)
         ;
 
+
+    class_<KSwitchKeys>("KSwitchKeys")
+        .constructor<>()
+        .function("saveToString", &KSwitchKeys::SaveToString)
+        .function("loadFromString", &KSwitchKeys::LoadFromString)
+        ;
+
     class_<KeyGenerator>("KeyGenerator")
         .constructor<std::shared_ptr<SEALContext>>()
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &, const PublicKey &>()
         .function("getPublicKey", &KeyGenerator::public_key)
         .function("getSecretKey", &KeyGenerator::secret_key)
-        .function("createRelinKeys", select_overload<RelinKeys(int, std::size_t)>(&KeyGenerator::relin_keys))
-        .function("createGaloisKeys", select_overload<GaloisKeys(int)>(&KeyGenerator::galois_keys))
+        .function("createRelinKeys", select_overload<RelinKeys()>(&KeyGenerator::relin_keys))
+        .function("createGaloisKeys", select_overload<GaloisKeys()>(&KeyGenerator::galois_keys))
+        ;
+
+    class_<RelinKeys, base<KSwitchKeys>>("RelinKeys")
+        .constructor<>()
+        ;
+    class_<GaloisKeys, base<KSwitchKeys>>("GaloisKeys")
+        .constructor<>()
         ;
 
     class_<PublicKey>("PublicKey")
@@ -346,18 +375,6 @@ EMSCRIPTEN_BINDINGS(bindings)
         .constructor<>()
         .function("saveToString", &SecretKey::SaveToString)
         .function("loadFromString", &SecretKey::LoadFromString)
-        ;
-
-    class_<RelinKeys>("RelinKeys")
-        .constructor<>()
-        .function("saveToString", &RelinKeys::SaveToString)
-        .function("loadFromString", &RelinKeys::LoadFromString)
-        ;
-
-    class_<GaloisKeys>("GaloisKeys")
-        .constructor<>()
-        .function("saveToString", &GaloisKeys::SaveToString)
-        .function("loadFromString", &GaloisKeys::LoadFromString)
         ;
 
     class_<Plaintext>("Plaintext")
@@ -375,8 +392,8 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<CKKSEncoder>("CKKSEncoder")
         .constructor<std::shared_ptr<SEALContext>>()
-        .function("encodeVectorDouble", select_overload<void(const std::vector<double> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
-        .function("encodeVectorComplexDouble", select_overload<void(const std::vector<std::complex<double>> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
+        .function("encodeVectorDouble", select_overload<void(const std::vector<double> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
+        .function("encodeVectorComplexDouble", select_overload<void(const std::vector<std::complex<double>> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
         .function("decodeVectorDouble", select_overload<void(const Plaintext &, std::vector<double> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
         .function("decodeVectorComplexDouble", select_overload<void(const Plaintext &, std::vector<std::complex<double>> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
         ;
@@ -400,10 +417,8 @@ EMSCRIPTEN_BINDINGS(bindings)
         .constructor<std::shared_ptr<SEALContext>>()
         .function("encodeVectorInt32", select_overload<void(const std::vector<std::int32_t> &, Plaintext &)>(&BatchEncoder::encodeVector))
         .function("encodeVectorUInt32", select_overload<void(const std::vector<std::uint32_t> &, Plaintext &)>(&BatchEncoder::encodeVector))
-        .function("decodeVectorInt32", select_overload<void(const Plaintext &, std::vector<std::int32_t> &,
-        MemoryPoolHandle)>(&BatchEncoder::decodeVector))
-        .function("decodeVectorUInt32", select_overload<void(const Plaintext &, std::vector<std::uint32_t> &,
-        MemoryPoolHandle)>(&BatchEncoder::decodeVector))
+        .function("decodeVectorInt32", select_overload<void(const Plaintext &, std::vector<std::int32_t> &, MemoryPoolHandle)>(&BatchEncoder::decodeVector))
+        .function("decodeVectorUInt32", select_overload<void(const Plaintext &, std::vector<std::uint32_t> &, MemoryPoolHandle)>(&BatchEncoder::decodeVector))
         .function("slotCount", &BatchEncoder::slot_count)
         ;
 

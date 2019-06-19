@@ -10,6 +10,10 @@
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
 #include "seal/valcheck.h"
+#ifdef EMSCRIPTEN
+    #include "seal/base64.h"
+    #include <sstream>
+#endif
 
 namespace seal
 {
@@ -197,6 +201,54 @@ namespace seal
             }
             std::swap(*this, new_keys);
         }
+
+#ifdef EMSCRIPTEN
+        /**
+        Saves the key (Relinearization or Galois) to a string. The output is in base64 format
+        and is human-readable.
+
+        @throws std::exception if the GaloisKeys could not be written to string
+        */
+        inline const std::string SaveToString()
+        {
+            std::ostringstream buffer;
+
+            this->save(buffer);
+
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+        }
+
+        /**
+        Loads a key from an input string overwriting the current key.
+        The loaded key is verified to be valid for the given SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] encoded The base64 string to load the key from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid key could not be read from stream
+        @throws std::invalid_argument if the loaded key is invalid for the
+        context
+        */
+        inline void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded)
+        {
+            std::string decoded = base64_decode(encoded);
+            std::istringstream is(decoded);
+
+            this->load(context, is);
+//            KSwitchKeys new_keys;
+//            new_keys.pool_ = pool_;
+//            new_keys.unsafe_load(is);
+//            if (!is_valid_for(new_keys, std::move(context)))
+//            {
+//                throw std::invalid_argument("KSwitchKeys data is invalid");
+//            }
+//            std::swap(*this, new_keys);
+        }
+#endif
 
         /**
         Returns the currently used MemoryPoolHandle.
