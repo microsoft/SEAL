@@ -339,7 +339,7 @@ namespace seal
         Helper function to determine whether given std::uint8_t represents a valid
         value for scheme_type.
         */
-        constexpr bool is_valid_scheme(std::uint8_t scheme) noexcept
+        bool is_valid_scheme(std::uint8_t scheme) const noexcept
         {
             return (scheme == static_cast<std::uint8_t>(scheme_type::BFV) ||
                 (scheme == static_cast<std::uint8_t>(scheme_type::CKKS)));
