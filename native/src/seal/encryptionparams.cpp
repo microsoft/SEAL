@@ -93,6 +93,7 @@ namespace seal
             // Supposedly everything worked so set the values of member variables
             parms.set_poly_modulus_degree(safe_cast<size_t>(poly_modulus_degree64));
             parms.set_coeff_modulus(coeff_modulus);
+
             // CKKS does not use plain_modulus
             if (parms.scheme() == scheme_type::BFV)
             {
@@ -103,11 +104,6 @@ namespace seal
             return parms;
         }
         catch (const exception &)
-        {
-            stream.exceptions(old_except_mask);
-            throw;
-        }
-        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
