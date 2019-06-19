@@ -590,7 +590,15 @@ namespace seal
             util::filter_highbits_uint(value_.get(), uint64_count(), bit_count_);
             return *this;
         }
-
+#ifndef SEAL_USE_MAYBE_UNUSED
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+#endif
         /**
         Increments the BigUInt but returns its old value. The BigUInt will increment
         the bit count if needed to fit the carry.
@@ -619,7 +627,13 @@ namespace seal
             util::filter_highbits_uint(value_.get(), uint64_count(), bit_count_);
             return result;
         }
-
+#ifndef SEAL_USE_MAYBE_UNUSED
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
+#endif
         /**
         Adds two BigUInts and returns the sum. The input operands are not modified.
         The bit count of the sum is set to be one greater than the significant bit
