@@ -21,12 +21,6 @@ namespace seal
         CKKS = 0x2
     };
 
-    inline bool is_valid_scheme(scheme_type scheme) noexcept
-    {
-        return (scheme == scheme_type::BFV) || 
-            (scheme == scheme_type::CKKS); 
-    }
-
     /**
     The data type to store unique identifiers of encryption parameters.
     */
@@ -83,7 +77,12 @@ namespace seal
         @throw std::invalid_argument if scheme is not supported
         @see scheme_type for the supported schemes
         */
-        EncryptionParameters(scheme_type scheme)
+        EncryptionParameters(scheme_type scheme) : scheme_(scheme)
+        {
+            compute_parms_id();
+        }
+
+        EncryptionParameters(std::uint8_t scheme)
         {
             // Check that a valid scheme is given
             if (!is_valid_scheme(scheme))
@@ -91,7 +90,7 @@ namespace seal
                 throw std::invalid_argument("unsupported scheme");
             }
 
-            scheme_ = scheme;
+            scheme_ = static_cast<scheme_type>(scheme);
             compute_parms_id();
         }
 
@@ -373,6 +372,16 @@ namespace seal
         static EncryptionParameters Load(std::istream &stream);
 
     private:
+        /**
+        Helper function to determine whether given std::uint8_t represents a valid
+        value for scheme_type.
+        */
+        bool is_valid_scheme(std::uint8_t scheme) const noexcept
+        {
+            return (scheme == static_cast<std::uint8_t>(scheme_type::BFV) ||
+                (scheme == static_cast<std::uint8_t>(scheme_type::CKKS)));
+        }
+
         void compute_parms_id();
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
