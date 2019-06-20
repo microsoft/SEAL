@@ -5,11 +5,6 @@
 #include "seal/util/polycore.h"
 #include "seal/util/defines.h"
 
-#ifdef SEAL_USE_ZLIB
-#include <sstream>
-#include "seal/util/ztools.h"
-#endif
-
 using namespace std;
 using namespace seal::util;
 
