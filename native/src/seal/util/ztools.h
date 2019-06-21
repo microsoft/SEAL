@@ -30,6 +30,7 @@ namespace seal
                 in_stream.seekg(in_stream_start_pos);
                 in_stream.seekg(in_size, in_stream.cur);
                 in_stream_end_pos = in_stream.tellg();
+                in_stream.seekg(in_stream_start_pos);
 
                 int result, flush;
                 int level = Z_DEFAULT_COMPRESSION; 
@@ -51,7 +52,7 @@ namespace seal
                 do
                 {
                     if (!in_stream.read(reinterpret_cast<char*>(in),
-                        std::max(static_cast<std::streamoff>(buf_size),
+                        std::min(static_cast<std::streamoff>(buf_size),
                         in_stream_end_pos - in_stream.tellg())))
                     {
                         deflateEnd(&zstream);
@@ -59,7 +60,7 @@ namespace seal
                     }
                     zstream.avail_in = 
                         static_cast<decltype(zstream.avail_in)>(in_stream.gcount());
-                    flush = (in_stream.tellg() == in_stream.end) ? Z_FINISH : Z_NO_FLUSH;
+                    flush = (in_stream.tellg() == in_stream_end_pos) ? Z_FINISH : Z_NO_FLUSH;
                     zstream.next_in = in;
 
                     do
@@ -96,6 +97,7 @@ namespace seal
                 in_stream.seekg(in_stream_start_pos);
                 in_stream.seekg(in_size, in_stream.cur);
                 in_stream_end_pos = in_stream.tellg();
+                in_stream.seekg(in_stream_start_pos);
 
                 int result;
                 std::size_t have;
@@ -118,7 +120,7 @@ namespace seal
                 do
                 {
                     if (!in_stream.read(reinterpret_cast<char*>(in),
-                        std::max(static_cast<std::streamoff>(buf_size),
+                        std::min(static_cast<std::streamoff>(buf_size),
                         in_stream_end_pos - in_stream.tellg())))
                     {
                         inflateEnd(&zstream);

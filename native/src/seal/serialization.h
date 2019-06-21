@@ -46,7 +46,8 @@ namespace seal
                 auto stream_start_pos = stream.tellp();
 
                 // First write the compression mode
-                stream.write(reinterpret_cast<const char*>(&compr_mode), sizeof(compr_mode_type));
+                std::uint32_t compr_mode32 = static_cast<std::uint32_t>(compr_mode);
+                stream.write(reinterpret_cast<const char*>(&compr_mode32), sizeof(std::uint32_t));
 
                 // Save the position where size should be stored and write zero for now
                 auto stream_size_pos = stream.tellp();
@@ -115,8 +116,13 @@ namespace seal
                 auto stream_start_pos = stream.tellg();
 
                 // First read the compression mode
-                compr_mode_type compr_mode = compr_mode_type::none;
-                stream.read(reinterpret_cast<char*>(&compr_mode), sizeof(compr_mode_type));
+                std::uint32_t compr_mode32 = 0;
+                stream.read(reinterpret_cast<char*>(&compr_mode32), sizeof(std::uint32_t));
+                if (compr_mode32 >> (sizeof(compr_mode_type) * util::bits_per_byte))
+                {
+                    throw std::logic_error("invalid compression mode header");
+                }
+                compr_mode_type compr_mode = static_cast<compr_mode_type>(compr_mode32); 
 
                 // Next read the stream size
                 std::uint32_t stream_size32 = 0;

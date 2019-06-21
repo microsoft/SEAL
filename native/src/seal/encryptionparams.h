@@ -20,6 +20,9 @@ namespace seal
     */
     enum class scheme_type : std::uint8_t
     {
+        // No scheme set
+        none = 0x0,
+
         // Brakerski/Fan-Vercauteren scheme
         BFV = 0x1,
 
@@ -84,7 +87,8 @@ namespace seal
         to specify the parameters poly_modulus, coeff_modulus, and plain_modulus
         for the parameters to be usable.
         */
-        EncryptionParameters(scheme_type scheme) : scheme_(scheme)
+        EncryptionParameters(scheme_type scheme = scheme_type::none) :
+            scheme_(scheme)
         {
             compute_parms_id();
         }
