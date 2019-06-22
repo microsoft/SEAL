@@ -2,7 +2,7 @@
 
 Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorphic encryption library developed by the Cryptography Research group at Microsoft. Microsoft SEAL is written in modern standard C++ and has no external dependencies, making it easy to compile and run in many different environments. For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 3.3.0. Users of previous versions of the library should look at the [list of changes](Changes.md).
+This document pertains to Microsoft SEAL version 3.3. Users of previous versions of the library should look at the [list of changes](Changes.md).
 
 # Contents
 - [Introduction](#introduction)

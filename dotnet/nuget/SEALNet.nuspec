@@ -6,7 +6,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Microsoft.Research.SEALNet</id>
-    <version>3.3.0</version>
+    <version>3.3.1</version>
     <title>Microsoft SEAL</title>
     <authors>Microsoft Research</authors>
     <owners>Microsoft Corporation</owners>

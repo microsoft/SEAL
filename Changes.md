@@ -1,6 +1,6 @@
 # List of Changes
 
-## Version 3.3.0 (current)
+## Version 3.3 (current)
 
 ### Features
 
@@ -63,4 +63,4 @@ Other important changes:
 - GoogleTest framework is now included as a Git submodule;
 - Numerous bugs have been fixed, particularly in the .NET wrappers.
 
-## Version 3.2.0
+## Version 3.2

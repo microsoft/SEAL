@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(SEALNetNative VERSION 3.3.0 LANGUAGES CXX C)
+project(SEALNetNative VERSION 3.3.1 LANGUAGES CXX C)
 
 # Library will be in ../lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../lib)
@@ -12,7 +12,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../lib)
 add_library(sealnetnative SHARED "")
 
 # Import Microsoft SEAL
-find_package(SEAL 3.3.0 EXACT REQUIRED)
+find_package(SEAL 3.3.1 EXACT REQUIRED)
 
 # Check that Microsoft SEAL is build as position-independent code
 if (SEAL_LIB_BUILD_TYPE STREQUAL "Static")
