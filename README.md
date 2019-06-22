@@ -12,7 +12,7 @@ This document pertains to Microsoft SEAL version 3.3.0. Users of previous versio
 - [Installing Microsoft SEAL](#installing-microsoft-seal)
   - [Windows](#windows)
   - [Linux and macOS](#linux-and-macos)
-- [Installing Microsoft SEAL for .NET](#installing-microsoft-seal-for-.net)
+- [Installing Microsoft SEAL for .NET](#installing-microsoft-seal-for-net)
   - [Windows](#windows-1)
   - [Linux and macOS](#linux-and-macos-1)
 - [Getting Started](#getting-started)
