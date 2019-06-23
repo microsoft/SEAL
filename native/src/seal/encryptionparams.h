@@ -20,7 +20,7 @@ namespace seal
     */
     enum class scheme_type : std::uint8_t
     {
-        // No scheme set
+        // No scheme set; cannot be used for encryption
         none = 0x0,
 
         // Brakerski/Fan-Vercauteren scheme
@@ -83,9 +83,12 @@ namespace seal
 
     public:
         /**
-        Creates an empty set of encryption parameters. At a minimum, the user needs
-        to specify the parameters poly_modulus, coeff_modulus, and plain_modulus
-        for the parameters to be usable.
+        Creates an empty set of encryption parameters. If no scheme is given, the
+        default value scheme_type::none is used, in which case the parameters can
+        only be used for deserialization.
+
+        @param[in] scheme The encryption scheme to be used
+        @see scheme_type for the supported schemes
         */
         EncryptionParameters(scheme_type scheme = scheme_type::none) :
             scheme_(scheme)
@@ -98,6 +101,7 @@ namespace seal
         to specify the parameters poly_modulus, coeff_modulus, and plain_modulus
         for the parameters to be usable.
 
+        @param[in] scheme The encryption scheme to be used
         @throws std::invalid_argument if scheme is not supported
         @see scheme_type for the supported schemes
         */
@@ -146,13 +150,20 @@ namespace seal
         The polynomial modulus directly affects the number of coefficients in
         plaintext polynomials, the size of ciphertext elements, the computational
         performance of the scheme (bigger is worse), and the security level (bigger
-        is better). In Microsoft SEAL the degree of the polynomial modulus must be a power
-        of 2 (e.g.  1024, 2048, 4096, 8192, 16384, or 32768).
+        is better). In Microsoft SEAL the degree of the polynomial modulus must be
+        a power of 2 (e.g.  1024, 2048, 4096, 8192, 16384, or 32768).
 
         @param[in] poly_modulus_degree The new polynomial modulus degree
+        @throws std::logic_error if a valid scheme is not set and poly_modulus_degree
+        is non-zero
         */
         inline void set_poly_modulus_degree(std::size_t poly_modulus_degree)
         {
+            if (scheme_ == scheme_type::none && poly_modulus_degree)
+            {
+                throw std::logic_error("poly_modulus_degree is not supported for this scheme");
+            }
+
             // Set the degree
             poly_modulus_degree_ = poly_modulus_degree;
 
@@ -164,18 +175,27 @@ namespace seal
         Sets the coefficient modulus parameter. The coefficient modulus consists
         of a list of distinct prime numbers, and is represented by a vector of
         SmallModulus objects. The coefficient modulus directly affects the size
-        of ciphertext elements, the amount of computation that the scheme can perform
-        (bigger is better), and the security level (bigger is worse). In Microsoft SEAL each
-        of the prime numbers in the coefficient modulus must be at most 60 bits,
-        and must be congruent to 1 modulo 2*poly_modulus_degree.
+        of ciphertext elements, the amount of computation that the scheme can
+        perform (bigger is better), and the security level (bigger is worse). In
+        Microsoft SEAL each of the prime numbers in the coefficient modulus must
+        be at most 60 bits, and must be congruent to 1 modulo 2*poly_modulus_degree.
 
         @param[in] coeff_modulus The new coefficient modulus
+        @throws std::logic_error if a valid scheme is not set and coeff_modulus is 
+        is non-empty
         @throws std::invalid_argument if size of coeff_modulus is invalid
         */
         inline void set_coeff_modulus(const std::vector<SmallModulus> &coeff_modulus)
         {
-            // Set the coeff_modulus_
-            if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX ||
+            // Check that a scheme is set 
+            if (scheme_ == scheme_type::none)
+            {
+                if (!coeff_modulus.empty())
+                {
+                    throw std::logic_error("coeff_modulus is not supported for this scheme");
+                }
+            }
+            else if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX ||
                 coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
             {
                 throw std::invalid_argument("coeff_modulus is invalid");
@@ -192,19 +212,21 @@ namespace seal
         modulus represented by the SmallModulus class. The plaintext modulus
         determines the largest coefficient that plaintext polynomials can represent.
         It also affects the amount of computation that the scheme can perform
-        (bigger is worse). In Microsoft SEAL the plaintext modulus can be at most 60 bits
-        long, but can otherwise be any integer. Note, however, that some features
-        (e.g. batching) require the plaintext modulus to be of a particular form.
+        (bigger is worse). In Microsoft SEAL the plaintext modulus can be at most
+        60 bits long, but can otherwise be any integer. Note, however, that some
+        features (e.g. batching) require the plaintext modulus to be of a particular
+        form.
 
         @param[in] plain_modulus The new plaintext modulus
-        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::logic_error if scheme is not scheme_type::BFV and plain_modulus
+        is non-zero
         */
         inline void set_plain_modulus(const SmallModulus &plain_modulus)
         {
-            // CKKS does not use plain_modulus
-            if (scheme_ != scheme_type::BFV)
+            // Check that scheme is BFV
+            if (scheme_ != scheme_type::BFV && !plain_modulus.is_zero())
             {
-                throw std::logic_error("unsupported scheme");
+                throw std::logic_error("plain_modulus is not supported for this scheme");
             }
 
             plain_modulus_ = plain_modulus;
@@ -219,8 +241,8 @@ namespace seal
         takes a std::uint64_t and automatically creates the SmallModulus object.
         The plaintext modulus determines the largest coefficient that plaintext
         polynomials can represent. It also affects the amount of computation that
-        the scheme can perform (bigger is worse). In Microsoft SEAL the plaintext modulus
-        can be at most 60 bits long, but can otherwise be any integer. Note,
+        the scheme can perform (bigger is worse). In Microsoft SEAL the plaintext
+        modulus can be at most 60 bits long, but can otherwise be any integer. Note,
         however, that some features (e.g. batching) require the plaintext modulus
         to be of a particular form.
 
@@ -325,7 +347,7 @@ namespace seal
         @throws std::exception if the EncryptionParameters could not be written
         to stream
         */
-        static void Save(const EncryptionParameters &parms, std::ostream &stream);
+        void save(std::ostream &stream) const;
 
         /**
         Loads EncryptionParameters from an input stream.
@@ -334,7 +356,19 @@ namespace seal
         @throws std::exception if valid EncryptionParameters could not be read
         from stream
         */
-        SEAL_NODISCARD static EncryptionParameters Load(std::istream &stream);
+        void load(std::istream &stream);
+
+        /**
+        Loads EncryptionParameters from an input stream.
+
+        @param[in] stream The stream to load the EncryptionParameters from
+        @throws std::exception if valid EncryptionParameters could not be read
+        from stream
+        */
+        inline void unsafe_load(std::istream &stream)
+        {
+            load(stream);
+        }
 
         /**
         Enables access to private members of seal::EncryptionParameters for .NET
@@ -345,12 +379,15 @@ namespace seal
     private:
         /**
         Helper function to determine whether given std::uint8_t represents a valid
-        value for scheme_type.
+        value for scheme_type. The return value will be false is the scheme is set
+        to scheme_type::none.
         */
         SEAL_NODISCARD bool is_valid_scheme(std::uint8_t scheme) const noexcept
         {
-            return (scheme == static_cast<std::uint8_t>(scheme_type::BFV) ||
-                (scheme == static_cast<std::uint8_t>(scheme_type::CKKS)));
+            return 
+                scheme == static_cast<std::uint8_t>(scheme_type::none) ||
+                scheme == static_cast<std::uint8_t>(scheme_type::BFV) ||
+                scheme == static_cast<std::uint8_t>(scheme_type::CKKS);
         }
 
         /**

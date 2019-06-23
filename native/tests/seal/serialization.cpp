@@ -300,4 +300,65 @@ namespace SEALTest
             ASSERT_EQ(ct.data()[i], ct2.data()[i]);
         }
     }
+
+    TEST(SerializationTest, EncryptionParameters)
+    {
+        stringstream ss;
+
+        EncryptionParameters parms, parms2;
+        auto out_size = Serialization::Save(parms, ss, compr_mode_type::none);
+        auto in_size = Serialization::Load(ss, parms2);
+        ASSERT_EQ(parms.poly_modulus_degree(), parms2.poly_modulus_degree());
+        ASSERT_EQ(parms.coeff_modulus().size(), parms2.coeff_modulus().size());
+        ASSERT_EQ(parms.plain_modulus(), parms2.plain_modulus());
+        ASSERT_EQ(out_size, in_size);
+
+        out_size = Serialization::Save(parms, ss, compr_mode_type::zlib);
+        in_size = Serialization::Load(ss, parms2);
+        ASSERT_EQ(parms.scheme(), parms2.scheme());
+        ASSERT_EQ(parms.poly_modulus_degree(), parms2.poly_modulus_degree());
+        ASSERT_EQ(parms.coeff_modulus().size(), parms2.coeff_modulus().size());
+        ASSERT_EQ(parms.plain_modulus(), parms2.plain_modulus());
+        ASSERT_EQ(out_size, in_size);
+
+        parms = EncryptionParameters(scheme_type::BFV);
+        size_t poly_modulus_degree = 16;
+        parms.set_poly_modulus_degree(poly_modulus_degree);
+        parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 20, 30 }));
+        parms.set_plain_modulus(4);
+        out_size = Serialization::Save(parms, ss, compr_mode_type::none);
+        in_size = Serialization::Load(ss, parms2);
+        ASSERT_EQ(parms.scheme(), parms2.scheme());
+        ASSERT_EQ(parms.poly_modulus_degree(), parms2.poly_modulus_degree());
+        ASSERT_EQ(parms.coeff_modulus().size(), parms2.coeff_modulus().size());
+        ASSERT_EQ(parms.plain_modulus(), parms2.plain_modulus());
+        ASSERT_EQ(out_size, in_size);
+
+        out_size = Serialization::Save(parms, ss, compr_mode_type::zlib);
+        in_size = Serialization::Load(ss, parms2);
+        ASSERT_EQ(parms.scheme(), parms2.scheme());
+        ASSERT_EQ(parms.poly_modulus_degree(), parms2.poly_modulus_degree());
+        ASSERT_EQ(parms.coeff_modulus().size(), parms2.coeff_modulus().size());
+        ASSERT_EQ(parms.plain_modulus(), parms2.plain_modulus());
+        ASSERT_EQ(out_size, in_size);
+
+        parms = EncryptionParameters(scheme_type::CKKS);
+        parms.set_poly_modulus_degree(poly_modulus_degree);
+        parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 20, 30 }));
+        out_size = Serialization::Save(parms, ss, compr_mode_type::none);
+        in_size = Serialization::Load(ss, parms2);
+        ASSERT_EQ(parms.scheme(), parms2.scheme());
+        ASSERT_EQ(parms.poly_modulus_degree(), parms2.poly_modulus_degree());
+        ASSERT_EQ(parms.coeff_modulus().size(), parms2.coeff_modulus().size());
+        ASSERT_EQ(parms.plain_modulus(), parms2.plain_modulus());
+        ASSERT_EQ(out_size, in_size);
+
+        out_size = Serialization::Save(parms, ss, compr_mode_type::zlib);
+        in_size = Serialization::Load(ss, parms2);
+        ASSERT_EQ(parms.scheme(), parms2.scheme());
+        ASSERT_EQ(parms.poly_modulus_degree(), parms2.poly_modulus_degree());
+        ASSERT_EQ(parms.coeff_modulus().size(), parms2.coeff_modulus().size());
+        ASSERT_EQ(parms.plain_modulus(), parms2.plain_modulus());
+        ASSERT_EQ(out_size, in_size);
+    }
 }

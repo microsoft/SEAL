@@ -124,8 +124,8 @@ namespace SEALTest
         if (scheme == scheme_type::BFV)
             parms.set_plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
-        EncryptionParameters::Save(parms, stream);
-        parms2 = EncryptionParameters::Load(stream);
+        parms.save(stream);
+        parms2.load(stream);
         ASSERT_TRUE(parms.scheme() == parms2.scheme());
         ASSERT_TRUE(parms.coeff_modulus() == parms2.coeff_modulus());
         ASSERT_TRUE(parms.plain_modulus() == parms2.plain_modulus());
@@ -138,8 +138,8 @@ namespace SEALTest
             parms.set_plain_modulus(1 << 30);
         parms.set_poly_modulus_degree(256);
 
-        EncryptionParameters::Save(parms, stream);
-        parms2 = EncryptionParameters::Load(stream);
+        parms.save(stream);
+        parms2.load(stream);
         ASSERT_TRUE(parms.scheme() == parms2.scheme());
         ASSERT_TRUE(parms.coeff_modulus() == parms2.coeff_modulus());
         ASSERT_TRUE(parms.plain_modulus() == parms2.plain_modulus());

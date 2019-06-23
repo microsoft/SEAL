@@ -187,6 +187,17 @@ namespace seal
             return in_size;
         }
 
+        static std::streamoff Load(std::istream &stream, EncryptionParameters &out)
+        {
+            // Overloaded method for loading EncryptionParameters, as there are no
+            // safe/unsafe variants.
+            EncryptionParameters new_object(scheme_type::none);
+            std::streamoff in_size = UnsafeLoad(stream, new_object);
+            std::swap(out, new_object);
+
+            return in_size;
+        }
+
     private:
         Serialization() = delete;
     };
