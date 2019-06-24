@@ -34,6 +34,7 @@
     <ClInclude Include="seal\relinkeys.h" />
     <ClInclude Include="seal\seal.h" />
     <ClInclude Include="seal\secretkey.h" />
+    <ClInclude Include="seal\serialization.h" />
     <ClInclude Include="seal\smallmodulus.h" />
     <ClInclude Include="seal\util\aes.h" />
     <ClInclude Include="seal\util\baseconverter.h" />
@@ -79,6 +80,7 @@
     <ClCompile Include="seal\memorymanager.cpp" />
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
+    <ClCompile Include="seal\serialization.cpp" />
     <ClCompile Include="seal\smallmodulus.cpp" />
     <ClCompile Include="seal\valcheck.cpp" />
     <ClCompile Include="seal\util\aes.cpp" />

@@ -55,6 +55,7 @@
     <ClCompile Include="seal\randomtostd.cpp" />
     <ClCompile Include="seal\relinkeys.cpp" />
     <ClCompile Include="seal\secretkey.cpp" />
+    <ClCompile Include="seal\serialization.cpp" />
     <ClCompile Include="seal\smallmodulus.cpp" />
     <ClCompile Include="seal\testrunner.cpp" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
