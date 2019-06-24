@@ -130,7 +130,7 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
-    void Ciphertext::save(ostream &stream) const
+    void Ciphertext::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -161,7 +161,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::unsafe_load(istream &stream)
+    void Ciphertext::load_members(istream &stream)
     {
         Ciphertext new_data(data_.pool());
 

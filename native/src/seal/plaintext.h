@@ -8,6 +8,7 @@
 #include <iostream>
 #include <algorithm>
 #include <memory>
+#include <functional>
 #include "seal/util/common.h"
 #include "seal/util/polycore.h"
 #include "seal/util/defines.h"
@@ -541,7 +542,14 @@ namespace seal
         @param[in] stream The stream to save the plaintext to
         @throws std::exception if the plaintext could not be written to stream
         */
-        void save(std::ostream &stream) const;
+        inline std::streamoff save(std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&Plaintext::save_members, this, _1),
+                stream, compr_mode);
+        }
 
         /**
         Loads a plaintext from an input stream overwriting the current plaintext.
@@ -552,7 +560,13 @@ namespace seal
         @param[in] stream The stream to load the plaintext from
         @throws std::exception if a valid plaintext could not be read from stream
         */
-        void unsafe_load(std::istream &stream);
+        inline std::streamoff unsafe_load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&Plaintext::load_members, this, _1),
+                stream);
+        }
 
         /**
         Loads a plaintext from an input stream overwriting the current plaintext.
@@ -566,16 +580,17 @@ namespace seal
         @throws std::invalid_argument if the loaded plaintext is invalid for the
         context
         */
-        inline void load(std::shared_ptr<SEALContext> context,
+        inline std::streamoff load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
             Plaintext new_data(pool());
-            new_data.unsafe_load(stream);
+            auto in_size = new_data.unsafe_load(stream);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::invalid_argument("Plaintext data is invalid");
             }
             std::swap(*this, new_data);
+            return in_size;
         }
 
         /**
@@ -641,6 +656,10 @@ namespace seal
         struct PlaintextPrivateHelper;
 
     private:
+        void save_members(std::ostream &stream) const;
+
+        void load_members(std::istream &stream);
+
         parms_id_type parms_id_ = parms_id_zero;
 
         double scale_ = 1.0;

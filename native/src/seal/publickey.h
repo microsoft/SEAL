@@ -86,9 +86,10 @@ namespace seal
         @param[in] stream The stream to save the PublicKey to
         @throws std::exception if the PublicKey could not be written to stream
         */
-        inline void save(std::ostream &stream) const
+        inline std::streamoff save(std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
         {
-            pk_.save(stream);
+            return pk_.save(stream);
         }
 
         /**
@@ -100,11 +101,12 @@ namespace seal
         @param[in] stream The stream to load the PublicKey from
         @throws std::exception if a valid PublicKey could not be read from stream
         */
-        inline void unsafe_load(std::istream &stream)
+        inline std::streamoff unsafe_load(std::istream &stream)
         {
             Ciphertext new_pk(pk_.pool());
-            new_pk.unsafe_load(stream);
+            auto in_size = new_pk.unsafe_load(stream);
             std::swap(pk_, new_pk);
+            return in_size;
         }
 
         /**
@@ -119,16 +121,17 @@ namespace seal
         @throws std::invalid_argument if the loaded PublicKey is invalid for the
         context
         */
-        inline void load(std::shared_ptr<SEALContext> context,
+        inline std::streamoff load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
             PublicKey new_pk(pool());
-            new_pk.unsafe_load(stream);
+            auto in_size = new_pk.unsafe_load(stream);
             if (!is_valid_for(new_pk, std::move(context)))
             {
                 throw std::invalid_argument("PublicKey data is invalid");
             }
             std::swap(*this, new_pk);
+            return in_size;
         }
 
         /**

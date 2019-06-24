@@ -203,7 +203,7 @@ namespace seal
         return *this;
     }
 
-    void Plaintext::save(ostream &stream) const
+    void Plaintext::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -224,7 +224,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Plaintext::unsafe_load(istream &stream)
+    void Plaintext::load_members(istream &stream)
     {
         Plaintext new_data(data_.pool());
 

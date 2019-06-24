@@ -10,7 +10,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    void EncryptionParameters::save(ostream &stream) const
+    void EncryptionParameters::save_members(ostream &stream) const
     {
         // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
         auto old_except_mask = stream.exceptions();
@@ -40,7 +40,7 @@ namespace seal
         }
     }
 
-    void EncryptionParameters::load(istream &stream)
+    void EncryptionParameters::load_members(istream &stream)
     {
         // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
         auto old_except_mask = stream.exceptions();

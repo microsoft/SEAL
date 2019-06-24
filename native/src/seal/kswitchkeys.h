@@ -160,7 +160,14 @@ namespace seal
         @param[in] stream The stream to save the KSwitchKeys to
         @throws std::exception if the KSwitchKeys could not be written to stream
         */
-        void save(std::ostream &stream) const;
+        inline std::streamoff save(std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&KSwitchKeys::save_members, this, _1),
+                stream, compr_mode);
+        }
 
         /**
         Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
@@ -171,7 +178,13 @@ namespace seal
         @param[in] stream The stream to load the KSwitchKeys from
         @throws std::exception if a valid KSwitchKeys could not be read from stream
         */
-        void unsafe_load(std::istream &stream);
+        inline std::streamoff unsafe_load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&KSwitchKeys::load_members, this, _1),
+                stream);
+        }
 
         /**
         Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
@@ -185,17 +198,18 @@ namespace seal
         @throws std::invalid_argument if the loaded KSwitchKeys is invalid for the
         context
         */
-        inline void load(std::shared_ptr<SEALContext> context,
+        inline std::streamoff load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
-            new_keys.unsafe_load(stream);
+            auto in_size = new_keys.unsafe_load(stream);
             if (!is_valid_for(new_keys, std::move(context)))
             {
                 throw std::invalid_argument("KSwitchKeys data is invalid");
             }
             std::swap(*this, new_keys);
+            return in_size;
         }
 
         /**
@@ -207,6 +221,10 @@ namespace seal
         }
 
     private:
+        void save_members(std::ostream &stream) const;
+
+        void load_members(std::istream &stream);
+
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
         parms_id_type parms_id_ = parms_id_zero;

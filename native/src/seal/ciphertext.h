@@ -8,6 +8,7 @@
 #include <iostream>
 #include <algorithm>
 #include <memory>
+#include <functional>
 #include "seal/util/defines.h"
 #include "seal/context.h"
 #include "seal/memorymanager.h"
@@ -543,7 +544,14 @@ namespace seal
         @param[in] stream The stream to save the ciphertext to
         @throws std::exception if the ciphertext could not be written to stream
         */
-        void save(std::ostream &stream) const;
+        inline std::streamoff save(std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&Ciphertext::save_members, this, _1),
+                stream, compr_mode);
+        }
 
         /**
         Loads a ciphertext from an input stream overwriting the current ciphertext.
@@ -554,7 +562,13 @@ namespace seal
         @param[in] stream The stream to load the ciphertext from
         @throws std::exception if a valid ciphertext could not be read from stream
         */
-        void unsafe_load(std::istream &stream);
+        inline std::streamoff unsafe_load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&Ciphertext::load_members, this, _1),
+                stream);
+        }
 
         /**
         Loads a ciphertext from an input stream overwriting the current ciphertext.
@@ -568,16 +582,17 @@ namespace seal
         @throws std::invalid_argument if the loaded ciphertext is invalid for the
         context
         */
-        inline void load(std::shared_ptr<SEALContext> context,
+        inline std::streamoff load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
             Ciphertext new_data(pool());
-            new_data.unsafe_load(stream);
+            auto in_size = new_data.unsafe_load(stream);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::invalid_argument("ciphertext data is invalid");
             }
             std::swap(*this, new_data);
+            return in_size;
         }
 
         /**
@@ -654,6 +669,10 @@ namespace seal
 
         void resize_internal(size_type size, size_type poly_modulus_degree,
             size_type coeff_mod_count);
+
+        void save_members(std::ostream &stream) const;
+
+        void load_members(std::istream &stream);
 
         parms_id_type parms_id_ = parms_id_zero;
 

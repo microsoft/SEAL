@@ -8,6 +8,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <zlib.h>
+#include "seal/util/pointer.h"
+#include "seal/memorymanager.h"
 
 namespace seal
 {
@@ -18,7 +20,8 @@ namespace seal
             constexpr std::size_t buf_size = 16384;
 
             int z_deflate_stream(std::istream &in_stream,
-                std::streamoff in_size, std::ostream &out_stream)
+                std::streamoff in_size, std::ostream &out_stream,
+                MemoryPoolHandle pool)
             {
                 auto in_stream_start_pos = in_stream.tellg();
                 in_stream.seekg(0, in_stream.end);
@@ -36,8 +39,8 @@ namespace seal
                 int level = Z_DEFAULT_COMPRESSION; 
                 std::size_t have;
 
-                unsigned char in[buf_size];
-                unsigned char out[buf_size];
+                auto in(allocate<unsigned char>(buf_size, pool));
+                auto out(allocate<unsigned char>(buf_size, pool));
 
                 z_stream zstream;
                 zstream.zalloc = Z_NULL;
@@ -51,7 +54,7 @@ namespace seal
 
                 do
                 {
-                    if (!in_stream.read(reinterpret_cast<char*>(in),
+                    if (!in_stream.read(reinterpret_cast<char*>(in.get()),
                         std::min(static_cast<std::streamoff>(buf_size),
                         in_stream_end_pos - in_stream.tellg())))
                     {
@@ -61,16 +64,16 @@ namespace seal
                     zstream.avail_in = 
                         static_cast<decltype(zstream.avail_in)>(in_stream.gcount());
                     flush = (in_stream.tellg() == in_stream_end_pos) ? Z_FINISH : Z_NO_FLUSH;
-                    zstream.next_in = in;
+                    zstream.next_in = in.get();
 
                     do
                     {
                         zstream.avail_out = buf_size;
-                        zstream.next_out = out;
+                        zstream.next_out = out.get();
                         result = deflate(&zstream, flush);
                         have = buf_size - static_cast<std::size_t>(zstream.avail_out);
 
-                        if (!out_stream.write(reinterpret_cast<const char*>(out), have))
+                        if (!out_stream.write(reinterpret_cast<const char*>(out.get()), have))
                         {
                             deflateEnd(&zstream);
                             return Z_ERRNO;
@@ -85,7 +88,8 @@ namespace seal
             }
 
             int z_inflate_stream(std::istream &in_stream,
-                std::streamoff in_size, std::ostream &out_stream)
+                std::streamoff in_size, std::ostream &out_stream,
+                MemoryPoolHandle pool)
             {
                 auto in_stream_start_pos = in_stream.tellg();
                 in_stream.seekg(0, in_stream.end);
@@ -102,8 +106,8 @@ namespace seal
                 int result;
                 std::size_t have;
 
-                unsigned char in[buf_size];
-                unsigned char out[buf_size];
+                auto in(allocate<unsigned char>(buf_size, pool));
+                auto out(allocate<unsigned char>(buf_size, pool));
 
                 z_stream zstream;
                 zstream.zalloc = Z_NULL;
@@ -119,7 +123,7 @@ namespace seal
 
                 do
                 {
-                    if (!in_stream.read(reinterpret_cast<char*>(in),
+                    if (!in_stream.read(reinterpret_cast<char*>(in.get()),
                         std::min(static_cast<std::streamoff>(buf_size),
                         in_stream_end_pos - in_stream.tellg())))
                     {
@@ -131,12 +135,12 @@ namespace seal
                     {
                         break;
                     }
-                    zstream.next_in = in;
+                    zstream.next_in = in.get();
 
                     do
                     {
                         zstream.avail_out = buf_size;
-                        zstream.next_out = out;
+                        zstream.next_out = out.get();
                         result = inflate(&zstream, Z_NO_FLUSH);
 
                         switch (result)
@@ -155,7 +159,7 @@ namespace seal
 
                         have = buf_size - static_cast<std::size_t>(zstream.avail_out);
 
-                        if (!out_stream.write(reinterpret_cast<const char*>(out), have))
+                        if (!out_stream.write(reinterpret_cast<const char*>(out.get()), have))
                         {
                             inflateEnd(&zstream);
                             return Z_ERRNO;

@@ -6,12 +6,14 @@
 #include <iostream>
 #include <numeric>
 #include <memory>
+#include <functional>
 #include "seal/util/defines.h"
 #include "seal/util/globals.h"
 #include "seal/randomgen.h"
 #include "seal/smallmodulus.h"
 #include "seal/util/hash.h"
 #include "seal/memorymanager.h"
+#include "seal/serialization.h"
 
 namespace seal
 {
@@ -347,27 +349,31 @@ namespace seal
         @throws std::exception if the EncryptionParameters could not be written
         to stream
         */
-        void save(std::ostream &stream) const;
-
-        /**
-        Loads EncryptionParameters from an input stream.
-
-        @param[in] stream The stream to load the EncryptionParameters from
-        @throws std::exception if valid EncryptionParameters could not be read
-        from stream
-        */
-        void load(std::istream &stream);
-
-        /**
-        Loads EncryptionParameters from an input stream.
-
-        @param[in] stream The stream to load the EncryptionParameters from
-        @throws std::exception if valid EncryptionParameters could not be read
-        from stream
-        */
-        inline void unsafe_load(std::istream &stream)
+        inline std::streamoff save(std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
         {
-            load(stream);
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&EncryptionParameters::save_members, this, _1),
+                stream, compr_mode);
+        }
+
+        /**
+        Loads EncryptionParameters from an input stream.
+
+        @param[in] stream The stream to load the EncryptionParameters from
+        @throws std::exception if valid EncryptionParameters could not be read
+        from stream
+        */
+        inline std::streamoff load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            EncryptionParameters new_parms(scheme_type::none);
+            auto in_size = Serialization::Load(
+                std::bind(&EncryptionParameters::load_members, &new_parms, _1),
+                stream);
+            std::swap(*this, new_parms);
+            return in_size;
         }
 
         /**
@@ -400,6 +406,10 @@ namespace seal
         }
 
         void compute_parms_id();
+
+        void save_members(std::ostream &stream) const;
+
+        void load_members(std::istream &stream);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

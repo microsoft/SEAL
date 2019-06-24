@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include "seal/memorymanager.h"
-#include "seal/util/pointer.h"
-#include "seal/util/defines.h"
-#include "seal/util/common.h"
 #include <type_traits>
 #include <algorithm>
 #include <limits>
 #include <iostream>
 #include <cstring>
+#include "seal/memorymanager.h"
+#include "seal/util/pointer.h"
+#include "seal/util/defines.h"
+#include "seal/util/common.h"
 
 namespace seal
 {

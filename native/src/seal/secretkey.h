@@ -3,17 +3,17 @@
 
 #pragma once
 
+#include <iostream>
+#include <cstdint>
+#include <cstddef>
+#include <memory>
+#include <random>
 #include "seal/util/defines.h"
 #include "seal/randomgen.h"
 #include "seal/plaintext.h"
 #include "seal/memorymanager.h"
 #include "seal/util/common.h"
 #include "seal/valcheck.h"
-#include <iostream>
-#include <cstdint>
-#include <cstddef>
-#include <memory>
-#include <random>
 
 namespace seal
 {
@@ -111,9 +111,10 @@ namespace seal
         @param[in] stream The stream to save the SecretKey to
         @throws std::exception if the plaintext could not be written to stream
         */
-        inline void save(std::ostream &stream) const
+        inline std::streamoff save(std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
         {
-            sk_.save(stream);
+            return sk_.save(stream, compr_mode);
         }
 
         /**
@@ -125,12 +126,13 @@ namespace seal
         @param[in] stream The stream to load the SecretKey from
         @throws std::exception if a valid SecretKey could not be read from stream
         */
-        inline void unsafe_load(std::istream &stream)
+        inline std::streamoff unsafe_load(std::istream &stream)
         {
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
-            new_sk.unsafe_load(stream);
+            auto in_size = new_sk.unsafe_load(stream);
             std::swap(sk_, new_sk);
+            return in_size;
         }
 
         /**
@@ -145,16 +147,17 @@ namespace seal
         @throws std::invalid_argument if the loaded SecretKey is invalid for the
         context
         */
-        inline void load(std::shared_ptr<SEALContext> context,
+        inline std::streamoff load(std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
             SecretKey new_sk;
-            new_sk.unsafe_load(stream);
+            auto in_size = new_sk.unsafe_load(stream);
             if (!is_valid_for(new_sk, std::move(context)))
             {
                 throw std::invalid_argument("SecretKey data is invalid");
             }
             std::swap(*this, new_sk);
+            return in_size;
         }
 
         /**
@@ -186,6 +189,8 @@ namespace seal
         }
 
     private:
+        void load_members(std::istream &stream);
+
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         Plaintext sk_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true) };
     };
