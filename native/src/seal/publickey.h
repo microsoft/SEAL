@@ -89,7 +89,7 @@ namespace seal
         inline std::streamoff save(std::ostream &stream,
             compr_mode_type compr_mode = compr_mode_default) const
         {
-            return pk_.save(stream);
+            return pk_.save(stream, compr_mode);
         }
 
         /**
