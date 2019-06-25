@@ -6,6 +6,7 @@
 #include <string>
 #include <functional>
 #include "gtest/gtest.h"
+#include "seal/util/defines.h"
 #include "seal/serialization.h"
 
 using namespace seal;
@@ -33,7 +34,7 @@ namespace SEALTest
 
     TEST(SerializationTest, SaveLoad)
     {
-        test_struct st{ 3, 3.14159 }, st2, st3;
+        test_struct st{ 3, 3.14159 }, st2;
         using namespace std::placeholders;
         stringstream stream;
 
@@ -46,7 +47,8 @@ namespace SEALTest
         ASSERT_EQ(out_size, in_size);
         ASSERT_EQ(st.a, st2.a);
         ASSERT_EQ(st.b, st2.b);
-
+#ifdef SEAL_USE_ZLIB
+        test_struct st3;
         out_size = Serialization::Save(
             bind(&test_struct::save_members, &st, _1),
             stream, compr_mode_type::deflate);
@@ -56,5 +58,6 @@ namespace SEALTest
         ASSERT_EQ(out_size, in_size);
         ASSERT_EQ(st.a, st3.a);
         ASSERT_EQ(st.b, st3.b);
+#endif
     }
 }

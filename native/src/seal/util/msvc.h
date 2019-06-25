@@ -27,6 +27,13 @@
 #undef SEAL_USE_MSGSL
 #endif //__has_include(<gsl/gsl>)
 
+// Check for zlib
+#if __has_include(<zlib.h>)
+#define SEAL_USE_ZLIB
+#else
+#undef SEAL_USE_ZLIB
+#endif //__has_include(<zlib.h>)
+
 #endif
 
 // In Visual Studio redefine std::byte (SEAL_BYTE)

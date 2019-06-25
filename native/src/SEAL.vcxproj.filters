@@ -182,6 +182,9 @@
     <ClInclude Include="seal\serialization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="seal\util\ztools.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\batchencoder.cpp">
@@ -288,6 +291,9 @@
     </ClCompile>
     <ClCompile Include="seal\serialization.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\ztools.cpp">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
