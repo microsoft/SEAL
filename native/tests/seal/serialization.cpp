@@ -51,7 +51,7 @@ namespace SEALTest
         test_struct st3;
         out_size = Serialization::Save(
             bind(&test_struct::save_members, &st, _1),
-            stream, compr_mode_type::deflate);
+            stream, compr_mode_type::zlib);
         in_size = Serialization::Load(
             bind(&test_struct::load_members, &st3, _1),
             stream);

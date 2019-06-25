@@ -50,7 +50,7 @@ namespace seal
                 save_members(stream);
                 break;
 #ifdef SEAL_USE_ZLIB
-            case compr_mode_type::deflate:
+            case compr_mode_type::zlib:
                 {
                     constexpr int Z_OK = 0;
                     stringstream temp_stream;
@@ -132,7 +132,7 @@ namespace seal
                 }
                 break;
 #ifdef SEAL_USE_ZLIB
-            case compr_mode_type::deflate:
+            case compr_mode_type::zlib:
                 {
                     constexpr int Z_OK = 0;
                     streamoff compr_size =
