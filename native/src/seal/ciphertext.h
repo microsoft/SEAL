@@ -558,7 +558,7 @@ namespace seal
         format and is not human-readable. If the given pointer is null, then the
         function only returns the number of bytes that would be written.
 
-        @param[out] out The memory location to write to 
+        @param[out] out The memory location to write to
         @throws std::exception if the ciphertext could not be written
         */
         inline std::streamoff save(SEAL_BYTE *out,
@@ -593,7 +593,7 @@ namespace seal
         encryption parameters is performed. This function should not be used
         unless the ciphertext comes from a fully trusted source.
 
-        @param[in] in The memory location to read from 
+        @param[in] in The memory location to read from
         @throws std::exception if a valid ciphertext could not be read
         */
         inline std::streamoff unsafe_load(const SEAL_BYTE *in)
@@ -635,7 +635,7 @@ namespace seal
         SEALContext.
 
         @param[in] context The SEALContext
-        @param[in] in The memory location to read from 
+        @param[in] in The memory location to read from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
         @throws std::exception if a valid ciphertext could not be read
