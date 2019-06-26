@@ -11,7 +11,7 @@ i.e., relinearization and rotation, do not consume any noise budget (BFV)
 or impact accuracy (CKKS). The implementations of these operations are
 significantly simplified and unified, and no longer use bit decomposition,
 so decomposition bit count is gone. Moreover, fresh ciphertexts now have
-a larger noise budget. These changes have an effect on the API and it will
+lower noise. These changes have an effect on the API and it will
 be especially worthwhile for users of older versions of the library to study
 the examples and comments in
 [native/examples/3_levels.cpp](native/examples/3_levels.cpp) (C++) or
