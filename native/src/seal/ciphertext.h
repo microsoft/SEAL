@@ -541,7 +541,7 @@ namespace seal
         Saves the ciphertext to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
-        @param[in] stream The stream to save the ciphertext to
+        @param[out] stream The stream to save the ciphertext to
         @throws std::exception if the ciphertext could not be written to stream
         */
         inline std::streamoff save(std::ostream &stream,
@@ -551,6 +551,23 @@ namespace seal
             return Serialization::Save(
                 std::bind(&Ciphertext::save_members, this, _1),
                 stream, compr_mode);
+        }
+
+        /**
+        Saves the ciphertext to a given memory location. The output is in binary
+        format and is not human-readable. If the given pointer is null, then the
+        function only returns the number of bytes that would be written.
+
+        @param[out] out The memory location to write to 
+        @throws std::exception if the ciphertext could not be written
+        */
+        inline std::streamoff save(SEAL_BYTE *out,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&Ciphertext::save_members, this, _1),
+                out, compr_mode);
         }
 
         /**
@@ -571,6 +588,23 @@ namespace seal
         }
 
         /**
+        Loads a ciphertext from a given memory location overwriting the current
+        ciphertext. No checking of the validity of the ciphertext data against
+        encryption parameters is performed. This function should not be used
+        unless the ciphertext comes from a fully trusted source.
+
+        @param[in] in The memory location to read from 
+        @throws std::exception if a valid ciphertext could not be read
+        */
+        inline std::streamoff unsafe_load(const SEAL_BYTE *in)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&Ciphertext::load_members, this, _1),
+                in);
+        }
+
+        /**
         Loads a ciphertext from an input stream overwriting the current ciphertext.
         The loaded ciphertext is verified to be valid for the given SEALContext.
 
@@ -587,6 +621,32 @@ namespace seal
         {
             Ciphertext new_data(pool());
             auto in_size = new_data.unsafe_load(stream);
+            if (!is_valid_for(new_data, std::move(context)))
+            {
+                throw std::invalid_argument("ciphertext data is invalid");
+            }
+            std::swap(*this, new_data);
+            return in_size;
+        }
+
+        /**
+        Loads a ciphertext from a given memory location overwriting the current
+        ciphertext. The loaded ciphertext is verified to be valid for the given
+        SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] in The memory location to read from 
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid ciphertext could not be read
+        @throws std::invalid_argument if the loaded ciphertext is invalid for the
+        context
+        */
+        inline std::streamoff load(std::shared_ptr<SEALContext> context,
+            const SEAL_BYTE *in)
+        {
+            Ciphertext new_data(pool());
+            auto in_size = new_data.unsafe_load(in);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::invalid_argument("ciphertext data is invalid");

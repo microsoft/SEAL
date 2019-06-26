@@ -32,7 +32,7 @@ namespace SEALTest
         }
     };
 
-    TEST(SerializationTest, SaveLoad)
+    TEST(SerializationTest, SaveLoadToStream)
     {
         test_struct st{ 3, 3.14159 }, st2;
         using namespace std::placeholders;
@@ -55,6 +55,55 @@ namespace SEALTest
         in_size = Serialization::Load(
             bind(&test_struct::load_members, &st3, _1),
             stream);
+        ASSERT_EQ(out_size, in_size);
+        ASSERT_EQ(st.a, st3.a);
+        ASSERT_EQ(st.b, st3.b);
+#endif
+    }
+
+    TEST(SerializationTest, SaveLoadToBuffer)
+    {
+        test_struct st{ 3, 3.14159 }, st2;
+        using namespace std::placeholders;
+
+        constexpr size_t arr_size = 1024;
+        SEAL_BYTE buffer[arr_size]{};
+
+        auto test_out_size = Serialization::Save(
+            bind(&test_struct::save_members, &st, _1),
+            nullptr, compr_mode_type::none);
+        auto out_size = Serialization::Save(
+            bind(&test_struct::save_members, &st, _1),
+            buffer, compr_mode_type::none);
+        ASSERT_EQ(test_out_size, out_size);
+        for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
+        {
+            ASSERT_EQ(SEAL_BYTE(0), buffer[i]);
+        }
+
+        auto in_size = Serialization::Load(
+            bind(&test_struct::load_members, &st2, _1),
+            buffer);
+        ASSERT_EQ(out_size, in_size);
+        ASSERT_EQ(st.a, st2.a);
+        ASSERT_EQ(st.b, st2.b);
+#ifdef SEAL_USE_ZLIB
+        test_struct st3;
+        test_out_size = Serialization::Save(
+            bind(&test_struct::save_members, &st, _1),
+            nullptr, compr_mode_type::zlib);
+        out_size = Serialization::Save(
+            bind(&test_struct::save_members, &st, _1),
+            buffer, compr_mode_type::zlib);
+        ASSERT_EQ(test_out_size, out_size);
+        for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
+        {
+            ASSERT_EQ(SEAL_BYTE(0), buffer[i]);
+        }
+
+        in_size = Serialization::Load(
+            bind(&test_struct::load_members, &st3, _1),
+            buffer);
         ASSERT_EQ(out_size, in_size);
         ASSERT_EQ(st.a, st3.a);
         ASSERT_EQ(st.b, st3.b);

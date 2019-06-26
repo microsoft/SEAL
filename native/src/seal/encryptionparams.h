@@ -359,7 +359,25 @@ namespace seal
         }
 
         /**
-        Loads EncryptionParameters from an input stream.
+        Saves EncryptionParameters to a given memory location. The output is in
+        binary format and is not human-readable. If the given pointer is null,
+        then the function only returns the number of bytes that would be written.
+
+        @param[out] out The memory location to write to 
+        @throws std::exception if the EncryptionParameters could not be written
+        */
+        inline std::streamoff save(SEAL_BYTE *out,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&EncryptionParameters::save_members, this, _1),
+                out, compr_mode);
+        }
+
+        /**
+        Loads EncryptionParameters from an input stream overwriting the current
+        EncryptionParameters.
 
         @param[in] stream The stream to load the EncryptionParameters from
         @throws std::exception if valid EncryptionParameters could not be read
@@ -372,6 +390,24 @@ namespace seal
             auto in_size = Serialization::Load(
                 std::bind(&EncryptionParameters::load_members, &new_parms, _1),
                 stream);
+            std::swap(*this, new_parms);
+            return in_size;
+        }
+
+        /**
+        Loads EncryptionParameters from a given memory location overwriting the
+        current EncryptionParameters.
+
+        @param[in] in The memory location to read from 
+        @throws std::exception if valid EncryptionParameters could not be read
+        */
+        inline std::streamoff load(const SEAL_BYTE *in)
+        {
+            using namespace std::placeholders;
+            EncryptionParameters new_parms(scheme_type::none);
+            auto in_size = Serialization::Load(
+                std::bind(&EncryptionParameters::load_members, &new_parms, _1),
+                in);
             std::swap(*this, new_parms);
             return in_size;
         }
