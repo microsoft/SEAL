@@ -258,10 +258,8 @@ namespace SEALNetExamples
                 decryptor.InvariantNoiseBudget(encrypted));
 
             /*
-            From the print-out we see that the noise budget after these computations is
-            just slightly below the level we would have in a fresh ciphertext after one
-            modulus switch (135 bits). Surprisingly, in this case modulus switching has
-            no effect at all on the noise budget.
+            Surprisingly, in this case modulus switching has no effect at all on the
+            noise budget.
             */
             evaluator.ModSwitchToNextInplace(encrypted);
             Console.WriteLine("    + Noise budget after modulus switching: {0} bits",
