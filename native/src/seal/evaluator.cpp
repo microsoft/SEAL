@@ -84,7 +84,7 @@ namespace seal
                     coeff_count, coeff_modulus[i], encrypted.data(j) + (i * coeff_count));
             }
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
@@ -155,7 +155,7 @@ namespace seal
                 coeff_count * (encrypted2_size - encrypted1_size),
                 coeff_mod_count, encrypted1.data(encrypted1_size));
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted1.is_transparent())
         {
@@ -249,7 +249,7 @@ namespace seal
                     encrypted1.data(encrypted1_size) + (i * coeff_count));
             }
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted1.is_transparent())
         {
@@ -289,7 +289,7 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted1.is_transparent())
         {
@@ -716,7 +716,7 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
@@ -1199,7 +1199,7 @@ namespace seal
         // Put the output of final relinearization into destination.
         // Prepare destination only at this point because we are resizing down
         encrypted.resize(context_, parms.parms_id(), destination_size);
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
@@ -1779,7 +1779,7 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (destination.is_transparent())
         {
@@ -1881,7 +1881,7 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (destination.is_transparent())
         {
@@ -1934,7 +1934,7 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
@@ -2148,7 +2148,7 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
@@ -2260,7 +2260,7 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
@@ -2302,7 +2302,7 @@ namespace seal
         {
             multiply_plain_normal(encrypted, plain, move(pool));
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
@@ -2692,7 +2692,7 @@ namespace seal
 
         // Finally change the is_ntt_transformed flag
         encrypted.is_ntt_form() = true;
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
@@ -2746,7 +2746,7 @@ namespace seal
 
         // Finally change the is_ntt_transformed flag
         encrypted_ntt.is_ntt_form() = false;
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted_ntt.is_transparent())
         {
@@ -3046,7 +3046,7 @@ namespace seal
         {
             encrypted.is_ntt_form() = true;
         }
-#ifndef SEAL_ALLOW_TRANSPARENT_CIPHERTEXT
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
         {
