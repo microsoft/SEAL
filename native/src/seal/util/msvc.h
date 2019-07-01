@@ -13,6 +13,9 @@
 // Read in config.h
 #include "seal/util/config.h"
 
+// Do not throw when Evaluator produces transparent ciphertexts
+//#undef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
+
 // Try to check presence of additional headers using __has_include
 #ifdef __has_include
 
