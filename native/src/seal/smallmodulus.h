@@ -287,7 +287,19 @@ namespace seal
         @param[in] stream The stream to save the SmallModulus to
         @throws std::exception if the SmallModulus could not be written to string
         */
-        static std::string SaveToString(const SmallModulus &sm);
+        inline const std::string SaveToString()
+        {
+            std::ostringstream  buffer; // no growth specification necessary
+
+            // Write to the output stream
+            this->save(buffer);
+
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+        }
 
 
         /**
@@ -296,17 +308,45 @@ namespace seal
         @param[in] encoded The base64 string to load the SmallModulus from
         @throws std::exception if a valid SmallModulus could not be read from string
         */
-        static SmallModulus CreateFromString(const std::string &encoded);
+        inline SmallModulus CreateFromString(const std::string &encoded)
+        {
+            std::string decoded = base64_decode(encoded);
+            std::istringstream is(decoded);
+
+            SmallModulus sm;
+            sm.load(is);
+            return sm;
+        }
 
         /**
         Loads a SmallModulus from a string representing an uint64 value.
 
-        @param[in] value The string (desired uint64) to load into the SmallModulus
+        @param[in] encoded The string (desired uint64) to load into the SmallModulus
         @throws std::exception if a valid SmallModulus could not be read from string
         */
-        void LoadFromString(const std::string &value);
+        inline void LoadFromString(const std::string &encoded)
+        {
+            uint64_t value;
+            std::istringstream iss(encoded);
+            iss >> value;
 
-        std::string Value();
+            set_value(value);
+        }
+
+       /**
+       Returns the string representation of a SmallModulus
+       **/
+        inline std::string Value()
+        {
+            uint64_t value;
+            value = this->value();
+            std::ostringstream oss;
+            oss << value;
+
+            std::string intAsString;
+            intAsString = oss.str();
+            return intAsString;
+        }
 #endif
 
         /**

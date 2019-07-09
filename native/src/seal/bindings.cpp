@@ -283,33 +283,24 @@ EMSCRIPTEN_BINDINGS(bindings)
         .class_function("BatchingVector", select_overload<std::vector<SmallModulus>(std::size_t, std::vector<int>)>(&PlainModulus::Batching))
         ;
 
-//    class_<DefaultParams>("DefaultParams")
-//        .class_function("coeffModulus128", &DefaultParams::coeff_modulus_128)
-//        .class_function("coeffModulus192", &DefaultParams::coeff_modulus_192)
-//        .class_function("coeffModulus256", &DefaultParams::coeff_modulus_256)
-//        .class_function("smallMods60bit", &DefaultParams::small_mods_60bit)
-//        .class_function("smallMods50bit", &DefaultParams::small_mods_50bit)
-//        .class_function("smallMods40bit", &DefaultParams::small_mods_40bit)
-//        .class_function("smallMods30bit", &DefaultParams::small_mods_30bit)
-//        .class_function("dbcMax", &DefaultParams::dbc_max)
-//        .class_function("dbcMin", &DefaultParams::dbc_min)
-//        ;
-
     class_<SmallModulus>("SmallModulus")
         .constructor<>()
         .function("bitCount", &SmallModulus::bit_count)
         .function("value", &SmallModulus::Value)
         .function("loadFromString", &SmallModulus::LoadFromString)
-        .class_function("saveToString", &SmallModulus::SaveToString)
-        .class_function("createFromString", &SmallModulus::CreateFromString)
+        .function("saveToString", &SmallModulus::SaveToString)
+        .function("createFromString", &SmallModulus::CreateFromString)
         ;
-
 
     class_<EncryptionParameters>("EncryptionParameters")
         .constructor<scheme_type>()
         .function("setPolyModulusDegree", &EncryptionParameters::set_poly_modulus_degree)
         .function("setCoeffModulus", &EncryptionParameters::set_coeff_modulus)
         .function("setPlainModulus", select_overload<void(const SmallModulus &)>(&EncryptionParameters::set_plain_modulus))
+        .function("scheme", &EncryptionParameters::scheme)
+        .function("polyModulusDegree", &EncryptionParameters::poly_modulus_degree)
+        .function("coeffModulus", &EncryptionParameters::coeff_modulus)
+        .function("plainModulus", &EncryptionParameters::plain_modulus)
         .class_function("saveToString", &EncryptionParameters::SaveToString)
         .class_function("createFromString", &EncryptionParameters::CreateFromString)
         ;
@@ -317,6 +308,12 @@ EMSCRIPTEN_BINDINGS(bindings)
     class_<SEALContext::ContextData>("SEALContext::ContextData")
         .smart_ptr<std::shared_ptr<SEALContext::ContextData>>("std::shared_ptr<SEALContext::ContextData>")
         .function("parms", &SEALContext::ContextData::parms)
+        .function("parmsId", &SEALContext::ContextData::parms_id)
+        .function("qualifiers", &SEALContext::ContextData::qualifiers)
+        .function("totalCoeffModulusBitCount", &SEALContext::ContextData::total_coeff_modulus_bit_count)
+        .function("prevContextData", &SEALContext::ContextData::prev_context_data)
+        .function("nextContextData", &SEALContext::ContextData::next_context_data)
+        .function("chainIndex", &SEALContext::ContextData::chain_index)
         ;
 
     class_<SEALContext>("SEALContext")
@@ -325,9 +322,15 @@ EMSCRIPTEN_BINDINGS(bindings)
 //        .function("contextData", select_overload<const std::shared_ptr<const SEALContext::ContextData>(parms_id_type)>
 //        (&SEALContext::context_data))
 
+        .function("getContextData", &SEALContext::get_context_data)
+        .function("keyContextData", &SEALContext::key_context_data)
+        .function("firstContextData", &SEALContext::first_context_data)
+        .function("lastContextData", &SEALContext::last_context_data)
+        .function("parametersSet", &SEALContext::parameters_set)
+        .function("keyParmsId", &SEALContext::key_parms_id)
         .function("firstParmsId", &SEALContext::first_parms_id)
         .function("lastParmsId", &SEALContext::last_parms_id)
-        .function("parametersSet", &SEALContext::parameters_set)
+        .function("usingKeyswitching", &SEALContext::using_keyswitching)
         ;
 
     class_<Evaluator>("Evaluator")
