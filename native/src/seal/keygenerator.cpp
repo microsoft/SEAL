@@ -133,7 +133,7 @@ namespace seal
             secret_key_.parms_id() = context_data.parms_id();
         }
 
-        // Set the secret_key_array to have size 1 (first power of secret) 
+        // Set the secret_key_array to have size 1 (first power of secret)
         secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
         set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count,
             secret_key_array_.get());

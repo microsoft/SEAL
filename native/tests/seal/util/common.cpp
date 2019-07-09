@@ -205,7 +205,7 @@ namespace SEALTest
         TEST(Common, ReverseBits32)
         {
             ReverseBits32Helper<uint32_t>();
- 
+
             // Other types
 #ifdef SEAL_USE_IF_CONSTEXPR
             SEAL_IF_CONSTEXPR (sizeof(unsigned) == 4)
@@ -266,7 +266,7 @@ namespace SEALTest
         TEST(Common, ReverseBits64)
         {
             ReverseBits64Helper<uint64_t>();
- 
+
             // Other types
 #ifdef SEAL_USE_IF_CONSTEXPR
             SEAL_IF_CONSTEXPR (sizeof(unsigned) == 8)
