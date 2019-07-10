@@ -208,32 +208,4 @@ namespace seal
 
         swap(*this, new_data);
     }
-
-#ifdef EMSCRIPTEN
-    const std::string Ciphertext::SaveToString()
-    {
-        std::ostringstream buffer;
-
-        this->save(buffer);
-
-        std::string contents = buffer.str();
-        size_t bufferSize = contents.size();
-        std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
-        return encoded;
-    }
-
-    void Ciphertext::LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded)
-    {
-        std::string decoded = base64_decode(encoded);
-        std::istringstream is(decoded);
-
-        Ciphertext new_data(pool());
-        new_data.unsafe_load(is);
-        if (!is_valid_for(new_data, std::move(context)))
-        {
-            throw std::invalid_argument("ciphertext data is invalid");
-        }
-        std::swap(*this, new_data);
-    }
-#endif
 }

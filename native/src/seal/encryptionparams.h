@@ -342,7 +342,19 @@ namespace seal
         @throws std::exception if the EncryptionParameters could not be written
         to stream
         */
-        static std::string SaveToString(const EncryptionParameters &ep);
+        inline static std::string SaveToString(const EncryptionParameters &ep)
+        {
+            std::ostringstream  buffer; // no growth specification necessary
+
+            // Write to the output stream
+            EncryptionParameters::Save(ep, buffer);
+
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+        }
 
         /**
         Create EncryptionParameters from a base64 string.
@@ -351,7 +363,15 @@ namespace seal
         @throws std::exception if valid EncryptionParameters could not be read
         from stream
         */
-        static EncryptionParameters CreateFromString(const std::string &encoded);
+        inline static EncryptionParameters CreateFromString(const std::string &encoded)
+        {
+            std::string decoded = base64_decode(encoded);
+            std::istringstream is(decoded);
+
+            // Create the Enc Parms from the input stream
+            EncryptionParameters ep = EncryptionParameters::Load(is);
+            return ep;
+        }
 
 #endif
 
