@@ -1,6 +1,12 @@
 # List of Changes
 
-## Version 3.3 (current)
+## Version 3.3.1 (patch)
+
+Minor bug and typo fixes. Most importantly:
+- A bug was fixed that introduced significant extra inaccuracy in CKKS when compiled on Linux, at least with some versions of glibc; Windows and macOS were not affected.
+- A bug was fixed where, on 32-bit platforms, some versions of GCC resolved the util::reverse_bits function to the incorrect overload.
+
+## Version 3.3.0
 
 ### Features
 
