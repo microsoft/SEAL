@@ -427,9 +427,9 @@ namespace seal
             }
 #endif
             // Just return zero if bit_count is zero
-            return (bit_count == 0) ? T(0) :
-                reverse_bits(operand) >> (
-                    sizeof(T) * static_cast<std::size_t>(bits_per_byte) - bit_count);
+            return (bit_count == 0) ? T(0) : reverse_bits(operand) >> (
+                sizeof(T) * static_cast<std::size_t>(bits_per_byte)
+                    - static_cast<std::size_t>(bit_count));
         }
 
         inline void get_msb_index_generic(unsigned long *result, std::uint64_t value)
