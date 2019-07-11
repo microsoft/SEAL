@@ -285,6 +285,8 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<SmallModulus>("SmallModulus")
         .constructor<>()
+        .function("isZero", &SmallModulus::is_zero)
+        .function("isPrime", &SmallModulus::is_prime)
         .function("bitCount", &SmallModulus::bit_count)
         .function("value", &SmallModulus::Value)
         .function("loadFromString", &SmallModulus::LoadFromString)
@@ -341,10 +343,19 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("multiply", &Evaluator::multiply)
         .function("square", &Evaluator::square)
         .function("relinearize", &Evaluator::relinearize)
+        .function("cipherModSwitchToNext", select_overload<void(const Ciphertext &, Ciphertext &, MemoryPoolHandle)>(&Evaluator::mod_switch_to_next))
+        .function("cipherModSwitchTo", select_overload<void(const Ciphertext &, parms_id_type, Ciphertext &, MemoryPoolHandle)>(&Evaluator::mod_switch_to))
+        .function("plainModSwitchToNext", select_overload<void(const Plaintext &, Plaintext &)>(&Evaluator::mod_switch_to_next))
+        .function("plainModSwitchTo", select_overload<void(const Plaintext &, parms_id_type, Plaintext &)>(&Evaluator::mod_switch_to))
+        .function("rescaleToNext", &Evaluator::rescale_to_next)
+        .function("rescaleTo", &Evaluator::rescale_to)
         .function("exponentiate", &Evaluator::exponentiate)
         .function("addPlain", &Evaluator::add_plain)
         .function("subPlain", &Evaluator::sub_plain)
         .function("multiplyPlain", &Evaluator::multiply_plain)
+        .function("plainTransformToNtt", select_overload<void(const Plaintext &, parms_id_type, Plaintext &, MemoryPoolHandle)>(&Evaluator::transform_to_ntt))
+        .function("cipherTransformToNtt", select_overload<void(const Ciphertext &, Ciphertext &)>(&Evaluator::transform_to_ntt))
+        .function("cipherTransformFromNtt", select_overload<void(const Ciphertext &, Ciphertext &)>(&Evaluator::transform_from_ntt))
         .function("applyGalois", &Evaluator::apply_galois)
         .function("rotateRows", &Evaluator::rotate_rows)
         .function("rotateColumns", &Evaluator::rotate_columns)
@@ -352,11 +363,17 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("complexConjugate", &Evaluator::complex_conjugate)
         ;
 
-
     class_<KSwitchKeys>("KSwitchKeys")
         .constructor<>()
         .function("saveToString", &KSwitchKeys::SaveToString)
         .function("loadFromString", &KSwitchKeys::LoadFromString)
+        ;
+
+    class_<RelinKeys, base<KSwitchKeys>>("RelinKeys")
+        .constructor<>()
+        ;
+    class_<GaloisKeys, base<KSwitchKeys>>("GaloisKeys")
+        .constructor<>()
         ;
 
     class_<KeyGenerator>("KeyGenerator")
@@ -367,13 +384,6 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("getSecretKey", &KeyGenerator::secret_key)
         .function("createRelinKeys", select_overload<RelinKeys()>(&KeyGenerator::relin_keys))
         .function("createGaloisKeys", select_overload<GaloisKeys()>(&KeyGenerator::galois_keys))
-        ;
-
-    class_<RelinKeys, base<KSwitchKeys>>("RelinKeys")
-        .constructor<>()
-        ;
-    class_<GaloisKeys, base<KSwitchKeys>>("GaloisKeys")
-        .constructor<>()
         ;
 
     class_<PublicKey>("PublicKey")
@@ -390,8 +400,20 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<Plaintext>("Plaintext")
         .constructor<>()
-        .function("toString", &Plaintext::to_string)
+        .function("saveToString", &Plaintext::SaveToString)
+        .function("loadFromString", &Plaintext::LoadFromString)
+        .function("isZero", &Plaintext::is_zero)
+        .function("capacity", &Plaintext::capacity)
+        .function("coeffCount", &Plaintext::coeff_count)
+        .function("significantCoeffCount", &Plaintext::significant_coeff_count)
+        .function("nonzeroCoeffCount", &Plaintext::nonzero_coeff_count)
+        .function("toPolynomial", &Plaintext::to_string)
+        .function("isNttForm", select_overload< bool () const>(&Plaintext::is_ntt_form))
+        .function("parmsId", select_overload< parms_id_type & ()>(&Plaintext::parms_id))
+        .function("scale", select_overload< double & ()>(&Plaintext::scale))
+        .function("pool", &Plaintext::pool)
         ;
+
     class_<Ciphertext>("Ciphertext")
         .constructor<>()
         .function("saveToString", &Ciphertext::SaveToString)
