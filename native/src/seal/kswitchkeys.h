@@ -239,14 +239,6 @@ namespace seal
             std::istringstream is(decoded);
 
             this->load(context, is);
-//            KSwitchKeys new_keys;
-//            new_keys.pool_ = pool_;
-//            new_keys.unsafe_load(is);
-//            if (!is_valid_for(new_keys, std::move(context)))
-//            {
-//                throw std::invalid_argument("KSwitchKeys data is invalid");
-//            }
-//            std::swap(*this, new_keys);
         }
 #endif
 
