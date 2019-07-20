@@ -14,7 +14,8 @@ find_package_handle_standard_args(msgsl
     REQUIRED_VARS MSGSL_INCLUDE_DIR)
 
 if(msgsl_FOUND)
-    # Now check for individual classes                                                                                              
+    # Now check for individual classes
+    include(CMakePushCheckState)
     cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_INCLUDES ${MSGSL_INCLUDE_DIR})
     set(CMAKE_EXTRA_INCLUDE_FILES gsl/gsl)
