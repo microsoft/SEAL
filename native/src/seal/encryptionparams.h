@@ -163,7 +163,7 @@ namespace seal
         of ciphertext elements, the amount of computation that the scheme can perform
         (bigger is better), and the security level (bigger is worse). In Microsoft SEAL each
         of the prime numbers in the coefficient modulus must be at most 60 bits,
-        and must be congruent to 1 modulo 2*degree(poly_modulus).
+        and must be congruent to 1 modulo 2*poly_modulus_degree.
 
         @param[in] coeff_modulus The new coefficient modulus
         @throws std::invalid_argument if size of coeff_modulus is invalid
@@ -245,7 +245,7 @@ namespace seal
         /**
         Returns the encryption scheme type.
         */
-        inline scheme_type scheme() const noexcept
+        SEAL_NODISCARD inline scheme_type scheme() const noexcept
         {
             return scheme_;
         }
@@ -253,7 +253,7 @@ namespace seal
         /**
         Returns the degree of the polynomial modulus parameter.
         */
-        inline std::size_t poly_modulus_degree() const noexcept
+        SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
         {
             return poly_modulus_degree_;
         }
@@ -261,7 +261,8 @@ namespace seal
         /**
         Returns a const reference to the currently set coefficient modulus parameter.
         */
-        inline const std::vector<SmallModulus> &coeff_modulus() const noexcept
+        SEAL_NODISCARD inline auto coeff_modulus() const noexcept
+            -> const std::vector<SmallModulus>&
         {
             return coeff_modulus_;
         }
@@ -269,7 +270,7 @@ namespace seal
         /**
         Returns a const reference to the currently set plaintext modulus parameter.
         */
-        inline const SmallModulus &plain_modulus() const noexcept
+        SEAL_NODISCARD inline const SmallModulus &plain_modulus() const noexcept
         {
             return plain_modulus_;
         }
@@ -277,7 +278,8 @@ namespace seal
         /**
         Returns a pointer to the random number generator factory to use for encryption.
         */
-        inline std::shared_ptr<UniformRandomGeneratorFactory> random_generator() const noexcept
+        SEAL_NODISCARD inline auto random_generator() const noexcept
+            -> std::shared_ptr<UniformRandomGeneratorFactory>
         {
             return random_generator_;
         }
@@ -290,7 +292,8 @@ namespace seal
 
         @parms[in] other The EncryptionParameters to compare against
         */
-        inline bool operator ==(const EncryptionParameters &other) const noexcept
+        SEAL_NODISCARD inline bool operator ==(
+            const EncryptionParameters &other) const noexcept
         {
             return (parms_id_ == other.parms_id_);
         }
@@ -303,7 +306,8 @@ namespace seal
 
         @parms[in] other The EncryptionParameters to compare against
         */
-        inline bool operator !=(const EncryptionParameters &other) const noexcept
+        SEAL_NODISCARD inline bool operator !=(
+            const EncryptionParameters &other) const noexcept
         {
             return (parms_id_ != other.parms_id_);
         }
@@ -326,7 +330,7 @@ namespace seal
         @throws std::exception if valid EncryptionParameters could not be read
         from stream
         */
-        static EncryptionParameters Load(std::istream &stream);
+        SEAL_NODISCARD static EncryptionParameters Load(std::istream &stream);
 
         /**
         Enables access to private members of seal::EncryptionParameters for .NET
@@ -339,7 +343,7 @@ namespace seal
         Helper function to determine whether given std::uint8_t represents a valid
         value for scheme_type.
         */
-        bool is_valid_scheme(std::uint8_t scheme) const noexcept
+        SEAL_NODISCARD bool is_valid_scheme(std::uint8_t scheme) const noexcept
         {
             return (scheme == static_cast<std::uint8_t>(scheme_type::BFV) ||
                 (scheme == static_cast<std::uint8_t>(scheme_type::CKKS)));
@@ -349,7 +353,7 @@ namespace seal
         Returns the parms_id of the current parameters. This function is intended
         for internal use.
         */
-        inline auto &parms_id() const noexcept
+        SEAL_NODISCARD inline auto &parms_id() const noexcept
         {
             return parms_id_;
         }

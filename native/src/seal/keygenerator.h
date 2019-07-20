@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <random>
+#include "seal/util/defines.h"
 #include "seal/context.h"
 #include "seal/util/smallntt.h"
 #include "seal/memorymanager.h"
@@ -27,7 +28,7 @@ namespace seal
     @see RelinKeys for more details on relinearization keys.
     @see GaloisKeys for more details on Galois keys.
     */
-    class KeyGenerator
+    class SEAL_NODISCARD KeyGenerator
     {
     public:
         /**
@@ -75,17 +76,17 @@ namespace seal
         /**
         Returns a const reference to the secret key.
         */
-        const SecretKey &secret_key() const;
+        SEAL_NODISCARD const SecretKey &secret_key() const;
 
         /**
         Returns a const reference to the public key.
         */
-        const PublicKey &public_key() const;
+        SEAL_NODISCARD const PublicKey &public_key() const;
 
         /**
         Generates and returns relinearization keys.
         */
-        inline RelinKeys relin_keys()
+        SEAL_NODISCARD inline RelinKeys relin_keys()
         {
             return relin_keys(1);
         }
@@ -97,7 +98,7 @@ namespace seal
         corresponding to the keys that are to be created.
 
         The Galois elements are odd integers in the interval [1, M-1], where
-        M = 2*N, and N = degree(poly_modulus). Used with batching, a Galois element
+        M = 2*N, and N = poly_modulus_degree. Used with batching, a Galois element
         3^i % M corresponds to a cyclic row rotation i steps to the left, and
         a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation i
         steps to the right. The Galois element M-1 corresponds to a column rotation
@@ -108,7 +109,8 @@ namespace seal
         @param[in] galois_elts The Galois elements for which to generate keys
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        GaloisKeys galois_keys(const std::vector<std::uint64_t> &galois_elts);
+        SEAL_NODISCARD GaloisKeys galois_keys(
+            const std::vector<std::uint64_t> &galois_elts);
 
         /**
         Generates and returns Galois keys. This function creates specific Galois
@@ -124,7 +126,7 @@ namespace seal
         and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
         */
-        GaloisKeys galois_keys(const std::vector<int> &steps);
+        SEAL_NODISCARD GaloisKeys galois_keys(const std::vector<int> &steps);
 
         /**
         Generates and returns Galois keys. This function creates logarithmically
@@ -132,7 +134,7 @@ namespace seal
         to apply any Galois automorphism (e.g. rotations) on encrypted data. Most
         users will want to use this overload of the function.
         */
-        GaloisKeys galois_keys();
+        SEAL_NODISCARD GaloisKeys galois_keys();
 
     private:
         KeyGenerator(const KeyGenerator &copy) = delete;

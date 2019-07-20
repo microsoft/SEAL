@@ -20,65 +20,68 @@ namespace seal
     template<typename T_out,
         typename = std::enable_if_t<std::is_same<T_out, double>::value ||
         std::is_same<T_out, std::complex<double>>::value>>
-    inline T_out from_complex(std::complex<double> in);
+    SEAL_NODISCARD inline T_out from_complex(std::complex<double> in);
 
     template<>
-    inline double from_complex(std::complex<double> in)
+    SEAL_NODISCARD inline double from_complex(std::complex<double> in)
     {
         return in.real();
     }
 
     template<>
-    inline std::complex<double> from_complex(std::complex<double> in)
+    SEAL_NODISCARD inline std::complex<double> from_complex(std::complex<double> in)
     {
         return in;
     }
 
     /**
-    Provides functionality for encoding vectors of complex or real numbers into plaintext
-    polynomials to be encrypted and computed on using the CKKS scheme. If the polynomial
-    modulus degree is N, then CKKSEncoder converts vectors of N/2 complex numbers into
-    plaintext elements. Homomorphic operations performed on such encrypted vectors are
-    applied coefficient (slot-)wise, enabling powerful SIMD functionality for computations
-    that are vectorizable. This functionality is often called "batching" in the homomorphic
-    encryption literature.
+    Provides functionality for encoding vectors of complex or real numbers into
+    plaintext polynomials to be encrypted and computed on using the CKKS scheme.
+    If the polynomial modulus degree is N, then CKKSEncoder converts vectors of
+    N/2 complex numbers into plaintext elements. Homomorphic operations performed
+    on such encrypted vectors are applied coefficient (slot-)wise, enabling
+    powerful SIMD functionality for computations that are vectorizable. This
+    functionality is often called "batching" in the homomorphic encryption
+    literature.
 
     @par Mathematical Background
-    Mathematically speaking, if the polynomial modulus is X^N+1, N is a power of two, the
-    CKKSEncoder implements an approximation of the canonical embedding of the ring of
-    integers Z[X]/(X^N+1) into C^(N/2), where C denotes the complex numbers. The Galois
-    group of the extension is (Z/2NZ)* ~= Z/2Z x Z/(N/2) whose action on the primitive roots
-    of unity modulo coeff_modulus is easy to describe. Since the batching slots correspond
-    1-to-1 to the primitive roots of unity, applying Galois automorphisms on the plaintext
-    acts by permuting the slots. By applying generators of the two cyclic subgroups of the
-    Galois group, we can effectively enable cyclic rotations and complex conjugations of
-    the encrypted complex vectors.
+    Mathematically speaking, if the polynomial modulus is X^N+1, N is a power of
+    two, the CKKSEncoder implements an approximation of the canonical embedding
+    of the ring of integers Z[X]/(X^N+1) into C^(N/2), where C denotes the complex
+    numbers. The Galois group of the extension is (Z/2NZ)* ~= Z/2Z x Z/(N/2)
+    whose action on the primitive roots of unity modulo coeff_modulus is easy to
+    describe. Since the batching slots correspond 1-to-1 to the primitive roots
+    of unity, applying Galois automorphisms on the plaintext acts by permuting
+    the slots. By applying generators of the two cyclic subgroups of the Galois
+    group, we can effectively enable cyclic rotations and complex conjugations
+    of the encrypted complex vectors.
     */
-    class CKKSEncoder
+    class SEAL_NODISCARD CKKSEncoder
     {
     public:
         /**
         Creates a CKKSEncoder instance initialized with the specified SEALContext.
 
         @param[in] context The SEALContext
-        @throws std::invalid_argument if the context is not set or encryption parameters
-        are not valid
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
         @throws std::invalid_argument if scheme is not scheme_type::CKKS
         */
         CKKSEncoder(std::shared_ptr<SEALContext> context);
 
         /**
-        Encodes double-precision floating-point real or complex numbers into a plaintext
-        polynomial. Dynamic memory allocations in the process are allocated from the
-        memory pool pointed to by the given MemoryPoolHandle.
+        Encodes double-precision floating-point real or complex numbers into
+        a plaintext polynomial. Dynamic memory allocations in the process are
+        allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
         @param[in] values The vector of double-precision floating-point numbers
         (of type T) to encode
-        @param[in] parms_id parms_id determining the encryption parameters to be used
-        by the result plaintext
+        @param[in] parms_id parms_id determining the encryption parameters to
+        be used by the result plaintext
         @param[in] scale Scaling parameter defining encoding precision
-        @param[out] destination The plaintext polynomial to overwrite with the result
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if values has invalid size
         @throws std::invalid_argument if parms_id is not valid for the encryption
@@ -100,15 +103,17 @@ namespace seal
 
         /**
         Encodes double-precision floating-point real or complex numbers into
-        a plaintext polynomial. The encryption parameters used are the top level
-        parameters for the given context. Dynamic memory allocations in the process
-        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        a plaintext polynomial. The encryption parameters used are the top
+        level parameters for the given context. Dynamic memory allocations in
+        the process are allocated from the memory pool pointed to by the given
+        MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
         @param[in] values The vector of double-precision floating-point numbers
         (of type T) to encode
         @param[in] scale Scaling parameter defining encoding precision
-        @param[out] destination The plaintext polynomial to overwrite with the result
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if values has invalid size
         @throws std::invalid_argument if scale is not strictly positive
@@ -128,15 +133,16 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext polynomial.
-        Dynamic memory allocations in the process are allocated from the memory pool
-        pointed to by the given MemoryPoolHandle.
+        Encodes a double-precision floating-point number into a plaintext
+        polynomial. Dynamic memory allocations in the process are allocated from
+        the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
-        @param[in] parms_id parms_id determining the encryption parameters to be used
-        by the result plaintext
+        @param[in] parms_id parms_id determining the encryption parameters to be
+        used by the result plaintext
         @param[in] scale Scaling parameter defining encoding precision
-        @param[out] destination The plaintext polynomial to overwrite with the result
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
@@ -153,14 +159,15 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext polynomial.
-        The encryption parameters used are the top level parameters for the given context.
-        Dynamic memory allocations in the process are allocated from the memory pool
-        pointed to by the given MemoryPoolHandle.
+        Encodes a double-precision floating-point number into a plaintext
+        polynomial. The encryption parameters used are the top level parameters
+        for the given context. Dynamic memory allocations in the process are
+        allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
         @param[in] scale Scaling parameter defining encoding precision
-        @param[out] destination The plaintext polynomial to overwrite with the result
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if scale is not strictly positive
         @throws std::invalid_argument if encoding is too large for the encryption
@@ -176,15 +183,16 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision complex number into a plaintext polynomial. Dynamic
-        memory allocations in the process are allocated from the memory pool pointed to
-        by the given MemoryPoolHandle.
+        Encodes a double-precision complex number into a plaintext polynomial.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision complex number to encode
-        @param[in] parms_id parms_id determining the encryption parameters to be used
-        by the result plaintext
+        @param[in] parms_id parms_id determining the encryption parameters to be
+        used by the result plaintext
         @param[in] scale Scaling parameter defining encoding precision
-        @param[out] destination The plaintext polynomial to overwrite with the result
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
@@ -201,14 +209,15 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision complex number into a plaintext polynomial. The
-        encryption parameters used are the top level parameters for the given context.
-        Dynamic memory allocations in the process are allocated from the memory pool
-        pointed to by the given MemoryPoolHandle.
+        Encodes a double-precision complex number into a plaintext polynomial.
+        The encryption parameters used are the top level parameters for the
+        given context. Dynamic memory allocations in the process are allocated
+        from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision complex number to encode
         @param[in] scale Scaling parameter defining encoding precision
-        @param[out] destination The plaintext polynomial to overwrite with the result
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if scale is not strictly positive
         @throws std::invalid_argument if encoding is too large for the encryption
@@ -227,9 +236,10 @@ namespace seal
         Encodes an integer number into a plaintext polynomial without any scaling.
 
         @param[in] value The integer number to encode
-        @param[in] parms_id parms_id determining the encryption parameters to be used
-        by the result plaintext
-        @param[out] destination The plaintext polynomial to overwrite with the result
+        @param[in] parms_id parms_id determining the encryption parameters to be
+        used by the result plaintext
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         */
@@ -240,11 +250,13 @@ namespace seal
         }
 
         /**
-        Encodes an integer number into a plaintext polynomial without any scaling. The
-        encryption parameters used are the top level parameters for the given context.
+        Encodes an integer number into a plaintext polynomial without any scaling.
+        The encryption parameters used are the top level parameters for the given
+        context.
 
         @param[in] value The integer number to encode
-        @param[out] destination The plaintext polynomial to overwrite with the result
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
         */
         inline void encode(std::int64_t value, Plaintext &destination)
         {
@@ -252,16 +264,17 @@ namespace seal
         }
 
         /**
-        Decodes a plaintext polynomial into double-precision floating-point real or
-        complex numbers. Dynamic memory allocations in the process are allocated from
-        the memory pool pointed to by the given MemoryPoolHandle.
+        Decodes a plaintext polynomial into double-precision floating-point
+        real or complex numbers. Dynamic memory allocations in the process are
+        allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
         @param[in] plain The plaintext to decode
-        @param[out] destination The vector to be overwritten with the values in the slots
+        @param[out] destination The vector to be overwritten with the values in
+        the slots
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not in NTT form or is invalid for the
-        encryption parameters
+        @throws std::invalid_argument if plain is not in NTT form or is invalid
+        for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
         template<typename T,
@@ -276,7 +289,7 @@ namespace seal
         /**
         Returns the number of complex numbers encoded.
         */
-        inline std::size_t slot_count() const noexcept
+        SEAL_NODISCARD inline std::size_t slot_count() const noexcept
         {
             return slots_;
         }
@@ -284,8 +297,9 @@ namespace seal
     private:
         // This is the same function as in evaluator.h
         inline void decompose_single_coeff(
-            const SEALContext::ContextData &context_data, const std::uint64_t *value,
-            std::uint64_t *destination, util::MemoryPool &pool)
+            const SEALContext::ContextData &context_data,
+            const std::uint64_t *value, std::uint64_t *destination,
+            util::MemoryPool &pool)
         {
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();

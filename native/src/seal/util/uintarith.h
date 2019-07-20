@@ -17,8 +17,9 @@ namespace seal
     namespace util
     {
         template<typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
-        inline unsigned char add_uint64_generic(T operand1, S operand2,
-            unsigned char carry, unsigned long long *result)
+        SEAL_NODISCARD inline unsigned char add_uint64_generic(
+            T operand1, S operand2, unsigned char carry,
+            unsigned long long *result)
         {
 #ifdef SEAL_DEBUG
             if (!result)
@@ -32,23 +33,26 @@ namespace seal
         }
 
         template<typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
-        inline unsigned char add_uint64(T operand1, S operand2,
-            unsigned char carry, unsigned long long *result)
+        SEAL_NODISCARD inline unsigned char add_uint64(
+            T operand1, S operand2, unsigned char carry,
+            unsigned long long *result)
         {
             return SEAL_ADD_CARRY_UINT64(operand1, operand2, carry, result);
         }
 
         template<typename T, typename S, typename R,
             typename = std::enable_if<is_uint64_v<T, S, R>>>
-        inline unsigned char add_uint64(T operand1, S operand2, R *result)
+        SEAL_NODISCARD inline unsigned char add_uint64(
+            T operand1, S operand2, R *result)
         {
             *result = operand1 + operand2;
             return static_cast<unsigned char>(*result < operand1);
         }
 
-        inline unsigned char add_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count, unsigned char carry,
+        inline unsigned char add_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count,
+            unsigned char carry,
             std::size_t result_uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -89,9 +93,9 @@ namespace seal
             return carry;
         }
 
-        inline unsigned char add_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count,
-            std::uint64_t *result)
+        inline unsigned char add_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!uint64_count)
@@ -124,8 +128,9 @@ namespace seal
             return carry;
         }
 
-        inline unsigned char add_uint_uint64(const std::uint64_t *operand1,
-            std::uint64_t operand2, std::size_t uint64_count, std::uint64_t *result)
+        inline unsigned char add_uint_uint64(
+            const std::uint64_t *operand1, std::uint64_t operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!uint64_count)
@@ -155,7 +160,8 @@ namespace seal
         }
 
         template<typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
-        inline unsigned char sub_uint64_generic(T operand1, S operand2,
+        SEAL_NODISCARD inline unsigned char sub_uint64_generic(
+            T operand1, S operand2,
             unsigned char borrow, unsigned long long *result)
         {
 #ifdef SEAL_DEBUG
@@ -170,7 +176,8 @@ namespace seal
         }
 
         template<typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
-        inline unsigned char sub_uint64(T operand1, S operand2,
+        SEAL_NODISCARD inline unsigned char sub_uint64(
+            T operand1, S operand2,
             unsigned char borrow, unsigned long long *result)
         {
             return SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result);
@@ -178,15 +185,17 @@ namespace seal
 
         template<typename T, typename S, typename R,
             typename = std::enable_if<is_uint64_v<T, S, R>>>
-        inline unsigned char sub_uint64(T operand1, S operand2, R *result)
+        SEAL_NODISCARD inline unsigned char sub_uint64(
+            T operand1, S operand2, R *result)
         {
             *result = operand1 - operand2;
             return static_cast<unsigned char>(operand2 > operand1);
         }
 
-        inline unsigned char sub_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count, unsigned char borrow,
+        inline unsigned char sub_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count,
+            unsigned char borrow,
             std::size_t result_uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -210,8 +219,9 @@ namespace seal
             return borrow;
         }
 
-        inline unsigned char sub_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count, std::uint64_t *result)
+        inline unsigned char sub_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!uint64_count)
@@ -244,8 +254,9 @@ namespace seal
             return borrow;
         }
 
-        inline unsigned char sub_uint_uint64(const std::uint64_t *operand1,
-            std::uint64_t operand2, std::size_t uint64_count, std::uint64_t *result)
+        inline unsigned char sub_uint_uint64(
+            const std::uint64_t *operand1, std::uint64_t operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!uint64_count)
@@ -274,8 +285,9 @@ namespace seal
             return borrow;
         }
 
-        inline unsigned char increment_uint(const std::uint64_t *operand,
-            std::size_t uint64_count, std::uint64_t *result)
+        inline unsigned char increment_uint(
+            const std::uint64_t *operand, std::size_t uint64_count,
+            std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand)
@@ -294,8 +306,9 @@ namespace seal
             return add_uint_uint64(operand, 1, uint64_count, result);
         }
 
-        inline unsigned char decrement_uint(const std::uint64_t *operand,
-            std::size_t uint64_count, std::uint64_t *result)
+        inline unsigned char decrement_uint(
+            const std::uint64_t *operand, std::size_t uint64_count,
+            std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand && uint64_count > 0)
@@ -310,7 +323,8 @@ namespace seal
             return sub_uint_uint64(operand, 1, uint64_count, result);
         }
 
-        inline void negate_uint(const std::uint64_t *operand, std::size_t uint64_count,
+        inline void negate_uint(
+            const std::uint64_t *operand, std::size_t uint64_count,
             std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -664,8 +678,9 @@ namespace seal
             }
         }
 
-        inline void half_round_up_uint(const std::uint64_t *operand,
-            std::size_t uint64_count, std::uint64_t *result)
+        inline void half_round_up_uint(
+            const std::uint64_t *operand, std::size_t uint64_count,
+            std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand && uint64_count > 0)
@@ -697,7 +712,8 @@ namespace seal
             }
         }
 
-        inline void not_uint(const std::uint64_t *operand, std::size_t uint64_count,
+        inline void not_uint(
+            const std::uint64_t *operand, std::size_t uint64_count,
             std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -716,8 +732,9 @@ namespace seal
             }
         }
 
-        inline void and_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count, std::uint64_t *result)
+        inline void and_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && uint64_count > 0)
@@ -739,8 +756,9 @@ namespace seal
             }
         }
 
-        inline void or_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count, std::uint64_t *result)
+        inline void or_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && uint64_count > 0)
@@ -762,8 +780,9 @@ namespace seal
             }
         }
 
-        inline void xor_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count, std::uint64_t *result)
+        inline void xor_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && uint64_count > 0)
@@ -786,8 +805,8 @@ namespace seal
         }
 
         template<typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
-        inline void multiply_uint64_generic(T operand1, S operand2,
-            unsigned long long *result128)
+        inline void multiply_uint64_generic(
+            T operand1, S operand2, unsigned long long *result128)
         {
 #ifdef SEAL_DEBUG
             if (!result128)
@@ -814,15 +833,15 @@ namespace seal
         }
 
         template<typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
-        inline void multiply_uint64(T operand1, S operand2,
-            unsigned long long *result128)
+        inline void multiply_uint64(
+            T operand1, S operand2, unsigned long long *result128)
         {
             SEAL_MULTIPLY_UINT64(operand1, operand2, result128);
         }
 
         template<typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
-        inline void multiply_uint64_hw64_generic(T operand1, S operand2,
-            unsigned long long *hw64)
+        inline void multiply_uint64_hw64_generic(
+            T operand1, S operand2, unsigned long long *hw64)
         {
 #ifdef SEAL_DEBUG
             if (!hw64)
@@ -847,52 +866,58 @@ namespace seal
         }
 
         template<typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
-        inline void multiply_uint64_hw64(T operand1, S operand2,
-            unsigned long long *hw64)
+        inline void multiply_uint64_hw64(
+            T operand1, S operand2, unsigned long long *hw64)
         {
             SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64);
         }
 
-        void multiply_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count, std::size_t result_uint64_count,
-            std::uint64_t *result);
+        void multiply_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count,
+            std::size_t result_uint64_count, std::uint64_t *result);
 
-        inline void multiply_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count, std::uint64_t *result)
+        inline void multiply_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
             multiply_uint_uint(operand1, uint64_count, operand2, uint64_count,
                 uint64_count * 2, result);
         }
 
-        void multiply_uint_uint64(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, std::uint64_t operand2,
-            std::size_t result_uint64_count, std::uint64_t *result);
+        void multiply_uint_uint64(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            std::uint64_t operand2, std::size_t result_uint64_count,
+            std::uint64_t *result);
 
-        inline void multiply_truncate_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count, std::uint64_t *result)
+        inline void multiply_truncate_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count, std::uint64_t *result)
         {
             multiply_uint_uint(operand1, uint64_count, operand2, uint64_count,
                 uint64_count, result);
         }
 
-        void divide_uint_uint_inplace(std::uint64_t *numerator,
-            const std::uint64_t *denominator, std::size_t uint64_count,
-            std::uint64_t *quotient, MemoryPool &pool);
+        void divide_uint_uint_inplace(
+            std::uint64_t *numerator, const std::uint64_t *denominator,
+            std::size_t uint64_count, std::uint64_t *quotient, MemoryPool &pool);
 
-        inline void divide_uint_uint(const std::uint64_t *numerator,
-            const std::uint64_t *denominator, std::size_t uint64_count,
-            std::uint64_t *quotient, std::uint64_t *remainder, MemoryPool &pool)
+        inline void divide_uint_uint(
+            const std::uint64_t *numerator, const std::uint64_t *denominator,
+            std::size_t uint64_count, std::uint64_t *quotient,
+            std::uint64_t *remainder, MemoryPool &pool)
         {
             set_uint_uint(numerator, uint64_count, remainder);
             divide_uint_uint_inplace(remainder, denominator, uint64_count, quotient, pool);
         }
 
-        void divide_uint128_uint64_inplace_generic(std::uint64_t *numerator,
-            std::uint64_t denominator, std::uint64_t *quotient);
+        void divide_uint128_uint64_inplace_generic(
+            std::uint64_t *numerator, std::uint64_t denominator,
+            std::uint64_t *quotient);
 
-        inline void divide_uint128_uint64_inplace(std::uint64_t *numerator,
-            std::uint64_t denominator, std::uint64_t *quotient)
+        inline void divide_uint128_uint64_inplace(
+            std::uint64_t *numerator, std::uint64_t denominator,
+            std::uint64_t *quotient)
         {
 #ifdef SEAL_DEBUG
             if (!numerator)
@@ -915,21 +940,24 @@ namespace seal
             SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, quotient);
         }
 
-        void divide_uint128_uint64_inplace(std::uint64_t *numerator,
-            std::uint64_t denominator, std::uint64_t *quotient);
+        void divide_uint128_uint64_inplace(
+            std::uint64_t *numerator, std::uint64_t denominator,
+            std::uint64_t *quotient);
 
-        void divide_uint192_uint64_inplace(std::uint64_t *numerator,
-            std::uint64_t denominator, std::uint64_t *quotient);
+        void divide_uint192_uint64_inplace(
+            std::uint64_t *numerator, std::uint64_t denominator,
+            std::uint64_t *quotient);
 
-        void exponentiate_uint(const std::uint64_t *operand,
-            std::size_t operand_uint64_count, const std::uint64_t *exponent,
-            std::size_t exponent_uint64_count, std::size_t result_uint64_count,
-            std::uint64_t *result, MemoryPool &pool);
+        void exponentiate_uint(
+            const std::uint64_t *operand, std::size_t operand_uint64_count,
+            const std::uint64_t *exponent, std::size_t exponent_uint64_count,
+            std::size_t result_uint64_count, std::uint64_t *result,
+            MemoryPool &pool);
 
-        std::uint64_t exponentiate_uint64_safe(std::uint64_t operand,
-            std::uint64_t exponent);
+        SEAL_NODISCARD std::uint64_t exponentiate_uint64_safe(
+            std::uint64_t operand, std::uint64_t exponent);
 
-        std::uint64_t exponentiate_uint64(std::uint64_t operand,
-            std::uint64_t exponent);
+        SEAL_NODISCARD std::uint64_t exponentiate_uint64(
+            std::uint64_t operand, std::uint64_t exponent);
     }
 }

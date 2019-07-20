@@ -135,7 +135,7 @@ namespace seal
         /**
         Returns a pointer to the beginning of the array data.
         */
-        inline T* begin() noexcept
+        SEAL_NODISCARD inline T* begin() noexcept
         {
             return data_.get();
         }
@@ -143,7 +143,7 @@ namespace seal
         /**
         Returns a constant pointer to the beginning of the array data.
         */
-        inline const T* cbegin() const noexcept
+        SEAL_NODISCARD inline const T* cbegin() const noexcept
         {
             return data_.get();
         }
@@ -151,7 +151,7 @@ namespace seal
         /**
         Returns a pointer to the end of the array data.
         */
-        inline T* end() noexcept
+        SEAL_NODISCARD inline T* end() noexcept
         {
             return size_ ? begin() + size_ : begin();
         }
@@ -159,7 +159,7 @@ namespace seal
         /**
         Returns a constant pointer to the end of the array data.
         */
-        inline const T* cend() const noexcept
+        SEAL_NODISCARD inline const T* cend() const noexcept
         {
             return size_ ? cbegin() + size_ : cbegin();
         }
@@ -167,7 +167,7 @@ namespace seal
         /**
         Returns a span pointing to the beginning of the IntArray.
         */
-        inline gsl::span<T> span()
+        SEAL_NODISCARD inline gsl::span<T> span()
         {
             return gsl::span<T>(
                 begin(), static_cast<std::ptrdiff_t>(size_));
@@ -176,7 +176,7 @@ namespace seal
         /**
         Returns a span pointing to the beginning of the IntArray.
         */
-        inline gsl::span<const T> span() const
+        SEAL_NODISCARD inline gsl::span<const T> span() const
         {
             return gsl::span<const T>(
                 cbegin(), static_cast<std::ptrdiff_t>(size_));
@@ -190,7 +190,7 @@ namespace seal
         @param[in] index The index of the array element
         @throws std::out_of_range if index is out of range
         */
-        inline const T &at(size_type index) const
+        SEAL_NODISCARD inline const T &at(size_type index) const
         {
             if (index >= size_)
             {
@@ -207,7 +207,7 @@ namespace seal
         @param[in] index The index of the array element
         @throws std::out_of_range if index is out of range
         */
-        inline T &at(size_type index)
+        SEAL_NODISCARD inline T &at(size_type index)
         {
             if (index >= size_)
             {
@@ -222,7 +222,7 @@ namespace seal
 
         @param[in] index The index of the array element
         */
-        inline const T &operator [](size_type index) const
+        SEAL_NODISCARD inline const T &operator [](size_type index) const
         {
             return data_[index];
         }
@@ -233,7 +233,7 @@ namespace seal
 
         @param[in] index The index of the array element
         */
-        inline T &operator [](size_type index)
+        SEAL_NODISCARD inline T &operator [](size_type index)
         {
             return data_[index];
         }
@@ -241,7 +241,7 @@ namespace seal
         /**
         Returns whether the array has size zero.
         */
-        inline bool empty() const noexcept
+        SEAL_NODISCARD inline bool empty() const noexcept
         {
             return (size_ == 0);
         }
@@ -249,7 +249,7 @@ namespace seal
         /**
         Returns the largest possible array size.
         */
-        inline size_type max_size() const noexcept
+        SEAL_NODISCARD inline size_type max_size() const noexcept
         {
             return std::numeric_limits<size_type>::max();
         }
@@ -257,7 +257,7 @@ namespace seal
         /**
         Returns the size of the array.
         */
-        inline size_type size() const noexcept
+        SEAL_NODISCARD inline size_type size() const noexcept
         {
             return size_;
         }
@@ -265,7 +265,7 @@ namespace seal
         /**
         Returns the capacity of the array.
         */
-        inline size_type capacity() const noexcept
+        SEAL_NODISCARD inline size_type capacity() const noexcept
         {
             return capacity_;
         }
@@ -273,7 +273,7 @@ namespace seal
         /**
         Returns the currently used MemoryPoolHandle.
         */
-        inline MemoryPoolHandle pool() const noexcept
+        SEAL_NODISCARD inline MemoryPoolHandle pool() const noexcept
         {
             return pool_;
         }

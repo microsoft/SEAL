@@ -12,9 +12,9 @@ namespace seal
 {
     namespace util
     {
-        inline void increment_uint_mod(const std::uint64_t *operand,
-            const std::uint64_t *modulus, std::size_t uint64_count,
-            std::uint64_t *result)
+        inline void increment_uint_mod(
+            const std::uint64_t *operand, const std::uint64_t *modulus,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand)
@@ -50,9 +50,9 @@ namespace seal
             }
         }
 
-        inline void decrement_uint_mod(const std::uint64_t *operand,
-            const std::uint64_t *modulus, std::size_t uint64_count,
-            std::uint64_t *result)
+        inline void decrement_uint_mod(
+            const std::uint64_t *operand, const std::uint64_t *modulus,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand)
@@ -86,9 +86,9 @@ namespace seal
             }
         }
 
-        inline void negate_uint_mod(const std::uint64_t *operand,
-            const std::uint64_t *modulus, std::size_t uint64_count,
-            std::uint64_t *result)
+        inline void negate_uint_mod(
+            const std::uint64_t *operand, const std::uint64_t *modulus,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand)
@@ -124,9 +124,9 @@ namespace seal
             }
         }
 
-        inline void div2_uint_mod(const std::uint64_t *operand,
-            const std::uint64_t *modulus, std::size_t uint64_count,
-            std::uint64_t *result)
+        inline void div2_uint_mod(
+            const std::uint64_t *operand, const std::uint64_t *modulus,
+            std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand)
@@ -170,9 +170,10 @@ namespace seal
             }
         }
 
-        inline void add_uint_uint_mod(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, const std::uint64_t *modulus,
-            std::size_t uint64_count, std::uint64_t *result)
+        inline void add_uint_uint_mod(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            const std::uint64_t *modulus, std::size_t uint64_count,
+            std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1)
@@ -216,9 +217,10 @@ namespace seal
             }
         }
 
-        inline void sub_uint_uint_mod(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, const std::uint64_t *modulus,
-            std::size_t uint64_count, std::uint64_t *result)
+        inline void sub_uint_uint_mod(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            const std::uint64_t *modulus, std::size_t uint64_count,
+            std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1)
@@ -260,8 +262,8 @@ namespace seal
             }
         }
 
-        bool try_invert_uint_mod(const std::uint64_t *operand,
-            const std::uint64_t *modulus, std::size_t uint64_count, std::uint64_t *result,
-            MemoryPool &pool);
+        bool try_invert_uint_mod(
+            const std::uint64_t *operand, const std::uint64_t *modulus,
+            std::size_t uint64_count, std::uint64_t *result, MemoryPool &pool);
     }
 }

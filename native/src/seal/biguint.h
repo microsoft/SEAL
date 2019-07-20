@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <string>
 #include "seal/memorymanager.h"
+#include "seal/util/defines.h"
 #include "seal/util/pointer.h"
 #include "seal/util/common.h"
 #include "seal/util/uintcore.h"
@@ -194,7 +195,7 @@ namespace seal
 
         @see BigUInt for a detailed description of aliased BigUInt.
         */
-        inline bool is_alias() const noexcept
+        SEAL_NODISCARD inline bool is_alias() const noexcept
         {
             return value_.is_alias();
         }
@@ -204,7 +205,7 @@ namespace seal
 
         @see significant_bit_count() to instead ignore leading zero bits.
         */
-        inline int bit_count() const noexcept
+        SEAL_NODISCARD inline int bit_count() const noexcept
         {
             return bit_count_;
         }
@@ -220,7 +221,7 @@ namespace seal
         @see uint64_count() to determine the number of std::uint64_t values
         in the backing array.
         */
-        inline std::uint64_t *data()
+        SEAL_NODISCARD inline std::uint64_t *data()
         {
             return value_.get();
         }
@@ -236,7 +237,7 @@ namespace seal
         @see uint64_count() to determine the number of std::uint64_t values in the
         backing array.
         */
-        inline const std::uint64_t *data() const noexcept
+        SEAL_NODISCARD inline const std::uint64_t *data() const noexcept
         {
             return value_.get();
         }
@@ -248,7 +249,7 @@ namespace seal
         occurs when the BigUInt is resized, destroyed, or the alias() function is
         called.
         */
-        inline gsl::span<std::uint64_t> data_span()
+        SEAL_NODISCARD inline gsl::span<std::uint64_t> data_span()
         {
             return gsl::span<std::uint64_t>(value_.get(),
                 static_cast<std::ptrdiff_t>(uint64_count()));
@@ -261,7 +262,7 @@ namespace seal
         occurs when the BigUInt is resized, destroyed, or the alias() function is
         called.
         */
-        inline gsl::span<const std::uint64_t> data_span() const
+        SEAL_NODISCARD inline gsl::span<const std::uint64_t> data_span() const
         {
             return gsl::span<const std::uint64_t>(value_.get(),
                 static_cast<std::ptrdiff_t>(uint64_count()));
@@ -273,7 +274,7 @@ namespace seal
 
         @see BigUInt for a detailed description of the format of the backing array.
         */
-        inline std::size_t byte_count() const
+        SEAL_NODISCARD inline std::size_t byte_count() const
         {
             return static_cast<std::size_t>(
                 util::divide_round_up(bit_count_, util::bits_per_byte));
@@ -285,7 +286,7 @@ namespace seal
 
         @see BigUInt for a detailed description of the format of the backing array.
         */
-        inline std::size_t uint64_count() const
+        SEAL_NODISCARD inline std::size_t uint64_count() const
         {
             return static_cast<std::size_t>(
                 util::divide_round_up(bit_count_, util::bits_per_uint64));
@@ -297,7 +298,7 @@ namespace seal
         @see bit_count() to instead return the bit count regardless of leading zero
         bits.
         */
-        inline int significant_bit_count() const
+        SEAL_NODISCARD inline int significant_bit_count() const
         {
             if (bit_count_ == 0)
             {
@@ -310,7 +311,7 @@ namespace seal
         Returns the BigUInt value as a double. Note that precision may be lost during
         the conversion.
         */
-        double to_double() const noexcept
+        SEAL_NODISCARD double to_double() const noexcept
         {
             const double TwoToThe64 = 18446744073709551616.0;
             double result = 0;
@@ -325,17 +326,17 @@ namespace seal
         /**
         Returns the BigUInt value as a hexadecimal string.
         */
-        std::string to_string() const;
+        SEAL_NODISCARD std::string to_string() const;
 
         /**
         Returns the BigUInt value as a decimal string.
         */
-        std::string to_dec_string() const;
+        SEAL_NODISCARD std::string to_dec_string() const;
 
         /**
         Returns whether or not the BigUInt has the value zero.
         */
-        inline bool is_zero() const
+        SEAL_NODISCARD inline bool is_zero() const
         {
             if (bit_count_ == 0)
             {
@@ -352,7 +353,8 @@ namespace seal
         @throws std::out_of_range if index is not within [0, byte_count())
         @see BigUInt for a detailed description of the format of the backing array.
         */
-        inline const SEAL_BYTE &operator [](std::size_t index) const
+        SEAL_NODISCARD inline const SEAL_BYTE &operator [](
+            std::size_t index) const
         {
             if (index >= byte_count())
             {
@@ -374,7 +376,7 @@ namespace seal
         @throws std::out_of_range if index is not within [0, byte_count())
         @see BigUInt for a detailed description of the format of the backing array.
         */
-        inline SEAL_BYTE &operator [](std::size_t index)
+        SEAL_NODISCARD inline SEAL_BYTE &operator [](std::size_t index)
         {
             if (index >= byte_count())
             {
@@ -533,7 +535,7 @@ namespace seal
         /**
         Returns a copy of the BigUInt value resized to the significant bit count.
         */
-        inline BigUInt operator +() const
+        SEAL_NODISCARD inline BigUInt operator +() const
         {
             BigUInt result;
             result = *this;
@@ -543,7 +545,7 @@ namespace seal
         /**
         Returns a negated copy of the BigUInt value. The bit count does not change.
         */
-        inline BigUInt operator -() const
+        SEAL_NODISCARD inline BigUInt operator -() const
         {
             BigUInt result(bit_count_);
             util::negate_uint(value_.get(), result.uint64_count(), result.data());
@@ -554,7 +556,7 @@ namespace seal
         /**
         Returns an inverted copy of the BigUInt value. The bit count does not change.
         */
-        inline BigUInt operator ~() const
+        SEAL_NODISCARD inline BigUInt operator ~() const
         {
             BigUInt result(bit_count_);
             util::not_uint(value_.get(), result.uint64_count(), result.data());
@@ -641,7 +643,7 @@ namespace seal
 
         @param[in] operand2 The second operand to add
         */
-        inline BigUInt operator +(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator +(const BigUInt &operand2) const
         {
             int result_bits = util::add_safe(std::max(significant_bit_count(),
                 operand2.significant_bit_count()), 1);
@@ -658,7 +660,7 @@ namespace seal
 
         @param[in] operand2 The second operand to add
         */
-        inline BigUInt operator +(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator +(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -672,7 +674,7 @@ namespace seal
 
         @param[in] operand2 The second operand to subtract
         */
-        inline BigUInt operator -(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator -(const BigUInt &operand2) const
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
@@ -689,7 +691,7 @@ namespace seal
 
         @param[in] operand2 The second operand to subtract
         */
-        inline BigUInt operator -(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator -(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -703,7 +705,7 @@ namespace seal
 
         @param[in] operand2 The second operand to multiply
         */
-        inline BigUInt operator *(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator *(const BigUInt &operand2) const
         {
             int result_bits = util::add_safe(significant_bit_count(),
                 operand2.significant_bit_count());
@@ -720,7 +722,7 @@ namespace seal
 
         @param[in] operand2 The second operand to multiply
         */
-        inline BigUInt operator *(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator *(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -735,7 +737,7 @@ namespace seal
         @param[in] operand2 The second operand to divide
         @throws std::invalid_argument if operand2 is zero
         */
-        BigUInt operator /(const BigUInt &operand2) const;
+        SEAL_NODISCARD BigUInt operator /(const BigUInt &operand2) const;
 
         /**
         Divides a BigUInt and an unsigned integer and returns the quotient. The
@@ -745,7 +747,7 @@ namespace seal
         @param[in] operand2 The second operand to divide
         @throws std::invalid_argument if operand2 is zero
         */
-        inline BigUInt operator /(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator /(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -759,7 +761,7 @@ namespace seal
 
         @param[in] operand2 The second operand to XOR
         */
-        inline BigUInt operator ^(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator ^(const BigUInt &operand2) const
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
@@ -767,16 +769,19 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::xor_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
+                util::xor_uint_uint(
+                    result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::xor_uint_uint(result.data(), value_.get(), uint64_count, result.data());
+                util::xor_uint_uint(
+                    result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::xor_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
+                util::xor_uint_uint(
+                    value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -789,7 +794,7 @@ namespace seal
 
         @param[in] operand2 The second operand to XOR
         */
-        inline BigUInt operator ^(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator ^(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -803,7 +808,7 @@ namespace seal
 
         @param[in] operand2 The second operand to AND
         */
-        inline BigUInt operator &(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator &(const BigUInt &operand2) const
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
@@ -811,16 +816,19 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::and_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
+                util::and_uint_uint(
+                    result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::and_uint_uint(result.data(), value_.get(), uint64_count, result.data());
+                util::and_uint_uint(
+                    result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::and_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
+                util::and_uint_uint(
+                    value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -833,7 +841,7 @@ namespace seal
 
         @param[in] operand2 The second operand to AND
         */
-        inline BigUInt operator &(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator &(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -847,7 +855,7 @@ namespace seal
 
         @param[in] operand2 The second operand to OR
         */
-        inline BigUInt operator |(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator |(const BigUInt &operand2) const
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
@@ -855,16 +863,19 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::or_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
+                util::or_uint_uint(
+                    result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::or_uint_uint(result.data(), value_.get(), uint64_count, result.data());
+                util::or_uint_uint(
+                    result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::or_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
+                util::or_uint_uint(
+                    value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -877,7 +888,7 @@ namespace seal
 
         @param[in] operand2 The second operand to OR
         */
-        inline BigUInt operator |(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator |(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -891,7 +902,7 @@ namespace seal
 
         @param[in] compare The value to compare against
         */
-        inline int compareto(const BigUInt &compare) const
+        SEAL_NODISCARD inline int compareto(const BigUInt &compare) const
         {
             return util::compare_uint_uint(value_.get(), uint64_count(),
                 compare.value_.get(), compare.uint64_count());
@@ -904,7 +915,7 @@ namespace seal
 
         @param[in] compare The value to compare against
         */
-        inline int compareto(std::uint64_t compare) const
+        SEAL_NODISCARD inline int compareto(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -917,7 +928,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator <(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator <(const BigUInt &compare) const
         {
             return util::compare_uint_uint(value_.get(), uint64_count(),
                 compare.value_.get(), compare.uint64_count()) < 0;
@@ -929,7 +940,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator <(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator <(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -942,7 +953,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator >(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator >(const BigUInt &compare) const
         {
             return util::compare_uint_uint(value_.get(), uint64_count(),
                 compare.value_.get(), compare.uint64_count()) > 0;
@@ -954,7 +965,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator >(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator >(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -967,7 +978,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator <=(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator <=(const BigUInt &compare) const
         {
             return util::compare_uint_uint(value_.get(), uint64_count(),
                 compare.value_.get(), compare.uint64_count()) <= 0;
@@ -979,7 +990,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator <=(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator <=(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -992,7 +1003,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator >=(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator >=(const BigUInt &compare) const
         {
             return util::compare_uint_uint(value_.get(), uint64_count(),
                 compare.value_.get(), compare.uint64_count()) >= 0;
@@ -1004,7 +1015,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator >=(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator >=(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -1017,7 +1028,7 @@ namespace seal
 
         @param[in] compare The value to compare against
         */
-        inline bool operator ==(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator ==(const BigUInt &compare) const
         {
             return util::compare_uint_uint(value_.get(), uint64_count(),
                 compare.value_.get(), compare.uint64_count()) == 0;
@@ -1029,7 +1040,7 @@ namespace seal
 
         @param[in] compare The value to compare against
         */
-        inline bool operator ==(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator ==(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -1042,7 +1053,7 @@ namespace seal
 
         @param[in] compare The value to compare against
         */
-        inline bool operator !=(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator !=(const BigUInt &compare) const
         {
             return !(operator ==(compare));
         }
@@ -1053,7 +1064,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        inline bool operator !=(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator !=(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -1068,7 +1079,7 @@ namespace seal
         @param[in] shift The number of bits to shift by
         @throws std::invalid_argument if shift is negative
         */
-        inline BigUInt operator <<(int shift) const
+        SEAL_NODISCARD inline BigUInt operator <<(int shift) const
         {
             if (shift < 0)
             {
@@ -1090,7 +1101,7 @@ namespace seal
         @param[in] shift The number of bits to shift by
         @throws std::invalid_argument if shift is negative
         */
-        inline BigUInt operator >>(int shift) const
+        SEAL_NODISCARD inline BigUInt operator >>(int shift) const
         {
             if (shift < 0)
             {
@@ -1470,7 +1481,7 @@ namespace seal
         @throws std::Invalid_argument if modulus is not greater than the BigUInt value
         @throws std::Invalid_argument if the BigUInt value and modulus are not co-prime
         */
-        inline BigUInt modinv(const BigUInt &modulus) const
+        SEAL_NODISCARD inline BigUInt modinv(const BigUInt &modulus) const
         {
             if (modulus.is_zero())
             {
@@ -1501,7 +1512,7 @@ namespace seal
         @throws std::Invalid_argument if modulus is not greater than the BigUInt value
         @throws std::Invalid_argument if the BigUInt value and modulus are not co-prime
         */
-        inline BigUInt modinv(std::uint64_t modulus) const
+        SEAL_NODISCARD inline BigUInt modinv(std::uint64_t modulus) const
         {
             BigUInt modulusuint;
             modulusuint = modulus;
@@ -1594,7 +1605,7 @@ namespace seal
 
         @param[in] value The value to initialized the BigUInt to
         */
-        inline static BigUInt of(std::uint64_t value)
+        SEAL_NODISCARD inline static BigUInt of(std::uint64_t value)
         {
             BigUInt result;
             result = value;

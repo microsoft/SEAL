@@ -42,7 +42,7 @@ namespace seal
 
         void ecb_encrypt(const aes_block &plaintext, aes_block &ciphertext) const;
 
-        inline aes_block ecb_encrypt(const aes_block &plaintext) const
+        SEAL_NODISCARD inline aes_block ecb_encrypt(const aes_block &plaintext) const
         {
             aes_block ret;
             ecb_encrypt(plaintext, ret);
@@ -72,7 +72,7 @@ namespace seal
 
         void ecb_decrypt(const aes_block &ciphertext, aes_block &plaintext);
 
-        inline aes_block ecb_decrypt(const aes_block &ciphertext)
+        SEAL_NODISCARD inline aes_block ecb_decrypt(const aes_block &ciphertext)
         {
             aes_block ret;
             ecb_decrypt(ciphertext, ret);

@@ -184,7 +184,7 @@ namespace Microsoft.Research.SEAL
         ///     the amount of computation that the scheme can perform (bigger is better), and the
         ///     security level (bigger is worse). In Microsoft SEAL each of the prime numbers in
         ///     the coefficient modulus must be at most 60 bits, and must be congruent to 1 modulo
-        ///     2*degree(PolyModulus).
+        ///     2*PolyModulusDegree.
         /// </remarks>
         /// <exception cref="ArgumentNullException">if the value being set is null</exception>
         /// <exception cref="ArgumentException">if the value being set is invalid</exception>

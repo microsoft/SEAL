@@ -99,7 +99,7 @@ namespace seal
         Generates a new uniform unsigned 32-bit random number. Note that the
         implementation does not need to be thread-safe.
         */
-        virtual std::uint32_t generate() override
+        SEAL_NODISCARD virtual std::uint32_t generate() override
         {
             std::uint32_t result;
             std::copy_n(buffer_head_, util::bytes_per_uint32,
@@ -166,7 +166,8 @@ namespace seal
         to ensure the returned instance is destroyed once it is no longer in-use
         to prevent a memory leak.
         */
-        virtual auto create() -> std::shared_ptr<UniformRandomGenerator> override;
+        SEAL_NODISCARD virtual auto create()
+            -> std::shared_ptr<UniformRandomGenerator> override;
 
         /**
         Destroys the random number generator factory.
@@ -174,7 +175,7 @@ namespace seal
         virtual ~FastPRNGFactory() = default;
 
     private:
-        std::uint64_t random_uint64() const noexcept
+        SEAL_NODISCARD std::uint64_t random_uint64() const noexcept
         {
             std::random_device rd;
             return (static_cast<std::uint64_t>(rd()) << 32)
@@ -203,7 +204,7 @@ namespace seal
         /**
         Returns a reference to the random number generator.
         */
-        inline const RNG &generator() const noexcept
+        SEAL_NODISCARD inline const RNG &generator() const noexcept
         {
             return generator_;
         }
@@ -211,7 +212,7 @@ namespace seal
         /**
         Returns a reference to the random number generator.
         */
-        inline RNG &generator() noexcept
+        SEAL_NODISCARD inline RNG &generator() noexcept
         {
             return generator_;
         }
@@ -219,7 +220,7 @@ namespace seal
         /**
         Generates a new uniform unsigned 32-bit random number.
         */
-        std::uint32_t generate() noexcept override
+        SEAL_NODISCARD std::uint32_t generate() noexcept override
         {
             SEAL_IF_CONSTEXPR (RNG::min() == 0 && RNG::max() >= UINT32_MAX)
             {
@@ -275,7 +276,8 @@ namespace seal
         /**
         Creates a new uniform random number generator.
         */
-        auto create() -> std::shared_ptr<UniformRandomGenerator> override
+        SEAL_NODISCARD auto create()
+            -> std::shared_ptr<UniformRandomGenerator> override
         {
             return std::shared_ptr<UniformRandomGenerator>{
                 new StandardRandomAdapter<RNG>() };

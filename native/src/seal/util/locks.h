@@ -16,27 +16,27 @@ namespace seal
 
         using WriterLock = std::unique_lock<std::shared_mutex>;
 
-        class ReaderWriterLocker
+        class SEAL_NODISCARD ReaderWriterLocker
         {
         public:
             ReaderWriterLocker() = default;
 
-            inline ReaderLock acquire_read()
+            SEAL_NODISCARD inline ReaderLock acquire_read()
             {
                 return ReaderLock(rw_lock_mutex_);
             }
 
-            inline WriterLock acquire_write()
+            SEAL_NODISCARD inline WriterLock acquire_write()
             {
                 return WriterLock(rw_lock_mutex_);
             }
 
-            inline ReaderLock try_acquire_read() noexcept
+            SEAL_NODISCARD inline ReaderLock try_acquire_read() noexcept
             {
                 return ReaderLock(rw_lock_mutex_, std::try_to_lock);
             }
 
-            inline WriterLock try_acquire_write() noexcept
+            SEAL_NODISCARD inline WriterLock try_acquire_write() noexcept
             {
                 return WriterLock(rw_lock_mutex_, std::try_to_lock);
             }
@@ -65,7 +65,7 @@ namespace seal
 
         class ReaderWriterLocker;
 
-        class ReaderLock
+        class SEAL_NODISCARD ReaderLock
         {
         public:
             ReaderLock() noexcept : locker_(nullptr)
@@ -93,7 +93,7 @@ namespace seal
                 unlock();
             }
 
-            inline bool owns_lock() const noexcept
+            SEAL_NODISCARD inline bool owns_lock() const noexcept
             {
                 return locker_ != nullptr;
             }
@@ -120,7 +120,7 @@ namespace seal
             ReaderWriterLocker *locker_;
         };
 
-        class WriterLock
+        class SEAL_NODISCARD WriterLock
         {
         public:
             WriterLock() noexcept : locker_(nullptr)
@@ -148,7 +148,7 @@ namespace seal
                 unlock();
             }
 
-            inline bool owns_lock() const noexcept
+            SEAL_NODISCARD inline bool owns_lock() const noexcept
             {
                 return locker_ != nullptr;
             }
@@ -175,7 +175,7 @@ namespace seal
             ReaderWriterLocker *locker_;
         };
 
-        class ReaderWriterLocker
+        class SEAL_NODISCARD ReaderWriterLocker
         {
             friend class ReaderLock;
 
@@ -186,22 +186,22 @@ namespace seal
             {
             }
 
-            inline ReaderLock acquire_read() noexcept
+            SEAL_NODISCARD inline ReaderLock acquire_read() noexcept
             {
                 return ReaderLock(*this);
             }
 
-            inline WriterLock acquire_write() noexcept
+            SEAL_NODISCARD inline WriterLock acquire_write() noexcept
             {
                 return WriterLock(*this);
             }
 
-            inline ReaderLock try_acquire_read() noexcept
+            SEAL_NODISCARD inline ReaderLock try_acquire_read() noexcept
             {
                 return ReaderLock(*this, try_to_lock);
             }
 
-            inline WriterLock try_acquire_write() noexcept
+            SEAL_NODISCARD inline WriterLock try_acquire_write() noexcept
             {
                 return WriterLock(*this, try_to_lock);
             }
@@ -241,7 +241,8 @@ namespace seal
             } while (locker_ == nullptr);
         }
 
-        inline bool ReaderLock::try_acquire(ReaderWriterLocker &locker) noexcept
+        SEAL_NODISCARD inline bool ReaderLock::try_acquire(
+            ReaderWriterLocker &locker) noexcept
         {
             unlock();
             locker.reader_locks_.fetch_add(1, std::memory_order_acquire);
@@ -267,7 +268,8 @@ namespace seal
             while (locker.reader_locks_.load(std::memory_order_acquire) != 0);
         }
 
-        inline bool WriterLock::try_acquire(ReaderWriterLocker &locker) noexcept
+        SEAL_NODISCARD inline bool WriterLock::try_acquire(
+            ReaderWriterLocker &locker) noexcept
         {
             unlock();
             bool expected = false;

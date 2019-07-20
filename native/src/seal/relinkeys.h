@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include "seal/util/defines.h"
 #include "seal/ciphertext.h"
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
@@ -59,7 +60,8 @@ namespace seal
         @param[in] key_power The power of the secret key
         @throws std::invalid_argument if key_power is less than 2
         */
-        inline static std::size_t get_index(std::size_t key_power)
+        SEAL_NODISCARD inline static std::size_t get_index(
+            std::size_t key_power)
         {
             if (key_power < 2)
             {
@@ -75,7 +77,7 @@ namespace seal
         @param[in] key_power The power of the secret key
         @throws std::invalid_argument if key_power is less than 2
         */
-        inline bool has_key(std::size_t key_power) const
+        SEAL_NODISCARD inline bool has_key(std::size_t key_power) const
         {
             std::size_t index = get_index(key_power);
             return data().size() > index && !data()[index].empty();
@@ -88,7 +90,7 @@ namespace seal
         @param[in] key_power The power of the secret key
         @throws std::invalid_argument if the key corresponding to key_power does not exist
         */
-        inline auto &key(std::size_t key_power) const
+        SEAL_NODISCARD inline auto &key(std::size_t key_power) const
         {
             return KSwitchKeys::data(get_index(key_power));
         }

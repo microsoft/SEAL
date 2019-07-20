@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include "seal/util/defines.h"
 #include "seal/ciphertext.h"
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
@@ -46,7 +47,8 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if galois_elt is not valid
         */
-        inline static std::size_t get_index(std::uint64_t galois_elt)
+        SEAL_NODISCARD inline static std::size_t get_index(
+            std::uint64_t galois_elt)
         {
             // Verify parameters
             if (!(galois_elt & 1))
@@ -62,7 +64,7 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if galois_elt is not valid
         */
-        inline bool has_key(std::uint64_t galois_elt) const
+        SEAL_NODISCARD inline bool has_key(std::uint64_t galois_elt) const
         {
             std::size_t index = get_index(galois_elt);
             return data().size() > index && !data()[index].empty();
@@ -75,7 +77,7 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if the key corresponding to galois_elt does not exist
         */
-        inline const auto &key(std::uint64_t galois_elt) const
+        SEAL_NODISCARD inline const auto &key(std::uint64_t galois_elt) const
         {
             return KSwitchKeys::data(get_index(galois_elt));
         }

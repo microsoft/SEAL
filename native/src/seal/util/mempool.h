@@ -40,22 +40,22 @@ namespace seal
             {
             }
 
-            inline SEAL_BYTE *data() noexcept
+            SEAL_NODISCARD inline SEAL_BYTE *data() noexcept
             {
                 return data_;
             }
 
-            inline const SEAL_BYTE *data() const noexcept
+            SEAL_NODISCARD inline const SEAL_BYTE *data() const noexcept
             {
                 return data_;
             }
 
-            inline MemoryPoolItem* &next() noexcept
+            SEAL_NODISCARD inline MemoryPoolItem* &next() noexcept
             {
                 return next_;
             }
 
-            inline const MemoryPoolItem *next() const noexcept
+            SEAL_NODISCARD inline const MemoryPoolItem *next() const noexcept
             {
                 return next_;
             }
@@ -118,13 +118,13 @@ namespace seal
             ~MemoryPoolHeadMT() noexcept override;
 
             // Byte size of the allocations (items) owned by this pool
-            inline std::size_t item_byte_count() const noexcept override
+            SEAL_NODISCARD inline std::size_t item_byte_count() const noexcept override
             {
                 return item_byte_count_;
             }
 
             // Returns the total number of items allocated
-            inline std::size_t item_count() const noexcept override
+            SEAL_NODISCARD inline std::size_t item_count() const noexcept override
             {
                 return item_count_;
             }
@@ -173,18 +173,18 @@ namespace seal
             ~MemoryPoolHeadST() noexcept override;
 
             // Byte size of the allocations (items) owned by this pool
-            inline std::size_t item_byte_count() const noexcept override
+            SEAL_NODISCARD inline std::size_t item_byte_count() const noexcept override
             {
                 return item_byte_count_;
             }
 
             // Returns the total number of items allocated
-            inline std::size_t item_count() const noexcept override
+            SEAL_NODISCARD inline std::size_t item_count() const noexcept override
             {
                 return item_count_;
             }
 
-            MemoryPoolItem *get() override;
+            SEAL_NODISCARD MemoryPoolItem *get() override;
 
             inline void add(MemoryPoolItem *new_first) noexcept override
             {
@@ -244,15 +244,16 @@ namespace seal
 
             ~MemoryPoolMT() noexcept override;
 
-            Pointer<SEAL_BYTE> get_for_byte_count(std::size_t byte_count) override;
+            SEAL_NODISCARD Pointer<SEAL_BYTE> get_for_byte_count(
+                std::size_t byte_count) override;
 
-            inline std::size_t pool_count() const override
+            SEAL_NODISCARD inline std::size_t pool_count() const override
             {
                 ReaderLock lock(pools_locker_.acquire_read());
                 return pools_.size();
             }
 
-            std::size_t alloc_byte_count() const override;
+            SEAL_NODISCARD std::size_t alloc_byte_count() const override;
 
         protected:
             MemoryPoolMT(const MemoryPoolMT &copy) = delete;
@@ -276,9 +277,10 @@ namespace seal
 
             ~MemoryPoolST() noexcept override;
 
-            Pointer<SEAL_BYTE> get_for_byte_count(std::size_t byte_count) override;
+            SEAL_NODISCARD Pointer<SEAL_BYTE> get_for_byte_count(
+                std::size_t byte_count) override;
 
-            inline std::size_t pool_count() const override
+            SEAL_NODISCARD inline std::size_t pool_count() const override
             {
                 return pools_.size();
             }

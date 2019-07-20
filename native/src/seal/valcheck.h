@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "seal/util/defines.h"
 #include "seal/context.h"
 #include <memory>
 
@@ -26,7 +27,7 @@ namespace seal
     @param[in] in The plaintext to check
     @param[in] context The SEALContext
     */
-    bool is_metadata_valid_for(
+    SEAL_NODISCARD bool is_metadata_valid_for(
         const Plaintext &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -40,7 +41,7 @@ namespace seal
     @param[in] in The ciphertext to check
     @param[in] context The SEALContext
     */
-    bool is_metadata_valid_for(
+    SEAL_NODISCARD bool is_metadata_valid_for(
         const Ciphertext &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -54,7 +55,7 @@ namespace seal
     @param[in] in The secret key to check
     @param[in] context The SEALContext
     */
-    bool is_metadata_valid_for(
+    SEAL_NODISCARD bool is_metadata_valid_for(
         const SecretKey &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -68,7 +69,7 @@ namespace seal
     @param[in] in The public key to check
     @param[in] context The SEALContext
     */
-    bool is_metadata_valid_for(
+    SEAL_NODISCARD bool is_metadata_valid_for(
         const PublicKey &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -82,7 +83,7 @@ namespace seal
     @param[in] in The KSwitchKeys to check
     @param[in] context The SEALContext
     */
-    bool is_metadata_valid_for(
+    SEAL_NODISCARD bool is_metadata_valid_for(
         const KSwitchKeys &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -96,7 +97,7 @@ namespace seal
     @param[in] in The RelinKeys to check
     @param[in] context The SEALContext
     */
-    bool is_metadata_valid_for(
+    SEAL_NODISCARD bool is_metadata_valid_for(
         const RelinKeys &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -110,7 +111,7 @@ namespace seal
     @param[in] in The RelinKeys to check
     @param[in] context The SEALContext
     */
-    bool is_metadata_valid_for(
+    SEAL_NODISCARD bool is_metadata_valid_for(
         const GaloisKeys &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -123,7 +124,7 @@ namespace seal
     @param[in] in The plaintext to check
     @param[in] context The SEALContext
     */
-    bool is_valid_for(
+    SEAL_NODISCARD bool is_valid_for(
         const Plaintext &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -136,7 +137,7 @@ namespace seal
     @param[in] in The ciphertext to check
     @param[in] context The SEALContext
     */
-    bool is_valid_for(
+    SEAL_NODISCARD bool is_valid_for(
         const Ciphertext &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -149,7 +150,7 @@ namespace seal
     @param[in] in The secret key to check
     @param[in] context The SEALContext
     */
-    bool is_valid_for(
+    SEAL_NODISCARD bool is_valid_for(
         const SecretKey &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -162,7 +163,7 @@ namespace seal
     @param[in] in The public key to check
     @param[in] context The SEALContext
     */
-    bool is_valid_for(
+    SEAL_NODISCARD bool is_valid_for(
         const PublicKey &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -175,7 +176,7 @@ namespace seal
     @param[in] in The KSwitchKeys to check
     @param[in] context The SEALContext
     */
-    bool is_valid_for(
+    SEAL_NODISCARD bool is_valid_for(
         const KSwitchKeys &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -188,7 +189,7 @@ namespace seal
     @param[in] in The RelinKeys to check
     @param[in] context The SEALContext
     */
-    bool is_valid_for(
+    SEAL_NODISCARD bool is_valid_for(
         const RelinKeys &in,
         std::shared_ptr<const SEALContext> context);
 
@@ -201,7 +202,7 @@ namespace seal
     @param[in] in The GaloisKeys to check
     @param[in] context The SEALContext
     */
-    bool is_valid_for(
+    SEAL_NODISCARD bool is_valid_for(
         const GaloisKeys &in,
         std::shared_ptr<const SEALContext> context);
 }

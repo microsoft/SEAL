@@ -4,16 +4,17 @@
 #pragma once
 
 #include <memory>
+#include "seal/util/defines.h"
 #include "seal/randomgen.h"
 #include "seal/encryptionparams.h"
 #include "seal/context.h"
-#include "seal/util/smallntt.h"
 #include "seal/memorymanager.h"
 #include "seal/ciphertext.h"
 #include "seal/plaintext.h"
 #include "seal/secretkey.h"
-#include "seal/util/baseconverter.h"
 #include "seal/smallmodulus.h"
+#include "seal/util/smallntt.h"
+#include "seal/util/baseconverter.h"
 #include "seal/util/locks.h"
 
 namespace seal
@@ -46,7 +47,7 @@ namespace seal
     to be in the default NTT form, and will throw an exception if this is not the
     case.
     */
-    class Decryptor
+    class SEAL_NODISCARD Decryptor
     {
     public:
         /**
@@ -65,16 +66,19 @@ namespace seal
         Decrypts a Ciphertext and stores the result in the destination parameter.
 
         @param[in] encrypted The ciphertext to decrypt
-        @param[out] destination The plaintext to overwrite with the decrypted ciphertext
-        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
+        @param[out] destination The plaintext to overwrite with the decrypted
+        ciphertext
+        @throws std::invalid_argument if encrypted is not valid for the encryption
+        parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         */
         void decrypt(const Ciphertext &encrypted, Plaintext &destination);
 
         /*
-        Computes the invariant noise budget (in bits) of a ciphertext. The invariant
-        noise budget measures the amount of room there is for the noise to grow while
-        ensuring correct decryptions. This function works only with the BFV scheme.
+        Computes the invariant noise budget (in bits) of a ciphertext. The
+        invariant noise budget measures the amount of room there is for the noise
+        to grow while ensuring correct decryptions. This function works only with
+        the BFV scheme.
 
         @par Invariant Noise Budget
         The invariant noise polynomial of a ciphertext is a rational coefficient
@@ -90,10 +94,11 @@ namespace seal
 
         @param[in] encrypted The ciphertext
         @throws std::invalid_argument if the scheme is not BFV
-        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is not valid for the encryption
+        parameters
         @throws std::invalid_argument if encrypted is in NTT form
         */
-        int invariant_noise_budget(const Ciphertext &encrypted);
+        SEAL_NODISCARD int invariant_noise_budget(const Ciphertext &encrypted);
 
     private:
         void bfv_decrypt(const Ciphertext &encrypted, Plaintext &destination,

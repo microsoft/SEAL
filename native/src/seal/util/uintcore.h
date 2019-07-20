@@ -16,11 +16,12 @@ namespace seal
 {
     namespace util
     {
-        std::string uint_to_hex_string(const std::uint64_t *value,
-            std::size_t uint64_count);
+        SEAL_NODISCARD std::string uint_to_hex_string(
+            const std::uint64_t *value, std::size_t uint64_count);
 
-        std::string uint_to_dec_string(const std::uint64_t *value,
-            std::size_t uint64_count, MemoryPool &pool);
+        SEAL_NODISCARD std::string uint_to_dec_string(
+            const std::uint64_t *value, std::size_t uint64_count,
+            MemoryPool &pool);
 
         inline void hex_string_to_uint(const char *hex_string,
             int char_count, std::size_t uint64_count, std::uint64_t *result)
@@ -64,7 +65,8 @@ namespace seal
             }
         }
 
-        inline auto allocate_uint(std::size_t uint64_count, MemoryPool &pool)
+        SEAL_NODISCARD inline auto allocate_uint(
+            std::size_t uint64_count, MemoryPool &pool)
         {
             return allocate<std::uint64_t>(uint64_count, pool);
         }
@@ -80,7 +82,8 @@ namespace seal
             std::fill_n(result, uint64_count, std::uint64_t(0));
         }
 
-        inline auto allocate_zero_uint(std::size_t uint64_count, MemoryPool &pool)
+        SEAL_NODISCARD inline auto allocate_zero_uint(
+            std::size_t uint64_count, MemoryPool &pool)
         {
             auto result(allocate_uint(uint64_count, pool));
             set_zero_uint(uint64_count, result.get());
@@ -90,8 +93,8 @@ namespace seal
             // return allocate<std::uint64_t>(uint64_count, pool, std::uint64_t(0));
         }
 
-        inline void set_uint(std::uint64_t value, std::size_t uint64_count,
-            std::uint64_t *result)
+        inline void set_uint(
+            std::uint64_t value, std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!uint64_count)
@@ -130,8 +133,8 @@ namespace seal
             std::copy_n(value, uint64_count, result);
         }
 
-        inline bool is_zero_uint(const std::uint64_t *value,
-            std::size_t uint64_count)
+        SEAL_NODISCARD inline bool is_zero_uint(
+            const std::uint64_t *value, std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
             if (!value && uint64_count)
@@ -143,8 +146,9 @@ namespace seal
                 [](auto coeff) -> bool { return !coeff; });
         }
 
-        inline bool is_equal_uint(const std::uint64_t *value,
-            std::size_t uint64_count, std::uint64_t scalar)
+        SEAL_NODISCARD inline bool is_equal_uint(
+            const std::uint64_t *value, std::size_t uint64_count,
+            std::uint64_t scalar)
         {
 #ifdef SEAL_DEBUG
             if (!value)
@@ -164,8 +168,8 @@ namespace seal
                 [](auto coeff) -> bool { return !coeff; });
         }
 
-        inline bool is_high_bit_set_uint(const std::uint64_t *value,
-            std::size_t uint64_count)
+        SEAL_NODISCARD inline bool is_high_bit_set_uint(
+            const std::uint64_t *value, std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
             if (!value)
@@ -188,7 +192,8 @@ namespace seal
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
 #endif
-        inline bool is_bit_set_uint(const std::uint64_t *value,
+        SEAL_NODISCARD inline bool is_bit_set_uint(
+            const std::uint64_t *value,
             std::size_t uint64_count SEAL_MAYBE_UNUSED, int bit_index)
         {
 #ifdef SEAL_DEBUG
@@ -244,7 +249,7 @@ namespace seal
 #pragma clang diagnostic pop
 #endif
 #endif
-        inline int get_significant_bit_count_uint(
+        SEAL_NODISCARD inline int get_significant_bit_count_uint(
             const std::uint64_t *value, std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
@@ -272,7 +277,7 @@ namespace seal
                 get_significant_bit_count(*value);
         }
 
-        inline std::size_t get_significant_uint64_count_uint(
+        SEAL_NODISCARD inline std::size_t get_significant_uint64_count_uint(
             const std::uint64_t *value, std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
@@ -294,7 +299,7 @@ namespace seal
             return uint64_count;
         }
 
-        inline std::size_t get_nonzero_uint64_count_uint(
+        SEAL_NODISCARD inline std::size_t get_nonzero_uint64_count_uint(
             const std::uint64_t *value, std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
@@ -351,7 +356,7 @@ namespace seal
             }
         }
 
-        inline int get_power_of_two(std::uint64_t value)
+        SEAL_NODISCARD inline int get_power_of_two(std::uint64_t value)
         {
             if (value == 0 || (value & (value - 1)) != 0)
             {
@@ -363,7 +368,8 @@ namespace seal
             return static_cast<int>(result);
         }
 
-        inline int get_power_of_two_minus_one(std::uint64_t value)
+        SEAL_NODISCARD inline int get_power_of_two_minus_one(
+            std::uint64_t value)
         {
             if (value == 0xFFFFFFFFFFFFFFFF)
             {
@@ -372,8 +378,8 @@ namespace seal
             return get_power_of_two(value + 1);
         }
 
-        inline int get_power_of_two_uint(const std::uint64_t *operand,
-            std::size_t uint64_count)
+        SEAL_NODISCARD inline int get_power_of_two_uint(
+            const std::uint64_t *operand, std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
             if (!operand && uint64_count)
@@ -408,7 +414,7 @@ namespace seal
                     mul_safe(long_index, bits_per_uint64))), zeros, -1);
         }
 
-        inline int get_power_of_two_minus_one_uint(
+        SEAL_NODISCARD inline int get_power_of_two_minus_one_uint(
             const std::uint64_t *operand, std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
@@ -451,7 +457,8 @@ namespace seal
         inline void filter_highbits_uint(std::uint64_t *operand,
             std::size_t uint64_count, int bit_count)
         {
-            std::size_t bits_per_uint64_sz = static_cast<std::size_t>(bits_per_uint64);
+            std::size_t bits_per_uint64_sz =
+                static_cast<std::size_t>(bits_per_uint64);
 #ifdef SEAL_DEBUG
             if (!operand && uint64_count)
             {
@@ -478,9 +485,9 @@ namespace seal
             }
         }
 
-        inline auto duplicate_uint_if_needed(const std::uint64_t *input,
-            std::size_t uint64_count, std::size_t new_uint64_count,
-            bool force, MemoryPool &pool)
+        SEAL_NODISCARD inline auto duplicate_uint_if_needed(
+            const std::uint64_t *input, std::size_t uint64_count,
+            std::size_t new_uint64_count, bool force, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (!input && uint64_count)
@@ -498,8 +505,9 @@ namespace seal
             return ConstPointer<std::uint64_t>(std::move(allocation));
         }
 
-        inline int compare_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count)
+        SEAL_NODISCARD inline int compare_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && uint64_count)
@@ -522,9 +530,9 @@ namespace seal
             return result;
         }
 
-        inline int compare_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count)
+        SEAL_NODISCARD inline int compare_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && operand1_uint64_count)
@@ -562,51 +570,57 @@ namespace seal
             return result;
         }
 
-        inline bool is_greater_than_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count)
+        SEAL_NODISCARD inline bool is_greater_than_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count)
         {
             return compare_uint_uint(operand1, operand2, uint64_count) > 0;
         }
 
-        inline bool is_greater_than_or_equal_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count)
+        SEAL_NODISCARD inline bool is_greater_than_or_equal_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count)
         {
             return compare_uint_uint(operand1, operand2, uint64_count) >= 0;
         }
 
-        inline bool is_less_than_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count)
+        SEAL_NODISCARD inline bool is_less_than_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count)
         {
             return compare_uint_uint(operand1, operand2, uint64_count) < 0;
         }
 
-        inline bool is_less_than_or_equal_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count)
+        SEAL_NODISCARD inline bool is_less_than_or_equal_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count)
         {
             return compare_uint_uint(operand1, operand2, uint64_count) <= 0;
         }
 
-        inline bool is_equal_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count)
+        SEAL_NODISCARD inline bool is_equal_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count)
         {
             return compare_uint_uint(operand1, operand2, uint64_count) == 0;
         }
 
-        inline bool is_not_equal_uint_uint(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t uint64_count)
+        SEAL_NODISCARD inline bool is_not_equal_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2,
+            std::size_t uint64_count)
         {
             return compare_uint_uint(operand1, operand2, uint64_count) != 0;
         }
 
-        inline bool is_greater_than_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count)
+        SEAL_NODISCARD inline bool is_greater_than_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count)
         {
             return compare_uint_uint(operand1, operand1_uint64_count, operand2,
                 operand2_uint64_count) > 0;
         }
 
-        inline bool is_greater_than_or_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_greater_than_or_equal_uint_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count,
             const std::uint64_t *operand2, std::size_t operand2_uint64_count)
         {
@@ -614,39 +628,40 @@ namespace seal
                 operand2_uint64_count) >= 0;
         }
 
-        inline bool is_less_than_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count)
+        SEAL_NODISCARD inline bool is_less_than_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count)
         {
             return compare_uint_uint(operand1, operand1_uint64_count, operand2,
                 operand2_uint64_count) < 0;
         }
 
-        inline bool is_less_than_or_equal_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count)
+        SEAL_NODISCARD inline bool is_less_than_or_equal_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count)
         {
             return compare_uint_uint(operand1, operand1_uint64_count, operand2,
                 operand2_uint64_count) <= 0;
         }
 
-        inline bool is_equal_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count)
+        SEAL_NODISCARD inline bool is_equal_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count)
         {
             return compare_uint_uint(operand1, operand1_uint64_count, operand2,
                 operand2_uint64_count) == 0;
         }
 
-        inline bool is_not_equal_uint_uint(const std::uint64_t *operand1,
-            std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count)
+        SEAL_NODISCARD inline bool is_not_equal_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count,
+            const std::uint64_t *operand2, std::size_t operand2_uint64_count)
         {
             return compare_uint_uint(operand1, operand1_uint64_count, operand2,
                 operand2_uint64_count) != 0;
         }
 
-        inline std::uint64_t hamming_weight(std::uint64_t value)
+        SEAL_NODISCARD inline std::uint64_t hamming_weight(
+            std::uint64_t value)
         {
             std::uint64_t res = 0;
             while (value)
@@ -657,7 +672,8 @@ namespace seal
             return res;
         }
 
-        inline std::uint64_t hamming_weight_split(std::uint64_t value)
+        SEAL_NODISCARD inline std::uint64_t hamming_weight_split(
+            std::uint64_t value)
         {
             std::uint64_t hwx = hamming_weight(value);
             std::uint64_t target = (hwx + 1) >> 1;

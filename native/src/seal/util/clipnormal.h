@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "seal/util/defines.h"
 #include <random>
 #include <cmath>
 
@@ -17,18 +18,20 @@ namespace seal
 
             using param_type = ClippedNormalDistribution;
 
-            ClippedNormalDistribution(result_type mean, result_type standard_deviation,
+            ClippedNormalDistribution(
+                result_type mean, result_type standard_deviation,
                 result_type max_deviation);
 
             template <typename RNG>
-            inline result_type operator()(RNG &engine, const param_type &parm) noexcept
+            SEAL_NODISCARD inline result_type operator()(
+                RNG &engine, const param_type &parm) noexcept
             {
                 param(parm);
                 return operator()(engine);
             }
 
             template <typename RNG>
-            inline result_type operator()(RNG &engine) noexcept
+            SEAL_NODISCARD inline result_type operator()(RNG &engine) noexcept
             {
                 result_type mean = normal_.mean();
                 while (true)
@@ -42,32 +45,32 @@ namespace seal
                 }
             }
 
-            inline result_type mean() const noexcept
+            SEAL_NODISCARD inline result_type mean() const noexcept
             {
                 return normal_.mean();
             }
 
-            inline result_type standard_deviation() const noexcept
+            SEAL_NODISCARD inline result_type standard_deviation() const noexcept
             {
                 return normal_.stddev();
             }
 
-            inline result_type max_deviation() const noexcept
+            SEAL_NODISCARD inline result_type max_deviation() const noexcept
             {
                 return max_deviation_;
             }
 
-            inline result_type min() const noexcept
+            SEAL_NODISCARD inline result_type min() const noexcept
             {
                 return normal_.mean() - max_deviation_;
             }
 
-            inline result_type max() const noexcept
+            SEAL_NODISCARD inline result_type max() const noexcept
             {
                 return normal_.mean() + max_deviation_;
             }
 
-            inline param_type param() const noexcept
+            SEAL_NODISCARD inline param_type param() const noexcept
             {
                 return *this;
             }

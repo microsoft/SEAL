@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <utility>
 #include <unordered_map>
+#include "seal/util/defines.h"
 #include "seal/util/mempool.h"
 #include "seal/util/globals.h"
 
@@ -138,7 +139,7 @@ namespace seal
         /**
         Returns a MemoryPoolHandle pointing to the global memory pool.
         */
-        inline static MemoryPoolHandle Global() noexcept
+        SEAL_NODISCARD inline static MemoryPoolHandle Global() noexcept
         {
             return util::global_variables::global_memory_pool;
         }
@@ -146,7 +147,7 @@ namespace seal
         /**
         Returns a MemoryPoolHandle pointing to the thread-local memory pool.
         */
-        inline static MemoryPoolHandle ThreadLocal() noexcept
+        SEAL_NODISCARD inline static MemoryPoolHandle ThreadLocal() noexcept
         {
             return util::global_variables::tls_memory_pool;
         }
@@ -158,7 +159,8 @@ namespace seal
         should be cleared when destroyed. This can be important when memory pools
         are used to store private data.
         */
-        inline static MemoryPoolHandle New(bool clear_on_destruction = false)
+        SEAL_NODISCARD inline static MemoryPoolHandle New(
+            bool clear_on_destruction = false)
         {
             return MemoryPoolHandle(
                 std::make_shared<util::MemoryPoolMT>(clear_on_destruction));
@@ -170,7 +172,7 @@ namespace seal
 
         @throws std::logic_error if the MemoryPoolHandle is uninitialized
         */
-        inline operator util::MemoryPool &() const
+        SEAL_NODISCARD inline operator util::MemoryPool &() const
         {
             if (!pool_)
             {
@@ -187,7 +189,7 @@ namespace seal
         If it has instead allocated one allocation of size 64 KB and one of 128 KB,
         this function returns 2.
         */
-        inline std::size_t pool_count() const noexcept
+        SEAL_NODISCARD inline std::size_t pool_count() const noexcept
         {
             return !pool_ ? std::size_t(0) : pool_->pool_count();
         }
@@ -197,7 +199,7 @@ namespace seal
         amount of memory (in bytes) allocated by the memory pool pointed to by
         the current MemoryPoolHandle.
         */
-        inline std::size_t alloc_byte_count() const noexcept
+        SEAL_NODISCARD inline std::size_t alloc_byte_count() const noexcept
         {
             return !pool_ ? std::size_t(0) : pool_->alloc_byte_count();
         }
@@ -205,7 +207,7 @@ namespace seal
         /**
         Returns the number of MemoryPoolHandle objects sharing this memory pool.
         */
-        inline long use_count() const noexcept
+        SEAL_NODISCARD inline long use_count() const noexcept
         {
             return !pool_ ? 0 : pool_.use_count();
         }
@@ -213,7 +215,7 @@ namespace seal
         /**
         Returns whether the MemoryPoolHandle is initialized.
         */
-        inline operator bool () const noexcept
+        SEAL_NODISCARD inline operator bool () const noexcept
         {
             return pool_.operator bool();
         }
@@ -312,8 +314,8 @@ namespace seal
         Returns a MemoryPoolHandle pointing to the global memory pool. The
         mm_prof_opt_t input parameter has no effect.
         */
-        inline virtual MemoryPoolHandle
-            get_pool(mm_prof_opt_t) override
+        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(
+            mm_prof_opt_t) override
         {
             return MemoryPoolHandle::Global();
         }
@@ -345,8 +347,8 @@ namespace seal
         Returns a MemoryPoolHandle pointing to a new thread-safe memory pool. The
         mm_prof_opt_t input parameter has no effect.
         */
-        inline virtual MemoryPoolHandle
-            get_pool(mm_prof_opt_t) override
+        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(
+            mm_prof_opt_t) override
         {
             return MemoryPoolHandle::New();
         }
@@ -387,8 +389,8 @@ namespace seal
         Returns a MemoryPoolHandle pointing to the stored memory pool. The
         mm_prof_opt_t input parameter has no effect.
         */
-        inline virtual MemoryPoolHandle
-            get_pool(mm_prof_opt_t) override
+        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(
+            mm_prof_opt_t) override
         {
             return pool_;
         }
@@ -425,8 +427,8 @@ namespace seal
         Returns a MemoryPoolHandle pointing to the thread-local memory pool. The
         mm_prof_opt_t input parameter has no effect.
         */
-        inline virtual MemoryPoolHandle
-            get_pool(mm_prof_opt_t) override
+        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(
+            mm_prof_opt_t) override
         {
             return MemoryPoolHandle::ThreadLocal();
         }
@@ -496,7 +498,8 @@ namespace seal
         instructions to the memory manager profile for internal logic.
         */
         template<typename... Args>
-        static inline MemoryPoolHandle GetPool(mm_prof_opt_t prof_opt, Args &&...args)
+        SEAL_NODISCARD static inline MemoryPoolHandle GetPool(
+            mm_prof_opt_t prof_opt, Args &&...args)
         {
             switch (prof_opt)
             {
@@ -524,13 +527,13 @@ namespace seal
             }
         }
 
-        static inline MemoryPoolHandle GetPool()
+        SEAL_NODISCARD static inline MemoryPoolHandle GetPool()
         {
             return GetPool(mm_prof_opt::DEFAULT);
         }
 
     private:
-        static inline std::unique_ptr<MMProf>
+        SEAL_NODISCARD static inline std::unique_ptr<MMProf>
             SwitchProfileThreadUnsafe(
                 MMProf* &&mm_prof)
         {
@@ -543,7 +546,7 @@ namespace seal
             return ret_mm_prof;
         }
 
-        static inline std::unique_ptr<MMProf>
+        SEAL_NODISCARD static inline std::unique_ptr<MMProf>
             SwitchProfileThreadUnsafe(
                 std::unique_ptr<MMProf> &&mm_prof)
         {
