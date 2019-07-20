@@ -101,6 +101,7 @@
       <ControlFlowGuard>Guard</ControlFlowGuard>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -120,6 +121,7 @@
       <ControlFlowGuard>Guard</ControlFlowGuard>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

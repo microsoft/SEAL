@@ -69,6 +69,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>sealnet/stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -91,6 +92,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>sealnet/stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
