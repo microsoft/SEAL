@@ -31,9 +31,10 @@ find_dependency(Threads REQUIRED)
 
 include(${CMAKE_CURRENT_LIST_DIR}/SEALTargets.cmake)
 
-message(STATUS "Microsoft SEAL -> Version ${SEAL_VERSION} detected")
-if(SEAL_DEBUG)
-    message(STATUS "Performance warning: Microsoft SEAL compiled in debug mode")
-endif()
-
+if(NOT SEAL_FIND_QUIETLY)
+    message(STATUS "Microsoft SEAL -> Version ${SEAL_VERSION} detected")
+    if(SEAL_DEBUG)
+        message(STATUS "Performance warning: Microsoft SEAL compiled in debug mode")
+    endif()
 message(STATUS "Microsoft SEAL -> Library build type: ${SEAL_LIB_BUILD_TYPE}")
+endif()
