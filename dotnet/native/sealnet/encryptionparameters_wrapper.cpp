@@ -153,9 +153,9 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_GetParmsId(void *thisptr, uint64_t *par
     IfNullRet(params, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    // We will assume the array is always size sha3_block_uint64_count
+    // We will assume the array is always size hash_block_uint64_count
     auto parmsid = EncryptionParameters::EncryptionParametersPrivateHelper::parms_id(*params);
-    for (size_t i = 0; i < util::HashFunction::sha3_block_uint64_count; i++)
+    for (size_t i = 0; i < util::HashFunction::hash_block_uint64_count; i++)
     {
         parms_id[i] = parmsid[i];
     }

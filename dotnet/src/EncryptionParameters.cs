@@ -49,8 +49,8 @@ namespace Microsoft.Research.SEAL
     /// PlainModulus and too small CoeffModulus).
     /// </para>
     /// <para>
-    /// The EncryptionParameters class maintains at all times a 256-bit SHA-3 hash of
-    /// the currently set encryption parameters called the ParmsId. This hash acts as
+    /// The EncryptionParameters class maintains at all times a 256-bit hash of the
+    /// currently set encryption parameters called the ParmsId. This hash acts as
     /// a unique identifier of the encryption parameters and is used by all further
     /// objects created for these encryption parameters. The ParmsId is not intended
     /// to be directly modified by the user but is used internally for pre-computation

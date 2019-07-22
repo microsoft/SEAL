@@ -134,7 +134,7 @@ namespace seal
         set_uint_uint(plain_modulus_.data(), plain_modulus_.uint64_count(), param_data_ptr);
         param_data_ptr += plain_modulus_.uint64_count();
 
-        HashFunction::sha3_hash(param_data.get(), total_uint64_count, parms_id_);
+        HashFunction::hash(param_data.get(), total_uint64_count, parms_id_);
 
         // Did we somehow manage to get a zero block as result? This is reserved for
         // plaintexts to indicate non-NTT-transformed form.

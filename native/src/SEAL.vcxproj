@@ -38,6 +38,8 @@
     <ClInclude Include="seal\smallmodulus.h" />
     <ClInclude Include="seal\util\aes.h" />
     <ClInclude Include="seal\util\baseconverter.h" />
+    <ClInclude Include="seal\util\blake2.h" />
+    <ClInclude Include="seal\util\blake2-impl.h" />
     <ClInclude Include="seal\util\clang.h" />
     <ClInclude Include="seal\util\clipnormal.h" />
     <ClInclude Include="seal\util\common.h" />
@@ -87,9 +89,9 @@
     <ClCompile Include="seal\valcheck.cpp" />
     <ClCompile Include="seal\util\aes.cpp" />
     <ClCompile Include="seal\util\baseconverter.cpp" />
+    <ClInclude Include="seal\util\blake2b.c" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
     <ClCompile Include="seal\util\globals.cpp" />
-    <ClCompile Include="seal\util\hash.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
     <ClCompile Include="seal\util\polyarith.cpp" />

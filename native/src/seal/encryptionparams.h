@@ -35,13 +35,13 @@ namespace seal
     /**
     The data type to store unique identifiers of encryption parameters.
     */
-    using parms_id_type = util::HashFunction::sha3_block_type;
+    using parms_id_type = util::HashFunction::hash_block_type;
 
     /**
     A parms_id_type value consisting of zeros.
     */
     static constexpr parms_id_type parms_id_zero =
-        util::HashFunction::sha3_zero_block;
+        util::HashFunction::hash_zero_block;
 
     /**
     Represents user-customizable encryption scheme settings. The parameters (most
@@ -59,8 +59,8 @@ namespace seal
     plain_modulus and too small coeff_modulus).
 
     @par parms_id
-    The EncryptionParameters class maintains at all times a 256-bit SHA-3 hash of
-    the currently set encryption parameters called the parms_id. This hash acts as
+    The EncryptionParameters class maintains at all times a 256-bit hash of the
+    currently set encryption parameters called the parms_id. This hash acts as
     a unique identifier of the encryption parameters and is used by all further
     objects created for these encryption parameters. The parms_id is not intended
     to be directly modified by the user but is used internally for pre-computation
