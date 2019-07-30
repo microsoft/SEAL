@@ -82,9 +82,9 @@ namespace seal
         destination.resize(context_, parms_id, 2);
 
         auto prev_context_data_ptr = context_data.prev_context_data();
-        auto &prev_context_data = *prev_context_data_ptr;
         if (prev_context_data_ptr)
         {
+            auto &prev_context_data = *prev_context_data_ptr;
             auto &prev_parms_id = prev_context_data.parms_id();
             auto &base_converter = prev_context_data.base_converter();
 
@@ -242,5 +242,4 @@ namespace seal
             }
         }
     }
-
 }
