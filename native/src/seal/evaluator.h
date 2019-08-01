@@ -663,7 +663,7 @@ namespace seal
         @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
-        void multiply_many(std::vector<Ciphertext> &encrypteds,
+        void multiply_many(const std::vector<Ciphertext> &encrypteds,
             const RelinKeys &relin_keys, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 

@@ -1574,7 +1574,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_many(vector<Ciphertext> &encrypteds,
+    void Evaluator::multiply_many(const vector<Ciphertext> &encrypteds,
         const RelinKeys &relin_keys, Ciphertext &destination,
         MemoryPoolHandle pool)
     {
@@ -1618,29 +1618,37 @@ namespace seal
             return;
         }
 
-        // Repeatedly multiply and add to the back of the vector until the end is reached
-        Ciphertext product(context_, context_data.parms_id(), pool);
+        // Do first level of multiplications
+        vector<Ciphertext> product_vec;
         for (size_t i = 0; i < encrypteds.size() - 1; i += 2)
         {
-            // We only compare pointers to determine if a faster path can be taken.
-            // This is under the assumption that if the two pointers are the same and
-            // the parameter sets match, then it makes no sense for one of the ciphertexts
-            // to be of different size than the other. More generally, it seems like
-            // a reasonable assumption that if the pointers are the same, then the
-            // ciphertexts are the same.
+            Ciphertext temp(context_, context_data.parms_id(), pool);
             if (encrypteds[i].data() == encrypteds[i + 1].data())
             {
-                square(encrypteds[i], product);
+                square(encrypteds[i], temp);
             }
             else
             {
-                multiply(encrypteds[i], encrypteds[i + 1], product);
+                multiply(encrypteds[i], encrypteds[i + 1], temp);
             }
-            relinearize_inplace(product, relin_keys, pool);
-            encrypteds.emplace_back(product);
+            relinearize_inplace(temp, relin_keys, pool);
+            product_vec.emplace_back(move(temp));
+        }
+        if (encrypteds.size() & 1)
+        {
+            product_vec.emplace_back(encrypteds.back());
         }
 
-        destination = encrypteds[encrypteds.size() - 1];
+        // Repeatedly multiply and add to the back of the vector until the end is reached
+        for (size_t i = 0; i < product_vec.size() - 1; i += 2)
+        {
+            Ciphertext temp(context_, context_data.parms_id(), pool);
+            multiply(product_vec[i], product_vec[i + 1], temp);
+            relinearize_inplace(temp, relin_keys, pool);
+            product_vec.emplace_back(move(temp));
+        }
+
+        destination = product_vec.back();
     }
 
     void Evaluator::exponentiate_inplace(Ciphertext &encrypted, uint64_t exponent,
