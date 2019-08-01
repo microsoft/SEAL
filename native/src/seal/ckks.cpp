@@ -13,10 +13,6 @@ using namespace seal::util;
 
 namespace seal
 {
-    // For C++14 compatibility need to define static constexpr
-    // member variables with no initialization here.
-    constexpr double CKKSEncoder::PI_;
-
     CKKSEncoder::CKKSEncoder(shared_ptr<SEALContext> context) :
         context_(context)
     {

@@ -749,8 +749,6 @@ namespace seal
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
-        static constexpr double PI_ = 3.1415926535897932384626433832795028842;
-
         std::shared_ptr<SEALContext> context_{ nullptr };
 
         std::size_t slots_;
