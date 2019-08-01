@@ -6,6 +6,7 @@
 #include <limits>
 #include <cinttypes>
 #include "seal/ckks.h"
+#include "seal/util/croots.h"
 
 using namespace std;
 using namespace seal::util;
@@ -62,10 +63,9 @@ namespace seal
 
         roots_ = allocate<complex<double>>(coeff_count, pool_);
         inv_roots_ = allocate<complex<double>>(coeff_count, pool_);
-        double psi_arg = 2 * PI_ / static_cast<double>(m);
         for (size_t i = 0; i < coeff_count; i++)
         {
-            roots_[i] = polar<double>(1.0, psi_arg * static_cast<double>(reverse_bits(i, logn)));
+            roots_[i] = ComplexRoots::get_root(reverse_bits(i, logn), m);
             inv_roots_[i] = conj(roots_[i]);
         }
     }

@@ -7,6 +7,7 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
         ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
         ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/croots.cpp
         ${CMAKE_CURRENT_LIST_DIR}/globals.cpp
         ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
         ${CMAKE_CURRENT_LIST_DIR}/numth.cpp
@@ -35,6 +36,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/clipnormal.h
         ${CMAKE_CURRENT_LIST_DIR}/common.h
         ${CMAKE_CURRENT_LIST_DIR}/config.h
+        ${CMAKE_CURRENT_LIST_DIR}/croots.h
         ${CMAKE_CURRENT_LIST_DIR}/defines.h
         ${CMAKE_CURRENT_LIST_DIR}/gcc.h
         ${CMAKE_CURRENT_LIST_DIR}/globals.h

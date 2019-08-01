@@ -43,6 +43,7 @@
     <ClInclude Include="seal\util\clang.h" />
     <ClInclude Include="seal\util\clipnormal.h" />
     <ClInclude Include="seal\util\common.h" />
+    <ClInclude Include="seal\util\croots.h" />
     <ClInclude Include="seal\util\defines.h" />
     <ClInclude Include="seal\util\gcc.h" />
     <ClInclude Include="seal\util\globals.h" />
@@ -91,6 +92,7 @@
     <ClCompile Include="seal\util\baseconverter.cpp" />
     <ClInclude Include="seal\util\blake2b.c" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
+    <ClCompile Include="seal\util\croots.cpp" />
     <ClCompile Include="seal\util\globals.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
