@@ -102,14 +102,14 @@ namespace seal
             {
                 if (is_ntt_form)
                 {
-                    base_converter->floor_last_coeff_modulus_ntt_inplace(
+                    base_converter->round_last_coeff_modulus_ntt_inplace(
                         temp.data(j),
                         prev_context_data.small_ntt_tables(),
                         pool);
                 }
                 else
                 {
-                    base_converter->floor_last_coeff_modulus_inplace(
+                    base_converter->round_last_coeff_modulus_inplace(
                         temp.data(j),
                         pool);
                 }
