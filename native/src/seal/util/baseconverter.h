@@ -46,6 +46,15 @@ namespace seal
                 const Pointer<SmallNTTTables> &rns_ntt_tables,
                 MemoryPoolHandle pool) const;
 
+            void round_last_coeff_modulus_inplace(
+                std::uint64_t *rns_poly,
+                MemoryPoolHandle pool) const;
+
+            void round_last_coeff_modulus_ntt_inplace(
+                std::uint64_t *rns_poly,
+                const Pointer<SmallNTTTables> &rns_ntt_tables,
+                MemoryPoolHandle pool) const;
+
             /**
             Fast base converter from q to Bsk
             */
