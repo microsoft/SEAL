@@ -654,10 +654,12 @@ namespace seal
         {
             auto temp(allocate_uint(coeff_count_, pool));
             uint64_t *last_ptr = rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_;
+
             // Add (p-1)/2 to change from flooring to rounding.
             auto last_modulus = coeff_base_array_[coeff_base_mod_count_ - 1];
-            uint64_t half = last_modulus.value() >> 1;            
-            for (size_t j = 0; j < coeff_count_; j++) {
+            uint64_t half = last_modulus.value() >> 1;
+            for (size_t j = 0; j < coeff_count_; j++)
+            {
                 last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
             }
 
@@ -669,9 +671,10 @@ namespace seal
                     coeff_count_,
                     coeff_base_array_[i],
                     temp.get());
-                
+
                 uint64_t half_mod = barrett_reduce_63(half, coeff_base_array_[i]);
-                for (size_t j = 0; j < coeff_count_; j++) {
+                for (size_t j = 0; j < coeff_count_; j++)
+                {
                    temp.get()[j] = sub_uint_uint_mod(temp.get()[j], half_mod, coeff_base_array_[i]);
                 }
                 sub_poly_poly_coeffmod(
@@ -704,8 +707,9 @@ namespace seal
 
             // Add (p-1)/2 to change from flooring to rounding.
             auto last_modulus = coeff_base_array_[coeff_base_mod_count_ - 1];
-            uint64_t half = last_modulus.value() >> 1;            
-            for (size_t j = 0; j < coeff_count_; j++) {
+            uint64_t half = last_modulus.value() >> 1;
+            for (size_t j = 0; j < coeff_count_; j++)
+            {
                 last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
             }
 

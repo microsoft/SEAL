@@ -1236,8 +1236,9 @@ namespace seal
                 coeff_count, temp1.get());
             // Add (p-1)/2 to change from flooring to rounding.
             auto last_modulus = context_data.parms().coeff_modulus().back();
-            uint64_t half = last_modulus.value() >> 1;            
-            for (size_t j = 0; j < coeff_count; j++) {
+            uint64_t half = last_modulus.value() >> 1;
+            for (size_t j = 0; j < coeff_count; j++)
+            {
                 temp1.get()[j] = barrett_reduce_63(temp1.get()[j] + half, last_modulus);
             }
             for (size_t mod_index = 0; mod_index < next_coeff_mod_count; mod_index++,
@@ -1247,7 +1248,8 @@ namespace seal
                 modulo_poly_coeffs_63(temp1.get(), coeff_count,
                     next_coeff_modulus[mod_index], temp2_ptr);
                 uint64_t half_mod = barrett_reduce_63(half, next_coeff_modulus[mod_index]);
-                for (size_t j = 0; j < coeff_count; j++) {
+                for (size_t j = 0; j < coeff_count; j++)
+                {
                    temp2_ptr[j] = sub_uint_uint_mod(temp2_ptr[j], half_mod, next_coeff_modulus[mod_index]);
                 }
                 // ((ct mod qi) - (ct mod qk)) mod qi
@@ -2813,7 +2815,8 @@ namespace seal
                     local_small_poly.get());
 
                 uint64_t half_mod = barrett_reduce_63(half, key_modulus[j]);
-                for (size_t l = 0; l < coeff_count; l++) {
+                for (size_t l = 0; l < coeff_count; l++)
+                {
                     local_small_poly.get()[l] = sub_uint_uint_mod(local_small_poly.get()[l],
                         half_mod,
                         key_modulus[j]);
