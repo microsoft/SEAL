@@ -658,7 +658,7 @@ namespace seal
             auto last_modulus = coeff_base_array_[coeff_base_mod_count_ - 1];
             uint64_t half = last_modulus.value() >> 1;            
             for (size_t j = 0; j < coeff_count_; j++) {
-                last_ptr[j] = add_uint_uint_mod(last_ptr[j], half, last_modulus);
+                last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
             }
 
             for (size_t i = 0; i < coeff_base_mod_count_ - 1; i++)
@@ -706,7 +706,7 @@ namespace seal
             auto last_modulus = coeff_base_array_[coeff_base_mod_count_ - 1];
             uint64_t half = last_modulus.value() >> 1;            
             for (size_t j = 0; j < coeff_count_; j++) {
-                last_ptr[j] = add_uint_uint_mod(last_ptr[j], half, last_modulus);
+                last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
             }
 
             for (size_t i = 0; i < coeff_base_mod_count_ - 1; i++)

@@ -1238,7 +1238,7 @@ namespace seal
             auto last_modulus = context_data.parms().coeff_modulus().back();
             uint64_t half = last_modulus.value() >> 1;            
             for (size_t j = 0; j < coeff_count; j++) {
-                temp1.get()[j] = add_uint_uint_mod(temp1.get()[j], half, last_modulus);
+                temp1.get()[j] = barrett_reduce_63(temp1.get()[j] + half, last_modulus);
             }
             for (size_t mod_index = 0; mod_index < next_coeff_mod_count; mod_index++,
                 temp2_ptr += coeff_count)
@@ -2790,7 +2790,7 @@ namespace seal
             uint64_t half = key_modulus[key_mod_count - 1].value() >> 1;
             for (size_t l = 0; l < coeff_count; l++)
             {
-                temp_last_poly_ptr[l] = add_uint_uint_mod(temp_last_poly_ptr[l], half,
+                temp_last_poly_ptr[l] = barrett_reduce_63(temp_last_poly_ptr[l] + half,
                     key_modulus[key_mod_count - 1]);
             }
 
