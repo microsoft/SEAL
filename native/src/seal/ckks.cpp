@@ -62,11 +62,10 @@ namespace seal
 
         roots_ = allocate<complex<double>>(coeff_count, pool_);
         inv_roots_ = allocate<complex<double>>(coeff_count, pool_);
-        complex<double> psi{ cos((2 * PI_) / static_cast<double>(m)),
-            sin((2 * PI_) / static_cast<double>(m)) };
+        double psi_arg = 2 * PI_ / static_cast<double>(m);
         for (size_t i = 0; i < coeff_count; i++)
         {
-            roots_[i] = pow(psi, static_cast<double>(reverse_bits(i, logn)));
+            roots_[i] = polar<double>(1.0, psi_arg * reverse_bits(i, logn));
             inv_roots_[i] = 1.0 / roots_[i];
         }
     }

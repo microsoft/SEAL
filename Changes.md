@@ -1,6 +1,12 @@
 # List of Changes
 
-## Version 3.3.0 (current)
+## Version 3.3.1 (patch)
+
+Minor bug and typo fixes. Most importantly:
+- A bug was fixed that introduced significant extra inaccuracy in CKKS when compiled on Linux, at least with some versions of glibc; Windows and macOS were not affected.
+- A bug was fixed where, on 32-bit platforms, some versions of GCC resolved the util::reverse_bits function to the incorrect overload.
+
+## Version 3.3.0
 
 ### Features
 
@@ -11,7 +17,7 @@ i.e., relinearization and rotation, do not consume any noise budget (BFV)
 or impact accuracy (CKKS). The implementations of these operations are
 significantly simplified and unified, and no longer use bit decomposition,
 so decomposition bit count is gone. Moreover, fresh ciphertexts now have
-a larger noise budget. These changes have an effect on the API and it will
+lower noise. These changes have an effect on the API and it will
 be especially worthwhile for users of older versions of the library to study
 the examples and comments in
 [native/examples/3_levels.cpp](native/examples/3_levels.cpp) (C++) or
@@ -63,4 +69,4 @@ Other important changes:
 - GoogleTest framework is now included as a Git submodule;
 - Numerous bugs have been fixed, particularly in the .NET wrappers.
 
-## Version 3.2.0
+## Version 3.2

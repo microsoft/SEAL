@@ -273,7 +273,7 @@ namespace SEALNetExamples
 
             /*
             Operating on the ciphertext results in homomorphic operations being performed
-            simultaneously in all 4096 slots (matrix elements). To illustrate this, we
+            simultaneously in all 8192 slots (matrix elements). To illustrate this, we
             form another plaintext matrix
 
                 [ 1,  2,  1,  2,  1,  2, ..., 2 ]
@@ -414,9 +414,9 @@ namespace SEALNetExamples
             the result.
 
             In CKKS the message is stored modulo CoeffModulus (in BFV it is stored modulo
-            PlainModulus), so the scale must not get too close to the total size of
-            CoeffModulus. In this case our CoeffModulus is quite large (218 bits) so we
-            have little to worry about in this regard. For this simple example a 30-bit
+            PlainModulus), so the scaled message must not get too close to the total size
+            of CoeffModulus. In this case our CoeffModulus is quite large (218 bits) so
+            we have little to worry about in this regard. For this simple example a 30-bit
             scale is more than enough.
             */
             Plaintext plain = new Plaintext();

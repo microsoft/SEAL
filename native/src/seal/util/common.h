@@ -388,8 +388,30 @@ namespace seal
             }
             else SEAL_IF_CONSTEXPR (is_uint64_v<T>)
             {
+// Temporarily disable UB warnings when `if constexpr` is not available.
+#ifndef SEAL_USE_IF_CONSTEXPR
+#if (SEAL_COMPILER == SEAL_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4293)
+#elif (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-count-overflow"
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshift-count-overflow"
+#endif
+#endif
                 return static_cast<T>(reverse_bits(static_cast<std::uint32_t>(operand >> 32))) |
                     (static_cast<T>(reverse_bits(static_cast<std::uint32_t>(operand & T(0xFFFFFFFF)))) << 32);
+#ifndef SEAL_USE_IF_CONSTEXPR
+#if (SEAL_COMPILER == SEAL_COMPILER_MSVC)
+#pragma warning(pop)
+#elif (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
+#endif
             }
         }
 
@@ -397,14 +419,17 @@ namespace seal
         inline T reverse_bits(T operand, int bit_count)
         {
 #ifdef SEAL_DEBUG
-            if (bit_count < 0 || bit_count > sizeof(T) * bits_per_byte)
+            if (bit_count < 0 ||
+                static_cast<std::size_t>(bit_count) >
+                    mul_safe(sizeof(T), static_cast<std::size_t>(bits_per_byte)))
             {
                 throw std::invalid_argument("bit_count");
             }
 #endif
             // Just return zero if bit_count is zero
-            return (bit_count == 0) ? T(0) :
-                reverse_bits(operand) >> (sizeof(T) * bits_per_byte - bit_count);
+            return (bit_count == 0) ? T(0) : reverse_bits(operand) >> (
+                sizeof(T) * static_cast<std::size_t>(bits_per_byte)
+                    - static_cast<std::size_t>(bit_count));
         }
 
         inline void get_msb_index_generic(unsigned long *result, std::uint64_t value)

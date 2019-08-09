@@ -2,7 +2,7 @@
 
 Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorphic encryption library developed by the Cryptography Research group at Microsoft. Microsoft SEAL is written in modern standard C++ and has no external dependencies, making it easy to compile and run in many different environments. For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 3.3.0. Users of previous versions of the library should look at the [list of changes](Changes.md).
+This document pertains to Microsoft SEAL version 3.3. Users of previous versions of the library should look at the [list of changes](Changes.md).
 
 # Contents
 - [Introduction](#introduction)
@@ -12,7 +12,7 @@ This document pertains to Microsoft SEAL version 3.3.0. Users of previous versio
 - [Installing Microsoft SEAL](#installing-microsoft-seal)
   - [Windows](#windows)
   - [Linux and macOS](#linux-and-macos)
-- [Installing Microsoft SEAL for .NET](#installing-microsoft-seal-for-.net)
+- [Installing Microsoft SEAL for .NET](#installing-microsoft-seal-for-net)
   - [Windows](#windows-1)
   - [Linux and macOS](#linux-and-macos-1)
 - [Getting Started](#getting-started)
@@ -39,7 +39,7 @@ Microsoft SEAL is a homomorphic encryption library that allows additions and mul
 
 It is not always easy or straightfoward to translate an unencrypted computation into a computation on encrypted data, for example, it is not possible to branch on encrypted data. Microsoft SEAL itself has a steep learning curve and requires the user to understand many homomorphic encryption specific concepts, even though in the end the API is not too complicated. Even if a user is able to program and run a specific computation using Microsoft SEAL, the difference between efficient and inefficient implementations can be several orders of magnitude, and it can be hard for new users to know how to improve the performance of their computation.
 
-Microsoft SEAL comes with two different homomorphic encryption schemes with very different properties. The BFV scheme allows modular arithmetic to be performed on encrypted integers. The CKKS scheme allow additions and multiplications on encrypted real or complex numbers, but yields only approximate results. In applications such a summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances of encrypted locations CKKS is going to be by far the best choice. For applications where exact values are necessary, the BFV scheme is the only choice.
+Microsoft SEAL comes with two different homomorphic encryption schemes with very different properties. The BFV scheme allows modular arithmetic to be performed on encrypted integers. The CKKS scheme allows additions and multiplications on encrypted real or complex numbers, but yields only approximate results. In applications such a summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances of encrypted locations CKKS is going to be by far the best choice. For applications where exact values are necessary, the BFV scheme is the only choice.
 
 # Installing Microsoft SEAL
 

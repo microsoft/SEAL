@@ -11,7 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 add_executable(sealtest seal/testrunner.cpp)
 
 # Import Microsoft SEAL
-find_package(SEAL 3.3.0 EXACT REQUIRED)
+find_package(SEAL 3.3.1 EXACT REQUIRED)
 
 # Add source files
 add_subdirectory(seal)
