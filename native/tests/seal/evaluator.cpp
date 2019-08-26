@@ -3202,6 +3202,7 @@ namespace SEALTest
         encryptor.encrypt(encoder.encode(7), encrypted3);
         vector<Ciphertext> encrypteds{ encrypted1, encrypted2, encrypted3 };
             evaluator.multiply_many(encrypteds, rlk, product);
+            ASSERT_EQ(3, encrypteds.size());
             decryptor.decrypt(product, plain);
             ASSERT_EQ(static_cast<uint64_t>(210), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
@@ -3213,6 +3214,7 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(-17), encrypted2);
             encrypteds = { encrypted1, encrypted2 };
             evaluator.multiply_many(encrypteds, rlk, product);
+            ASSERT_EQ(2, encrypteds.size());
             decryptor.decrypt(product, plain);
             ASSERT_EQ(static_cast<uint64_t>(153), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
@@ -3224,6 +3226,7 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(7), encrypted3);
             encrypteds = { encrypted1, encrypted2, encrypted3 };
             evaluator.multiply_many(encrypteds, rlk, product);
+            ASSERT_EQ(3, encrypteds.size());
             decryptor.decrypt(product, plain);
             ASSERT_TRUE(static_cast<int64_t>(-434) == encoder.decode_int64(plain));
             ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
@@ -3237,6 +3240,7 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(-1), encrypted4);
             encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
             evaluator.multiply_many(encrypteds, rlk, product);
+            ASSERT_EQ(4, encrypteds.size());
             decryptor.decrypt(product, plain);
             ASSERT_EQ(static_cast<uint64_t>(1), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
@@ -3251,6 +3255,7 @@ namespace SEALTest
             encryptor.encrypt(encoder.encode(34567), encrypted4);
             encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
             evaluator.multiply_many(encrypteds, rlk, product);
+            ASSERT_EQ(4, encrypteds.size());
             decryptor.decrypt(product, plain);
             ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
