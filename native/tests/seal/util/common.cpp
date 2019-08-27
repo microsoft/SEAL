@@ -68,6 +68,8 @@ namespace SEALTest
             unsigned char pos_uc_max = 0xFF;
             unsigned long long pos_ull_max = 0xFFFFFFFFFFFFFFFF;
             long long neg_ull = -1;
+            unsigned long long res_ul;
+            long long res_l;
 
             ASSERT_EQ(25, mul_safe(pos_i, pos_i));
             ASSERT_EQ(25, mul_safe(neg_i, neg_i));
@@ -78,19 +80,19 @@ namespace SEALTest
             ASSERT_EQ(10, sub_safe(pos_i, neg_i));
             ASSERT_EQ(-10, sub_safe(neg_i, pos_i));
             ASSERT_EQ(unsigned(0), sub_safe(pos_u, pos_u));
-            ASSERT_THROW(sub_safe(unsigned(0), pos_u), out_of_range);
-            ASSERT_THROW(sub_safe(unsigned(4), pos_u), out_of_range);
-            ASSERT_THROW(add_safe(pos_uc_max, (unsigned char)1), out_of_range);
+            ASSERT_THROW(res_ul = sub_safe(unsigned(0), pos_u), out_of_range);
+            ASSERT_THROW(res_ul = sub_safe(unsigned(4), pos_u), out_of_range);
+            ASSERT_THROW(res_ul = add_safe(pos_uc_max, (unsigned char)1), out_of_range);
             ASSERT_TRUE(pos_uc_max == add_safe(pos_uc_max, (unsigned char)0));
-            ASSERT_THROW(mul_safe(pos_ull_max, pos_ull_max), out_of_range);
+            ASSERT_THROW(res_ul = mul_safe(pos_ull_max, pos_ull_max), out_of_range);
             ASSERT_EQ(0ULL, mul_safe(0ULL, pos_ull_max));
             ASSERT_TRUE((long long)1 == mul_safe(neg_ull, neg_ull));
-            ASSERT_THROW(mul_safe(pos_uc_max, pos_uc_max), out_of_range);
+            ASSERT_THROW(res_ul = mul_safe(pos_uc_max, pos_uc_max), out_of_range);
             ASSERT_EQ(15, add_safe(pos_i, -pos_i, pos_i, pos_i, pos_i));
             ASSERT_EQ(6, add_safe(0, -pos_i, pos_i, 1, pos_i));
             ASSERT_EQ(0, mul_safe(pos_i, pos_i, pos_i, 0, pos_i));
             ASSERT_EQ(625, mul_safe(pos_i, pos_i, pos_i, pos_i));
-            ASSERT_THROW(mul_safe(
+            ASSERT_THROW(res_l = mul_safe(
                 pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i,
                 pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i), out_of_range);
         }

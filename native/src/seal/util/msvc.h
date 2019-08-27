@@ -43,9 +43,14 @@
 
 // Use [[maybe_unused]]
 #define SEAL_USE_MAYBE_UNUSED
+
+// Use [[nodiscard]]
+#define SEAL_USE_NODISCARD
+
 #else
 #undef SEAL_USE_IF_CONSTEXPR
 #undef SEAL_USE_MAYBE_UNUSED
+#undef SEAL_USE_NODISCARD
 #endif
 
 // X64

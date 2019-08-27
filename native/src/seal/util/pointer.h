@@ -16,7 +16,7 @@ namespace seal
     {
         // Specialization for SEAL_BYTE
         template<>
-        class Pointer<SEAL_BYTE>
+        class SEAL_NODISCARD Pointer<SEAL_BYTE>
         {
             friend class MemoryPoolST;
             friend class MemoryPoolMT;
@@ -45,12 +45,13 @@ namespace seal
                 std::fill_n(data_, head_->item_byte_count(), value);
             }
 
-            inline SEAL_BYTE &operator [](std::size_t index)
+            SEAL_NODISCARD inline SEAL_BYTE &operator [](std::size_t index)
             {
                 return data_[index];
             }
 
-            inline const SEAL_BYTE &operator [](std::size_t index) const
+            SEAL_NODISCARD inline const SEAL_BYTE &operator [](
+                std::size_t index) const
             {
                 return data_[index];
             }
@@ -61,42 +62,42 @@ namespace seal
                 return *this;
             }
 
-            inline bool is_set() const noexcept
+            SEAL_NODISCARD inline bool is_set() const noexcept
             {
                 return data_ != nullptr;
             }
 
-            inline SEAL_BYTE *get() noexcept
+            SEAL_NODISCARD inline SEAL_BYTE *get() noexcept
             {
                 return data_;
             }
 
-            inline const SEAL_BYTE *get() const noexcept
+            SEAL_NODISCARD inline const SEAL_BYTE *get() const noexcept
             {
                 return data_;
             }
 
-            inline SEAL_BYTE *operator ->() noexcept
+            SEAL_NODISCARD inline SEAL_BYTE *operator ->() noexcept
             {
                 return data_;
             }
 
-            inline const SEAL_BYTE *operator ->() const noexcept
+            SEAL_NODISCARD inline const SEAL_BYTE *operator ->() const noexcept
             {
                 return data_;
             }
 
-            inline SEAL_BYTE &operator *()
+            SEAL_NODISCARD inline SEAL_BYTE &operator *()
             {
                 return *data_;
             }
 
-            inline const SEAL_BYTE &operator *() const
+            SEAL_NODISCARD inline const SEAL_BYTE &operator *() const
             {
                 return *data_;
             }
 
-            inline bool is_alias() const noexcept
+            SEAL_NODISCARD inline bool is_alias() const noexcept
             {
                 return alias_;
             }
@@ -149,17 +150,19 @@ namespace seal
                 release();
             }
 
-            operator bool() const noexcept
+            SEAL_NODISCARD operator bool() const noexcept
             {
                 return (data_ != nullptr);
             }
 
-            inline static Pointer<SEAL_BYTE> Owning(SEAL_BYTE *pointer) noexcept
+            SEAL_NODISCARD inline static Pointer<SEAL_BYTE> Owning(
+                SEAL_BYTE *pointer) noexcept
             {
                 return {pointer, false};
             }
 
-            inline static Pointer<SEAL_BYTE> Aliasing(SEAL_BYTE *pointer) noexcept
+            SEAL_NODISCARD inline static auto Aliasing(
+                SEAL_BYTE *pointer) noexcept -> Pointer<SEAL_BYTE>
             {
                 return {pointer, true};
             }
@@ -197,7 +200,7 @@ namespace seal
         };
 
         template<typename T, typename>
-        class Pointer
+        class SEAL_NODISCARD Pointer
         {
             friend class MemoryPoolST;
             friend class MemoryPoolMT;
@@ -280,12 +283,12 @@ namespace seal
                 source.alias_ = false;
             }
 
-            inline T &operator [](std::size_t index)
+            SEAL_NODISCARD inline T &operator [](std::size_t index)
             {
                 return data_[index];
             }
 
-            inline const T &operator [](std::size_t index) const
+            SEAL_NODISCARD inline const T &operator [](std::size_t index) const
             {
                 return data_[index];
             }
@@ -302,42 +305,42 @@ namespace seal
                 return *this;
             }
 
-            inline bool is_set() const noexcept
+            SEAL_NODISCARD inline bool is_set() const noexcept
             {
                 return data_ != nullptr;
             }
 
-            inline T *get() noexcept
+            SEAL_NODISCARD inline T *get() noexcept
             {
                 return data_;
             }
 
-            inline const T *get() const noexcept
+            SEAL_NODISCARD inline const T *get() const noexcept
             {
                 return data_;
             }
 
-            inline T *operator ->() noexcept
+            SEAL_NODISCARD inline T *operator ->() noexcept
             {
                 return data_;
             }
 
-            inline const T *operator ->() const noexcept
+            SEAL_NODISCARD inline const T *operator ->() const noexcept
             {
                 return data_;
             }
 
-            inline T &operator *()
+            SEAL_NODISCARD inline T &operator *()
             {
                 return *data_;
             }
 
-            inline const T &operator *() const
+            SEAL_NODISCARD inline const T &operator *() const
             {
                 return *data_;
             }
 
-            inline bool is_alias() const noexcept
+            SEAL_NODISCARD inline bool is_alias() const noexcept
             {
                 return alias_;
             }
@@ -436,17 +439,18 @@ namespace seal
                 release();
             }
 
-            operator bool() const noexcept
+            SEAL_NODISCARD operator bool() const noexcept
             {
                 return (data_ != nullptr);
             }
 
-            inline static Pointer<T> Owning(T *pointer) noexcept
+            SEAL_NODISCARD inline static Pointer<T> Owning(T *pointer) noexcept
             {
                 return {pointer, false};
             }
 
-            inline static Pointer<T> Aliasing(T *pointer) noexcept
+            SEAL_NODISCARD inline static auto Aliasing(
+                T *pointer) noexcept -> Pointer<T>
             {
                 return {pointer, true};
             }
@@ -512,7 +516,7 @@ namespace seal
 
         // Specialization for SEAL_BYTE
         template<>
-        class ConstPointer<SEAL_BYTE>
+        class SEAL_NODISCARD ConstPointer<SEAL_BYTE>
         {
             friend class MemoryPoolST;
             friend class MemoryPoolMT;
@@ -570,27 +574,28 @@ namespace seal
                 return *this;
             }
 
-            inline const SEAL_BYTE &operator [](std::size_t index) const
+            SEAL_NODISCARD inline const SEAL_BYTE &operator [](
+                std::size_t index) const
             {
                 return data_[index];
             }
 
-            inline bool is_set() const noexcept
+            SEAL_NODISCARD inline bool is_set() const noexcept
             {
                 return data_ != nullptr;
             }
 
-            inline const SEAL_BYTE *get() const noexcept
+            SEAL_NODISCARD inline const SEAL_BYTE *get() const noexcept
             {
                 return data_;
             }
 
-            inline const SEAL_BYTE *operator ->() const noexcept
+            SEAL_NODISCARD inline const SEAL_BYTE *operator ->() const noexcept
             {
                 return data_;
             }
 
-            inline const SEAL_BYTE &operator *() const
+            SEAL_NODISCARD inline const SEAL_BYTE &operator *() const
             {
                 return *data_;
             }
@@ -662,19 +667,19 @@ namespace seal
                 release();
             }
 
-            operator bool() const
+            SEAL_NODISCARD operator bool() const
             {
                 return (data_ != nullptr);
             }
 
-            inline static auto Owning(SEAL_BYTE *pointer) noexcept
+            SEAL_NODISCARD inline static auto Owning(SEAL_BYTE *pointer) noexcept
                 -> ConstPointer<SEAL_BYTE>
             {
                 return {pointer, false};
             }
 
-            inline static auto Aliasing(const SEAL_BYTE *pointer) noexcept
-                -> ConstPointer<SEAL_BYTE>
+            SEAL_NODISCARD inline static auto Aliasing(
+                const SEAL_BYTE *pointer) noexcept -> ConstPointer<SEAL_BYTE>
             {
                 return {const_cast<SEAL_BYTE*>(pointer), true};
             }
@@ -712,7 +717,7 @@ namespace seal
         };
 
         template<typename T, typename>
-        class ConstPointer
+        class SEAL_NODISCARD ConstPointer
         {
             friend class MemoryPoolST;
             friend class MemoryPoolMT;
@@ -886,27 +891,27 @@ namespace seal
                 return *this;
             }
 
-            inline const T &operator [](std::size_t index) const
+            SEAL_NODISCARD inline const T &operator [](std::size_t index) const
             {
                 return data_[index];
             }
 
-            inline bool is_set() const noexcept
+            SEAL_NODISCARD inline bool is_set() const noexcept
             {
                 return data_ != nullptr;
             }
 
-            inline const T *get() const noexcept
+            SEAL_NODISCARD inline const T *get() const noexcept
             {
                 return data_;
             }
 
-            inline const T *operator ->() const noexcept
+            SEAL_NODISCARD inline const T *operator ->() const noexcept
             {
                 return data_;
             }
 
-            inline const T &operator *() const
+            SEAL_NODISCARD inline const T &operator *() const
             {
                 return *data_;
             }
@@ -1060,17 +1065,18 @@ namespace seal
                 release();
             }
 
-            operator bool() const noexcept
+            SEAL_NODISCARD operator bool() const noexcept
             {
                 return (data_ != nullptr);
             }
 
-            inline static ConstPointer<T> Owning(T *pointer) noexcept
+            SEAL_NODISCARD inline static ConstPointer<T> Owning(T *pointer) noexcept
             {
                 return {pointer, false};
             }
 
-            inline static ConstPointer<T> Aliasing(const T *pointer) noexcept
+            SEAL_NODISCARD inline static auto Aliasing(
+                const T *pointer) noexcept -> ConstPointer<T>
             {
                 return {const_cast<T*>(pointer), true};
             }
@@ -1136,7 +1142,8 @@ namespace seal
         // Allocate single element
         template<typename T_, typename... Args,
             typename = std::enable_if<std::is_standard_layout<T_>::value>>
-        inline auto allocate(MemoryPool &pool, Args &&...args)
+        SEAL_NODISCARD inline auto allocate(
+            MemoryPool &pool, Args &&...args)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
             return Pointer<T>(pool.get_for_byte_count(sizeof(T)),
@@ -1146,7 +1153,8 @@ namespace seal
         // Allocate array of elements
         template<typename T_, typename... Args,
             typename = std::enable_if<std::is_standard_layout<T_>::value>>
-        inline auto allocate(std::size_t count, MemoryPool &pool, Args &&...args)
+        SEAL_NODISCARD inline auto allocate(
+            std::size_t count, MemoryPool &pool, Args &&...args)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
             return Pointer<T>(pool.get_for_byte_count(util::mul_safe(count, sizeof(T))),
@@ -1155,8 +1163,8 @@ namespace seal
 
         template<typename T_,
             typename = std::enable_if<std::is_standard_layout<T_>::value>>
-        inline auto duplicate_if_needed(T_ *original, std::size_t count,
-            bool condition, MemoryPool &pool)
+        SEAL_NODISCARD inline auto duplicate_if_needed(
+            T_ *original, std::size_t count, bool condition, MemoryPool &pool)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
 #ifdef SEAL_DEBUG
@@ -1176,8 +1184,8 @@ namespace seal
 
         template<typename T_,
             typename = std::enable_if<std::is_standard_layout<T_>::value>>
-        inline auto duplicate_if_needed(const T_ *original,
-            std::size_t count, bool condition, MemoryPool &pool)
+        SEAL_NODISCARD inline auto duplicate_if_needed(
+            const T_ *original, std::size_t count, bool condition, MemoryPool &pool)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
 #ifdef SEAL_DEBUG

@@ -3,18 +3,20 @@
 
 #pragma once
 
+#include "seal/util/defines.h"
+#include "seal/smallmodulus.h"
+#include "seal/util/common.h"
 #include <stdexcept>
 #include <cstdint>
 #include <vector>
 #include <tuple>
-#include "seal/smallmodulus.h"
-#include "seal/util/common.h"
 
 namespace seal
 {
     namespace util
     {
-        inline std::uint64_t gcd(std::uint64_t x, std::uint64_t y)
+        SEAL_NODISCARD inline std::uint64_t gcd(
+            std::uint64_t x, std::uint64_t y)
         {
 #ifdef SEAL_DEBUG
             if (x == 0)
@@ -48,7 +50,7 @@ namespace seal
             }
         }
 
-        inline auto xgcd(std::uint64_t x, std::uint64_t y)
+        SEAL_NODISCARD inline auto xgcd(std::uint64_t x, std::uint64_t y)
             -> std::tuple<std::uint64_t, std::int64_t, std::int64_t>
         {
             /* Extended GCD:
@@ -118,30 +120,32 @@ namespace seal
             }
         }
 
-        std::vector<std::uint64_t> multiplicative_orders(
+        SEAL_NODISCARD std::vector<std::uint64_t> multiplicative_orders(
             std::vector<std::uint64_t> conjugate_classes,
             std::uint64_t modulus);
 
-        std::vector<std::uint64_t> conjugate_classes(std::uint64_t modulus,
-            std::uint64_t subgroup_generator);
+        SEAL_NODISCARD std::vector<std::uint64_t> conjugate_classes(
+            std::uint64_t modulus, std::uint64_t subgroup_generator);
 
         void babystep_giantstep(std::uint64_t modulus,
             std::vector<std::uint64_t> &baby_steps,
             std::vector<std::uint64_t> &giant_steps);
 
-        auto decompose_babystep_giantstep(
+        SEAL_NODISCARD auto decompose_babystep_giantstep(
             std::uint64_t modulus,
             std::uint64_t input,
             const std::vector<std::uint64_t> &baby_steps,
             const std::vector<std::uint64_t> &giant_steps)
             -> std::pair<std::size_t, std::size_t>;
 
-        bool is_prime(const SmallModulus &modulus, std::size_t num_rounds = 40);
+        SEAL_NODISCARD bool is_prime(
+            const SmallModulus &modulus, std::size_t num_rounds = 40);
 
-        std::vector<SmallModulus> get_primes(std::size_t ntt_size, int bit_size,
-            std::size_t count);
+        SEAL_NODISCARD std::vector<SmallModulus> get_primes(
+            std::size_t ntt_size, int bit_size, std::size_t count);
 
-        inline SmallModulus get_prime(std::size_t ntt_size, int bit_size)
+        SEAL_NODISCARD inline SmallModulus get_prime(
+            std::size_t ntt_size, int bit_size)
         {
             return get_primes(ntt_size, bit_size, 1)[0];
         }

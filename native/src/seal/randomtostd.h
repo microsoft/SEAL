@@ -41,7 +41,7 @@ namespace seal
         /**
         Returns a new random number from the backing UniformRandomGenerator.
         */
-        result_type operator()()
+        SEAL_NODISCARD inline result_type operator()()
         {
             return generator_->generate();
         }
@@ -49,7 +49,7 @@ namespace seal
         /**
         Returns the backing UniformRandomGenerator.
         */
-        auto generator() const noexcept
+        SEAL_NODISCARD inline auto generator() const noexcept
         {
             return generator_;
         }
@@ -57,7 +57,7 @@ namespace seal
         /**
         Returns the smallest possible output value.
         */
-        static constexpr result_type min() noexcept
+        SEAL_NODISCARD inline static constexpr result_type min() noexcept
         {
             return std::numeric_limits<result_type>::min();
         }
@@ -65,7 +65,7 @@ namespace seal
         /**
         Returns the largest possible output value.
         */
-        static constexpr result_type max() noexcept
+        SEAL_NODISCARD static constexpr result_type max() noexcept
         {
             return std::numeric_limits<result_type>::max();
         }

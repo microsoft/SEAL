@@ -1234,12 +1234,24 @@ namespace seal
             set_uint_uint(
                 encrypted_copy.data(poly_index) + next_coeff_mod_count * coeff_count,
                 coeff_count, temp1.get());
+            // Add (p-1)/2 to change from flooring to rounding.
+            auto last_modulus = context_data.parms().coeff_modulus().back();
+            uint64_t half = last_modulus.value() >> 1;
+            for (size_t j = 0; j < coeff_count; j++)
+            {
+                temp1.get()[j] = barrett_reduce_63(temp1.get()[j] + half, last_modulus);
+            }
             for (size_t mod_index = 0; mod_index < next_coeff_mod_count; mod_index++,
                 temp2_ptr += coeff_count)
             {
                 // (ct mod qk) mod qi
                 modulo_poly_coeffs_63(temp1.get(), coeff_count,
                     next_coeff_modulus[mod_index], temp2_ptr);
+                uint64_t half_mod = barrett_reduce_63(half, next_coeff_modulus[mod_index]);
+                for (size_t j = 0; j < coeff_count; j++)
+                {
+                   temp2_ptr[j] = sub_uint_uint_mod(temp2_ptr[j], half_mod, next_coeff_modulus[mod_index]);
+                }
                 // ((ct mod qi) - (ct mod qk)) mod qi
                 sub_poly_poly_coeffmod(
                     encrypted_copy.data(poly_index) + mod_index * coeff_count, temp2_ptr,
@@ -1574,7 +1586,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_many(vector<Ciphertext> &encrypteds,
+    void Evaluator::multiply_many(const vector<Ciphertext> &encrypteds,
         const RelinKeys &relin_keys, Ciphertext &destination,
         MemoryPoolHandle pool)
     {
@@ -1618,29 +1630,37 @@ namespace seal
             return;
         }
 
-        // Repeatedly multiply and add to the back of the vector until the end is reached
-        Ciphertext product(context_, context_data.parms_id(), pool);
+        // Do first level of multiplications
+        vector<Ciphertext> product_vec;
         for (size_t i = 0; i < encrypteds.size() - 1; i += 2)
         {
-            // We only compare pointers to determine if a faster path can be taken.
-            // This is under the assumption that if the two pointers are the same and
-            // the parameter sets match, then it makes no sense for one of the ciphertexts
-            // to be of different size than the other. More generally, it seems like
-            // a reasonable assumption that if the pointers are the same, then the
-            // ciphertexts are the same.
+            Ciphertext temp(context_, context_data.parms_id(), pool);
             if (encrypteds[i].data() == encrypteds[i + 1].data())
             {
-                square(encrypteds[i], product);
+                square(encrypteds[i], temp);
             }
             else
             {
-                multiply(encrypteds[i], encrypteds[i + 1], product);
+                multiply(encrypteds[i], encrypteds[i + 1], temp);
             }
-            relinearize_inplace(product, relin_keys, pool);
-            encrypteds.emplace_back(product);
+            relinearize_inplace(temp, relin_keys, pool);
+            product_vec.emplace_back(move(temp));
+        }
+        if (encrypteds.size() & 1)
+        {
+            product_vec.emplace_back(encrypteds.back());
         }
 
-        destination = encrypteds[encrypteds.size() - 1];
+        // Repeatedly multiply and add to the back of the vector until the end is reached
+        for (size_t i = 0; i < product_vec.size() - 1; i += 2)
+        {
+            Ciphertext temp(context_, context_data.parms_id(), pool);
+            multiply(product_vec[i], product_vec[i + 1], temp);
+            relinearize_inplace(temp, relin_keys, pool);
+            product_vec.emplace_back(move(temp));
+        }
+
+        destination = product_vec.back();
     }
 
     void Evaluator::exponentiate_inplace(Ciphertext &encrypted, uint64_t exponent,
@@ -2763,9 +2783,18 @@ namespace seal
                     key_modulus[key_mod_count - 1]);
             }
             // Lazy reduction, they are then reduced mod qi
+            uint64_t *temp_last_poly_ptr = temp_poly[k].get() + decomp_mod_count * coeff_count * 2;
             inverse_ntt_negacyclic_harvey_lazy(
-                temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
+                temp_last_poly_ptr,
                 small_ntt_tables[key_mod_count - 1]);
+
+            // Add (p-1)/2 to change from flooring to rounding.
+            uint64_t half = key_modulus[key_mod_count - 1].value() >> 1;
+            for (size_t l = 0; l < coeff_count; l++)
+            {
+                temp_last_poly_ptr[l] = barrett_reduce_63(temp_last_poly_ptr[l] + half,
+                    key_modulus[key_mod_count - 1]);
+            }
 
             uint64_t *encrypted_ptr = encrypted.data(k);
             for (size_t j = 0; j < decomp_mod_count; j++)
@@ -2780,10 +2809,19 @@ namespace seal
                 }
                 // (ct mod 4qk) mod qi
                 modulo_poly_coeffs_63(
-                    temp_poly[k].get() + decomp_mod_count * coeff_count * 2,
+                    temp_last_poly_ptr,
                     coeff_count,
                     key_modulus[j],
                     local_small_poly.get());
+
+                uint64_t half_mod = barrett_reduce_63(half, key_modulus[j]);
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    local_small_poly.get()[l] = sub_uint_uint_mod(local_small_poly.get()[l],
+                        half_mod,
+                        key_modulus[j]);
+                }
+
                 if (scheme == scheme_type::CKKS)
                 {
                     ntt_negacyclic_harvey(

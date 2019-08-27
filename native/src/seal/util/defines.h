@@ -97,6 +97,13 @@ namespace seal
 #define SEAL_MAYBE_UNUSED
 #endif
 
+// Use [[nodiscard]] from C++17
+#ifdef SEAL_USE_NODISCARD
+#define SEAL_NODISCARD [[nodiscard]]
+#else
+#define SEAL_NODISCARD
+#endif
+
 // Which random number generator factory to use by default
 #ifdef SEAL_USE_AES_NI_PRNG
 // AES-PRNG with seed from std::random_device

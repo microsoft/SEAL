@@ -25,23 +25,20 @@ namespace SEALTest
             SmallNTTTables tables;
             int coeff_count_power = 1;
             SmallModulus modulus(get_prime(uint64_t(1) << coeff_count_power, 60));
-            tables.generate(coeff_count_power, modulus);
+            ASSERT_TRUE(tables.generate(coeff_count_power, modulus));
             ASSERT_EQ(2ULL, tables.coeff_count());
-            ASSERT_TRUE(tables.is_generated());
             ASSERT_EQ(1, tables.coeff_count_power());
 
             coeff_count_power = 2;
             modulus = get_prime(uint64_t(1) << coeff_count_power, 50);
-            tables.generate(coeff_count_power, modulus);
+            ASSERT_TRUE(tables.generate(coeff_count_power, modulus));
             ASSERT_EQ(4ULL, tables.coeff_count());
-            ASSERT_TRUE(tables.is_generated());
             ASSERT_EQ(2, tables.coeff_count_power());
 
             coeff_count_power = 10;
             modulus = get_prime(uint64_t(1) << coeff_count_power, 40);
-            tables.generate(coeff_count_power, modulus);
+            ASSERT_TRUE(tables.generate(coeff_count_power, modulus));
             ASSERT_EQ(1024ULL, tables.coeff_count());
-            ASSERT_TRUE(tables.is_generated());
             ASSERT_EQ(10, tables.coeff_count_power());
         }
 
@@ -52,7 +49,7 @@ namespace SEALTest
 
             int coeff_count_power = 1;
             SmallModulus modulus(0xffffffffffc0001ULL);
-            tables.generate(coeff_count_power, modulus);
+            ASSERT_TRUE(tables.generate(coeff_count_power, modulus));
             ASSERT_EQ(1ULL, tables.get_from_root_powers(0));
             ASSERT_EQ(288794978602139552ULL, tables.get_from_root_powers(1));
             uint64_t inv;
@@ -60,7 +57,7 @@ namespace SEALTest
             ASSERT_EQ(inv, tables.get_from_inv_root_powers(1));
 
             coeff_count_power = 2;
-            tables.generate(coeff_count_power, modulus);
+            ASSERT_TRUE(tables.generate(coeff_count_power, modulus));
             ASSERT_EQ(1ULL, tables.get_from_root_powers(0));
             ASSERT_EQ(288794978602139552ULL, tables.get_from_root_powers(1));
             ASSERT_EQ(178930308976060547ULL, tables.get_from_root_powers(2));
@@ -69,12 +66,12 @@ namespace SEALTest
 
         TEST(SmallNTTTablesTest, NegacyclicSmallNTTTest)
         {
-        MemoryPoolHandle pool = MemoryPoolHandle::Global();
-        SmallNTTTables tables;
+            MemoryPoolHandle pool = MemoryPoolHandle::Global();
+            SmallNTTTables tables;
 
             int coeff_count_power = 1;
             SmallModulus modulus(0xffffffffffc0001ULL);
-            tables.generate(coeff_count_power, modulus);
+            ASSERT_TRUE(tables.generate(coeff_count_power, modulus));
             auto poly(allocate_poly(2, 1, pool));
             poly[0] = 0;
             poly[1] = 0;
@@ -97,12 +94,12 @@ namespace SEALTest
 
         TEST(SmallNTTTablesTest, InverseNegacyclicSmallNTTTest)
         {
-        MemoryPoolHandle pool = MemoryPoolHandle::Global();
-        SmallNTTTables tables;
+            MemoryPoolHandle pool = MemoryPoolHandle::Global();
+            SmallNTTTables tables;
 
             int coeff_count_power = 3;
             SmallModulus modulus(0xffffffffffc0001ULL);
-            tables.generate(coeff_count_power, modulus);
+            ASSERT_TRUE(tables.generate(coeff_count_power, modulus));
             auto poly(allocate_zero_poly(800, 1, pool));
             auto temp(allocate_zero_poly(800, 1, pool));
 
@@ -126,5 +123,5 @@ namespace SEALTest
                 ASSERT_EQ(temp[i], poly[i]);
             }
         }
-   }
+    }
 }

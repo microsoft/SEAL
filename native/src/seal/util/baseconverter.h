@@ -46,6 +46,15 @@ namespace seal
                 const Pointer<SmallNTTTables> &rns_ntt_tables,
                 MemoryPoolHandle pool) const;
 
+            void round_last_coeff_modulus_inplace(
+                std::uint64_t *rns_poly,
+                MemoryPoolHandle pool) const;
+
+            void round_last_coeff_modulus_ntt_inplace(
+                std::uint64_t *rns_poly,
+                const Pointer<SmallNTTTables> &rns_ntt_tables,
+                MemoryPoolHandle pool) const;
+
             /**
             Fast base converter from q to Bsk
             */
@@ -84,92 +93,93 @@ namespace seal
 
             void reset() noexcept;
 
-            inline auto is_generated() const noexcept
+            SEAL_NODISCARD inline auto is_generated() const noexcept
             {
                 return generated_;
             }
 
-            inline auto coeff_base_mod_count() const noexcept
+            SEAL_NODISCARD inline auto coeff_base_mod_count() const noexcept
             {
                 return coeff_base_mod_count_;
             }
 
-            inline auto aux_base_mod_count() const noexcept
+            SEAL_NODISCARD inline auto aux_base_mod_count() const noexcept
             {
                 return aux_base_mod_count_;
             }
 
-            inline auto &get_plain_gamma_product() const noexcept
+            SEAL_NODISCARD inline auto &get_plain_gamma_product() const noexcept
             {
                 return plain_gamma_product_mod_coeff_array_;
             }
 
-            inline auto &get_neg_inv_coeff() const noexcept
+            SEAL_NODISCARD inline auto &get_neg_inv_coeff() const noexcept
             {
                 return neg_inv_coeff_products_all_mod_plain_gamma_array_;
             }
 
-            inline auto &get_plain_gamma_array() const noexcept
+            SEAL_NODISCARD inline auto &get_plain_gamma_array() const noexcept
             {
                 return plain_gamma_array_;
             }
 
-            inline const std::uint64_t *get_coeff_products_array() const noexcept
+            SEAL_NODISCARD inline auto get_coeff_products_array() const noexcept
+                -> const std::uint64_t *
             {
                 return coeff_products_array_.get();
             }
 
-            inline std::uint64_t get_inv_gamma() const noexcept
+            SEAL_NODISCARD inline std::uint64_t get_inv_gamma() const noexcept
             {
                 return inv_gamma_mod_plain_;
             }
 
-            inline auto &get_bsk_small_ntt_tables() const noexcept
+            SEAL_NODISCARD inline auto &get_bsk_small_ntt_tables() const noexcept
             {
                 return bsk_small_ntt_tables_;
             }
 
-            inline auto bsk_base_mod_count() const noexcept
+            SEAL_NODISCARD inline auto bsk_base_mod_count() const noexcept
             {
                 return bsk_base_mod_count_;
             }
 
-            inline auto &get_bsk_mod_array() const noexcept
+            SEAL_NODISCARD inline auto &get_bsk_mod_array() const noexcept
             {
                 return bsk_base_array_;
             }
 
-            inline auto &get_msk() const noexcept
+            SEAL_NODISCARD inline auto &get_msk() const noexcept
             {
                 return m_sk_;
             }
 
-            inline auto &get_m_tilde() const noexcept
+            SEAL_NODISCARD inline auto &get_m_tilde() const noexcept
             {
                 return m_tilde_;
             }
 
-            inline auto &get_mtilde_inv_coeff_products_mod_coeff() const noexcept
+            SEAL_NODISCARD inline auto &get_mtilde_inv_coeff_products_mod_coeff() const noexcept
             {
                 return mtilde_inv_coeff_base_products_mod_coeff_array_;
             }
 
-            inline auto &get_inv_coeff_mod_mtilde() const noexcept
+            SEAL_NODISCARD inline auto &get_inv_coeff_mod_mtilde() const noexcept
             {
                 return inv_coeff_products_mod_mtilde_;
             }
 
-            inline auto &get_inv_coeff_mod_coeff_array() const noexcept
+            SEAL_NODISCARD inline auto &get_inv_coeff_mod_coeff_array() const noexcept
             {
                 return inv_coeff_base_products_mod_coeff_array_;
             }
 
-            inline auto &get_inv_last_coeff_mod_array() const noexcept
+            SEAL_NODISCARD inline auto &get_inv_last_coeff_mod_array() const noexcept
             {
                 return inv_last_coeff_mod_array_;
             }
 
-            inline auto &get_coeff_base_products_mod_msk() const noexcept
+            SEAL_NODISCARD inline auto &get_coeff_base_products_mod_msk() const noexcept
             {
                 return coeff_base_products_mod_aux_bsk_array_[bsk_base_mod_count_ - 1];
             }

@@ -663,7 +663,7 @@ namespace seal
         @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
-        void multiply_many(std::vector<Ciphertext> &encrypteds,
+        void multiply_many(const std::vector<Ciphertext> &encrypteds,
             const RelinKeys &relin_keys, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
@@ -966,7 +966,7 @@ namespace seal
 
 
         The desired Galois automorphism is given as a Galois element, and must be
-        an odd integer in the interval [1, M-1], where M = 2*N, and N = degree(poly_modulus).
+        an odd integer in the interval [1, M-1], where M = 2*N, and N = poly_modulus_degree.
         Used with batching, a Galois element 3^i % M corresponds to a cyclic row
         rotation i steps to the left, and a Galois element 3^(N/2-i) % M corresponds
         to a cyclic row rotation i steps to the right. The Galois element M-1 corresponds
@@ -1002,7 +1002,7 @@ namespace seal
         MemoryPoolHandle.
 
         The desired Galois automorphism is given as a Galois element, and must be
-        an odd integer in the interval [1, M-1], where M = 2*N, and N = degree(poly_modulus).
+        an odd integer in the interval [1, M-1], where M = 2*N, and N = poly_modulus_degree.
         Used with batching, a Galois element 3^i % M corresponds to a cyclic row
         rotation i steps to the left, and a Galois element 3^(N/2-i) % M corresponds
         to a cyclic row rotation i steps to the right. The Galois element M-1 corresponds

@@ -648,6 +648,103 @@ namespace seal
             }
         }
 
+        void BaseConverter::round_last_coeff_modulus_inplace(
+            uint64_t *rns_poly,
+            MemoryPoolHandle pool) const
+        {
+            auto temp(allocate_uint(coeff_count_, pool));
+            uint64_t *last_ptr = rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_;
+
+            // Add (p-1)/2 to change from flooring to rounding.
+            auto last_modulus = coeff_base_array_[coeff_base_mod_count_ - 1];
+            uint64_t half = last_modulus.value() >> 1;
+            for (size_t j = 0; j < coeff_count_; j++)
+            {
+                last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
+            }
+
+            for (size_t i = 0; i < coeff_base_mod_count_ - 1; i++)
+            {
+                // (ct mod qk) mod qi
+                modulo_poly_coeffs_63(
+                    last_ptr,
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    temp.get());
+
+                uint64_t half_mod = barrett_reduce_63(half, coeff_base_array_[i]);
+                for (size_t j = 0; j < coeff_count_; j++)
+                {
+                   temp.get()[j] = sub_uint_uint_mod(temp.get()[j], half_mod, coeff_base_array_[i]);
+                }
+                sub_poly_poly_coeffmod(
+                    rns_poly + i * coeff_count_,
+                    temp.get(),
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    rns_poly + i * coeff_count_);
+                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
+                multiply_poly_scalar_coeffmod(
+                    rns_poly + i * coeff_count_,
+                    coeff_count_,
+                    inv_last_coeff_mod_array_[i],
+                    coeff_base_array_[i],
+                    rns_poly + i * coeff_count_);
+            }
+        }
+
+        void BaseConverter::round_last_coeff_modulus_ntt_inplace(
+                std::uint64_t *rns_poly,
+                const Pointer<SmallNTTTables> &rns_ntt_tables,
+                MemoryPoolHandle pool) const
+        {
+            auto temp(allocate_uint(coeff_count_, pool));
+            uint64_t *last_ptr = rns_poly + (coeff_base_mod_count_ - 1) * coeff_count_;
+            // Convert to non-NTT form
+            inverse_ntt_negacyclic_harvey(
+                last_ptr,
+                rns_ntt_tables[coeff_base_mod_count_ - 1]);
+
+            // Add (p-1)/2 to change from flooring to rounding.
+            auto last_modulus = coeff_base_array_[coeff_base_mod_count_ - 1];
+            uint64_t half = last_modulus.value() >> 1;
+            for (size_t j = 0; j < coeff_count_; j++)
+            {
+                last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
+            }
+
+            for (size_t i = 0; i < coeff_base_mod_count_ - 1; i++)
+            {
+                // (ct mod qk) mod qi
+                modulo_poly_coeffs_63(
+                    last_ptr,
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    temp.get());
+
+                uint64_t half_mod = barrett_reduce_63(half, coeff_base_array_[i]);
+                for (size_t j = 0; j < coeff_count_; j++) {
+                   temp.get()[j] = sub_uint_uint_mod(temp.get()[j], half_mod, coeff_base_array_[i]);
+                }
+                // Convert to NTT form
+                ntt_negacyclic_harvey(temp.get(), rns_ntt_tables[i]);
+                // ((ct mod qi) - (ct mod qk)) mod qi
+                sub_poly_poly_coeffmod(
+                    rns_poly + i * coeff_count_,
+                    temp.get(),
+                    coeff_count_,
+                    coeff_base_array_[i],
+                    rns_poly + i * coeff_count_);
+                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
+                multiply_poly_scalar_coeffmod(
+                    rns_poly + i * coeff_count_,
+                    coeff_count_,
+                    inv_last_coeff_mod_array_[i],
+                    coeff_base_array_[i],
+                    rns_poly + i * coeff_count_);
+            }
+        }
+
         void BaseConverter::fastbconv_sk(const uint64_t *input,
             uint64_t *destination, MemoryPoolHandle pool) const
         {

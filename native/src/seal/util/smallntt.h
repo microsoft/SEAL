@@ -29,7 +29,7 @@ namespace seal
             SmallNTTTables(int coeff_count_power, const SmallModulus &modulus,
                 MemoryPoolHandle pool = MemoryManager::GetPool());
 
-            inline bool is_generated() const
+            SEAL_NODISCARD inline bool is_generated() const
             {
                 return generated_;
             }
@@ -38,7 +38,7 @@ namespace seal
 
             void reset();
 
-            inline std::uint64_t get_root() const
+            SEAL_NODISCARD inline std::uint64_t get_root() const
             {
 #ifdef SEAL_DEBUG
                 if (!generated_)
@@ -49,7 +49,8 @@ namespace seal
                 return root_;
             }
 
-            inline std::uint64_t get_from_root_powers(std::size_t index) const
+            SEAL_NODISCARD inline auto get_from_root_powers(
+                std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -64,7 +65,8 @@ namespace seal
                 return root_powers_[index];
             }
 
-            inline std::uint64_t get_from_scaled_root_powers(std::size_t index) const
+            SEAL_NODISCARD inline auto get_from_scaled_root_powers(
+                std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -79,7 +81,8 @@ namespace seal
                 return scaled_root_powers_[index];
             }
 
-            inline std::uint64_t get_from_inv_root_powers(std::size_t index) const
+            SEAL_NODISCARD inline auto get_from_inv_root_powers(
+                std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -94,7 +97,8 @@ namespace seal
                 return inv_root_powers_[index];
             }
 
-            inline std::uint64_t get_from_scaled_inv_root_powers(std::size_t index) const
+            SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers(
+                std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -109,8 +113,8 @@ namespace seal
                 return scaled_inv_root_powers_[index];
             }
 
-            inline std::uint64_t get_from_inv_root_powers_div_two(
-                std::size_t index) const
+            SEAL_NODISCARD inline auto get_from_inv_root_powers_div_two(
+                std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -125,8 +129,8 @@ namespace seal
                 return inv_root_powers_div_two_[index];
             }
 
-            inline std::uint64_t get_from_scaled_inv_root_powers_div_two(
-                std::size_t index) const
+            SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers_div_two(
+                std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -141,7 +145,8 @@ namespace seal
                 return scaled_inv_root_powers_div_two_[index];
             }
 
-            inline const std::uint64_t *get_inv_degree_modulo() const
+            SEAL_NODISCARD inline auto get_inv_degree_modulo() const
+                -> const std::uint64_t*
             {
 #ifdef SEAL_DEBUG
                 if (!generated_)
@@ -152,17 +157,17 @@ namespace seal
                 return &inv_degree_modulo_;
             }
 
-            inline const SmallModulus &modulus() const
+            SEAL_NODISCARD inline const SmallModulus &modulus() const
             {
                 return modulus_;
             }
 
-            inline int coeff_count_power() const
+            SEAL_NODISCARD inline int coeff_count_power() const
             {
                 return coeff_count_power_;
             }
 
-            inline std::size_t coeff_count() const
+            SEAL_NODISCARD inline std::size_t coeff_count() const
             {
                 return coeff_count_;
             }

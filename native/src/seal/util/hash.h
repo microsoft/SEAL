@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <array>
+#include "seal/util/defines.h"
 
 namespace seal
 {
@@ -61,7 +62,8 @@ namespace seal
                 0x8000000000008080, 0x0000000080000001, 0x8000000080008008
             };
 
-            inline static std::uint64_t rot(std::uint64_t input, std::uint8_t s)
+            SEAL_NODISCARD inline static std::uint64_t rot(
+                std::uint64_t input, std::uint8_t s) noexcept
             {
                 return (input << s) | (input >> (64 - s));
             }

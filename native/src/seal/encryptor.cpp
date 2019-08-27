@@ -82,9 +82,9 @@ namespace seal
         destination.resize(context_, parms_id, 2);
 
         auto prev_context_data_ptr = context_data.prev_context_data();
-        auto &prev_context_data = *prev_context_data_ptr;
         if (prev_context_data_ptr)
         {
+            auto &prev_context_data = *prev_context_data_ptr;
             auto &prev_parms_id = prev_context_data.parms_id();
             auto &base_converter = prev_context_data.base_converter();
 
@@ -102,14 +102,14 @@ namespace seal
             {
                 if (is_ntt_form)
                 {
-                    base_converter->floor_last_coeff_modulus_ntt_inplace(
+                    base_converter->round_last_coeff_modulus_ntt_inplace(
                         temp.data(j),
                         prev_context_data.small_ntt_tables(),
                         pool);
                 }
                 else
                 {
-                    base_converter->floor_last_coeff_modulus_inplace(
+                    base_converter->round_last_coeff_modulus_inplace(
                         temp.data(j),
                         pool);
                 }
@@ -242,5 +242,4 @@ namespace seal
             }
         }
     }
-
 }

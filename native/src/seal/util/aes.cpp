@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "aes.h"
+#include "seal/util/aes.h"
 
 #ifdef SEAL_USE_AES_NI_PRNG
 

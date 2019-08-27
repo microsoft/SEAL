@@ -25,7 +25,12 @@ namespace seal
                 throw invalid_argument("pool is uninitialized");
             }
 #endif
-            generate(coeff_count_power, modulus);
+            if (!generate(coeff_count_power, modulus))
+            {
+                // Generation failed; probably modulus wasn't prime.
+                // It is necessary to check generated() after creating
+                // this class.
+            }
         }
 
         void SmallNTTTables::reset()

@@ -115,25 +115,24 @@ namespace seal
             // Set up source of randomness that produces 32 bit random things.
             RandomToStandardAdapter engine(random);
 
-            uint64_t max_uint64 = numeric_limits<uint64_t>::max();
-            uint64_t modulus = 0;
-            uint64_t max_multiple = 0;
-
+            // We sample numbers up to 2^63-1 to use barrett_reduce_63
+            constexpr uint64_t max_random =
+                numeric_limits<uint64_t>::max() & uint64_t(0x7FFFFFFFFFFFFFFF);
             for (size_t j = 0; j < coeff_mod_count; j++)
             {
-                modulus = coeff_modulus[j].value();
-                max_multiple = max_uint64 - max_uint64 % modulus;
+                auto &modulus = coeff_modulus[j];
+                uint64_t max_multiple = max_random - max_random % modulus.value();
                 for (size_t i = 0; i < coeff_count; i++)
                 {
                     // This ensures uniform distribution.
                     uint64_t rand;
                     do
                     {
-                        rand = (static_cast<uint64_t>(engine()) << 32) +
-                            static_cast<uint64_t>(engine());
+                        rand = (static_cast<uint64_t>(engine()) << 31) |
+                            (static_cast<uint64_t>(engine() >> 1));
                     }
                     while (rand >= max_multiple);
-                    poly[i + j * coeff_count] = rand % modulus;
+                    poly[i + j * coeff_count] = barrett_reduce_63(rand, modulus);
                 }
             }
         }
@@ -208,7 +207,7 @@ namespace seal
 
             // Generate e_j <-- chi.
             // c[j] = public_key[j] * u + e[j]
-            for (size_t j = 0; j < 2; j++)
+            for (size_t j = 0; j < encrypted_size; j++)
             {
                 sample_poly_normal(u.get(), random, parms);
                 for (size_t i = 0; i < coeff_mod_count; i++)

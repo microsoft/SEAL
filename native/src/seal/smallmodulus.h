@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <iostream>
 #include <array>
+#include "seal/util/defines.h"
 #include "seal/util/uintcore.h"
 #include "seal/memorymanager.h"
 #ifdef EMSCRIPTEN
@@ -86,7 +87,7 @@ namespace seal
         /**
         Returns the significant bit count of the value of the current SmallModulus.
         */
-        inline int bit_count() const noexcept
+        SEAL_NODISCARD inline int bit_count() const noexcept
         {
             return bit_count_;
         }
@@ -94,7 +95,7 @@ namespace seal
         /**
         Returns the size (in 64-bit words) of the value of the current SmallModulus.
         */
-        inline std::size_t uint64_count() const noexcept
+        SEAL_NODISCARD inline std::size_t uint64_count() const noexcept
         {
             return uint64_count_;
         }
@@ -102,7 +103,7 @@ namespace seal
         /**
         Returns a const pointer to the value of the current SmallModulus.
         */
-        inline const uint64_t *data() const noexcept
+        SEAL_NODISCARD inline const uint64_t *data() const noexcept
         {
             return &value_;
         }
@@ -110,7 +111,7 @@ namespace seal
         /**
         Returns the value of the current SmallModulus.
         */
-        inline std::uint64_t value() const noexcept
+        SEAL_NODISCARD inline std::uint64_t value() const noexcept
         {
             return value_;
         }
@@ -120,7 +121,7 @@ namespace seal
         The first two components of the Barrett ratio are the floor of 2^128/value,
         and the third component is the remainder.
         */
-        inline auto &const_ratio() const noexcept
+        SEAL_NODISCARD inline auto &const_ratio() const noexcept
         {
             return const_ratio_;
         }
@@ -128,7 +129,7 @@ namespace seal
         /**
         Returns whether the value of the current SmallModulus is zero.
         */
-        inline bool is_zero() const noexcept
+        SEAL_NODISCARD inline bool is_zero() const noexcept
         {
             return value_ == 0;
         }
@@ -136,7 +137,7 @@ namespace seal
         /**
         Returns whether the value of the current SmallModulus is a prime number.
         */
-        inline bool is_prime() const noexcept
+        SEAL_NODISCARD inline bool is_prime() const noexcept
         {
             return is_prime_;
         }
@@ -146,7 +147,8 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator ==(const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator ==(
+            const SmallModulus &compare) const noexcept
         {
             return value_ == compare.value_;
         }
@@ -156,7 +158,8 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        inline bool operator ==(std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator ==(
+            std::uint64_t compare) const noexcept
         {
             return value_ == compare;
         }
@@ -166,7 +169,8 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator !=(const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator !=(
+            const SmallModulus &compare) const noexcept
         {
             return !(value_ == compare.value_);
         }
@@ -176,7 +180,8 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        inline bool operator !=(std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator !=(
+            std::uint64_t compare) const noexcept
         {
             return value_ != compare;
         }
@@ -186,7 +191,8 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator <(const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator <(
+            const SmallModulus &compare) const noexcept
         {
             return value_ < compare.value_;
         }
@@ -196,7 +202,8 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        inline bool operator <(std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator <(
+            std::uint64_t compare) const noexcept
         {
             return value_ < compare;
         }
@@ -206,7 +213,8 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator <=(const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator <=(
+            const SmallModulus &compare) const noexcept
         {
             return value_ <= compare.value_;
         }
@@ -216,7 +224,8 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        inline bool operator <=(std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator <=(
+            std::uint64_t compare) const noexcept
         {
             return value_ <= compare;
         }
@@ -226,7 +235,8 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator >(const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator >(
+            const SmallModulus &compare) const noexcept
         {
             return value_ > compare.value_;
         }
@@ -236,7 +246,8 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        inline bool operator >(std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator >(
+            std::uint64_t compare) const noexcept
         {
             return value_ > compare;
         }
@@ -246,7 +257,8 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        inline bool operator >=(const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator >=(
+            const SmallModulus &compare) const noexcept
         {
             return value_ >= compare.value_;
         }
@@ -256,7 +268,8 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        inline bool operator >=(std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator >=(
+            std::uint64_t compare) const noexcept
         {
             return value_ >= compare;
         }

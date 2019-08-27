@@ -1,5 +1,13 @@
 # List of Changes
 
+## Version 3.3.2 (patch)
+
+Minor bug and typo fixes. Most importantly:
+- Switched to using RNS rounding instead of RNS flooring to fix the CKKS accuracy issue reported in [issue 52](https://github.com/microsoft/SEAL/issues/52).
+- Added support for QUIET option in CMake (`find_package(seal QUIET)`).
+- Using `[[nodiscard]]` attribute when compiling as C++17.
+- Fixed a bug in `Evaluator::multiply_many` where the input vector was changed.
+
 ## Version 3.3.1 (patch)
 
 Minor bug and typo fixes. Most importantly:
@@ -48,7 +56,7 @@ In class `SEALContext`:
 - Added `key_context_data()`, `key_parms_id()`, `first_context_data()`, and `last_context_data()`;
 - Added `using_keyswitching()` that indicates whether key switching is upported in this `SEALContext`;
 - `Create(...)` in C++, and constructor in C#, now accepts an optional security level based on
-[HomomorphicEncryption.org](HomomorphicEncryption.org) security standard, causing it to enforce the specified security level. By default a 128-bit security level is used.
+[HomomorphicEncryption.org](https://HomomorphicEncryption.org) security standard, causing it to enforce the specified security level. By default a 128-bit security level is used.
 - Added `prev_context_data()` method to class `ContextData` (doubly linked modulus switching chain);
 - In C# `SEALContext` now has a public constructor.
 

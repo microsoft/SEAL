@@ -49,7 +49,7 @@ namespace seal
     @see EncryptionParameterQualifiers for more information about parameter qualifiers.
     @see Evaluator for rotating rows and columns of encrypted matrices.
     */
-    class BatchEncoder
+    class SEAL_NODISCARD BatchEncoder
     {
     public:
         /**
@@ -353,7 +353,7 @@ namespace seal
         /**
         Returns the number of slots.
         */
-        inline auto slot_count() const noexcept
+        SEAL_NODISCARD inline auto slot_count() const noexcept
         {
             return slots_;
         }

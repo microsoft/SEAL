@@ -81,7 +81,7 @@ namespace seal
         Returns the current number of keyswitching keys. Only keys that are
         non-empty are counted.
         */
-        inline std::size_t size() const noexcept
+        SEAL_NODISCARD inline std::size_t size() const noexcept
         {
             return std::accumulate(keys_.cbegin(), keys_.cend(), std::size_t(0),
                 [](std::size_t res, auto &next_key)
@@ -93,7 +93,7 @@ namespace seal
         /**
         Returns a reference to the KSwitchKeys data.
         */
-        inline auto &data() noexcept
+        SEAL_NODISCARD inline auto &data() noexcept
         {
             return keys_;
         }
@@ -101,7 +101,7 @@ namespace seal
         /**
         Returns a const reference to the KSwitchKeys data.
         */
-        inline auto &data() const noexcept
+        SEAL_NODISCARD inline auto &data() const noexcept
         {
             return keys_;
         }
@@ -112,7 +112,7 @@ namespace seal
         @param[in] index The index of the keyswitching key
         @throws std::invalid_argument if the key at the given index does not exist
         */
-        inline auto &data(std::size_t index)
+        SEAL_NODISCARD inline auto &data(std::size_t index)
         {
             if (index >= keys_.size() || keys_[index].empty())
             {
@@ -127,7 +127,7 @@ namespace seal
         @param[in] index The index of the keyswitching key
         @throws std::invalid_argument if the key at the given index does not exist
         */
-        inline const auto &data(std::size_t index) const
+        SEAL_NODISCARD inline const auto &data(std::size_t index) const
         {
             if (index >= keys_.size() || keys_[index].empty())
             {
@@ -141,7 +141,7 @@ namespace seal
 
         @see EncryptionParameters for more information about parms_id.
         */
-        inline auto &parms_id() noexcept
+        SEAL_NODISCARD inline auto &parms_id() noexcept
         {
             return parms_id_;
         }
@@ -151,7 +151,7 @@ namespace seal
 
         @see EncryptionParameters for more information about parms_id.
         */
-        inline auto &parms_id() const noexcept
+        SEAL_NODISCARD inline auto &parms_id() const noexcept
         {
             return parms_id_;
         }
@@ -245,7 +245,7 @@ namespace seal
         /**
         Returns the currently used MemoryPoolHandle.
         */
-        inline MemoryPoolHandle pool() const noexcept
+        SEAL_NODISCARD inline MemoryPoolHandle pool() const noexcept
         {
             return pool_;
         }

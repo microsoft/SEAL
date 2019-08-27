@@ -169,7 +169,7 @@ namespace seal
             /**
             Returns a const reference to the underlying encryption parameters.
             */
-            inline auto &parms() const noexcept
+            SEAL_NODISCARD inline auto &parms() const noexcept
             {
                 return parms_;
             }
@@ -177,7 +177,7 @@ namespace seal
             /**
             Returns the parms_id of the current parameters.
             */
-            inline auto &parms_id() const noexcept
+            SEAL_NODISCARD inline auto &parms_id() const noexcept
             {
                 return parms_.parms_id();
             }
@@ -188,7 +188,7 @@ namespace seal
             necessary to create a new instance of SEALContext once appropriate changes
             to the encryption parameters have been made.
             */
-            inline auto qualifiers() const noexcept
+            SEAL_NODISCARD inline auto qualifiers() const noexcept
             {
                 return qualifiers_;
             }
@@ -198,7 +198,8 @@ namespace seal
             modulus. The security of the encryption parameters largely depends on the
             bit-length of this product, and on the degree of the polynomial modulus.
             */
-            inline const std::uint64_t *total_coeff_modulus() const noexcept
+            SEAL_NODISCARD inline auto total_coeff_modulus() const noexcept
+                -> const std::uint64_t*
             {
                 return total_coeff_modulus_.get();
             }
@@ -206,7 +207,7 @@ namespace seal
             /**
             Returns the significant bit count of the total coefficient modulus.
             */
-            inline int total_coeff_modulus_bit_count() const noexcept
+            SEAL_NODISCARD inline int total_coeff_modulus_bit_count() const noexcept
             {
                 return total_coeff_modulus_bit_count_;
             }
@@ -214,7 +215,7 @@ namespace seal
             /**
             Returns a const reference to the base converter.
             */
-            inline auto &base_converter() const noexcept
+            SEAL_NODISCARD inline auto &base_converter() const noexcept
             {
                 return base_converter_;
             }
@@ -222,7 +223,7 @@ namespace seal
             /**
             Returns a const reference to the NTT tables.
             */
-            inline auto &small_ntt_tables() const noexcept
+            SEAL_NODISCARD inline auto &small_ntt_tables() const noexcept
             {
                 return small_ntt_tables_;
             }
@@ -230,7 +231,7 @@ namespace seal
             /**
             Returns a const reference to the NTT tables.
             */
-            inline auto &plain_ntt_tables() const noexcept
+            SEAL_NODISCARD inline auto &plain_ntt_tables() const noexcept
             {
                 return plain_ntt_tables_;
             }
@@ -239,7 +240,8 @@ namespace seal
             Return a pointer to BFV "Delta", i.e. coefficient modulus divided by
             plaintext modulus.
             */
-            inline const std::uint64_t *coeff_div_plain_modulus() const noexcept
+            SEAL_NODISCARD inline auto coeff_div_plain_modulus() const noexcept
+                -> const std::uint64_t*
             {
                 return coeff_div_plain_modulus_.get();
             }
@@ -248,7 +250,8 @@ namespace seal
             Return the threshold for the upper half of integers modulo plain_modulus.
             This is simply (plain_modulus + 1) / 2.
             */
-            inline std::uint64_t plain_upper_half_threshold() const noexcept
+            SEAL_NODISCARD inline auto plain_upper_half_threshold() const noexcept
+                -> std::uint64_t
             {
                 return plain_upper_half_threshold_;
             }
@@ -259,7 +262,8 @@ namespace seal
             for the full product coeff_modulus if using_fast_plain_lift is false and is
             otherwise represented modulo each of the coeff_modulus primes in order.
             */
-            inline const std::uint64_t *plain_upper_half_increment() const noexcept
+            SEAL_NODISCARD inline auto plain_upper_half_increment() const noexcept
+                -> const std::uint64_t*
             {
                 return plain_upper_half_increment_.get();
             }
@@ -268,7 +272,8 @@ namespace seal
             Return a pointer to the upper half threshold with respect to the total
             coefficient modulus. This is needed in CKKS decryption.
             */
-            inline const std::uint64_t *upper_half_threshold() const noexcept
+            SEAL_NODISCARD inline auto upper_half_threshold() const noexcept
+                -> const std::uint64_t*
             {
                 return upper_half_threshold_.get();
             }
@@ -284,7 +289,8 @@ namespace seal
             this operation is only done for negative message coefficients, i.e. those
             that exceed plain_upper_half_threshold.
             */
-            inline const std::uint64_t *upper_half_increment() const noexcept
+            SEAL_NODISCARD inline auto upper_half_increment() const noexcept
+                -> const std::uint64_t*
             {
                 return upper_half_increment_.get();
             }
@@ -294,7 +300,7 @@ namespace seal
             in the modulus switching chain. If the current data is the first one in the
             chain, then the result is nullptr.
             */
-            inline auto prev_context_data() const noexcept
+            SEAL_NODISCARD inline auto prev_context_data() const noexcept
             {
                 return prev_context_data_.lock();
             }
@@ -304,7 +310,7 @@ namespace seal
             in the modulus switching chain. If the current data is the last one in the
             chain, then the result is nullptr.
             */
-            inline auto next_context_data() const noexcept
+            SEAL_NODISCARD inline auto next_context_data() const noexcept
             {
                 return next_context_data_;
             }
@@ -313,7 +319,7 @@ namespace seal
             Returns the index of the parameter set in a chain. The initial parameters
             have index 0 and the index increases sequentially in the parameter chain.
             */
-            inline std::size_t chain_index() const noexcept
+            SEAL_NODISCARD inline std::size_t chain_index() const noexcept
             {
                 return chain_index_;
             }
@@ -373,7 +379,8 @@ namespace seal
         @param[in] sec_level Determines whether a specific security level should be
         enforced according to HomomorphicEncryption.org security standard
         */
-        static auto Create(const EncryptionParameters &parms,
+        SEAL_NODISCARD static auto Create(
+            const EncryptionParameters &parms,
             bool expand_mod_chain = true,
             sec_level_type sec_level = sec_level_type::tc128)
         {
@@ -393,7 +400,8 @@ namespace seal
 
         @param[in] parms_id The parms_id of the encryption parameters
         */
-        inline auto get_context_data(parms_id_type parms_id) const
+        SEAL_NODISCARD inline auto get_context_data(
+            parms_id_type parms_id) const
         {
             auto data = context_data_map_.find(parms_id);
             return (data != context_data_map_.end()) ?
@@ -404,7 +412,7 @@ namespace seal
         Returns the ContextData corresponding to encryption parameters that are
         used for keys.
         */
-        inline auto key_context_data() const
+        SEAL_NODISCARD inline auto key_context_data() const
         {
             auto data = context_data_map_.find(key_parms_id_);
             return (data != context_data_map_.end()) ?
@@ -415,7 +423,7 @@ namespace seal
         Returns the ContextData corresponding to the first encryption parameters
         that are used for data.
         */
-        inline auto first_context_data() const
+        SEAL_NODISCARD inline auto first_context_data() const
         {
             auto data = context_data_map_.find(first_parms_id_);
             return (data != context_data_map_.end()) ?
@@ -426,7 +434,7 @@ namespace seal
         Returns the ContextData corresponding to the last encryption parameters
         that are used for data.
         */
-        inline auto last_context_data() const
+        SEAL_NODISCARD inline auto last_context_data() const
         {
             auto data = context_data_map_.find(last_parms_id_);
             return (data != context_data_map_.end()) ?
@@ -436,7 +444,7 @@ namespace seal
         /**
         Returns whether the encryption parameters are valid.
         */
-        inline auto parameters_set() const
+        SEAL_NODISCARD inline auto parameters_set() const
         {
             return first_context_data() ?
                 first_context_data()->qualifiers_.parameters_set : false;
@@ -446,7 +454,7 @@ namespace seal
         Returns a parms_id_type corresponding to the set of encryption parameters
         that are used for keys.
         */
-        inline auto &key_parms_id() const noexcept
+        SEAL_NODISCARD inline auto &key_parms_id() const noexcept
         {
             return key_parms_id_;
         }
@@ -455,7 +463,7 @@ namespace seal
         Returns a parms_id_type corresponding to the first encryption parameters
         that are used for data.
         */
-        inline auto &first_parms_id() const noexcept
+        SEAL_NODISCARD inline auto &first_parms_id() const noexcept
         {
             return first_parms_id_;
         }
@@ -464,7 +472,7 @@ namespace seal
         Returns a parms_id_type corresponding to the last encryption parameters
         that are used for data.
         */
-        inline auto &last_parms_id() const noexcept
+        SEAL_NODISCARD inline auto &last_parms_id() const noexcept
         {
             return last_parms_id_;
         }
@@ -476,7 +484,7 @@ namespace seal
         keyswitching to be available, the coefficient modulus parameter must consist
         of at least two prime number factors.
         */
-        inline bool using_keyswitching() const noexcept
+        SEAL_NODISCARD inline bool using_keyswitching() const noexcept
         {
             return using_keyswitching_;
         }

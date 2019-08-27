@@ -68,20 +68,20 @@ namespace seal
         encryption parameter
         @param[in] sec_level The desired standard security level
         */
-        static constexpr int MaxBitCount(
+        SEAL_NODISCARD static constexpr int MaxBitCount(
             std::size_t poly_modulus_degree,
             sec_level_type sec_level = sec_level_type::tc128) noexcept
         {
             switch (sec_level)
             {
             case sec_level_type::tc128:
-                return SEAL_HE_STD_PARMS_128_TC(poly_modulus_degree);
+                return util::SEAL_HE_STD_PARMS_128_TC(poly_modulus_degree);
 
             case sec_level_type::tc192:
-                return SEAL_HE_STD_PARMS_192_TC(poly_modulus_degree);
+                return util::SEAL_HE_STD_PARMS_192_TC(poly_modulus_degree);
 
             case sec_level_type::tc256:
-                return SEAL_HE_STD_PARMS_256_TC(poly_modulus_degree);
+                return util::SEAL_HE_STD_PARMS_256_TC(poly_modulus_degree);
 
             case sec_level_type::none:
                 return std::numeric_limits<int>::max();
@@ -108,7 +108,7 @@ namespace seal
         or is too large
         @throws std::invalid_argument if sec_level is sec_level_type::none
         */
-        static std::vector<SmallModulus> BFVDefault(
+        SEAL_NODISCARD static std::vector<SmallModulus> BFVDefault(
             std::size_t poly_modulus_degree,
             sec_level_type sec_level = sec_level_type::tc128);
 
@@ -128,7 +128,7 @@ namespace seal
         are out of bounds
         @throws std::logic_error if not enough suitable primes could be found
         */
-        static std::vector<SmallModulus> Create(
+        SEAL_NODISCARD static std::vector<SmallModulus> Create(
             std::size_t poly_modulus_degree,
             std::vector<int> bit_sizes);
     };
@@ -153,7 +153,7 @@ namespace seal
         @throws std::invalid_argument if bit_size is out of bounds
         @throws std::logic_error if a suitable prime could not be found
         */
-        static inline SmallModulus Batching(
+        SEAL_NODISCARD static inline SmallModulus Batching(
             std::size_t poly_modulus_degree,
             int bit_size)
         {
@@ -175,7 +175,7 @@ namespace seal
         are out of bounds
         @throws std::logic_error if not enough suitable primes could be found
         */
-        static inline std::vector<SmallModulus> Batching(
+        SEAL_NODISCARD static inline std::vector<SmallModulus> Batching(
             std::size_t poly_modulus_degree,
             std::vector<int> bit_sizes)
         {

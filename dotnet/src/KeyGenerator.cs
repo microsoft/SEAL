@@ -177,7 +177,7 @@ namespace Microsoft.Research.SEAL
         /// to the keys that are to be created.
         ///
         /// The Galois elements are odd integers in the interval [1, M-1], where
-        /// M = 2*N, and N = degree(PolyModulus). Used with batching, a Galois element
+        /// M = 2*N, and N = PolyModulusDegree. Used with batching, a Galois element
         /// 3^i % M corresponds to a cyclic row rotation i steps to the left, and
         /// a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation i
         /// steps to the right. The Galois element M-1 corresponds to a column rotation

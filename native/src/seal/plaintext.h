@@ -329,7 +329,7 @@ namespace seal
         /**
         Returns a pointer to the beginning of the plaintext polynomial.
         */
-        inline pt_coeff_type *data()
+        SEAL_NODISCARD inline pt_coeff_type *data()
         {
             return data_.begin();
         }
@@ -337,7 +337,7 @@ namespace seal
         /**
         Returns a const pointer to the beginning of the plaintext polynomial.
         */
-        inline const pt_coeff_type *data() const
+        SEAL_NODISCARD inline const pt_coeff_type *data() const
         {
             return data_.cbegin();
         }
@@ -345,7 +345,7 @@ namespace seal
         /**
         Returns a span pointing to the beginning of the text polynomial.
         */
-        inline gsl::span<pt_coeff_type> data_span()
+        SEAL_NODISCARD inline gsl::span<pt_coeff_type> data_span()
         {
             return gsl::span<pt_coeff_type>(data_.begin(),
                 static_cast<std::ptrdiff_t>(coeff_count()));
@@ -354,7 +354,7 @@ namespace seal
         /**
         Returns a span pointing to the beginning of the text polynomial.
         */
-        inline gsl::span<const pt_coeff_type> data_span() const
+        SEAL_NODISCARD inline gsl::span<const pt_coeff_type> data_span() const
         {
             return gsl::span<const pt_coeff_type>(data_.cbegin(),
                 static_cast<std::ptrdiff_t>(coeff_count()));
@@ -366,7 +366,7 @@ namespace seal
         @param[in] coeff_index The index of the coefficient in the plaintext polynomial
         @throws std::out_of_range if coeff_index is not within [0, coeff_count)
         */
-        inline pt_coeff_type *data(size_type coeff_index)
+        SEAL_NODISCARD inline pt_coeff_type *data(size_type coeff_index)
         {
             if (coeff_count() == 0)
             {
@@ -384,7 +384,8 @@ namespace seal
 
         @param[in] coeff_index The index of the coefficient in the plaintext polynomial
         */
-        inline const pt_coeff_type *data(size_type coeff_index) const
+        SEAL_NODISCARD inline const pt_coeff_type *data(
+            size_type coeff_index) const
         {
             if (coeff_count() == 0)
             {
@@ -403,7 +404,8 @@ namespace seal
         @param[in] coeff_index The index of the coefficient in the plaintext polynomial
         @throws std::out_of_range if coeff_index is not within [0, coeff_count)
         */
-        inline const pt_coeff_type &operator [](size_type coeff_index) const
+        SEAL_NODISCARD inline const pt_coeff_type &operator [](
+            size_type coeff_index) const
         {
             return data_.at(coeff_index);
         }
@@ -414,7 +416,8 @@ namespace seal
         @param[in] coeff_index The index of the coefficient in the plaintext polynomial
         @throws std::out_of_range if coeff_index is not within [0, coeff_count)
         */
-        inline pt_coeff_type &operator [](size_type coeff_index)
+        SEAL_NODISCARD inline pt_coeff_type &operator [](
+            size_type coeff_index)
         {
             return data_.at(coeff_index);
         }
@@ -425,7 +428,7 @@ namespace seal
 
         @param[in] compare The plaintext to compare against
         */
-        inline bool operator ==(const Plaintext &compare) const
+        SEAL_NODISCARD inline bool operator ==(const Plaintext &compare) const
         {
             std::size_t sig_coeff_count = significant_coeff_count();
             std::size_t sig_coeff_count_compare = compare.significant_coeff_count();
@@ -451,7 +454,7 @@ namespace seal
 
         @param[in] compare The plaintext to compare against
         */
-        inline bool operator !=(const Plaintext &compare) const
+        SEAL_NODISCARD inline bool operator !=(const Plaintext &compare) const
         {
             return !operator ==(compare);
         }
@@ -459,7 +462,7 @@ namespace seal
         /**
         Returns whether the current plaintext polynomial has all zero coefficients.
         */
-        inline bool is_zero() const
+        SEAL_NODISCARD inline bool is_zero() const
         {
             return (coeff_count() == 0) ||
                 std::all_of(data_.cbegin(), data_.cend(),
@@ -469,7 +472,7 @@ namespace seal
         /**
         Returns the capacity of the current allocation.
         */
-        inline size_type capacity() const noexcept
+        SEAL_NODISCARD inline size_type capacity() const noexcept
         {
             return data_.capacity();
         }
@@ -477,7 +480,7 @@ namespace seal
         /**
         Returns the coefficient count of the current plaintext polynomial.
         */
-        inline size_type coeff_count() const noexcept
+        SEAL_NODISCARD inline size_type coeff_count() const noexcept
         {
             return data_.size();
         }
@@ -485,7 +488,7 @@ namespace seal
         /**
         Returns the significant coefficient count of the current plaintext polynomial.
         */
-        inline size_type significant_coeff_count() const
+        SEAL_NODISCARD inline size_type significant_coeff_count() const
         {
             if (coeff_count() == 0)
             {
@@ -497,7 +500,7 @@ namespace seal
         /**
         Returns the non-zero coefficient count of the current plaintext polynomial.
         */
-        inline size_type nonzero_coeff_count() const
+        SEAL_NODISCARD inline size_type nonzero_coeff_count() const
         {
             if (coeff_count() == 0)
             {
@@ -526,7 +529,7 @@ namespace seal
 
         @throws std::invalid_argument if the plaintext is in NTT transformed form
         */
-        inline std::string to_string() const
+        SEAL_NODISCARD inline std::string to_string() const
         {
             if (is_ntt_form())
             {
@@ -626,7 +629,7 @@ namespace seal
         /**
         Returns whether the plaintext is in NTT form.
         */
-        inline bool is_ntt_form() const noexcept
+        SEAL_NODISCARD inline bool is_ntt_form() const noexcept
         {
             return (parms_id_ != parms_id_zero);
         }
@@ -637,7 +640,7 @@ namespace seal
 
         @see EncryptionParameters for more information about parms_id.
         */
-        inline auto &parms_id() noexcept
+        SEAL_NODISCARD inline auto &parms_id() noexcept
         {
             return parms_id_;
         }
@@ -648,7 +651,7 @@ namespace seal
 
         @see EncryptionParameters for more information about parms_id.
         */
-        inline auto &parms_id() const noexcept
+        SEAL_NODISCARD inline auto &parms_id() const noexcept
         {
             return parms_id_;
         }
@@ -658,7 +661,7 @@ namespace seal
         encryption scheme. The user should have little or no reason to ever change
         the scale by hand.
         */
-        inline auto &scale() noexcept
+        SEAL_NODISCARD inline auto &scale() noexcept
         {
             return scale_;
         }
@@ -667,7 +670,7 @@ namespace seal
         Returns a constant reference to the scale. This is only needed when using
         the CKKS encryption scheme.
         */
-        inline auto &scale() const noexcept
+        SEAL_NODISCARD inline auto &scale() const noexcept
         {
             return scale_;
         }
@@ -675,7 +678,7 @@ namespace seal
         /**
         Returns the currently used MemoryPoolHandle.
         */
-        inline MemoryPoolHandle pool() const noexcept
+        SEAL_NODISCARD inline MemoryPoolHandle pool() const noexcept
         {
             return data_.pool();
         }

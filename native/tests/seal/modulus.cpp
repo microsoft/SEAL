@@ -15,23 +15,23 @@ namespace SEALTest
     TEST(CoeffModTest, CustomExceptionTest)
     {
         // Too small poly_modulus_degree
-        ASSERT_THROW(CoeffModulus::Create(1, { 2 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(1, { 2 }), invalid_argument);
 
         // Too large poly_modulus_degree
-        ASSERT_THROW(CoeffModulus::Create(65536, { 30 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(65536, { 30 }), invalid_argument);
 
         // Invalid poly_modulus_degree
-        ASSERT_THROW(CoeffModulus::Create(1023, { 20 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(1023, { 20 }), invalid_argument);
 
         // Invalid bit-size
-        ASSERT_THROW(CoeffModulus::Create(2048, { 0 }), invalid_argument);
-        ASSERT_THROW(CoeffModulus::Create(2048, { -30 }), invalid_argument);
-        ASSERT_THROW(CoeffModulus::Create(2048, { 30, -30 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, { 0 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, { -30 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, { 30, -30 }), invalid_argument);
 
         // Too small primes requested
-        ASSERT_THROW(CoeffModulus::Create(2, { 2 }), logic_error);
-        ASSERT_THROW(CoeffModulus::Create(2, { 3, 3, 3 }), logic_error);
-        ASSERT_THROW(CoeffModulus::Create(1024, { 8 }), logic_error);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2, { 2 }), logic_error);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2, { 3, 3, 3 }), logic_error);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(1024, { 8 }), logic_error);
     }
 
     TEST(CoeffModTest, CustomTest)
