@@ -68,8 +68,8 @@ namespace SEALTest
             unsigned char pos_uc_max = 0xFF;
             unsigned long long pos_ull_max = 0xFFFFFFFFFFFFFFFF;
             long long neg_ull = -1;
-            unsigned long long res_ul;
-            long long res_l;
+            SEAL_MAYBE_UNUSED unsigned long long res_ul;
+            SEAL_MAYBE_UNUSED long long res_l;
 
             ASSERT_EQ(25, mul_safe(pos_i, pos_i));
             ASSERT_EQ(25, mul_safe(neg_i, neg_i));
