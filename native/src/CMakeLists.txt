@@ -117,6 +117,10 @@ set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member o
 option(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR} ON)
 mark_as_advanced(FORCE SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT)
 
+# Use system random number generator if available
+set(SEAL_USE_SYSTEM_RNG_OPTION_STR "Use system random number generator")
+option(SEAL_USE_SYSTEM_RNG ${SEAL_USE_SYSTEM_RNG_OPTION_STR} ON)
+
 # Use intrinsics if available
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
 option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
@@ -129,6 +133,18 @@ option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 set(SEAL_USE_ZLIB_OPTION_STR "Use zlib for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
 
+# Check for availability of system random number generator
+if(DEFINED MSVC)
+    check_include_file_cxx("bcrypt.h" HAVE_BCRYPT_HEADER)
+    if(NOT HAVE_BCRYPT_HEADER)
+        set(SEAL_USE_SYSTEM_RNG OFF CACHE BOOL ${SEAL_USE_SYSTEM_RNG_OPTION_STR} FORCE)
+    endif()
+else()
+    if(NOT EXISTS /dev/urandom)
+        set(SEAL_USE_SYSTEM_RNG OFF CACHE BOOL ${SEAL_USE_SYSTEM_RNG_OPTION_STR} FORCE)
+    endif()
+endif()
+
 # Check for intrin.h or x64intrin.h
 if(SEAL_USE_INTRIN)
     if(DEFINED MSVC)
@@ -138,7 +154,6 @@ if(SEAL_USE_INTRIN)
     endif()
 
     check_include_file_cxx(${SEAL_INTRIN_HEADER} HAVE_INTRIN_HEADER)
-
     if(NOT HAVE_INTRIN_HEADER)
         set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
     endif()

@@ -106,11 +106,9 @@ namespace seal
 
 // Which random number generator factory to use by default
 #ifdef SEAL_USE_AES_NI_PRNG
-// AES-PRNG with seed from std::random_device
 #define SEAL_DEFAULT_RNG_FACTORY FastPRNGFactory()
 #else
-// std::random_device
-#define SEAL_DEFAULT_RNG_FACTORY StandardRandomAdapterFactory<std::random_device>
+#define SEAL_DEFAULT_RNG_FACTORY BlakePRNGFactory()
 #endif
 
 // Use generic functions as (slower) fallback

@@ -7,12 +7,16 @@
 #include <memory>
 #include <random>
 #include <algorithm>
+#include <iterator>
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
 #include "seal/util/aes.h"
+#include "seal/util/blake2.h"
 
 namespace seal
 {
+    SEAL_NODISCARD std::uint64_t random_uint64();
+
     /**
     Provides the base class for a uniform random number generator. Instances of
     this class are typically returned from the UniformRandomGeneratorFactory class.
@@ -86,8 +90,7 @@ namespace seal
     {
     public:
         /**
-        Creates a new FastPRNGFactory instance that initializes every FastPRNG
-        instance it creates with the given seed.
+        Creates a new FastPRNG instance initialized with the given seed.
         */
         FastPRNG(std::uint64_t seed_lw, std::uint64_t seed_hw) :
             aes_enc_{ seed_lw, seed_hw }
@@ -120,28 +123,20 @@ namespace seal
     private:
         AESEncryptor aes_enc_;
 
-        static constexpr std::size_t bytes_per_block_ =
-            sizeof(aes_block) / sizeof(SEAL_BYTE);
+        static constexpr std::size_t aes_block_byte_count_ = 16;
 
-        static constexpr std::size_t buffer_block_size_ = 8;
+        static constexpr std::size_t buffer_block_count_ = 128;
 
-        static constexpr std::size_t buffer_size_ =
-            buffer_block_size_ * bytes_per_block_;
+        static constexpr std::size_t buffer_byte_count_ =
+            buffer_block_count_ * aes_block_byte_count_;
 
-        std::array<SEAL_BYTE, buffer_size_> buffer_;
+        std::array<SEAL_BYTE, buffer_byte_count_> buffer_;
 
         std::size_t counter_ = 0;
 
         typename decltype(buffer_)::const_iterator buffer_head_;
 
-        void refill_buffer()
-        {
-            // Fill the randomness buffer
-            aes_block *buffer_ptr = reinterpret_cast<aes_block*>(&*buffer_.begin());
-            aes_enc_.counter_encrypt(counter_, buffer_block_size_, buffer_ptr);
-            counter_ += buffer_block_size_;
-            buffer_head_ = buffer_.cbegin();
-        }
+        void refill_buffer();
     };
 
     class FastPRNGFactory : public UniformRandomGeneratorFactory
@@ -151,7 +146,7 @@ namespace seal
         Creates a new FastPRNGFactory instance that initializes every FastPRNG
         instance it creates with the given seed. A zero seed (default value)
         signals that each random number generator created by the factory should
-        use a different random seed obtained from std::random_device.
+        use a different random seed.
 
         @param[in] seed_lw Low-word for seed for the PRNG
         @param[in] seed_hw High-word for seed for the PRNG
@@ -162,9 +157,7 @@ namespace seal
         }
 
         /**
-        Creates a new uniform random number generator. The caller of create needs
-        to ensure the returned instance is destroyed once it is no longer in-use
-        to prevent a memory leak.
+        Creates a new uniform random number generator.
         */
         SEAL_NODISCARD virtual auto create()
             -> std::shared_ptr<UniformRandomGenerator> override;
@@ -175,16 +168,96 @@ namespace seal
         virtual ~FastPRNGFactory() = default;
 
     private:
-        SEAL_NODISCARD std::uint64_t random_uint64() const noexcept
-        {
-            std::random_device rd;
-            return (static_cast<std::uint64_t>(rd()) << 32)
-                + static_cast<std::uint64_t>(rd());
-        }
-
-        std::uint64_t seed_[2];
+        std::array<std::uint64_t, 2> seed_;
     };
 #endif //SEAL_USE_AES_NI_PRNG
+    /**
+    Provides an implementation of UniformRandomGenerator for using Blake2b for
+    generating randomness with given 128-bit seed.
+    */
+    class BlakePRNG : public UniformRandomGenerator
+    {
+    public:
+        /**
+        Creates a new BlakePRNG instance initialized with the given seed.
+        */
+        BlakePRNG(std::uint64_t seed_lw, std::uint64_t seed_hw)
+        {
+            seed_ = { seed_lw, seed_hw };
+            refill_buffer();
+        }
+
+        /**
+        Generates a new uniform unsigned 32-bit random number. Note that the
+        implementation does not need to be thread-safe.
+        */
+        SEAL_NODISCARD virtual std::uint32_t generate() override
+        {
+            std::uint32_t result;
+            std::copy_n(buffer_head_, util::bytes_per_uint32,
+                reinterpret_cast<SEAL_BYTE*>(&result));
+            buffer_head_ += util::bytes_per_uint32;
+            if (buffer_head_ == buffer_.cend())
+            {
+                refill_buffer();
+            }
+            return result;
+        }
+
+        /**
+        Destroys the random number generator.
+        */
+        virtual ~BlakePRNG() override = default;
+
+    private:
+        static constexpr std::size_t buffer_uint64_count_ = 4096;
+
+        static constexpr std::size_t buffer_byte_count_ =
+            buffer_uint64_count_ * util::bytes_per_uint64;
+
+        std::array<std::uint64_t, 2> seed_;
+
+        std::array<SEAL_BYTE, buffer_byte_count_> buffer_;
+
+        std::size_t counter_ = 0;
+
+        typename decltype(buffer_)::const_iterator buffer_head_;
+
+        void refill_buffer();
+    };
+
+    class BlakePRNGFactory : public UniformRandomGeneratorFactory
+    {
+    public:
+        /**
+        Creates a new BlakePRNGFactory instance that initializes every BlakePRNG
+        instance it creates with the given seed. A zero seed (default value)
+        signals that each random number generator created by the factory should
+        use a different random seed.
+
+        @param[in] seed_lw Low-word for seed for the PRNG
+        @param[in] seed_hw High-word for seed for the PRNG
+        */
+        BlakePRNGFactory(std::uint64_t seed_lw = 0, std::uint64_t seed_hw = 0) :
+            seed_{ seed_lw, seed_hw }
+        {
+        }
+
+        /**
+        Creates a new uniform random number generator.
+        */
+        SEAL_NODISCARD virtual auto create()
+            -> std::shared_ptr<UniformRandomGenerator> override;
+
+        /**
+        Destroys the random number generator factory.
+        */
+        virtual ~BlakePRNGFactory() = default;
+
+    private:
+        std::array<std::uint64_t, 2> seed_;
+    };
+
     /**
     Provides an implementation of UniformRandomGenerator for the standard C++
     library's uniform random number generators.
