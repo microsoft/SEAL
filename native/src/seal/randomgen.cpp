@@ -5,8 +5,14 @@
 #include <random>
 #include <iostream>
 #include "seal/randomgen.h"
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4804)
+#endif
 #include "seal/util/blake2.h"
-
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 using namespace std;
 
 namespace seal
