@@ -226,7 +226,7 @@ namespace seal
                         unsigned long long Q;
                         for (size_t j = j1; j < j2; j++)
                         {
-                            // The Harvey butterfly: assume X, Y in [0, 2p), and return X', Y' in [0, 2p).
+                            // The Harvey butterfly: assume X, Y in [0, 2p), and return X', Y' in [0, 4p).
                             // X', Y' = X + WY, X - WY (mod p).
                             currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
