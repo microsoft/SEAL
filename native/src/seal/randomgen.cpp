@@ -1,67 +1,49 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include <algorithm>
+#include <random>
+#include <iostream>
 #include "seal/randomgen.h"
 #include "seal/util/blake2.h"
-#include "seal/util/aes.h"
-#ifdef SEAL_USE_SYSTEM_RNG
-#include <thread>
-#include <chrono>
-#if SEAL_COMPILER == SEAL_COMPILER_MSVC
-#include <bcrypt.h>
-#elif (SEAL_COMPILER == SEAL_COMPILER_GCC) || (SEAL_COMPILER == SEAL_COMPILER_CLANG)
-#include <fstream>
-#endif
-#endif
 
 using namespace std;
 
 namespace seal
 {
-    std::uint64_t random_uint64()
+    uint64_t random_uint64()
     {
         uint64_t result;
-#ifdef SEAL_USE_SYSTEM_RNG
-        using namespace chrono_literals;
-#if SEAL_COMPILER == SEAL_COMPILER_MSVC
-        while(!BCRYPT_SUCCESS(BCryptGenRandom(
-            NULL, static_cast<char*>(&result), buffer_byte_count_,
-            BCRYPT_USE_SYSTEM_PREFERRED_RNG)))
-        {
-            // Wait and retry
-            this_thread::sleep_for(10ns);
-        }
-#elif (SEAL_COMPILER == SEAL_COMPILER_GCC) || (SEAL_COMPILER == SEAL_COMPILER_CLANG)
-        while (!([](uint64_t &out) -> bool {
-                ifstream fs("/dev/random", ios::binary);
-                if (!fs)
-                {
-                    return false;
-                }
-                fs.read(reinterpret_cast<char*>(&out), util::bytes_per_uint64);
-                if (fs.gcount() != util::bytes_per_uint64)
-                {
-                    return false;
-                }
-                return true;
-            }(result)))
-        {
-            // Wait and retry
-            this_thread::sleep_for(10ns);
-        }
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC) || (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+        random_device rd("/dev/urandom");
+#else // SEAL_COMPILER == SEAL_COMPILER_MSVC
+        random_device rd;
 #endif
-#else
-        std::random_device rd;
         result = (static_cast<std::uint64_t>(rd()) << 32)
             + static_cast<std::uint64_t>(rd());
-#endif
         return result;
     }
 
-    /**
-    Returns the default random number generator factory. This instance should
-    not be destroyed.
-    */
+    void UniformRandomGenerator::generate(
+        size_t byte_count, SEAL_BYTE *destination)
+    {
+        while (byte_count)
+        {
+            size_t current_bytes = min(
+                byte_count,
+                static_cast<size_t>(distance(buffer_head_, buffer_.cend())));
+            copy_n(buffer_head_, current_bytes, destination);
+            buffer_head_ += current_bytes;
+            destination += current_bytes;
+            byte_count -= current_bytes;
+
+            if (buffer_head_ == buffer_.end())
+            {
+                refresh();
+            }
+        }
+    }
+
     auto UniformRandomGeneratorFactory::default_factory()
         -> const shared_ptr<UniformRandomGeneratorFactory>
     {
@@ -88,7 +70,6 @@ namespace seal
         aes_block *buffer_ptr = reinterpret_cast<aes_block*>(buffer_.data());
         aes_enc_.counter_encrypt(counter_, buffer_block_count_, buffer_ptr);
         counter_ += buffer_block_count_;
-        buffer_head_ = buffer_.cbegin();
     }
 #endif
     auto BlakePRNGFactory::create() -> shared_ptr<UniformRandomGenerator>
@@ -106,13 +87,15 @@ namespace seal
     void BlakePRNG::refill_buffer()
     {
         // Fill the randomness buffer
-        blake2b(
+        if (blake2xb(
             reinterpret_cast<SEAL_BYTE*>(buffer_.data()),
             buffer_byte_count_,
             reinterpret_cast<const SEAL_BYTE*>(&counter_),
             sizeof(counter_),
-            seed_.data(), sizeof(seed_));
+            seed_.data(), sizeof(seed_)) != 0)
+        {
+            throw runtime_error("blake2xb failed");
+        }
         counter_++;
-        buffer_head_ = buffer_.cbegin();
     }
 }

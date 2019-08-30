@@ -4,14 +4,10 @@
 #pragma once
 
 #include <array>
-#include <memory>
-#include <random>
-#include <algorithm>
 #include <iterator>
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
 #include "seal/util/aes.h"
-#include "seal/util/blake2.h"
 
 namespace seal
 {
@@ -34,15 +30,49 @@ namespace seal
     {
     public:
         /**
+        Fills a given buffer with a given number of bytes of randomness. Note that
+        the implementation does not need to be thread-safe.
+        */
+        void generate(std::size_t byte_count, SEAL_BYTE *destination);
+
+        /**
         Generates a new uniform unsigned 32-bit random number. Note that the
         implementation does not need to be thread-safe.
         */
-        virtual std::uint32_t generate() = 0;
+        SEAL_NODISCARD inline std::uint32_t generate()
+        {
+            std::uint32_t result;
+            generate(sizeof(result), reinterpret_cast<SEAL_BYTE*>(&result));
+            return result;
+        }
+
+        /**
+        Discards the contents of the current randomness buffer and refills it
+        with fresh randomness.
+        */
+        inline void refresh()
+        {
+            refill_buffer();
+            buffer_head_ = buffer_.cbegin();
+        }
 
         /**
         Destroys the random number generator.
         */
         virtual ~UniformRandomGenerator() = default;
+
+    protected:
+        static constexpr std::size_t buffer_uint64_count_ = 1024;
+
+        static constexpr std::size_t buffer_byte_count_ =
+            buffer_uint64_count_ * util::bytes_per_uint64;
+
+        alignas(16) std::array<SEAL_BYTE, buffer_byte_count_> buffer_;
+
+        virtual void refill_buffer() = 0;
+
+    private:
+        typename decltype(buffer_)::const_iterator buffer_head_ = buffer_.cend();
     };
 
     /**
@@ -64,7 +94,7 @@ namespace seal
         /**
         Creates a new uniform random number generator.
         */
-        virtual auto create()
+        SEAL_NODISCARD virtual auto create()
             -> std::shared_ptr<UniformRandomGenerator> = 0;
 
         /**
@@ -95,24 +125,6 @@ namespace seal
         FastPRNG(std::uint64_t seed_lw, std::uint64_t seed_hw) :
             aes_enc_{ seed_lw, seed_hw }
         {
-            refill_buffer();
-        }
-
-        /**
-        Generates a new uniform unsigned 32-bit random number. Note that the
-        implementation does not need to be thread-safe.
-        */
-        SEAL_NODISCARD virtual std::uint32_t generate() override
-        {
-            std::uint32_t result;
-            std::copy_n(buffer_head_, util::bytes_per_uint32,
-                reinterpret_cast<SEAL_BYTE*>(&result));
-            buffer_head_ += util::bytes_per_uint32;
-            if (buffer_head_ == buffer_.cend())
-            {
-                refill_buffer();
-            }
-            return result;
         }
 
         /**
@@ -120,23 +132,18 @@ namespace seal
         */
         virtual ~FastPRNG() override = default;
 
+    protected:
+        virtual void refill_buffer() override;
+
     private:
         AESEncryptor aes_enc_;
 
         static constexpr std::size_t aes_block_byte_count_ = 16;
 
-        static constexpr std::size_t buffer_block_count_ = 128;
-
-        static constexpr std::size_t buffer_byte_count_ =
-            buffer_block_count_ * aes_block_byte_count_;
-
-        std::array<SEAL_BYTE, buffer_byte_count_> buffer_;
+        static constexpr std::size_t buffer_block_count_ =
+            buffer_byte_count_ / aes_block_byte_count_;
 
         std::size_t counter_ = 0;
-
-        typename decltype(buffer_)::const_iterator buffer_head_;
-
-        void refill_buffer();
     };
 
     class FastPRNGFactory : public UniformRandomGeneratorFactory
@@ -172,7 +179,7 @@ namespace seal
     };
 #endif //SEAL_USE_AES_NI_PRNG
     /**
-    Provides an implementation of UniformRandomGenerator for using Blake2b for
+    Provides an implementation of UniformRandomGenerator for using Blake2xb for
     generating randomness with given 128-bit seed.
     */
     class BlakePRNG : public UniformRandomGenerator
@@ -181,27 +188,9 @@ namespace seal
         /**
         Creates a new BlakePRNG instance initialized with the given seed.
         */
-        BlakePRNG(std::uint64_t seed_lw, std::uint64_t seed_hw)
+        BlakePRNG(std::uint64_t seed_lw, std::uint64_t seed_hw) :
+            seed_{ seed_lw, seed_hw }
         {
-            seed_ = { seed_lw, seed_hw };
-            refill_buffer();
-        }
-
-        /**
-        Generates a new uniform unsigned 32-bit random number. Note that the
-        implementation does not need to be thread-safe.
-        */
-        SEAL_NODISCARD virtual std::uint32_t generate() override
-        {
-            std::uint32_t result;
-            std::copy_n(buffer_head_, util::bytes_per_uint32,
-                reinterpret_cast<SEAL_BYTE*>(&result));
-            buffer_head_ += util::bytes_per_uint32;
-            if (buffer_head_ == buffer_.cend())
-            {
-                refill_buffer();
-            }
-            return result;
         }
 
         /**
@@ -209,21 +198,13 @@ namespace seal
         */
         virtual ~BlakePRNG() override = default;
 
+    protected:
+        virtual void refill_buffer() override;
+
     private:
-        static constexpr std::size_t buffer_uint64_count_ = 4096;
-
-        static constexpr std::size_t buffer_byte_count_ =
-            buffer_uint64_count_ * util::bytes_per_uint64;
-
         std::array<std::uint64_t, 2> seed_;
 
-        std::array<SEAL_BYTE, buffer_byte_count_> buffer_;
-
         std::size_t counter_ = 0;
-
-        typename decltype(buffer_)::const_iterator buffer_head_;
-
-        void refill_buffer();
     };
 
     class BlakePRNGFactory : public UniformRandomGeneratorFactory
@@ -256,106 +237,5 @@ namespace seal
 
     private:
         std::array<std::uint64_t, 2> seed_;
-    };
-
-    /**
-    Provides an implementation of UniformRandomGenerator for the standard C++
-    library's uniform random number generators.
-
-    @tparam RNG specifies the type of the standard C++ library's random number
-    generator (e.g., std::default_random_engine)
-    */
-    template<typename RNG>
-    class StandardRandomAdapter : public UniformRandomGenerator
-    {
-    public:
-        /**
-        Creates a new random number generator (of type RNG).
-        */
-        StandardRandomAdapter() = default;
-
-        /**
-        Returns a reference to the random number generator.
-        */
-        SEAL_NODISCARD inline const RNG &generator() const noexcept
-        {
-            return generator_;
-        }
-
-        /**
-        Returns a reference to the random number generator.
-        */
-        SEAL_NODISCARD inline RNG &generator() noexcept
-        {
-            return generator_;
-        }
-
-        /**
-        Generates a new uniform unsigned 32-bit random number.
-        */
-        SEAL_NODISCARD std::uint32_t generate() noexcept override
-        {
-            SEAL_IF_CONSTEXPR (RNG::min() == 0 && RNG::max() >= UINT32_MAX)
-            {
-                return static_cast<std::uint32_t>(generator_());
-            }
-            else SEAL_IF_CONSTEXPR (RNG::max() - RNG::min() >= UINT32_MAX)
-            {
-                return static_cast<std::uint32_t>(generator_() - RNG::min());
-            }
-            else SEAL_IF_CONSTEXPR (RNG::min() == 0)
-            {
-                std::uint64_t max_value = RNG::max();
-                std::uint64_t value = static_cast<std::uint64_t>(generator_());
-                std::uint64_t max = max_value;
-                while (max < UINT32_MAX)
-                {
-                    value *= max_value;
-                    max *= max_value;
-                    value += static_cast<std::uint64_t>(generator_());
-                }
-                return static_cast<std::uint32_t>(value);
-            }
-            else
-            {
-                std::uint64_t max_value = RNG::max() - RNG::min();
-                std::uint64_t value = static_cast<std::uint64_t>(generator_() - RNG::min());
-                std::uint64_t max = max_value;
-                while (max < UINT32_MAX)
-                {
-                    value *= max_value;
-                    max *= max_value;
-                    value += static_cast<std::uint64_t>(generator_() - RNG::min());
-                }
-                return static_cast<std::uint32_t>(value);
-            }
-        }
-
-    private:
-        RNG generator_;
-    };
-
-    /**
-    Provides an implementation of UniformRandomGeneratorFactory for the standard
-    C++ library's random number generators.
-
-    @tparam RNG specifies the type of the standard C++ library's random number
-    generator (e.g., std::default_random_engine)
-    */
-    template<typename RNG>
-    class StandardRandomAdapterFactory : public UniformRandomGeneratorFactory
-    {
-    public:
-        /**
-        Creates a new uniform random number generator.
-        */
-        SEAL_NODISCARD auto create()
-            -> std::shared_ptr<UniformRandomGenerator> override
-        {
-            return std::shared_ptr<UniformRandomGenerator>{
-                new StandardRandomAdapter<RNG>() };
-        }
-
-    private:
     };
 }
