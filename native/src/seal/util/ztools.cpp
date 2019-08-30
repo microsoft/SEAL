@@ -72,7 +72,8 @@ namespace seal
                         result = deflate(&zstream, flush);
                         have = buf_size - static_cast<size_t>(zstream.avail_out);
 
-                        if (!out_stream.write(reinterpret_cast<const char*>(out.get()), have))
+                        if (!out_stream.write(reinterpret_cast<const char*>(out.get()),
+                            static_cast<streamsize>(have)))
                         {
                             deflateEnd(&zstream);
                             return Z_ERRNO;
@@ -156,7 +157,8 @@ namespace seal
 
                         have = buf_size - static_cast<size_t>(zstream.avail_out);
 
-                        if (!out_stream.write(reinterpret_cast<const char*>(out.get()), have))
+                        if (!out_stream.write(reinterpret_cast<const char*>(out.get()),
+                            static_cast<streamsize>(have)))
                         {
                             inflateEnd(&zstream);
                             return Z_ERRNO;
