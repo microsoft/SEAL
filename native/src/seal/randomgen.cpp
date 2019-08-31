@@ -5,15 +5,12 @@
 #include <random>
 #include <iostream>
 #include "seal/randomgen.h"
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4804)
-#pragma warning(disable: 4267)
-#endif
 #include "seal/util/blake2.h"
-#ifdef _MSC_VER
-#pragma warning(pop)
+#ifdef _WIN32
+#include <Windows.h>
+#include <bcrypt.h>
 #endif
+
 using namespace std;
 
 namespace seal
@@ -21,13 +18,20 @@ namespace seal
     uint64_t random_uint64()
     {
         uint64_t result;
-#if (SEAL_COMPILER == SEAL_COMPILER_GCC) || (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#if defined(__linux__) || (defined(__APPLE__) && defined(__MACH__))
         random_device rd("/dev/urandom");
-#else // SEAL_COMPILER == SEAL_COMPILER_MSVC
-        random_device rd;
-#endif
         result = (static_cast<std::uint64_t>(rd()) << 32)
             + static_cast<std::uint64_t>(rd());
+#elif defined(_WIN32)
+        if (!BCRYPT_SUCCESS(BCryptGenRandom(
+            NULL,
+            reinterpret_cast<unsigned char*>(&result),
+            sizeof(result),
+            BCRYPT_USE_SYSTEM_PREFERRED_RNG)))
+        {
+            throw runtime_error("BCryptGenRandom failed");
+        }
+#endif
         return result;
     }
 

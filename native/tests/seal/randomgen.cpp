@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <memory>
 #include <numeric>
+#include <set>
 
 using namespace seal;
 using namespace std;
@@ -92,5 +93,16 @@ namespace SEALTest
         sgen->generate(4096, reinterpret_cast<SEAL_BYTE*>(compare_list.data()));
 
         ASSERT_TRUE(equal(value_list.cbegin(), value_list.cend(), compare_list.cbegin()));
+    }
+
+    TEST(RandomGenerator, RandomUInt64)
+    {
+        set<uint64_t> values;
+        size_t count = 100;
+        for (size_t i = 0; i < count; i++)
+        {
+            values.emplace(random_uint64());
+        }
+        ASSERT_EQ(count, values.size());
     }
 }

@@ -5,8 +5,8 @@ target_sources(seal
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/aes.cpp
         ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/blake2b-ref.c
-        ${CMAKE_CURRENT_LIST_DIR}/blake2xb-ref.c
+        ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
+        ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
         ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
         ${CMAKE_CURRENT_LIST_DIR}/croots.cpp
         ${CMAKE_CURRENT_LIST_DIR}/globals.cpp
