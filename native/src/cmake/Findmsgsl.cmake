@@ -21,13 +21,13 @@ if(msgsl_FOUND)
     set(CMAKE_EXTRA_INCLUDE_FILES gsl/gsl)
     set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 -std=c++14")
     set(CMAKE_REQUIRED_QUIET TRUE)
-       
+
     # Detect gsl::span
     check_type_size("gsl::span<std::uint64_t>" msgsl_SPAN LANGUAGE CXX)
 
     # Detect gsl::multi_span
     check_type_size("gsl::multi_span<std::uint64_t, 1, gsl::dynamic_range>" msgsl_MULTISPAN LANGUAGE CXX)
-       
+
     cmake_pop_check_state()
 
     # Create interface target for msgsl

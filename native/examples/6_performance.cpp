@@ -85,7 +85,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     /*
     How many times to run the test?
     */
-    int count = 10;
+    long long count = 10;
 
     /*
     Populate a vector of values to batch.
@@ -99,7 +99,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     }
 
     cout << "Running tests ";
-    for (int i = 0; i < count; i++)
+    for (long long i = 0; i < count; i++)
     {
         /*
         [Batching]
@@ -368,7 +368,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     /*
     How many times to run the test?
     */
-    int count = 10;
+    long long count = 10;
 
     /*
     Populate a vector of floating-point values to batch.
@@ -381,7 +381,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     }
 
     cout << "Running tests ";
-    for (int i = 0; i < count; i++)
+    for (long long i = 0; i < count; i++)
     {
         /*
         [Encoding]

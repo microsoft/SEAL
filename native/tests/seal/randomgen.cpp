@@ -27,7 +27,10 @@ namespace SEALTest
                     reinterpret_cast<uint8_t*>(buffer_.data()),
                     reinterpret_cast<uint8_t*>(buffer_.data()) + buffer_.size(),
                     value);
-                value += static_cast<uint8_t>(buffer_byte_count_);
+
+                // Avoiding MSVC warning C4309
+                size_t buffer_byte_count = buffer_byte_count_;
+                value += static_cast<uint8_t>(buffer_byte_count);
             }
 
         private:
@@ -82,11 +85,11 @@ namespace SEALTest
     {
         unique_ptr<UniformRandomGenerator> sgen =
             make_unique<SequentialRandomGenerator>();
-        array<uint8_t, 16384> value_list;
+        array<uint8_t, 4096> value_list;
         iota(value_list.begin(), value_list.end(), 0);
 
-        array<uint8_t, 16384> compare_list;
-        sgen->generate(16384, reinterpret_cast<SEAL_BYTE*>(compare_list.data()));
+        array<uint8_t, 4096> compare_list;
+        sgen->generate(4096, reinterpret_cast<SEAL_BYTE*>(compare_list.data()));
 
         ASSERT_TRUE(equal(value_list.cbegin(), value_list.cend(), compare_list.cbegin()));
     }

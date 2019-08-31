@@ -76,10 +76,11 @@ namespace seal
             }
 
             // Read the coeff_modulus
-            vector<SmallModulus> coeff_modulus(coeff_mod_count64);
-            for (auto &mod : coeff_modulus)
+            vector<SmallModulus> coeff_modulus;
+            for (uint64_t i = 0; i < coeff_mod_count64; i++)
             {
-                mod.load(stream);
+                coeff_modulus.emplace_back();
+                coeff_modulus.back().load(stream);
             }
 
             // Read the plain_modulus
@@ -93,7 +94,7 @@ namespace seal
             // Only BFV uses plain_modulus; set_plain_modulus checks that for
             // other schemes it is zero
             parms.set_plain_modulus(plain_modulus);
-            
+
             // Set the loaded parameters
             swap(*this, parms);
 

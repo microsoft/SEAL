@@ -36,12 +36,12 @@ namespace seal
         slots_ = coeff_count >> 1;
         int logn = get_power_of_two(coeff_count);
 
-        matrix_reps_index_map_ = allocate_uint(coeff_count, pool_);
+        matrix_reps_index_map_ = allocate<size_t>(coeff_count, pool_);
 
         // Copy from the matrix to the value vectors
         uint64_t gen = 3;
         uint64_t pos = 1;
-        uint64_t m = coeff_count << 1;
+        uint64_t m = static_cast<uint64_t>(coeff_count) << 1;
         for (size_t i = 0; i < slots_; i++)
         {
             // Position in normal bit order
@@ -49,8 +49,10 @@ namespace seal
             uint64_t index2 = (m - pos - 1) >> 1;
 
             // Set the bit-reversed locations
-            matrix_reps_index_map_[i] = reverse_bits(index1, logn);
-            matrix_reps_index_map_[slots_ | i] = reverse_bits(index2, logn);
+            matrix_reps_index_map_[i] =
+                safe_cast<size_t>(reverse_bits(index1, logn));
+            matrix_reps_index_map_[slots_ | i] =
+                safe_cast<size_t>(reverse_bits(index2, logn));
 
             // Next primitive root
             pos *= gen;
@@ -61,7 +63,8 @@ namespace seal
         inv_roots_ = allocate<complex<double>>(coeff_count, pool_);
         for (size_t i = 0; i < coeff_count; i++)
         {
-            roots_[i] = ComplexRoots::get_root(reverse_bits(i, logn), m);
+            roots_[i] = ComplexRoots::get_root(
+                reverse_bits(i, logn), static_cast<size_t>(m));
             inv_roots_[i] = conj(roots_[i]);
         }
     }

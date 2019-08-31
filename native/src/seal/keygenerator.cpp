@@ -255,7 +255,8 @@ namespace seal
         for (uint64_t galois_elt : galois_elts)
         {
             // Verify coprime conditions.
-            if (!(galois_elt & 1) || (galois_elt >= 2 * coeff_count))
+            if (!(galois_elt & 1) ||
+                (galois_elt >= static_cast<uint64_t>(coeff_count) << 1))
             {
                 throw invalid_argument("Galois element is not valid");
             }
@@ -280,7 +281,7 @@ namespace seal
 
             // Initialize Galois key
             // This is the location in the galois_keys vector
-            uint64_t index = GaloisKeys::get_index(galois_elt);
+            size_t index = GaloisKeys::get_index(galois_elt);
             shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
             // Create Galois keys.
@@ -328,8 +329,9 @@ namespace seal
             throw logic_error("cannot generate Galois keys for unspecified secret key");
         }
 
-        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-        uint64_t m = coeff_count << 1;
+        size_t coeff_count = static_cast<size_t>(
+            context_->key_context_data()->parms().poly_modulus_degree());
+        uint64_t m = static_cast<uint64_t>(coeff_count) << 1;
         int logn = get_power_of_two(static_cast<uint64_t>(coeff_count));
 
         vector<uint64_t> logn_galois_keys{};

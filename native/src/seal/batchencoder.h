@@ -382,6 +382,6 @@ namespace seal
 
         util::Pointer<std::uint64_t> roots_of_unity_;
 
-        util::Pointer<std::uint64_t> matrix_reps_index_map_;
+        util::Pointer<std::size_t> matrix_reps_index_map_;
     };
 }

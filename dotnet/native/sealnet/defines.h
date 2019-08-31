@@ -6,10 +6,10 @@
 // STD
 #include <cstddef>
 
-#ifdef _MSC_VER
-
-// Check that size_t is 64 bits
+// Check that std::size_t is 64 bits
 static_assert(sizeof(std::size_t) == 8, "Require sizeof(std::size_t) == 8");
+
+#ifdef _MSC_VER
 
 // Check that architecture (platform) is x64
 #ifndef _WIN64
@@ -53,4 +53,3 @@ static_assert(false, "Require architecture == x64");
 #define FAILED(hr) (((HRESULT)(hr)) < 0)
 
 #endif // _MSC_VER
-

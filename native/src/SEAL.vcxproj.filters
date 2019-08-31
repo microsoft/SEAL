@@ -235,10 +235,16 @@
     <ClCompile Include="seal\memorymanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="seal\modulus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="seal\plaintext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\randomgen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\serialization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\smallmodulus.cpp">
@@ -251,9 +257,6 @@
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\baseconverter.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\util\blake2b.c">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\clipnormal.cpp">
@@ -298,13 +301,13 @@
     <ClCompile Include="seal\util\uintcore.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="seal\modulus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\serialization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="seal\util\ztools.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\blake2xb.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\blake2b.c">
       <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>

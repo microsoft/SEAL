@@ -1692,7 +1692,7 @@ namespace seal
         }
 
         // Create a vector of copies of encrypted
-        vector<Ciphertext> exp_vector(exponent, encrypted);
+        vector<Ciphertext> exp_vector(static_cast<size_t>(exponent), encrypted);
         multiply_many(exp_vector, relin_keys, encrypted, move(pool));
     }
 

@@ -183,13 +183,13 @@ namespace seal
         be at most 60 bits, and must be congruent to 1 modulo 2*poly_modulus_degree.
 
         @param[in] coeff_modulus The new coefficient modulus
-        @throws std::logic_error if a valid scheme is not set and coeff_modulus is 
+        @throws std::logic_error if a valid scheme is not set and coeff_modulus is
         is non-empty
         @throws std::invalid_argument if size of coeff_modulus is invalid
         */
         inline void set_coeff_modulus(const std::vector<SmallModulus> &coeff_modulus)
         {
-            // Check that a scheme is set 
+            // Check that a scheme is set
             if (scheme_ == scheme_type::none)
             {
                 if (!coeff_modulus.empty())
@@ -363,7 +363,7 @@ namespace seal
         binary format and is not human-readable. If the given pointer is null,
         then the function only returns the number of bytes that would be written.
 
-        @param[out] out The memory location to write to 
+        @param[out] out The memory location to write to
         @throws std::exception if the EncryptionParameters could not be written
         */
         inline std::streamoff save(SEAL_BYTE *out,
@@ -398,7 +398,7 @@ namespace seal
         Loads EncryptionParameters from a given memory location overwriting the
         current EncryptionParameters.
 
-        @param[in] in The memory location to read from 
+        @param[in] in The memory location to read from
         @throws std::exception if valid EncryptionParameters could not be read
         */
         inline std::streamoff load(const SEAL_BYTE *in)
@@ -426,7 +426,7 @@ namespace seal
         */
         SEAL_NODISCARD bool is_valid_scheme(std::uint8_t scheme) const noexcept
         {
-            return 
+            return
                 scheme == static_cast<std::uint8_t>(scheme_type::none) ||
                 scheme == static_cast<std::uint8_t>(scheme_type::BFV) ||
                 scheme == static_cast<std::uint8_t>(scheme_type::CKKS);

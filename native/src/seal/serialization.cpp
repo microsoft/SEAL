@@ -206,7 +206,7 @@ namespace seal
             {
                 throw logic_error("invalid compression mode header");
             }
-            compr_mode_type compr_mode = static_cast<compr_mode_type>(compr_mode32); 
+            compr_mode_type compr_mode = static_cast<compr_mode_type>(compr_mode32);
 
             // Next read the stream size
             uint32_t stream_size32 = 0;
@@ -247,7 +247,7 @@ namespace seal
             default:
                 throw invalid_argument("unsupported compression mode");
             }
-            
+
             in_size = stream_size;
         }
         catch (const exception &)
