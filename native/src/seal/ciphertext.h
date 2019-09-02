@@ -14,6 +14,9 @@
 #include "seal/memorymanager.h"
 #include "seal/intarray.h"
 #include "seal/valcheck.h"
+#ifdef SEAL_USE_MSGSL_MULTISPAN
+#include <gsl/multi_span>
+#endif
 
 namespace seal
 {

@@ -13,12 +13,26 @@
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
 #include "seal/util/ztools.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
 
 using namespace std;
 using namespace seal::util;
 
 namespace seal
 {
+    namespace
+    {
+#ifdef SEAL_USE_MSGSL_SPAN
+        class span_buffer : std::streambuf
+        {
+        public:
+            span_buffer(
+        };
+#endif SEAL_USE_MSGSL_SPAN
+    }
+
     streamoff Serialization::Save(
         function<void(ostream &stream)> save_members,
         ostream &stream,

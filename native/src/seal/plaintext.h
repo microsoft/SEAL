@@ -17,6 +17,9 @@
 #include "seal/intarray.h"
 #include "seal/context.h"
 #include "seal/valcheck.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
 
 namespace seal
 {

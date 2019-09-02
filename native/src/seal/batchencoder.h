@@ -11,6 +11,12 @@
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/plaintext.h"
 #include "seal/context.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
+#ifdef SEAL_USE_MSGSL_MULTISPAN
+#include <gsl/multi_span>
+#endif
 
 namespace seal
 {

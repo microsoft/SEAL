@@ -25,10 +25,11 @@ namespace seal
         zlib = 1
 #endif
     };
-#ifdef SEAL_USE_ZLIB
+
     /**
     The compression mode used by default.
     */
+#ifdef SEAL_USE_ZLIB
     constexpr compr_mode_type compr_mode_default = compr_mode_type::zlib;
 #else
     constexpr compr_mode_type compr_mode_default = compr_mode_type::none;

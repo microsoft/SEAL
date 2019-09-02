@@ -12,6 +12,9 @@
 #include "seal/util/pointer.h"
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
 
 namespace seal
 {
