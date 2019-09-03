@@ -162,9 +162,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         We create two ciphertexts and perform a few additions with them.
         */
         Ciphertext encrypted1(context);
-        encryptor.encrypt(encoder.encode(i), encrypted1);
+        encryptor.encrypt(encoder.encode(static_cast<uint64_t>(i)), encrypted1);
         Ciphertext encrypted2(context);
-        encryptor.encrypt(encoder.encode(i + 1), encrypted2);
+        encryptor.encrypt(encoder.encode(static_cast<uint64_t>(i + 1)), encrypted2);
         time_start = chrono::high_resolution_clock::now();
         evaluator.add_inplace(encrypted1, encrypted1);
         evaluator.add_inplace(encrypted2, encrypted2);
