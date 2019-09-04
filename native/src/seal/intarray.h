@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cstring>
 #include "seal/memorymanager.h"
+#include "seal/serialization.h"
 #include "seal/util/pointer.h"
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
@@ -408,10 +409,72 @@ namespace seal
         Saves the IntArray to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
-        @param[in] stream The stream to save the IntArray to
+        @param[out] stream The stream to save the IntArray to
+        @param[in] compr_mode The desired compression mode
         @throws std::exception if the IntArray could not be written to stream
         */
-        inline void save(std::ostream &stream) const
+        inline std::streamoff save(
+            std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&IntArray<T_>::save_members, this, _1),
+                stream, compr_mode);
+        }
+
+        /**
+        Loads a IntArray from an input stream overwriting the current IntArray.
+
+        @param[in] stream The stream to load the IntArray from
+        @throws std::exception if a valid IntArray could not be read from stream
+        */
+        inline std::streamoff load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&IntArray<T_>::load_members, this, _1),
+                stream);
+        }
+
+        /**
+        Saves the IntArray to a given memory location. The output is in binary
+        format and not human-readable.
+
+        @param[out] out The memory location to write the SmallModulus to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::exception if the IntArray could not be written to stream
+        */
+        inline std::streamoff save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&IntArray<T_>::save_members, this, _1),
+                out, size, compr_mode);
+        }
+
+        /**
+        Loads a IntArray from a given memory location overwriting the current
+        IntArray.
+
+        @param[in] in The memory location to load the SmallModulus from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::exception if a valid IntArray could not be read from stream
+        */
+        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&IntArray<T_>::load_members, this, _1),
+                in, size);
+        }
+
+    private:
+        void save_members(std::ostream &stream) const
         {
             auto old_except_mask = stream.exceptions();
             try
@@ -434,13 +497,7 @@ namespace seal
             stream.exceptions(old_except_mask);
         }
 
-        /**
-        Loads a IntArray from an input stream overwriting the current IntArray.
-
-        @param[in] stream The stream to load the IntArray from
-        @throws std::exception if a valid IntArray could not be read from stream
-        */
-        inline void load(std::istream &stream)
+        void load_members(std::istream &stream)
         {
             auto old_except_mask = stream.exceptions();
             try
@@ -468,7 +525,6 @@ namespace seal
             stream.exceptions(old_except_mask);
         }
 
-    private:
         MemoryPoolHandle pool_;
 
         size_type capacity_ = 0;

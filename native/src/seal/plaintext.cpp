@@ -213,7 +213,7 @@ namespace seal
 
             stream.write(reinterpret_cast<const char*>(&parms_id_), sizeof(parms_id_type));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
-            data_.save(stream);
+            data_.save(stream, compr_mode_type::none);
         }
         catch (const exception &)
         {

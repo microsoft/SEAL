@@ -83,10 +83,12 @@ namespace seal
         Saves the PublicKey to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
-        @param[in] stream The stream to save the PublicKey to
+        @param[out] stream The stream to save the PublicKey to
+        @param[in] compr_mode The desired compression mode
         @throws std::exception if the PublicKey could not be written to stream
         */
-        inline std::streamoff save(std::ostream &stream,
+        inline std::streamoff save(
+            std::ostream &stream,
             compr_mode_type compr_mode = compr_mode_default) const
         {
             return pk_.save(stream, compr_mode);
@@ -121,11 +123,75 @@ namespace seal
         @throws std::invalid_argument if the loaded PublicKey is invalid for the
         context
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context,
+        inline std::streamoff load(
+            std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(stream);
+            if (!is_valid_for(new_pk, std::move(context)))
+            {
+                throw std::invalid_argument("PublicKey data is invalid");
+            }
+            std::swap(*this, new_pk);
+            return in_size;
+        }
+
+        /**
+        Saves the PublicKey to a given memory location. The output is in binary
+        format and is not human-readable.
+
+        @param[out] out The memory location to write the PublicKey to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::exception if the PublicKey could not be written to stream
+        */
+        inline std::streamoff save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            return pk_.save(out, size, compr_mode);
+        }
+
+        /**
+        Loads a PublicKey from a given memory location overwriting the current
+        PublicKey. No checking of the validity of the PublicKey data against
+        encryption parameters is performed. This function should not be used
+        unless the PublicKey comes from a fully trusted source.
+
+        @param[in] in The memory location to load the PublicKey from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::exception if a valid PublicKey could not be read from stream
+        */
+        inline std::streamoff unsafe_load(const SEAL_BYTE *in, std::size_t size)
+        {
+            Ciphertext new_pk(pk_.pool());
+            auto in_size = new_pk.unsafe_load(in, size);
+            std::swap(pk_, new_pk);
+            return in_size;
+        }
+
+        /**
+        Loads a PublicKey from a given memory location overwriting the current
+        PublicKey. The loaded PublicKey is verified to be valid for the given
+        SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] in The memory location to load the PublicKey from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid PublicKey could not be read from stream
+        @throws std::invalid_argument if the loaded PublicKey is invalid for the
+        context
+        */
+        inline std::streamoff load(
+            std::shared_ptr<SEALContext> context,
+            const SEAL_BYTE *in, std::size_t size)
+        {
+            PublicKey new_pk(pool());
+            auto in_size = new_pk.unsafe_load(in, size);
             if (!is_valid_for(new_pk, std::move(context)))
             {
                 throw std::invalid_argument("PublicKey data is invalid");

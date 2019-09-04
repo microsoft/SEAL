@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <string>
 #include "seal/memorymanager.h"
+#include "seal/serialization.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
 #include "seal/util/common.h"
@@ -1586,10 +1587,18 @@ namespace seal
         serialized, including insignificant bits. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
-        @param[in] stream The stream to save the BigUInt to
+        @param[out] stream The stream to save the BigUInt to
+        @param[in] compr_mode The desired compression mode
         @throws std::exception if the BigUInt could not be written to stream
         */
-        void save(std::ostream &stream) const;
+        inline std::streamoff save(std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&BigUInt::save_members, this, _1),
+                stream, compr_mode);
+        }
 
         /**
         Loads a BigUInt from an input stream overwriting the current BigUInt
@@ -1600,7 +1609,52 @@ namespace seal
         is too large to fit with the current bit
         @throws std::exception if a valid BigUInt could not be read from stream
         */
-        void load(std::istream &stream);
+        inline std::streamoff load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&BigUInt::load_members, this, _1),
+                stream);
+        }
+
+        /**
+        Saves the BigUInt to a given memory location. The full state of the
+        BigUInt is serialized, including insignificant bits. The output is in
+        binary format and not human-readable.
+
+        @param[out] out The memory location to write the BigUInt to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::exception if the BigUInt could not be written to stream
+        */
+        inline std::streamoff save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&BigUInt::save_members, this, _1),
+                out, size, compr_mode);
+        }
+
+        /**
+        Loads a BigUInt from a memory location overwriting the current BigUInt
+        and enlarging if needed to fit the loaded BigUInt.
+
+        @param[in] in The memory location to load the BigUInt from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::logic_error if BigUInt is an alias and the loaded BigUInt
+        is too large to fit with the current bit
+        @throws std::exception if a valid BigUInt could not be read from stream
+        */
+        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&BigUInt::load_members, this, _1),
+                in, size);
+        }
 
         /**
         Creates a minimally sized BigUInt initialized to the specified unsigned
@@ -1654,6 +1708,10 @@ namespace seal
             value_.release();
             bit_count_ = 0;
         }
+
+        void save_members(std::ostream &stream) const;
+
+        void load_members(std::istream &stream);
 
         /**
         Points to the backing array for the BigUInt. This pointer will be set

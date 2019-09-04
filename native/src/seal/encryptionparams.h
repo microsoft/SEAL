@@ -345,7 +345,8 @@ namespace seal
         format and is not human-readable. The output stream must have the "binary"
         flag set.
 
-        @param[in] stream The stream to save the EncryptionParameters to
+        @param[out] stream The stream to save the EncryptionParameters to
+        @param[in] compr_mode The desired compression mode
         @throws std::exception if the EncryptionParameters could not be written
         to stream
         */
@@ -356,23 +357,6 @@ namespace seal
             return Serialization::Save(
                 std::bind(&EncryptionParameters::save_members, this, _1),
                 stream, compr_mode);
-        }
-
-        /**
-        Saves EncryptionParameters to a given memory location. The output is in
-        binary format and is not human-readable. If the given pointer is null,
-        then the function only returns the number of bytes that would be written.
-
-        @param[out] out The memory location to write to
-        @throws std::exception if the EncryptionParameters could not be written
-        */
-        inline std::streamoff save(SEAL_BYTE *out,
-            compr_mode_type compr_mode = compr_mode_default) const
-        {
-            using namespace std::placeholders;
-            return Serialization::Save(
-                std::bind(&EncryptionParameters::save_members, this, _1),
-                out, compr_mode);
         }
 
         /**
@@ -395,19 +379,40 @@ namespace seal
         }
 
         /**
+        Saves EncryptionParameters to a given memory location. The output is in
+        binary format and is not human-readable.
+
+        @param[out] out The memory location to write the EncryptionParameters to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::exception if the EncryptionParameters could not be written
+        */
+        inline std::streamoff save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&EncryptionParameters::save_members, this, _1),
+                out, size, compr_mode);
+        }
+
+        /**
         Loads EncryptionParameters from a given memory location overwriting the
         current EncryptionParameters.
 
-        @param[in] in The memory location to read from
+        @param[in] in The memory location to load the EncryptionParameters from
+        @param[in] size The number of bytes available in the given memory location
         @throws std::exception if valid EncryptionParameters could not be read
         */
-        inline std::streamoff load(const SEAL_BYTE *in)
+        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
             auto in_size = Serialization::Load(
                 std::bind(&EncryptionParameters::load_members, &new_parms, _1),
-                in);
+                in, size);
             std::swap(*this, new_parms);
             return in_size;
         }
