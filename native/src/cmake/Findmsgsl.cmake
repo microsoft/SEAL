@@ -5,7 +5,7 @@
 set(CURRENT_MSGSL_INCLUDE_DIR ${MSGSL_INCLUDE_DIR})
 unset(MSGSL_INCLUDE_DIR CACHE)
 find_path(MSGSL_INCLUDE_DIR
-    NAMES gsl/gsl gsl/span gsl/multi_span
+    NAMES gsl/span gsl/multi_span
     HINTS ${CMAKE_INCLUDE_PATH} ${CURRENT_MSGSL_INCLUDE_DIR})
 
 # Determine whether found based on MSGSL_INCLUDE_DIR

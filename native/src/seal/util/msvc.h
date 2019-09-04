@@ -19,17 +19,17 @@
 // Check for MSGSL headers
 #ifdef SEAL_USE_MSGSL
 #if defined(SEAL_USE_MSGSL_SPAN) && !__has_include(<gsl/span>)
-#error "Microsoft GSL headers not found (gsl/span)"
+#error "Microsoft GSL headers not included in project properties (gsl/span)"
 #endif
 #if defined(SEAL_USE_MSGSL_MULTISPAN) && !__has_include(<gsl/multi_span>)
-#error "Microsoft GSL headers not found (gsl/multi_span)"
+#error "Microsoft GSL headers not included in project properties (gsl/multi_span)"
 #endif
 #endif
 
 // Check for zlib headers
 #ifdef SEAL_USE_ZLIB
 #if !__has_include(<zlib.h>)
-#error "zlib headers not bound"
+#error "zlib headers not included in project properties"
 #endif
 #endif
 
