@@ -5,6 +5,7 @@
 
 #include <array>
 #include <iterator>
+#include <memory>
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
 #include "seal/util/aes.h"
