@@ -252,7 +252,7 @@ namespace seal
         return quotient;
     }
 
-    void BigUInt::save(ostream &stream) const
+    void BigUInt::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -274,7 +274,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void BigUInt::load(istream &stream)
+    void BigUInt::load_members(istream &stream)
     {
         auto old_except_mask = stream.exceptions();
         try

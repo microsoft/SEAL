@@ -60,25 +60,6 @@ namespace seal
             compr_mode_type compr_mode);
 
         /**
-        Evaluates save_members and compresses the output according to the given
-        compr_mode_type. The resulting data is written to a given memory location
-        and is prepended by the given compr_mode_type and the total size of the
-        data to facilitate deserialization. In typical use-cases save_members would
-        be a function that serializes the member variables of an object to the
-        given stream. If the given pointer is null, then the function only returns
-        the number of bytes that would be written.
-
-        @param[in] save_members A function taking an std::ostream reference as an
-        argument, possibly writing some number of bytes into it
-        @param[out] out The memory location to write to
-        @param[in] compr_mode The desired compression mode
-        */
-        static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members,
-            SEAL_BYTE *out,
-            compr_mode_type compr_mode);
-
-        /**
         Deserializes data from stream that was serialized by Save. Once stream has
         been decompressed (depending on compression mode), load_members is applied
         to the decompressed stream. In typical use-cases load_members would be
@@ -94,19 +75,41 @@ namespace seal
             std::istream &stream);
 
         /**
+        Evaluates save_members and compresses the output according to the given
+        compr_mode_type. The resulting data is written to a given memory location
+        and is prepended by the given compr_mode_type and the total size of the
+        data to facilitate deserialization. In typical use-cases save_members would
+        be a function that serializes the member variables of an object to the
+        given stream.
+
+        @param[in] save_members A function that takes an std::ostream reference as
+        an argument and writes some number of bytes into it
+        @param[out] out The memory location to write to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        */
+        static std::streamoff Save(
+            std::function<void(std::ostream &stream)> save_members,
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode);
+
+        /**
         Deserializes data from a memory location that was serialized by Save.
         Once the data has been decompressed (depending on compression mode),
         load_members is applied to the decompressed stream. In typical use-cases
         load_members would be a function that deserializes the member variables
         of an object from the given stream.
 
-        @param[in] load_members A function taking an std::istream reference as an
-        argument, possibly reading some number of bytes from it
+        @param[in] load_members A function that takes an std::istream reference as
+        an argument and reads some number of bytes from it
         @param[in] in The memory location to read from
+        @param[in] size The number of bytes available in the given memory location
         */
         static std::streamoff Load(
             std::function<void(std::istream &stream)> load_members,
-            const SEAL_BYTE *in);
+            const SEAL_BYTE *in,
+            std::size_t size);
 
     private:
         Serialization() = delete;

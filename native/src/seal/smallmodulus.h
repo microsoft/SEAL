@@ -9,6 +9,7 @@
 #include "seal/util/defines.h"
 #include "seal/util/uintcore.h"
 #include "seal/memorymanager.h"
+#include "seal/serialization.h"
 
 namespace seal
 {
@@ -275,18 +276,70 @@ namespace seal
         serialized. The output is in binary format and not human-readable. The output
         stream must have the "binary" flag set.
 
-        @param[in] stream The stream to save the SmallModulus to
+        @param[out] stream The stream to save the SmallModulus to
+        @param[in] compr_mode The desired compression mode
         @throws std::exception if the SmallModulus could not be written to stream
         */
-        void save(std::ostream &stream) const;
+        inline std::streamoff save(
+            std::ostream &stream,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&SmallModulus::save_members, this, _1),
+                stream, compr_mode);
+        }
 
         /**
-        Loads a SmallModulus from an input stream overwriting the current SmallModulus.
+        Loads a SmallModulus from an input stream overwriting the current
+        SmallModulus.
 
         @param[in] stream The stream to load the SmallModulus from
         @throws std::exception if a valid SmallModulus could not be read from stream
         */
-        void load(std::istream &stream);
+        inline std::streamoff load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&SmallModulus::load_members, this, _1),
+                stream);
+        }
+
+        /**
+        Saves the SmallModulus to a given memory location. The full state of the
+        modulus is serialized. The output is in binary format and not human-readable.
+
+        @param[out] out The memory location to write the SmallModulus to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::exception if the SmallModulus could not be written to stream
+        */
+        inline std::streamoff save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&SmallModulus::save_members, this, _1),
+                out, size, compr_mode);
+        }
+
+        /**
+        Loads a SmallModulus from a given memory location overwriting the current
+        SmallModulus.
+
+        @param[in] in The memory location to load the SmallModulus from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::exception if a valid SmallModulus could not be read from stream
+        */
+        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&SmallModulus::load_members, this, _1),
+                in, size);
+        }
 
         /**
         Returns in decreasing order a vector of the largest prime numbers of a given
@@ -311,6 +364,10 @@ namespace seal
 
     private:
         void set_value(std::uint64_t value);
+
+        void save_members(std::ostream &stream) const;
+
+        void load_members(std::istream &stream);
 
         std::uint64_t value_ = 0;
 

@@ -157,7 +157,8 @@ namespace seal
         in binary format and not human-readable. The output stream must have
         the "binary" flag set.
 
-        @param[in] stream The stream to save the KSwitchKeys to
+        @param[out] stream The stream to save the KSwitchKeys to
+        @param[in] compr_mode The desired compression mode
         @throws std::exception if the KSwitchKeys could not be written to stream
         */
         inline std::streamoff save(std::ostream &stream,
@@ -204,6 +205,73 @@ namespace seal
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
             auto in_size = new_keys.unsafe_load(stream);
+            if (!is_valid_for(new_keys, std::move(context)))
+            {
+                throw std::invalid_argument("KSwitchKeys data is invalid");
+            }
+            std::swap(*this, new_keys);
+            return in_size;
+        }
+
+        /**
+        Saves the KSwitchKeys instance to a given memory location. The output is
+        in binary format and not human-readable.
+
+        @param[out] out The memory location to write the KSwitchKeys to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::exception if the KSwitchKeys could not be written to stream
+        */
+        inline std::streamoff save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&KSwitchKeys::save_members, this, _1),
+                out, size, compr_mode);
+        }
+
+        /**
+        Loads a KSwitchKeys from a given memory location overwriting the current
+        KSwitchKeys. No checking of the validity of the KSwitchKeys data against
+        encryption parameters is performed. This function should not be used
+        unless the KSwitchKeys comes from a fully trusted source.
+
+        @param[in] in The memory location to load the KSwitchKeys from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::exception if a valid KSwitchKeys could not be read from stream
+        */
+        inline std::streamoff unsafe_load(const SEAL_BYTE *in, std::size_t size)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&KSwitchKeys::load_members, this, _1),
+                in, size);
+        }
+
+        /**
+        Loads a KSwitchKeys from a given memory location overwriting the current
+        KSwitchKeys. The loaded KSwitchKeys is verified to be valid for the given
+        SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] in The memory location to load the KSwitchKeys from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::exception if a valid KSwitchKeys could not be read from stream
+        @throws std::invalid_argument if the loaded KSwitchKeys is invalid for the
+        context
+        */
+        inline std::streamoff load(
+            std::shared_ptr<SEALContext> context,
+            const SEAL_BYTE *in, std::size_t size)
+        {
+            KSwitchKeys new_keys;
+            new_keys.pool_ = pool_;
+            auto in_size = new_keys.unsafe_load(in, size);
             if (!is_valid_for(new_keys, std::move(context)))
             {
                 throw std::invalid_argument("KSwitchKeys data is invalid");

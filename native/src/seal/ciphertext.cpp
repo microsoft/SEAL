@@ -150,7 +150,7 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
             // Save the data
-            data_.save(stream);
+            data_.save(stream, compr_mode_type::none);
         }
         catch (const exception &)
         {

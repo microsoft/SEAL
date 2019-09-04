@@ -13,7 +13,7 @@ using namespace std;
 
 namespace seal
 {
-    void SmallModulus::save(ostream &stream) const
+    void SmallModulus::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -32,7 +32,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void SmallModulus::load(istream &stream)
+    void SmallModulus::load_members(istream &stream)
     {
         auto old_except_mask = stream.exceptions();
         try

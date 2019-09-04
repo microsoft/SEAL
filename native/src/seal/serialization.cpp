@@ -4,18 +4,16 @@
 #include <stdexcept>
 #include <cstdint>
 #include <sstream>
+#include <streambuf>
 #include <type_traits>
 #include <utility>
 #include <algorithm>
 #include "seal/context.h"
+#include "seal/intarray.h"
 #include "seal/serialization.h"
 #include "seal/memorymanager.h"
-#include "seal/util/defines.h"
 #include "seal/util/common.h"
 #include "seal/util/ztools.h"
-#ifdef SEAL_USE_MSGSL_SPAN
-#include <gsl/span>
-#endif
 
 using namespace std;
 using namespace seal::util;
@@ -24,13 +22,425 @@ namespace seal
 {
     namespace
     {
-#ifdef SEAL_USE_MSGSL_SPAN
-        class span_buffer : std::streambuf
+        class SafeByteBuffer final : public std::streambuf
         {
         public:
-            span_buffer(
+            SafeByteBuffer(streamsize size = 1) :
+                size_(size)
+            {
+                if (!fits_in<int>(add_safe(size_, streamsize(1))))
+                {
+                    throw invalid_argument("size is too large");
+                }
+                buf_.resize(static_cast<size_t>(size_ + 1));
+                setp(buf_.begin(), buf_.begin() + size_);
+                setg(buf_.begin(), buf_.begin(), buf_.begin() + size_);
+            }
+
+            ~SafeByteBuffer() override = default;
+
+            SafeByteBuffer(const SafeByteBuffer &copy) = delete;
+
+            SafeByteBuffer &operator =(const SafeByteBuffer &assign) = delete;
+
+        private:
+            int_type underflow() override
+            {
+                if (gptr() == egptr())
+                {
+                    return eof_;
+                }
+                return traits_type::to_int_type(*gptr());
+            }
+
+            int_type pbackfail(int_type ch) override
+            {
+                if (gptr() == eback() ||
+                    (traits_type::not_eof(ch) && ch != gptr()[-1]))
+                {
+                    return traits_type::eof();
+                }
+                gbump(-1);
+                return traits_type::to_int_type(*gptr());
+            }
+
+            streamsize showmanyc() override
+            {
+                if (gptr() >= egptr())
+                {
+                    return -1;
+                }
+                return distance(gptr(), egptr());
+            }
+
+            streamsize xsgetn(char_type *s, streamsize count) override
+            {
+                streamsize avail = 
+                    max(streamsize(0), min(count, distance(gptr(), egptr())));
+                copy_n(gptr(), avail, s);
+                gbump(safe_cast<int>(avail));
+                return avail;
+            }
+
+            pos_type seekpos(
+                pos_type pos,
+                ios_base::openmode which = ios_base::in | ios_base::out) override
+            {
+                if (pos < 0 || pos > size_)
+                {
+                    return pos_type(off_type(-1));
+                }
+                if (which & ios_base::in)
+                {
+                    setg(eback(), eback() + pos, egptr());
+                }
+                if (which & ios_base::out)
+                {
+                    setp(pbase(), epptr());
+                    pbump(static_cast<int>(pos));
+                }
+                return pos;
+            }
+
+            pos_type seekoff(
+                off_type off,
+                ios_base::seekdir dir,
+                ios_base::openmode which = ios_base::in | ios_base::out) override
+            {
+                // Cannot seek relative to current position for both input and
+                // output heads if they are in different positions.
+                if (which == (ios_base::in | ios_base::out) &&
+                    dir == ios_base::cur && gptr() != pptr())
+                {
+                    return pos_type(off_type(-1));
+                }
+
+                // We are guaranteed to have only a single absolute offset
+                off_type newoff = off;
+                switch (dir)
+                {
+                    case ios_base::beg:
+                        break;
+
+                    case ios_base::cur:
+                        if (which == ios_base::in)
+                        {
+                            newoff = add_safe(newoff, distance(eback(), gptr()));
+                        }
+                        else
+                        {
+                            newoff = add_safe(newoff, distance(pbase(), pptr()));
+                        }
+                        break;
+
+                    case ios_base::end:
+                        newoff = add_safe(newoff, size_);
+                        break;
+
+                    default:
+                        return pos_type(off_type(-1));
+                }
+                return seekpos(pos_type(newoff), which);
+            }
+
+            void expand_size()
+            {
+                // Compute expanded size
+                size_ = safe_cast<streamsize>(
+                    ceil(safe_cast<double>(buf_.size()) * expansion_factor_));
+
+                // Store the old offsets for both put and get heads
+                streamsize old_poff = distance(pbase(), pptr());
+                streamsize old_goff = distance(eback(), gptr());
+
+                // Copy entire buffer to new location and reserve extra byte
+                buf_.resize(safe_cast<size_t>(
+                    add_safe<streamsize>(size_, streamsize(1))));
+
+                // Set the get and put pointers appropriately
+                setp(buf_.begin(), buf_.begin() + size_);
+                pbump(safe_cast<int>(old_poff));
+                setg(buf_.begin(), buf_.begin() + old_goff, buf_.begin() + size_);
+            }
+
+            int_type overflow(int_type ch = traits_type::eof()) override
+            {
+                if (traits_type::eq_int_type(eof_, ch) || !fits_in<int>(
+                    ceil(static_cast<double>(buf_.size()) * expansion_factor_) + 1))
+                {
+                    return eof_;
+                }
+
+                // Output ch to the buffer (there is one byte left of space) and overflow
+                *pptr() = traits_type::to_char_type(ch);
+                pbump(1);
+
+                // Expand the size of the buffer
+                expand_size();
+
+                return ch;
+            }
+
+            streamsize xsputn(const char_type *s, streamsize count) override
+            {
+                streamsize remaining = count;
+                while (remaining)
+                {
+                    if (pptr() == epptr())
+                    {
+                        expand_size();
+                    }
+                    streamsize avail = max(
+                        streamsize(0), min(remaining, distance(pptr(), epptr())));
+                    copy_n(s, avail, pptr());
+                    pbump(safe_cast<int>(avail));
+                    remaining -= avail;
+                    s += avail;
+                }
+                return count;
+            }
+
+            IntArray<char> buf_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true) };
+
+            streamsize size_;
+
+            static constexpr double expansion_factor_ = 1.3;
+
+            int_type eof_ = traits_type::eof();
         };
-#endif SEAL_USE_MSGSL_SPAN
+
+        class ArrayGetBuffer final : public std::streambuf
+        {
+        public:
+            ArrayGetBuffer(const char_type *buf, streamsize size) :
+                buf_(buf),
+                size_(size)
+            {
+                if (!buf)
+                {
+                    throw invalid_argument("buf cannot be null");
+                }
+                if (size <= 0)
+                {
+                    throw invalid_argument("size must be positive");
+                }
+                begin_ = buf_;
+                end_ = buf_ + size_;
+                head_ = begin_;
+            }
+
+            ~ArrayGetBuffer() override = default;
+
+            ArrayGetBuffer(const ArrayGetBuffer &copy) = delete;
+
+            ArrayGetBuffer &operator =(const ArrayGetBuffer &assign) = delete;
+
+        private:
+            int_type underflow() override
+            {
+                if (head_ == end_)
+                {
+                    return eof_;
+                }
+                return traits_type::to_int_type(*head_);
+            }
+
+            int_type uflow() override
+            {
+                if (head_ == end_)
+                {
+                    return eof_;
+                }
+                return traits_type::to_int_type(*head_++);
+            }
+
+            int_type pbackfail(int_type ch) override
+            {
+                if (head_ == begin_ ||
+                    (traits_type::not_eof(ch) && ch != head_[-1]))
+                {
+                    return traits_type::eof();
+                }
+                return traits_type::to_int_type(*--head_);
+            }
+
+            streamsize showmanyc() override
+            {
+                if (head_ >= end_)
+                {
+                    return -1;
+                }
+                return distance(head_, end_);
+            }
+
+            streamsize xsgetn(char_type *s, streamsize count) override
+            {
+                streamsize avail =
+                    max(streamsize(0), min(count, distance(head_, end_)));
+                copy_n(head_, avail, s);
+                advance(head_, avail);
+                return avail;
+            }
+
+            pos_type seekpos(
+                pos_type pos,
+                ios_base::openmode which = ios_base::in) override
+            {
+                if (which != ios_base::in)
+                {
+                    return pos_type(off_type(-1));
+                }
+                if (pos < 0 || pos > pos_type(size_))
+                {
+                    return pos_type(off_type(-1));
+                }
+
+                head_ = begin_ + pos;
+                return pos;
+            }
+
+            pos_type seekoff(
+                off_type off,
+                ios_base::seekdir dir,
+                ios_base::openmode which = ios_base::in) override
+            {
+                off_type newoff = off;
+                switch (dir)
+                {
+                    case ios_base::beg:
+                        break;
+
+                    case ios_base::cur:
+                        newoff = add_safe(newoff, distance(begin_, head_));
+                        break;
+
+                    case ios_base::end:
+                        newoff = add_safe(newoff, off_type(size_));
+                        break;
+
+                    default:
+                        return pos_type(off_type(-1));
+                }
+                return seekpos(pos_type(newoff), which);
+            }
+
+            const char_type *buf_;
+
+            streamsize size_;
+
+            using iterator_type = const char_type*;
+
+            int_type eof_ = traits_type::eof();
+
+            iterator_type begin_;
+
+            iterator_type end_;
+
+            iterator_type head_;
+        };
+
+        class ArrayPutBuffer final : public std::streambuf
+        {
+        public:
+            ArrayPutBuffer(char_type *buf, streamsize size) :
+                buf_(buf),
+                size_(size)
+            {
+                if (!buf)
+                {
+                    throw invalid_argument("buf cannot be null");
+                }
+                if (size <= 0)
+                {
+                    throw invalid_argument("size must be positive");
+                }
+                begin_ = buf_;
+                end_ = buf_+ size_;
+                head_ = begin_;
+            }
+
+            ~ArrayPutBuffer() override = default;
+
+            ArrayPutBuffer(const ArrayPutBuffer &copy) = delete;
+
+            ArrayPutBuffer &operator =(const ArrayPutBuffer &assign) = delete;
+
+        private:
+            int_type overflow(int_type ch = traits_type::eof()) override
+            {
+                if (head_ == end_ || traits_type::eq_int_type(eof_, ch))
+                {
+                    return eof_;
+                }
+                *head_++ = traits_type::to_char_type(ch);
+                return ch;
+            }
+
+            streamsize xsputn(const char_type *s, streamsize count) override
+            {
+                streamsize avail =
+                    max(streamsize(0), min(count, distance(head_, end_)));
+                copy_n(s, avail, head_);
+                advance(head_, avail);
+                return avail;
+            }
+
+            pos_type seekpos(
+                pos_type pos,
+                ios_base::openmode which = ios_base::out) override
+            {
+                if (which != ios_base::out)
+                {
+                    return pos_type(off_type(-1));
+                }
+                if (pos < 0 || pos > pos_type(size_))
+                {
+                    return pos_type(off_type(-1));
+                }
+
+                head_ = begin_ + pos;
+                return pos;
+            }
+
+            pos_type seekoff(
+                off_type off,
+                ios_base::seekdir dir,
+                ios_base::openmode which = ios_base::out) override
+            {
+                off_type newoff = off;
+                switch (dir)
+                {
+                    case ios_base::beg:
+                        break;
+
+                    case ios_base::cur:
+                        newoff = add_safe(newoff, distance(begin_, head_));
+                        break;
+
+                    case ios_base::end:
+                        newoff = add_safe(newoff, off_type(size_));
+                        break;
+
+                    default:
+                        return pos_type(off_type(-1));
+                }
+                return seekpos(pos_type(newoff), which);
+            }
+
+            char_type *buf_;
+
+            streamsize size_;
+
+            using iterator_type = char_type*;
+
+            int_type eof_ = traits_type::eof();
+
+            iterator_type begin_;
+
+            iterator_type end_;
+
+            iterator_type head_;
+        };
     }
 
     streamoff Serialization::Save(
@@ -68,7 +478,8 @@ namespace seal
             case compr_mode_type::zlib:
                 {
                     constexpr int Z_OK = 0;
-                    stringstream temp_stream;
+                    SafeByteBuffer safe_buffer(256);
+                    iostream temp_stream(&safe_buffer);
                     temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
                     save_members(temp_stream);
                     if (ztools::deflate_stream(
@@ -104,22 +515,6 @@ namespace seal
 
         stream.exceptions(old_except_mask);
 
-        return out_size;
-    }
-
-    streamoff Serialization::Save(
-        function<void(ostream &stream)> save_members,
-        SEAL_BYTE *out,
-        compr_mode_type compr_mode)
-    {
-        stringstream temp_stream;
-        temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
-        auto out_size = Save(save_members, temp_stream, compr_mode);
-        temp_stream.seekg(0, temp_stream.beg);
-        if (out)
-        {
-            temp_stream.rdbuf()->sgetn(reinterpret_cast<char*>(out), out_size);
-        }
         return out_size;
     }
 
@@ -167,7 +562,8 @@ namespace seal
                 {
                     constexpr int Z_OK = 0;
                     auto compr_size = stream_size - (stream.tellg() - stream_start_pos);
-                    stringstream temp_stream;
+                    SafeByteBuffer safe_buffer(256);
+                    iostream temp_stream(&safe_buffer);
                     temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
                     if (ztools::inflate_stream(
                         stream, compr_size, temp_stream,
@@ -196,79 +592,28 @@ namespace seal
         return in_size;
     }
 
+    streamoff Serialization::Save(
+        function<void(ostream &stream)> save_members,
+        SEAL_BYTE *out,
+        size_t size,
+        compr_mode_type compr_mode)
+    {
+        ArrayPutBuffer apbuf(
+            reinterpret_cast<char*>(out),
+            safe_cast<streamsize>(size));
+        ostream stream(&apbuf);
+        return Save(save_members, stream, compr_mode);
+    }
+
     streamoff Serialization::Load(
         function<void(istream &stream)> load_members,
-        const SEAL_BYTE *in)
+        const SEAL_BYTE *in,
+        size_t size)
     {
-        if (!in)
-        {
-            throw invalid_argument("in cannot be null");
-        }
-
-        streamoff in_size = 0;
-
-        try
-        {
-            // Save the starting position
-            auto stream_start_pos = in;
-
-            // First read the compression mode
-            uint32_t compr_mode32 = 0;
-            copy_n(in, sizeof(uint32_t), reinterpret_cast<SEAL_BYTE*>(&compr_mode32));
-            in += sizeof(uint32_t);
-            if (compr_mode32 >> (sizeof(compr_mode_type) * bits_per_byte))
-            {
-                throw logic_error("invalid compression mode header");
-            }
-            compr_mode_type compr_mode = static_cast<compr_mode_type>(compr_mode32);
-
-            // Next read the stream size
-            uint32_t stream_size32 = 0;
-            copy_n(in, sizeof(uint32_t), reinterpret_cast<SEAL_BYTE*>(&stream_size32));
-            in += sizeof(uint32_t);
-            auto stream_size = safe_cast<streamoff>(stream_size32);
-
-            auto compr_size = stream_size - static_cast<streamoff>(in - stream_start_pos);
-            switch (compr_mode)
-            {
-            case compr_mode_type::none:
-                {
-                    // Read rest of the data
-                    stringstream temp_stream;
-                    temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
-                    temp_stream.write(reinterpret_cast<const char*>(in), compr_size);
-                    load_members(temp_stream);
-                    break;
-                }
-#ifdef SEAL_USE_ZLIB
-            case compr_mode_type::zlib:
-                {
-                    constexpr int Z_OK = 0;
-                    stringstream compr_temp_stream, temp_stream;
-                    compr_temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
-                    temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
-                    compr_temp_stream.write(reinterpret_cast<const char*>(in), compr_size);
-                    if (ztools::inflate_stream(
-                        compr_temp_stream, compr_size, temp_stream,
-                        MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)) != Z_OK)
-                    {
-                        throw runtime_error("stream deflate failed");
-                    }
-                    load_members(temp_stream);
-                    break;
-                }
-#endif
-            default:
-                throw invalid_argument("unsupported compression mode");
-            }
-
-            in_size = stream_size;
-        }
-        catch (const exception &)
-        {
-            throw;
-        }
-
-        return in_size;
+        ArrayGetBuffer agbuf(
+            reinterpret_cast<const char*>(in),
+            safe_cast<streamsize>(size));
+        istream stream(&agbuf);
+        return Load(load_members, stream);
     }
 }
