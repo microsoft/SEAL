@@ -42,6 +42,45 @@ namespace seal
     class Serialization
     {
     public:
+        static constexpr std::uint16_t seal_magic = 0x5EA1;
+
+        /**
+        Struct to contain header information for serialization. The size of the
+        header is 9 bytes and it consists of the following fields:
+
+        1. a magic number 0x5EA1 identifying this is a SEALHeader struct (2 bytes)
+        2. a version identifier, possibly 0x0000 (2 bytes)
+        3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
+        4. the size in bytes of the entire serialized object, including the header (4 bytes)
+        */
+        struct SEALHeader
+        {
+            std::uint16_t magic = seal_magic;
+
+            std::uint16_t version = 0x0000;
+
+            compr_mode_type compr_mode;
+
+            std::uint32_t size;
+        };
+
+        /**
+        Saves a SEALHeader to a given stream. The output is in binary format and
+        not human-readable. The output stream must have the "binary" flag set.
+
+        @param[in] header The SEALHeader to save to the stream
+        @param[out] stream The stream to save the SEALHeader to
+        */
+        static void SaveHeader(const SEALHeader &header, std::ostream &stream);
+
+        /**
+        Loads a SEALHeader from a given stream.
+
+        @param[in] stream The stream to load the SEALHeader from
+        @param[in] header The SEALHeader to populate with the loaded data
+        */
+        static void LoadHeader(std::istream &stream, SEALHeader &header);
+
         /**
         Evaluates save_members and compresses the output according to the given
         compr_mode_type. The resulting data is written to stream and is prepended

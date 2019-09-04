@@ -22,7 +22,7 @@ namespace seal
 {
     namespace
     {
-        class SafeByteBuffer final : public std::streambuf
+        class SafeByteBuffer final : public streambuf
         {
         public:
             SafeByteBuffer(streamsize size = 1) :
@@ -119,26 +119,26 @@ namespace seal
                 off_type newoff = off;
                 switch (dir)
                 {
-                    case ios_base::beg:
-                        break;
+                case ios_base::beg:
+                    break;
 
-                    case ios_base::cur:
-                        if (which == ios_base::in)
-                        {
-                            newoff = add_safe(newoff, distance(eback(), gptr()));
-                        }
-                        else
-                        {
-                            newoff = add_safe(newoff, distance(pbase(), pptr()));
-                        }
-                        break;
+                case ios_base::cur:
+                    if (which == ios_base::in)
+                    {
+                        newoff = add_safe(newoff, distance(eback(), gptr()));
+                    }
+                    else
+                    {
+                        newoff = add_safe(newoff, distance(pbase(), pptr()));
+                    }
+                    break;
 
-                    case ios_base::end:
-                        newoff = add_safe(newoff, size_);
-                        break;
+                case ios_base::end:
+                    newoff = add_safe(newoff, size_);
+                    break;
 
-                    default:
-                        return pos_type(off_type(-1));
+                default:
+                    return pos_type(off_type(-1));
                 }
                 return seekpos(pos_type(newoff), which);
             }
@@ -209,7 +209,7 @@ namespace seal
             int_type eof_ = traits_type::eof();
         };
 
-        class ArrayGetBuffer final : public std::streambuf
+        class ArrayGetBuffer final : public streambuf
         {
         public:
             ArrayGetBuffer(const char_type *buf, streamsize size) :
@@ -307,19 +307,19 @@ namespace seal
                 off_type newoff = off;
                 switch (dir)
                 {
-                    case ios_base::beg:
-                        break;
+                case ios_base::beg:
+                    break;
 
-                    case ios_base::cur:
-                        newoff = add_safe(newoff, distance(begin_, head_));
-                        break;
+                case ios_base::cur:
+                    newoff = add_safe(newoff, distance(begin_, head_));
+                    break;
 
-                    case ios_base::end:
-                        newoff = add_safe(newoff, off_type(size_));
-                        break;
+                case ios_base::end:
+                    newoff = add_safe(newoff, off_type(size_));
+                    break;
 
-                    default:
-                        return pos_type(off_type(-1));
+                default:
+                    return pos_type(off_type(-1));
                 }
                 return seekpos(pos_type(newoff), which);
             }
@@ -339,7 +339,7 @@ namespace seal
             iterator_type head_;
         };
 
-        class ArrayPutBuffer final : public std::streambuf
+        class ArrayPutBuffer final : public streambuf
         {
         public:
             ArrayPutBuffer(char_type *buf, streamsize size) :
@@ -410,19 +410,19 @@ namespace seal
                 off_type newoff = off;
                 switch (dir)
                 {
-                    case ios_base::beg:
-                        break;
+                case ios_base::beg:
+                    break;
 
-                    case ios_base::cur:
-                        newoff = add_safe(newoff, distance(begin_, head_));
-                        break;
+                case ios_base::cur:
+                    newoff = add_safe(newoff, distance(begin_, head_));
+                    break;
 
-                    case ios_base::end:
-                        newoff = add_safe(newoff, off_type(size_));
-                        break;
+                case ios_base::end:
+                    newoff = add_safe(newoff, off_type(size_));
+                    break;
 
-                    default:
-                        return pos_type(off_type(-1));
+                default:
+                    return pos_type(off_type(-1));
                 }
                 return seekpos(pos_type(newoff), which);
             }
@@ -441,6 +441,74 @@ namespace seal
 
             iterator_type head_;
         };
+
+        bool is_valid_compr_mode(uint8_t compr_mode)
+        {
+            switch (compr_mode)
+            {
+            case static_cast<uint8_t>(compr_mode_type::none):
+                /* fall through */
+#ifdef SEAL_USE_ZLIB
+            case static_cast<uint8_t>(compr_mode_type::zlib):
+#endif
+                return true;
+            }
+            return false;
+        }
+    }
+
+    void Serialization::SaveHeader(const SEALHeader &header, ostream &stream)
+    {
+        auto old_except_mask = stream.exceptions();
+        try
+        {
+            // Throw exceptions on ios_base::badbit and ios_base::failbit
+            stream.exceptions(ios_base::badbit | ios_base::failbit);
+
+            stream.write(reinterpret_cast<const char*>(&header), sizeof(SEALHeader));
+        }
+        catch (const exception &)
+        {
+            stream.exceptions(old_except_mask);
+            throw;
+        }
+        stream.exceptions(old_except_mask);
+    }
+
+    void Serialization::LoadHeader(istream &stream, SEALHeader &header)
+    {
+        SEALHeader new_header;
+
+        auto old_except_mask = stream.exceptions();
+        try
+        {
+            // Throw exceptions on ios_base::badbit and ios_base::failbit
+            stream.exceptions(ios_base::badbit | ios_base::failbit);
+
+            stream.read(reinterpret_cast<char*>(&new_header), sizeof(SEALHeader));
+
+            // Check the validity of the loaded data
+            if (new_header.magic != seal_magic)
+            {
+                throw logic_error("loaded header is invalid");
+            }
+            if (new_header.version != 0x0000)
+            {
+                throw logic_error("loaded header is invalid");
+            }
+            if (!is_valid_compr_mode(static_cast<uint8_t>(new_header.compr_mode)))
+            {
+                throw logic_error("unsupported compression mode");
+            }
+
+            header = new_header;
+        }
+        catch (const exception &)
+        {
+            stream.exceptions(old_except_mask);
+            throw;
+        }
+        stream.exceptions(old_except_mask);
     }
 
     streamoff Serialization::Save(
@@ -456,17 +524,16 @@ namespace seal
             // Throw exceptions on ios_base::badbit and ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            // Save the starting position
+            // Save the starting (header) position
             auto stream_start_pos = stream.tellp();
 
-            // First write the compression mode
-            uint32_t compr_mode32 = static_cast<uint32_t>(compr_mode);
-            stream.write(reinterpret_cast<const char*>(&compr_mode32), sizeof(uint32_t));
+            // Create the header
+            SEALHeader header;
+            header.compr_mode = compr_mode;
 
-            // Save the position where size should be stored and write zero for now
-            auto stream_size_pos = stream.tellp();
-            uint32_t stream_size32 = 0;
-            stream.write(reinterpret_cast<const char*>(&stream_size32), sizeof(uint32_t));
+            // Write zeros for header for now
+            char zero_header[sizeof(SEALHeader)] = { 0 };
+            stream.write(zero_header, sizeof(SEALHeader));
 
             switch (compr_mode)
             {
@@ -498,11 +565,11 @@ namespace seal
             // Compute how many bytes were written
             auto stream_end_pos = stream.tellp();
             out_size = stream_end_pos - stream_start_pos;
-            stream_size32 = safe_cast<uint32_t>(out_size);
+            header.size = safe_cast<uint32_t>(out_size);
 
-            // Go back to write the size
-            stream.seekp(stream_size_pos);
-            stream.write(reinterpret_cast<const char*>(&stream_size32), sizeof(uint32_t));
+            // Go back to write the header
+            stream.seekp(stream_start_pos);
+            SaveHeader(header, stream);
 
             // Go back to end
             stream.seekp(stream_end_pos);
@@ -512,7 +579,6 @@ namespace seal
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
 
         return out_size;
@@ -523,6 +589,7 @@ namespace seal
         istream &stream)
     {
         streamoff in_size = 0;
+        SEALHeader header;
 
         auto old_except_mask = stream.exceptions();
         try
@@ -533,26 +600,15 @@ namespace seal
             // Save the starting position
             auto stream_start_pos = stream.tellg();
 
-            // First read the compression mode
-            uint32_t compr_mode32 = 0;
-            stream.read(reinterpret_cast<char*>(&compr_mode32), sizeof(uint32_t));
-            if (compr_mode32 >> (sizeof(compr_mode_type) * bits_per_byte))
-            {
-                throw logic_error("invalid compression mode header");
-            }
-            compr_mode_type compr_mode = static_cast<compr_mode_type>(compr_mode32);
+            // First read the header
+            LoadHeader(stream, header);
 
-            // Next read the stream size
-            uint32_t stream_size32 = 0;
-            stream.read(reinterpret_cast<char*>(&stream_size32), sizeof(uint32_t));
-            auto stream_size = safe_cast<streamoff>(stream_size32);
-
-            switch (compr_mode)
+            switch (header.compr_mode)
             {
             case compr_mode_type::none:
                 // Read rest of the data
                 load_members(stream);
-                if (stream_size != stream.tellg() - stream_start_pos)
+                if (header.size != stream.tellg() - stream_start_pos)
                 {
                     throw logic_error("invalid data size");
                 }
@@ -561,7 +617,7 @@ namespace seal
             case compr_mode_type::zlib:
                 {
                     constexpr int Z_OK = 0;
-                    auto compr_size = stream_size - (stream.tellg() - stream_start_pos);
+                    auto compr_size = header.size - (stream.tellg() - stream_start_pos);
                     SafeByteBuffer safe_buffer(256);
                     iostream temp_stream(&safe_buffer);
                     temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
@@ -579,14 +635,13 @@ namespace seal
                 throw invalid_argument("unsupported compression mode");
             }
 
-            in_size = stream_size;
+            in_size = safe_cast<streamoff>(header.size);
         }
         catch (const exception &)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
 
         return in_size;
