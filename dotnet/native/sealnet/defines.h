@@ -37,10 +37,10 @@ static_assert(false, "Require architecture == x64");
 #define E_INVALIDARG            _HRESULT_TYPEDEF_(0x80070057L)
 #define E_OUTOFMEMORY           _HRESULT_TYPEDEF_(0x8007000EL)
 #define E_UNEXPECTED            _HRESULT_TYPEDEF_(0x8000FFFFL)
+#define COR_E_IO                _HRESULT_TYPEDEF_(0x80131620L)
 
 #define S_OK                    _HRESULT_TYPEDEF_(0L)
 #define S_FALSE                 _HRESULT_TYPEDEF_(1L)
-
 
 #define FACILITY_WIN32                 7
 #define HRESULT_FROM_WIN32(x) ((HRESULT)(x) <= 0 ? ((HRESULT)(x)) : ((HRESULT) (((x) & 0x0000FFFF) | (FACILITY_WIN32 << 16) | 0x80000000)))

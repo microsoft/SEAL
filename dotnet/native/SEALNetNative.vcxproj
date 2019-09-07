@@ -210,6 +210,7 @@
     <ClInclude Include="sealnet\relinkeys_wrapper.h" />
     <ClInclude Include="sealnet\sealcontext_wrapper.h" />
     <ClInclude Include="sealnet\secretkey_wrapper.h" />
+    <ClInclude Include="sealnet\serialization_wrapper.h" />
     <ClInclude Include="sealnet\smallmodulus_wrapper.h" />
     <ClInclude Include="sealnet\stdafx.h" />
     <ClInclude Include="sealnet\targetver.h" />
@@ -239,6 +240,7 @@
     <ClCompile Include="sealnet\relinkeys_wrapper.cpp" />
     <ClCompile Include="sealnet\sealcontext_wrapper.cpp" />
     <ClCompile Include="sealnet\secretkey_wrapper.cpp" />
+    <ClCompile Include="sealnet\serialization_wrapper.cpp" />
     <ClCompile Include="sealnet\smallmodulus_wrapper.cpp" />
     <ClCompile Include="sealnet\encryptionparameters_wrapper.cpp" />
     <ClCompile Include="sealnet\utilities.cpp" />

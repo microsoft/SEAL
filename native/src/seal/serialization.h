@@ -20,48 +20,56 @@ namespace seal
     */
     enum class compr_mode_type : std::uint8_t
     {
+        // No compression is used.
         none = 0,
 #ifdef SEAL_USE_ZLIB
-        zlib = 1
+        // Use Deflate compression
+        deflate = 1,
 #endif
     };
 
     /**
-    The compression mode used by default.
-    */
-#ifdef SEAL_USE_ZLIB
-    constexpr compr_mode_type compr_mode_default = compr_mode_type::zlib;
-#else
-    constexpr compr_mode_type compr_mode_default = compr_mode_type::none;
-#endif
-    /**
-    Class to provide functionality for compressed serialization. Most users of
-    the library should never have to call these functions explicitly, as they are
-    called internally by functions such as Ciphertext::save and Ciphertext::load.
+    Class to provide functionality for serialization. Most users of the library
+    should never have to call these functions explicitly, as they are called
+    internally by functions such as Ciphertext::save and Ciphertext::load.
     */
     class Serialization
     {
     public:
-        static constexpr std::uint16_t seal_magic = 0x5EA1;
+        /**
+        The compression mode used by default.
+        */
+#ifdef SEAL_USE_ZLIB
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::deflate;
+#else
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::none;
+#endif
+        /**
+        The magic value indicating a Microsoft SEAL header.
+        */
+        static constexpr std::uint16_t seal_magic = 0xA15E;
 
         /**
         Struct to contain header information for serialization. The size of the
-        header is 9 bytes and it consists of the following fields:
+        header is 16 bytes and it consists of the following fields:
 
-        1. a magic number 0x5EA1 identifying this is a SEALHeader struct (2 bytes)
-        2. a version identifier, possibly 0x0000 (2 bytes)
+        1. a magic number identifying this is a SEALHeader struct (2 bytes)
+        2. 0x00 (1 byte)
         3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
         4. the size in bytes of the entire serialized object, including the header (4 bytes)
+        5. reserved for future use (8 bytes)
         */
         struct SEALHeader
         {
             std::uint16_t magic = seal_magic;
 
-            std::uint16_t version = 0x0000;
+            std::uint8_t zero_byte = 0x00;
 
-            compr_mode_type compr_mode;
+            compr_mode_type compr_mode = compr_mode_type::none;
 
-            std::uint32_t size;
+            std::uint32_t size = 0;
+
+            std::uint64_t reserved = 0;
         };
 
         /**
@@ -70,6 +78,7 @@ namespace seal
 
         @param[in] header The SEALHeader to save to the stream
         @param[out] stream The stream to save the SEALHeader to
+        @throws std::runtime_error if I/O operations failed
         */
         static void SaveHeader(const SEALHeader &header, std::ostream &stream);
 
@@ -78,6 +87,9 @@ namespace seal
 
         @param[in] stream The stream to load the SEALHeader from
         @param[in] header The SEALHeader to populate with the loaded data
+        @throws std::runtime_error if I/O operations failed
+        @throws std::logic_error if the loaded data is not a valid SEALHeader or
+        if the loaded compression mode is not supported
         */
         static void LoadHeader(std::istream &stream, SEALHeader &header);
 
@@ -92,6 +104,10 @@ namespace seal
         argument, possibly writing some number of bytes into it
         @param[out] stream The stream to write to
         @param[in] compr_mode The desired compression mode
+        @throws std::invalid_argument if save_members is invalid
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
             std::function<void(std::ostream &stream)> save_members,
@@ -108,6 +124,10 @@ namespace seal
         @param[in] load_members A function taking an std::istream reference as an
         argument, possibly reading some number of bytes from it
         @param[in] stream The stream to read from
+        @throws std::invalid_argument if load_members is invalid
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
             std::function<void(std::istream &stream)> load_members,
@@ -126,6 +146,11 @@ namespace seal
         @param[out] out The memory location to write to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
+        @throws std::invalid_argument if save_members is invalid, if out is null,
+        or if size is too small to contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
             std::function<void(std::ostream &stream)> save_members,
@@ -144,13 +169,62 @@ namespace seal
         an argument and reads some number of bytes from it
         @param[in] in The memory location to read from
         @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if load_members is invalid, if in is null,
+        or if size is too small to contain a SEALHeader
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
             std::function<void(std::istream &stream)> load_members,
             const SEAL_BYTE *in,
             std::size_t size);
 
+        /**
+        Enables access to private members of seal::Serialization for .NET wrapper.
+        */
+        struct SerializationPrivateHelper;
+
     private:
         Serialization() = delete;
+
+        SEAL_NODISCARD static bool IsSupportedComprMode(
+            std::uint8_t compr_mode) noexcept
+        {
+            switch (compr_mode)
+            {
+            case static_cast<std::uint8_t>(compr_mode_type::none) :
+                /* fall through */
+#ifdef SEAL_USE_ZLIB
+            case static_cast<std::uint8_t>(compr_mode_type::deflate) :
+#endif
+                return true;
+            }
+            return false;
+        }
+
+        SEAL_NODISCARD static inline bool IsSupportedComprMode(
+            compr_mode_type compr_mode) noexcept
+        {
+            return IsSupportedComprMode(static_cast<uint8_t>(compr_mode));
+        }
+
+        SEAL_NODISCARD static bool IsValidHeader(
+            const SEALHeader &header) noexcept
+        {
+            if (header.magic != seal_magic)
+            {
+                return false;
+            }
+            if (header.zero_byte != 0x00)
+            {
+                return false;
+            }
+            if (!IsSupportedComprMode(static_cast<uint8_t>(header.compr_mode)))
+            {
+                return false;
+            }
+            return true;
+        }
     };
 }

@@ -54,8 +54,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create1(void *memoryPoolHandle, void **
     {
         return E_INVALIDARG;
     }
-
-    return E_UNEXPECTED;
 }
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
@@ -74,8 +72,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void *memo
     {
         return E_INVALIDARG;
     }
-
-    return E_UNEXPECTED;
 }
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
@@ -94,8 +90,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coe
     {
         return E_INVALIDARG;
     }
-
-    return E_UNEXPECTED;
 }
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Create4(char *hexPoly, void *memoryPoolHandle, void **plaintext)
@@ -115,8 +109,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create4(char *hexPoly, void *memoryPool
     {
         return E_INVALIDARG;
     }
-
-    return E_UNEXPECTED;
 }
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Create5(void *copy, void **plaintext)
@@ -157,8 +149,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Set2(void *thisptr, char *hex_poly)
     {
         return E_INVALIDARG;
     }
-
-    return E_UNEXPECTED;
 }
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Set3(void *thisptr, uint64_t const_coeff)
@@ -248,8 +238,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_ToString(void *thispt, uint64_t *length
     {
         return E_INVALIDARG;
     }
-
-    return E_UNEXPECTED;
 }
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form)
@@ -282,7 +270,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_GetParmsId(void *thisptr, uint64_t *par
     {
         parms_id[i] = plain->parms_id()[i];
     }
-
     return S_OK;
 }
 
@@ -312,8 +299,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, uint64_t start_
 
     try
     {
-        using size_type = Plaintext::size_type;
-        plain->set_zero(safe_cast<size_type>(start_coeff));
+        plain->set_zero(safe_cast<size_t>(start_coeff));
         return S_OK;
     }
     catch (const out_of_range&)
@@ -329,8 +315,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, uint64_t start_
 
     try
     {
-        using size_type = Plaintext::size_type;
-        plain->set_zero(safe_cast<size_type>(start_coeff), safe_cast<size_type>(length));
+        plain->set_zero(safe_cast<size_t>(start_coeff), safe_cast<size_t>(length));
         return S_OK;
     }
     catch (const out_of_range&)
@@ -481,4 +466,109 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Pool(void *thisptr, void **pool)
     MemoryPoolHandle *handleptr = new MemoryPoolHandle(plain->pool());
     *pool = handleptr;
     return S_OK;
+}
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_SaveSize(void *thisptr, int64_t *result)
+{
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    try
+    {
+        *result = static_cast<int64_t>(plain->save_size());
+        return S_OK;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+}
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
+{
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+    IfNullRet(outptr, E_POINTER);
+    IfNullRet(out_bytes, E_POINTER);
+
+    try
+    {
+        *out_bytes = util::safe_cast<int64_t>(plain->save(
+            reinterpret_cast<SEAL_BYTE *>(outptr),
+            util::safe_cast<size_t>(size),
+            static_cast<compr_mode_type>(compr_mode)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+    catch (const runtime_error &)
+    {
+        return COR_E_IO;
+    }
+}
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_UnsafeLoad(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+{
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+    IfNullRet(inptr, E_POINTER);
+    IfNullRet(in_bytes, E_POINTER);
+
+    try
+    {
+        *in_bytes = util::safe_cast<int64_t>(plain->unsafe_load(
+            reinterpret_cast<SEAL_BYTE *>(inptr),
+            util::safe_cast<size_t>(size)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+    catch (const runtime_error &)
+    {
+        return COR_E_IO;
+    }
+}
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+{
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+    const auto &sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(inptr, E_POINTER);
+    IfNullRet(in_bytes, E_POINTER);
+
+    try
+    {
+        *in_bytes = util::safe_cast<int64_t>(plain->load(
+            sharedctx,
+            reinterpret_cast<SEAL_BYTE *>(inptr),
+            util::safe_cast<size_t>(size)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+    catch (const runtime_error &)
+    {
+        return COR_E_IO;
+    }
 }

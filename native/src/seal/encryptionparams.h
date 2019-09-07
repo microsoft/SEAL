@@ -14,6 +14,7 @@
 #include "seal/util/hash.h"
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
+#include "seal/util/ztools.h"
 
 namespace seal
 {
@@ -85,9 +86,7 @@ namespace seal
 
     public:
         /**
-        Creates an empty set of encryption parameters. If no scheme is given, the
-        default value scheme_type::none is used, in which case the parameters can
-        only be used for deserialization.
+        Creates an empty set of encryption parameters.
 
         @param[in] scheme The encryption scheme to be used
         @see scheme_type for the supported schemes
@@ -99,13 +98,10 @@ namespace seal
         }
 
         /**
-        Creates an empty set of encryption parameters. At a minimum, the user needs
-        to specify the parameters poly_modulus, coeff_modulus, and plain_modulus
-        for the parameters to be usable.
+        Creates an empty set of encryption parameters.
 
         @param[in] scheme The encryption scheme to be used
         @throws std::invalid_argument if scheme is not supported
-        @see scheme_type for the supported schemes
         */
         EncryptionParameters(std::uint8_t scheme)
         {
@@ -341,17 +337,47 @@ namespace seal
         }
 
         /**
+        Returns an upper bound on the size of the EncryptionParameters, as if it
+        was written to an output stream.
+
+        @throws std::logic_error if the size does not fit in the return type
+        */
+        SEAL_NODISCARD inline std::streamoff save_size() const
+        {
+            std::size_t coeff_modulus_total_size = coeff_modulus_.empty() ?
+                std::size_t(0) :
+                util::safe_cast<std::size_t>(coeff_modulus_[0].save_size());
+            coeff_modulus_total_size = util::mul_safe(
+                coeff_modulus_total_size, coeff_modulus_.size());
+
+            std::size_t members_size = util::ztools::deflate_size_bound(
+                util::add_safe(
+                    sizeof(scheme_),
+                    sizeof(std::uint64_t), // poly_modulus_degree_
+                    sizeof(std::uint64_t), // coeff_mod_count
+                    coeff_modulus_total_size,
+                    util::safe_cast<std::size_t>(plain_modulus_.save_size())
+            ));
+
+            return util::safe_cast<std::streamoff>(util::add_safe(
+                sizeof(Serialization::SEALHeader),
+                members_size
+            ));
+        }
+
+        /**
         Saves EncryptionParameters to an output stream. The output is in binary
         format and is not human-readable. The output stream must have the "binary"
         flag set.
 
         @param[out] stream The stream to save the EncryptionParameters to
         @param[in] compr_mode The desired compression mode
-        @throws std::exception if the EncryptionParameters could not be written
-        to stream
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(std::ostream &stream,
-            compr_mode_type compr_mode = compr_mode_default) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
@@ -364,8 +390,9 @@ namespace seal
         EncryptionParameters.
 
         @param[in] stream The stream to load the EncryptionParameters from
-        @throws std::exception if valid EncryptionParameters could not be read
-        from stream
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(std::istream &stream)
         {
@@ -385,12 +412,16 @@ namespace seal
         @param[out] out The memory location to write the EncryptionParameters to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
-        @throws std::exception if the EncryptionParameters could not be written
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
             SEAL_BYTE *out,
             std::size_t size,
-            compr_mode_type compr_mode = compr_mode_default) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
@@ -404,7 +435,11 @@ namespace seal
 
         @param[in] in The memory location to load the EncryptionParameters from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::exception if valid EncryptionParameters could not be read
+        @throws std::invalid_argument if in is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
         {
@@ -431,10 +466,18 @@ namespace seal
         */
         SEAL_NODISCARD bool is_valid_scheme(std::uint8_t scheme) const noexcept
         {
-            return
-                scheme == static_cast<std::uint8_t>(scheme_type::none) ||
-                scheme == static_cast<std::uint8_t>(scheme_type::BFV) ||
-                scheme == static_cast<std::uint8_t>(scheme_type::CKKS);
+            switch (scheme)
+            {
+            case static_cast<std::uint8_t>(scheme_type::none) :
+                /* fall through */
+
+            case static_cast<std::uint8_t>(scheme_type::BFV) :
+                /* fall through */
+
+            case static_cast<std::uint8_t>(scheme_type::CKKS) :
+                return true;
+            }
+            return false;
         }
 
         /**

@@ -17,11 +17,6 @@ namespace Microsoft.Research.SEAL
     /// also at any time be used to generate relinearization keys and Galois keys.
     /// Constructing a KeyGenerator requires only a SEALContext.
     /// </remarks>
-    /// <see cref="EncryptionParameters">see EncryptionParameters for more details on encryption parameters.</see>
-    /// <see cref="SEAL.SecretKey">see SecretKey for more details on secret key.</see>
-    /// <see cref="SEAL.PublicKey">see PublicKey for more details on public key.</see>
-    /// <see cref="SEAL.RelinKeys">see RelinKeys for more details on relinearization keys.</see>
-    /// <see cref="SEAL.GaloisKeys">see GaloisKeys for more details on Galois keys.</see>
     public class KeyGenerator : NativeObject
     {
         /// <summary>
@@ -59,10 +54,12 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="context">The SEALContext</param>
         /// <param name="secretKey">A previously generated secret key</param>
-        /// <exception cref="ArgumentNullException">if either context or secretKey are null</exception>
-        /// <exception cref="ArgumentException">if encryption parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if secretKey or publicKey is not valid
-        /// for encryption parameters</exception>
+        /// <exception cref="ArgumentNullException">if either context or secretKey
+        /// are null</exception>
+        /// <exception cref="ArgumentException">if encryption parameters are not
+        /// valid</exception>
+        /// <exception cref="ArgumentException">if secretKey or publicKey is not
+        /// valid for encryption parameters</exception>
         public KeyGenerator(SEALContext context, SecretKey secretKey)
         {
             if (null == context)
@@ -74,7 +71,8 @@ namespace Microsoft.Research.SEAL
             if (!ValCheck.IsValidFor(secretKey, context))
                 throw new ArgumentException("Secret key is not valid for encryption parameters");
 
-            NativeMethods.KeyGenerator_Create(context.NativePtr, secretKey.NativePtr, out IntPtr ptr);
+            NativeMethods.KeyGenerator_Create(context.NativePtr,
+                secretKey.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -92,10 +90,12 @@ namespace Microsoft.Research.SEAL
         /// <param name="context">The SEALContext</param>
         /// <param name="secretKey">A previously generated secret key</param>
         /// <param name="publicKey">A previously generated public key</param>
-        /// <exception cref="ArgumentNullException">if either context, secretKey or publicKey are null</exception>
-        /// <exception cref="ArgumentException">if encryption parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if secretKey or publicKey is not valid
-        /// for encryption parameters</exception>
+        /// <exception cref="ArgumentNullException">if either context, secretKey
+        /// or publicKey are null</exception>
+        /// <exception cref="ArgumentException">if encryption parameters are not
+        /// valid</exception>
+        /// <exception cref="ArgumentException">if secretKey or publicKey is not
+        /// valid for encryption parameters</exception>
         public KeyGenerator(SEALContext context, SecretKey secretKey, PublicKey publicKey)
         {
             if (null == context)
@@ -111,7 +111,8 @@ namespace Microsoft.Research.SEAL
             if (!ValCheck.IsValidFor(publicKey, context))
                 throw new ArgumentException("Public key is not valid for encryption parameters");
 
-            NativeMethods.KeyGenerator_Create(context.NativePtr, secretKey.NativePtr, publicKey.NativePtr, out IntPtr ptr);
+            NativeMethods.KeyGenerator_Create(context.NativePtr, secretKey.NativePtr,
+                publicKey.NativePtr, out IntPtr ptr);
             NativePtr = ptr;
         }
 
@@ -153,12 +154,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Generates Galois keys.
         /// </summary>
-        ///
         /// <remarks>
-        /// Generates Galois keys. This function creates logarithmically many (in degree of the
-        /// polynomial modulus) Galois keys that is sufficient to apply any Galois automorphism
-        /// (e.g. rotations) on encrypted data. Most users will want to use this overload of
-        /// the function.
+        /// Generates Galois keys. This function creates logarithmically many (in
+        /// degree of the polynomial modulus) Galois keys that is sufficient to apply
+        /// any Galois automorphism (e.g. rotations) on encrypted data. Most users
+        /// will want to use this overload of the function.
         /// </remarks>
         public GaloisKeys GaloisKeys()
         {
@@ -193,7 +193,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(galoisElts));
 
             ulong[] galoisEltsArr = galoisElts.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, (ulong)galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
+            NativeMethods.KeyGenerator_GaloisKeys(NativePtr,
+                (ulong)galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
             return new GaloisKeys(galoisKeysPtr);
         }
 
@@ -201,18 +202,21 @@ namespace Microsoft.Research.SEAL
         /// Generates and returns Galois keys.
         /// </summary>
         /// <remarks>
-        /// This function creates specific Galois keys that can be used to apply specific
-        /// Galois automorphisms on encrypted data. The user needs to give as input
-        /// a vector of desired Galois rotation step counts, where negative step counts
-        /// correspond to rotations to the right and positive step counts correspond to
-        /// rotations to the left. A step count of zero can be used to indicate a column
-        /// rotation in the BFV scheme complex conjugation in the CKKS scheme.
+        /// This function creates specific Galois keys that can be used to apply
+        /// specific Galois automorphisms on encrypted data. The user needs to give
+        /// as input a vector of desired Galois rotation step counts, where negative
+        /// step counts correspond to rotations to the right and positive step counts
+        /// correspond to rotations to the left. A step count of zero can be used to
+        /// indicate a column rotation in the BFV scheme complex conjugation in the
+        /// CKKS scheme.
         /// </remarks>
-        /// <param name="steps">The rotation step counts for which to generate keys</param>
+        /// <param name="steps">The rotation step counts for which to generate
+        /// keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
-        /// <exception cref="InvalidOperationException">if the encryption parameters do not
-        /// support batching and scheme is SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if the step counts are not valid</exception>
+        /// <exception cref="InvalidOperationException">if the encryption parameters
+        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="ArgumentException">if the step counts are not
+        /// valid</exception>
         public GaloisKeys GaloisKeys(IEnumerable<int> steps)
         {
             if (null == steps)
@@ -221,14 +225,15 @@ namespace Microsoft.Research.SEAL
             try
             {
                 int[] stepsArr = steps.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, (ulong)stepsArr.Length, stepsArr, out IntPtr galoisKeysPtr);
+                NativeMethods.KeyGenerator_GaloisKeys(NativePtr,
+                    (ulong)stepsArr.Length, stepsArr, out IntPtr galoisKeysPtr);
                 return new GaloisKeys(galoisKeysPtr);
             }
             catch (COMException ex)
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
-                throw;
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 

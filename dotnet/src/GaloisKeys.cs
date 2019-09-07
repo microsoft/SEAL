@@ -28,10 +28,6 @@ namespace Microsoft.Research.SEAL
     /// the Galois keys not being thread-safe.
     /// </para>
     /// </remarks>
-    /// <see cref="SecretKey">see SecretKey for the class that stores the secret key.</see>
-    /// <see cref="PublicKey">see PublicKey for the class that stores the public key.</see>
-    /// <see cref="RelinKeys">see RelinKeys for the class that stores the relinearization keys.</see>
-    /// <see cref="KeyGenerator">see KeyGenerator for the class that generates the Galois keys.</see>
     public class GaloisKeys : KSwitchKeys
     {
         /// <summary>
@@ -96,8 +92,8 @@ namespace Microsoft.Research.SEAL
         /// given Galois element and is valid only as long as the GaloisKeys is valid.
         /// </remarks>
         /// <param name="galoisElt">The Galois element</param>
-        /// <exception cref="ArgumentException">if the key corresponding to galoisElt does
-        /// not exist</exception>
+        /// <exception cref="ArgumentException">if the key corresponding to galoisElt
+        /// does not exist</exception>
         public IEnumerable<PublicKey> Key(ulong galoisElt)
         {
             return Data.ElementAt(checked((int)GetIndex(galoisElt)));

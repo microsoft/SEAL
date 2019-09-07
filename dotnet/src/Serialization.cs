@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-using Microsoft.Research.SEAL.Tools;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -19,79 +18,285 @@ namespace Microsoft.Research.SEAL
     /// </summary>
     public enum ComprModeType : byte
     {
-        none = 0
+        /// <summary>No compression is used.</summary>
+        None = 0,
+
+        /// <summary>Use Deflate compression.</summary>
+        Deflate = 1,
     }
 
-    /// <summary> 
-    /// The compression mode used by default.
-    /// </summary>
-    ComprModeType comprModeDefault = ComprModeType.None;
-
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary>Class to provide functionality for serialization.</summary>
     /// <remarks>
-    /// <para>
-    /// Memory Management
-    /// The size of a ciphertext refers to the number of polynomials it contains,
-    /// whereas its capacity refers to the number of polynomials that fit in the
-    /// current memory allocation. In high-performance applications unnecessary
-    /// re-allocations should be avoided by reserving enough memory for the
-    /// ciphertext to begin with either by providing the desired capacity to the
-    /// constructor as an extra argument, or by calling the reserve function at
-    /// any time.
-    /// </para>
-    /// <para>
-    /// Thread Safety
-    /// In general, reading from ciphertext is thread-safe as long as no other
-    /// thread is concurrently mutating it. This is due to the underlying data
-    /// structure storing the ciphertext not being thread-safe.
-    /// </para>
+    /// Class to provide functionality for serialization. Most users of the library
+    /// should never have to call these functions explicitly, as they are called
+    /// internally by functions such as Ciphertext.Save and Ciphertext.Load.
     /// </remarks>
-    /// <seealso cref="Plaintext">See Plaintext for the class that stores plaintexts.</seealso>
-    //public class Ciphertext : NativeObject
-    /**
-    Class to provide functionality for compressed serialization. Most users of
-    the library should never have to call these functions explicitly, as they are
-    called internally by functions such as Ciphertext::save and Ciphertext::load.
-    */
     public abstract class Serialization
     {
-        static System.UInt16 sealMagic = 0x5EA1;
-
-        /**
-        Struct to contain header information for serialization. The size of the
-        header is 9 bytes and it consists of the following fields:
-
-        1. a magic number 0x5EA1 identifying this is a SEALHeader struct (2 bytes)
-        2. a version identifier, possibly 0x0000 (2 bytes)
-        3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
-        4. the size in bytes of the entire serialized object, including the header (4 bytes)
-        */
-        struct SEALHeader
+        private static bool IsSupportedComprMode(byte comprMode)
         {
-            std::uint16_t magic = seal_magic;
+            NativeMethods.Serialization_IsSupportedComprMode(comprMode, out bool result);
+            return result;
+        }
 
-            std::uint16_t version = 0x0000;
+        private static bool IsSupportedComprMode(ComprModeType comprMode) =>
+            IsSupportedComprMode((byte)comprMode);
 
-            compr_mode_type compr_mode;
+        /// <summary>
+        /// The compression mode used by default.
+        /// </summary>
+        public static readonly ComprModeType ComprModeDefault = ((Func<ComprModeType>)(() => {
+            NativeMethods.Serialization_ComprModeDefault(out byte comprMode);
+            return (ComprModeType)comprMode;
+        }))();
+      
+        /// <summary>The magic value indicating a Microsoft SEAL header.</summary>
+        public static readonly ushort SEALMagic = ((Func<ushort>)(() => {
+            NativeMethods.Serialization_SEALMagic(out ushort sealMagic);
+            return sealMagic;
+        }))();
 
-            std::uint32_t size;
+        /// <summary>Struct to contain header information for serialization.</summary>
+        /// <remarks>
+        /// Struct to contain header information for serialization. The size of the
+        /// header is 16 bytes and it consists of the following fields:
+        ///
+        /// 1. a magic number identifying this is a SEALHeader struct (2 bytes)
+        /// 2. 0x00 (1 byte)
+        /// 3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
+        /// 4. the size in bytes of the entire serialized object, including the header (4 bytes)
+        /// 5. reserved for future use (8 bytes)
+        /// </remarks>
+        public class SEALHeader
+        {
+            /// <summary>A magic number identifying this as a SEALHeader struct
+            /// (2 bytes)</summary>
+            public ushort Magic = SEALMagic;
+
+            /// <summary>0x00 (1 byte)</summary>
+            public byte ZeroByte = 0x00;
+
+            /// <summary>A ComprModeType indicating whether data after the header is
+            /// compressed (1 byte)</summary>
+            public ComprModeType ComprMode = ComprModeDefault;
+
+            /// <summary>The size in bytes of the entire serialized object, including the
+            /// header (4 bytes)</summary>
+            public uint Size = 0;
+
+            /// <summary>Reserved for future use (8 bytes)</summary>
+            public uint Reserved = 0;
         };
 
-        /**
-        Saves a SEALHeader to a given stream. The output is in binary format and
-        not human-readable. The output stream must have the "binary" flag set.
+        private static bool IsValidHeader(SEALHeader header)
+        {
+            byte[] headerArray = new byte[16];
+            using (MemoryStream stream = new MemoryStream(headerArray))
+            {
+                SaveHeader(header, stream);
+                NativeMethods.Serialization_IsValidHeader(
+                    headerArray, (ulong)headerArray.Length, out bool result);
+                return result;
+            }
+        }
 
-        @param[in] header The SEALHeader to save to the stream
-        @param[out] stream The stream to save the SEALHeader to
-        */
-        static void SaveHeader(const SEALHeader &header, std::ostream &stream);
+        /// <summary>Saves a SEALHeader to a given binary stream.</summary>
+        /// <remarks>
+        /// Saves a SEALHeader to a given stream. The output is in binary format and
+        /// not human-readable.
+        /// </remarks>
+        /// <param name="header">The SEALHeader to save to the stream</param>
+        /// <param name="stream">The stream to save the SEALHeader to</param>
+        /// <exception cref="ArgumentNullException">if header or stream is null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not support
+        /// writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        public static void SaveHeader(SEALHeader header, Stream stream)
+        {
+            if (null == header)
+                throw new ArgumentNullException(nameof(header));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanWrite)
+                throw new ArgumentException(nameof(stream));
 
-        /**
-        Loads a SEALHeader from a given stream.
+            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
+            {
+                writer.Write(header.Magic);
+                writer.Write(header.ZeroByte);
+                writer.Write((byte)header.ComprMode);
+                writer.Write(header.Reserved);
+            }
+        }
 
-        @param[in] stream The stream to load the SEALHeader from
-        @param[in] header The SEALHeader to populate with the loaded data
-        */
-        static void LoadHeader(std::istream &stream, SEALHeader &header);
+        /// <summary>Loads a SEALHeader from a given stream.</summary>
+        /// <param name="stream">The stream to load the SEALHeader from</param>
+        /// <param name="header">The SEALHeader to populate with the loaded data</param>
+        /// <exception cref="ArgumentNullException">if header or stream is null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not support
+        /// reading</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is not a valid
+        /// SEALHeader or if the loaded compression mode is not supported</exception>
+        /// <exception cref="EndOfStreamException">if the stream ended unexpectedly</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        public static void LoadHeader(Stream stream, SEALHeader header)
+        {
+            if (null == header)
+                throw new ArgumentNullException(nameof(header));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanRead)
+                throw new ArgumentException(nameof(stream));
+
+            using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, true))
+            {
+                header.Magic = reader.ReadUInt16();
+                header.ZeroByte = reader.ReadByte();
+                header.ComprMode = (ComprModeType)reader.ReadByte();
+                header.Size = reader.ReadUInt32();
+            }
+        }
+
+        internal delegate void SaveDelegate(
+            byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        internal delegate void LoadDelegate(
+            byte[] inptr, ulong size, out long inBytes);
+
+        /// <summary>Saves data to a given binary stream.</summary>
+        /// <remarks>
+        /// First this function allocates a buffer of size <paramref name="size" />.
+        /// The buffer is used by the <paramref name="SaveData"/> delegate that
+        /// writes some number of bytes to the buffer and outputs (in out-parameter)
+        /// the number of bytes written (less than the size of the buffer). The
+        /// contents of the buffer are then written to <paramref name="stream"/> and
+        /// the function returns the output value of <paramref name="SaveData"/>.
+        /// This function is intended only for internal use.
+        /// </remarks>
+        /// <param name="SaveData">The delegate that writes some number of bytes to
+        /// a given buffer</param>
+        /// <param name="size">An upper bound on the number of bytes that
+        /// <paramref name="SaveData" /> requires</param>
+        /// <param name="comprMode">The desired compression mode</param>
+        /// <param name="stream">The destination stream</param>
+        /// <exception cref="ArgumentNullException">if SaveData or stream is
+        /// null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing, or if size is negative or too large</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the data to be saved is
+        /// invalid, if compression mode is not supported, or if compression
+        /// failed</exception>
+        internal static long Save(SaveDelegate SaveData, long size,
+            ComprModeType comprMode, Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+            if (null == SaveData)
+                throw new ArgumentNullException(nameof(SaveData));
+            if (!stream.CanWrite)
+                throw new ArgumentException(nameof(stream));
+            if (!IsSupportedComprMode(comprMode))
+                throw new InvalidOperationException("Unsupported compression mode");
+
+            try
+            {
+                int sizeInt = checked((int)size);
+                byte[] buffer = new byte[sizeInt];
+                SaveData(buffer, checked((ulong)size), (byte)comprMode, out long outBytes);
+
+                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
+                {
+                    writer.Write(buffer, 0, sizeInt);
+                }
+
+                // Clear the buffer for safety reasons
+                Array.Clear(buffer, 0, sizeInt);
+
+                return outBytes;
+            }
+            catch (OverflowException ex)
+            {
+                throw new ArgumentException($"{nameof(size)} is out of bounds", ex);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Save operation failed", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+        }
+
+        /// <summary>Loads data from a given binary stream.</summary>
+        /// <remarks>
+        /// This function calls the <see cref="LoadHeader" /> function to first load 
+        /// a <see cref="SEALHeader" /> object from <paramref name="stream"/>. The
+        /// <see cref="SEALHeader.Size"/> is then read from the <see cref="SEALHeader" />
+        /// and a buffer of corresponding size is allocated. Next, the buffer is
+        /// filled with data read from <paramref name="stream"/> and <paramref name="LoadData"/>
+        /// is called with the buffer as input, which outputs (in out-parameter) the
+        /// number bytes read from the buffer. This should match exactly the size of
+        /// the buffer. Finally, the function returns the output value of
+        /// <paramref name="LoadData"/>. This function is intended only for internal
+        /// use.
+        /// </remarks>
+        /// <param name="LoadData">The delegate that reads some number of bytes to
+        /// a given buffer</param>
+        /// <param name="stream">The input stream</param>
+        /// <exception cref="ArgumentNullException">if LoadData or stream is null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support reading</exception>
+        /// <exception cref="EndOfStreamException">if the stream ended unexpectedly</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is invalid
+        /// or if the loaded compression mode is not supported</exception>
+        internal static long Load(LoadDelegate LoadData, Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+            if (null == LoadData)
+                throw new ArgumentNullException(nameof(LoadData));
+            if (!stream.CanRead)
+                throw new ArgumentException(nameof(stream));
+
+            try
+            {
+                SEALHeader header = new SEALHeader();
+                var pos = stream.Position;
+                LoadHeader(stream, header);
+
+                // Check the validity of the header
+                if (!IsSupportedComprMode(header.ComprMode))
+                    throw new InvalidOperationException("Unsupported compression mode");
+                if (!IsValidHeader(header))
+                    throw new InvalidOperationException("Loaded SEALHeader is invalid");
+
+                int sizeInt = checked((int)header.Size);
+                stream.Seek(pos, SeekOrigin.Begin);
+
+                byte[] buffer = null;
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, true))
+                {
+                    buffer = reader.ReadBytes(sizeInt);
+                }
+
+                LoadData(buffer, header.Size, out long outBytes);
+
+                // Clear the buffer for safety reasons
+                Array.Clear(buffer, 0, sizeInt);
+
+                return outBytes;
+            }
+            catch (OverflowException ex)
+            {
+                throw new InvalidOperationException("Size indicated by loaded SEALHeader is out of bounds", ex);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Save operation failed", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+        }
+    }
+}

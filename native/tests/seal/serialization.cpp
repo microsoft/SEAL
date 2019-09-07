@@ -51,7 +51,7 @@ namespace SEALTest
         test_struct st3;
         out_size = Serialization::Save(
             bind(&test_struct::save_members, &st, _1),
-            stream, compr_mode_type::zlib);
+            stream, compr_mode_type::deflate);
         in_size = Serialization::Load(
             bind(&test_struct::load_members, &st3, _1),
             stream);
@@ -96,10 +96,10 @@ namespace SEALTest
         ss.seekp(0);
         test_out_size = Serialization::Save(
             bind(&test_struct::save_members, &st, _1),
-            ss, compr_mode_type::zlib);
+            ss, compr_mode_type::deflate);
         out_size = Serialization::Save(
             bind(&test_struct::save_members, &st, _1),
-            buffer, arr_size, compr_mode_type::zlib);
+            buffer, arr_size, compr_mode_type::deflate);
         ASSERT_EQ(test_out_size, out_size);
         for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
         {

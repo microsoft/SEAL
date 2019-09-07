@@ -326,7 +326,7 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => cipher.Save(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher.UnsafeLoad(null));
-            Assert.ThrowsException<ArgumentException>(() => cipher.UnsafeLoad(new MemoryStream()));
+            Assert.ThrowsException<EndOfStreamException>(() => cipher.UnsafeLoad(new MemoryStream()));
 
             Assert.ThrowsException<ArgumentNullException>(() => cipher.Load(null, new MemoryStream()));
             Assert.ThrowsException<ArgumentNullException>(() => cipher.Load(context, null));

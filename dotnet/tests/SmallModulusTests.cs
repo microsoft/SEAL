@@ -206,13 +206,10 @@ namespace SEALNetTest
             Assert.AreNotEqual(sm1, sm2);
             Assert.AreNotEqual(sm1.IsPrime, sm2.IsPrime);
 
-
             using (MemoryStream stream = new MemoryStream())
             {
                 sm1.Save(stream);
-
                 stream.Seek(offset: 0, loc: SeekOrigin.Begin);
-
                 sm2.Load(stream);
             }
 
@@ -230,15 +227,12 @@ namespace SEALNetTest
         public void ExceptionsTest()
         {
             SmallModulus sm = new SmallModulus(0x12345ul);
-            MemoryStream ms_empty = new MemoryStream();
 
             Assert.ThrowsException<ArgumentNullException>(() => sm = new SmallModulus(null));
-
             Assert.ThrowsException<ArgumentNullException>(() => sm.Set(null));
-
             Assert.ThrowsException<ArgumentNullException>(() => sm.Save(null));
             Assert.ThrowsException<ArgumentNullException>(() => sm.Load(null));
-            Assert.ThrowsException<ArgumentException>(() => sm.Load(ms_empty));
+            Assert.ThrowsException<EndOfStreamException>(() => sm.Load(new MemoryStream()));
         }
     }
 }

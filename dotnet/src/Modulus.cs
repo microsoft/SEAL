@@ -167,6 +167,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Failed to find enough qualifying primes", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
 
             return result;

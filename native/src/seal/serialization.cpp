@@ -75,8 +75,9 @@ namespace seal
 
             streamsize xsgetn(char_type *s, streamsize count) override
             {
-                streamsize avail = 
-                    max(streamsize(0), min(count, distance(gptr(), egptr())));
+                streamsize avail =
+                    max(streamsize(0), min(
+                        count, safe_cast<streamsize>(distance(gptr(), egptr()))));
                 copy_n(gptr(), avail, s);
                 gbump(safe_cast<int>(avail));
                 return avail;
@@ -92,7 +93,7 @@ namespace seal
                 }
                 if (which & ios_base::in)
                 {
-                    setg(eback(), eback() + pos, egptr());
+                    setg(eback(), eback() + static_cast<ptrdiff_t>(pos), egptr());
                 }
                 if (which & ios_base::out)
                 {
@@ -125,11 +126,13 @@ namespace seal
                 case ios_base::cur:
                     if (which == ios_base::in)
                     {
-                        newoff = add_safe(newoff, distance(eback(), gptr()));
+                        newoff = add_safe(newoff,
+                            safe_cast<streamoff>(distance(eback(), gptr())));
                     }
                     else
                     {
-                        newoff = add_safe(newoff, distance(pbase(), pptr()));
+                        newoff = add_safe(newoff,
+                            safe_cast<streamoff>(distance(pbase(), pptr())));
                     }
                     break;
 
@@ -190,8 +193,8 @@ namespace seal
                     {
                         expand_size();
                     }
-                    streamsize avail = max(
-                        streamsize(0), min(remaining, distance(pptr(), epptr())));
+                    streamsize avail = max(streamsize(0), min(
+                        remaining, safe_cast<streamsize>(distance(pptr(), epptr()))));
                     copy_n(s, avail, pptr());
                     pbump(safe_cast<int>(avail));
                     remaining -= avail;
@@ -275,8 +278,8 @@ namespace seal
 
             streamsize xsgetn(char_type *s, streamsize count) override
             {
-                streamsize avail =
-                    max(streamsize(0), min(count, distance(head_, end_)));
+                streamsize avail = max(streamsize(0),
+                    min(count, safe_cast<streamsize>(distance(head_, end_))));
                 copy_n(head_, avail, s);
                 advance(head_, avail);
                 return avail;
@@ -295,7 +298,7 @@ namespace seal
                     return pos_type(off_type(-1));
                 }
 
-                head_ = begin_ + pos;
+                head_ = begin_ + static_cast<ptrdiff_t>(pos);
                 return pos;
             }
 
@@ -311,7 +314,8 @@ namespace seal
                     break;
 
                 case ios_base::cur:
-                    newoff = add_safe(newoff, distance(begin_, head_));
+                    newoff = add_safe(newoff,
+                        safe_cast<off_type>(distance(begin_, head_)));
                     break;
 
                 case ios_base::end:
@@ -328,7 +332,7 @@ namespace seal
 
             streamsize size_;
 
-            using iterator_type = const char_type*;
+            using iterator_type = const char_type *;
 
             int_type eof_ = traits_type::eof();
 
@@ -355,7 +359,7 @@ namespace seal
                     throw invalid_argument("size must be positive");
                 }
                 begin_ = buf_;
-                end_ = buf_+ size_;
+                end_ = buf_ + size_;
                 head_ = begin_;
             }
 
@@ -379,7 +383,8 @@ namespace seal
             streamsize xsputn(const char_type *s, streamsize count) override
             {
                 streamsize avail =
-                    max(streamsize(0), min(count, distance(head_, end_)));
+                    max(streamsize(0), min(
+                        count, safe_cast<streamsize>(distance(head_, end_))));
                 copy_n(s, avail, head_);
                 advance(head_, avail);
                 return avail;
@@ -398,7 +403,7 @@ namespace seal
                     return pos_type(off_type(-1));
                 }
 
-                head_ = begin_ + pos;
+                head_ = begin_ + static_cast<ptrdiff_t>(pos);
                 return pos;
             }
 
@@ -414,7 +419,8 @@ namespace seal
                     break;
 
                 case ios_base::cur:
-                    newoff = add_safe(newoff, distance(begin_, head_));
+                    newoff = add_safe(newoff,
+                        safe_cast<off_type>(distance(begin_, head_)));
                     break;
 
                 case ios_base::end:
@@ -431,7 +437,7 @@ namespace seal
 
             streamsize size_;
 
-            using iterator_type = char_type*;
+            using iterator_type = char_type *;
 
             int_type eof_ = traits_type::eof();
 
@@ -441,20 +447,6 @@ namespace seal
 
             iterator_type head_;
         };
-
-        bool is_valid_compr_mode(uint8_t compr_mode)
-        {
-            switch (compr_mode)
-            {
-            case static_cast<uint8_t>(compr_mode_type::none):
-                /* fall through */
-#ifdef SEAL_USE_ZLIB
-            case static_cast<uint8_t>(compr_mode_type::zlib):
-#endif
-                return true;
-            }
-            return false;
-        }
     }
 
     void Serialization::SaveHeader(const SEALHeader &header, ostream &stream)
@@ -467,7 +459,12 @@ namespace seal
 
             stream.write(reinterpret_cast<const char*>(&header), sizeof(SEALHeader));
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
@@ -477,33 +474,20 @@ namespace seal
 
     void Serialization::LoadHeader(istream &stream, SEALHeader &header)
     {
-        SEALHeader new_header;
-
         auto old_except_mask = stream.exceptions();
         try
         {
             // Throw exceptions on ios_base::badbit and ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            stream.read(reinterpret_cast<char*>(&new_header), sizeof(SEALHeader));
-
-            // Check the validity of the loaded data
-            if (new_header.magic != seal_magic)
-            {
-                throw logic_error("loaded header is invalid");
-            }
-            if (new_header.version != 0x0000)
-            {
-                throw logic_error("loaded header is invalid");
-            }
-            if (!is_valid_compr_mode(static_cast<uint8_t>(new_header.compr_mode)))
-            {
-                throw logic_error("unsupported compression mode");
-            }
-
-            header = new_header;
+            stream.read(reinterpret_cast<char*>(&header), sizeof(SEALHeader));
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
@@ -516,6 +500,15 @@ namespace seal
         ostream &stream,
         compr_mode_type compr_mode)
     {
+        if (!save_members)
+        {
+            throw invalid_argument("save_members is invalid");
+        }
+        if (!IsSupportedComprMode(compr_mode))
+        {
+            throw logic_error("unsupported compression mode");
+        }
+
         streamoff out_size = 0;
 
         auto old_except_mask = stream.exceptions();
@@ -542,7 +535,7 @@ namespace seal
                 save_members(stream);
                 break;
 #ifdef SEAL_USE_ZLIB
-            case compr_mode_type::zlib:
+            case compr_mode_type::deflate:
                 {
                     constexpr int Z_OK = 0;
                     SafeByteBuffer safe_buffer(256);
@@ -553,13 +546,13 @@ namespace seal
                         temp_stream, temp_stream.tellp(), stream,
                         MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)) != Z_OK)
                     {
-                        throw runtime_error("stream deflate failed");
+                        throw logic_error("stream deflate failed");
                     }
                     break;
                 }
 #endif
             default:
-                throw invalid_argument("unsupported compression mode");
+                throw logic_error("unsupported compression mode");
             }
 
             // Compute how many bytes were written
@@ -574,7 +567,12 @@ namespace seal
             // Go back to end
             stream.seekp(stream_end_pos);
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
@@ -588,6 +586,11 @@ namespace seal
         function<void(istream &stream)> load_members,
         istream &stream)
     {
+        if (!load_members)
+        {
+            throw invalid_argument("load_members is invalid");
+        }
+
         streamoff in_size = 0;
         SEALHeader header;
 
@@ -602,6 +605,10 @@ namespace seal
 
             // First read the header
             LoadHeader(stream, header);
+            if (!IsValidHeader(header))
+            {
+                throw logic_error("loaded SEALHeader is invalid");
+            }
 
             switch (header.compr_mode)
             {
@@ -614,7 +621,7 @@ namespace seal
                 }
                 break;
 #ifdef SEAL_USE_ZLIB
-            case compr_mode_type::zlib:
+            case compr_mode_type::deflate:
                 {
                     constexpr int Z_OK = 0;
                     auto compr_size = header.size - (stream.tellg() - stream_start_pos);
@@ -625,7 +632,7 @@ namespace seal
                         stream, compr_size, temp_stream,
                         MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)) != Z_OK)
                     {
-                        throw runtime_error("stream deflate failed");
+                        throw logic_error("stream inflate failed");
                     }
                     load_members(temp_stream);
                     break;
@@ -637,7 +644,12 @@ namespace seal
 
             in_size = safe_cast<streamoff>(header.size);
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
@@ -653,9 +665,21 @@ namespace seal
         size_t size,
         compr_mode_type compr_mode)
     {
+        if (!out)
+        {
+            throw invalid_argument("out cannot be null");
+        }
+        if (size < sizeof(SEALHeader))
+        {
+            throw invalid_argument("insufficient size");
+        }
+        if (!fits_in<streamsize>(size))
+        {
+            throw invalid_argument("size is too large");
+        }
         ArrayPutBuffer apbuf(
             reinterpret_cast<char*>(out),
-            safe_cast<streamsize>(size));
+            static_cast<streamsize>(size));
         ostream stream(&apbuf);
         return Save(save_members, stream, compr_mode);
     }
@@ -665,9 +689,21 @@ namespace seal
         const SEAL_BYTE *in,
         size_t size)
     {
+        if (!in)
+        {
+            throw invalid_argument("in cannot be null");
+        }
+        if (size < sizeof(SEALHeader))
+        {
+            throw invalid_argument("insufficient size");
+        }
+        if (!fits_in<streamsize>(size))
+        {
+            throw invalid_argument("size is too large");
+        }
         ArrayGetBuffer agbuf(
             reinterpret_cast<const char*>(in),
-            safe_cast<streamsize>(size));
+            static_cast<streamsize>(size));
         istream stream(&agbuf);
         return Load(load_members, stream);
     }

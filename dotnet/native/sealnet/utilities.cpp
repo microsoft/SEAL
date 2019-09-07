@@ -56,13 +56,13 @@ void sealnet::BuildSmallModulusPointers(const vector<SmallModulus> &in_mods, uin
 
 const shared_ptr<SEALContext> &sealnet::SharedContextFromVoid(void *context)
 {
-    SEALContext *contextptr = FromVoid<SEALContext>(context);
-    if (nullptr == contextptr)
+    SEALContext *ctx = FromVoid<SEALContext>(context);
+    if (nullptr == ctx)
     {
         return null_context_;
     }
 
-    const auto &ctxiter = pointer_store_.find(contextptr);
+    const auto &ctxiter = pointer_store_.find(ctx);
     if (ctxiter == pointer_store_.end())
     {
         return null_context_;

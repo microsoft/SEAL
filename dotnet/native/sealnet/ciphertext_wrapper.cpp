@@ -479,3 +479,108 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Pool(void *thisptr, void **pool)
     *pool = handleptr;
     return S_OK;
 }
+
+SEALNETNATIVE HRESULT SEALCALL Ciphertext_SaveSize(void *thisptr, int64_t *result)
+{
+    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    try
+    {
+        *result = static_cast<int64_t>(cipher->save_size());
+        return S_OK;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+}
+
+SEALNETNATIVE HRESULT SEALCALL Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
+{
+    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    IfNullRet(outptr, E_POINTER);
+    IfNullRet(out_bytes, E_POINTER);
+
+    try
+    {
+        *out_bytes = util::safe_cast<int64_t>(cipher->save(
+            reinterpret_cast<SEAL_BYTE *>(outptr),
+            util::safe_cast<size_t>(size),
+            static_cast<compr_mode_type>(compr_mode)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+    catch (const runtime_error &)
+    {
+        return COR_E_IO;
+    }
+}
+
+SEALNETNATIVE HRESULT SEALCALL Ciphertext_UnsafeLoad(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+{
+    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    IfNullRet(inptr, E_POINTER);
+    IfNullRet(in_bytes, E_POINTER);
+
+    try
+    {
+        *in_bytes = util::safe_cast<int64_t>(cipher->unsafe_load(
+            reinterpret_cast<SEAL_BYTE *>(inptr),
+            util::safe_cast<size_t>(size)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+    catch (const runtime_error &)
+    {
+        return COR_E_IO;
+    }
+}
+
+SEALNETNATIVE HRESULT SEALCALL Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+{
+    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    const auto &sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(inptr, E_POINTER);
+    IfNullRet(in_bytes, E_POINTER);
+
+    try
+    {
+        *in_bytes = util::safe_cast<int64_t>(cipher->load(
+            sharedctx,
+            reinterpret_cast<SEAL_BYTE *>(inptr),
+            util::safe_cast<size_t>(size)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+    catch (const runtime_error &)
+    {
+        return COR_E_IO;
+    }
+}

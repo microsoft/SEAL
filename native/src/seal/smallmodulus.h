@@ -10,6 +10,7 @@
 #include "seal/util/uintcore.h"
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
+#include "seal/util/ztools.h"
 
 namespace seal
 {
@@ -272,17 +273,38 @@ namespace seal
         }
 
         /**
+        Returns an upper bound on the size of the SmallModulus, as if it was written
+        to an output stream.
+
+        @throws std::logic_error if the size does not fit in the return type
+        */
+        SEAL_NODISCARD inline std::streamoff save_size() const
+        {
+            std::size_t members_size = util::ztools::deflate_size_bound(
+                util::add_safe(
+                    sizeof(value_)
+            ));
+
+            return util::safe_cast<std::streamoff>(util::add_safe(
+                sizeof(Serialization::SEALHeader),
+                members_size
+            ));
+        }
+
+        /**
         Saves the SmallModulus to an output stream. The full state of the modulus is
         serialized. The output is in binary format and not human-readable. The output
         stream must have the "binary" flag set.
 
         @param[out] stream The stream to save the SmallModulus to
         @param[in] compr_mode The desired compression mode
-        @throws std::exception if the SmallModulus could not be written to stream
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
             std::ostream &stream,
-            compr_mode_type compr_mode = compr_mode_default) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
@@ -295,7 +317,9 @@ namespace seal
         SmallModulus.
 
         @param[in] stream The stream to load the SmallModulus from
-        @throws std::exception if a valid SmallModulus could not be read from stream
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(std::istream &stream)
         {
@@ -312,12 +336,16 @@ namespace seal
         @param[out] out The memory location to write the SmallModulus to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
-        @throws std::exception if the SmallModulus could not be written to stream
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
             SEAL_BYTE *out,
             std::size_t size,
-            compr_mode_type compr_mode = compr_mode_default) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
@@ -331,7 +359,11 @@ namespace seal
 
         @param[in] in The memory location to load the SmallModulus from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::exception if a valid SmallModulus could not be read from stream
+        @throws std::invalid_argument if in is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
         {
@@ -340,27 +372,6 @@ namespace seal
                 std::bind(&SmallModulus::load_members, this, _1),
                 in, size);
         }
-
-        /**
-        Returns in decreasing order a vector of the largest prime numbers of a given
-        length that all support NTTs of a given size. More precisely, the generated
-        primes are all congruent to 1 modulo 2 * ntt_size. Typically, the user might
-        call this function by passing poly_modulus_degree as ntt_size if the primes
-        are to be used as a coefficient modulus primes for encryption parameters.
-
-        @param[in] bit_size the bit-size of primes to be generated, no less than 2 and
-        no larger than 62
-        @param[in] count The total number of primes to be generated
-        @param[in] ntt_size The size of NTT that should be supported
-        @throws std::invalid_argument if bit_size is less than 2
-        @throws std::invalid_argument if count or ntt_size is zero
-        @throws std::logic_error if enough qualifying primes cannot be found
-        */
-        //static std::vector<SmallModulus> GetPrimes(int bit_size, std::size_t count,
-        //    std::size_t ntt_size);
-
-        //static std::vector<SmallModulus> BuildCoeffModulus(
-        //    std::size_t poly_modulus_degree, std::vector<int> bit_sizes);
 
     private:
         void set_value(std::uint64_t value);

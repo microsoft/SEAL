@@ -105,16 +105,29 @@ namespace seal
         }
 
         /**
+        Returns an upper bound on the size of the SecretKey, as if it was written
+        to an output stream.
+
+        @throws std::logic_error if the size does not fit in the return type
+        */
+        SEAL_NODISCARD inline std::streamoff save_size() const
+        {
+            return sk_.save_size();
+        }
+
+        /**
         Saves the SecretKey to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
         @param[out] stream The stream to save the SecretKey to
         @param[in] compr_mode The desired compression mode
-        @throws std::exception if the plaintext could not be written to stream
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
             std::ostream &stream,
-            compr_mode_type compr_mode = compr_mode_default) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return sk_.save(stream, compr_mode);
         }
@@ -126,7 +139,9 @@ namespace seal
         SecretKey comes from a fully trusted source.
 
         @param[in] stream The stream to load the SecretKey from
-        @throws std::exception if a valid SecretKey could not be read from stream
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff unsafe_load(std::istream &stream)
         {
@@ -145,9 +160,9 @@ namespace seal
         @param[in] stream The stream to load the SecretKey from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::exception if a valid SecretKey could not be read from stream
-        @throws std::invalid_argument if the loaded SecretKey is invalid for the
-        context
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(
             std::shared_ptr<SEALContext> context,
@@ -157,7 +172,7 @@ namespace seal
             auto in_size = new_sk.unsafe_load(stream);
             if (!is_valid_for(new_sk, std::move(context)))
             {
-                throw std::invalid_argument("SecretKey data is invalid");
+                throw std::logic_error("SecretKey data is invalid");
             }
             std::swap(*this, new_sk);
             return in_size;
@@ -170,12 +185,16 @@ namespace seal
         @param[out] out The memory location to write the SecretKey to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
-        @throws std::exception if the plaintext could not be written to stream
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
             SEAL_BYTE *out,
             std::size_t size,
-            compr_mode_type compr_mode = compr_mode_default) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return sk_.save(out, size, compr_mode);
         }
@@ -188,7 +207,11 @@ namespace seal
 
         @param[in] in The memory location to load the SecretKey from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::exception if a valid SecretKey could not be read from stream
+        @throws std::invalid_argument if in is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff unsafe_load(const SEAL_BYTE *in, std::size_t size)
         {
@@ -209,9 +232,11 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::exception if a valid SecretKey could not be read from stream
-        @throws std::invalid_argument if the loaded SecretKey is invalid for the
-        context
+        @throws std::invalid_argument if in is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(
             std::shared_ptr<SEALContext> context,
@@ -221,7 +246,7 @@ namespace seal
             auto in_size = new_sk.unsafe_load(in, size);
             if (!is_valid_for(new_sk, std::move(context)))
             {
-                throw std::invalid_argument("SecretKey data is invalid");
+                throw std::logic_error("SecretKey data is invalid");
             }
             std::swap(*this, new_sk);
             return in_size;
@@ -256,8 +281,6 @@ namespace seal
         }
 
     private:
-        void load_members(std::istream &stream);
-
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         Plaintext sk_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true) };
     };

@@ -15,12 +15,11 @@ using namespace sealnet;
 
 SEALNETNATIVE HRESULT SEALCALL Encryptor_Create(void *context, void *public_key, void **encryptor)
 {
-    SEALContext *contextptr = FromVoid<SEALContext>(context);
-    IfNullRet(contextptr, E_POINTER);
     PublicKey *pkey = FromVoid<PublicKey>(public_key);
     IfNullRet(pkey, E_POINTER);
     const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
+    IfNullRet(encryptor, E_POINTER);
 
     try
     {

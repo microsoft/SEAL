@@ -5,7 +5,6 @@ using Microsoft.Research.SEAL.Tools;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Microsoft.Research.SEAL
 {
@@ -508,112 +507,106 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Saves the ciphertext to an output stream. The output is in binary
-        /// format and not human-readable. The output stream must have the
-        /// "binary" flag set.
+        /// Returns an upper bound on the size of the ciphertext, as if it was written
+        /// to an output stream.
         /// </summary>
-        /// <param name="stream">The stream to save the ciphertext to</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if the ciphertext could not be written to stream</exception>
-        public void Save(Stream stream)
+        /// <exception cref="InvalidOperationException">if the size does not fit in
+        /// the return type</exception>
+        public long SaveSize
         {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            try
+            get
             {
-                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                try
                 {
-                    ParmsId.Save(writer.BaseStream);
-                    writer.Write(IsNTTForm);
-                    writer.Write(Size);
-                    writer.Write(PolyModulusDegree);
-                    writer.Write(CoeffModCount);
-
-                    ulong ulongCount = checked(Size * PolyModulusDegree * CoeffModCount);
-                    for (ulong i = 0; i < ulongCount; i++)
-                    {
-                        writer.Write(this[i]);
-                    }
+                    NativeMethods.Ciphertext_SaveSize(NativePtr, out long outBytes);
+                    return outBytes;
                 }
-            }
-            catch (IOException ex)
-            {
-                throw new ArgumentException("Could not write Ciphertext", ex);
+                catch (COMException ex)
+                {
+                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                        throw new InvalidOperationException("The size does not fit in the return type", ex);
+                    throw new InvalidOperationException("Unexpected native library error", ex);
+                }
             }
         }
 
-        /// <summary>
+        /// <summary>Saves the ciphertext to an output stream.</summary>
+        /// <remarks>
+        /// Saves the ciphertext to an output stream. The output is in binary format
+        /// and not human-readable.
+        /// </remarks>
+        /// <param name="stream">The stream to save the ciphertext to</param>
+        /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the data to be saved
+        /// is invalid, if compression mode is not supported, or if compression
+        /// failed</exception>
+        public long Save(Stream stream, ComprModeType? comprMode = null)
+        {
+            return Serialization.Save(
+                (byte[] outptr, ulong size, byte cm, out long outBytes) =>
+                    NativeMethods.Ciphertext_Save(NativePtr, outptr, size,
+                    cm, out outBytes),
+                SaveSize,
+                comprMode ?? Serialization.ComprModeDefault, stream);
+        }
+
+        /// <summary>Loads a ciphertext from an input stream overwriting the current
+        /// ciphertext.</summary>
+        /// <remarks>
         /// Loads a ciphertext from an input stream overwriting the current ciphertext.
         /// No checking of the validity of the ciphertext data against encryption
         /// parameters is performed. This function should not be used unless the
         /// ciphertext comes from a fully trusted source.
-        /// </summary>
+        /// </remarks>
         /// <param name="stream">The stream to load the ciphertext from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if a ciphertext could not be read from
-        /// stream</exception>
-        public void UnsafeLoad(Stream stream)
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support reading</exception>
+        /// <exception cref="EndOfStreamException">if the stream ended
+        /// unexpectedly</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is invalid
+        /// or if the loaded compression mode is not supported</exception>
+        public long UnsafeLoad(Stream stream)
         {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            try
-            {
-                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
-                {
-                    ParmsId parms = new ParmsId();
-                    parms.Load(reader.BaseStream);
-                    ParmsId = parms;
-
-                    bool isNTT = reader.ReadBoolean();
-                    ulong size = reader.ReadUInt64();
-                    ulong polyModulusDegree = reader.ReadUInt64();
-                    ulong coeffModCount = reader.ReadUInt64();
-                    ulong ulongCount = checked(size * polyModulusDegree * coeffModCount);
-
-                    IsNTTForm = isNTT;
-                    Resize(size, polyModulusDegree, coeffModCount);
-                    for (ulong i = 0; i < ulongCount; i++)
-                    {
-                        this[i] = reader.ReadUInt64();
-                    }
-                }
-            }
-            catch (EndOfStreamException ex)
-            {
-                throw new ArgumentException("Stream ended unexpectedly", ex);
-            }
-            catch (IOException ex)
-            {
-                throw new ArgumentException("Could not load Ciphertext", ex);
-            }
+            return Serialization.Load(
+                (byte[] outptr, ulong size, out long outBytes) =>
+                    NativeMethods.Ciphertext_UnsafeLoad(NativePtr, outptr, size,
+                    out outBytes),
+                stream);
         }
 
-
-        /// <summary>
+        /// <summary>Loads a ciphertext from an input stream overwriting the current
+        /// ciphertext.</summary>
+        /// <remarks>
         /// Loads a ciphertext from an input stream overwriting the current ciphertext.
         /// The loaded ciphertext is verified to be valid for the given SEALContext.
-        /// </summary>
+        /// </remarks>
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the ciphertext from</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if a ciphertext could not be read from
-        /// stream or is invalid for the context</exception>
-        public void Load(SEALContext context, Stream stream)
+        /// <exception cref="ArgumentNullException">if context or stream is
+        /// null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support reading</exception>
+        /// <exception cref="EndOfStreamException">if the stream ended
+        /// unexpectedly</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is invalid
+        /// or if the loaded compression mode is not supported</exception>
+        public long Load(SEALContext context, Stream stream)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
 
-            UnsafeLoad(stream);
-            if (!ValCheck.IsValidFor(this, context))
-            {
-                throw new ArgumentException("Ciphertext data is invalid for the SEALContext");
-            }
+            return Serialization.Load(
+                (byte[] outptr, ulong size, out long outBytes) =>
+                    NativeMethods.Ciphertext_Load(NativePtr, context.NativePtr,
+                    outptr, size, out outBytes),
+                stream);
         }
 
         /// <summary>
@@ -636,7 +629,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a copy of ParmsId.
         /// </summary>
-        /// <seealso cref="EncryptionParameters">See EncryptionParameters for more information about parmsId.</seealso>
         public ParmsId ParmsId
         {
             get

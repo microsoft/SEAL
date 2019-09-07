@@ -33,11 +33,17 @@ namespace seal
             // Only BFV uses plain_modulus but save it in any case for simplicity
             plain_modulus_.save(stream, compr_mode_type::none);
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
+        stream.exceptions(old_except_mask);
     }
 
     void EncryptionParameters::load_members(istream &stream)
@@ -100,11 +106,17 @@ namespace seal
 
             stream.exceptions(old_except_mask);
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
+        stream.exceptions(old_except_mask);
     }
 
     void EncryptionParameters::compute_parms_id()

@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-using System;
-using System.IO;
-using System.Text;
 using Microsoft.Research.SEAL.Tools;
+using System;
+using System.Text;
 
 namespace Microsoft.Research.SEAL
 {
@@ -59,44 +58,6 @@ namespace Microsoft.Research.SEAL
             foreach (ulong ul in src)
             {
                 dest.Block[idx++] = ul;
-            }
-        }
-
-        /// <summary>
-        /// Save the ParmsId to a stream.
-        /// </summary>
-        /// <param name="stream">The stream to save to</param>
-        /// <exception cref="ArgumentNullException">if stream is null.</exception>
-        public void Save(Stream stream)
-        {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
-            {
-                for (int i = 0; i < ULongCount; i++)
-                {
-                    writer.Write(Block[i]);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Read the ParmsId from a stream.
-        /// </summary>
-        /// <param name="stream">The stream to read from</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
-        public void Load(Stream stream)
-        {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
-            {
-                for (int i = 0; i < ULongCount; i++)
-                {
-                    Block[i] = reader.ReadUInt64();
-                }
             }
         }
 

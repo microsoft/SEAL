@@ -126,17 +126,15 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
 
             Assert.ThrowsException<ArgumentNullException>(() => keys = new RelinKeys(null));
-
             Assert.ThrowsException<ArgumentNullException>(() => keys.Set(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
             Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
 
             Assert.ThrowsException<ArgumentNullException>(() => keys.Save(null));
-
             Assert.ThrowsException<ArgumentNullException>(() => keys.Load(context, null));
             Assert.ThrowsException<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
-            Assert.ThrowsException<ArgumentException>(() => keys.Load(context, new MemoryStream()));
+            Assert.ThrowsException<EndOfStreamException>(() => keys.Load(context, new MemoryStream()));
             Assert.ThrowsException<ArgumentNullException>(() => keys.UnsafeLoad(null));
         }
     }

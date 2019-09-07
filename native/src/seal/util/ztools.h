@@ -22,6 +22,8 @@ namespace seal
             int inflate_stream(std::istream &in_stream,
                 std::streamoff in_size, std::ostream &out_stream,
                 MemoryPoolHandle pool);
+
+            SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
         }
     }
 }
