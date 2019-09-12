@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <cstdint>
+#include <cstddef>
+#include <stdexcept>
 #include <array>
 #include <iterator>
 #include <memory>
@@ -243,7 +246,7 @@ namespace seal
 
         const std::size_t buffer_block_count_;
 
-        std::size_t counter_ = 0;
+        std::uint64_t counter_ = 0;
     };
 
     class FastPRNGFactory : public UniformRandomGeneratorFactory
@@ -318,7 +321,7 @@ namespace seal
         virtual void refill_buffer() override;
 
     private:
-        std::size_t counter_ = 0;
+        std::uint64_t counter_ = 0;
     };
 
     class BlakePRNGFactory : public UniformRandomGeneratorFactory

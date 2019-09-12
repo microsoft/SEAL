@@ -20,8 +20,8 @@ namespace seal
         uint64_t result;
 #if defined(__linux__) || (defined(__APPLE__) && defined(__MACH__))
         random_device rd("/dev/urandom");
-        result = (static_cast<std::uint64_t>(rd()) << 32)
-            + static_cast<std::uint64_t>(rd());
+        result = (static_cast<uint64_t>(rd()) << 32)
+            + static_cast<uint64_t>(rd());
 #elif defined(_WIN32)
         if (!BCRYPT_SUCCESS(BCryptGenRandom(
             NULL,
