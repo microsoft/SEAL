@@ -19,7 +19,7 @@ namespace SEALTest
         class SequentialRandomGenerator : public UniformRandomGenerator
         {
         public:
-            SequentialRandomGenerator() : UniformRandomGenerator({ 0, 0})
+            SequentialRandomGenerator() : UniformRandomGenerator({ 0, 0}, 4096)
             {
             }
 
@@ -34,8 +34,8 @@ namespace SEALTest
                     value);
 
                 // Avoiding MSVC warning C4309
-                size_t buffer_byte_count = buffer_byte_count_;
-                value += static_cast<uint8_t>(buffer_byte_count);
+                size_t buffer_size = buffer_size_;
+                value += static_cast<uint8_t>(buffer_size);
             }
 
         private:
@@ -46,7 +46,8 @@ namespace SEALTest
         {
         private:
             SEAL_NODISCARD auto create_impl(
-                SEAL_MAYBE_UNUSED array<uint64_t, 2> seed)
+                SEAL_MAYBE_UNUSED array<uint64_t, 2> seed,
+                SEAL_MAYBE_UNUSED size_t buffer_size)
                 -> shared_ptr<UniformRandomGenerator> override
             {
                 return make_shared<SequentialRandomGenerator>();

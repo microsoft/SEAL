@@ -78,7 +78,7 @@ namespace seal
         // Fill the randomness buffer
         if (blake2xb(
             buffer_begin_,
-            buffer_byte_count_,
+            buffer_size_,
             reinterpret_cast<const SEAL_BYTE*>(&counter_),
             sizeof(counter_),
             seed_.data(), sizeof(seed_)) != 0)
