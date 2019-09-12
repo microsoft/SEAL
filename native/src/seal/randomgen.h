@@ -6,6 +6,7 @@
 #include <array>
 #include <iterator>
 #include <memory>
+#include <mutex>
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
 #include "seal/util/aes.h"
@@ -23,9 +24,7 @@ namespace seal
     Provides the base class for a seeded uniform random number generator. Instances
     of this class are meant to be created by an instance of the factory class
     UniformRandomGeneratorFactory. This class is meant for users to sub-class to
-    implement their own random number generators. The library will never use one
-    instance of the UniformRandomGenerator class concurrently, so calls to functions
-    such as generate() do not need to be thread-safe.
+    implement their own random number generators.
 
     @see UniformRandomGeneratorFactory for the base class of a factory class that
     generates UniformRandomGenerator instances.
@@ -54,18 +53,15 @@ namespace seal
             {
                 throw std::invalid_argument("buffer_size must be a positive multiple of 16");
             }
-            buffer_.resize(buffer_size_);
         }
 
         /**
-        Fills a given buffer with a given number of bytes of randomness. Note that
-        the implementation does not need to be thread-safe.
+        Fills a given buffer with a given number of bytes of randomness.
         */
         void generate(std::size_t byte_count, SEAL_BYTE *destination);
 
         /**
-        Generates a new unsigned 32-bit random number. Note that the implementation
-        does not need to be thread-safe.
+        Generates a new unsigned 32-bit random number.
         */
         SEAL_NODISCARD inline std::uint32_t generate()
         {
@@ -80,6 +76,7 @@ namespace seal
         */
         inline void refresh()
         {
+            std::lock_guard<std::mutex> lock(mutex_);
             refill_buffer();
             buffer_head_ = buffer_begin_;
         }
@@ -106,6 +103,8 @@ namespace seal
 
     private:
         IntArray<SEAL_BYTE> buffer_;
+
+        std::mutex mutex_;
 
     protected:
         decltype(buffer_)::T *const buffer_begin_;

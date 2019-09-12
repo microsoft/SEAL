@@ -40,6 +40,7 @@ namespace seal
     void UniformRandomGenerator::generate(
         size_t byte_count, SEAL_BYTE *destination)
     {
+        lock_guard<mutex> lock(mutex_);
         while (byte_count)
         {
             size_t current_bytes = min(
@@ -52,7 +53,8 @@ namespace seal
 
             if (buffer_head_ == buffer_end_)
             {
-                refresh();
+                refill_buffer();
+                buffer_head_ = buffer_begin_;
             }
         }
     }
