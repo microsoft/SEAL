@@ -5,6 +5,8 @@
 #include "seal/randomgen.h"
 #include "seal/keygenerator.h"
 #include <cstdint>
+#include <algorithm>
+#include <thread>
 #include <memory>
 #include <numeric>
 #include <set>
@@ -111,5 +113,114 @@ namespace SEALTest
             values.emplace(random_uint64());
         }
         ASSERT_EQ(count, values.size());
+    }
+
+    TEST(RandomGenerator, SeededRNG)
+    {
+        ASSERT_THROW(UniformRandomGeneratorFactory::DefaultFactory()->create(
+            15), invalid_argument);
+        ASSERT_THROW(UniformRandomGeneratorFactory::DefaultFactory()->create(
+            8), invalid_argument);
+        ASSERT_THROW(UniformRandomGeneratorFactory::DefaultFactory()->create(
+            0), invalid_argument);
+
+        size_t buffer_size = 16;
+
+        auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create(
+            { 0, 0 }, buffer_size));
+        array<uint32_t, 20> values1;
+        generator1->generate(sizeof(values1),
+            reinterpret_cast<SEAL_BYTE*>(values1.data()));
+
+        auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create(
+            { 0, 1 }, buffer_size));
+        array<uint32_t, 20> values2;
+        generator2->generate(sizeof(values2),
+            reinterpret_cast<SEAL_BYTE*>(values2.data()));
+
+        auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create(
+            { 0, 1 }, buffer_size * 10));
+        array<uint32_t, 20> values3;
+        generator3->generate(sizeof(values3),
+            reinterpret_cast<SEAL_BYTE*>(values3.data()));
+
+        for (size_t i = 0; i < values1.size(); i++)
+        {
+            ASSERT_NE(values1[i], values2[i]);
+            ASSERT_EQ(values2[i], values3[i]);
+        }
+
+        uint32_t val1, val2, val3;
+        val1 = generator1->generate();
+        val2 = generator2->generate();
+        val3 = generator3->generate();
+        ASSERT_NE(val1, val2);
+        ASSERT_EQ(val2, val3);
+    }
+
+    TEST(RandomGenerator, RandomSeededRNG)
+    {
+        auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create(16));
+        array<uint32_t, 20> values1;
+        generator1->generate(sizeof(values1),
+            reinterpret_cast<SEAL_BYTE*>(values1.data()));
+
+        auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create(32));
+        array<uint32_t, 20> values2;
+        generator2->generate(sizeof(values2),
+            reinterpret_cast<SEAL_BYTE*>(values2.data()));
+
+        auto seed3 = generator2->seed();
+        auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create(seed3, 128));
+        array<uint32_t, 20> values3;
+        generator3->generate(sizeof(values3),
+            reinterpret_cast<SEAL_BYTE*>(values3.data()));
+        
+        for (size_t i = 0; i < values1.size(); i++)
+        {
+            ASSERT_NE(values1[i], values2[i]);
+            ASSERT_EQ(values2[i], values3[i]);
+        }
+
+        uint32_t val1, val2, val3;
+        val1 = generator1->generate();
+        val2 = generator2->generate();
+        val3 = generator3->generate();
+        ASSERT_NE(val1, val2);
+        ASSERT_EQ(val2, val3);
+    }
+
+    TEST(RandomGenerator, MultiThreaded)
+    {
+        constexpr size_t thread_count = 2;
+        constexpr size_t numbers_per_thread = 50;
+        array<uint64_t, thread_count * numbers_per_thread> results;
+
+        auto generator(UniformRandomGeneratorFactory::DefaultFactory()->create());
+
+        vector<thread> th_vec;
+        for (size_t i = 0; i < thread_count; i++)
+        {
+            auto th_func = [&results, generator, i]() {
+                generator->generate(sizeof(uint64_t) * numbers_per_thread,
+                    reinterpret_cast<SEAL_BYTE*>(results.data() + numbers_per_thread * i));
+            };
+            th_vec.emplace_back(th_func);
+        }
+
+        for (auto &th : th_vec)
+        {
+            th.join();
+        }
+
+        auto seed = generator->seed();
+        auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create(seed));
+        for (size_t i = 0; i < thread_count * numbers_per_thread; i++)
+        {
+            uint64_t value = 0;
+            generator2->generate(sizeof(value),
+                reinterpret_cast<SEAL_BYTE*>(&value));
+            ASSERT_TRUE(find(results.begin(), results.end(), value) != results.end());
+        }
     }
 }
