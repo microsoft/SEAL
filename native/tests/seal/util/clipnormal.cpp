@@ -18,7 +18,8 @@ namespace SEALTest
     {
         TEST(ClipNormal, ClipNormalGenerate)
         {
-            shared_ptr<UniformRandomGenerator> generator(UniformRandomGeneratorFactory::default_factory()->create());
+            shared_ptr<UniformRandomGenerator> generator(
+                UniformRandomGeneratorFactory::DefaultFactory()->create());
             RandomToStandardAdapter rand(generator);
             ClippedNormalDistribution dist(50.0, 10.0, 20.0);
 

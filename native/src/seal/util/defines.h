@@ -51,6 +51,8 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #define SEAL_COMPILER SEAL_COMPILER_CLANG
 #elif defined(__GNUC__) && !defined(__clang__)
 #define SEAL_COMPILER SEAL_COMPILER_GCC
+#else
+#error "Unsupported compiler"
 #endif
 
 // MSVC support

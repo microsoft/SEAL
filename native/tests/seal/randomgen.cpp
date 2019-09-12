@@ -19,14 +19,18 @@ namespace SEALTest
         class SequentialRandomGenerator : public UniformRandomGenerator
         {
         public:
+            SequentialRandomGenerator() : UniformRandomGenerator({ 0, 0})
+            {
+            }
+
             ~SequentialRandomGenerator() override = default;
 
         protected:
             void refill_buffer() override
             {
                 iota(
-                    reinterpret_cast<uint8_t*>(buffer_.data()),
-                    reinterpret_cast<uint8_t*>(buffer_.data()) + buffer_.size(),
+                    reinterpret_cast<uint8_t*>(buffer_begin_),
+                    reinterpret_cast<uint8_t*>(buffer_end_),
                     value);
 
                 // Avoiding MSVC warning C4309
@@ -40,8 +44,10 @@ namespace SEALTest
 
         class SequentialRandomGeneratorFactory : public UniformRandomGeneratorFactory
         {
-        public:
-            shared_ptr<UniformRandomGenerator> create() override
+        private:
+            SEAL_NODISCARD auto create_impl(
+                SEAL_MAYBE_UNUSED array<uint64_t, 2> seed)
+                -> shared_ptr<UniformRandomGenerator> override
             {
                 return make_shared<SequentialRandomGenerator>();
             }
@@ -51,7 +57,7 @@ namespace SEALTest
     TEST(RandomGenerator, UniformRandomCreateDefault)
     {
         shared_ptr<UniformRandomGenerator> generator(
-            UniformRandomGeneratorFactory::default_factory()->create());
+            UniformRandomGeneratorFactory::DefaultFactory()->create());
         bool lower_half = false;
         bool upper_half = false;
         bool even = false;

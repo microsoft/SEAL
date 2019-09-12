@@ -348,7 +348,7 @@ namespace seal
         if (!parms.random_generator())
         {
             parms.set_random_generator(
-                UniformRandomGeneratorFactory::default_factory());
+                UniformRandomGeneratorFactory::DefaultFactory());
         }
 
         // Validate parameters and add new ContextData to the map

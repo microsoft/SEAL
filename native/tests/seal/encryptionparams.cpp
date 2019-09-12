@@ -20,7 +20,7 @@ namespace SEALTest
             if (scheme == scheme_type::BFV)
                 parms.set_plain_modulus(2);
             parms.set_poly_modulus_degree(2);
-            parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+            parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
 
             ASSERT_TRUE(scheme == parms.scheme());
             ASSERT_TRUE(parms.coeff_modulus()[0] == 2);
@@ -34,13 +34,13 @@ namespace SEALTest
                 ASSERT_TRUE(parms.plain_modulus().value() == 0);
             }
             ASSERT_TRUE(parms.poly_modulus_degree() == 2);
-            ASSERT_TRUE(parms.random_generator() == UniformRandomGeneratorFactory::default_factory());
+            ASSERT_TRUE(parms.random_generator() == UniformRandomGeneratorFactory::DefaultFactory());
 
             parms.set_coeff_modulus(CoeffModulus::Create(2, { 30, 40, 50 }));
             if (scheme == scheme_type::BFV)
                 parms.set_plain_modulus(2);
             parms.set_poly_modulus_degree(128);
-            parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+            parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
 
             ASSERT_TRUE(util::is_prime(parms.coeff_modulus()[0]));
             ASSERT_TRUE(util::is_prime(parms.coeff_modulus()[1]));
@@ -55,7 +55,7 @@ namespace SEALTest
                 ASSERT_TRUE(parms.plain_modulus().value() == 0);
             }
             ASSERT_TRUE(parms.poly_modulus_degree() == 128);
-            ASSERT_TRUE(parms.random_generator() == UniformRandomGeneratorFactory::default_factory());
+            ASSERT_TRUE(parms.random_generator() == UniformRandomGeneratorFactory::DefaultFactory());
         };
         encryption_parameters_test(scheme_type::BFV);
         encryption_parameters_test(scheme_type::CKKS);
@@ -69,7 +69,7 @@ namespace SEALTest
         if (scheme == scheme_type::BFV)
             parms1.set_plain_modulus(1 << 6);
         parms1.set_poly_modulus_degree(64);
-        parms1.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms1.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
 
         EncryptionParameters parms2(parms1);
         ASSERT_TRUE(parms1 == parms2);

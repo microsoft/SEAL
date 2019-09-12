@@ -37,7 +37,9 @@ namespace seal
     In general, reading from IntArray is thread-safe as long as no other thread
     is concurrently mutating it.
     */
-    template<typename T_, typename = std::enable_if_t<std::is_integral<T_>::value>>
+    template<typename T_,
+        typename = std::enable_if_t<std::is_integral<T_>::value ||
+            std::is_same<typename std::decay<T_>::type, SEAL_BYTE>::value>>
     class IntArray
     {
     public:
@@ -139,7 +141,7 @@ namespace seal
         /**
         Returns a pointer to the beginning of the array data.
         */
-        SEAL_NODISCARD inline T* begin() noexcept
+        SEAL_NODISCARD inline T *begin() noexcept
         {
             return data_.get();
         }
@@ -147,7 +149,7 @@ namespace seal
         /**
         Returns a constant pointer to the beginning of the array data.
         */
-        SEAL_NODISCARD inline const T* cbegin() const noexcept
+        SEAL_NODISCARD inline const T *cbegin() const noexcept
         {
             return data_.get();
         }
@@ -155,7 +157,7 @@ namespace seal
         /**
         Returns a pointer to the end of the array data.
         */
-        SEAL_NODISCARD inline T* end() noexcept
+        SEAL_NODISCARD inline T *end() noexcept
         {
             return size_ ? begin() + size_ : begin();
         }
@@ -163,7 +165,7 @@ namespace seal
         /**
         Returns a constant pointer to the end of the array data.
         */
-        SEAL_NODISCARD inline const T* cend() const noexcept
+        SEAL_NODISCARD inline const T *cend() const noexcept
         {
             return size_ ? cbegin() + size_ : cbegin();
         }
@@ -347,7 +349,7 @@ namespace seal
                 // If so, need to set top terms to zero
                 if (size > size_)
                 {
-                    std::fill(end(), begin() + size, T{ 0 });
+                    std::fill(end(), begin() + size, T(0));
                 }
 
                 // Set the size
@@ -360,7 +362,7 @@ namespace seal
             // to reallocate to bigger
             auto new_data(util::allocate<T>(size, pool_));
             std::copy_n(cbegin(), size_, new_data.get());
-            std::fill(new_data.get() + size_, new_data.get() + size, T{ 0 });
+            std::fill(new_data.get() + size_, new_data.get() + size, T(0));
             std::swap(data_, new_data);
 
             // Set the coeff_count and capacity

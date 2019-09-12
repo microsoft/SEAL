@@ -31,6 +31,8 @@ namespace seal
         {
             throw runtime_error("BCryptGenRandom failed");
         }
+#else
+#error "Unsupported target platform"
 #endif
         return result;
     }
@@ -42,20 +44,20 @@ namespace seal
         {
             size_t current_bytes = min(
                 byte_count,
-                static_cast<size_t>(distance(buffer_head_, buffer_.cend())));
+                static_cast<size_t>(distance(buffer_head_, buffer_end_)));
             copy_n(buffer_head_, current_bytes, destination);
             buffer_head_ += current_bytes;
             destination += current_bytes;
             byte_count -= current_bytes;
 
-            if (buffer_head_ == buffer_.end())
+            if (buffer_head_ == buffer_end_)
             {
                 refresh();
             }
         }
     }
 
-    auto UniformRandomGeneratorFactory::default_factory()
+    auto UniformRandomGeneratorFactory::DefaultFactory()
         -> const shared_ptr<UniformRandomGeneratorFactory>
     {
         static const shared_ptr<UniformRandomGeneratorFactory>
@@ -63,43 +65,19 @@ namespace seal
         return default_factory;
     }
 #ifdef SEAL_USE_AES_NI_PRNG
-    auto FastPRNGFactory::create() -> shared_ptr<UniformRandomGenerator>
-    {
-        if (!(seed_[0] | seed_[1]))
-        {
-            return make_shared<FastPRNG>(random_uint64(), random_uint64());
-        }
-        else
-        {
-            return make_shared<FastPRNG>(seed_[0], seed_[1]);
-        }
-    }
-
     void FastPRNG::refill_buffer()
     {
         // Fill the randomness buffer
-        aes_block *buffer_ptr = reinterpret_cast<aes_block*>(buffer_.data());
+        aes_block *buffer_ptr = reinterpret_cast<aes_block*>(buffer_begin_);
         aes_enc_.counter_encrypt(counter_, buffer_block_count_, buffer_ptr);
         counter_ += buffer_block_count_;
     }
 #endif
-    auto BlakePRNGFactory::create() -> shared_ptr<UniformRandomGenerator>
-    {
-        if (!(seed_[0] | seed_[1]))
-        {
-            return make_shared<BlakePRNG>(random_uint64(), random_uint64());
-        }
-        else
-        {
-            return make_shared<BlakePRNG>(seed_[0], seed_[1]);
-        }
-    }
-
     void BlakePRNG::refill_buffer()
     {
         // Fill the randomness buffer
         if (blake2xb(
-            reinterpret_cast<SEAL_BYTE*>(buffer_.data()),
+            buffer_begin_,
             buffer_byte_count_,
             reinterpret_cast<const SEAL_BYTE*>(&counter_),
             sizeof(counter_),
