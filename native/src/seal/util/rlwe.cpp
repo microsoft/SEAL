@@ -271,16 +271,29 @@ namespace seal
             // calculate -(a*s + e) (mod q) and store in c[0]
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                // Transform the noise e into NTT representation.
-                ntt_negacyclic_harvey(
-                    noise.get() + i * coeff_count,
-                    small_ntt_tables[i]);
-                dyadic_product_coeffmod(
-                    secret_key.data().data() + i * coeff_count,
-                    destination.data(1) + i * coeff_count,
-                    coeff_count,
-                    coeff_modulus[i],
-                    destination.data() + i * coeff_count);
+                if (is_ntt_form) {
+                    dyadic_product_coeffmod(
+                        secret_key.data().data() + i * coeff_count,
+                        destination.data(1) + i * coeff_count,
+                        coeff_count,
+                        coeff_modulus[i],
+                        destination.data() + i * coeff_count);
+                    // Transform the noise e into NTT representation.
+                    ntt_negacyclic_harvey(
+                        noise.get() + i * coeff_count,
+                        small_ntt_tables[i]);
+                }
+                else {
+                    dyadic_product_coeffmod(
+                        secret_key.data().data() + i * coeff_count,
+                        destination.data(1) + i * coeff_count,
+                        coeff_count,
+                        coeff_modulus[i],
+                        destination.data() + i * coeff_count);
+                    inverse_ntt_negacyclic_harvey(
+                        destination.data() + i * coeff_count,
+                        small_ntt_tables[i]);
+                }
                 add_poly_poly_coeffmod(
                     noise.get() + i * coeff_count,
                     destination.data() + i * coeff_count,
