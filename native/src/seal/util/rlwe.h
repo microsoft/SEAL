@@ -48,5 +48,13 @@ namespace seal
             bool is_ntt_form,
             Ciphertext &destination,
             MemoryPoolHandle pool);
+        
+        void multiply_plain_with_scaling_variant(
+            const std::uint64_t *plain, std::size_t plain_coeff_count,
+            const SEALContext::ContextData &context_data, std::uint64_t *destination);
+        
+        void divide_plain_by_scaling_variant(std::uint64_t *plain,
+            const SEALContext::ContextData &context_data, std::uint64_t *destination,
+            MemoryPoolHandle pool);
     }
 }

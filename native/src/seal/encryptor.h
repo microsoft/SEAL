@@ -113,9 +113,6 @@ namespace seal
 
         Encryptor &operator =(Encryptor &&assign) = delete;
 
-        void preencrypt(const std::uint64_t *plain, std::size_t plain_coeff_count,
-            const SEALContext::ContextData &context_data, std::uint64_t *destination);
-
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
         std::shared_ptr<SEALContext> context_{ nullptr };
