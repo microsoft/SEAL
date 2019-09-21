@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dotnet\src\SEALNet.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>../bin/$(Configuration)</OutputPath>
+  </PropertyGroup>
+ 
+  <ItemGroup>
+    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../dotnet/lib/x64/$(Configuration)/sealnetnative.*" />
+    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../dotnet/lib/libsealnetnative.*" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="@(SEALNetNativeBinaryFiles)" DestinationFolder="$(TargetDir)" />
+  </Target>
+</Project>
