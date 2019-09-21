@@ -150,6 +150,8 @@ namespace Microsoft.Research.SEAL
         {
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
+            if (pool?.IsInitialized == false)
+                throw new ArgumentException("Pool must be initialized", nameof(pool));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.BatchEncoder_Encode(NativePtr, plain.NativePtr, poolPtr);
@@ -166,7 +168,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="plain">The plaintext polynomial to unbatch</param>
         /// <param name="destination">The matrix to be overwritten with the values in the slots</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either plain or destionation are null</exception>
+        /// <exception cref="ArgumentNullException">if either plain or destination are null</exception>
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is in NTT form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
@@ -176,6 +178,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(plain));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
+            if (pool?.IsInitialized == false)
+                throw new ArgumentException("Pool must be initialized", nameof(pool));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
@@ -213,6 +217,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(plain));
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
+            if (pool?.IsInitialized == false)
+                throw new ArgumentException("Pool must be initialized", nameof(pool));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 
@@ -247,6 +253,8 @@ namespace Microsoft.Research.SEAL
         {
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
+            if (pool?.IsInitialized == false)
+                throw new ArgumentException("Pool must be initialized", nameof(pool));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
 

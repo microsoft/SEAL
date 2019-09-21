@@ -663,6 +663,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(modulus));
             if (null == inverse)
                 throw new ArgumentNullException(nameof(inverse));
+            if (modulus.IsZero)
+                throw new ArgumentException("Modulus cannot be zero", nameof(modulus));
+            if (this.CompareTo(modulus) < 1)
+                throw new ArgumentException("Modulus must be greater than the BigUInt value", nameof(modulus));
             if (inverse.IsAlias)
                 throw new InvalidOperationException("inverse is an alias");
 
