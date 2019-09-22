@@ -22,6 +22,8 @@ if(msgsl_FOUND)
     set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 -std=c++14")
     set(CMAKE_REQUIRED_QUIET TRUE)
 
+    include(CheckTypeSize)
+
     # Detect gsl::span
     check_type_size("gsl::span<std::uint64_t>" msgsl_SPAN LANGUAGE CXX)
 
