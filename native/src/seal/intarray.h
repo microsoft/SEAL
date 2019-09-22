@@ -21,10 +21,10 @@
 namespace seal
 {
     /**
-    A resizable container for storing an array of integral data types. The
-    allocations are done from a memory pool. The IntArray class is mainly
-    intended for internal use and provides the underlying data structure for
-    Plaintext and Ciphertext classes.
+    A resizable container for storing an array of arithmetic data types or
+    SEAL_BYTE types (e.g., std::byte). The allocations are done from a memory
+    pool. The IntArray class is mainly intended for internal use and provides
+    the underlying data structure for Plaintext and Ciphertext classes.
 
     @par Size and Capacity
     IntArray allows the user to pre-allocate memory (capacity) for the array
@@ -38,7 +38,7 @@ namespace seal
     is concurrently mutating it.
     */
     template<typename T_,
-        typename = std::enable_if_t<std::is_integral<T_>::value ||
+        typename = std::enable_if_t<std::is_arithmetic<T_>::value ||
             std::is_same<typename std::decay<T_>::type, SEAL_BYTE>::value>>
     class IntArray
     {
