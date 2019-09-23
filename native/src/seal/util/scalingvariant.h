@@ -5,14 +5,19 @@
 
 #include <cstdint>
 #include "seal/context.h"
+#include "seal/plaintext.h"
 
 namespace seal
 {
     namespace util
     {
-        void multiply_plain_with_scaling_variant(
-            const std::uint64_t *plain, std::size_t plain_coeff_count,
-            const SEALContext::ContextData &context_data, std::uint64_t *destination);
+        void multiply_add_plain_with_scaling_variant(
+            const Plaintext &plain, const SEALContext::ContextData &context_data,
+            std::uint64_t *destination);
+
+        void multiply_sub_plain_with_scaling_variant(
+            const Plaintext &plain, const SEALContext::ContextData &context_data,
+            std::uint64_t *destination);
 
         void divide_plain_by_scaling_variant(std::uint64_t *plain,
             const SEALContext::ContextData &context_data, std::uint64_t *destination,

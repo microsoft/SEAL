@@ -161,9 +161,7 @@ namespace seal
 
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
-            util::multiply_plain_with_scaling_variant(plain.data(),
-                plain.coeff_count(),
-                *context_->first_context_data(),
+            multiply_add_plain_with_scaling_variant(plain, *context_->first_context_data(),
                 destination.data());
         }
         else if (scheme == scheme_type::CKKS)
