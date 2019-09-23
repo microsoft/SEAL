@@ -113,7 +113,7 @@ namespace seal
         destination.resize(coeff_count);
 
         // Divide scaling variant using Bajaard full-RNS techniques.
-        divide_plain_by_scaling_variant(tmp_dest_modq.get(), context_data,
+        divide_phase_by_scaling_variant(tmp_dest_modq.get(), context_data,
             destination.data(), pool);
 
         // How many non-zero coefficients do we really have in the result?
@@ -407,9 +407,9 @@ namespace seal
         compute_inner_product_ciphertext_secret_key_array(encrypted, noise_poly.get(), pool_);
 
         // Storage for the plaintext
-        Plaintext plain(coeff_mod_count);
+        Plaintext plain(coeff_count);
         // Divide scaling variant using Bajaard full-RNS techniques.
-        divide_plain_by_scaling_variant(noise_poly.get(), context_data,
+        divide_phase_by_scaling_variant(noise_poly.get(), context_data,
             plain.data(), pool_);
         size_t plain_coeff_count = get_significant_uint64_count_uint(
             plain.data(), coeff_count);

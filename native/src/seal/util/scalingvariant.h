@@ -19,7 +19,7 @@ namespace seal
             const Plaintext &plain, const SEALContext::ContextData &context_data,
             std::uint64_t *destination);
 
-        void divide_plain_by_scaling_variant(std::uint64_t *plain,
+        void divide_phase_by_scaling_variant(const std::uint64_t *phase,
             const SEALContext::ContextData &context_data, std::uint64_t *destination,
             MemoryPoolHandle pool);
     }
