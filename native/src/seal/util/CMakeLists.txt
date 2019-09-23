@@ -14,6 +14,7 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/rlwe.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/scalingvariant.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallntt.cpp
         ${CMAKE_CURRENT_LIST_DIR}/uintarith.cpp
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.cpp
@@ -47,6 +48,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.h
         ${CMAKE_CURRENT_LIST_DIR}/polycore.h
         ${CMAKE_CURRENT_LIST_DIR}/rlwe.h
+        ${CMAKE_CURRENT_LIST_DIR}/scalingvariant.h
         ${CMAKE_CURRENT_LIST_DIR}/smallntt.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarith.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.h

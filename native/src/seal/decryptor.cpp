@@ -13,7 +13,7 @@
 #include "seal/util/polycore.h"
 #include "seal/util/polyarithmod.h"
 #include "seal/util/polyarithsmallmod.h"
-#include "seal/util/rlwe.h"
+#include "seal/util/scalingvariant.h"
 
 using namespace std;
 using namespace seal::util;
@@ -113,21 +113,18 @@ namespace seal
         auto wide_destination(allocate_uint(coeff_count, pool));
 
         // Divide scaling variant using Bajaard full-RNS techniques.
-        util::divide_plain_by_scaling_variant(tmp_dest_modq.get(), context_data,
+        divide_plain_by_scaling_variant(tmp_dest_modq.get(), context_data,
             wide_destination.get(), pool);
 
         // How many non-zero coefficients do we really have in the result?
         size_t plain_coeff_count = get_significant_uint64_count_uint(
             wide_destination.get(), coeff_count);
-
         // Resize destination to appropriate size
         destination.resize(max(plain_coeff_count, size_t(1)));
+        // Copy result from wide_destination to destination.
+        set_uint_uint(wide_destination.get(), max(plain_coeff_count, size_t(1)),
+            destination.data());
         destination.parms_id() = parms_id_zero;
-
-        // Perform final multiplication by gamma inverse mod plain_modulus
-        multiply_poly_scalar_coeffmod(wide_destination.get(),
-            max(plain_coeff_count, size_t(1)),
-            inv_gamma, plain_gamma_array[0], destination.data());
     }
 
     void Decryptor::ckks_decrypt(const Ciphertext &encrypted,
@@ -404,63 +401,16 @@ namespace seal
         auto noise_poly(allocate_zero_poly(coeff_count, coeff_mod_count, pool_));
 
         // Now need to compute c(s) - Delta*m (mod q)
-
-        // Make sure we have enough secret keys computed
-        compute_secret_key_array(encrypted_size - 1);
-
-        /*
-        Firstly find c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q
-        This is equal to Delta m + v where ||v|| < Delta/2.
-        */
+        // Firstly find c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q
+        // This is equal to Delta m + v where ||v|| < Delta/2.
         // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q
         // in destination_poly.
-        // Make a copy of the encryption for NTT (except the first polynomial is
-        // not needed).
-        auto encrypted_copy(allocate_poly(
-            mul_safe(encrypted_size - 1, coeff_count), coeff_mod_count, pool_));
-        set_poly_poly(encrypted.data(1), mul_safe(encrypted_size - 1, coeff_count),
-            coeff_mod_count, encrypted_copy.get());
-
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
-        auto copy_operand1(allocate_uint(coeff_count, pool_));
-        for (size_t i = 0; i < coeff_mod_count; i++)
-        {
-            // Initialize pointers for multiplication
-            const uint64_t *current_array1 = encrypted.data(1) + (i * coeff_count);
-            const uint64_t *current_array2 = secret_key_array_.get() + (i * coeff_count);
-
-            for (size_t j = 0; j < encrypted_size - 1; j++)
-            {
-                // Perform the dyadic product.
-                set_uint_uint(current_array1, coeff_count, copy_operand1.get());
-
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(copy_operand1.get(), small_ntt_tables[i]);
-
-                dyadic_product_coeffmod(copy_operand1.get(), current_array2, coeff_count,
-                    coeff_modulus[i], copy_operand1.get());
-                add_poly_poly_coeffmod(noise_poly.get() + (i * coeff_count),
-                    copy_operand1.get(),
-                    coeff_count, coeff_modulus[i],
-                    noise_poly.get() + (i * coeff_count));
-
-                current_array1 += rns_poly_uint64_count;
-                current_array2 += key_rns_poly_uint64_count;
-            }
-
-            // Perform inverse NTT
-            inverse_ntt_negacyclic_harvey(noise_poly.get() + (i * coeff_count),
-                small_ntt_tables[i]);
-        }
+        compute_inner_product_ciphertext_secret_key_array(encrypted, noise_poly.get(), pool_);
 
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            // add c_0 into noise_poly
-            add_poly_poly_coeffmod(noise_poly.get() + (i * coeff_count),
-                encrypted.data() + (i * coeff_count), coeff_count, coeff_modulus[i],
-                noise_poly.get() + (i * coeff_count));
-
             // Multiply by parms.plain_modulus() and reduce mod parms.coeff_modulus() to get
             // parms.coeff_modulus()*noise
             multiply_poly_scalar_coeffmod(noise_poly.get() + (i * coeff_count),

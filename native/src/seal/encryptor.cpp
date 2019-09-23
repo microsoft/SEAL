@@ -13,6 +13,7 @@
 #include "seal/util/clipnormal.h"
 #include "seal/util/smallntt.h"
 #include "seal/util/rlwe.h"
+#include "seal/util/scalingvariant.h"
 
 using namespace std;
 using namespace seal::util;
