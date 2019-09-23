@@ -107,23 +107,20 @@ namespace seal
         // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
-        compute_inner_product_ciphertext_secret_key_array(encrypted, tmp_dest_modq.get(), pool);
+        compute_inner_product_ciphertext_secret_key_array(encrypted, tmp_dest_modq.get(), pool_);
 
         // Allocate a full size destination to write to
-        auto wide_destination(allocate_uint(coeff_count, pool));
+        destination.resize(coeff_count);
 
         // Divide scaling variant using Bajaard full-RNS techniques.
         divide_plain_by_scaling_variant(tmp_dest_modq.get(), context_data,
-            wide_destination.get(), pool);
+            destination.data(), pool);
 
         // How many non-zero coefficients do we really have in the result?
         size_t plain_coeff_count = get_significant_uint64_count_uint(
-            wide_destination.get(), coeff_count);
+            destination.data(), coeff_count);
         // Resize destination to appropriate size
         destination.resize(max(plain_coeff_count, size_t(1)));
-        // Copy result from wide_destination to destination.
-        set_uint_uint(wide_destination.get(), max(plain_coeff_count, size_t(1)),
-            destination.data());
         destination.parms_id() = parms_id_zero;
     }
 
@@ -394,8 +391,8 @@ namespace seal
 
         auto &small_ntt_tables = context_data.small_ntt_tables();
 
-        // Storage for noise uint
-        auto destination(allocate_uint(coeff_mod_count, pool_));
+        // Storage for the infinity norm of noise poly
+        auto norm(allocate_uint(coeff_mod_count, pool_));
 
         // Storage for noise poly
         auto noise_poly(allocate_zero_poly(coeff_count, coeff_mod_count, pool_));
@@ -409,25 +406,28 @@ namespace seal
         // The secret key powers are already NTT transformed.
         compute_inner_product_ciphertext_secret_key_array(encrypted, noise_poly.get(), pool_);
 
-        for (size_t i = 0; i < coeff_mod_count; i++)
-        {
-            // Multiply by parms.plain_modulus() and reduce mod parms.coeff_modulus() to get
-            // parms.coeff_modulus()*noise
-            multiply_poly_scalar_coeffmod(noise_poly.get() + (i * coeff_count),
-                coeff_count, plain_modulus, coeff_modulus[i],
-                noise_poly.get() + (i * coeff_count));
-        }
+        // Storage for the plaintext
+        Plaintext plain(coeff_mod_count);
+        // Divide scaling variant using Bajaard full-RNS techniques.
+        divide_plain_by_scaling_variant(noise_poly.get(), context_data,
+            plain.data(), pool_);
+        size_t plain_coeff_count = get_significant_uint64_count_uint(
+            plain.data(), coeff_count);
+        plain.resize(max(plain_coeff_count, size_t(1)));
+        // Multiply plain with scaling variant and substract from noise_poly.
+        multiply_sub_plain_with_scaling_variant(plain, context_data, noise_poly.get());
 
         // Compose the noise
         compose(context_data, noise_poly.get());
 
         // Next we compute the infinity norm mod parms.coeff_modulus()
         poly_infty_norm_coeffmod(noise_poly.get(), coeff_count, coeff_mod_count,
-            context_data.total_coeff_modulus(), destination.get(), pool_);
+            context_data.total_coeff_modulus(), norm.get(), pool_);
 
         // The -1 accounts for scaling the invariant noise by 2
         int bit_count_diff = context_data.total_coeff_modulus_bit_count() -
-            get_significant_bit_count_uint(destination.get(), coeff_mod_count) - 1;
+            get_significant_bit_count_uint(norm.get(), coeff_mod_count) - 1 -
+            parms.plain_modulus().bit_count();
         return max(0, bit_count_diff);
     }
 }
