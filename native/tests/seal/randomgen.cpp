@@ -201,7 +201,7 @@ namespace SEALTest
         vector<thread> th_vec;
         for (size_t i = 0; i < thread_count; i++)
         {
-            auto th_func = [&results, generator, i]() {
+            auto th_func = [&results, generator, i, &numbers_per_thread]() {
                 generator->generate(sizeof(uint64_t) * numbers_per_thread,
                     reinterpret_cast<SEAL_BYTE*>(results.data() + numbers_per_thread * i));
             };

@@ -71,7 +71,8 @@ namespace seal
     {
         // Fill the randomness buffer
         aes_block *buffer_ptr = reinterpret_cast<aes_block*>(buffer_begin_);
-        aes_enc_.counter_encrypt(counter_, buffer_block_count_, buffer_ptr);
+        aes_enc_.counter_encrypt(
+            counter_, static_cast<uint64_t>(buffer_block_count_), buffer_ptr);
         counter_ += buffer_block_count_;
     }
 #endif

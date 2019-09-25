@@ -206,7 +206,7 @@ namespace seal
             -> std::shared_ptr<UniformRandomGenerator> = 0;
 
     private:
-        std::array<std::uint64_t, 2> default_seed_;
+        std::array<std::uint64_t, 2> default_seed_ = {};
 
         bool use_random_seed_ = false;
     };

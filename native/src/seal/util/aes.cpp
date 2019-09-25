@@ -50,7 +50,7 @@ namespace seal
     }
 
     void AESEncryptor::ecb_encrypt(const aes_block *plaintext,
-        size_t aes_block_count, aes_block *ciphertext) const
+        uint64_t aes_block_count, aes_block *ciphertext) const
     {
         for (; aes_block_count--; ciphertext++, plaintext++)
         {
@@ -68,8 +68,8 @@ namespace seal
         }
     }
 
-    void AESEncryptor::counter_encrypt(size_t start_index,
-        size_t aes_block_count, aes_block *ciphertext) const
+    void AESEncryptor::counter_encrypt(uint64_t start_index,
+        uint64_t aes_block_count, aes_block *ciphertext) const
     {
         for (; aes_block_count--; start_index++, ciphertext++)
         {

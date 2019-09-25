@@ -131,27 +131,27 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7EA96C25-FC0D-485A-BB71-32B6DA55652A}</ProjectGuid>
     <RootNamespace>SEAL</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
@@ -159,7 +159,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
@@ -215,7 +215,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
@@ -245,7 +245,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
@@ -276,7 +276,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
@@ -309,7 +309,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>

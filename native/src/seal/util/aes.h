@@ -51,11 +51,11 @@ namespace seal
 
         // ECB mode encryption
         void ecb_encrypt(const aes_block *plaintext,
-            std::size_t aes_block_count, aes_block *ciphertext) const;
+            std::uint64_t aes_block_count, aes_block *ciphertext) const;
 
         // Counter Mode encryption: encrypts the counter
-        void counter_encrypt(std::size_t start_index,
-            std::size_t aes_block_count, aes_block *ciphertext) const;
+        void counter_encrypt(std::uint64_t start_index,
+            std::uint64_t aes_block_count, aes_block *ciphertext) const;
 
     private:
         __m128i round_key_[11]{ 0 };
