@@ -90,12 +90,6 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
 
-        auto &base_converter = context_data.base_converter();
-        auto &plain_gamma_product = base_converter->get_plain_gamma_product();
-        auto &plain_gamma_array = base_converter->get_plain_gamma_array();
-        auto &neg_inv_coeff = base_converter->get_neg_inv_coeff();
-        auto inv_gamma = base_converter->get_inv_gamma();
-
         // Firstly find c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q
         // This is equal to Delta m + v where ||v|| < Delta/2.
         // Add Delta / 2 and now we have something which is Delta * (m + epsilon) where epsilon < 1
@@ -387,10 +381,6 @@ namespace seal
         size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
         size_t key_rns_poly_uint64_count = mul_safe(coeff_count,
             context_->key_context_data()->parms().coeff_modulus().size());
-        size_t encrypted_size = encrypted.size();
-        uint64_t plain_modulus = parms.plain_modulus().value();
-
-        auto &small_ntt_tables = context_data.small_ntt_tables();
 
         // Storage for the infinity norm of noise poly
         auto norm(allocate_uint(coeff_mod_count, pool_));
@@ -408,7 +398,7 @@ namespace seal
         dot_product_ct_sk_array(encrypted, noise_poly.get(), pool_);
 
         // Storage for the plaintext
-        Plaintext plain(coeff_count);
+        Plaintext plain(coeff_count, pool_);
 
         // Divide scaling variant using Bajard FullRNS techniques.
         divide_phase_by_scaling_variant(noise_poly.get(), context_data,
