@@ -175,7 +175,7 @@ namespace SEALTest
         array<uint32_t, 20> values3;
         generator3->generate(sizeof(values3),
             reinterpret_cast<SEAL_BYTE*>(values3.data()));
-        
+
         for (size_t i = 0; i < values1.size(); i++)
         {
             ASSERT_NE(values1[i], values2[i]);

@@ -157,8 +157,8 @@ namespace seal
 
                     zstream.avail_in = safe_cast<uInt>(in_size);
                     zstream.next_in = in.get();
-                    zstream.avail_out = safe_cast<uInt>(out_size); 
-                    zstream.next_out = out.get(); 
+                    zstream.avail_out = safe_cast<uInt>(out_size);
+                    zstream.next_out = out.get();
 
                     result = deflate(&zstream, flush);
                     if (result != Z_STREAM_END)
