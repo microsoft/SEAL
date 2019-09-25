@@ -378,9 +378,6 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
-        size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
-        size_t key_rns_poly_uint64_count = mul_safe(coeff_count,
-            context_->key_context_data()->parms().coeff_modulus().size());
 
         // Storage for the infinity norm of noise poly
         auto norm(allocate_uint(coeff_mod_count, pool_));

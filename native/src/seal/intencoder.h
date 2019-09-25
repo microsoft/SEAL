@@ -30,7 +30,7 @@ namespace seal
     that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
     would be stored as a polynomial coefficient plain_modulus-1.
     */
-    class SEAL_NODISCARD IntegerEncoder
+    class IntegerEncoder
     {
     public:
         /**

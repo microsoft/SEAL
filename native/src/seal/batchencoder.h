@@ -55,7 +55,7 @@ namespace seal
     @see EncryptionParameterQualifiers for more information about parameter qualifiers.
     @see Evaluator for rotating rows and columns of encrypted matrices.
     */
-    class SEAL_NODISCARD BatchEncoder
+    class BatchEncoder
     {
     public:
         /**

@@ -28,7 +28,7 @@ namespace seal
     @see RelinKeys for more details on relinearization keys.
     @see GaloisKeys for more details on Galois keys.
     */
-    class SEAL_NODISCARD KeyGenerator
+    class KeyGenerator
     {
     public:
         /**

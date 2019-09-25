@@ -40,7 +40,7 @@ namespace seal
     the "default NTT form". Decryption requires the input ciphertexts to be in
     the default NTT form, and will throw an exception if this is not the case.
     */
-    class SEAL_NODISCARD Encryptor
+    class Encryptor
     {
     public:
         /**

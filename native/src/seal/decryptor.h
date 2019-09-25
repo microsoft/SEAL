@@ -47,7 +47,7 @@ namespace seal
     to be in the default NTT form, and will throw an exception if this is not the
     case.
     */
-    class SEAL_NODISCARD Decryptor
+    class Decryptor
     {
     public:
         /**

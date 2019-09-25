@@ -56,7 +56,7 @@ namespace seal
     group, we can effectively enable cyclic rotations and complex conjugations
     of the encrypted complex vectors.
     */
-    class SEAL_NODISCARD CKKSEncoder
+    class CKKSEncoder
     {
     public:
         /**
