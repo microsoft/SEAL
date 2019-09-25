@@ -345,7 +345,7 @@ namespace seal
                 ct_coeff_type,
                 gsl::dynamic_range,
                 gsl::dynamic_range,
-                gsl::dynamic_range> 
+                gsl::dynamic_range>
         {
             return gsl::as_multi_span<
                 ct_coeff_type,
@@ -366,7 +366,7 @@ namespace seal
                 const ct_coeff_type,
                 gsl::dynamic_range,
                 gsl::dynamic_range,
-                gsl::dynamic_range> 
+                gsl::dynamic_range>
         {
             return gsl::as_multi_span<
                 const ct_coeff_type,

@@ -283,7 +283,7 @@ namespace seal
             set_zero_uint(coeff_count, destination_ptr);
             for (size_t j = 0; j < encrypted_size - 1; j++)
             {
-                set_uint_uint(encrypted_ptr, coeff_count, copy_operand1.get());                
+                set_uint_uint(encrypted_ptr, coeff_count, copy_operand1.get());
                 if (!is_ntt_form)
                 {
                     ntt_negacyclic_harvey_lazy(copy_operand1.get(), small_ntt_tables[i]);
