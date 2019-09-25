@@ -137,7 +137,7 @@ namespace seal
                     break;
 
                 case ios_base::end:
-                    newoff = add_safe(newoff, size_);
+                    newoff = add_safe(newoff, safe_cast<off_type>(size_));
                     break;
 
                 default:
