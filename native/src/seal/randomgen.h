@@ -44,7 +44,16 @@ namespace seal
         */
         UniformRandomGenerator(std::array<std::uint64_t, 2> seed,
             std::size_t buffer_size) :
-            seed_(seed),
+            seed_(std::move([&seed]() {
+                // Create a new seed allocation
+                IntArray<std::uint64_t> new_seed(
+                    2, MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+
+                // Assign the given seed and return
+                new_seed[0] = seed[0];
+                new_seed[1] = seed[1];
+                return new_seed;
+            }())),
             buffer_size_(buffer_size),
             buffer_(buffer_size_,
                 MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)),
@@ -56,6 +65,11 @@ namespace seal
             {
                 throw std::invalid_argument("buffer_size must be a positive multiple of 16");
             }
+        }
+
+        SEAL_NODISCARD inline std::array<std::uint64_t, 2> seed() const noexcept
+        {
+            return { seed_[0], seed_[1] };
         }
 
         /**
@@ -85,14 +99,6 @@ namespace seal
         }
 
         /**
-        Returns the seed for the random number generator.
-        */
-        SEAL_NODISCARD inline std::array<std::uint64_t, 2> seed() noexcept
-        {
-            return seed_;
-        }
-
-        /**
         Destroys the random number generator.
         */
         virtual ~UniformRandomGenerator() = default;
@@ -100,7 +106,7 @@ namespace seal
     protected:
         virtual void refill_buffer() = 0;
 
-        const std::array<std::uint64_t, 2> seed_;
+        const IntArray<std::uint64_t> seed_;
 
         const std::size_t buffer_size_;
 

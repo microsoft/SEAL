@@ -84,7 +84,7 @@ namespace seal
             buffer_size_,
             reinterpret_cast<const SEAL_BYTE*>(&counter_),
             sizeof(counter_),
-            seed_.data(), sizeof(seed_)) != 0)
+            seed_.cbegin(), seed_.size() * sizeof(decltype(seed_)::T)) != 0)
         {
             throw runtime_error("blake2xb failed");
         }
