@@ -32,7 +32,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 2, 30 });
         parms.set_plain_modulus(2);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
@@ -50,7 +50,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 17, 41 });
         parms.set_plain_modulus(34);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
@@ -68,7 +68,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 2 });
         parms.set_plain_modulus(3);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(2ULL, *context->first_context_data()->total_coeff_modulus());
@@ -87,7 +87,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 3 });
         parms.set_plain_modulus(2);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(3ULL, *context->first_context_data()->total_coeff_modulus());
@@ -106,7 +106,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 17, 41 });
         parms.set_plain_modulus(18);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
@@ -125,7 +125,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 17, 41 });
         parms.set_plain_modulus(16);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(17ULL, *context->first_context_data()->total_coeff_modulus());
@@ -146,7 +146,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 17, 41 });
         parms.set_plain_modulus(49);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
@@ -165,7 +165,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 17, 41 });
         parms.set_plain_modulus(73);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
@@ -184,7 +184,7 @@ namespace SEALTest
         parms.set_poly_modulus_degree(4);
         parms.set_coeff_modulus({ 137, 193 });
         parms.set_plain_modulus(73);
-        parms.set_random_generator(UniformRandomGeneratorFactory::default_factory());
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(137ULL, *context->first_context_data()->total_coeff_modulus());

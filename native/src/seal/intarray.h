@@ -3,23 +3,28 @@
 
 #pragma once
 
-#include "seal/memorymanager.h"
-#include "seal/util/pointer.h"
-#include "seal/util/defines.h"
-#include "seal/util/common.h"
 #include <type_traits>
 #include <algorithm>
 #include <limits>
 #include <iostream>
 #include <cstring>
+#include "seal/memorymanager.h"
+#include "seal/serialization.h"
+#include "seal/util/pointer.h"
+#include "seal/util/defines.h"
+#include "seal/util/common.h"
+#include "seal/util/ztools.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
 
 namespace seal
 {
     /**
-    A resizable container for storing an array of integral data types. The
-    allocations are done from a memory pool. The IntArray class is mainly
-    intended for internal use and provides the underlying data structure for
-    Plaintext and Ciphertext classes.
+    A resizable container for storing an array of arithmetic data types or
+    SEAL_BYTE types (e.g., std::byte). The allocations are done from a memory
+    pool. The IntArray class is mainly intended for internal use and provides
+    the underlying data structure for Plaintext and Ciphertext classes.
 
     @par Size and Capacity
     IntArray allows the user to pre-allocate memory (capacity) for the array
@@ -32,11 +37,12 @@ namespace seal
     In general, reading from IntArray is thread-safe as long as no other thread
     is concurrently mutating it.
     */
-    template<typename T_, typename = std::enable_if_t<std::is_integral<T_>::value>>
+    template<typename T_,
+        typename = std::enable_if_t<std::is_arithmetic<T_>::value ||
+            std::is_same<typename std::decay<T_>::type, SEAL_BYTE>::value>>
     class IntArray
     {
     public:
-        using size_type = std::size_t;
         using T = typename std::decay<T_>::type;
 
         /**
@@ -62,7 +68,7 @@ namespace seal
         @throws std::invalid_argument if size is less than zero
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(size_type size,
+        explicit IntArray(std::size_t size,
             MemoryPoolHandle pool = MemoryManager::GetPool()) :
             pool_(std::move(pool))
         {
@@ -86,7 +92,7 @@ namespace seal
         @throws std::invalid_argument if size is less than zero
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(size_type capacity, size_type size,
+        explicit IntArray(std::size_t capacity, std::size_t size,
             MemoryPoolHandle pool = MemoryManager::GetPool()) :
             pool_(std::move(pool))
         {
@@ -135,7 +141,7 @@ namespace seal
         /**
         Returns a pointer to the beginning of the array data.
         */
-        SEAL_NODISCARD inline T* begin() noexcept
+        SEAL_NODISCARD inline T *begin() noexcept
         {
             return data_.get();
         }
@@ -143,7 +149,7 @@ namespace seal
         /**
         Returns a constant pointer to the beginning of the array data.
         */
-        SEAL_NODISCARD inline const T* cbegin() const noexcept
+        SEAL_NODISCARD inline const T *cbegin() const noexcept
         {
             return data_.get();
         }
@@ -151,7 +157,7 @@ namespace seal
         /**
         Returns a pointer to the end of the array data.
         */
-        SEAL_NODISCARD inline T* end() noexcept
+        SEAL_NODISCARD inline T *end() noexcept
         {
             return size_ ? begin() + size_ : begin();
         }
@@ -159,7 +165,7 @@ namespace seal
         /**
         Returns a constant pointer to the end of the array data.
         */
-        SEAL_NODISCARD inline const T* cend() const noexcept
+        SEAL_NODISCARD inline const T *cend() const noexcept
         {
             return size_ ? cbegin() + size_ : cbegin();
         }
@@ -190,7 +196,7 @@ namespace seal
         @param[in] index The index of the array element
         @throws std::out_of_range if index is out of range
         */
-        SEAL_NODISCARD inline const T &at(size_type index) const
+        SEAL_NODISCARD inline const T &at(std::size_t index) const
         {
             if (index >= size_)
             {
@@ -207,7 +213,7 @@ namespace seal
         @param[in] index The index of the array element
         @throws std::out_of_range if index is out of range
         */
-        SEAL_NODISCARD inline T &at(size_type index)
+        SEAL_NODISCARD inline T &at(std::size_t index)
         {
             if (index >= size_)
             {
@@ -222,7 +228,7 @@ namespace seal
 
         @param[in] index The index of the array element
         */
-        SEAL_NODISCARD inline const T &operator [](size_type index) const
+        SEAL_NODISCARD inline const T &operator [](std::size_t index) const
         {
             return data_[index];
         }
@@ -233,7 +239,7 @@ namespace seal
 
         @param[in] index The index of the array element
         */
-        SEAL_NODISCARD inline T &operator [](size_type index)
+        SEAL_NODISCARD inline T &operator [](std::size_t index)
         {
             return data_[index];
         }
@@ -249,15 +255,15 @@ namespace seal
         /**
         Returns the largest possible array size.
         */
-        SEAL_NODISCARD inline size_type max_size() const noexcept
+        SEAL_NODISCARD inline std::size_t max_size() const noexcept
         {
-            return std::numeric_limits<size_type>::max();
+            return std::numeric_limits<std::size_t>::max();
         }
 
         /**
         Returns the size of the array.
         */
-        SEAL_NODISCARD inline size_type size() const noexcept
+        SEAL_NODISCARD inline std::size_t size() const noexcept
         {
             return size_;
         }
@@ -265,7 +271,7 @@ namespace seal
         /**
         Returns the capacity of the array.
         */
-        SEAL_NODISCARD inline size_type capacity() const noexcept
+        SEAL_NODISCARD inline std::size_t capacity() const noexcept
         {
             return capacity_;
         }
@@ -304,9 +310,9 @@ namespace seal
 
         @param[in] capacity The capacity of the array
         */
-        inline void reserve(size_type capacity)
+        inline void reserve(std::size_t capacity)
         {
-            size_type copy_size = std::min(capacity, size_);
+            std::size_t copy_size = std::min(capacity, size_);
 
             // Create new allocation and copy over value
             auto new_data(util::allocate<T>(capacity, pool_));
@@ -335,7 +341,7 @@ namespace seal
 
         @param[in] size The size of the array
         */
-        inline void resize(size_type size)
+        inline void resize(std::size_t size)
         {
             if (size <= capacity_)
             {
@@ -343,7 +349,7 @@ namespace seal
                 // If so, need to set top terms to zero
                 if (size > size_)
                 {
-                    std::fill(end(), begin() + size, T{ 0 });
+                    std::fill(end(), begin() + size, T(0));
                 }
 
                 // Set the size
@@ -356,7 +362,7 @@ namespace seal
             // to reallocate to bigger
             auto new_data(util::allocate<T>(size, pool_));
             std::copy_n(cbegin(), size_, new_data.get());
-            std::fill(new_data.get() + size_, new_data.get() + size, T{ 0 });
+            std::fill(new_data.get() + size_, new_data.get() + size, T(0));
             std::swap(data_, new_data);
 
             // Set the coeff_count and capacity
@@ -402,13 +408,107 @@ namespace seal
         }
 
         /**
+        Returns an upper bound on the size of the IntArray, as if it was written
+        to an output stream.
+
+        @throws std::logic_error if the size does not fit in the return type
+        */
+        SEAL_NODISCARD inline std::streamoff save_size() const
+        {
+            std::size_t members_size = util::ztools::deflate_size_bound(
+                util::add_safe(
+                    sizeof(std::uint64_t), // size_
+                    util::mul_safe(size_, sizeof(T)) // data_
+            ));
+
+            return util::safe_cast<std::streamoff>(util::add_safe(
+                sizeof(Serialization::SEALHeader),
+                members_size
+            ));
+        }
+
+        /**
         Saves the IntArray to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
-        @param[in] stream The stream to save the IntArray to
-        @throws std::exception if the IntArray could not be written to stream
+        @param[out] stream The stream to save the IntArray to
+        @param[in] compr_mode The desired compression mode
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
-        inline void save(std::ostream &stream) const
+        inline std::streamoff save(
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&IntArray<T_>::save_members, this, _1),
+                stream, compr_mode);
+        }
+
+        /**
+        Loads a IntArray from an input stream overwriting the current IntArray.
+
+        @param[in] stream The stream to load the IntArray from
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
+        */
+        inline std::streamoff load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&IntArray<T_>::load_members, this, _1),
+                stream);
+        }
+
+        /**
+        Saves the IntArray to a given memory location. The output is in binary
+        format and not human-readable.
+
+        @param[out] out The memory location to write the SmallModulus to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
+        */
+        inline std::streamoff save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&IntArray<T_>::save_members, this, _1),
+                out, size, compr_mode);
+        }
+
+        /**
+        Loads a IntArray from a given memory location overwriting the current
+        IntArray.
+
+        @param[in] in The memory location to load the SmallModulus from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if in is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
+        */
+        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&IntArray<T_>::load_members, this, _1),
+                in, size);
+        }
+
+    private:
+        void save_members(std::ostream &stream) const
         {
             auto old_except_mask = stream.exceptions();
             try
@@ -418,26 +518,26 @@ namespace seal
 
                 std::uint64_t size64 = size_;
                 stream.write(reinterpret_cast<const char*>(&size64), sizeof(std::uint64_t));
-                stream.write(reinterpret_cast<const char*>(cbegin()),
-                    util::safe_cast<std::streamsize>(
-                        util::mul_safe(size_, util::safe_cast<size_type>(sizeof(T)))));
+                if (size_)
+                {
+                    stream.write(reinterpret_cast<const char*>(cbegin()),
+                        util::safe_cast<std::streamsize>(util::mul_safe(size_, sizeof(T))));
+                }
             }
-            catch (const std::exception &)
+            catch (const std::ios_base::failure &)
+            {
+                stream.exceptions(old_except_mask);
+                throw std::runtime_error("I/O error");
+            }
+            catch (...)
             {
                 stream.exceptions(old_except_mask);
                 throw;
             }
-
             stream.exceptions(old_except_mask);
         }
 
-        /**
-        Loads a IntArray from an input stream overwriting the current IntArray.
-
-        @param[in] stream The stream to load the IntArray from
-        @throws std::exception if a valid IntArray could not be read from stream
-        */
-        inline void load(std::istream &stream)
+        void load_members(std::istream &stream)
         {
             auto old_except_mask = stream.exceptions();
             try
@@ -449,28 +549,33 @@ namespace seal
                 stream.read(reinterpret_cast<char*>(&size64), sizeof(std::uint64_t));
 
                 // Set new size
-                resize(util::safe_cast<size_type>(size64));
+                resize(util::safe_cast<std::size_t>(size64));
 
                 // Read data
-                stream.read(reinterpret_cast<char*>(begin()),
-                    util::safe_cast<std::streamsize>(
-                        util::mul_safe(size_, util::safe_cast<size_type>(sizeof(T)))));
+                if (size_)
+                {
+                    stream.read(reinterpret_cast<char*>(begin()),
+                        util::safe_cast<std::streamsize>(util::mul_safe(size_, sizeof(T))));
+                }
             }
-            catch (const std::exception &)
+            catch (const std::ios_base::failure &)
+            {
+                stream.exceptions(old_except_mask);
+                throw std::runtime_error("I/O error");
+            }
+            catch (...)
             {
                 stream.exceptions(old_except_mask);
                 throw;
             }
-
             stream.exceptions(old_except_mask);
         }
 
-    private:
         MemoryPoolHandle pool_;
 
-        size_type capacity_ = 0;
+        std::size_t capacity_ = 0;
 
-        size_type size_ = 0;
+        std::size_t size_ = 0;
 
         util::Pointer<T> data_;
     };

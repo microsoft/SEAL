@@ -182,7 +182,7 @@ namespace seal
 #ifdef SEAL_DEBUG
                 if (!head)
                 {
-                    throw std::invalid_argument("head cannot be nullptr");
+                    throw std::invalid_argument("head cannot be null");
                 }
 #endif
                 head_ = head;
@@ -470,7 +470,7 @@ namespace seal
 #ifdef SEAL_DEBUG
                 if (!head)
                 {
-                    throw std::invalid_argument("head cannot be nullptr");
+                    throw std::invalid_argument("head cannot be null");
                 }
 #endif
                 head_ = head;
@@ -492,7 +492,7 @@ namespace seal
 #ifdef SEAL_DEBUG
                 if (!head)
                 {
-                    throw std::invalid_argument("head cannot be nullptr");
+                    throw std::invalid_argument("head cannot be null");
                 }
 #endif
                 head_ = head;
@@ -699,7 +699,7 @@ namespace seal
 #ifdef SEAL_DEBUG
                 if (!head)
                 {
-                    throw std::invalid_argument("head cannot be nullptr");
+                    throw std::invalid_argument("head cannot be null");
                 }
 #endif
                 head_ = head;
@@ -1095,7 +1095,7 @@ namespace seal
 #ifdef SEAL_DEBUG
                 if (!head)
                 {
-                    throw std::invalid_argument("head cannot be nullptr");
+                    throw std::invalid_argument("head cannot be null");
                 }
 #endif
                 head_ = head;
@@ -1117,7 +1117,7 @@ namespace seal
 #ifdef SEAL_DEBUG
                 if (!head)
                 {
-                    throw std::invalid_argument("head cannot be nullptr");
+                    throw std::invalid_argument("head cannot be null");
                 }
 #endif
                 head_ = head;

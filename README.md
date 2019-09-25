@@ -50,22 +50,27 @@ Microsoft SEAL comes with two different homomorphic encryption schemes with very
 
 ## Windows
 
-Microsoft SEAL comes with a Microsoft Visual Studio 2017 solution file `SEAL.sln` that can be
-used to conveniently build the library, examples, and unit tests.
+Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln` that can be used to conveniently build the library, examples, and unit tests. Visual Studio 2017 version
+15.3 or newer is required.
+
+#### Platform
+
+The Visual Studio solution `SEAL.sln` is configured to build Microsoft SEAL both for `Win32` and `x64`
+platforms. Please choose the right platform before building Microsoft SEAL. The `SEALNetNative` project
+or the .NET wrapper library `SEALNet` can only be built for `x64`.
 
 #### Debug and Release builds
 
 You can easily switch from Visual Studio build configuration menu whether Microsoft SEAL should be
-built in `Debug` mode (no optimizations) or in `Release` mode. Please note that `Debug`
-mode should not be used except for debugging SEAL itself, as the performance will be
-orders of magnitude worse than in `Release` mode.
+built in `Debug` mode (no optimizations) or in `Release` mode. Please note that `Debug` mode should
+not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude
+worse than in `Release` mode.
 
 #### Library
 
-Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`. This results
-in the static library `seal.lib` to be created in `native\lib\$(Platform)\$(Configuration)`. When
-linking with applications, you need to add `native\src\` (full path) as an include directory
-for SEAL header files.
+Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`. This results in the static library
+`seal.lib` to be created in `native\lib\$(Platform)\$(Configuration)`. When linking with applications,
+you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
 
 #### Examples
 
@@ -89,7 +94,7 @@ In macOS you will need CMake with command line tools. For this, you can either
 1. install the cmake package with [Homebrew](https://brew.sh), or
 2. download CMake directly from [https://cmake.org/download](https://cmake.org/download) and [enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
 
-Below we give instructions for how to configure, build, and install SEAL either
+Below we give instructions for how to configure, build, and install Microsoft SEAL either
 system-wide (global install), or for a single user (local install). A system-wide
 install requires elevated (root) privileges.
 
@@ -192,7 +197,7 @@ for use in .NET development.
 
 ## Windows
 
-The Microsoft Visual Studio 2017 solution file `SEAL.sln` contains the projects necessary
+The Microsoft Visual Studio 2019 solution file `SEAL.sln` contains the projects necessary
 to build the .NET assembly, a backing native shared library, .NET examples, and unit tests.
 
 #### Native library

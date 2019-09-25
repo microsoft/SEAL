@@ -20,6 +20,13 @@ namespace seal
         ContextData context_data(parms, pool_);
         context_data.qualifiers_.parameters_set = true;
 
+        // Is a scheme set?
+        if (parms.scheme() == scheme_type::none)
+        {
+            context_data.qualifiers_.parameters_set = false;
+            return context_data;
+        }
+
         auto &coeff_modulus = parms.coeff_modulus();
         auto &plain_modulus = parms.plain_modulus();
 
@@ -84,7 +91,8 @@ namespace seal
         // Quick sanity check
         if (!product_fits_in(coeff_mod_count, poly_modulus_degree))
         {
-            throw logic_error("invalid parameters");
+            context_data.qualifiers_.parameters_set = false;
+            return context_data;
         }
 
         // Polynomial modulus X^(2^k) + 1 is guaranteed at this point
@@ -263,7 +271,8 @@ namespace seal
         }
         else
         {
-            throw invalid_argument("unsupported scheme");
+            context_data.qualifiers_.parameters_set = false;
+            return context_data;
         }
 
         // Create BaseConverter
@@ -339,7 +348,7 @@ namespace seal
         if (!parms.random_generator())
         {
             parms.set_random_generator(
-                UniformRandomGeneratorFactory::default_factory());
+                UniformRandomGeneratorFactory::DefaultFactory());
         }
 
         // Validate parameters and add new ContextData to the map

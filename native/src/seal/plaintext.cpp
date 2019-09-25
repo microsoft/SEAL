@@ -203,7 +203,7 @@ namespace seal
         return *this;
     }
 
-    void Plaintext::save(ostream &stream) const
+    void Plaintext::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -213,18 +213,22 @@ namespace seal
 
             stream.write(reinterpret_cast<const char*>(&parms_id_), sizeof(parms_id_type));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
-            data_.save(stream);
+            data_.save(stream, compr_mode_type::none);
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
     }
 
-    void Plaintext::unsafe_load(istream &stream)
+    void Plaintext::load_members(istream &stream)
     {
         Plaintext new_data(data_.pool());
 
@@ -249,7 +253,12 @@ namespace seal
             // Set the scale
             new_data.scale_ = scale;
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;

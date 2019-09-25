@@ -40,7 +40,7 @@ namespace seal
         return *this;
     }
 
-    void KSwitchKeys::save(ostream &stream) const
+    void KSwitchKeys::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -68,20 +68,24 @@ namespace seal
                 for (size_t j = 0; j < keys_dim2; j++)
                 {
                     // Save the key
-                    keys_[index][j].save(stream);
+                    keys_[index][j].save(stream, compr_mode_type::none);
                 }
             }
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
     }
 
-    void KSwitchKeys::unsafe_load(istream &stream)
+    void KSwitchKeys::load_members(istream &stream)
     {
         // Create new keys
         vector<vector<PublicKey>> new_keys;
@@ -121,7 +125,12 @@ namespace seal
                 }
             }
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;

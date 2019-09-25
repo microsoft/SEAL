@@ -15,8 +15,6 @@ using namespace sealnet;
 
 SEALNETNATIVE HRESULT SEALCALL Decryptor_Create(void *context, void *secret_key, void **decryptor)
 {
-    SEALContext *contextptr = FromVoid<SEALContext>(context);
-    IfNullRet(contextptr, E_POINTER);
     SecretKey *secretKey = FromVoid<SecretKey>(secret_key);
     IfNullRet(secretKey, E_POINTER);
     const auto &sharedctx = SharedContextFromVoid(context);

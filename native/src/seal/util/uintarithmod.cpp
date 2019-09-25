@@ -35,7 +35,7 @@ namespace seal
             }
             if (is_greater_than_or_equal_uint_uint(operand, modulus, uint64_count))
             {
-                throw out_of_range("operand");
+                throw logic_error("operand");
             }
 #endif
             // Cannot invert 0.

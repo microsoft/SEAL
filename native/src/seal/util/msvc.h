@@ -16,17 +16,21 @@
 // Do not throw when Evaluator produces transparent ciphertexts
 //#undef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
 
-// Try to check presence of additional headers using __has_include
-#ifdef __has_include
+// Check for MSGSL headers
+#ifdef SEAL_USE_MSGSL
+#if defined(SEAL_USE_MSGSL_SPAN) && !__has_include(<gsl/span>)
+#error "Microsoft GSL headers not included in project properties (gsl/span)"
+#endif
+#if defined(SEAL_USE_MSGSL_MULTISPAN) && !__has_include(<gsl/multi_span>)
+#error "Microsoft GSL headers not included in project properties (gsl/multi_span)"
+#endif
+#endif
 
-// Check for MSGSL
-#if __has_include(<gsl/gsl>)
-#include <gsl/gsl>
-#define SEAL_USE_MSGSL
-#else
-#undef SEAL_USE_MSGSL
-#endif //__has_include(<gsl/gsl>)
-
+// Check for zlib headers
+#ifdef SEAL_USE_ZLIB
+#if !__has_include(<zlib.h>)
+#error "zlib headers not included in project properties"
+#endif
 #endif
 
 // In Visual Studio redefine std::byte (SEAL_BYTE)

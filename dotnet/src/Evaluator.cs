@@ -137,6 +137,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -194,6 +195,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -226,6 +228,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -282,6 +285,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -350,6 +354,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -410,6 +415,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -485,6 +491,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -525,6 +532,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -662,6 +670,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -750,6 +759,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -849,6 +859,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -902,6 +913,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -984,6 +996,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1039,6 +1052,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1092,6 +1106,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1160,6 +1175,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1274,6 +1290,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1323,6 +1340,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1427,6 +1445,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1516,6 +1535,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1598,6 +1618,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1687,6 +1708,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -1765,6 +1787,7 @@ namespace Microsoft.Research.SEAL
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
                     throw new InvalidOperationException("Result ciphertext is transparent", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 

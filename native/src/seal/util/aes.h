@@ -58,7 +58,7 @@ namespace seal
             std::size_t aes_block_count, aes_block *ciphertext) const;
 
     private:
-        __m128i round_key_[11];
+        __m128i round_key_[11]{ 0 };
     };
 
     class AESDecryptor

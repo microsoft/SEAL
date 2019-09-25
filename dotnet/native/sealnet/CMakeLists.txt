@@ -25,6 +25,7 @@ target_sources(sealnetnative
         ${CMAKE_CURRENT_LIST_DIR}/relinkeys_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/sealcontext_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/secretkey_wrapper.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/serialization_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus_wrapper.cpp
         ${CMAKE_CURRENT_LIST_DIR}/utilities.cpp
         ${CMAKE_CURRENT_LIST_DIR}/valcheck_wrapper.cpp

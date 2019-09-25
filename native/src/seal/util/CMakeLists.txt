@@ -5,9 +5,11 @@ target_sources(seal
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/aes.cpp
         ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
+        ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
         ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/croots.cpp
         ${CMAKE_CURRENT_LIST_DIR}/globals.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/hash.cpp
         ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
         ${CMAKE_CURRENT_LIST_DIR}/numth.cpp
         ${CMAKE_CURRENT_LIST_DIR}/polyarith.cpp
@@ -20,6 +22,7 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/uintcore.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ztools.cpp
 )
 
 # Create the config file
@@ -29,10 +32,13 @@ install(
     FILES
         ${CMAKE_CURRENT_LIST_DIR}/aes.h
         ${CMAKE_CURRENT_LIST_DIR}/baseconverter.h
+        ${CMAKE_CURRENT_LIST_DIR}/blake2.h
+        ${CMAKE_CURRENT_LIST_DIR}/blake2-impl.h
         ${CMAKE_CURRENT_LIST_DIR}/clang.h
         ${CMAKE_CURRENT_LIST_DIR}/clipnormal.h
         ${CMAKE_CURRENT_LIST_DIR}/common.h
         ${CMAKE_CURRENT_LIST_DIR}/config.h
+        ${CMAKE_CURRENT_LIST_DIR}/croots.h
         ${CMAKE_CURRENT_LIST_DIR}/defines.h
         ${CMAKE_CURRENT_LIST_DIR}/gcc.h
         ${CMAKE_CURRENT_LIST_DIR}/globals.h
@@ -54,6 +60,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.h
         ${CMAKE_CURRENT_LIST_DIR}/uintcore.h
+        ${CMAKE_CURRENT_LIST_DIR}/ztools.h
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal/util
 )

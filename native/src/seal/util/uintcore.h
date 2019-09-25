@@ -262,11 +262,6 @@ namespace seal
                 throw std::invalid_argument("uint64_count");
             }
 #endif
-            if (!uint64_count)
-            {
-                return 0;
-            }
-
             value += uint64_count - 1;
             for (; *value == 0 && uint64_count > 1; uint64_count--)
             {

@@ -14,7 +14,7 @@ namespace SEALTest
 {
     TEST(RandomToStandard, RandomToStandardGenerate)
     {
-        shared_ptr<UniformRandomGenerator> generator(UniformRandomGeneratorFactory::default_factory()->create());
+        shared_ptr<UniformRandomGenerator> generator(UniformRandomGeneratorFactory::DefaultFactory()->create());
         RandomToStandardAdapter rand(generator);
         ASSERT_TRUE(rand.generator() == generator);
         ASSERT_EQ(static_cast<uint32_t>(0), rand.min());

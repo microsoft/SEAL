@@ -15,7 +15,7 @@ void example_levels()
     related objects that represent them in Microsoft SEAL.
 
     In Microsoft SEAL a set of encryption parameters (excluding the random number
-    generator) is identified uniquely by a SHA-3 hash of the parameters. This
+    generator) is identified uniquely by a 256-bit hash of the parameters. This
     hash is called the `parms_id' and can be easily accessed and printed at any
     time. The hash will change as soon as any of the parameters is changed.
 

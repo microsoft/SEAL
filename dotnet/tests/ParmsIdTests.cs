@@ -83,9 +83,6 @@ namespace SEALNetTest
             ParmsId id_null = null;
 
             Assert.ThrowsException<ArgumentNullException>(() => id = new ParmsId(id_null));
-
-            Assert.ThrowsException<ArgumentNullException>(() => id.Load(null));
-            Assert.ThrowsException<ArgumentNullException>(() => id.Save(null));
         }
     }
 }

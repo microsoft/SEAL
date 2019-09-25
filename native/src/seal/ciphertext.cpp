@@ -3,6 +3,7 @@
 
 #include "seal/ciphertext.h"
 #include "seal/util/polycore.h"
+#include "seal/util/defines.h"
 
 using namespace std;
 using namespace seal::util;
@@ -33,7 +34,7 @@ namespace seal
     }
 
     void Ciphertext::reserve(shared_ptr<SEALContext> context,
-        parms_id_type parms_id, size_type size_capacity)
+        parms_id_type parms_id, size_t size_capacity)
     {
         // Verify parameters
         if (!context)
@@ -55,12 +56,12 @@ namespace seal
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
-        reserve_internal(size_capacity, parms.poly_modulus_degree(),
-            safe_cast<size_type>(parms.coeff_modulus().size()));
+        reserve_internal(size_capacity,
+            parms.poly_modulus_degree(), parms.coeff_modulus().size());
     }
 
-    void Ciphertext::reserve_internal(size_type size_capacity,
-        size_type poly_modulus_degree, size_type coeff_mod_count)
+    void Ciphertext::reserve_internal(size_t size_capacity,
+        size_t poly_modulus_degree, size_t coeff_mod_count)
     {
         if (size_capacity < SEAL_CIPHERTEXT_SIZE_MIN ||
             size_capacity > SEAL_CIPHERTEXT_SIZE_MAX)
@@ -68,22 +69,22 @@ namespace seal
             throw invalid_argument("invalid size_capacity");
         }
 
-        size_type new_data_capacity =
+        size_t new_data_capacity =
             mul_safe(size_capacity, poly_modulus_degree, coeff_mod_count);
-        size_type new_data_size = min<size_type>(new_data_capacity, data_.size());
+        size_t new_data_size = min<size_t>(new_data_capacity, data_.size());
 
         // First reserve, then resize
         data_.reserve(new_data_capacity);
         data_.resize(new_data_size);
 
         // Set the size
-        size_ = min<size_type>(size_capacity, size_);
+        size_ = min<size_t>(size_capacity, size_);
         poly_modulus_degree_ = poly_modulus_degree;
         coeff_mod_count_ = coeff_mod_count;
     }
 
     void Ciphertext::resize(shared_ptr<SEALContext> context,
-        parms_id_type parms_id, size_type size)
+        parms_id_type parms_id, size_t size)
     {
         // Verify parameters
         if (!context)
@@ -105,12 +106,12 @@ namespace seal
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
-        resize_internal(size, parms.poly_modulus_degree(),
-            safe_cast<size_type>(parms.coeff_modulus().size()));
+        resize_internal(size,
+            parms.poly_modulus_degree(), parms.coeff_modulus().size());
     }
 
-    void Ciphertext::resize_internal(size_type size,
-        size_type poly_modulus_degree, size_type coeff_mod_count)
+    void Ciphertext::resize_internal(size_t size,
+        size_t poly_modulus_degree, size_t coeff_mod_count)
     {
         if ((size < SEAL_CIPHERTEXT_SIZE_MIN && size != 0) ||
             size > SEAL_CIPHERTEXT_SIZE_MAX)
@@ -119,7 +120,7 @@ namespace seal
         }
 
         // Resize the data
-        size_type new_data_size =
+        size_t new_data_size =
             mul_safe(size, poly_modulus_degree, coeff_mod_count);
         data_.resize(new_data_size);
 
@@ -129,7 +130,7 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
-    void Ciphertext::save(ostream &stream) const
+    void Ciphertext::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -149,18 +150,22 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
             // Save the data
-            data_.save(stream);
+            data_.save(stream, compr_mode_type::none);
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::unsafe_load(istream &stream)
+    void Ciphertext::load_members(istream &stream)
     {
         Ciphertext new_data(data_.pool());
 
@@ -188,18 +193,23 @@ namespace seal
             if (unsigned_neq(new_data.data_.size(),
                 mul_safe(size64, poly_modulus_degree64, coeff_mod_count64)))
             {
-                throw invalid_argument("ciphertext data is invalid");
+                throw logic_error("ciphertext data is invalid");
             }
 
             // Set values
             new_data.parms_id_ = parms_id;
             new_data.is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
-            new_data.size_ = safe_cast<size_type>(size64);
-            new_data.poly_modulus_degree_ = safe_cast<size_type>(poly_modulus_degree64);
-            new_data.coeff_mod_count_ = safe_cast<size_type>(coeff_mod_count64);
+            new_data.size_ = safe_cast<size_t>(size64);
+            new_data.poly_modulus_degree_ = safe_cast<size_t>(poly_modulus_degree64);
+            new_data.coeff_mod_count_ = safe_cast<size_t>(coeff_mod_count64);
             new_data.scale_ = scale;
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;

@@ -71,8 +71,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(parms));
 
             NativeMethods.SEALContext_Create(parms.NativePtr,
-                expandModChain, (int)secLevel, out IntPtr contextPtr);
-            NativePtr = contextPtr;
+                expandModChain, (int)secLevel, out IntPtr context);
+            NativePtr = context;
         }
 
         /// <summary>

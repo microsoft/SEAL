@@ -51,6 +51,8 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #define SEAL_COMPILER SEAL_COMPILER_CLANG
 #elif defined(__GNUC__) && !defined(__clang__)
 #define SEAL_COMPILER SEAL_COMPILER_GCC
+#else
+#error "Unsupported compiler"
 #endif
 
 // MSVC support
@@ -106,11 +108,9 @@ namespace seal
 
 // Which random number generator factory to use by default
 #ifdef SEAL_USE_AES_NI_PRNG
-// AES-PRNG with seed from std::random_device
 #define SEAL_DEFAULT_RNG_FACTORY FastPRNGFactory()
 #else
-// std::random_device
-#define SEAL_DEFAULT_RNG_FACTORY StandardRandomAdapterFactory<std::random_device>
+#define SEAL_DEFAULT_RNG_FACTORY BlakePRNGFactory()
 #endif
 
 // Use generic functions as (slower) fallback

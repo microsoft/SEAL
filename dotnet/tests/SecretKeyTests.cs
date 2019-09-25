@@ -60,19 +60,14 @@ namespace SEALNetTest
             Assert.AreNotEqual(ParmsId.Zero, secret.ParmsId);
 
             SecretKey secret2 = new SecretKey();
-            MemoryPoolHandle handle = secret2.Pool;
-
             Assert.IsNotNull(secret2);
             Assert.AreEqual(0ul, secret2.Data.CoeffCount);
             Assert.IsFalse(secret2.Data.IsNTTForm);
-            ulong alloced = handle.AllocByteCount;
 
             using (MemoryStream stream = new MemoryStream())
             {
                 secret.Save(stream);
-
                 stream.Seek(offset: 0, loc: SeekOrigin.Begin);
-
                 secret2.Load(context, stream);
             }
 
@@ -81,7 +76,6 @@ namespace SEALNetTest
             Assert.IsTrue(secret2.Data.IsNTTForm);
             Assert.AreNotEqual(ParmsId.Zero, secret2.ParmsId);
             Assert.AreEqual(secret.ParmsId, secret2.ParmsId);
-            Assert.IsTrue(handle.AllocByteCount != alloced);
         }
 
         [TestMethod]
@@ -102,7 +96,7 @@ namespace SEALNetTest
 
             Assert.ThrowsException<ArgumentNullException>(() => key.Load(context, null));
             Assert.ThrowsException<ArgumentNullException>(() => key.Load(null, new MemoryStream()));
-            Assert.ThrowsException<ArgumentException>(() => key.Load(context, new MemoryStream()));
+            Assert.ThrowsException<EndOfStreamException>(() => key.Load(context, new MemoryStream()));
         }
     }
 }

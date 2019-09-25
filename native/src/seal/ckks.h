@@ -728,8 +728,8 @@ namespace seal
             destination.reserve(slots_);
             for (std::size_t i = 0; i < slots_; i++)
             {
-                destination.emplace_back(
-                    from_complex<T>(res[matrix_reps_index_map_[i]]));
+                destination.emplace_back(from_complex<T>(
+                    res[static_cast<std::size_t>(matrix_reps_index_map_[i])]));
             }
         }
 
@@ -749,8 +749,6 @@ namespace seal
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
-        static constexpr double PI_ = 3.1415926535897932384626433832795028842;
-
         std::shared_ptr<SEALContext> context_{ nullptr };
 
         std::size_t slots_;
@@ -759,6 +757,6 @@ namespace seal
 
         util::Pointer<std::complex<double>> inv_roots_;
 
-        util::Pointer<std::uint64_t> matrix_reps_index_map_;
+        util::Pointer<std::size_t> matrix_reps_index_map_;
     };
 }

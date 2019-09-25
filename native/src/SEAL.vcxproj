@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -34,12 +42,16 @@
     <ClInclude Include="seal\relinkeys.h" />
     <ClInclude Include="seal\seal.h" />
     <ClInclude Include="seal\secretkey.h" />
+    <ClInclude Include="seal\serialization.h" />
     <ClInclude Include="seal\smallmodulus.h" />
     <ClInclude Include="seal\util\aes.h" />
     <ClInclude Include="seal\util\baseconverter.h" />
+    <ClInclude Include="seal\util\blake2.h" />
+    <ClInclude Include="seal\util\blake2-impl.h" />
     <ClInclude Include="seal\util\clang.h" />
     <ClInclude Include="seal\util\clipnormal.h" />
     <ClInclude Include="seal\util\common.h" />
+    <ClInclude Include="seal\util\croots.h" />
     <ClInclude Include="seal\util\defines.h" />
     <ClInclude Include="seal\util\gcc.h" />
     <ClInclude Include="seal\util\globals.h" />
@@ -61,6 +73,7 @@
     <ClInclude Include="seal\util\uintarithmod.h" />
     <ClInclude Include="seal\util\uintarithsmallmod.h" />
     <ClInclude Include="seal\util\uintcore.h" />
+    <ClInclude Include="seal\util\ztools.h" />
     <ClInclude Include="seal\valcheck.h" />
   </ItemGroup>
   <ItemGroup>
@@ -80,13 +93,17 @@
     <ClCompile Include="seal\memorymanager.cpp" />
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
+    <ClCompile Include="seal\serialization.cpp" />
     <ClCompile Include="seal\smallmodulus.cpp" />
+    <ClCompile Include="seal\util\ztools.cpp" />
     <ClCompile Include="seal\valcheck.cpp" />
     <ClCompile Include="seal\util\aes.cpp" />
     <ClCompile Include="seal\util\baseconverter.cpp" />
+    <ClCompile Include="seal\util\blake2b.c" />
+    <ClCompile Include="seal\util\blake2xb.c" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
+    <ClCompile Include="seal\util\croots.cpp" />
     <ClCompile Include="seal\util\globals.cpp" />
-    <ClCompile Include="seal\util\hash.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
     <ClCompile Include="seal\util\polyarith.cpp" />
@@ -124,7 +141,22 @@
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
@@ -140,7 +172,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -150,7 +188,19 @@
     <TargetExt>.lib</TargetExt>
     <TargetName>seal</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(ProjectDir)..\lib\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.lib</TargetExt>
+    <TargetName>seal</TargetName>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\lib\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.lib</TargetExt>
+    <TargetName>seal</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)..\lib\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
     <TargetExt>.lib</TargetExt>
@@ -168,6 +218,10 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -178,6 +232,38 @@
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Configure Microsoft SEAL through CMake</Message>
+    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -193,6 +279,9 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -205,8 +294,42 @@
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions); _ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Configure Microsoft SEAL through CMake</Message>
+    </PreBuildEvent>
+    <Lib>
+      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

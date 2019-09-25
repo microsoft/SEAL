@@ -11,6 +11,12 @@
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/plaintext.h"
 #include "seal/context.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
+#ifdef SEAL_USE_MSGSL_MULTISPAN
+#include <gsl/multi_span>
+#endif
 
 namespace seal
 {
@@ -382,6 +388,6 @@ namespace seal
 
         util::Pointer<std::uint64_t> roots_of_unity_;
 
-        util::Pointer<std::uint64_t> matrix_reps_index_map_;
+        util::Pointer<std::size_t> matrix_reps_index_map_;
     };
 }

@@ -918,17 +918,13 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentException>(() => bui.DivideRemainder(0ul, bui2));
 
             Assert.ThrowsException<ArgumentNullException>(() => bui.DuplicateFrom(null));
-
             Assert.ThrowsException<ArgumentNullException>(() => bui.DuplicateTo(null));
 
             Assert.IsFalse(bui.Equals(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => bui.Load(null));
-
             Assert.ThrowsException<ArgumentNullException>(() => bui.ModuloInvert(null));
-
             Assert.ThrowsException<ArgumentException>(() => bui.Resize(bitCount: -1));
-
             Assert.ThrowsException<ArgumentNullException>(() => bui.Save(null));
 
             Assert.ThrowsException<ArgumentNullException>(() => bui.Set((BigUInt)null));
@@ -937,7 +933,6 @@ namespace SEALNetTest
             Assert.ThrowsException<ArgumentNullException>(() => bui.TryModuloInvert(bui1, null));
             Assert.ThrowsException<ArgumentNullException>(() => bui.TryModuloInvert(null, bui2));
             Assert.ThrowsException<ArgumentException>(() => bui.TryModuloInvert(bui1, bui2));
-
             Assert.ThrowsException<ArgumentNullException>(() => bui.TryModuloInvert(1ul, null));
 
             bui2 = null;
