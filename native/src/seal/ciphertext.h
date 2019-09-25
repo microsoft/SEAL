@@ -23,7 +23,7 @@ namespace seal
     itself is not meant to be modified directly by the user, but is instead
     operated on by functions in the Evaluator class. The size of the backing
     array of a ciphertext depends on the encryption parameters and the size
-    of the ciphertext (at least 2). If the degree of the poly_modulus encryption
+    of the ciphertext (at least 2). If the poly_modulus_degree encryption
     parameter is N, and the number of primes in the coeff_modulus encryption
     parameter is K, then the ciphertext backing array requires precisely
     8*N*K*size bytes of memory. A ciphertext also carries with it the
