@@ -120,8 +120,10 @@ namespace seal
         // Compute c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q.
         // Store result in destination in RNS form.
         // destination has the size of an RNS polynomial.
-        void compute_inner_product_ciphertext_secret_key_array(
-            const Ciphertext &encrypted, std::uint64_t *destination, MemoryPoolHandle pool);
+        void dot_product_ct_sk_array(
+            const Ciphertext &encrypted,
+            std::uint64_t *destination,
+            MemoryPoolHandle pool);
 
         void compose(const SEALContext::ContextData &context_data,
             std::uint64_t *value);

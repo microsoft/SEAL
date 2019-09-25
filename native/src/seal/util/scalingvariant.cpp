@@ -11,7 +11,8 @@ namespace seal
     namespace util
     {
         void multiply_add_plain_with_scaling_variant(
-            const Plaintext &plain, const SEALContext::ContextData &context_data,
+            const Plaintext &plain,
+            const SEALContext::ContextData &context_data,
             uint64_t *destination)
         {
             auto &parms = context_data.parms();
@@ -54,7 +55,8 @@ namespace seal
         }
 
         void multiply_sub_plain_with_scaling_variant(
-            const Plaintext &plain, const SEALContext::ContextData &context_data,
+            const Plaintext &plain,
+            const SEALContext::ContextData &context_data,
             uint64_t *destination)
         {
             auto &parms = context_data.parms();
@@ -96,8 +98,10 @@ namespace seal
             }
         }
 
-        void divide_phase_by_scaling_variant(const uint64_t *phase,
-            const SEALContext::ContextData &context_data, uint64_t *destination,
+        void divide_phase_by_scaling_variant(
+            const uint64_t *phase,
+            const SEALContext::ContextData &context_data,
+            uint64_t *destination,
             MemoryPoolHandle pool)
         {
             auto &parms = context_data.parms();
@@ -119,20 +123,26 @@ namespace seal
             // Compute |gamma * plain|qi * ct(s)
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                multiply_poly_scalar_coeffmod(phase + (i * coeff_count), coeff_count,
-                    plain_gamma_product[i], coeff_modulus[i], temp.get() + (i * coeff_count));
+                multiply_poly_scalar_coeffmod(
+                    phase + (i * coeff_count), coeff_count,
+                    plain_gamma_product[i], coeff_modulus[i],
+                    temp.get() + (i * coeff_count));
             }
 
-            // Make another temp destination to get the poly in mod {gamma U plain_modulus}
-            auto tmp_dest_plain_gamma(allocate_poly(coeff_count, plain_gamma_uint64_count, pool));
+            // Make another temp destination to get the poly in
+            // mod {gamma U plain_modulus}
+            auto tmp_dest_plain_gamma(
+                allocate_poly(coeff_count, plain_gamma_uint64_count, pool));
 
             // Compute FastBConvert from q to {gamma, plain_modulus}
-            base_converter->fastbconv_plain_gamma(temp.get(), tmp_dest_plain_gamma.get(), pool);
+            base_converter->fastbconv_plain_gamma(
+                temp.get(), tmp_dest_plain_gamma.get(), pool);
 
             // Compute result multiply by coeff_modulus inverse in mod {gamma U plain_modulus}
             for (size_t i = 0; i < plain_gamma_uint64_count; i++)
             {
-                multiply_poly_scalar_coeffmod(tmp_dest_plain_gamma.get() + (i * coeff_count),
+                multiply_poly_scalar_coeffmod(
+                    tmp_dest_plain_gamma.get() + (i * coeff_count),
                     coeff_count, neg_inv_coeff[i], plain_gamma_array[i],
                     tmp_dest_plain_gamma.get() + (i * coeff_count));
             }

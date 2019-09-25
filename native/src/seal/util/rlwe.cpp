@@ -277,13 +277,15 @@ namespace seal
                     coeff_count,
                     coeff_modulus[i],
                     destination.data() + i * coeff_count);
-                if (is_ntt_form) {
+                if (is_ntt_form)
+                {
                     // Transform the noise e into NTT representation.
                     ntt_negacyclic_harvey(
                         noise.get() + i * coeff_count,
                         small_ntt_tables[i]);
                 }
-                else {
+                else
+                {
                     inverse_ntt_negacyclic_harvey(
                         destination.data() + i * coeff_count,
                         small_ntt_tables[i]);
