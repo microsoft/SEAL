@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <iostream>
@@ -206,6 +208,7 @@ namespace seal
             {
                 throw std::invalid_argument("invalid context");
             }
+
             auto parms_id = context->first_parms_id();
             reserve(std::move(context), parms_id, size_capacity);
         }
@@ -221,10 +224,19 @@ namespace seal
         */
         inline void reserve(std::size_t size_capacity)
         {
+            // Record old size
+            std::size_t old_size = size_;
+
             // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid
             // or coeff_mod_count_ is zero (in which case no memory is allocated).
             reserve_internal(size_capacity, poly_modulus_degree_,
                 coeff_mod_count_);
+
+            // Clear the seed if the size changed
+            if (old_size != size_)
+            {
+                clear_seed();
+            }
         }
 
         /**
@@ -275,6 +287,7 @@ namespace seal
             {
                 throw std::invalid_argument("invalid context");
             }
+
             auto parms_id = context->first_parms_id();
             resize(std::move(context), parms_id, size);
         }
@@ -293,9 +306,18 @@ namespace seal
         */
         inline void resize(std::size_t size)
         {
+            // Record old size
+            std::size_t old_size = size_;
+
             // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid
             // or coeff_mod_count_ is zero (in which case no memory is allocated).
             resize_internal(size, poly_modulus_degree_, coeff_mod_count_);
+
+            // Clear the seed if the size changed
+            if (old_size != size_)
+            {
+                clear_seed();
+            }
         }
 
         /**
@@ -307,6 +329,8 @@ namespace seal
         {
             parms_id_ = parms_id_zero;
             is_ntt_form_ = false;
+            is_seed_set_ = false;
+            seed_ = {};
             size_ = 0;
             poly_modulus_degree_ = 0;
             coeff_mod_count_ = 0;
@@ -554,12 +578,14 @@ namespace seal
             std::size_t members_size = util::ztools::deflate_size_bound(
                 util::add_safe(
                     sizeof(parms_id_),
-                    sizeof(is_ntt_form_),
+                    sizeof(SEAL_BYTE), // is_ntt_form_
+                    sizeof(SEAL_BYTE), // is_seed_set_
+                    sizeof(seed_),
                     sizeof(std::uint64_t), // size_
                     sizeof(std::uint64_t), // poly_modulus_degree_
                     sizeof(std::uint64_t), // coeff_mod_count_
                     sizeof(scale_),
-                    util::safe_cast<std::size_t>(data_.save_size())
+                    is_seed_set_ ? 0 : util::safe_cast<std::size_t>(data_.save_size())
             ));
 
             return util::safe_cast<std::streamoff>(util::add_safe(
@@ -725,6 +751,48 @@ namespace seal
         }
 
         /**
+        Returns whether half of the ciphertext can be generated from a seed. This
+        can only be the case when the ciphertext has been produced through symmetric
+        key encryption. If the seed is set, the ciphertext will automatically be
+        serialized in a compressed format. If this behavior is for some reason not
+        desired, the seed can be disabled by calling the function clear_seed().
+        */
+        SEAL_NODISCARD inline bool is_seed_set() noexcept
+        {
+            return is_seed_set_;
+        }
+
+        /**
+        Returns a reference to the currently set seed.
+        */
+        SEAL_NODISCARD inline const auto &seed() const noexcept
+        {
+            return seed_;
+        }
+
+        /**
+        Sets the seed to a given value. This function is intended for internal use
+        only. The user should never have any reason to manually change the value
+        of the seed as this can lead to unexpected behavior.
+
+        @param[in] new_seed The new value for the seed
+        */
+        inline void set_seed(const std::array<std::uint64_t, 2> &new_seed) noexcept
+        {
+            is_seed_set_ = true;
+            seed_ = new_seed;
+        }
+
+        /**
+        Clears the seed, whether it was set or not.
+        */
+        inline void clear_seed() noexcept
+        {
+            is_seed_set_ = false;
+            seed_ = {};
+        }
+
+        /**
         Returns a reference to parms_id.
 
         @see EncryptionParameters for more information about parms_id.
@@ -783,6 +851,8 @@ namespace seal
         void resize_internal(std::size_t size, std::size_t poly_modulus_degree,
             std::size_t coeff_mod_count);
 
+        void expand_seed(std::shared_ptr<SEALContext> context);
+
         void save_members(std::ostream &stream) const;
 
         void load_members(std::istream &stream);
@@ -790,6 +860,10 @@ namespace seal
         parms_id_type parms_id_ = parms_id_zero;
 
         bool is_ntt_form_ = false;
+
+        bool is_seed_set_ = false;
+
+        std::array<std::uint64_t, 2> seed_ = {};
 
         std::size_t size_ = 0;
 

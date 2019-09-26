@@ -2,8 +2,9 @@
 // Licensed under the MIT license.
 
 #include "seal/ciphertext.h"
-#include "seal/util/polycore.h"
+#include "seal/randomgen.h"
 #include "seal/util/defines.h"
+#include "seal/util/polyarithsmallmod.h"
 
 using namespace std;
 using namespace seal::util;
@@ -21,6 +22,8 @@ namespace seal
         // Copy over fields
         parms_id_ = assign.parms_id_;
         is_ntt_form_ = assign.is_ntt_form_;
+        is_seed_set_ = assign.is_seed_set_;
+        seed_ = assign.seed_;
         scale_ = assign.scale_;
 
         // Then resize
@@ -52,12 +55,22 @@ namespace seal
             throw invalid_argument("parms_id is not valid for encryption parameters");
         }
 
+        // Record old parms_id and size
+        auto old_parms_id = parms_id_;
+        size_t old_size = size_;
+
         // Need to set parms_id first
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
         reserve_internal(size_capacity,
             parms.poly_modulus_degree(), parms.coeff_modulus().size());
+
+        // Clear the seed if the parms_id or size changed
+        if (old_parms_id != parms_id_ || old_size != size_)
+        {
+            clear_seed();
+        }
     }
 
     void Ciphertext::reserve_internal(size_t size_capacity,
@@ -102,12 +115,22 @@ namespace seal
             throw invalid_argument("parms_id is not valid for encryption parameters");
         }
 
+        // Record old parms_id and size
+        auto old_parms_id = parms_id_;
+        size_t old_size = size_;
+
         // Need to set parms_id first
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
         resize_internal(size,
             parms.poly_modulus_degree(), parms.coeff_modulus().size());
+
+        // Clear the seed if the parms_id or size changed
+        if (old_parms_id != parms_id_ || old_size != size_)
+        {
+            clear_seed();
+        }
     }
 
     void Ciphertext::resize_internal(size_t size,
@@ -130,6 +153,36 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
+    void Ciphertext::expand_seed(shared_ptr<SEALContext> context)
+    {
+        auto context_data_ptr = context->get_context_data(parms_id_);
+        auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
+
+        // Set up the BlakePRNG with appropriate non-default buffer size
+        // and given seed.
+        BlakePRNG rg({ seed_[0], seed_[1] }, poly_modulus_degree_);
+
+        // Flood the entire ciphertext polynomial with random data
+        rg.generate(
+            mul_safe(data_.size(), sizeof(ct_coeff_type)),
+            reinterpret_cast<SEAL_BYTE*>(data_.begin()));
+
+        // Finally reduce each polynomial appropriately. Note that the function
+        // modulo_poly_coeffs_63 ignores the highest bit of each 64-bit word.
+        auto data_ptr = data_.begin();
+        for (size_t poly_index = 0; poly_index < size_; poly_index++)
+        {
+            for (size_t rns_index = 0; rns_index < coeff_mod_count_; rns_index++)
+            {
+                modulo_poly_coeffs_63(
+                    data_ptr,
+                    poly_modulus_degree_,
+                    coeff_modulus[rns_index],
+                    data_ptr); 
+            }
+        }
+    }
+
     void Ciphertext::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
@@ -149,8 +202,16 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
+            // Save the seed
+            SEAL_BYTE is_seed_set_byte = static_cast<SEAL_BYTE>(is_seed_set_);
+            stream.write(reinterpret_cast<const char*>(&is_seed_set_byte), sizeof(SEAL_BYTE));
+            stream.write(reinterpret_cast<const char*>(seed_.data()), sizeof(seed_));
+
             // Save the data
-            data_.save(stream, compr_mode_type::none);
+            if (is_seed_set_)
+            {
+                data_.save(stream, compr_mode_type::none);
+            }
         }
         catch (const ios_base::failure &)
         {
