@@ -22,11 +22,11 @@ if not exist "%VSDEVENVDIR%" (
 	echo Trying first standard location.
 	set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE"
 	
-	if not exist "%VSDEVENVDIR%" (
-	    echo Did not find VS at first standard location: "%VSDEVENVDIR%".
-		echo Trying second standard location.
-	    set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE"
-	)
+	REM if not exist "%VSDEVENVDIR%" (
+	    REM echo Did not find VS at first standard location: "%VSDEVENVDIR%".
+		REM echo Trying second standard location.
+	    REM set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE"
+	REM )
 )
 
 set VSDEVENVDIR=%VSDEVENVDIR:"=%
