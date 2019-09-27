@@ -3,7 +3,6 @@
 
 target_sources(seal
     PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/aes.cpp
         ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
         ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
         ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
@@ -30,7 +29,6 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/config.h.in ${CMAKE_CURRENT_LIST_DIR}/c
 
 install(
     FILES
-        ${CMAKE_CURRENT_LIST_DIR}/aes.h
         ${CMAKE_CURRENT_LIST_DIR}/baseconverter.h
         ${CMAKE_CURRENT_LIST_DIR}/blake2.h
         ${CMAKE_CURRENT_LIST_DIR}/blake2-impl.h

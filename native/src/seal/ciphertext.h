@@ -11,12 +11,13 @@
 #include <algorithm>
 #include <memory>
 #include <functional>
-#include "seal/util/common.h"
-#include "seal/util/defines.h"
 #include "seal/context.h"
 #include "seal/memorymanager.h"
+#include "seal/randomgen.h"
 #include "seal/intarray.h"
 #include "seal/valcheck.h"
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
 #include "seal/util/ztools.h"
 #ifdef SEAL_USE_MSGSL_SPAN
 #include <gsl/span>
@@ -777,7 +778,7 @@ namespace seal
 
         @param[in] new_seed The new value for the seed
         */
-        inline void set_seed(const std::array<std::uint64_t, 2> &new_seed) noexcept
+        inline void set_seed(const random_seed_type &new_seed) noexcept
         {
             is_seed_set_ = true;
             seed_ = new_seed;
@@ -863,7 +864,7 @@ namespace seal
 
         bool is_seed_set_ = false;
 
-        std::array<std::uint64_t, 2> seed_ = {};
+        random_seed_type seed_ = {};
 
         std::size_t size_ = 0;
 

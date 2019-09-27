@@ -66,16 +66,7 @@ namespace seal
             default_factory{ new SEAL_DEFAULT_RNG_FACTORY };
         return default_factory;
     }
-#ifdef SEAL_USE_AES_NI_PRNG
-    void FastPRNG::refill_buffer()
-    {
-        // Fill the randomness buffer
-        aes_block *buffer_ptr = reinterpret_cast<aes_block*>(buffer_begin_);
-        aes_enc_.counter_encrypt(
-            counter_, static_cast<uint64_t>(buffer_block_count_), buffer_ptr);
-        counter_ += buffer_block_count_;
-    }
-#endif
+
     void BlakePRNG::refill_buffer()
     {
         // Fill the randomness buffer

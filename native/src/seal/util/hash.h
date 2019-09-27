@@ -39,11 +39,6 @@ namespace seal
                     throw std::runtime_error("blake2b failed");
                 }
             }
-
-            inline static void hash(std::uint64_t input, hash_block_type &destination)
-            {
-                hash(&input, 1, destination);
-            }
         };
     }
 }

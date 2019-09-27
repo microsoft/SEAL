@@ -160,7 +160,7 @@ namespace seal
 
         // Set up the BlakePRNG with appropriate non-default buffer size
         // and given seed.
-        BlakePRNG rg({ seed_[0], seed_[1] }, poly_modulus_degree_);
+        BlakePRNG rg(seed_);
 
         // Flood the entire ciphertext polynomial with random data
         rg.generate(
@@ -174,6 +174,11 @@ namespace seal
         {
             for (size_t rns_index = 0; rns_index < coeff_mod_count_; rns_index++)
             {
+                // Clear top bits from each coefficient
+                transform(data_ptr, data_ptr + poly_modulus_degree_, data_ptr,
+                    [](auto in) {
+                        return in & static_cast<ct_coeff_type>(0x7FFFFFFFFFFFFFFFULL);
+                    });
                 modulo_poly_coeffs_63(
                     data_ptr,
                     poly_modulus_degree_,

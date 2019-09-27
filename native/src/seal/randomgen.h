@@ -8,16 +8,17 @@
 #include <stdexcept>
 #include <array>
 #include <iterator>
+#include <algorithm>
 #include <memory>
 #include <mutex>
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
-#include "seal/util/aes.h"
 #include "seal/intarray.h"
 #include "seal/memorymanager.h"
 
 namespace seal
 {
+    using random_seed_type = std::array<std::uint64_t, 8>;
     /**
     Returns a random 64-bit integer.
     */
@@ -39,37 +40,30 @@ namespace seal
         Creates a new UniformRandomGenerator instance initialized with the given seed.
 
         @param[in] seed The seed for the random number generator
-        @param[in] buffer_size The size of the buffer in bytes
-        @throws std::invalid_argument if buffer_size is not a positive multiple of 16
         */
-        UniformRandomGenerator(std::array<std::uint64_t, 2> seed,
-            std::size_t buffer_size) :
+        UniformRandomGenerator(random_seed_type seed) :
             seed_(std::move([&seed]() {
                 // Create a new seed allocation
                 IntArray<std::uint64_t> new_seed(
                     2, MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
 
                 // Assign the given seed and return
-                new_seed[0] = seed[0];
-                new_seed[1] = seed[1];
+                std::copy(seed.cbegin(), seed.cend(), new_seed.begin());
                 return new_seed;
             }())),
-            buffer_size_(buffer_size),
             buffer_(buffer_size_,
                 MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)),
             buffer_begin_(buffer_.begin()),
             buffer_end_(buffer_.end()),
             buffer_head_(buffer_.end())
         {
-            if (!buffer_size_ || (buffer_size_ & 0xF))
-            {
-                throw std::invalid_argument("buffer_size must be a positive multiple of 16");
-            }
         }
 
-        SEAL_NODISCARD inline std::array<std::uint64_t, 2> seed() const noexcept
+        SEAL_NODISCARD inline random_seed_type seed() const noexcept
         {
-            return { seed_[0], seed_[1] };
+            random_seed_type ret;
+            std::copy(seed_.cbegin(), seed_.cend(), ret.begin());
+            return ret;
         }
 
         /**
@@ -108,7 +102,7 @@ namespace seal
 
         const IntArray<std::uint64_t> seed_;
 
-        const std::size_t buffer_size_;
+        const std::size_t buffer_size_ = 4096;
 
     private:
         IntArray<SEAL_BYTE> buffer_;
@@ -158,8 +152,7 @@ namespace seal
         @param[in] default_seed The default value for a seed to be used by all
         created instances of UniformRandomGenerator
         */
-        UniformRandomGeneratorFactory(
-            std::array<std::uint64_t, 2> default_seed) :
+        UniformRandomGeneratorFactory(random_seed_type default_seed) :
             default_seed_(default_seed),
             use_random_seed_(false)
         {
@@ -167,16 +160,13 @@ namespace seal
 
         /**
         Creates a new uniform random number generator.
-
-        @param[in] buffer_size The size of the buffer in bytes
-        @throws std::invalid_argument if buffer_size is not a positive multiple of 16
         */
-        SEAL_NODISCARD auto create(std::size_t buffer_size = 4096)
+        SEAL_NODISCARD auto create()
             -> std::shared_ptr<UniformRandomGenerator>
         {
             return use_random_seed_ ?
-                create_impl({ random_uint64(), random_uint64() }, buffer_size) :
-                create_impl(default_seed_, buffer_size);
+                create_impl({ random_uint64(), random_uint64() }) :
+                create_impl(default_seed_);
         }
 
         /**
@@ -184,14 +174,11 @@ namespace seal
         overriding the default seed for this factory instance.
 
         @param[in] seed The seed to be used for the created random number generator
-        @param[in] buffer_size The size of the buffer in bytes
-        @throws std::invalid_argument if buffer_size is not a positive multiple of 16
         */
-        SEAL_NODISCARD auto create(
-            std::array<std::uint64_t, 2> seed, std::size_t buffer_size = 4096)
+        SEAL_NODISCARD auto create(random_seed_type seed)
             -> std::shared_ptr<UniformRandomGenerator>
         {
-            return create_impl(seed, buffer_size);
+            return create_impl(seed);
         }
 
         /**
@@ -207,98 +194,15 @@ namespace seal
             -> const std::shared_ptr<UniformRandomGeneratorFactory>;
 
     protected:
-        SEAL_NODISCARD virtual auto create_impl(
-            std::array<std::uint64_t, 2> seed, std::size_t buffer_size)
+        SEAL_NODISCARD virtual auto create_impl(random_seed_type seed)
             -> std::shared_ptr<UniformRandomGenerator> = 0;
 
     private:
-        std::array<std::uint64_t, 2> default_seed_ = {};
+        random_seed_type default_seed_ = {};
 
         bool use_random_seed_ = false;
     };
-#ifdef SEAL_USE_AES_NI_PRNG
-    /**
-    Provides an implementation of UniformRandomGenerator for using very fast
-    AES-NI randomness with given 128-bit seed.
-    */
-    class FastPRNG : public UniformRandomGenerator
-    {
-    public:
-        /**
-        Creates a new FastPRNG instance initialized with the given seed.
 
-        @param[in] seed The seed for the random number generator
-        @param[in] buffer_size The size of the buffer in bytes
-        @throws std::invalid_argument if buffer_size is not a positive multiple of 16
-        */
-        FastPRNG(std::array<std::uint64_t, 2> seed,
-            std::size_t buffer_size) :
-            UniformRandomGenerator(seed, buffer_size),
-            aes_enc_{ seed_[0], seed_[1] },
-            buffer_block_count_(buffer_size_ / sizeof(aes_block))
-        {
-        }
-
-        /**
-        Destroys the random number generator.
-        */
-        virtual ~FastPRNG() override = default;
-
-    protected:
-        virtual void refill_buffer() override;
-
-    private:
-        AESEncryptor aes_enc_;
-
-        const std::size_t buffer_block_count_;
-
-        std::uint64_t counter_ = 0;
-    };
-
-    class FastPRNGFactory : public UniformRandomGeneratorFactory
-    {
-    public:
-        /**
-        Creates a new FastPRNGFactory. The seed will be sampled randomly for each
-        FastPRNG instance created by the factory instance, which is desirable in
-        most normal use-cases.
-        */
-        FastPRNGFactory() : UniformRandomGeneratorFactory()
-        {
-        }
-
-        /**
-        Creates a new FastPRNGFactory and sets the default seed to the given value.
-        For debugging purposes it may sometimes be convenient to have the same
-        randomness be used deterministically and repeatedly. Such randomness
-        sampling is naturally insecure and must be strictly restricted to debugging
-        situations. Thus, most users should never have a reason to use this
-        constructor.
-
-        @param[in] default_seed The default value for a seed to be used by all
-        created instances of FastPRNG
-        */
-        FastPRNGFactory(std::array<std::uint64_t, 2> default_seed) :
-            UniformRandomGeneratorFactory(default_seed)
-        {
-        }
-
-        /**
-        Destroys the random number generator factory.
-        */
-        virtual ~FastPRNGFactory() = default;
-
-    protected:
-        SEAL_NODISCARD virtual auto create_impl(
-            std::array<std::uint64_t, 2> seed, std::size_t buffer_size)
-            -> std::shared_ptr<UniformRandomGenerator> override
-        {
-            return std::make_shared<FastPRNG>(seed, buffer_size);
-        }
-
-    private:
-    };
-#endif //SEAL_USE_AES_NI_PRNG
     /**
     Provides an implementation of UniformRandomGenerator for using Blake2xb for
     generating randomness with given 128-bit seed.
@@ -310,11 +214,8 @@ namespace seal
         Creates a new BlakePRNG instance initialized with the given seed.
 
         @param[in] seed The seed for the random number generator
-        @param[in] buffer_size The size of the buffer in bytes
-        @throws std::invalid_argument if buffer_size is not a positive multiple of 16
         */
-        BlakePRNG(std::array<std::uint64_t, 2> seed, std::size_t buffer_size) :
-            UniformRandomGenerator(seed, buffer_size)
+        BlakePRNG(random_seed_type seed) : UniformRandomGenerator(seed)
         {
         }
 
@@ -353,7 +254,7 @@ namespace seal
         @param[in] default_seed The default value for a seed to be used by all
         created instances of BlakePRNG
         */
-        BlakePRNGFactory(std::array<std::uint64_t, 2> default_seed) :
+        BlakePRNGFactory(random_seed_type default_seed) :
             UniformRandomGeneratorFactory(default_seed)
         {
         }
@@ -364,11 +265,10 @@ namespace seal
         virtual ~BlakePRNGFactory() = default;
 
     protected:
-        SEAL_NODISCARD virtual auto create_impl(
-            std::array<std::uint64_t, 2> seed, std::size_t buffer_size)
+        SEAL_NODISCARD virtual auto create_impl(random_seed_type seed)
             -> std::shared_ptr<UniformRandomGenerator> override
         {
-            return std::make_shared<BlakePRNG>(seed, buffer_size);
+            return std::make_shared<BlakePRNG>(seed);
         }
 
     private:
