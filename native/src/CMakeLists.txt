@@ -39,8 +39,8 @@ set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
-set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION})
-set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION})
+set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 
 # For extra modules we might have
 list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
@@ -338,7 +338,7 @@ else()
     add_library(seal STATIC "")
 
     # For a static library indicate version in the filename
-    set_target_properties(seal PROPERTIES OUTPUT_NAME seal-${SEAL_VERSION})
+    set_target_properties(seal PROPERTIES OUTPUT_NAME seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 endif()
 
 # Set VERSION for all library build types
