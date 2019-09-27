@@ -525,8 +525,8 @@ namespace seal
             header.compr_mode = compr_mode;
 
             // Write zeros for header for now
-            char zero_header[sizeof(SEALHeader)] = { 0 };
-            stream.write(zero_header, sizeof(SEALHeader));
+            array<char, sizeof(SEALHeader)> zero_header = {};
+            stream.write(zero_header.data(), sizeof(SEALHeader));
 
             switch (compr_mode)
             {

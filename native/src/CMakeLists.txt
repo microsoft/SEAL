@@ -31,15 +31,16 @@ else()
 endif()
 
 # Required files and directories
+include(GNUInstallDirs)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/../bin)
-set(SEAL_INCLUDES_INSTALL_DIR include)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
-set(SEAL_CONFIG_INSTALL_DIR lib/cmake/SEAL)
+set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 
 # For extra modules we might have
 list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
@@ -293,7 +294,7 @@ endif()
 
 # Try to find zlib if requested
 if(SEAL_USE_ZLIB)
-    find_package(ZLIB QUIET)
+    find_package(ZLIB 1.2.11 EXACT)
     if(NOT ZLIB_FOUND)
         set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)
     endif()
@@ -308,6 +309,9 @@ if(SEAL_LIB_BUILD_TYPE STREQUAL "Shared")
         SOVERSION ${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 else()
     add_library(seal STATIC "")
+
+    # For a static library indicate version in the filename
+    set_target_properties(seal PROPERTIES OUTPUT_NAME seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 endif()
 
 # Set VERSION for all library build types
@@ -349,9 +353,9 @@ endif()
 
 # Associate seal to export seal_export
 install(TARGETS seal EXPORT seal_export
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     INCLUDES DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
 
 # Export the targets

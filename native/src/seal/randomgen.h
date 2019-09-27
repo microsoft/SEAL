@@ -19,6 +19,7 @@
 namespace seal
 {
     using random_seed_type = std::array<std::uint64_t, 8>;
+
     /**
     Returns a random 64-bit integer.
     */
@@ -45,7 +46,8 @@ namespace seal
             seed_(std::move([&seed]() {
                 // Create a new seed allocation
                 IntArray<std::uint64_t> new_seed(
-                    2, MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+                    seed.size(),
+                    MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
 
                 // Assign the given seed and return
                 std::copy(seed.cbegin(), seed.cend(), new_seed.begin());

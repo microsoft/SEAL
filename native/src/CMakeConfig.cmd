@@ -20,7 +20,7 @@ if not exist "%VSDEVENVDIR%" (
 	rem We may be running in the CI server. Try a standard VS path.
 	echo Did not find VS at provided location: "%VSDEVENVDIR%".
 	echo Trying standard location.
-	set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE"
+	set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE"
 )
 
 set VSDEVENVDIR=%VSDEVENVDIR:"=%
