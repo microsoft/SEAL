@@ -19,14 +19,8 @@ echo Configuring Microsoft SEAL through CMake
 if not exist "%VSDEVENVDIR%" (
 	rem We may be running in the CI server. Try a standard VS path.
 	echo Did not find VS at provided location: "%VSDEVENVDIR%".
-	echo Trying first standard location.
+	echo Trying standard location.
 	set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE"
-	
-	REM if not exist "%VSDEVENVDIR%" (
-	    REM echo Did not find VS at first standard location: "%VSDEVENVDIR%".
-		REM echo Trying second standard location.
-	    REM set VSDEVENVDIR="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE"
-	REM )
 )
 
 set VSDEVENVDIR=%VSDEVENVDIR:"=%
