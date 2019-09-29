@@ -1,5 +1,7 @@
 # List of Changes
 
+## Version 3.4.0
+
 ## Version 3.3.2 (patch)
 
 Minor bug and typo fixes. Most importantly:

@@ -6,12 +6,15 @@ cmake_minimum_required(VERSION 3.10)
 project(SEALTest LANGUAGES CXX)
 
 # Executable will be in ../bin
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SEALTest_SOURCE_DIR}/../bin)
 
 add_executable(sealtest seal/testrunner.cpp)
 
 # Import Microsoft SEAL
-find_package(SEAL 3.4.0 EXACT REQUIRED)
+find_package(SEAL 3.4.0 EXACT REQUIRED
+    # Providing a hint so this can be built without installing Microsoft SEAL
+    HINTS ${SEALTest_SOURCE_DIR}/../src/cmake
+)
 
 # Add source files
 add_subdirectory(seal)
@@ -22,10 +25,11 @@ option(INSTALL_GTEST OFF)
 mark_as_advanced(BUILD_GMOCK INSTALL_GTEST)
 
 # Add GTest
-set(GTEST_DIR "thirdparty/googletest")
+set(GTEST_DIR ${SEALTest_SOURCE_DIR}/thirdparty/googletest)
 if(NOT EXISTS ${GTEST_DIR}/CMakeLists.txt)
     message(FATAL_ERROR "Could not find `${GTEST_DIR}/CMakeLists.txt`. Run `git submodule update --init` and retry.")
 endif()
+
 add_subdirectory(${GTEST_DIR})
 
 # Link Microsoft SEAL and GTest
