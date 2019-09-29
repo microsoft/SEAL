@@ -35,6 +35,7 @@ include(GNUInstallDirs)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
+set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
@@ -416,3 +417,10 @@ install(
         ${SEAL_CONFIG_VERSION_FILENAME}
         ${MSGSL_FIND_MODULE_PATH}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
+
+# We export SEALTargets from the build tree so it can be used by other projects
+# without requiring an install.
+export(
+    EXPORT SEALTargets
+    NAMESPACE SEAL::
+    FILE ${SEAL_TARGETS_FILENAME})

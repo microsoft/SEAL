@@ -6,16 +6,20 @@ cmake_minimum_required(VERSION 3.10)
 project(SEALNetNative VERSION 3.4.0 LANGUAGES CXX C)
 
 # Library will be in ../lib
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEALNetNative_SOURCE_DIR}/../lib)
+set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEALNetNative_SOURCE_DIR}/../lib)
 
 # Create library but add no source files yet
 add_library(sealnetnative SHARED "")
 
 # Import Microsoft SEAL
-find_package(SEAL 3.4.0 EXACT REQUIRED)
+find_package(SEAL 3.4.0 EXACT REQUIRED
+    # Providing a hint so this can be built without installing Microsoft SEAL
+    HINTS ${SEALNetNative_SOURCE_DIR}/../../native/src/cmake
+)
 
 # Check that Microsoft SEAL is build as position-independent code
-if (SEAL_LIB_BUILD_TYPE STREQUAL "Static")
+if(SEAL_LIB_BUILD_TYPE STREQUAL "Static")
     message(FATAL_ERROR "Microsoft SEAL is not built as position-independent code; please set SEAL_LIB_BUILD_TYPE to either \"Static_PIC\" or \"Shared\" and rebuild.")
 endif()
 
