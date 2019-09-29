@@ -34,10 +34,9 @@ endif()
 include(GNUInstallDirs)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
-set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/../bin)
+set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
-set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
@@ -294,6 +293,10 @@ endif()
 
 # Try to find MSGSL if requested
 if(SEAL_USE_MSGSL)
+    # Set the find module path so we can install it later
+    set(MSGSL_FIND_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake/Findmsgsl.cmake)
+
+    # Find msgsl and create an interface target
     find_package(msgsl MODULE)
     if(NOT msgsl_FOUND)
         set(SEAL_USE_MSGSL OFF CACHE BOOL ${SEAL_USE_MSGSL_OPTION_STR} FORCE)
@@ -305,7 +308,7 @@ set(SEAL_USE_MSGSL_SPAN_OPTION_STR "Use gsl::span")
 cmake_dependent_option(SEAL_USE_MSGSL_SPAN ${SEAL_USE_MSGSL_SPAN_OPTION_STR} ON "SEAL_USE_MSGSL" OFF)
 if(SEAL_USE_MSGSL_SPAN)
     # Detect gsl::span
-    if(NOT msgsl_SPAN GREATER 0)
+    if(NOT HAVE_msgsl_SPAN)
         set(SEAL_USE_MSGSL_SPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_SPAN_OPTION_STR} FORCE)
     endif()
 endif()
@@ -314,7 +317,7 @@ set(SEAL_USE_MSGSL_MULTISPAN_OPTION_STR "Use gsl::multi_span")
 cmake_dependent_option(SEAL_USE_MSGSL_MULTISPAN ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} ON "SEAL_USE_MSGSL" OFF)
 if(SEAL_USE_MSGSL_MULTISPAN)
     # Detect gsl::multi_span
-    if(NOT msgsl_MULTISPAN GREATER 0)
+    if(NOT HAVE_msgsl_MULTISPAN)
         set(SEAL_USE_MSGSL_MULTISPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} FORCE)
     endif()
 endif()
@@ -348,7 +351,9 @@ set_target_properties(seal PROPERTIES VERSION ${SEAL_VERSION})
 add_subdirectory(seal)
 
 # Add local include directories for build
-target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${SEAL_SOURCE_DIR}>)
+target_include_directories(seal PUBLIC
+    $<BUILD_INTERFACE:${SEAL_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${SEAL_INCLUDES_INSTALL_DIR}>)
 
 # We require at least C++14
 if(SEAL_USE_CXX17)
@@ -371,11 +376,8 @@ find_package(Threads REQUIRED)
 target_link_libraries(seal PUBLIC Threads::Threads)
 
 if(SEAL_USE_MSGSL)
-    # Associate msgsl with export seal_export
-    install(TARGETS msgsl EXPORT seal_export)
-
     # Link msgsl with seal
-    target_link_libraries(seal PUBLIC msgsl)
+    target_link_libraries(seal PUBLIC msgsl::msgsl)
 endif()
 
 if(SEAL_USE_ZLIB)
@@ -383,38 +385,34 @@ if(SEAL_USE_ZLIB)
     target_link_libraries(seal PRIVATE ZLIB::ZLIB)
 endif()
 
-# Associate seal to export seal_export
-install(TARGETS seal EXPORT seal_export
+# Associate seal to export SEALTargets
+install(TARGETS seal EXPORT SEALTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
-
-# Export the targets
-export(EXPORT seal_export
-    FILE ${SEAL_TARGETS_FILENAME}
-    NAMESPACE SEAL::)
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Create the CMake config file
-configure_file(${SEAL_CONFIG_IN_FILENAME} ${SEAL_CONFIG_FILENAME} @ONLY)
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${SEAL_CONFIG_IN_FILENAME} ${SEAL_CONFIG_FILENAME}
+    INSTALL_DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
 # Install the export
 install(
-    EXPORT seal_export
-    FILE SEALTargets.cmake
+    EXPORT SEALTargets
     NAMESPACE SEAL::
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
 # Version file; we require exact version match for downstream
-include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     ${SEAL_CONFIG_VERSION_FILENAME}
     VERSION ${SEAL_VERSION}
     COMPATIBILITY ExactVersion)
 
-# Install other files
+# Install config and module files
 install(
     FILES
         ${SEAL_CONFIG_FILENAME}
         ${SEAL_CONFIG_VERSION_FILENAME}
+        ${MSGSL_FIND_MODULE_PATH}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
