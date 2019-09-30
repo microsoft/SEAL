@@ -26,13 +26,6 @@
 #endif
 #endif
 
-// Check for zlib headers
-#ifdef SEAL_USE_ZLIB
-#if !__has_include(<zlib.h>)
-#error "zlib headers not included in project properties"
-#endif
-#endif
-
 // In Visual Studio redefine std::byte (SEAL_BYTE)
 #undef SEAL_USE_STD_BYTE
 

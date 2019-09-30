@@ -225,7 +225,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
@@ -254,7 +254,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
@@ -287,7 +287,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
@@ -319,7 +319,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
