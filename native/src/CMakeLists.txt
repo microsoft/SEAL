@@ -1,12 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 project(SEAL VERSION 3.4.0 LANGUAGES CXX C)
 
-if(DEFINED MSVC)
-    if(DEFINED ALLOW_COMMAND_LINE_BUILD)
+if(MSVC)
+    if(ALLOW_COMMAND_LINE_BUILD)
         message(STATUS "Configuring for Visual Studio")
     else()
         message(FATAL_ERROR "Please build Microsoft SEAL using the attached Visual Studio solution/project files")
@@ -18,8 +18,8 @@ set(SEAL_DEFAULT_BUILD_TYPE "Release")
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE ${SEAL_DEFAULT_BUILD_TYPE} CACHE
         STRING "Build type" FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-        "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
+        STRINGS "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
@@ -34,13 +34,14 @@ endif()
 include(GNUInstallDirs)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
-set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
+set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/../bin)
 set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+set(MSGSL_FIND_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake/Findmsgsl.cmake)
 
 # For extra modules we might have
 list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
@@ -101,8 +102,8 @@ set(SEAL_DEFAULT_LIB_BUILD_TYPE "Static_PIC")
 if(NOT SEAL_LIB_BUILD_TYPE)
     set(SEAL_LIB_BUILD_TYPE ${SEAL_DEFAULT_LIB_BUILD_TYPE} CACHE
         STRING "Library build type" FORCE)
-    set_property(CACHE SEAL_LIB_BUILD_TYPE PROPERTY STRINGS
-        "Static" "Static_PIC" "Shared")
+    set_property(CACHE SEAL_LIB_BUILD_TYPE PROPERTY
+        STRINGS "Static" "Static_PIC" "Shared")
 endif()
 message(STATUS "Library build type (SEAL_LIB_BUILD_TYPE): ${SEAL_LIB_BUILD_TYPE}")
 
@@ -132,7 +133,7 @@ option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
 
 # Check for intrin.h or x64intrin.h
 if(SEAL_USE_INTRIN)
-    if(DEFINED MSVC)
+    if(MSVC)
         set(SEAL_INTRIN_HEADER "intrin.h")
     else()
         set(SEAL_INTRIN_HEADER "x86intrin.h")
@@ -145,7 +146,7 @@ if(SEAL_USE_INTRIN)
 endif()
 
 # Specific intrinsics depending on SEAL_USE_INTRIN
-if(DEFINED MSVC)
+if(MSVC)
     set(SEAL_USE__UMUL128_OPTION_STR "Use _umul128")
     cmake_dependent_option(SEAL_USE__UMUL128 SEAL_USE__UMUL128_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
 
@@ -168,11 +169,11 @@ cmake_dependent_option(SEAL_USE__SUBBORROW_U64 SEAL_USE__SUBBORROW_U64_OPTION_ST
 if(SEAL_USE_INTRIN)
     cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_QUIET TRUE)
-    if(NOT DEFINED MSVC)
+    if(NOT MSVC)
         set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
     endif()
 
-    if(DEFINED MSVC)
+    if(MSVC)
         # Check for presence of _umul128
         if(SEAL_USE__UMUL128)
             check_cxx_source_runs("
@@ -267,8 +268,13 @@ endif()
 
 # Try to find MSGSL if requested
 if(SEAL_USE_MSGSL)
-    # Set the find module path so we can install it later
-    set(MSGSL_FIND_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake/Findmsgsl.cmake)
+    if(MSVC)
+        # We unset the msgsl include directory to force a new find for each MSVC build.
+        # This allows developers to enable/disable msgsl support by simply adding or
+        # removing the msgsl directory from the SEAL project property pages (Include
+        # Directories).
+        unset(MSGSL_INCLUDE_DIR CACHE)
+    endif()
 
     # Find msgsl and create an interface target
     find_package(msgsl MODULE)
@@ -298,6 +304,16 @@ endif()
 
 # Try to find zlib if requested
 if(SEAL_USE_ZLIB)
+    if(MSVC)
+        # We unset the ZLIB variables to force a new find for each MSVC build.
+		# This allows developers to enable/disable ZLIB support by simply adding
+		# or removing ZLIB directories from the SEAL project property pages
+		# (Include Directories and Library Directories).
+        unset(ZLIB_INCLUDE_DIR CACHE)
+        unset(ZLIB_LIBRARY_DEBUG CACHE)
+        unset(ZLIB_LIBRARY_RELEASE CACHE)
+    endif()
+
     find_package(ZLIB 1.2.11 EXACT)
     if(NOT ZLIB_FOUND)
         set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)

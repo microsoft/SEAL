@@ -66,8 +66,7 @@ rem Call CMake.
 	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%" ^
 	-DSEAL_LIB_BUILD_TYPE="Static_PIC"          ^
 	-DSEAL_USE_MSGSL=1                          ^
-	-DMSGSL_INCLUDE_DIR="%INCLUDEPATH%"         ^
-	-DSEAL_USE_ZIB=1                            ^
-	-DZLIB_INCLUDE_DIR="%INCLUDEPATH%"          ^
-	-DZLIB_LIBRARY="%LIBRARYPATH%"              ^
+	-DMSGSL_ROOT="%INCLUDEPATH%"                ^
+	-DSEAL_USE_ZLIB=1                           ^
+	-DZLIB_ROOT="%LIBRARYPATH%;%INCLUDEPATH%"   ^
 	--no-warn-unused-cli

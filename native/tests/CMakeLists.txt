@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 project(SEALTest LANGUAGES CXX)
 
@@ -12,8 +12,8 @@ add_executable(sealtest seal/testrunner.cpp)
 
 # Import Microsoft SEAL
 find_package(SEAL 3.4.0 EXACT REQUIRED
-    # Providing a hint so this can be built without installing Microsoft SEAL
-    HINTS ${SEALTest_SOURCE_DIR}/../src/cmake
+    # Providing a path so this can be built without installing Microsoft SEAL
+    PATHS ${SEALTest_SOURCE_DIR}/../src/cmake
 )
 
 # Add source files
