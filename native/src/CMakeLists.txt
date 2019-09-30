@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 project(SEAL VERSION 3.4.0 LANGUAGES CXX C)
 
@@ -41,6 +41,7 @@ set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+set(MSGSL_FIND_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake/Findmsgsl.cmake)
 
 # For extra modules we might have
 list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
@@ -294,8 +295,13 @@ endif()
 
 # Try to find MSGSL if requested
 if(SEAL_USE_MSGSL)
-    # Set the find module path so we can install it later
-    set(MSGSL_FIND_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake/Findmsgsl.cmake)
+    if(MSVC)
+        # We unset the msgsl include directory to force a new find for each MSVC build.
+        # This allows developers to enable/disable msgsl support by simply adding or
+        # removing the msgsl directory from the SEAL project property pages (Include
+        # Directories).
+        unset(MSGSL_INCLUDE_DIR CACHE)
+    endif()
 
     # Find msgsl and create an interface target
     find_package(msgsl MODULE)
@@ -325,6 +331,16 @@ endif()
 
 # Try to find zlib if requested
 if(SEAL_USE_ZLIB)
+    if(MSVC)
+        # We unset the ZLIB variables to force a new find for each MSVC build.
+		# This allows developers to enable/disable ZLIB support by simply adding
+		# or removing ZLIB directories from the SEAL project property pages
+		# (Include Directories and Library Directories).
+        unset(ZLIB_INCLUDE_DIR CACHE)
+        unset(ZLIB_LIBRARY_DEBUG CACHE)
+        unset(ZLIB_LIBRARY_RELEASE CACHE)
+    endif()
+
     find_package(ZLIB 1.2.11 EXACT)
     if(NOT ZLIB_FOUND)
         set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)

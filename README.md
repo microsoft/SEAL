@@ -86,7 +86,7 @@ automatically download and install it for you.
 
 ## Linux and macOS
 
-Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.10).
+Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
 A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed. In macOS the
 Xcode toolchain (>= 9.3) will work.
 
@@ -242,7 +242,7 @@ Alternatively, you can build and use a NuGet package; see instructions in [NUGET
 ## Linux and macOS
 
 Microsoft SEAL for .NET relies on a native shared library that can be easily configured and built
-using CMake (>= 3.10) and a modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0). In macOS
+using CMake (>= 3.12) and a modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0). In macOS
 the Xcode toolchain (>= 9.3) will work.
 
 For compiling .NET code you will need to install a .NET Core SDK (>= 2.1). You can follow
