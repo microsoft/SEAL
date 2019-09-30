@@ -13,6 +13,7 @@ set VSVERSION=%~1
 set PROJECTCONFIGURATION=%~2
 set VSDEVENVDIR=%~3
 set INCLUDEPATH=%~4
+set LIBRARYPATH=%~5
 
 echo Configuring Microsoft SEAL through CMake
 
@@ -66,4 +67,7 @@ rem Call CMake.
 	-DSEAL_LIB_BUILD_TYPE="Static_PIC"          ^
 	-DSEAL_USE_MSGSL=1                          ^
 	-DMSGSL_INCLUDE_DIR="%INCLUDEPATH%"         ^
+	-DSEAL_USE_ZIB=1                            ^
+	-DZLIB_INCLUDE_DIR="%INCLUDEPATH%"          ^
+	-DZLIB_LIBRARY="%LIBRARYPATH%"              ^
 	--no-warn-unused-cli
