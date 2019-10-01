@@ -402,25 +402,107 @@ ciphertext data to be accessed hierarchically through a `gsl::multi_span`.
 
 To build Microsoft SEAL with support for Microsoft GSL, clone first the Microsoft GSL
 library from [https://github.com/Microsoft/GSL](GitHub.com/Microsoft/GSL) to some
-convenient directory, e.g., `native\src\GSL`. Then open the Microsoft SEAL solution
-file in Visual Studio, right-click on the project SEAL in the *Solution Explorer*,
-click *Properties*, and add (for all configurations and all platforms) the following
-directory to the list of *Include Directories* on the *VC++ Directories* tab:
+convenient directory, e.g., `native\GSL` in this example. Then open the Microsoft
+SEAL solution file in Visual Studio, right-click on the project SEAL in the *Solution
+Explorer*, click *Properties*, and add (for all configurations and all platforms)
+the following directory to the list of *Include Directories* on the *VC++ Directories*
+tab:
 ````
-$(ProjectDir)GSL\include
+$(SolutionDir)native\GSL\include
 ````
 Rebuilding Microsoft SEAL should now automatically detect that Microsoft GSL is
 available, and enable both `gsl::span` and `gsl::multi_span` support. Note that
 any programs or libraries consuming Microsoft SEAL will now also need access to
-the Microsoft GSL header files.
+the Microsoft GSL header files, so you might need to add the `native\GSL\include`
+directory to *Include Directories* in your other projects as well.
 
 #### Microsoft GSL in Linux and macOS
 
+On Linux and macOS Microsoft GSL can be most conveniently obtained through a package
+manager such as APT on Linux (package `libmsgsl-dev`) or Homebrew on macOS (package
+`cpp-gsl`). Alternatively, you can simply clone it from
+[https://github.com/Microsoft/GSL](GitHub.com/Microsoft/GSL). When installed using
+a package manager, CMake will likely detect the Microsoft GSL header file location
+automatically. Alternatively, if Microsoft GSL is cloned to `~/mylibs/GSL`, you may
+provide CMake with this location for building Microsoft SEAL as follows:
+````
+cd native/src
+cmake . -DMSGSL_ROOT=~/mylibs/GSL/include
+make
+````
+
 ### ZLIB
+
+ZLIB is a widely used compression library that implements the *DEFLATE* compression
+algorithm. If present, Microsoft SEAL can use ZLIB to automatically compress data
+that is serialized. For example, in some cases `Ciphertext` objects consist of a large
+number of integers modulo specific prime numbers. When using the CKKS scheme these
+prime numbers can often be quite small (e.g., 30 bits), but the numbers will always
+be serialized as 64-bit integers. Thus, in this case more than half of the ciphertext
+data consists of zeros, which a compression library, such as ZLIB, can compress away.
+The BFV scheme benefits typically less from this technique, because the prime numbers
+tend to be larger and integers modulo these prime numbers fill more of each 64-bit
+word. The compression is not only applied to `Ciphertext` objects, but to every
+serializable Microsoft SEAL object.
+
+**WARNING: The compression rate for a `SecretKey` can reveal information about the
+key. In most common applications of Microsoft SEAL the size of a `SecretKey` would
+not be deliberately revealed to untrusted parties, but if this is a concern we
+recommend saving the `SecretKey` in an uncompressed form by passing
+`compr_mode_type::none` to `SecretKey::save`.**
 
 #### ZLIB in Windows
 
+ZLIB is usually not found on a typical Windows system, but you can clone it from
+[https://github.com/madler/zlib](GitHub.com/madler/zlib) to some convenient
+directory, e.g., `native\zlib` in this example. To build ZLIB on Windows, open the
+*Developer Command Prompt for VS 2019*, switch to `native\zlib`, and do:
+````
+cmake .
+cmake --build . --config Release
+copy Release\zlib.dll ..\bin
+````
+Then open the Microsoft SEAL solution file in Visual Studio, right-click on the
+project SEAL in the *Solution Explorer*, click *Properties*, and add (for all
+configurations and all platforms) on the *VC++ Directories* tab the following
+directory to the list of *Include Directories*:
+````
+$(SolutionDir)native\zlib
+````
+and the following directory to the list of *Library Directories*:
+````
+$(SolutionDir)native\zlib\Release
+````
+Next, open the *Librarian* tab and add `zlib.lib` to *Additional Dependencies*.
+Rebuilding Microsoft SEAL should now automatically detect that ZLIB is available,
+and enable support for using `compr_mode_type::deflate` in serialization.
+
+When running applications built against a ZLIB-enabled Microsoft SEAL you will
+need to ensure that a copy of `native\zlib\Release\zlib.dll` resides in the same
+directory where the application executable is.
+
 #### ZLIB in Linux and macOS
+
+On Ubuntu Linux ZLIB can be most conveniently obtained through APT:
+````
+sudo apt install zlib1g-dev
+````
+On macOS ... **TODO TODO TODO**
+
+Alternatively, on either Linux or macOS, you can simply clone it from
+[https://github.com/madler/zlib](GitHub.com/madler/zlib). For example, you can clone
+it to `~/mylibs/zlib` and do:
+````
+cd ~/mylibs/zlib
+cmake .
+make
+````
+When building Microsoft SEAL you may provide CMake with this location as follows:
+````
+cd native/src
+cmake . -DZLIB_ROOT=~/mylibs/zlib
+make
+```
 
 ### Using Microsoft SEAL for .NET in your own application
 

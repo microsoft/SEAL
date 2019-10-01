@@ -16,16 +16,6 @@
 // Do not throw when Evaluator produces transparent ciphertexts
 //#undef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
 
-// Check for MSGSL headers
-#ifdef SEAL_USE_MSGSL
-#if defined(SEAL_USE_MSGSL_SPAN) && !__has_include(<gsl/span>)
-#error "Microsoft GSL headers not included in project properties (gsl/span)"
-#endif
-#if defined(SEAL_USE_MSGSL_MULTISPAN) && !__has_include(<gsl/multi_span>)
-#error "Microsoft GSL headers not included in project properties (gsl/multi_span)"
-#endif
-#endif
-
 // In Visual Studio redefine std::byte (SEAL_BYTE)
 #undef SEAL_USE_STD_BYTE
 
