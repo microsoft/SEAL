@@ -454,7 +454,7 @@ recommend saving the `SecretKey` in an uncompressed form by passing
 #### ZLIB in Windows
 
 ZLIB is usually not found on a typical Windows system, but you can clone it from
-[https://github.com/madler/zlib](GitHub.com/madler/zlib) to some convenient
+[https://github.com/madler/zlib](https://github.com/madler/zlib) to some convenient
 directory, e.g., `native\zlib` in this example. To build ZLIB on Windows, open the
 *Developer Command Prompt for VS 2019*, switch to `native\zlib`, and do:
 ````
