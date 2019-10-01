@@ -1,16 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-# Simple attempt to locate Microsoft GSL
 find_path(MSGSL_INCLUDE_DIR
-    NAMES gsl/gsl gsl/span gsl/multi_span
-    HINTS ${MSGSL_ROOT} ${CMAKE_INCLUDE_PATH})
+    NAMES gsl/gsl gsl/span gsl/multi_span)
 
 find_package(PackageHandleStandardArgs)
-find_package_handle_standard_args(msgsl
+find_package_handle_standard_args(MSGSL
     REQUIRED_VARS MSGSL_INCLUDE_DIR)
 
-if(msgsl_FOUND AND NOT TARGET msgsl::msgsl)
+if(MSGSL_FOUND AND NOT TARGET MSGSL::MSGSL)
     # Now check for individual classes
     include(CMakePushCheckState)
     cmake_push_check_state(RESET)
@@ -22,15 +20,15 @@ if(msgsl_FOUND AND NOT TARGET msgsl::msgsl)
     include(CheckTypeSize)
 
     # Detect gsl::span
-    check_type_size("gsl::span<std::uint64_t>" msgsl_SPAN LANGUAGE CXX)
+    check_type_size("gsl::span<std::uint64_t>" MSGSL_SPAN LANGUAGE CXX)
 
     # Detect gsl::multi_span
-    check_type_size("gsl::multi_span<std::uint64_t, 1, gsl::dynamic_range>" msgsl_MULTISPAN LANGUAGE CXX)
+    check_type_size("gsl::multi_span<std::uint64_t, 1, gsl::dynamic_range>" MSGSL_MULTISPAN LANGUAGE CXX)
 
     cmake_pop_check_state()
 
-    # Create interface target for msgsl
-    add_library(msgsl::msgsl IMPORTED INTERFACE)
-    set_target_properties(msgsl::msgsl PROPERTIES
+    # Create interface target for MSGSL
+    add_library(MSGSL::MSGSL IMPORTED INTERFACE)
+    set_target_properties(MSGSL::MSGSL PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES ${MSGSL_INCLUDE_DIR})
 endif()
