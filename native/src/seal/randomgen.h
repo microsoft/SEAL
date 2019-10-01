@@ -43,7 +43,7 @@ namespace seal
         @param[in] seed The seed for the random number generator
         */
         UniformRandomGenerator(random_seed_type seed) :
-            seed_(std::move([&seed]() {
+            seed_([&seed]() {
                 // Create a new seed allocation
                 IntArray<std::uint64_t> new_seed(
                     seed.size(),
@@ -52,7 +52,7 @@ namespace seal
                 // Assign the given seed and return
                 std::copy(seed.cbegin(), seed.cend(), new_seed.begin());
                 return new_seed;
-            }())),
+            }()),
             buffer_(buffer_size_,
                 MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)),
             buffer_begin_(buffer_.begin()),
