@@ -335,7 +335,7 @@
     <None Include="seal\util\config.h.in">
       <Filter>Other\seal\util</Filter>
     </None>
-    <None Include="cmake\Findmsgsl.cmake">
+    <None Include="cmake\FindMSGSL.cmake">
       <Filter>Other\cmake</Filter>
     </None>
     <None Include="CMakeConfig.cmd">

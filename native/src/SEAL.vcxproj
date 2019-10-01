@@ -123,7 +123,7 @@
     <Text Include="seal\util\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cmake\Findmsgsl.cmake" />
+    <None Include="cmake\FindMSGSL.cmake" />
     <None Include="cmake\SEALConfig.cmake.in" />
     <None Include="seal\util\config.h.in" />
     <None Include="CMakeConfig.cmd" />
