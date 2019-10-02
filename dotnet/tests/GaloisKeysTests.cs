@@ -198,20 +198,20 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             GaloisKeys keys = new GaloisKeys();
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys = new GaloisKeys(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => keys = new GaloisKeys(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys.Set(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => keys.Set(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys.Save(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => keys.Save(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys.UnsafeLoad(null));
-            Assert.ThrowsException<EndOfStreamException>(() => keys.UnsafeLoad(new MemoryStream()));
+            Utilities.AssertThrow<ArgumentNullException>(() => keys.UnsafeLoad(null));
+            Utilities.AssertThrow<EndOfStreamException>(() => keys.UnsafeLoad(new MemoryStream()));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys.Load(context, null));
-            Assert.ThrowsException<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
+            Utilities.AssertThrow<ArgumentNullException>(() => keys.Load(context, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
         }
     }
 }

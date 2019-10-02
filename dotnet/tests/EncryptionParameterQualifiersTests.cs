@@ -58,7 +58,7 @@ namespace SEALNetTest
             EncryptionParameterQualifiers epq1 = GlobalContext.BFVContext.FirstContextData.Qualifiers;
             EncryptionParameterQualifiers epq2 = null;
 
-            Assert.ThrowsException<ArgumentNullException>(() => epq2 = new EncryptionParameterQualifiers(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => epq2 = new EncryptionParameterQualifiers(null));
         }
     }
 }

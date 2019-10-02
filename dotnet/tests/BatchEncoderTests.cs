@@ -210,7 +210,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Utilities.AssertThrow<ArgumentException>(() =>
             {
                 BatchEncoder encoder = new BatchEncoder(context);
             });

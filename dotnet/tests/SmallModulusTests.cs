@@ -77,19 +77,17 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFail1Test()
         {
             // Should fail if value is 1
-            SmallModulus sm = new SmallModulus(1);
+            Utilities.AssertThrow<ArgumentException>(() => { SmallModulus sm = new SmallModulus(1); });
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFail2Test()
         {
             // Should fail if value is larger than 62 bits
-            SmallModulus sm = new SmallModulus(0x7FFFFFFFFFFFFFFFul);
+            Utilities.AssertThrow<ArgumentException>(() => { SmallModulus sm = new SmallModulus(0x7FFFFFFFFFFFFFFFul); });
         }
 
         [TestMethod]
@@ -119,21 +117,19 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void SetFail1Test()
         {
             // Should faile if set to 1
             SmallModulus sm = new SmallModulus();
-            sm.Set(1);
+            Utilities.AssertThrow<ArgumentException>(() => sm.Set(1));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void SetFail2Test()
         {
             // Should fail if set to bigger than 62 bits
             SmallModulus sm = new SmallModulus();
-            sm.Set(0x7FFFFFFFFFFFFFFFul);
+            Utilities.AssertThrow<ArgumentException>(() => sm.Set(0x7FFFFFFFFFFFFFFFul));
         }
 
         [TestMethod]
@@ -228,11 +224,11 @@ namespace SEALNetTest
         {
             SmallModulus sm = new SmallModulus(0x12345ul);
 
-            Assert.ThrowsException<ArgumentNullException>(() => sm = new SmallModulus(null));
-            Assert.ThrowsException<ArgumentNullException>(() => sm.Set(null));
-            Assert.ThrowsException<ArgumentNullException>(() => sm.Save(null));
-            Assert.ThrowsException<ArgumentNullException>(() => sm.Load(null));
-            Assert.ThrowsException<EndOfStreamException>(() => sm.Load(new MemoryStream()));
+            Utilities.AssertThrow<ArgumentNullException>(() => sm = new SmallModulus(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => sm.Set(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => sm.Save(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => sm.Load(null));
+            Utilities.AssertThrow<EndOfStreamException>(() => sm.Load(new MemoryStream()));
         }
     }
 }
