@@ -70,9 +70,10 @@ namespace seal
         CKKSEncoder(std::shared_ptr<SEALContext> context);
 
         /**
-        Encodes double-precision floating-point real or complex numbers into
-        a plaintext polynomial. Dynamic memory allocations in the process are
-        allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        Encodes a vector of double-precision floating-point real or complex numbers
+        into a plaintext polynomial. Append zeros if vector size is less than N/2.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
         @param[in] values The vector of double-precision floating-point numbers
@@ -102,11 +103,11 @@ namespace seal
         }
 
         /**
-        Encodes double-precision floating-point real or complex numbers into
-        a plaintext polynomial. The encryption parameters used are the top
-        level parameters for the given context. Dynamic memory allocations in
-        the process are allocated from the memory pool pointed to by the given
-        MemoryPoolHandle.
+        Encodes a vector of double-precision floating-point real or complex numbers
+        into a plaintext polynomial. Append zeros if vector size is less than N/2.
+        The encryption parameters used are the top level parameters for the given
+        context. Dynamic memory allocations in the process are allocated from the
+        memory pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
         @param[in] values The vector of double-precision floating-point numbers
@@ -133,9 +134,10 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext
-        polynomial. Dynamic memory allocations in the process are allocated from
-        the memory pool pointed to by the given MemoryPoolHandle.
+        Encodes a double-precision floating-point number into a plaintext polynomial.
+        The number repeats for N/2 times to fill all slots. Dynamic memory
+        allocations in the process are allocated from the memory pool pointed to
+        by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
         @param[in] parms_id parms_id determining the encryption parameters to be
@@ -159,10 +161,11 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext
-        polynomial. The encryption parameters used are the top level parameters
-        for the given context. Dynamic memory allocations in the process are
-        allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        Encodes a double-precision floating-point number into a plaintext polynomial.
+        The number repeats for N/2 times to fill all slots.The encryption parameters
+        used are the top level parameters for the given context. Dynamic memory
+        allocations in the process are allocated from the memory pool pointed to
+        by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
         @param[in] scale Scaling parameter defining encoding precision
