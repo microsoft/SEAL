@@ -26,7 +26,7 @@ namespace SEALNetTest
         /// it is found.
         /// </summary>
         /// <typeparam name="T">Expected exception type</typeparam>
-        /// <param name="action">Action to run that should throw an exception</param>
+        /// <param name="action">Function to run that should throw an exception</param>
         /// <param name="caller">Path to the source file that called this method</param>
         /// <param name="line">Line in the source file that called this method</param>
         public static void AssertThrows<T>(Func<object> action, [CallerFilePath] string caller = "", [CallerLineNumber] int line = 0) where T : Exception
@@ -45,7 +45,7 @@ namespace SEALNetTest
         /// it is found.
         /// </summary>
         /// <typeparam name="T">Expected exception type</typeparam>
-        /// <param name="action">Function to run that should throw an exception</param>
+        /// <param name="action">Action to run that should throw an exception</param>
         /// <param name="caller">Path to the source file that called this method</param>
         /// <param name="line">Line in the source file that called this method</param>
         public static void AssertThrows<T>(Action action, [CallerFilePath] string caller = "", [CallerLineNumber] int line = 0) where T : Exception
