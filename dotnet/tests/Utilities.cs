@@ -63,17 +63,14 @@ namespace SEALNetTest
             }
             catch (Exception ex)
             {
-                T expectedType = ex as T;
-
-                if (null != expectedType)
+                if (ex is T)
                 {
                     // Expected exception has been thrown
                     return;
                 }
 
                 // Workaround: Check if exception is FileNotFoundException
-                FileNotFoundException workaroundExc = ex as FileNotFoundException;
-                if (null != workaroundExc)
+                if (ex is FileNotFoundException workaroundExc)
                 {
                     string workaroundStr = workaroundExc.GetType().ToString();
                     Trace.WriteLine($"WARNING: {caller}:{line}: Expected exception of type '{expectedStr}', got type '{workaroundStr}' instead.");
