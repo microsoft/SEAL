@@ -895,96 +895,96 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt("DEADBEEF");
             BigUInt bui1 = null;
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = new BigUInt((BigUInt)null));
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = new BigUInt((string)null));
-            Assert.ThrowsException<ArgumentException>(() => bui1 = new BigUInt(bitCount: -1));
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = new BigUInt(bitCount: 64, hexString: null));
-            Assert.ThrowsException<ArgumentException>(() => bui1 = new BigUInt(bitCount: -1, hexString: "ABCDEF"));
-            Assert.ThrowsException<ArgumentException>(() => bui1 = new BigUInt(bitCount: -1, value: 10ul));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = new BigUInt((BigUInt)null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = new BigUInt((string)null));
+            Utilities.AssertThrow<ArgumentException>(() => bui1 = new BigUInt(bitCount: -1));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = new BigUInt(bitCount: 64, hexString: null));
+            Utilities.AssertThrow<ArgumentException>(() => bui1 = new BigUInt(bitCount: -1, hexString: "ABCDEF"));
+            Utilities.AssertThrow<ArgumentException>(() => bui1 = new BigUInt(bitCount: -1, value: 10ul));
 
             bui1 = new BigUInt();
             BigUInt bui2 = new BigUInt();
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui.Data(1));
+            Utilities.AssertThrow<ArgumentOutOfRangeException>(() => bui.Data(1));
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui[5]);
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => bui[5] = 2);
+            Utilities.AssertThrow<ArgumentOutOfRangeException>(() => { var val = bui[5]; });
+            Utilities.AssertThrow<ArgumentOutOfRangeException>(() => bui[5] = 2);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui.DivideRemainder(bui1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => bui.DivideRemainder(null, bui2));
-            Assert.ThrowsException<ArgumentException>(() => bui.DivideRemainder(bui1, bui2));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.DivideRemainder(bui1, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.DivideRemainder(null, bui2));
+            Utilities.AssertThrow<ArgumentException>(() => bui.DivideRemainder(bui1, bui2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui.DivideRemainder(1ul, null));
-            Assert.ThrowsException<ArgumentException>(() => bui.DivideRemainder(0ul, bui2));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.DivideRemainder(1ul, null));
+            Utilities.AssertThrow<ArgumentException>(() => bui.DivideRemainder(0ul, bui2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui.DuplicateFrom(null));
-            Assert.ThrowsException<ArgumentNullException>(() => bui.DuplicateTo(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.DuplicateFrom(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.DuplicateTo(null));
 
             Assert.IsFalse(bui.Equals(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui.Load(null));
-            Assert.ThrowsException<ArgumentNullException>(() => bui.ModuloInvert(null));
-            Assert.ThrowsException<ArgumentException>(() => bui.Resize(bitCount: -1));
-            Assert.ThrowsException<ArgumentNullException>(() => bui.Save(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.Load(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.ModuloInvert(null));
+            Utilities.AssertThrow<ArgumentException>(() => bui.Resize(bitCount: -1));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.Save(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui.Set((BigUInt)null));
-            Assert.ThrowsException<ArgumentNullException>(() => bui.Set((string)null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.Set((BigUInt)null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.Set((string)null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui.TryModuloInvert(bui1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => bui.TryModuloInvert(null, bui2));
-            Assert.ThrowsException<ArgumentException>(() => bui.TryModuloInvert(bui1, bui2));
-            Assert.ThrowsException<ArgumentNullException>(() => bui.TryModuloInvert(1ul, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.TryModuloInvert(bui1, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.TryModuloInvert(null, bui2));
+            Utilities.AssertThrow<ArgumentException>(() => bui.TryModuloInvert(bui1, bui2));
+            Utilities.AssertThrow<ArgumentNullException>(() => bui.TryModuloInvert(1ul, null));
 
             bui2 = null;
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui2 = +bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui2 = -bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui2 = ~bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui2++);
-            Assert.ThrowsException<ArgumentNullException>(() => bui2--);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui2 = +bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui2 = -bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui2 = ~bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui2++);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui2--);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui + bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 + bui);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 + 1ul);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui + bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 + bui);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 + 1ul);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui - bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 - bui);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 - 1ul);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui - bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 - bui);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 - 1ul);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui * bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 * bui);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 * 1ul);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui * bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 * bui);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 * 1ul);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui / bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 / bui);
-            Assert.ThrowsException<ArgumentException>(() => bui1 = bui / bui1);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 / 1ul);
-            Assert.ThrowsException<ArgumentException>(() => bui1 = bui / 0ul);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui / bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 / bui);
+            Utilities.AssertThrow<ArgumentException>(() => bui1 = bui / bui1);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 / 1ul);
+            Utilities.AssertThrow<ArgumentException>(() => bui1 = bui / 0ul);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui ^ bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 ^ bui);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 ^ 1ul);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui ^ bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 ^ bui);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 ^ 1ul);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui & bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 & bui);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 & 1ul);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui & bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 & bui);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 & 1ul);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui | bui2);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 | bui);
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 | 1ul);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui | bui2);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 | bui);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 | 1ul);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 << 5);
-            Assert.ThrowsException<ArgumentException>(() => bui1 = bui1 << -1);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 << 5);
+            Utilities.AssertThrow<ArgumentException>(() => bui1 = bui1 << -1);
 
-            Assert.ThrowsException<ArgumentNullException>(() => bui1 = bui2 >> 5);
-            Assert.ThrowsException<ArgumentException>(() => bui1 = bui1 >> -1);
+            Utilities.AssertThrow<ArgumentNullException>(() => bui1 = bui2 >> 5);
+            Utilities.AssertThrow<ArgumentException>(() => bui1 = bui1 >> -1);
 
-            Assert.ThrowsException<ArgumentNullException>(() => { double d = (double)bui2; });
-            Assert.ThrowsException<ArgumentNullException>(() => { float f = (float)bui2; });
-            Assert.ThrowsException<ArgumentNullException>(() => { ulong u = (ulong)bui2; });
-            Assert.ThrowsException<ArgumentNullException>(() => { long l = (long)bui2; });
-            Assert.ThrowsException<ArgumentNullException>(() => { uint u = (uint)bui2; });
-            Assert.ThrowsException<ArgumentNullException>(() => { int i = (int)bui2; });
+            Utilities.AssertThrow<ArgumentNullException>(() => { double d = (double)bui2; });
+            Utilities.AssertThrow<ArgumentNullException>(() => { float f = (float)bui2; });
+            Utilities.AssertThrow<ArgumentNullException>(() => { ulong u = (ulong)bui2; });
+            Utilities.AssertThrow<ArgumentNullException>(() => { long l = (long)bui2; });
+            Utilities.AssertThrow<ArgumentNullException>(() => { uint u = (uint)bui2; });
+            Utilities.AssertThrow<ArgumentNullException>(() => { int i = (int)bui2; });
         }
     }
 }
