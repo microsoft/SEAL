@@ -15,19 +15,47 @@ namespace SEALNetTest
     {
         internal static int WorkaroundInstanceCount { get; private set; } = 0;
 
-        public static void AssertThrow<T>(Func<object> action, [CallerFilePath] string caller = "", [CallerLineNumber] int line = 0) where T : Exception
+        /// <summary>
+        /// Assert that an exception of the given type is thrown.
+        /// 
+        /// This is a workaround for a unit testing issue in VS 2019.
+        /// When running unit tests a couple of them fail because of a FileNotFoundException being thrown instead
+        /// of the expected exception. The FileNotFoundException is thrown in the boundary between a .Net call
+        /// and a native method, so there is not really much we can do to fix it. As a workaround this method
+        /// works as Assert.ThrowsException, but allows FileNotFoundException as well, and outputs a warning when
+        /// it is found.
+        /// </summary>
+        /// <typeparam name="T">Expected exception type</typeparam>
+        /// <param name="action">Action to run that should throw an exception</param>
+        /// <param name="caller">Path to the source file that called this method</param>
+        /// <param name="line">Line in the source file that called this method</param>
+        public static void AssertThrows<T>(Func<object> action, [CallerFilePath] string caller = "", [CallerLineNumber] int line = 0) where T : Exception
         {
             DoAssertThrow<T>(() => { var result = action(); }, caller, line);
         }
 
-        public static void AssertThrow<T>(Action action, [CallerFilePath] string caller = "", [CallerLineNumber] int line = 0) where T : Exception
+        /// <summary>
+        /// Assert that an exception of the given type is thrown.
+        /// 
+        /// This is a workaround for a unit testing issue in VS 2019.
+        /// When running unit tests a couple of them fail because of a FileNotFoundException being thrown instead
+        /// of the expected exception. The FileNotFoundException is thrown in the boundary between a .Net call
+        /// and a native method, so there is not really much we can do to fix it. As a workaround this method
+        /// works as Assert.ThrowsException, but allows FileNotFoundException as well, and outputs a warning when
+        /// it is found.
+        /// </summary>
+        /// <typeparam name="T">Expected exception type</typeparam>
+        /// <param name="action">Function to run that should throw an exception</param>
+        /// <param name="caller">Path to the source file that called this method</param>
+        /// <param name="line">Line in the source file that called this method</param>
+        public static void AssertThrows<T>(Action action, [CallerFilePath] string caller = "", [CallerLineNumber] int line = 0) where T : Exception
         {
             DoAssertThrow<T>(action, caller, line);
         }
 
         private static void DoAssertThrow<T>(Action action, string caller, int line) where T : Exception
         {
-            string strT = typeof(T).ToString();
+            string expectedStr = typeof(T).ToString();
 
             try
             {
@@ -35,30 +63,30 @@ namespace SEALNetTest
             }
             catch (Exception ex)
             {
-                T ourType = ex as T;
+                T expectedType = ex as T;
 
-                if (null != ourType)
+                if (null != expectedType)
                 {
-                    // Expected exception throws
+                    // Expected exception has been thrown
                     return;
                 }
 
                 // Workaround: Check if exception is FileNotFoundException
-                FileNotFoundException waex = ex as FileNotFoundException;
-                if (null != waex)
+                FileNotFoundException workaroundExc = ex as FileNotFoundException;
+                if (null != workaroundExc)
                 {
-                    string strWaex = waex.GetType().ToString();
-                    Trace.WriteLine($"WARNING: {caller}:{line}: Expected exception of type '{strT}', got type '{strWaex}' instead.");
+                    string workaroundStr = workaroundExc.GetType().ToString();
+                    Trace.WriteLine($"WARNING: {caller}:{line}: Expected exception of type '{expectedStr}', got type '{workaroundStr}' instead.");
                     WorkaroundInstanceCount++;
                     return;
                 }
 
                 // Any other exception should fail.
-                string strEx = ex.GetType().ToString();
-                Assert.Fail($"{caller}:{line}: Expected exception of type '{strT}', got type '{strEx}' instead.");
+                string actualStr = ex.GetType().ToString();
+                Assert.Fail($"{caller}:{line}: Expected exception of type '{expectedStr}', got type '{actualStr}' instead.");
             }
 
-            Assert.Fail($"{caller}:{line}: Expected exception of type '{strT}', no exception thrown.");
+            Assert.Fail($"{caller}:{line}: Expected exception of type '{expectedStr}', no exception thrown.");
         }
     }
 }

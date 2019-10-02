@@ -84,19 +84,19 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             SecretKey key = new SecretKey();
 
-            Utilities.AssertThrow<ArgumentNullException>(() => key = new SecretKey(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key = new SecretKey(null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => key.Set(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.Set(null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsValidFor(key, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(key, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(key, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(key, null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => key.Save(null));
-            Utilities.AssertThrow<ArgumentNullException>(() => key.UnsafeLoad(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.UnsafeLoad(null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => key.Load(context, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => key.Load(null, new MemoryStream()));
-            Utilities.AssertThrow<EndOfStreamException>(() => key.Load(context, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.Load(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.Load(null, new MemoryStream()));
+            Utilities.AssertThrows<EndOfStreamException>(() => key.Load(context, new MemoryStream()));
         }
     }
 }
