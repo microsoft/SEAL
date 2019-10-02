@@ -80,15 +80,15 @@ namespace SEALNetTest
             Ciphertext cipher = new Ciphertext();
             Plaintext plain = new Plaintext();
 
-            Utilities.AssertThrow<ArgumentNullException>(() => decryptor = new Decryptor(context_, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => decryptor = new Decryptor(null, secretKey_));
-            Utilities.AssertThrow<ArgumentException>(() => decryptor = new Decryptor(context_, secret));
+            Utilities.AssertThrows<ArgumentNullException>(() => decryptor = new Decryptor(context_, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => decryptor = new Decryptor(null, secretKey_));
+            Utilities.AssertThrows<ArgumentException>(() => decryptor = new Decryptor(context_, secret));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => decryptor.Decrypt(cipher, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => decryptor.Decrypt(null, plain));
-            Utilities.AssertThrow<ArgumentException>(() => decryptor.Decrypt(cipher, plain));
+            Utilities.AssertThrows<ArgumentNullException>(() => decryptor.Decrypt(cipher, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => decryptor.Decrypt(null, plain));
+            Utilities.AssertThrows<ArgumentException>(() => decryptor.Decrypt(cipher, plain));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => decryptor.InvariantNoiseBudget(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => decryptor.InvariantNoiseBudget(null));
         }
     }
 }

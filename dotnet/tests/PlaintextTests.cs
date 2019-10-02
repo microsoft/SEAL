@@ -318,26 +318,26 @@ namespace SEALNetTest
             MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
             MemoryPoolHandle pool_uninit = new MemoryPoolHandle();
 
-            Utilities.AssertThrow<ArgumentException>(() => plain = new Plaintext(pool_uninit));
-            Utilities.AssertThrow<ArgumentNullException>(() => plain = new Plaintext((string)null, pool));
+            Utilities.AssertThrows<ArgumentException>(() => plain = new Plaintext(pool_uninit));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain = new Plaintext((string)null, pool));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => plain.Set((Plaintext)null));
-            Utilities.AssertThrow<ArgumentNullException>(() => plain.Set((string)null));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((Plaintext)null));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((string)null));
 
-            Utilities.AssertThrow<ArgumentOutOfRangeException>(() => plain.SetZero(100000));
-            Utilities.AssertThrow<ArgumentOutOfRangeException>(() => plain.SetZero(1, 100000));
-            Utilities.AssertThrow<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
+            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000));
+            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(1, 100000));
+            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsValidFor(plain, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(plain, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(plain, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(plain, null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => plain.Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Save(null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => plain.UnsafeLoad(null));
-            Utilities.AssertThrow<EndOfStreamException>(() => plain.UnsafeLoad(new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(null));
+            Utilities.AssertThrows<EndOfStreamException>(() => plain.UnsafeLoad(new MemoryStream()));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => plain.Load(context, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => plain.Load(null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(null, new MemoryStream()));
         }
     }
 }

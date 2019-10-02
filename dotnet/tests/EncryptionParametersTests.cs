@@ -51,12 +51,12 @@ namespace SEALNetTest
         {
             EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
 
-            Utilities.AssertThrow<InvalidOperationException>(() =>
+            Utilities.AssertThrows<InvalidOperationException>(() =>
             {
                 parms.PlainModulus = new SmallModulus(8192);
             });
 
-            Utilities.AssertThrow<InvalidOperationException>(() =>
+            Utilities.AssertThrows<InvalidOperationException>(() =>
             {
                 parms.SetPlainModulus(8192);
             });
@@ -144,12 +144,12 @@ namespace SEALNetTest
         public void ExceptionsTest()
         {
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
-            Utilities.AssertThrow<ArgumentNullException>(() => parms = new EncryptionParameters(null));
-            Utilities.AssertThrow<ArgumentNullException>(() => parms.Set(null));
-            Utilities.AssertThrow<ArgumentNullException>(() => parms.CoeffModulus = null);
-            Utilities.AssertThrow<ArgumentNullException>(() => parms.Save(null));
-            Utilities.AssertThrow<ArgumentNullException>(() => parms.Load(null));
-            Utilities.AssertThrow<EndOfStreamException>(() => parms.Load(new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => parms = new EncryptionParameters(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => parms.Set(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => parms.CoeffModulus = null);
+            Utilities.AssertThrows<ArgumentNullException>(() => parms.Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => parms.Load(null));
+            Utilities.AssertThrows<EndOfStreamException>(() => parms.Load(new MemoryStream()));
         }
     }
 }

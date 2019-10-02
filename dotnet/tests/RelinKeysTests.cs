@@ -111,8 +111,8 @@ namespace SEALNetTest
             Assert.IsTrue(relinKeys.HasKey(2));
             Assert.IsFalse(relinKeys.HasKey(3));
 
-            Utilities.AssertThrow<ArgumentException>(() => relinKeys.Key(0));
-            Utilities.AssertThrow<ArgumentException>(() => relinKeys.Key(1));
+            Utilities.AssertThrows<ArgumentException>(() => relinKeys.Key(0));
+            Utilities.AssertThrows<ArgumentException>(() => relinKeys.Key(1));
 
             List<PublicKey> key1 = new List<PublicKey>(relinKeys.Key(2));
             Assert.AreEqual(4, key1.Count);
@@ -125,17 +125,17 @@ namespace SEALNetTest
             RelinKeys keys = new RelinKeys();
             SEALContext context = GlobalContext.BFVContext;
 
-            Utilities.AssertThrow<ArgumentNullException>(() => keys = new RelinKeys(null));
-            Utilities.AssertThrow<ArgumentNullException>(() => keys.Set(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys = new RelinKeys(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.Set(null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => keys.Save(null));
-            Utilities.AssertThrow<ArgumentNullException>(() => keys.Load(context, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
-            Utilities.AssertThrow<EndOfStreamException>(() => keys.Load(context, new MemoryStream()));
-            Utilities.AssertThrow<ArgumentNullException>(() => keys.UnsafeLoad(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
+            Utilities.AssertThrows<EndOfStreamException>(() => keys.Load(context, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(null));
         }
     }
 }
