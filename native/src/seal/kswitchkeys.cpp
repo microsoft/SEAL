@@ -85,8 +85,18 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void KSwitchKeys::load_members(istream &stream)
+    void KSwitchKeys::load_members(shared_ptr<SEALContext> context, istream &stream)
     {
+        // Verify parameters
+        if (!context)
+        {
+            throw invalid_argument("invalid context");
+        }
+        if (!context->parameters_set())
+        {
+            throw invalid_argument("encryption parameters are not set correctly");
+        }
+
         // Create new keys
         vector<vector<PublicKey>> new_keys;
 
@@ -120,7 +130,7 @@ namespace seal
                 for (size_t j = 0; j < keys_dim2; j++)
                 {
                     PublicKey key(pool_);
-                    key.unsafe_load(stream);
+                    key.unsafe_load(context, stream);
                     new_keys[index].emplace_back(move(key));
                 }
             }

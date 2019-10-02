@@ -81,6 +81,6 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SaveSize(void *thisptr, int64_t *resul
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UnsafeLoad(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
+SEALNETNATIVE HRESULT SEALCALL Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);

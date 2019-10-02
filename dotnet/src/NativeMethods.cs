@@ -635,7 +635,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void Ciphertext_UnsafeLoad(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
+        internal static extern void Ciphertext_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 
@@ -799,7 +799,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void KSwitchKeys_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KSwitchKeys_UnsafeLoad(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
+        internal static extern void KSwitchKeys_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 
@@ -884,7 +884,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void PublicKey_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void PublicKey_UnsafeLoad(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
+        internal static extern void PublicKey_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 

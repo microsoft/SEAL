@@ -225,19 +225,10 @@ namespace seal
         */
         inline void reserve(std::size_t size_capacity)
         {
-            // Record old size
-            std::size_t old_size = size_;
-
             // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid
             // or coeff_mod_count_ is zero (in which case no memory is allocated).
             reserve_internal(size_capacity, poly_modulus_degree_,
                 coeff_mod_count_);
-
-            // Clear the seed if the size changed
-            if (old_size != size_)
-            {
-                clear_seed();
-            }
         }
 
         /**
@@ -307,18 +298,9 @@ namespace seal
         */
         inline void resize(std::size_t size)
         {
-            // Record old size
-            std::size_t old_size = size_;
-
             // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid
             // or coeff_mod_count_ is zero (in which case no memory is allocated).
             resize_internal(size, poly_modulus_degree_, coeff_mod_count_);
-
-            // Clear the seed if the size changed
-            if (old_size != size_)
-            {
-                clear_seed();
-            }
         }
 
         /**
@@ -330,8 +312,6 @@ namespace seal
         {
             parms_id_ = parms_id_zero;
             is_ntt_form_ = false;
-            is_seed_set_ = false;
-            seed_ = {};
             size_ = 0;
             poly_modulus_degree_ = 0;
             coeff_mod_count_ = 0;
@@ -580,13 +560,15 @@ namespace seal
                 util::add_safe(
                     sizeof(parms_id_),
                     sizeof(SEAL_BYTE), // is_ntt_form_
-                    sizeof(SEAL_BYTE), // is_seed_set_
-                    sizeof(seed_),
                     sizeof(std::uint64_t), // size_
                     sizeof(std::uint64_t), // poly_modulus_degree_
                     sizeof(std::uint64_t), // coeff_mod_count_
                     sizeof(scale_),
-                    is_seed_set_ ? 0 : util::safe_cast<std::size_t>(data_.save_size())
+                    sizeof(SEAL_BYTE), // seeding indicator 
+                    // At minimum we need to save a seed
+                    std::max(
+                        util::safe_cast<std::size_t>(data_.save_size()),
+                        sizeof(random_seed_type))
             ));
 
             return util::safe_cast<std::streamoff>(util::add_safe(
@@ -605,7 +587,8 @@ namespace seal
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff save(std::ostream &stream,
+        inline std::streamoff save(
+            std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
@@ -620,16 +603,21 @@ namespace seal
         parameters is performed. This function should not be used unless the
         ciphertext comes from a fully trusted source.
 
+        @param[in] context The SEALContext
         @param[in] stream The stream to load the ciphertext from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
         @throws std::logic_error if the loaded data is invalid or if decompression
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::istream &stream)
+        inline std::streamoff unsafe_load(
+            std::shared_ptr<SEALContext> context,
+            std::istream &stream)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&Ciphertext::load_members, this, _1),
+                std::bind(&Ciphertext::load_members, this, std::move(context), _1),
                 stream);
         }
 
@@ -645,11 +633,12 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context,
+        inline std::streamoff load(
+            std::shared_ptr<SEALContext> context,
             std::istream &stream)
         {
             Ciphertext new_data(pool());
-            auto in_size = new_data.unsafe_load(stream);
+            auto in_size = new_data.unsafe_load(context, stream);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::logic_error("ciphertext data is invalid");
@@ -688,8 +677,11 @@ namespace seal
         encryption parameters is performed. This function should not be used
         unless the ciphertext comes from a fully trusted source.
 
+        @param[in] context The SEALContext
         @param[in] in The memory location to load the ciphertext from
         @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the loaded data is invalid or if decompression
@@ -697,11 +689,12 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff unsafe_load(
+            std::shared_ptr<SEALContext> context,
             const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&Ciphertext::load_members, this, _1),
+                std::bind(&Ciphertext::load_members, this, std::move(context), _1),
                 in, size);
         }
 
@@ -726,7 +719,7 @@ namespace seal
             const SEAL_BYTE *in, std::size_t size)
         {
             Ciphertext new_data(pool());
-            auto in_size = new_data.unsafe_load(in, size);
+            auto in_size = new_data.unsafe_load(context, in, size);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::logic_error("ciphertext data is invalid");
@@ -749,48 +742,6 @@ namespace seal
         SEAL_NODISCARD inline bool &is_ntt_form() noexcept
         {
             return is_ntt_form_;
-        }
-
-        /**
-        Returns whether half of the ciphertext can be generated from a seed. This
-        can only be the case when the ciphertext has been produced through symmetric
-        key encryption. If the seed is set, the ciphertext will automatically be
-        serialized in a compressed format. If this behavior is for some reason not
-        desired, the seed can be disabled by calling the function clear_seed().
-        */
-        SEAL_NODISCARD inline bool is_seed_set() noexcept
-        {
-            return is_seed_set_;
-        }
-
-        /**
-        Returns a reference to the currently set seed.
-        */
-        SEAL_NODISCARD inline const auto &seed() const noexcept
-        {
-            return seed_;
-        }
-
-        /**
-        Sets the seed to a given value. This function is intended for internal use
-        only. The user should never have any reason to manually change the value
-        of the seed as this can lead to unexpected behavior.
-
-        @param[in] new_seed The new value for the seed
-        */
-        inline void set_seed(const random_seed_type &new_seed) noexcept
-        {
-            is_seed_set_ = true;
-            seed_ = new_seed;
-        }
-
-        /**
-        Clears the seed, whether it was set or not.
-        */
-        inline void clear_seed() noexcept
-        {
-            is_seed_set_ = false;
-            seed_ = {};
         }
 
         /**
@@ -852,19 +803,17 @@ namespace seal
         void resize_internal(std::size_t size, std::size_t poly_modulus_degree,
             std::size_t coeff_mod_count);
 
-        void expand_seed(std::shared_ptr<SEALContext> context);
+        void expand_seed(
+            std::shared_ptr<SEALContext> context,
+            const random_seed_type &seed);
 
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::istream &stream);
+        void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
 
         parms_id_type parms_id_ = parms_id_zero;
 
         bool is_ntt_form_ = false;
-
-        bool is_seed_set_ = false;
-
-        random_seed_type seed_ = {};
 
         std::size_t size_ = 0;
 

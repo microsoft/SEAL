@@ -22,8 +22,6 @@ namespace seal
         // Copy over fields
         parms_id_ = assign.parms_id_;
         is_ntt_form_ = assign.is_ntt_form_;
-        is_seed_set_ = assign.is_seed_set_;
-        seed_ = assign.seed_;
         scale_ = assign.scale_;
 
         // Then resize
@@ -55,22 +53,12 @@ namespace seal
             throw invalid_argument("parms_id is not valid for encryption parameters");
         }
 
-        // Record old parms_id and size
-        auto old_parms_id = parms_id_;
-        size_t old_size = size_;
-
         // Need to set parms_id first
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
         reserve_internal(size_capacity,
             parms.poly_modulus_degree(), parms.coeff_modulus().size());
-
-        // Clear the seed if the parms_id or size changed
-        if (old_parms_id != parms_id_ || old_size != size_)
-        {
-            clear_seed();
-        }
     }
 
     void Ciphertext::reserve_internal(size_t size_capacity,
@@ -115,22 +103,12 @@ namespace seal
             throw invalid_argument("parms_id is not valid for encryption parameters");
         }
 
-        // Record old parms_id and size
-        auto old_parms_id = parms_id_;
-        size_t old_size = size_;
-
         // Need to set parms_id first
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
         resize_internal(size,
             parms.poly_modulus_degree(), parms.coeff_modulus().size());
-
-        // Clear the seed if the parms_id or size changed
-        if (old_parms_id != parms_id_ || old_size != size_)
-        {
-            clear_seed();
-        }
     }
 
     void Ciphertext::resize_internal(size_t size,
@@ -153,22 +131,23 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
-    void Ciphertext::expand_seed(shared_ptr<SEALContext> context)
+    void Ciphertext::expand_seed(
+        shared_ptr<SEALContext> context,
+        const random_seed_type &seed)
     {
         auto context_data_ptr = context->get_context_data(parms_id_);
         auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
 
         // Set up the BlakePRNG with appropriate non-default buffer size
         // and given seed.
-        BlakePRNG rg(seed_);
+        BlakePRNG rg(seed);
 
         // Flood the entire ciphertext polynomial with random data
         rg.generate(
             mul_safe(data_.size(), sizeof(ct_coeff_type)),
             reinterpret_cast<SEAL_BYTE*>(data_.begin()));
 
-        // Finally reduce each polynomial appropriately. Note that the function
-        // modulo_poly_coeffs_63 ignores the highest bit of each 64-bit word.
+        // Finally reduce each polynomial appropriately
         auto data_ptr = data_.begin();
         for (size_t poly_index = 0; poly_index < size_; poly_index++)
         {
@@ -179,6 +158,8 @@ namespace seal
                     [](auto in) {
                         return in & static_cast<ct_coeff_type>(0x7FFFFFFFFFFFFFFFULL);
                     });
+
+                // Then reduce; unfortunately we do two passes over the data here
                 modulo_poly_coeffs_63(
                     data_ptr,
                     poly_modulus_degree_,
@@ -207,16 +188,11 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
-            // Save the seed
-            SEAL_BYTE is_seed_set_byte = static_cast<SEAL_BYTE>(is_seed_set_);
-            stream.write(reinterpret_cast<const char*>(&is_seed_set_byte), sizeof(SEAL_BYTE));
-            stream.write(reinterpret_cast<const char*>(seed_.data()), sizeof(seed_));
+            // Save a zero for the seeding indicator
+            SEAL_BYTE is_seeded_byte{ 0 };
+            stream.write(reinterpret_cast<const char*>(&is_seeded_byte), sizeof(SEAL_BYTE));
 
-            // Save the data
-            if (is_seed_set_)
-            {
-                data_.save(stream, compr_mode_type::none);
-            }
+            data_.save(stream, compr_mode_type::none);
         }
         catch (const ios_base::failure &)
         {
@@ -231,8 +207,18 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::load_members(istream &stream)
+    void Ciphertext::load_members(shared_ptr<SEALContext> context, istream &stream)
     {
+        // Verify parameters
+        if (!context)
+        {
+            throw invalid_argument("invalid context");
+        }
+        if (!context->parameters_set())
+        {
+            throw invalid_argument("encryption parameters are not set correctly");
+        }
+
         Ciphertext new_data(data_.pool());
 
         auto old_except_mask = stream.exceptions();
@@ -243,6 +229,14 @@ namespace seal
 
             parms_id_type parms_id{};
             stream.read(reinterpret_cast<char*>(&parms_id), sizeof(parms_id_type));
+
+            // Check the parms_id so we can correctly expand from seed if necessary
+            auto context_data_ptr = context->get_context_data(parms_id);
+            if (!context_data_ptr)
+            {
+                throw logic_error("ciphertext data is invalid");
+            }
+
             SEAL_BYTE is_ntt_form_byte;
             stream.read(reinterpret_cast<char*>(&is_ntt_form_byte), sizeof(SEAL_BYTE));
             uint64_t size64 = 0;
@@ -254,10 +248,27 @@ namespace seal
             double scale = 0;
             stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
 
-            // Load the data
-            new_data.data_.load(stream);
-            if (unsigned_neq(new_data.data_.size(),
-                mul_safe(size64, poly_modulus_degree64, coeff_mod_count64)))
+            SEAL_BYTE is_seeded_byte;
+            stream.read(reinterpret_cast<char*>(&is_seeded_byte), sizeof(SEAL_BYTE));
+
+            if (SEAL_BYTE(0) == is_seeded_byte)
+            {
+                // Load the data
+                new_data.data_.load(stream);
+                if (unsigned_neq(new_data.data_.size(),
+                    mul_safe(size64, poly_modulus_degree64, coeff_mod_count64)))
+                {
+                    throw logic_error("ciphertext data is invalid");
+                }
+            }
+            else if (SEAL_BYTE(1) == is_seeded_byte)
+            {
+                // Load the seed and expand
+                random_seed_type seed;
+                stream.read(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+                new_data.expand_seed(move(context), seed);
+            }
+            else
             {
                 throw logic_error("ciphertext data is invalid");
             }

@@ -29,7 +29,7 @@ namespace SEALTest
             GaloisKeys keys;
             GaloisKeys test_keys;
             keys.save(stream);
-            test_keys.unsafe_load(stream);
+            test_keys.unsafe_load(context, stream);
             ASSERT_EQ(keys.data().size(), test_keys.data().size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
             ASSERT_EQ(0ULL, keys.data().size());
@@ -62,7 +62,7 @@ namespace SEALTest
             GaloisKeys keys;
             GaloisKeys test_keys;
             keys.save(stream);
-            test_keys.unsafe_load(stream);
+            test_keys.unsafe_load(context, stream);
             ASSERT_EQ(keys.data().size(), test_keys.data().size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
             ASSERT_EQ(0ULL, keys.data().size());
