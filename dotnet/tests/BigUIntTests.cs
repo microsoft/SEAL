@@ -479,7 +479,6 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ModuloInvertFail1Test()
         {
             // Should fail when modulus is zero
@@ -489,11 +488,10 @@ namespace SEALNetTest
             Assert.IsTrue(mod.IsZero);
             Assert.IsFalse(bui.IsZero);
 
-            BigUInt result = bui.ModuloInvert(mod);
+            Utilities.AssertThrow<ArgumentException>(() => bui.ModuloInvert(mod));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ModuloInvertFail2Test()
         {
             // Should fail when modulus is not greater than the BigUInt value
@@ -503,11 +501,10 @@ namespace SEALNetTest
             Assert.IsFalse(mod.IsZero);
             Assert.IsFalse(bui.IsZero);
 
-            BigUInt result = bui.ModuloInvert(mod);
+            Utilities.AssertThrow<ArgumentException>(() => bui.ModuloInvert(mod));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ModuloInvertFail3Test()
         {
             // Should fail when biguint value and modulus are not coprime
@@ -517,7 +514,7 @@ namespace SEALNetTest
             Assert.IsFalse(mod.IsZero);
             Assert.IsFalse(bui.IsZero);
 
-            BigUInt result = bui.ModuloInvert(mod);
+            Utilities.AssertThrow<ArgumentException>(() => bui.ModuloInvert(mod));
         }
 
         [TestMethod]
@@ -536,7 +533,6 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void TryModuloInvertFail1Test()
         {
             BigUInt bui = new BigUInt("DEADBEEF");
@@ -545,11 +541,10 @@ namespace SEALNetTest
 
             // Should fail when modulus is zero
             Assert.IsTrue(mod.IsZero);
-            bui.TryModuloInvert(mod, inverse);
+            Utilities.AssertThrow<ArgumentException>(() => bui.TryModuloInvert(mod, inverse));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void TryModuloInvertFail2Test()
         {
             BigUInt bui = new BigUInt("DEADBEEF");
@@ -558,7 +553,7 @@ namespace SEALNetTest
 
             // Should fail when biguint is bigger than modulus
             Assert.IsFalse(mod.IsZero);
-            bui.TryModuloInvert(mod, inverse);
+            Utilities.AssertThrow<ArgumentException>(() => bui.TryModuloInvert(mod, inverse));
         }
 
         [TestMethod]
@@ -907,7 +902,7 @@ namespace SEALNetTest
 
             Utilities.AssertThrow<ArgumentOutOfRangeException>(() => bui.Data(1));
 
-            Utilities.AssertThrow<ArgumentOutOfRangeException>(() => { var val = bui[5]; });
+            Utilities.AssertThrow<ArgumentOutOfRangeException>(() => bui[5] );
             Utilities.AssertThrow<ArgumentOutOfRangeException>(() => bui[5] = 2);
 
             Utilities.AssertThrow<ArgumentNullException>(() => bui.DivideRemainder(bui1, null));

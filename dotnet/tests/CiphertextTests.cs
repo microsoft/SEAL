@@ -184,7 +184,7 @@ namespace SEALNetTest
 
             encryptor.Encrypt(plain, cipher);
 
-            Assert.ThrowsException<IndexOutOfRangeException>(() =>
+            Utilities.AssertThrow<IndexOutOfRangeException>(() =>
             {
                 // We only have 2 polynomials
                 ulong data = cipher[2, 0];
@@ -208,7 +208,7 @@ namespace SEALNetTest
             // We should have 8192 coefficients
             data = cipher[0, 32767]; // This will succeed
 
-            Assert.ThrowsException<IndexOutOfRangeException>(() =>
+            Utilities.AssertThrow<IndexOutOfRangeException>(() =>
             {
                 data = cipher[0, 32768]; // This will fail
             });
@@ -226,8 +226,8 @@ namespace SEALNetTest
             encryptor.Encrypt(plain, cipher);
             ulong data = 0;
 
-            Assert.ThrowsException<IndexOutOfRangeException>(() => data = cipher[65536]);
-            Assert.ThrowsException<IndexOutOfRangeException>(() => cipher[65536] = 10ul);
+            Utilities.AssertThrow<IndexOutOfRangeException>(() => data = cipher[65536]);
+            Utilities.AssertThrow<IndexOutOfRangeException>(() => cipher[65536] = 10ul);
         }
 
         [TestMethod]
@@ -293,44 +293,44 @@ namespace SEALNetTest
             Ciphertext cipher = new Ciphertext();
             Ciphertext copy = null;
 
-            Assert.ThrowsException<ArgumentNullException>(() => copy = new Ciphertext((Ciphertext)null));
+            Utilities.AssertThrow<ArgumentNullException>(() => copy = new Ciphertext((Ciphertext)null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(context, null, pool));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, pool));
-            Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, pool));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher = new Ciphertext(context, null, pool));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, pool));
+            Utilities.AssertThrow<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext((SEALContext)null, poolu));
-            Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, poolu));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher = new Ciphertext((SEALContext)null, poolu));
+            Utilities.AssertThrow<ArgumentException>(() => cipher = new Ciphertext(context, poolu));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(context, null, 6ul));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, 6ul, poolu));
-            Assert.ThrowsException<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, 6ul, poolu));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher = new Ciphertext(context, null, 6ul));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, 6ul, poolu));
+            Utilities.AssertThrow<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, 6ul, poolu));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Reserve(context, null, 10ul));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Reserve(null, ParmsId.Zero, 10ul));
-            Assert.ThrowsException<ArgumentException>(() => cipher.Reserve(context, ParmsId.Zero, 10ul));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Reserve(context, null, 10ul));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Reserve(null, ParmsId.Zero, 10ul));
+            Utilities.AssertThrow<ArgumentException>(() => cipher.Reserve(context, ParmsId.Zero, 10ul));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Reserve(null, 10ul));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Reserve(null, 10ul));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Resize(context, null, 10ul));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Resize(null, ParmsId.Zero, 10ul));
-            Assert.ThrowsException<ArgumentException>(() => cipher.Resize(context, ParmsId.Zero, 10ul));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Resize(context, null, 10ul));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Resize(null, ParmsId.Zero, 10ul));
+            Utilities.AssertThrow<ArgumentException>(() => cipher.Resize(context, ParmsId.Zero, 10ul));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Resize(null, 10ul));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Resize(null, 10ul));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Set(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Set(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(cipher, null));
-            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(cipher, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsValidFor(cipher, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(cipher, null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Save(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Save(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.UnsafeLoad(context, null));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.UnsafeLoad(null, new MemoryStream()));
-            Assert.ThrowsException<EndOfStreamException>(() => cipher.UnsafeLoad(context, new MemoryStream()));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.UnsafeLoad(context, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.UnsafeLoad(null, new MemoryStream()));
+            Utilities.AssertThrow<EndOfStreamException>(() => cipher.UnsafeLoad(context, new MemoryStream()));
 
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Load(null, new MemoryStream()));
-            Assert.ThrowsException<ArgumentNullException>(() => cipher.Load(context, null));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Load(null, new MemoryStream()));
+            Utilities.AssertThrow<ArgumentNullException>(() => cipher.Load(context, null));
         }
     }
 }

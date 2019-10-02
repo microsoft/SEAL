@@ -91,9 +91,9 @@ namespace SEALNetTest
         {
             MemoryPoolHandle handle = new MemoryPoolHandle();
 
-            Assert.ThrowsException<ArgumentNullException>(() => handle = new MemoryPoolHandle(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => handle = new MemoryPoolHandle(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => handle.Set(null));
+            Utilities.AssertThrow<ArgumentNullException>(() => handle.Set(null));
         }
     }
 }
