@@ -549,6 +549,7 @@ namespace seal
                 stream.read(reinterpret_cast<char*>(&size64), sizeof(std::uint64_t));
 
                 // Set new size
+                // WARNING: THIS IS POSSIBLY UNSAFE IF size64 IS LARGE!
                 resize(util::safe_cast<std::size_t>(size64));
 
                 // Read data

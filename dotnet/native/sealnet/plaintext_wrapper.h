@@ -63,6 +63,10 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Release(void *thisptr);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Capacity(void *thisptr, uint64_t *capacity);
 
+SEALNETNATIVE HRESULT SEALCALL Plaintext_UInt64Count(void* thisptr, uint64_t* uint64_count);
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_UInt64CountCapacity(void* thisptr, uint64_t* uint64_count_capacity);
+
 SEALNETNATIVE HRESULT SEALCALL Plaintext_SignificantCoeffCount(void *thisptr, uint64_t *significant_coeff_count);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_NonZeroCoeffCount(void *thisptr, uint64_t *nonzero_coeff_count);

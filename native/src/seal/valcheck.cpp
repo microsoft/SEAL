@@ -29,7 +29,6 @@ namespace seal
 
         if (in.is_ntt_form())
         {
-
             // Are the parameters valid for given plaintext? This check is slightly
             // non-trivial because we need to consider both the case where key_parms_id
             // equals first_parms_id, and cases where they are different.
@@ -43,6 +42,8 @@ namespace seal
             auto &parms = context_data_ptr->parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t poly_modulus_degree = parms.poly_modulus_degree();
+
+            // Check that buffer size is correct
             if (mul_safe(coeff_modulus.size(), poly_modulus_degree) != in.coeff_count())
             {
                 return false;
@@ -51,11 +52,6 @@ namespace seal
         else
         {
             auto &parms = context->first_context_data()->parms();
-            if (parms.scheme() != scheme_type::BFV)
-            {
-                return false;
-            }
-
             size_t poly_modulus_degree = parms.poly_modulus_degree();
             if (in.coeff_count() > poly_modulus_degree)
             {
@@ -118,15 +114,6 @@ namespace seal
 
         // Are the parameters valid for given secret key?
         if (in.parms_id() != context->key_parms_id())
-        {
-            return false;
-        }
-
-        auto context_data_ptr = context->key_context_data();
-        auto &parms = context_data_ptr->parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t poly_modulus_degree = parms.poly_modulus_degree();
-        if (mul_safe(coeff_modulus.size(), poly_modulus_degree) != in.data().coeff_count())
         {
             return false;
         }
@@ -221,7 +208,65 @@ namespace seal
             static_cast<const KSwitchKeys &>(in), move(context));
     }
 
-    bool is_valid_for(
+    bool is_buffer_valid_for(const Plaintext &in)
+    {
+        if (in.coeff_count() != in.uint64_count())
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool is_buffer_valid_for(const Ciphertext &in)
+    {
+        // Check that the buffer size is correct
+        if (in.uint64_count() != mul_safe(
+            in.size(), in.coeff_mod_count(), in.poly_modulus_degree()))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool is_buffer_valid_for(const SecretKey &in)
+    {
+        return is_buffer_valid_for(in.data());
+    }
+
+    bool is_buffer_valid_for(const PublicKey &in)
+    {
+        return is_buffer_valid_for(in.data());
+    }
+
+    bool is_buffer_valid_for(const KSwitchKeys &in)
+    {
+        for (auto &a : in.data())
+        {
+            for (auto &b : a)
+            {
+                if (!is_buffer_valid_for(b))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    bool is_buffer_valid_for(const RelinKeys &in)
+    {
+        return is_buffer_valid_for(static_cast<const KSwitchKeys &>(in));
+    }
+
+    bool is_buffer_valid_for(const GaloisKeys &in)
+    {
+        return is_buffer_valid_for(static_cast<const KSwitchKeys &>(in));
+    }
+
+    bool is_data_valid_for(
         const Plaintext &in,
         shared_ptr<const SEALContext> context)
     {
@@ -271,7 +316,7 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const Ciphertext &in,
         shared_ptr<const SEALContext> context)
     {
@@ -308,7 +353,7 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const SecretKey &in,
         shared_ptr<const SEALContext> context)
     {
@@ -341,7 +386,7 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const PublicKey &in,
         shared_ptr<const SEALContext> context)
     {
@@ -378,7 +423,7 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const KSwitchKeys &in,
         shared_ptr<const SEALContext> context)
     {
@@ -400,7 +445,7 @@ namespace seal
             {
                 // Check that b is a valid public key; this also checks that its
                 // parms_id matches key_parms_id.
-                if (!is_valid_for(b, context))
+                if (!is_data_valid_for(b, context))
                 {
                     return false;
                 }
@@ -410,17 +455,17 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const RelinKeys &in,
         shared_ptr<const SEALContext> context)
     {
-        return is_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
+        return is_data_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const GaloisKeys &in,
         shared_ptr<const SEALContext> context)
     {
-        return is_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
+        return is_data_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
     }
 }

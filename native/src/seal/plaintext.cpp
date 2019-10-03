@@ -212,6 +212,8 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             stream.write(reinterpret_cast<const char*>(&parms_id_), sizeof(parms_id_type));
+            uint64_t coeff_count64 = static_cast<uint64_t>(coeff_count_);
+            stream.write(reinterpret_cast<const char*>(&coeff_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
             data_.save(stream, compr_mode_type::none);
         }
@@ -241,17 +243,19 @@ namespace seal
             parms_id_type parms_id{};
             stream.read(reinterpret_cast<char*>(&parms_id), sizeof(parms_id_type));
 
+            uint64_t coeff_count64 = 0;
+            stream.read(reinterpret_cast<char*>(&coeff_count64), sizeof(uint64_t));
+
             double scale = 0;
             stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
 
+            // Set the metadata
+            new_data.parms_id_ = parms_id;
+            new_data.coeff_count_ = safe_cast<size_t>(coeff_count64);
+            new_data.scale_ = scale;
+
             // Load the data
             new_data.data_.load(stream);
-
-            // Set the parms_id
-            new_data.parms_id_ = parms_id;
-
-            // Set the scale
-            new_data.scale_ = scale;
         }
         catch (const ios_base::failure &)
         {

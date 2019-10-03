@@ -84,7 +84,8 @@ namespace seal
         */
         explicit Plaintext(std::size_t coeff_count,
             MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(coeff_count, std::move(pool))
+            coeff_count_(coeff_count),
+            data_(coeff_count_, std::move(pool))
         {
         }
 
@@ -102,7 +103,8 @@ namespace seal
         */
         explicit Plaintext(std::size_t capacity, std::size_t coeff_count,
             MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(capacity, coeff_count, std::move(pool))
+            coeff_count_(coeff_count),
+            data_(capacity, coeff_count_, std::move(pool))
         {
         }
 
@@ -183,6 +185,7 @@ namespace seal
                 throw std::logic_error("cannot reserve for an NTT transformed Plaintext");
             }
             data_.reserve(capacity);
+            coeff_count_ = data_.size();
         }
 
         /**
@@ -203,6 +206,7 @@ namespace seal
         inline void release() noexcept
         {
             parms_id_ = parms_id_zero;
+            coeff_count_ = 0;
             scale_ = 1.0;
             data_.release();
         }
@@ -223,6 +227,7 @@ namespace seal
                 throw std::logic_error("cannot reserve for an NTT transformed Plaintext");
             }
             data_.resize(coeff_count);
+            coeff_count_ = coeff_count;
         }
 
         /**
@@ -278,6 +283,7 @@ namespace seal
         {
             data_.resize(1);
             data_[0] = const_coeff;
+            coeff_count_ = 1;
             return *this;
         }
 
@@ -295,7 +301,7 @@ namespace seal
             {
                 return;
             }
-            if (start_coeff + length - 1 >= coeff_count())
+            if (start_coeff + length - 1 >= coeff_count_)
             {
                 throw std::out_of_range("length must be non-negative and start_coeff + length - 1 must be within [0, coeff_count)");
             }
@@ -310,7 +316,7 @@ namespace seal
         */
         inline void set_zero(std::size_t start_coeff)
         {
-            if (start_coeff >= coeff_count())
+            if (start_coeff >= coeff_count_)
             {
                 throw std::out_of_range("start_coeff must be within [0, coeff_count)");
             }
@@ -347,7 +353,7 @@ namespace seal
         SEAL_NODISCARD inline gsl::span<pt_coeff_type> data_span()
         {
             return gsl::span<pt_coeff_type>(data_.begin(),
-                static_cast<std::ptrdiff_t>(coeff_count()));
+                static_cast<std::ptrdiff_t>(coeff_count_));
         }
 
         /**
@@ -356,7 +362,7 @@ namespace seal
         SEAL_NODISCARD inline gsl::span<const pt_coeff_type> data_span() const
         {
             return gsl::span<const pt_coeff_type>(data_.cbegin(),
-                static_cast<std::ptrdiff_t>(coeff_count()));
+                static_cast<std::ptrdiff_t>(coeff_count_));
         }
 #endif
         /**
@@ -367,11 +373,11 @@ namespace seal
         */
         SEAL_NODISCARD inline pt_coeff_type *data(std::size_t coeff_index)
         {
-            if (coeff_count() == 0)
+            if (!coeff_count_)
             {
                 return nullptr;
             }
-            if (coeff_index >= coeff_count())
+            if (coeff_index >= coeff_count_)
             {
                 throw std::out_of_range("coeff_index must be within [0, coeff_count)");
             }
@@ -386,11 +392,11 @@ namespace seal
         SEAL_NODISCARD inline const pt_coeff_type *data(
             std::size_t coeff_index) const
         {
-            if (coeff_count() == 0)
+            if (!coeff_count_)
             {
                 return nullptr;
             }
-            if (coeff_index >= coeff_count())
+            if (coeff_index >= coeff_count_)
             {
                 throw std::out_of_range("coeff_index must be within [0, coeff_count)");
             }
@@ -463,7 +469,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool is_zero() const
         {
-            return (coeff_count() == 0) ||
+            return !coeff_count_ ||
                 std::all_of(data_.cbegin(), data_.cend(),
                     util::is_zero<pt_coeff_type>);
         }
@@ -473,6 +479,14 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t capacity() const noexcept
         {
+            return uint64_count_capacity();
+        }
+
+        /**
+        Returns the total size of the current allocation in 64-bit words.
+        */
+        SEAL_NODISCARD inline std::size_t uint64_count_capacity() const noexcept
+        {
             return data_.capacity();
         }
 
@@ -480,6 +494,14 @@ namespace seal
         Returns the coefficient count of the current plaintext polynomial.
         */
         SEAL_NODISCARD inline std::size_t coeff_count() const noexcept
+        {
+            return coeff_count_;
+        }
+
+        /**
+        Returns the total size of the current plaintext in 64-bit words.
+        */
+        SEAL_NODISCARD inline std::size_t uint64_count() const noexcept
         {
             return data_.size();
         }
@@ -489,11 +511,11 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t significant_coeff_count() const
         {
-            if (coeff_count() == 0)
+            if (!coeff_count_)
             {
                 return 0;
             }
-            return util::get_significant_uint64_count_uint(data_.cbegin(), coeff_count());
+            return util::get_significant_uint64_count_uint(data_.cbegin(), coeff_count_);
         }
 
         /**
@@ -501,11 +523,11 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t nonzero_coeff_count() const
         {
-            if (coeff_count() == 0)
+            if (!coeff_count_)
             {
                 return 0;
             }
-            return util::get_nonzero_uint64_count_uint(data_.cbegin(), coeff_count());
+            return util::get_nonzero_uint64_count_uint(data_.cbegin(), coeff_count_);
         }
 
         /**
@@ -534,7 +556,7 @@ namespace seal
             {
                 throw std::invalid_argument("cannot convert NTT transformed plaintext to string");
             }
-            return util::poly_to_hex_string(data_.cbegin(), coeff_count(), 1);
+            return util::poly_to_hex_string(data_.cbegin(), coeff_count_, 1);
         }
 
         /**
@@ -548,6 +570,7 @@ namespace seal
             std::size_t members_size = util::ztools::deflate_size_bound(
                 util::add_safe(
                     sizeof(parms_id_),
+                    sizeof(coeff_count_),
                     sizeof(scale_),
                     util::safe_cast<std::size_t>(data_.save_size())
             ));
@@ -766,6 +789,8 @@ namespace seal
         void load_members(std::istream &stream);
 
         parms_id_type parms_id_ = parms_id_zero;
+
+        std::size_t coeff_count_ = 0;
 
         double scale_ = 1.0;
 

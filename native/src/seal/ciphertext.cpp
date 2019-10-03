@@ -3,6 +3,7 @@
 
 #include "seal/ciphertext.h"
 #include "seal/randomgen.h"
+#include "seal/valcheck.h"
 #include "seal/util/defines.h"
 #include "seal/util/polyarithsmallmod.h"
 
@@ -229,14 +230,6 @@ namespace seal
 
             parms_id_type parms_id{};
             stream.read(reinterpret_cast<char*>(&parms_id), sizeof(parms_id_type));
-
-            // Check the parms_id so we can correctly expand from seed if necessary
-            auto context_data_ptr = context->get_context_data(parms_id);
-            if (!context_data_ptr)
-            {
-                throw logic_error("ciphertext data is invalid");
-            }
-
             SEAL_BYTE is_ntt_form_byte;
             stream.read(reinterpret_cast<char*>(&is_ntt_form_byte), sizeof(SEAL_BYTE));
             uint64_t size64 = 0;
@@ -248,38 +241,40 @@ namespace seal
             double scale = 0;
             stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
 
-            SEAL_BYTE is_seeded_byte;
-            stream.read(reinterpret_cast<char*>(&is_seeded_byte), sizeof(SEAL_BYTE));
-
-            if (SEAL_BYTE(0) == is_seeded_byte)
-            {
-                // Load the data
-                new_data.data_.load(stream);
-                if (unsigned_neq(new_data.data_.size(),
-                    mul_safe(size64, poly_modulus_degree64, coeff_mod_count64)))
-                {
-                    throw logic_error("ciphertext data is invalid");
-                }
-            }
-            else if (SEAL_BYTE(1) == is_seeded_byte)
-            {
-                // Load the seed and expand
-                random_seed_type seed;
-                stream.read(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
-                new_data.expand_seed(move(context), seed);
-            }
-            else
-            {
-                throw logic_error("ciphertext data is invalid");
-            }
-
-            // Set values
+            // Set values already at this point for the metadata validity check
             new_data.parms_id_ = parms_id;
             new_data.is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
             new_data.size_ = safe_cast<size_t>(size64);
             new_data.poly_modulus_degree_ = safe_cast<size_t>(poly_modulus_degree64);
             new_data.coeff_mod_count_ = safe_cast<size_t>(coeff_mod_count64);
             new_data.scale_ = scale;
+
+            // Checking the validity of loaded metadata
+            if (!is_metadata_valid_for(new_data, context))
+            {
+                throw logic_error("ciphertext data is invalid");
+            }
+
+            auto poly_uint64_count = mul_safe(poly_modulus_degree64, coeff_mod_count64);
+
+            // Load the data
+            new_data.data_.reserve(poly_uint64_count);
+            new_data.data_.load(stream);
+
+            if (unsigned_eq(new_data.data_.size(), poly_uint64_count))
+            {
+                // Single polynomial size data was loaded, so we are in the
+                // seeded ciphertext case. Next load the seed.
+                random_seed_type seed;
+                stream.read(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+                new_data.expand_seed(move(context), seed);
+            }
+            else if (unsigned_neq(
+                new_data.data_.size(),
+                mul_safe(poly_uint64_count, size64)))
+            {
+                throw logic_error("ciphertext data is invalid");
+            }
         }
         catch (const ios_base::failure &)
         {

@@ -389,6 +389,30 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Returns the total size of the current allocation in 64-bit words.
+        /// </summary>
+        public ulong UInt64CountCapacity
+        {
+            get
+            {
+                NativeMethods.Plaintext_UInt64CountCapacity(NativePtr, out ulong capacity);
+                return capacity;
+            }
+        }
+
+        /// <summary>
+        /// Returns the total size of the current plaintext in 64-bit words.
+        /// </summary>
+        public ulong UInt64Count
+        {
+            get
+            {
+                NativeMethods.Plaintext_UInt64Count(NativePtr, out ulong uint64Count);
+                return uint64Count;
+            }
+        }
+
+        /// <summary>
         /// Returns the coefficient count of the current plaintext polynomial.
         /// </summary>
         public ulong CoeffCount

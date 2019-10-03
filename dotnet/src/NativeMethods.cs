@@ -717,6 +717,12 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_Capacity(IntPtr thisptr, out ulong capacity);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_UInt64Count(IntPtr thisptr, out ulong uint64Count);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_UInt64CountCapacity(IntPtr thisptr, out ulong uint64CountCapacity);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Plaintext_SignificantCoeffCount(IntPtr thisptr, out ulong significantCoeffCount);
 
         [DllImport(sealnetnative, PreserveSig = false)]
@@ -1144,27 +1150,6 @@ namespace Microsoft.Research.SEAL
         #endregion
 
         #region ValCheck methods
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_Plaintext_IsMetadataValidFor(IntPtr plaintext, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_Ciphertext_IsMetadataValidFor(IntPtr ciphertext, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_SecretKey_IsMetadataValidFor(IntPtr secretKey, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_PublicKey_IsMetadataValidFor(IntPtr publicKey, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_KSwitchKeys_IsMetadataValidFor(IntPtr kswitchKeys, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_RelinKeys_IsMetadataValidFor(IntPtr relinKeys, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_GaloisKeys_IsMetadataValidFor(IntPtr galoisKeys, IntPtr context, out bool result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void ValCheck_Plaintext_IsValidFor(IntPtr plaintext, IntPtr context, out bool result);
