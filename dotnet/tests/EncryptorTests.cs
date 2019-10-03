@@ -125,14 +125,14 @@ namespace SEALNetTest
             Ciphertext cipher = new Ciphertext();
             MemoryPoolHandle pool_invalid = new MemoryPoolHandle();
 
-            Assert.ThrowsException<ArgumentNullException>(() => encryptor = new Encryptor(context, null));
-            Assert.ThrowsException<ArgumentNullException>(() => encryptor = new Encryptor(null, pubKey));
-            Assert.ThrowsException<ArgumentException>(() => encryptor = new Encryptor(context, pubKey_invalid));
+            Utilities.AssertThrows<ArgumentNullException>(() => encryptor = new Encryptor(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => encryptor = new Encryptor(null, pubKey));
+            Utilities.AssertThrows<ArgumentException>(() => encryptor = new Encryptor(context, pubKey_invalid));
 
-            Assert.ThrowsException<ArgumentNullException>(() => encryptor.Encrypt(plain, null));
-            Assert.ThrowsException<ArgumentNullException>(() => encryptor.Encrypt(null, cipher));
-            Assert.ThrowsException<ArgumentException>(() => encryptor.Encrypt(plain, cipher, pool_invalid));
-            Assert.ThrowsException<ArgumentException>(() => encryptor.EncryptZero(cipher, pool_invalid));
+            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.Encrypt(plain, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.Encrypt(null, cipher));
+            Utilities.AssertThrows<ArgumentException>(() => encryptor.Encrypt(plain, cipher, pool_invalid));
+            Utilities.AssertThrows<ArgumentException>(() => encryptor.EncryptZero(cipher, pool_invalid));
         }
     }
 }

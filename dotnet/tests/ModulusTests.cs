@@ -51,23 +51,23 @@ namespace SEALNetTest
         public void ExceptionsTest()
         {
             // Too small polyModulusDegree
-            Assert.ThrowsException<ArgumentException>(() => CoeffModulus.Create(1, new int[] { 2 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(1, new int[] { 2 }));
 
             // Too large polyModulusDegree
-            Assert.ThrowsException<ArgumentException>(() => CoeffModulus.Create(65536, new int[] { 30 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(65536, new int[] { 30 }));
 
             // Invalid polyModulusDegree
-            Assert.ThrowsException<ArgumentException>(() => CoeffModulus.Create(1023, new int[] { 20 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(1023, new int[] { 20 }));
 
             // Invalid bitSize
-            Assert.ThrowsException<ArgumentException>(() => CoeffModulus.Create(2048, new int[] { 0 }));
-            Assert.ThrowsException<ArgumentException>(() => CoeffModulus.Create(2048, new int[] { -30 }));
-            Assert.ThrowsException<ArgumentException>(() => CoeffModulus.Create(2048, new int[] { 30, -30 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, new int[] { 0 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, new int[] { -30 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, new int[] { 30, -30 }));
 
             // Too small primes requested
-            Assert.ThrowsException<InvalidOperationException>(() => CoeffModulus.Create(2, new int[] { 2 }));
-            Assert.ThrowsException<InvalidOperationException>(() => CoeffModulus.Create(2, new int[] { 3, 3, 3 }));
-            Assert.ThrowsException<InvalidOperationException>(() => CoeffModulus.Create(1024, new int[] { 8 }));
+            Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(2, new int[] { 2 }));
+            Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(2, new int[] { 3, 3, 3 }));
+            Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(1024, new int[] { 8 }));
         }
     }
 }
