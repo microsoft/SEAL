@@ -94,9 +94,9 @@ namespace SEALNetTest
 
             Utilities.AssertThrows<ArgumentNullException>(() => key.Set(null));
 
-            Utilities.AssertThrow<ArgumentNullException>(() => key.Save(null));
-            Utilities.AssertThrow<ArgumentNullException>(() => key.UnsafeLoad(context, null));
-            Utilities.AssertThrow<ArgumentNullException>(() => key.UnsafeLoad(null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.UnsafeLoad(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.UnsafeLoad(null, new MemoryStream()));
 
             Utilities.AssertThrows<ArgumentNullException>(() => key.Load(context, null));
             Utilities.AssertThrows<ArgumentNullException>(() => key.Load(null, new MemoryStream()));
