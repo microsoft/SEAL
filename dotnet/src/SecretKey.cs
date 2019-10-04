@@ -144,21 +144,28 @@ namespace Microsoft.Research.SEAL
         /// parameters is performed. This function should not be used unless the
         /// SecretKey comes from a fully trusted source.
         /// </remarks>
+        /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the SecretKey from</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentNullException">if context or stream is
+        /// null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support reading</exception>
+        /// <exception cref="ArgumentException">if context is not set or encryption
+        /// parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         /// <exception cref="InvalidOperationException">if the loaded data is invalid
         /// or if the loaded compression mode is not supported</exception>
-        public long UnsafeLoad(Stream stream)
+        public long UnsafeLoad(SEALContext context, Stream stream)
         {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
             return Serialization.Load(
                 (byte[] outptr, ulong size, out long outBytes) =>
-                    NativeMethods.SecretKey_UnsafeLoad(NativePtr, outptr, size,
-                    out outBytes),
+                    NativeMethods.SecretKey_UnsafeLoad(NativePtr, context.NativePtr,
+                    outptr, size, out outBytes),
                 stream);
         }
 

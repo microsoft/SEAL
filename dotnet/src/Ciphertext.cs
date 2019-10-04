@@ -466,30 +466,6 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the total size of the current allocation in 64-bit words.
-        /// </summary>
-        public ulong UInt64CountCapacity
-        {
-            get
-            {
-                NativeMethods.Ciphertext_UInt64CountCapacity(NativePtr, out ulong capacity);
-                return capacity;
-            }
-        }
-
-        /// <summary>
-        /// Returns the total size of the current ciphertext in 64-bit words.
-        /// </summary>
-        public ulong UInt64Count
-        {
-            get
-            {
-                NativeMethods.Ciphertext_UInt64Count(NativePtr, out ulong uint64Count);
-                return uint64Count;
-            }
-        }
-
-        /// <summary>
         /// Check whether the current ciphertext is transparent, i.e. does not require
         /// a secret key to decrypt. In typical security models such transparent
         /// ciphertexts would not be considered to be valid. Starting from the second

@@ -27,8 +27,8 @@ namespace SEALTest
         Ciphertext ctxt(context);
         ctxt.reserve(10);
         ASSERT_EQ(0ULL, ctxt.size());
-        ASSERT_EQ(0ULL, ctxt.uint64_count());
-        ASSERT_EQ(10ULL * 2 * 1, ctxt.uint64_count_capacity());
+        ASSERT_EQ(0ULL, ctxt.int_array().size());
+        ASSERT_EQ(10ULL * 2 * 1, ctxt.int_array().capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
@@ -36,8 +36,8 @@ namespace SEALTest
 
         ctxt.reserve(5);
         ASSERT_EQ(0ULL, ctxt.size());
-        ASSERT_EQ(0ULL, ctxt.uint64_count());
-        ASSERT_EQ(5ULL * 2 * 1, ctxt.uint64_count_capacity());
+        ASSERT_EQ(0ULL, ctxt.int_array().size());
+        ASSERT_EQ(5ULL * 2 * 1, ctxt.int_array().capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
         ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
@@ -45,8 +45,8 @@ namespace SEALTest
 
         ctxt.reserve(10);
         ASSERT_EQ(0ULL, ctxt.size());
-        ASSERT_EQ(0ULL, ctxt.uint64_count());
-        ASSERT_EQ(10ULL * 2 * 1, ctxt.uint64_count_capacity());
+        ASSERT_EQ(0ULL, ctxt.int_array().size());
+        ASSERT_EQ(10ULL * 2 * 1, ctxt.int_array().capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
         ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
@@ -55,8 +55,8 @@ namespace SEALTest
 
         ctxt.reserve(2);
         ASSERT_EQ(0ULL, ctxt.size());
-        ASSERT_EQ(2ULL * 2 * 1, ctxt.uint64_count_capacity());
-        ASSERT_EQ(0ULL, ctxt.uint64_count());
+        ASSERT_EQ(2ULL * 2 * 1, ctxt.int_array().capacity());
+        ASSERT_EQ(0ULL, ctxt.int_array().size());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
         ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
@@ -65,8 +65,8 @@ namespace SEALTest
 
         ctxt.reserve(5);
         ASSERT_EQ(0ULL, ctxt.size());
-        ASSERT_EQ(5ULL * 2 * 1, ctxt.uint64_count_capacity());
-        ASSERT_EQ(0ULL, ctxt.uint64_count());
+        ASSERT_EQ(5ULL * 2 * 1, ctxt.int_array().capacity());
+        ASSERT_EQ(0ULL, ctxt.int_array().size());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
         ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());

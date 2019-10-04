@@ -392,26 +392,6 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Capacity(void *thisptr, uint64_t *capac
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_UInt64Count(void* thisptr, uint64_t* uint64_count)
-{
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
-    IfNullRet(plain, E_POINTER);
-    IfNullRet(uint64_count, E_POINTER);
-
-    *uint64_count = plain->uint64_count();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL Plaintext_UInt64CountCapacity(void* thisptr, uint64_t* uint64_count_capacity)
-{
-    Plaintext* plain = FromVoid<Plaintext>(thisptr);
-    IfNullRet(plain, E_POINTER);
-    IfNullRet(uint64_count_capacity, E_POINTER);
-
-    *uint64_count_capacity = plain->uint64_count_capacity();
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL Plaintext_SignificantCoeffCount(void *thisptr, uint64_t *significant_coeff_count)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
@@ -534,16 +514,19 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Save(void *thisptr, uint8_t *outptr, ui
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_UnsafeLoad(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALNETNATIVE HRESULT SEALCALL Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
+    const auto &sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(plain->unsafe_load(
+            sharedctx,
             reinterpret_cast<SEAL_BYTE *>(inptr),
             util::safe_cast<size_t>(size)));
         return S_OK;

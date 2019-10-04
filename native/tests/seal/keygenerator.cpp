@@ -299,7 +299,7 @@ namespace SEALTest
         auto sk3 = keygen3.secret_key();
         auto pk3 = keygen3.public_key();
         ASSERT_EQ(sk3.data(), sk2.data());
-        for (size_t i = 0; i < pk3.data().uint64_count(); i++)
+        for (size_t i = 0; i < pk3.data().int_array().size(); i++)
         {
             ASSERT_EQ(pk3.data().data()[i], pk2.data().data()[i]);
         }

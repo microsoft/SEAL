@@ -332,6 +332,14 @@ namespace seal
         }
 
         /**
+        Returns a reference to the backing IntArray object.
+        */
+        SEAL_NODISCARD inline const auto &int_array() const noexcept
+        {
+            return data_;
+        }
+
+        /**
         Returns a pointer to the beginning of the plaintext polynomial.
         */
         SEAL_NODISCARD inline pt_coeff_type *data()
@@ -479,14 +487,6 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t capacity() const noexcept
         {
-            return uint64_count_capacity();
-        }
-
-        /**
-        Returns the total size of the current allocation in 64-bit words.
-        */
-        SEAL_NODISCARD inline std::size_t uint64_count_capacity() const noexcept
-        {
             return data_.capacity();
         }
 
@@ -496,14 +496,6 @@ namespace seal
         SEAL_NODISCARD inline std::size_t coeff_count() const noexcept
         {
             return coeff_count_;
-        }
-
-        /**
-        Returns the total size of the current plaintext in 64-bit words.
-        */
-        SEAL_NODISCARD inline std::size_t uint64_count() const noexcept
-        {
-            return data_.size();
         }
 
         /**
@@ -607,16 +599,21 @@ namespace seal
         parameters is performed. This function should not be used unless the
         plaintext comes from a fully trusted source.
 
+        @param[in] context The SEALContext
         @param[in] stream The stream to load the plaintext from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
         @throws std::logic_error if the loaded data is invalid or if decompression
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::istream &stream)
+        inline std::streamoff unsafe_load(
+            std::shared_ptr<SEALContext> context,
+            std::istream &stream)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&Plaintext::load_members, this, _1),
+                std::bind(&Plaintext::load_members, this, std::move(context), _1),
                 stream);
         }
 
@@ -637,7 +634,7 @@ namespace seal
             std::istream &stream)
         {
             Plaintext new_data(pool());
-            auto in_size = new_data.unsafe_load(stream);
+            auto in_size = new_data.unsafe_load(context, stream);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::logic_error("Plaintext data is invalid");
@@ -676,19 +673,24 @@ namespace seal
         encryption parameters is performed. This function should not be used
         unless the plaintext comes from a fully trusted source.
 
+        @param[in] context The SEALContext
         @param[in] in The memory location to load the plaintext from
         @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the loaded data is invalid or if decompression
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(
+            std::shared_ptr<SEALContext> context,
+            const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&Plaintext::load_members, this, _1),
+                std::bind(&Plaintext::load_members, this, std::move(context), _1),
                 in, size);
         }
 
@@ -712,7 +714,7 @@ namespace seal
             const SEAL_BYTE *in, std::size_t size)
         {
             Plaintext new_data(pool());
-            auto in_size = new_data.unsafe_load(in, size);
+            auto in_size = new_data.unsafe_load(context, in, size);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::logic_error("Plaintext data is invalid");
@@ -786,7 +788,7 @@ namespace seal
     private:
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::istream &stream);
+        void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
 
         parms_id_type parms_id_ = parms_id_zero;
 

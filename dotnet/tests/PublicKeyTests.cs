@@ -103,7 +103,6 @@ namespace SEALNetTest
             Utilities.AssertThrows<EndOfStreamException>(() => key.Load(context, new MemoryStream()));
 
             Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(key, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(key, null));
         }
     }
 }

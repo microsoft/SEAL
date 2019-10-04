@@ -753,7 +753,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void Plaintext_UnsafeLoad(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
+        internal static extern void Plaintext_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 
@@ -927,7 +927,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void SecretKey_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SecretKey_UnsafeLoad(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
+        internal static extern void SecretKey_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 

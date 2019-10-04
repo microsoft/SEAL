@@ -202,26 +202,6 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UInt64Count(void *thisptr, uint64_t *uint64_count)
-{
-    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
-    IfNullRet(cipher, E_POINTER);
-    IfNullRet(uint64_count, E_POINTER);
-
-    *uint64_count = cipher->uint64_count();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UInt64CountCapacity(void *thisptr, uint64_t *uint64_count_capacity)
-{
-    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
-    IfNullRet(cipher, E_POINTER);
-    IfNullRet(uint64_count_capacity, E_POINTER);
-
-    *uint64_count_capacity = cipher->uint64_count_capacity();
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Size(void *thisptr, uint64_t *size)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);

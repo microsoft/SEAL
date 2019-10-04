@@ -334,6 +334,14 @@ namespace seal
         Ciphertext &operator =(Ciphertext &&assign) = default;
 
         /**
+        Returns a reference to the backing IntArray object.
+        */
+        SEAL_NODISCARD inline const auto &int_array() const noexcept
+        {
+            return data_;
+        }
+
+        /**
         Returns a pointer to the beginning of the ciphertext data.
         */
         SEAL_NODISCARD inline ct_coeff_type *data() noexcept
@@ -507,14 +515,6 @@ namespace seal
         }
 
         /**
-        Returns the total size of the current allocation in 64-bit words.
-        */
-        SEAL_NODISCARD inline std::size_t uint64_count_capacity() const noexcept
-        {
-            return data_.capacity();
-        }
-
-        /**
         Returns the capacity of the allocation. This means the largest size
         of the ciphertext that can be stored in the current allocation with
         the current encryption parameters.
@@ -523,15 +523,7 @@ namespace seal
         {
             std::size_t poly_uint64_count = poly_modulus_degree_ * coeff_mod_count_;
             return poly_uint64_count ?
-                uint64_count_capacity() / poly_uint64_count : std::size_t(0);
-        }
-
-        /**
-        Returns the total size of the current ciphertext in 64-bit words.
-        */
-        SEAL_NODISCARD inline std::size_t uint64_count() const noexcept
-        {
-            return data_.size();
+                data_.capacity() / poly_uint64_count : std::size_t(0);
         }
 
         /**
@@ -543,7 +535,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool is_transparent() const
         {
-            return (!uint64_count() ||
+            return (!data_.size() ||
                 (size_ < SEAL_CIPHERTEXT_SIZE_MIN) ||
                 std::all_of(data(1), data_.cend(), util::is_zero<ct_coeff_type>));
         }
@@ -564,11 +556,7 @@ namespace seal
                     sizeof(std::uint64_t), // poly_modulus_degree_
                     sizeof(std::uint64_t), // coeff_mod_count_
                     sizeof(scale_),
-                    sizeof(SEAL_BYTE), // seeding indicator 
-                    // At minimum we need to save a seed
-                    std::max(
-                        util::safe_cast<std::size_t>(data_.save_size()),
-                        sizeof(random_seed_type))
+                    util::safe_cast<std::size_t>(data_.save_size())
             ));
 
             return util::safe_cast<std::streamoff>(util::add_safe(

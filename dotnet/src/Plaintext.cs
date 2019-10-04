@@ -389,30 +389,6 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the total size of the current allocation in 64-bit words.
-        /// </summary>
-        public ulong UInt64CountCapacity
-        {
-            get
-            {
-                NativeMethods.Plaintext_UInt64CountCapacity(NativePtr, out ulong capacity);
-                return capacity;
-            }
-        }
-
-        /// <summary>
-        /// Returns the total size of the current plaintext in 64-bit words.
-        /// </summary>
-        public ulong UInt64Count
-        {
-            get
-            {
-                NativeMethods.Plaintext_UInt64Count(NativePtr, out ulong uint64Count);
-                return uint64Count;
-            }
-        }
-
-        /// <summary>
         /// Returns the coefficient count of the current plaintext polynomial.
         /// </summary>
         public ulong CoeffCount
@@ -554,21 +530,28 @@ namespace Microsoft.Research.SEAL
         /// parameters is performed. This function should not be used unless the
         /// plaintext comes from a fully trusted source.
         /// </remarks>
+        /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the plaintext from</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentNullException">if context or stream is
+        /// null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support reading</exception>
+        /// <exception cref="ArgumentException">if context is not set or encryption
+        /// parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         /// <exception cref="InvalidOperationException">if the loaded data is invalid
         /// or if the loaded compression mode is not supported</exception>
-        public long UnsafeLoad(Stream stream)
+        public long UnsafeLoad(SEALContext context, Stream stream)
         {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
             return Serialization.Load(
                 (byte[] outptr, ulong size, out long outBytes) =>
-                    NativeMethods.Plaintext_UnsafeLoad(NativePtr, outptr, size,
-                    out outBytes),
+                    NativeMethods.Plaintext_UnsafeLoad(context.NativePtr, NativePtr,
+                    outptr, size, out outBytes),
                 stream);
         }
 

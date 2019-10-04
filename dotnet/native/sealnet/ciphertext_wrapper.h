@@ -33,10 +33,6 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Set(void *thisptr, void *assign);
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UInt64Count(void *thisptr, uint64_t *uint64_count);
-
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UInt64CountCapacity(void *thisptr, uint64_t *uint64_count_capacity);
-
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Size(void *thisptr, uint64_t *size);
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_SizeCapacity(void *thisptr, uint64_t *size_capacity);

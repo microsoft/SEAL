@@ -26,11 +26,13 @@ namespace seal
 
     @param[in] in The plaintext to check
     @param[in] context The SEALContext
+    @param[in] allow_pure_key_levels Determines whether pure key levels (i.e.,
+    non-data levels) should be considered valid
     */
     SEAL_NODISCARD bool is_metadata_valid_for(
         const Plaintext& in,
-        std::shared_ptr<const SEALContext> context);
-
+        std::shared_ptr<const SEALContext> context,
+        bool allow_pure_key_levels = false); 
     /**
     Check whether the given ciphertext is valid for a given SEALContext. If the
     given SEALContext is not set, the encryption parameters are invalid, or the
@@ -40,10 +42,13 @@ namespace seal
 
     @param[in] in The ciphertext to check
     @param[in] context The SEALContext
+    @param[in] allow_pure_key_levels Determines whether pure key levels (i.e.,
+    non-data levels) should be considered valid
     */
     SEAL_NODISCARD bool is_metadata_valid_for(
         const Ciphertext& in,
-        std::shared_ptr<const SEALContext> context);
+        std::shared_ptr<const SEALContext> context,
+        bool allow_pure_key_levels = false);
 
     /**
     Check whether the given secret key is valid for a given SEALContext. If the

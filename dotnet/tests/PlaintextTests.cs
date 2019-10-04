@@ -290,7 +290,7 @@ namespace SEALNetTest
 
             Assert.AreNotSame(plain, other);
             Assert.AreEqual(plain, other);
-            Assert.IsTrue(ValCheck.IsMetadataValidFor(other, context));
+            Assert.IsTrue(ValCheck.IsValidFor(other, context));
         }
 
         [TestMethod]
@@ -329,12 +329,12 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
 
             Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(plain, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(plain, null));
 
             Utilities.AssertThrows<ArgumentNullException>(() => plain.Save(null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(null));
-            Utilities.AssertThrows<EndOfStreamException>(() => plain.UnsafeLoad(new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(context, null));
+            Utilities.AssertThrows<EndOfStreamException>(() => plain.UnsafeLoad(context, new MemoryStream()));
 
             Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(context, null));
             Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(null, new MemoryStream()));

@@ -3,7 +3,6 @@
 
 #include "seal/ciphertext.h"
 #include "seal/randomgen.h"
-#include "seal/valcheck.h"
 #include "seal/util/defines.h"
 #include "seal/util/polyarithsmallmod.h"
 
@@ -189,10 +188,7 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
-            // Save a zero for the seeding indicator
-            SEAL_BYTE is_seeded_byte{ 0 };
-            stream.write(reinterpret_cast<const char*>(&is_seeded_byte), sizeof(SEAL_BYTE));
-
+            // Save the IntArray
             data_.save(stream, compr_mode_type::none);
         }
         catch (const ios_base::failure &)
@@ -250,18 +246,35 @@ namespace seal
             new_data.scale_ = scale;
 
             // Checking the validity of loaded metadata
-            if (!is_metadata_valid_for(new_data, context))
+            // Note: We allow pure key levels here! This is to allow load_members
+            // to be used also when loading derived objects like PublicKey. This
+            // further means that functions reading in Ciphertext objects must check
+            // that for those use-cases the Ciphertext truly is at the data level
+            // if it is supposed to be. In other words, one cannot assume simply
+            // based on load_members succeeding that the Ciphertext is valid for
+            // computations.
+            if (!is_metadata_valid_for(new_data, context, true))
             {
                 throw logic_error("ciphertext data is invalid");
             }
 
-            auto poly_uint64_count = mul_safe(poly_modulus_degree64, coeff_mod_count64);
+            // Compute the total uint64 count required and reserve memory.
+            // Note that this must be done after the metadata is checked for validity.
+            auto total_uint64_count = mul_safe(
+                new_data.size_,
+                new_data.poly_modulus_degree_,
+                new_data.coeff_mod_count_);
+            new_data.data_.reserve(total_uint64_count);
 
             // Load the data
-            new_data.data_.reserve(poly_uint64_count);
             new_data.data_.load(stream);
 
-            if (unsigned_eq(new_data.data_.size(), poly_uint64_count))
+            // Expected buffer size in the seeded case
+            auto seeded_uint64_count = poly_modulus_degree64 * coeff_mod_count64;
+
+            // This is the case where we need to expand a seed,
+            // otherwise full ciphertext data was loaded and do nothing
+            if (unsigned_eq(new_data.data_.size(), seeded_uint64_count))
             {
                 // Single polynomial size data was loaded, so we are in the
                 // seeded ciphertext case. Next load the seed.
@@ -269,9 +282,9 @@ namespace seal
                 stream.read(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
                 new_data.expand_seed(move(context), seed);
             }
-            else if (unsigned_neq(
-                new_data.data_.size(),
-                mul_safe(poly_uint64_count, size64)))
+
+            // Verify that the buffer is now correct after expanding the seed
+            if (!is_buffer_valid_for(new_data))
             {
                 throw logic_error("ciphertext data is invalid");
             }

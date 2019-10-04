@@ -114,7 +114,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Save(void *thisptr, uint8_t *outptr, ui
     try
     {
         *out_bytes = util::safe_cast<int64_t>(skey->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr),
+            reinterpret_cast<SEAL_BYTE*>(outptr),
             util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
@@ -133,17 +133,20 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Save(void *thisptr, uint8_t *outptr, ui
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_UnsafeLoad(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
+    const auto &sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(skey->unsafe_load(
-            reinterpret_cast<SEAL_BYTE *>(inptr),
+            sharedctx,
+            reinterpret_cast<SEAL_BYTE*>(inptr),
             util::safe_cast<size_t>(size)));
         return S_OK;
     }
@@ -174,7 +177,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Load(void *thisptr, void *context, uint
     {
         *in_bytes = util::safe_cast<int64_t>(skey->load(
             sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
+            reinterpret_cast<SEAL_BYTE*>(inptr),
             util::safe_cast<size_t>(size)));
         return S_OK;
     }
