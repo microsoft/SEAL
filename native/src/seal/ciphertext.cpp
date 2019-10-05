@@ -264,16 +264,21 @@ namespace seal
                 new_data.size_,
                 new_data.poly_modulus_degree_,
                 new_data.coeff_mod_count_);
+
+            // Reserve memory for the entire (expected) ciphertext data
             new_data.data_.reserve(total_uint64_count);
 
-            // Load the data
-            new_data.data_.load(stream);
+            // Load the data. Note that we are supplying also the expected maximum
+            // size of the loaded IntArray. This is an important security measure to
+            // prevent a malformed IntArray from causing arbitrarily large memory
+            // allocations.
+            new_data.data_.load(stream, total_uint64_count);
 
             // Expected buffer size in the seeded case
             auto seeded_uint64_count = poly_modulus_degree64 * coeff_mod_count64;
 
-            // This is the case where we need to expand a seed,
-            // otherwise full ciphertext data was loaded and do nothing
+            // This is the case where we need to expand a seed, otherwise full
+            // ciphertext data was (possibly) loaded and do nothing
             if (unsigned_eq(new_data.data_.size(), seeded_uint64_count))
             {
                 // Single polynomial size data was loaded, so we are in the
@@ -283,7 +288,7 @@ namespace seal
                 new_data.expand_seed(move(context), seed);
             }
 
-            // Verify that the buffer is now correct after expanding the seed
+            // Verify that the buffer is correct
             if (!is_buffer_valid(new_data))
             {
                 throw logic_error("ciphertext data is invalid");

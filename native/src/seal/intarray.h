@@ -449,17 +449,22 @@ namespace seal
 
         /**
         Loads a IntArray from an input stream overwriting the current IntArray.
+        This function takes optionally a bound on the size for the loaded IntArray
+        and throws an exception if the size indicated by the loaded metadata exceeds
+        the provided value. The check is omitted if in_size_bound is zero.
 
         @param[in] stream The stream to load the IntArray from
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @param[in] in_size_bound A bound on the size of the loaded IntArray
+        @throws std::logic_error if the loaded data is invalid, if the loaded size
+        exceeds in_size_bound, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::istream &stream)
+        inline std::streamoff load(
+            std::istream &stream, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&IntArray<T_>::load_members, this, _1),
+                std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound),
                 stream);
         }
 
@@ -489,21 +494,26 @@ namespace seal
 
         /**
         Loads a IntArray from a given memory location overwriting the current
-        IntArray.
+        IntArray. This function takes optionally a bound on the size for the loaded
+        IntArray and throws an exception if the size indicated by the loaded
+        metadata exceeds the provided value. The check is omitted if in_size_bound
+        is zero.
 
         @param[in] in The memory location to load the SmallModulus from
         @param[in] size The number of bytes available in the given memory location
+        @param[in] in_size_bound A bound on the size of the loaded IntArray
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the loaded data is invalid, if the loaded size
+        exceeds in_size_bound, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(
+            const SEAL_BYTE *in, std::size_t size, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&IntArray<T_>::load_members, this, _1),
+                std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound),
                 in, size);
         }
 
@@ -537,7 +547,7 @@ namespace seal
             stream.exceptions(old_except_mask);
         }
 
-        void load_members(std::istream &stream)
+        void load_members(std::istream &stream, std::size_t in_size_bound)
         {
             auto old_except_mask = stream.exceptions();
             try
@@ -548,8 +558,15 @@ namespace seal
                 std::uint64_t size64 = 0;
                 stream.read(reinterpret_cast<char*>(&size64), sizeof(std::uint64_t));
 
-                // Set new size
-                // WARNING: THIS IS POSSIBLY UNSAFE IF size64 IS LARGE!
+                // Check (optionally) that the size in the metadata does not exceed
+                // in_size_bound
+                if (in_size_bound && util::unsigned_gt(size64, in_size_bound))
+                {
+                    throw std::logic_error("unexpected size");
+                }
+
+                // Set new size; this is potentially unsafe if size64 was not checked
+                // against expected_size
                 resize(util::safe_cast<std::size_t>(size64));
 
                 // Read data
