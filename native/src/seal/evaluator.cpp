@@ -2522,7 +2522,7 @@ namespace seal
 
         // Perform rotation and key switching
         apply_galois_inplace(encrypted,
-            steps_to_galois_elt(steps, coeff_count),
+            galois_elt_from_step(steps, coeff_count),
             galois_keys, move(pool));
     }
 

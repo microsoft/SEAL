@@ -224,7 +224,9 @@ namespace seal
         return relin_keys;
     }
 
-    GaloisKeys KeyGenerator::galois_keys(const vector<uint64_t> &galois_elts)
+    GaloisKeys KeyGenerator::galois_keys(
+        const vector<uint64_t> &galois_elts,
+        bool save_seed)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
@@ -234,6 +236,11 @@ namespace seal
 
         // Extract encryption parameters.
         auto &context_data = *context_->key_context_data();
+        if (!context_data.qualifiers().using_batching)
+        {
+            throw logic_error("encryption parameters do not support batching");
+        }
+
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -287,7 +294,7 @@ namespace seal
             // Create Galois keys.
             generate_one_kswitch_key(
                 rotated_secret_key.get(),
-                galois_keys.data()[index]);
+                galois_keys.data()[index], save_seed);
         }
 
         // Set the parms_id
@@ -296,48 +303,26 @@ namespace seal
         return galois_keys;
     }
 
-    GaloisKeys KeyGenerator::galois_keys(const vector<int> &steps)
+    vector<uint64_t> KeyGenerator::galois_elts_from_steps(const vector<int> &steps)
     {
-        // Check to see if secret key and public key have been generated
-        if (!sk_generated_)
-        {
-            throw logic_error("cannot generate Galois keys for unspecified secret key");
-        }
-
-        // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
-        if (!context_data.qualifiers().using_batching)
-        {
-            throw logic_error("encryption parameters do not support batching");
-        }
-
-        auto &parms = context_data.parms();
-        size_t coeff_count = parms.poly_modulus_degree();
-
         vector<uint64_t> galois_elts;
+        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         transform(steps.begin(), steps.end(), back_inserter(galois_elts),
-            [&](auto s) { return steps_to_galois_elt(s, coeff_count); });
-
-        return galois_keys(galois_elts);
+            [&](auto s) { return galois_elt_from_step(s, coeff_count); });
+        return galois_elts;
     }
 
-    GaloisKeys KeyGenerator::galois_keys()
+    vector<uint64_t> KeyGenerator::galois_elts_all()
     {
-        // Check to see if secret key and public key have been generated
-        if (!sk_generated_)
-        {
-            throw logic_error("cannot generate Galois keys for unspecified secret key");
-        }
-
         size_t coeff_count = static_cast<size_t>(
             context_->key_context_data()->parms().poly_modulus_degree());
         uint64_t m = static_cast<uint64_t>(coeff_count) << 1;
         int logn = get_power_of_two(static_cast<uint64_t>(coeff_count));
 
-        vector<uint64_t> logn_galois_keys{};
+        vector<uint64_t> galois_elts{};
 
         // Generate Galois keys for m - 1 (X -> X^{m-1})
-        logn_galois_keys.push_back(m - 1);
+        galois_elts.push_back(m - 1);
 
         // Generate Galois key for power of 3 mod m (X -> X^{3^k}) and
         // for negative power of 3 mod m (X -> X^{-3^k})
@@ -346,16 +331,16 @@ namespace seal
         try_mod_inverse(3, m, neg_two_power_of_three);
         for (int i = 0; i < logn - 1; i++)
         {
-            logn_galois_keys.push_back(two_power_of_three);
+            galois_elts.push_back(two_power_of_three);
             two_power_of_three *= two_power_of_three;
             two_power_of_three &= (m - 1);
 
-            logn_galois_keys.push_back(neg_two_power_of_three);
+            galois_elts.push_back(neg_two_power_of_three);
             neg_two_power_of_three *= neg_two_power_of_three;
             neg_two_power_of_three &= (m - 1);
         }
 
-        return galois_keys(logn_galois_keys);
+        return galois_elts;
     }
 
     const SecretKey &KeyGenerator::secret_key() const

@@ -1378,7 +1378,7 @@ namespace seal
             std::size_t coeff_count = parms.poly_modulus_degree();
 
             // Perform rotation and key switching
-            apply_galois_inplace(encrypted, util::steps_to_galois_elt(0, coeff_count),
+            apply_galois_inplace(encrypted, util::galois_elt_from_step(0, coeff_count),
                 galois_keys, std::move(pool));
         }
 

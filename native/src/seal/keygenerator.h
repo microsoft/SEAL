@@ -88,7 +88,7 @@ namespace seal
         */
         SEAL_NODISCARD inline RelinKeys relin_keys()
         {
-            return relin_keys(1);
+            return relin_keys(1, false);
         }
 
         /**
@@ -101,7 +101,7 @@ namespace seal
         @param[out] stream The stream to save the relinearization keys to
         @param[in] compr_mode The desired compressoin mode
         */
-        inline std::streamoff relin_keys_save(
+        SEAL_NODISCARD inline std::streamoff relin_keys_save(
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default)
         {
@@ -126,8 +126,11 @@ namespace seal
         @param[in] galois_elts The Galois elements for which to generate keys
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        SEAL_NODISCARD GaloisKeys galois_keys(
-            const std::vector<std::uint64_t> &galois_elts);
+        SEAL_NODISCARD inline GaloisKeys galois_keys(
+            const std::vector<std::uint64_t> &galois_elts)
+        {
+            return galois_keys(galois_elts, false);
+        }
 
         /**
         Generates and saves Galois keys to an output stream. Half of the polynomials
@@ -140,10 +143,13 @@ namespace seal
         @param[in] galois_elts The Galois elements for which to generate keys
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        inline std::streamoff galois_keys_save(
+        SEAL_NODISCARD inline std::streamoff galois_keys_save(
             const std::vector<std::uint64_t> &galois_elts,
             std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const;
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys(galois_elts, true).save(stream, compr_mode);
+        }
 
         /**
         Generates and returns Galois keys. This function creates specific Galois
@@ -159,7 +165,10 @@ namespace seal
         and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
         */
-        SEAL_NODISCARD GaloisKeys galois_keys(const std::vector<int> &steps);
+        SEAL_NODISCARD GaloisKeys galois_keys(const std::vector<int> &steps)
+        {
+            return galois_keys(galois_elts_from_steps(steps));
+        }
 
         /**
         Generates and saves Galois keys to an output stream. Half of the polynomials
@@ -174,10 +183,13 @@ namespace seal
         and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
         */
-        inline std::streamoff galois_keys_save(
+        SEAL_NODISCARD inline std::streamoff galois_keys_save(
             const std::vector<int> &steps,
             std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const;
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys_save(galois_elts_from_steps(steps), stream, compr_mode);
+        }
 
         /**
         Generates and returns Galois keys. This function creates logarithmically
@@ -185,7 +197,10 @@ namespace seal
         to apply any Galois automorphism (e.g. rotations) on encrypted data. Most
         users will want to use this overload of the function.
         */
-        SEAL_NODISCARD GaloisKeys galois_keys();
+        SEAL_NODISCARD GaloisKeys galois_keys()
+        {
+            return galois_keys(galois_elts_all());
+        }
 
         /**
         Generates and saves Galois keys to an output stream. Half of the polynomials
@@ -196,9 +211,12 @@ namespace seal
         @param[out] stream The stream to save the relinearization keys to
         @param[in] compr_mode The desired compressoin mode
         */
-        inline std::streamoff relin_keys_save(
+        SEAL_NODISCARD inline std::streamoff galois_keys_save(
             std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const;
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys_save(galois_elts_all(), stream, compr_mode);
+        }
 
     private:
         KeyGenerator(const KeyGenerator &copy) = delete;
@@ -251,7 +269,36 @@ namespace seal
         @param[in] save_seed If true, save seed instead of a polynomial.
         @throws std::invalid_argument if count is zero or too large
         */
-        RelinKeys relin_keys(std::size_t count, bool save_seed = false);
+        RelinKeys relin_keys(std::size_t count, bool save_seed);
+
+        /**
+        Generates and returns Galois keys. This function creates specific Galois
+        keys that can be used to apply specific Galois automorphisms on encrypted
+        data. The user needs to give as input a vector of Galois elements
+        corresponding to the keys that are to be created.
+
+        The Galois elements are odd integers in the interval [1, M-1], where
+        M = 2*N, and N = poly_modulus_degree. Used with batching, a Galois element
+        3^i % M corresponds to a cyclic row rotation i steps to the left, and
+        a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation i
+        steps to the right. The Galois element M-1 corresponds to a column rotation
+        (row swap) in BFV, and complex conjugation in CKKS. In the polynomial view
+        (not batching), a Galois automorphism by a Galois element p changes Enc(plain(x))
+        to Enc(plain(x^p)).
+
+        @param[in] galois_elts The Galois elements for which to generate keys
+        @param[in] save_seed If true, replace second poly in Ciphertext with seed
+        @throws std::invalid_argument if the Galois elements are not valid
+        */
+        GaloisKeys galois_keys(
+            const std::vector<std::uint64_t> &galois_elts,
+            bool save_seed);
+
+        // Get a vector of galois_elts from a vector of steps.
+        std::vector<std::uint64_t> galois_elts_from_steps(const std::vector<int> &steps);
+
+        // Get a vector all necesssary galois_etls.
+        std::vector<std::uint64_t> galois_elts_all();
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);

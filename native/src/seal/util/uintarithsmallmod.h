@@ -326,7 +326,7 @@ namespace seal
             std::size_t uint64_count, std::uint64_t *quotient,
             MemoryPool &pool);
 
-        SEAL_NODISCARD std::uint64_t steps_to_galois_elt(
+        SEAL_NODISCARD std::uint64_t galois_elt_from_step(
             int steps, std::size_t coeff_count);
     }
 }
