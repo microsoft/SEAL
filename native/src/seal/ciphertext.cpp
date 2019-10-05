@@ -171,11 +171,16 @@ namespace seal
                 random_seed_type seed;
                 copy_n(data_1_ptr + 1, seed.size(), seed.begin());
 
-                // Create and serialize a half copy of data_.
-                // Alternatively, save_members cannot be constant.
-                IntArray<uint64_t> copy_data(data_.size() / 2);
-                copy_n(data_.cbegin(), copy_data.size(), copy_data.begin());
-                copy_data.save(stream, compr_mode_type::none);
+                // Save_members must be a const method.
+                // Create an alias of data_, must be handled with care.
+                // Alternatively, create and serialize a half copy of data_.
+                IntArray<ct_coeff_type> alias_data(data_.pool_);
+                alias_data.capacity_ = alias_data.size_ = data_.size_ / 2;
+                auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(const_cast<ct_coeff_type *>(data_.cbegin()));
+                swap(alias_data.data_, alias_ptr);
+                data_.save(stream, compr_mode_type::none);
+                swap(alias_data.data_, alias_ptr);
+                alias_data.capacity_ = alias_data.size_ = 0;
 
                 // Save the seed
                 stream.write(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));

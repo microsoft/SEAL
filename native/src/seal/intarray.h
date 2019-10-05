@@ -20,6 +20,8 @@
 
 namespace seal
 {
+    class Ciphertext;
+
     /**
     A resizable container for storing an array of arithmetic data types or
     SEAL_BYTE types (e.g., std::byte). The allocations are done from a memory
@@ -42,6 +44,8 @@ namespace seal
             std::is_same<typename std::decay<T_>::type, SEAL_BYTE>::value>>
     class IntArray
     {
+        friend class Ciphertext;
+
     public:
         using T = typename std::decay<T_>::type;
 
@@ -334,20 +338,21 @@ namespace seal
 
         /**
         Resizes the array to given size. When resizing to larger size the data
-        in the array remains unchanged and any new space is initialized to zero;
-        when resizing to smaller size the last elements of the array are dropped.
-        If the capacity is not already large enough to hold the new size, the
-        array is also reallocated.
+        in the array remains unchanged and any new space is initialized to zero
+        if fill_zero is set to true; when resizing to smaller size the last
+        elements of the array are dropped. If the capacity is not already large
+        enough to hold the new size, the array is also reallocated.
 
         @param[in] size The size of the array
+        @param[in] fill_zero If true, append zeros.
         */
-        inline void resize(std::size_t size)
+        inline void resize(std::size_t size, bool fill_zero = true)
         {
             if (size <= capacity_)
             {
                 // Are we changing size to bigger within current capacity?
                 // If so, need to set top terms to zero
-                if (size > size_)
+                if (size > size_ && fill_zero)
                 {
                     std::fill(end(), begin() + size, T(0));
                 }
@@ -362,7 +367,10 @@ namespace seal
             // to reallocate to bigger
             auto new_data(util::allocate<T>(size, pool_));
             std::copy_n(cbegin(), size_, new_data.get());
-            std::fill(new_data.get() + size_, new_data.get() + size, T(0));
+            if (fill_zero)
+            {
+                std::fill(new_data.get() + size_, new_data.get() + size, T(0));
+            }
             std::swap(data_, new_data);
 
             // Set the coeff_count and capacity
