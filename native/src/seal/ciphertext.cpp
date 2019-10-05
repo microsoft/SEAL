@@ -177,8 +177,6 @@ namespace seal
                     const_cast<ct_coeff_type *>(data_.cbegin()));
                 swap(alias_data.data_, alias_ptr);
                 data_.save(stream, compr_mode_type::none);
-                swap(alias_data.data_, alias_ptr);
-                alias_data.capacity_ = alias_data.size_ = 0;
 
                 // Save the seed
                 stream.write(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
