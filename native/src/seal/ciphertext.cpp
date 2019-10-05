@@ -5,6 +5,7 @@
 #include "seal/randomgen.h"
 #include "seal/util/defines.h"
 #include "seal/util/polyarithsmallmod.h"
+#include "seal/util/rlwe.h"
 
 using namespace std;
 using namespace seal::util;
@@ -138,35 +139,12 @@ namespace seal
         auto context_data_ptr = context->get_context_data(parms_id_);
         auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
 
-        // Set up the BlakePRNG with appropriate non-default buffer size
-        // and given seed.
-        BlakePRNG rg(seed);
-
-        // Flood the entire ciphertext polynomial with random data
-        rg.generate(
-            mul_safe(data_.size(), sizeof(ct_coeff_type)),
-            reinterpret_cast<SEAL_BYTE*>(data_.begin()));
-
-        // Finally reduce each polynomial appropriately
-        auto data_ptr = data_.begin();
-        for (size_t poly_index = 0; poly_index < size_; poly_index++)
-        {
-            for (size_t rns_index = 0; rns_index < coeff_mod_count_; rns_index++)
-            {
-                // Clear top bits from each coefficient
-                transform(data_ptr, data_ptr + poly_modulus_degree_, data_ptr,
-                    [](auto in) {
-                        return in & static_cast<ct_coeff_type>(0x7FFFFFFFFFFFFFFFULL);
-                    });
-
-                // Then reduce; unfortunately we do two passes over the data here
-                modulo_poly_coeffs_63(
-                    data_ptr,
-                    poly_modulus_degree_,
-                    coeff_modulus[rns_index],
-                    data_ptr); 
-            }
-        }
+        // 
+        auto poly_uint64_count = util::mul_safe(poly_modulus_degree_, coeff_mod_count_);
+        auto data_ptr = data_.begin() + util::safe_cast<std::size_t>(poly_uint64_count);
+        // Set up the BlakePRNG with a given seed.
+        // Rejection sampling to generate a uniform random polynomial.
+        sample_poly_uniform(make_shared<BlakePRNG>(seed), context_data_ptr->parms(), data_ptr);
     }
 
     void Ciphertext::save_members(ostream &stream) const

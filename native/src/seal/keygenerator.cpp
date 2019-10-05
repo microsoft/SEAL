@@ -120,7 +120,7 @@ namespace seal
 
             // Generate secret key
             uint64_t *secret_key = secret_key_.data().data();
-            sample_poly_ternary(secret_key, random, parms);
+            sample_poly_ternary(random, parms, secret_key);
 
             auto &small_ntt_tables = context_data.small_ntt_tables();
             for (size_t i = 0; i < coeff_mod_count; i++)
@@ -170,8 +170,7 @@ namespace seal
 
         shared_ptr<UniformRandomGenerator> random(
             parms.random_generator()->create());
-        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(),
-            random, true, public_key_.data(), pool_);
+        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, public_key_.data(), pool_);
 
         // Set the parms_id for public key
         public_key_.parms_id() = context_data.parms_id();
@@ -485,7 +484,7 @@ namespace seal
         for (size_t j = 0; j < decomp_mod_count; j++)
         {
             encrypt_zero_symmetric(secret_key_, context_,
-                key_context_data.parms_id(), random, true,
+                key_context_data.parms_id(), true,
                 destination[j].data(), pool_);
 
             factor = key_modulus.back().value() % key_modulus[j].value();
