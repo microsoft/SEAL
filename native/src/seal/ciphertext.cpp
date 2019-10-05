@@ -138,12 +138,10 @@ namespace seal
         const random_seed_type &seed)
     {
         auto context_data_ptr = context->get_context_data(parms_id_);
-        auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
 
-        auto data_1_ptr = data(1);
         // Set up the BlakePRNG with a given seed.
         // Rejection sampling to generate a uniform random polynomial.
-        sample_poly_uniform(make_shared<BlakePRNG>(seed), context_data_ptr->parms(), data_1_ptr);
+        sample_poly_uniform(make_shared<BlakePRNG>(seed), context_data_ptr->parms(), data(1));
     }
 
     void Ciphertext::save_members(ostream &stream) const
@@ -165,18 +163,18 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
-            const uint64_t *data_1_ptr = data(1);
-            if (static_cast<uint64_t>(0xffffffffffffffffULL) == data_1_ptr[0])
+            if (has_seed_marker())
             {
                 random_seed_type seed;
-                copy_n(data_1_ptr + 1, seed.size(), seed.begin());
+                copy_n(data(1) + 1, seed.size(), seed.begin());
 
                 // Save_members must be a const method.
                 // Create an alias of data_, must be handled with care.
                 // Alternatively, create and serialize a half copy of data_.
                 IntArray<ct_coeff_type> alias_data(data_.pool_);
                 alias_data.capacity_ = alias_data.size_ = data_.size_ / 2;
-                auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(const_cast<ct_coeff_type *>(data_.cbegin()));
+                auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(
+                    const_cast<ct_coeff_type *>(data_.cbegin()));
                 swap(alias_data.data_, alias_ptr);
                 data_.save(stream, compr_mode_type::none);
                 swap(alias_data.data_, alias_ptr);

@@ -799,6 +799,12 @@ namespace seal
 
         void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
 
+        inline bool has_seed_marker() const noexcept
+        {
+            return data_.size() && (size_ == 2) ?
+                (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
+        }
+
         parms_id_type parms_id_ = parms_id_zero;
 
         bool is_ntt_form_ = false;
