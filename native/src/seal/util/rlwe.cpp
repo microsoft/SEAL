@@ -237,7 +237,8 @@ namespace seal
             parms_id_type parms_id,
             bool is_ntt_form,
             Ciphertext &destination,
-            MemoryPoolHandle pool)
+            MemoryPoolHandle pool,
+            bool save_seed)
         {
             if (!pool)
             {
@@ -247,6 +248,7 @@ namespace seal
             {
                 throw invalid_argument("key_parms_id mismatch");
             }
+
             auto &context_data = *context->get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
@@ -255,94 +257,30 @@ namespace seal
             auto &small_ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = 2;
 
-            destination.resize(context, parms_id, encrypted_size);
-            destination.is_ntt_form() = is_ntt_form;
-            destination.scale() = 1.0;
-
-            // Create RNG, c[1] = a and error share one RNG.
-            auto rng = parms.random_generator()->create();
-
-            // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
-
-            // Sample a uniformly at random
-            // Set c[1] = a (we sample the NTT form directly)
-            sample_poly_uniform(rng, parms, destination.data(1));
-
-            // Sample e <-- chi
-            auto noise(allocate_poly(coeff_count, coeff_mod_count, pool));
-            sample_poly_normal(rng, parms, noise.get());
-
-            // calculate -(a*s + e) (mod q) and store in c[0]
-            for (size_t i = 0; i < coeff_mod_count; i++)
+            // If a polynomial is too small to store a seed, disable save_seed.
+            auto poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
+            if (save_seed &&
+                static_cast<uint64_t>(poly_uint64_count) < (random_seed_type().size() + 1))
             {
-                dyadic_product_coeffmod(
-                    secret_key.data().data() + i * coeff_count,
-                    destination.data(1) + i * coeff_count,
-                    coeff_count,
-                    coeff_modulus[i],
-                    destination.data() + i * coeff_count);
-                if (is_ntt_form)
-                {
-                    // Transform the noise e into NTT representation.
-                    ntt_negacyclic_harvey(
-                        noise.get() + i * coeff_count,
-                        small_ntt_tables[i]);
-                }
-                else
-                {
-                    inverse_ntt_negacyclic_harvey(
-                        destination.data() + i * coeff_count,
-                        small_ntt_tables[i]);
-                }
-                add_poly_poly_coeffmod(
-                    noise.get() + i * coeff_count,
-                    destination.data() + i * coeff_count,
-                    coeff_count,
-                    coeff_modulus[i],
-                    destination.data() + i * coeff_count);
-                negate_poly_coeffmod(
-                    destination.data() + i * coeff_count,
-                    coeff_count,
-                    coeff_modulus[i],
-                    destination.data() + i * coeff_count);
+                save_seed = false;
             }
-        }
-
-        void encrypt_zero_symmetric_save_seed(
-            const SecretKey &secret_key,
-            shared_ptr<SEALContext> context,
-            parms_id_type parms_id,
-            bool is_ntt_form,
-            Ciphertext &destination,
-            MemoryPoolHandle pool)
-        {
-            if (!pool)
-            {
-                throw invalid_argument("pool is uninitialized");
-            }
-            if (secret_key.parms_id() != context->key_parms_id())
-            {
-                throw invalid_argument("key_parms_id mismatch");
-            }
-            auto &context_data = *context->get_context_data(parms_id);
-            auto &parms = context_data.parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            size_t coeff_mod_count = coeff_modulus.size();
-            size_t coeff_count = parms.poly_modulus_degree();
-            auto &small_ntt_tables = context_data.small_ntt_tables();
-            size_t encrypted_size = 2;
 
             destination.resize(context, parms_id, encrypted_size);
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
 
-            // Create RNG, c[1] = a and error must not share an RNG.
-            auto rng_ciphertext = BlakePRNGFactory().create();
-            random_seed_type seed = rng_ciphertext->seed();
             auto rng_error = parms.random_generator()->create();
-
+            shared_ptr<UniformRandomGenerator> rng_ciphertext;
+            if (save_seed)
+            {
+                rng_ciphertext = BlakePRNGFactory().create();
+            }
+            else
+            {
+                rng_ciphertext = rng_error;
+            }
+            
             // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
-
             uint64_t *c0 = destination.data();
             uint64_t *c1 = destination.data(1);
 
@@ -389,11 +327,12 @@ namespace seal
                     c0 + i * coeff_count);
             }
 
-            // Write random seed to destination.data(1).
-            c1[0] = static_cast<uint64_t>(0xffffffffffffffffULL);
-            for (size_t i = 0; i < seed.size(); i++)
+            if (save_seed)
             {
-                c1[i + 1] = seed[i];
+                random_seed_type seed = rng_ciphertext->seed();
+                // Write random seed to destination.data(1).
+                c1[0] = static_cast<uint64_t>(0xffffffffffffffffULL);
+                copy_n(seed.cbegin(), seed.size(), c1 + 1);
             }
         }
     }

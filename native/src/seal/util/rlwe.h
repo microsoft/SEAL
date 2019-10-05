@@ -73,12 +73,14 @@ namespace seal
         /**
         Create an encryption of zero with a secret key and store in a ciphertext.
 
+        @param[out] destination The output ciphertext - an encryption of zero.
         @param[in] secret_key The secret key used for encryption.
         @param[in] context The SEALContext containing a chain of ContextData.
         @param[in] parms_id Indicates the level of encryption.
         @param[in] is_ntt_form If true, store Ciphertext in NTT form.
         @param[in] pool Memory pool to allocate temporary space.
-        @param[out] destination The output ciphertext - an encryption of zero.
+        @param[in] save_seed If true, The second component of ciphertext is
+        replaced with the random seed used to sample this component.
         */
         void encrypt_zero_symmetric(
             const SecretKey &secret_key,
@@ -86,26 +88,7 @@ namespace seal
             parms_id_type parms_id,
             bool is_ntt_form,
             Ciphertext &destination,
-            MemoryPoolHandle pool);
-
-        /**
-        Create an encryption of zero with a secret key and store in a ciphertext.
-        The second component of ciphertext is replaced with the random seed used
-        to sample this component.
-
-        @param[in] secret_key The secret key used for encryption.
-        @param[in] context The SEALContext containing a chain of ContextData.
-        @param[in] parms_id Indicates the level of encryption.
-        @param[in] is_ntt_form If true, store Ciphertext in NTT form.
-        @param[in] pool Memory pool to allocate temporary space.
-        @param[out] destination The output ciphertext - an encryption of zero.
-        */
-        void encrypt_zero_symmetric_save_seed(
-            const SecretKey &secret_key,
-            std::shared_ptr<SEALContext> context,
-            parms_id_type parms_id,
-            bool is_ntt_form,
-            Ciphertext &destination,
-            MemoryPoolHandle pool);
+            MemoryPoolHandle pool,
+            bool save_seed = false);
     }
 }

@@ -92,6 +92,23 @@ namespace seal
         }
 
         /**
+        Generates and saves relinearization keys to an output stream. Half of the
+        polynomials in relinearization keys are randomly generated and are
+        replaced with the seed used to compress output size. The output stream
+        must have the "binary" flag set. The output is in binary format and not
+        human-readable.
+
+        @param[out] stream The stream to save the relinearization keys to
+        @param[in] compr_mode The desired compressoin mode
+        */
+        inline std::streamoff relin_keys_save(
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return relin_keys(1, true).save(stream, compr_mode);
+        }
+
+        /**
         Generates and returns Galois keys. This function creates specific Galois
         keys that can be used to apply specific Galois automorphisms on encrypted
         data. The user needs to give as input a vector of Galois elements
@@ -113,6 +130,22 @@ namespace seal
             const std::vector<std::uint64_t> &galois_elts);
 
         /**
+        Generates and saves Galois keys to an output stream. Half of the polynomials
+        in Galois keys are randomly generated and are replaced with the seed used
+        to compress output size. The output stream must have the "binary" flag set. 
+        The output is in binary format and not human-readable.
+
+        @param[out] stream The stream to save the Galois keys to
+        @param[in] compr_mode The desired compressoin mode
+        @param[in] galois_elts The Galois elements for which to generate keys
+        @throws std::invalid_argument if the Galois elements are not valid
+        */
+        inline std::streamoff galois_keys_save(
+            const std::vector<std::uint64_t> &galois_elts,
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const;
+
+        /**
         Generates and returns Galois keys. This function creates specific Galois
         keys that can be used to apply specific Galois automorphisms on encrypted
         data. The user needs to give as input a vector of desired Galois rotation
@@ -121,12 +154,30 @@ namespace seal
         A step count of zero can be used to indicate a column rotation in the BFV
         scheme complex conjugation in the CKKS scheme.
 
-        @param[in] galois_elts The rotation step counts for which to generate keys
+        @param[in] galois_steps The rotation step counts for which to generate keys
         @throws std::logic_error if the encryption parameters do not support batching
         and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
         */
         SEAL_NODISCARD GaloisKeys galois_keys(const std::vector<int> &steps);
+
+        /**
+        Generates and saves Galois keys to an output stream. Half of the polynomials
+        in Galois keys are randomly generated and are replaced with the seed used
+        to compress output size. The output stream must have the "binary" flag set. 
+        The output is in binary format and not human-readable.
+
+        @param[out] stream The stream to save the Galois keys to
+        @param[in] compr_mode The desired compressoin mode
+        @param[in] galois_steps The rotation step counts for which to generate keys
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
+        @throws std::invalid_argument if the step counts are not valid
+        */
+        inline std::streamoff galois_keys_save(
+            const std::vector<int> &steps,
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const;
 
         /**
         Generates and returns Galois keys. This function creates logarithmically
@@ -135,6 +186,19 @@ namespace seal
         users will want to use this overload of the function.
         */
         SEAL_NODISCARD GaloisKeys galois_keys();
+
+        /**
+        Generates and saves Galois keys to an output stream. Half of the polynomials
+        in Galois keys are randomly generated and are replaced with the seed used
+        to compress output size. The output stream must have the "binary" flag set. 
+        The output is in binary format and not human-readable.
+
+        @param[out] stream The stream to save the relinearization keys to
+        @param[in] compr_mode The desired compressoin mode
+        */
+        inline std::streamoff relin_keys_save(
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const;
 
     private:
         KeyGenerator(const KeyGenerator &copy) = delete;
@@ -169,22 +233,25 @@ namespace seal
         void generate_kswitch_keys(
             const std::uint64_t *new_keys,
             std::size_t num_keys,
-            KSwitchKeys &destination);
+            KSwitchKeys &destination,
+            bool save_seed = false);
 
         /**
         Generates one key switching key for a new key.
         */
         void generate_one_kswitch_key(
             const uint64_t *new_key,
-            std::vector<PublicKey> &destination);
+            std::vector<PublicKey> &destination,
+            bool save_seed = false);
 
         /**
         Generates and returns the specified number of relinearization keys.
 
         @param[in] count The number of relinearization keys to generate
+        @param[in] save_seed If true, save seed instead of a polynomial.
         @throws std::invalid_argument if count is zero or too large
         */
-        RelinKeys relin_keys(std::size_t count);
+        RelinKeys relin_keys(std::size_t count, bool save_seed = false);
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);

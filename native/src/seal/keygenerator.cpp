@@ -179,7 +179,7 @@ namespace seal
         pk_generated_ = true;
     }
 
-    RelinKeys KeyGenerator::relin_keys(size_t count)
+    RelinKeys KeyGenerator::relin_keys(size_t count, bool save_seed)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
@@ -215,7 +215,8 @@ namespace seal
         generate_kswitch_keys(
             secret_key_array_.get() + coeff_mod_count * coeff_count,
             count,
-            static_cast<KSwitchKeys &>(relin_keys));
+            static_cast<KSwitchKeys &>(relin_keys),
+            save_seed);
 
         // Set the parms_id
         relin_keys.parms_id() = context_data.parms_id();
@@ -461,7 +462,8 @@ namespace seal
 
     void KeyGenerator::generate_one_kswitch_key(
         const uint64_t *new_key,
-        std::vector<PublicKey> &destination)
+        std::vector<PublicKey> &destination,
+        bool save_seed)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         size_t decomp_mod_count = context_->first_context_data()->parms().coeff_modulus().size();
@@ -485,8 +487,7 @@ namespace seal
         {
             encrypt_zero_symmetric(secret_key_, context_,
                 key_context_data.parms_id(), true,
-                destination[j].data(), pool_);
-
+                destination[j].data(), pool_, save_seed);
             factor = key_modulus.back().value() % key_modulus[j].value();
             multiply_poly_scalar_coeffmod(
                 new_key + j * coeff_count,
@@ -506,7 +507,8 @@ namespace seal
     void KeyGenerator::generate_kswitch_keys(
         const uint64_t *new_keys,
         size_t num_keys,
-        KSwitchKeys &destination)
+        KSwitchKeys &destination,
+        bool save_seed)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         auto &key_context_data = *context_->key_context_data();
@@ -525,7 +527,7 @@ namespace seal
         for (size_t l = 0; l < num_keys; l++)
         {
             const uint64_t *new_key_ptr = new_keys + l * coeff_mod_count * coeff_count;
-            generate_one_kswitch_key(new_key_ptr, destination.data()[l]);
+            generate_one_kswitch_key(new_key_ptr, destination.data()[l], save_seed);
         }
     }
 }
