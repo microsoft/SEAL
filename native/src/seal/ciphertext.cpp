@@ -2,8 +2,9 @@
 // Licensed under the MIT license.
 
 #include "seal/ciphertext.h"
-#include "seal/util/polycore.h"
+#include "seal/randomgen.h"
 #include "seal/util/defines.h"
+#include "seal/util/polyarithsmallmod.h"
 
 using namespace std;
 using namespace seal::util;
@@ -130,6 +131,43 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
+    void Ciphertext::expand_seed(
+        shared_ptr<SEALContext> context,
+        const random_seed_type &seed)
+    {
+        auto context_data_ptr = context->get_context_data(parms_id_);
+        auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
+
+        // Set up the BlakePRNG with given seed.
+        BlakePRNG rg(seed);
+
+        // Flood the entire ciphertext polynomial with random data
+        rg.generate(
+            mul_safe(data_.size(), sizeof(ct_coeff_type)),
+            reinterpret_cast<SEAL_BYTE*>(data_.begin()));
+
+        // Finally reduce each polynomial appropriately
+        auto data_ptr = data_.begin();
+        for (size_t poly_index = 0; poly_index < size_; poly_index++)
+        {
+            for (size_t rns_index = 0; rns_index < coeff_mod_count_; rns_index++)
+            {
+                // Clear top bits from each coefficient
+                transform(data_ptr, data_ptr + poly_modulus_degree_, data_ptr,
+                    [](auto in) {
+                        return in & static_cast<ct_coeff_type>(0x7FFFFFFFFFFFFFFFULL);
+                    });
+
+                // Then reduce; unfortunately we do two passes over the data here
+                modulo_poly_coeffs_63(
+                    data_ptr,
+                    poly_modulus_degree_,
+                    coeff_modulus[rns_index],
+                    data_ptr); 
+            }
+        }
+    }
+
     void Ciphertext::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
@@ -149,7 +187,7 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
-            // Save the data
+            // Save the IntArray
             data_.save(stream, compr_mode_type::none);
         }
         catch (const ios_base::failure &)
@@ -165,8 +203,18 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::load_members(istream &stream)
+    void Ciphertext::load_members(shared_ptr<SEALContext> context, istream &stream)
     {
+        // Verify parameters
+        if (!context)
+        {
+            throw invalid_argument("invalid context");
+        }
+        if (!context->parameters_set())
+        {
+            throw invalid_argument("encryption parameters are not set correctly");
+        }
+
         Ciphertext new_data(data_.pool());
 
         auto old_except_mask = stream.exceptions();
@@ -188,21 +236,62 @@ namespace seal
             double scale = 0;
             stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
 
-            // Load the data
-            new_data.data_.load(stream);
-            if (unsigned_neq(new_data.data_.size(),
-                mul_safe(size64, poly_modulus_degree64, coeff_mod_count64)))
-            {
-                throw logic_error("ciphertext data is invalid");
-            }
-
-            // Set values
+            // Set values already at this point for the metadata validity check
             new_data.parms_id_ = parms_id;
             new_data.is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
             new_data.size_ = safe_cast<size_t>(size64);
             new_data.poly_modulus_degree_ = safe_cast<size_t>(poly_modulus_degree64);
             new_data.coeff_mod_count_ = safe_cast<size_t>(coeff_mod_count64);
             new_data.scale_ = scale;
+
+            // Checking the validity of loaded metadata
+            // Note: We allow pure key levels here! This is to allow load_members
+            // to be used also when loading derived objects like PublicKey. This
+            // further means that functions reading in Ciphertext objects must check
+            // that for those use-cases the Ciphertext truly is at the data level
+            // if it is supposed to be. In other words, one cannot assume simply
+            // based on load_members succeeding that the Ciphertext is valid for
+            // computations.
+            if (!is_metadata_valid_for(new_data, context, true))
+            {
+                throw logic_error("ciphertext data is invalid");
+            }
+
+            // Compute the total uint64 count required and reserve memory.
+            // Note that this must be done after the metadata is checked for validity.
+            auto total_uint64_count = mul_safe(
+                new_data.size_,
+                new_data.poly_modulus_degree_,
+                new_data.coeff_mod_count_);
+
+            // Reserve memory for the entire (expected) ciphertext data
+            new_data.data_.reserve(total_uint64_count);
+
+            // Load the data. Note that we are supplying also the expected maximum
+            // size of the loaded IntArray. This is an important security measure to
+            // prevent a malformed IntArray from causing arbitrarily large memory
+            // allocations.
+            new_data.data_.load(stream, total_uint64_count);
+
+            // Expected buffer size in the seeded case
+            auto seeded_uint64_count = poly_modulus_degree64 * coeff_mod_count64;
+
+            // This is the case where we need to expand a seed, otherwise full
+            // ciphertext data was (possibly) loaded and do nothing
+            if (unsigned_eq(new_data.data_.size(), seeded_uint64_count))
+            {
+                // Single polynomial size data was loaded, so we are in the
+                // seeded ciphertext case. Next load the seed.
+                random_seed_type seed;
+                stream.read(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+                new_data.expand_seed(move(context), seed);
+            }
+
+            // Verify that the buffer is correct
+            if (!is_buffer_valid(new_data))
+            {
+                throw logic_error("ciphertext data is invalid");
+            }
         }
         catch (const ios_base::failure &)
         {

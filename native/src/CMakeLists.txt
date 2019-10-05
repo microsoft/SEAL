@@ -166,9 +166,6 @@ cmake_dependent_option(SEAL_USE__ADDCARRY_U64 SEAL_USE__ADDCARRY_U64_OPTION_STR 
 set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
 cmake_dependent_option(SEAL_USE__SUBBORROW_U64 SEAL_USE__SUBBORROW_U64_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
 
-set(SEAL_USE_AES_NI_PRNG_OPTION_STR "Use fast AES-NI PRNG")
-cmake_dependent_option(SEAL_USE_AES_NI_PRNG SEAL_USE_AES_NI_PRNG_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
-
 if(SEAL_USE_INTRIN)
     cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_QUIET TRUE)
@@ -266,30 +263,6 @@ if(SEAL_USE_INTRIN)
         endif()
     endif()
 
-    check_include_file_cxx("wmmintrin.h" HAVE_WMMINTRIN_HEADER)
-    if(NOT HAVE_WMMINTRIN_HEADER)
-        set(SEAL_USE_AES_NI_PRNG OFF CACHE BOOL ${SEAL_USE_AES_NI_PRNG_OPTION_STR} FORCE)
-    endif()
-
-    # Check that AES-NI runs
-    if(SEAL_USE_AES_NI_PRNG)
-        if(NOT MSVC)
-            set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -maes")
-        endif()
-        check_cxx_source_runs("
-            #include <wmmintrin.h>
-            int main() {
-                __m128i a{ 0 };
-                volatile auto b = _mm_aeskeygenassist_si128(a, 0);
-                return 0;
-            }"
-            USE_AES_KEYGEN_ASSIST
-        )
-        if(NOT USE_AES_KEYGEN_ASSIST EQUAL 1)
-            set(SEAL_USE_AES_NI_PRNG OFF CACHE BOOL ${SEAL_USE_AES_NI_PRNG_OPTION_STR} FORCE)
-        endif()
-    endif()
-
     cmake_pop_check_state()
 endif()
 
@@ -369,11 +342,6 @@ if(SEAL_USE_CXX17)
     target_compile_features(seal PUBLIC cxx_std_17)
 else()
     target_compile_features(seal PUBLIC cxx_std_14)
-endif()
-
-# Add -maes flag if needed
-if(SEAL_USE_AES_NI_PRNG)
-    target_compile_options(seal PUBLIC "-maes")
 endif()
 
 # Require thread library

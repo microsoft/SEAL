@@ -15,8 +15,8 @@ using namespace seal::util;
 
 namespace seal
 {
-    BatchEncoder::BatchEncoder(std::shared_ptr<SEALContext> context) :
-        context_(std::move(context))
+    BatchEncoder::BatchEncoder(shared_ptr<SEALContext> context) :
+        context_(move(context))
     {
         // Verify parameters
         if (!context_)

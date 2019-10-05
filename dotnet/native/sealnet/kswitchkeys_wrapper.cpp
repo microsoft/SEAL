@@ -230,16 +230,19 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Save(void *thisptr, uint8_t *outptr, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_UnsafeLoad(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     KSwitchKeys *keys = FromVoid<KSwitchKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
+    const auto &sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(keys->unsafe_load(
+            sharedctx,
             reinterpret_cast<SEAL_BYTE *>(inptr),
             util::safe_cast<size_t>(size)));
         return S_OK;

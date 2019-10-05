@@ -84,7 +84,8 @@ namespace seal
         */
         explicit Plaintext(std::size_t coeff_count,
             MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(coeff_count, std::move(pool))
+            coeff_count_(coeff_count),
+            data_(coeff_count_, std::move(pool))
         {
         }
 
@@ -102,7 +103,8 @@ namespace seal
         */
         explicit Plaintext(std::size_t capacity, std::size_t coeff_count,
             MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(capacity, coeff_count, std::move(pool))
+            coeff_count_(coeff_count),
+            data_(capacity, coeff_count_, std::move(pool))
         {
         }
 
@@ -183,6 +185,7 @@ namespace seal
                 throw std::logic_error("cannot reserve for an NTT transformed Plaintext");
             }
             data_.reserve(capacity);
+            coeff_count_ = data_.size();
         }
 
         /**
@@ -203,6 +206,7 @@ namespace seal
         inline void release() noexcept
         {
             parms_id_ = parms_id_zero;
+            coeff_count_ = 0;
             scale_ = 1.0;
             data_.release();
         }
@@ -223,6 +227,7 @@ namespace seal
                 throw std::logic_error("cannot reserve for an NTT transformed Plaintext");
             }
             data_.resize(coeff_count);
+            coeff_count_ = coeff_count;
         }
 
         /**
@@ -278,6 +283,7 @@ namespace seal
         {
             data_.resize(1);
             data_[0] = const_coeff;
+            coeff_count_ = 1;
             return *this;
         }
 
@@ -295,7 +301,7 @@ namespace seal
             {
                 return;
             }
-            if (start_coeff + length - 1 >= coeff_count())
+            if (start_coeff + length - 1 >= coeff_count_)
             {
                 throw std::out_of_range("length must be non-negative and start_coeff + length - 1 must be within [0, coeff_count)");
             }
@@ -310,7 +316,7 @@ namespace seal
         */
         inline void set_zero(std::size_t start_coeff)
         {
-            if (start_coeff >= coeff_count())
+            if (start_coeff >= coeff_count_)
             {
                 throw std::out_of_range("start_coeff must be within [0, coeff_count)");
             }
@@ -323,6 +329,14 @@ namespace seal
         inline void set_zero()
         {
             std::fill(data_.begin(), data_.end(), pt_coeff_type(0));
+        }
+
+        /**
+        Returns a reference to the backing IntArray object.
+        */
+        SEAL_NODISCARD inline const auto &int_array() const noexcept
+        {
+            return data_;
         }
 
         /**
@@ -347,7 +361,7 @@ namespace seal
         SEAL_NODISCARD inline gsl::span<pt_coeff_type> data_span()
         {
             return gsl::span<pt_coeff_type>(data_.begin(),
-                static_cast<std::ptrdiff_t>(coeff_count()));
+                static_cast<std::ptrdiff_t>(coeff_count_));
         }
 
         /**
@@ -356,7 +370,7 @@ namespace seal
         SEAL_NODISCARD inline gsl::span<const pt_coeff_type> data_span() const
         {
             return gsl::span<const pt_coeff_type>(data_.cbegin(),
-                static_cast<std::ptrdiff_t>(coeff_count()));
+                static_cast<std::ptrdiff_t>(coeff_count_));
         }
 #endif
         /**
@@ -367,11 +381,11 @@ namespace seal
         */
         SEAL_NODISCARD inline pt_coeff_type *data(std::size_t coeff_index)
         {
-            if (coeff_count() == 0)
+            if (!coeff_count_)
             {
                 return nullptr;
             }
-            if (coeff_index >= coeff_count())
+            if (coeff_index >= coeff_count_)
             {
                 throw std::out_of_range("coeff_index must be within [0, coeff_count)");
             }
@@ -386,11 +400,11 @@ namespace seal
         SEAL_NODISCARD inline const pt_coeff_type *data(
             std::size_t coeff_index) const
         {
-            if (coeff_count() == 0)
+            if (!coeff_count_)
             {
                 return nullptr;
             }
-            if (coeff_index >= coeff_count())
+            if (coeff_index >= coeff_count_)
             {
                 throw std::out_of_range("coeff_index must be within [0, coeff_count)");
             }
@@ -463,7 +477,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool is_zero() const
         {
-            return (coeff_count() == 0) ||
+            return !coeff_count_ ||
                 std::all_of(data_.cbegin(), data_.cend(),
                     util::is_zero<pt_coeff_type>);
         }
@@ -481,7 +495,7 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t coeff_count() const noexcept
         {
-            return data_.size();
+            return coeff_count_;
         }
 
         /**
@@ -489,11 +503,11 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t significant_coeff_count() const
         {
-            if (coeff_count() == 0)
+            if (!coeff_count_)
             {
                 return 0;
             }
-            return util::get_significant_uint64_count_uint(data_.cbegin(), coeff_count());
+            return util::get_significant_uint64_count_uint(data_.cbegin(), coeff_count_);
         }
 
         /**
@@ -501,11 +515,11 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t nonzero_coeff_count() const
         {
-            if (coeff_count() == 0)
+            if (!coeff_count_)
             {
                 return 0;
             }
-            return util::get_nonzero_uint64_count_uint(data_.cbegin(), coeff_count());
+            return util::get_nonzero_uint64_count_uint(data_.cbegin(), coeff_count_);
         }
 
         /**
@@ -534,7 +548,7 @@ namespace seal
             {
                 throw std::invalid_argument("cannot convert NTT transformed plaintext to string");
             }
-            return util::poly_to_hex_string(data_.cbegin(), coeff_count(), 1);
+            return util::poly_to_hex_string(data_.cbegin(), coeff_count_, 1);
         }
 
         /**
@@ -548,6 +562,7 @@ namespace seal
             std::size_t members_size = util::ztools::deflate_size_bound(
                 util::add_safe(
                     sizeof(parms_id_),
+                    sizeof(coeff_count_),
                     sizeof(scale_),
                     util::safe_cast<std::size_t>(data_.save_size())
             ));
@@ -584,16 +599,21 @@ namespace seal
         parameters is performed. This function should not be used unless the
         plaintext comes from a fully trusted source.
 
+        @param[in] context The SEALContext
         @param[in] stream The stream to load the plaintext from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
         @throws std::logic_error if the loaded data is invalid or if decompression
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::istream &stream)
+        inline std::streamoff unsafe_load(
+            std::shared_ptr<SEALContext> context,
+            std::istream &stream)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&Plaintext::load_members, this, _1),
+                std::bind(&Plaintext::load_members, this, std::move(context), _1),
                 stream);
         }
 
@@ -614,7 +634,7 @@ namespace seal
             std::istream &stream)
         {
             Plaintext new_data(pool());
-            auto in_size = new_data.unsafe_load(stream);
+            auto in_size = new_data.unsafe_load(context, stream);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::logic_error("Plaintext data is invalid");
@@ -653,19 +673,24 @@ namespace seal
         encryption parameters is performed. This function should not be used
         unless the plaintext comes from a fully trusted source.
 
+        @param[in] context The SEALContext
         @param[in] in The memory location to load the plaintext from
         @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the loaded data is invalid or if decompression
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(
+            std::shared_ptr<SEALContext> context,
+            const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&Plaintext::load_members, this, _1),
+                std::bind(&Plaintext::load_members, this, std::move(context), _1),
                 in, size);
         }
 
@@ -689,7 +714,7 @@ namespace seal
             const SEAL_BYTE *in, std::size_t size)
         {
             Plaintext new_data(pool());
-            auto in_size = new_data.unsafe_load(in, size);
+            auto in_size = new_data.unsafe_load(context, in, size);
             if (!is_valid_for(new_data, std::move(context)))
             {
                 throw std::logic_error("Plaintext data is invalid");
@@ -763,9 +788,11 @@ namespace seal
     private:
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::istream &stream);
+        void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
 
         parms_id_type parms_id_ = parms_id_zero;
+
+        std::size_t coeff_count_ = 0;
 
         double scale_ = 1.0;
 

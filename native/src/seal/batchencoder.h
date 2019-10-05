@@ -108,7 +108,7 @@ namespace seal
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
         of integers modulo the plaintext modulus into a plaintext element, and stores
-        the result in the destination parameter. The input vector must have size at most equal
+        the result in the destination parameter. The input must have size at most equal
         to the degree of the polynomial modulus. The first half of the elements represent the
         first row of the matrix, and the second half represent the second row. The numbers
         in the matrix can be at most equal to the plaintext modulus for it to represent
@@ -126,7 +126,7 @@ namespace seal
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
         of integers modulo the plaintext modulus into a plaintext element, and stores
-        the result in the destination parameter. The input vector must have size at most equal
+        the result in the destination parameter. The input must have size at most equal
         to the degree of the polynomial modulus. The first half of the elements represent the
         first row of the matrix, and the second half represent the second row. The numbers
         in the matrix can be at most equal to the plaintext modulus for it to represent

@@ -29,7 +29,7 @@ namespace SEALTest
             GaloisKeys keys;
             GaloisKeys test_keys;
             keys.save(stream);
-            test_keys.unsafe_load(stream);
+            test_keys.unsafe_load(context, stream);
             ASSERT_EQ(keys.data().size(), test_keys.data().size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
             ASSERT_EQ(0ULL, keys.data().size());
@@ -44,8 +44,8 @@ namespace SEALTest
                 for (size_t i = 0; i < test_keys.data()[j].size(); i++)
                 {
                     ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
-                    ASSERT_EQ(keys.data()[j][i].data().uint64_count(), test_keys.data()[j][i].data().uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(), keys.data()[j][i].data().uint64_count()));
+                    ASSERT_EQ(keys.data()[j][i].data().int_array().size(), test_keys.data()[j][i].data().int_array().size());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(), keys.data()[j][i].data().int_array().size()));
                 }
             }
             ASSERT_EQ(64ULL, keys.data().size());
@@ -62,7 +62,7 @@ namespace SEALTest
             GaloisKeys keys;
             GaloisKeys test_keys;
             keys.save(stream);
-            test_keys.unsafe_load(stream);
+            test_keys.unsafe_load(context, stream);
             ASSERT_EQ(keys.data().size(), test_keys.data().size());
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
             ASSERT_EQ(0ULL, keys.data().size());
@@ -77,8 +77,8 @@ namespace SEALTest
                 for (size_t i = 0; i < test_keys.data()[j].size(); i++)
                 {
                     ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
-                    ASSERT_EQ(keys.data()[j][i].data().uint64_count(), test_keys.data()[j][i].data().uint64_count());
-                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(), keys.data()[j][i].data().uint64_count()));
+                    ASSERT_EQ(keys.data()[j][i].data().int_array().size(), test_keys.data()[j][i].data().int_array().size());
+                    ASSERT_TRUE(is_equal_uint_uint(keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(), keys.data()[j][i].data().int_array().size()));
                 }
             }
             ASSERT_EQ(256ULL, keys.data().size());

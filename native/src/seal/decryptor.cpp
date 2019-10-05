@@ -20,7 +20,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    Decryptor::Decryptor(std::shared_ptr<SEALContext> context,
+    Decryptor::Decryptor(shared_ptr<SEALContext> context,
         const SecretKey &secret_key) : context_(move(context))
     {
         // Verify parameters

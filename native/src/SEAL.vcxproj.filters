@@ -101,9 +101,6 @@
     <ClInclude Include="seal\valcheck.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\util\aes.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="seal\util\baseconverter.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -255,9 +252,6 @@
     </ClCompile>
     <ClCompile Include="seal\valcheck.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\util\aes.cpp">
-      <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\baseconverter.cpp">
       <Filter>Source Files\util</Filter>

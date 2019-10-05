@@ -61,7 +61,7 @@ namespace SEALNetTest
             }
 
             Assert.AreEqual(24ul, other.Size);
-            Assert.IsTrue(ValCheck.IsMetadataValidFor(other, context));
+            Assert.IsTrue(ValCheck.IsValidFor(other, context));
 
             List<IEnumerable<PublicKey>> keysData = new List<IEnumerable<PublicKey>>(keys.Data);
             List<IEnumerable<PublicKey>> otherData = new List<IEnumerable<PublicKey>>(other.Data);
@@ -203,12 +203,12 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Set(null));
 
             Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
 
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Save(null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(null));
-            Utilities.AssertThrows<EndOfStreamException>(() => keys.UnsafeLoad(new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(context, null));
+            Utilities.AssertThrows<EndOfStreamException>(() => keys.UnsafeLoad(context, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(null, new MemoryStream()));
 
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(context, null));
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));

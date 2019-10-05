@@ -107,11 +107,7 @@ namespace seal
 #endif
 
 // Which random number generator factory to use by default
-#ifdef SEAL_USE_AES_NI_PRNG
-#define SEAL_DEFAULT_RNG_FACTORY FastPRNGFactory()
-#else
 #define SEAL_DEFAULT_RNG_FACTORY BlakePRNGFactory()
-#endif
 
 // Use generic functions as (slower) fallback
 #ifndef SEAL_ADD_CARRY_UINT64

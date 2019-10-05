@@ -95,14 +95,14 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentNullException>(() => key.Set(null));
 
             Utilities.AssertThrows<ArgumentNullException>(() => key.Save(null));
-            Utilities.AssertThrows<ArgumentNullException>(() => key.UnsafeLoad(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.UnsafeLoad(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => key.UnsafeLoad(null, new MemoryStream()));
 
             Utilities.AssertThrows<ArgumentNullException>(() => key.Load(context, null));
             Utilities.AssertThrows<ArgumentNullException>(() => key.Load(null, new MemoryStream()));
             Utilities.AssertThrows<EndOfStreamException>(() => key.Load(context, new MemoryStream()));
 
             Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(key, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(key, null));
         }
     }
 }

@@ -202,26 +202,6 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UInt64Count(void *thisptr, uint64_t *uint64_count)
-{
-    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
-    IfNullRet(cipher, E_POINTER);
-    IfNullRet(uint64_count, E_POINTER);
-
-    *uint64_count = cipher->uint64_count();
-    return S_OK;
-}
-
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UInt64CountCapacity(void *thisptr, uint64_t *uint64_count_capacity)
-{
-    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
-    IfNullRet(cipher, E_POINTER);
-    IfNullRet(uint64_count_capacity, E_POINTER);
-
-    *uint64_count_capacity = cipher->uint64_count_capacity();
-    return S_OK;
-}
-
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Size(void *thisptr, uint64_t *size)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
@@ -526,16 +506,19 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Save(void *thisptr, uint8_t *outptr, u
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UnsafeLoad(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALNETNATIVE HRESULT SEALCALL Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
+    const auto &sharedctx = SharedContextFromVoid(context);
+    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(cipher->unsafe_load(
+            sharedctx,
             reinterpret_cast<SEAL_BYTE *>(inptr),
             util::safe_cast<size_t>(size)));
         return S_OK;

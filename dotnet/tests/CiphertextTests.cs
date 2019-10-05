@@ -70,11 +70,9 @@ namespace SEALNetTest
             Ciphertext cipher = new Ciphertext(context, parms);
 
             Assert.AreEqual(2ul, cipher.SizeCapacity);
-            Assert.AreEqual(65536ul, cipher.UInt64CountCapacity);
 
             cipher.Reserve(context, parms, sizeCapacity: 10);
             Assert.AreEqual(10ul, cipher.SizeCapacity);
-            Assert.AreEqual(65536ul * 5, cipher.UInt64CountCapacity);
 
             Ciphertext cipher2 = new Ciphertext();
 
@@ -144,7 +142,7 @@ namespace SEALNetTest
             Assert.AreEqual(2ul, loaded.Size);
             Assert.AreEqual(8192ul, loaded.PolyModulusDegree);
             Assert.AreEqual(4ul, loaded.CoeffModCount);
-            Assert.IsTrue(ValCheck.IsMetadataValidFor(loaded, context));
+            Assert.IsTrue(ValCheck.IsValidFor(loaded, context));
 
             ulong ulongCount = cipher.Size * cipher.PolyModulusDegree * cipher.CoeffModCount;
             for (ulong i = 0; i < ulongCount; i++)
@@ -321,12 +319,12 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentNullException>(() => cipher.Set(null));
 
             Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(cipher, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(cipher, null));
 
             Utilities.AssertThrows<ArgumentNullException>(() => cipher.Save(null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => cipher.UnsafeLoad(null));
-            Utilities.AssertThrows<EndOfStreamException>(() => cipher.UnsafeLoad(new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.UnsafeLoad(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.UnsafeLoad(null, new MemoryStream()));
+            Utilities.AssertThrows<EndOfStreamException>(() => cipher.UnsafeLoad(context, new MemoryStream()));
 
             Utilities.AssertThrows<ArgumentNullException>(() => cipher.Load(null, new MemoryStream()));
             Utilities.AssertThrows<ArgumentNullException>(() => cipher.Load(context, null));

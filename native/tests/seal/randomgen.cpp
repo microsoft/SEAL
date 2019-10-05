@@ -21,7 +21,7 @@ namespace SEALTest
         class SequentialRandomGenerator : public UniformRandomGenerator
         {
         public:
-            SequentialRandomGenerator() : UniformRandomGenerator({ 0, 0}, 4096)
+            SequentialRandomGenerator() : UniformRandomGenerator({})
             {
             }
 
@@ -48,8 +48,7 @@ namespace SEALTest
         {
         private:
             SEAL_NODISCARD auto create_impl(
-                SEAL_MAYBE_UNUSED array<uint64_t, 2> seed,
-                SEAL_MAYBE_UNUSED size_t buffer_size)
+                SEAL_MAYBE_UNUSED random_seed_type seed)
                 -> shared_ptr<UniformRandomGenerator> override
             {
                 return make_shared<SequentialRandomGenerator>();
@@ -117,29 +116,20 @@ namespace SEALTest
 
     TEST(RandomGenerator, SeededRNG)
     {
-        ASSERT_THROW(auto rg = UniformRandomGeneratorFactory::DefaultFactory()->create(
-            15), invalid_argument);
-        ASSERT_THROW(auto rg = UniformRandomGeneratorFactory::DefaultFactory()->create(
-            8), invalid_argument);
-        ASSERT_THROW(auto rg = UniformRandomGeneratorFactory::DefaultFactory()->create(
-            0), invalid_argument);
-
-        size_t buffer_size = 16;
-
         auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create(
-            { 0, 0 }, buffer_size));
+            { }));
         array<uint32_t, 20> values1;
         generator1->generate(sizeof(values1),
             reinterpret_cast<SEAL_BYTE*>(values1.data()));
 
         auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create(
-            { 0, 1 }, buffer_size));
+            { 1 }));
         array<uint32_t, 20> values2;
         generator2->generate(sizeof(values2),
             reinterpret_cast<SEAL_BYTE*>(values2.data()));
 
         auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create(
-            { 0, 1 }, buffer_size));
+            { 1 }));
         array<uint32_t, 20> values3;
         generator3->generate(sizeof(values3),
             reinterpret_cast<SEAL_BYTE*>(values3.data()));
@@ -160,18 +150,18 @@ namespace SEALTest
 
     TEST(RandomGenerator, RandomSeededRNG)
     {
-        auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create(128));
+        auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create());
         array<uint32_t, 20> values1;
         generator1->generate(sizeof(values1),
             reinterpret_cast<SEAL_BYTE*>(values1.data()));
 
-        auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create(128));
+        auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create());
         array<uint32_t, 20> values2;
         generator2->generate(sizeof(values2),
             reinterpret_cast<SEAL_BYTE*>(values2.data()));
 
         auto seed3 = generator2->seed();
-        auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create(seed3, 128));
+        auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create(seed3));
         array<uint32_t, 20> values3;
         generator3->generate(sizeof(values3),
             reinterpret_cast<SEAL_BYTE*>(values3.data()));
