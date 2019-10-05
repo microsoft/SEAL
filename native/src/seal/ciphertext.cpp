@@ -138,8 +138,7 @@ namespace seal
         auto context_data_ptr = context->get_context_data(parms_id_);
         auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
 
-        // Set up the BlakePRNG with appropriate non-default buffer size
-        // and given seed.
+        // Set up the BlakePRNG with given seed.
         BlakePRNG rg(seed);
 
         // Flood the entire ciphertext polynomial with random data
