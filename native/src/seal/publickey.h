@@ -83,11 +83,14 @@ namespace seal
         Returns an upper bound on the size of the PublicKey, as if it was written
         to an output stream.
 
+        @param[in] compr_mode The compression mode
+        @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the size does not fit in the return type
         */
-        SEAL_NODISCARD inline std::streamoff save_size() const
+        SEAL_NODISCARD inline std::streamoff save_size(
+            compr_mode_type compr_mode) const
         {
-            return pk_.save_size();
+            return pk_.save_size(compr_mode);
         }
 
         /**

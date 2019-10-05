@@ -174,7 +174,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void BigUInt_ToDouble(IntPtr thisptr, out double result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void BigUInt_SaveSize(IntPtr thisptr, out long result);
+        internal static extern void BigUInt_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void BigUInt_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
@@ -260,7 +260,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void SmallModulus_Equals(IntPtr thisptr, ulong other, out bool result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SmallModulus_SaveSize(IntPtr thisptr, out long result);
+        internal static extern void SmallModulus_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SmallModulus_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
@@ -321,7 +321,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void EncParams_Equals(IntPtr thisptr, IntPtr otherptr, out bool result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void EncParams_SaveSize(IntPtr thisptr, out long result);
+        internal static extern void EncParams_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EncParams_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
@@ -626,7 +626,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_Pool(IntPtr thisptr, out IntPtr pool);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void Ciphertext_SaveSize(IntPtr thisptr, out long result);
+        internal static extern void Ciphertext_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Ciphertext_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
@@ -744,7 +744,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_Pool(IntPtr thisptr, out IntPtr pool);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void Plaintext_SaveSize(IntPtr thisptr, out long result);
+        internal static extern void Plaintext_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Plaintext_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
@@ -796,7 +796,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void KSwitchKeys_Pool(IntPtr thisptr, out IntPtr pool);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KSwitchKeys_SaveSize(IntPtr thisptr, out long result);
+        internal static extern void KSwitchKeys_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KSwitchKeys_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
@@ -881,7 +881,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void PublicKey_Destroy(IntPtr thisptr);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void PublicKey_SaveSize(IntPtr thisptr, out long result);
+        internal static extern void PublicKey_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void PublicKey_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
@@ -918,7 +918,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void SecretKey_Pool(IntPtr thisptr, out IntPtr pool);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void SecretKey_SaveSize(IntPtr thisptr, out long result);
+        internal static extern void SecretKey_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SecretKey_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);

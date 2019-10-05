@@ -544,26 +544,11 @@ namespace seal
         Returns an upper bound on the size of the ciphertext, as if it was written
         to an output stream.
 
+        @param[in] compr_mode The compression mode
+        @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the size does not fit in the return type
         */
-        SEAL_NODISCARD inline std::streamoff save_size() const
-        {
-            std::size_t members_size = util::ztools::deflate_size_bound(
-                util::add_safe(
-                    sizeof(parms_id_),
-                    sizeof(SEAL_BYTE), // is_ntt_form_
-                    sizeof(std::uint64_t), // size_
-                    sizeof(std::uint64_t), // poly_modulus_degree_
-                    sizeof(std::uint64_t), // coeff_mod_count_
-                    sizeof(scale_),
-                    util::safe_cast<std::size_t>(data_.save_size())
-            ));
-
-            return util::safe_cast<std::streamoff>(util::add_safe(
-                sizeof(Serialization::SEALHeader),
-                members_size
-            ));
-        }
+        SEAL_NODISCARD std::streamoff save_size(compr_mode_type compr_mode) const;
 
         /**
         Saves the ciphertext to an output stream. The output is in binary format
@@ -582,6 +567,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&Ciphertext::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 stream, compr_mode);
         }
 
@@ -656,6 +642,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&Ciphertext::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 out, size, compr_mode);
         }
 
@@ -798,6 +785,12 @@ namespace seal
         void save_members(std::ostream &stream) const;
 
         void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
+
+        inline bool has_seed_marker() const noexcept
+        {
+            return data_.size() && (size_ == 2) ?
+                (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
+        }
 
         parms_id_type parms_id_ = parms_id_zero;
 

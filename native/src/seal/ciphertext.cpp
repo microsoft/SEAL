@@ -4,6 +4,7 @@
 #include "seal/ciphertext.h"
 #include "seal/randomgen.h"
 #include "seal/util/defines.h"
+#include "seal/util/pointer.h"
 #include "seal/util/polyarithsmallmod.h"
 
 using namespace std;
@@ -166,6 +167,46 @@ namespace seal
                     data_ptr); 
             }
         }
+    }
+
+    streamoff Ciphertext::save_size(compr_mode_type compr_mode) const
+    {
+        // We need to consider two cases: seeded and unseeded; these have very
+        // different size characteristics and we need the exact size when
+        // compr_mode is compr_mode_type::none.
+        size_t data_size;
+        if (has_seed_marker())
+        {
+            // Create a temporary aliased IntArray of smaller size
+            IntArray<ct_coeff_type> alias_data(
+                Pointer<ct_coeff_type>::Aliasing(
+                    const_cast<ct_coeff_type*>(data_.cbegin())),
+                data_.size() / 2, false, data_.pool());
+
+            data_size = add_safe(safe_cast<size_t>(
+                alias_data.save_size(compr_mode_type::none)), // data_(0)
+                sizeof(random_seed_type)); // seed
+        }
+        else
+        {
+            data_size = safe_cast<size_t>(
+                data_.save_size(compr_mode_type::none)); // data_
+        }
+            
+        size_t members_size = Serialization::ComprSizeEstimate(
+            add_safe(
+                sizeof(parms_id_),
+                sizeof(SEAL_BYTE), // is_ntt_form_
+                sizeof(uint64_t), // size_
+                sizeof(uint64_t), // poly_modulus_degree_
+                sizeof(uint64_t), // coeff_mod_count_
+                sizeof(scale_),
+                data_size),
+            compr_mode);
+
+        return safe_cast<streamoff>(add_safe(
+            sizeof(Serialization::SEALHeader),
+            members_size));
     }
 
     void Ciphertext::save_members(ostream &stream) const

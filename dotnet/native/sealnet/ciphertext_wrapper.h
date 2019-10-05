@@ -73,7 +73,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsTransparent(void *thisptr, bool *res
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Pool(void *thisptr, void **pool);
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_SaveSize(void *thisptr, int64_t *result);
+SEALNETNATIVE HRESULT SEALCALL Ciphertext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
 
 SEALNETNATIVE HRESULT SEALCALL Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
 

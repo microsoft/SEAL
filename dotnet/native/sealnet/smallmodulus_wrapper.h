@@ -39,7 +39,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals1(void *thisptr, void *other, 
 
 SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals2(void *thisptr, uint64_t other, bool *result);
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_SaveSize(void *thisptr, int64_t *result);
+SEALNETNATIVE HRESULT SEALCALL SmallModulus_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
 
 SEALNETNATIVE HRESULT SEALCALL SmallModulus_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
 

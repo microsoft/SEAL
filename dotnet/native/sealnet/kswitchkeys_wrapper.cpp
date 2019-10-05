@@ -184,7 +184,7 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Pool(void *thisptr, void **pool)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_SaveSize(void *thisptr, int64_t *result)
+SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     KSwitchKeys *keys = FromVoid<KSwitchKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
@@ -192,8 +192,13 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_SaveSize(void *thisptr, int64_t *resu
 
     try
     {
-        *result = static_cast<int64_t>(keys->save_size());
+        *result = static_cast<int64_t>(
+            keys->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
     }
     catch (const logic_error &)
     {

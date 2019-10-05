@@ -221,7 +221,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_Equals(void *thisptr, void *otherptr, b
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_SaveSize(void *thisptr, int64_t *result)
+SEALNETNATIVE HRESULT SEALCALL EncParams_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
@@ -229,8 +229,13 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_SaveSize(void *thisptr, int64_t *result
 
     try
     {
-        *result = static_cast<int64_t>(params->save_size());
+        *result = static_cast<int64_t>(
+            params->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
     }
     catch (const logic_error &)
     {

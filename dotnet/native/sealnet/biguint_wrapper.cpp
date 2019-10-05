@@ -702,7 +702,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_ToDouble(void *thisptr, double *result)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_SaveSize(void *thisptr, int64_t *result)
+SEALNETNATIVE HRESULT SEALCALL BigUInt_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     BigUInt* biguint = FromVoid<BigUInt>(thisptr);
     IfNullRet(biguint, E_POINTER);
@@ -710,8 +710,13 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_SaveSize(void *thisptr, int64_t *result)
 
     try
     {
-        *result = static_cast<int64_t>(biguint->save_size());
+        *result = static_cast<int64_t>(
+            biguint->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
     }
     catch (const logic_error &)
     {

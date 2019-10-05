@@ -87,7 +87,7 @@ SEALNETNATIVE HRESULT SEALCALL PublicKey_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_SaveSize(void *thisptr, int64_t *result)
+SEALNETNATIVE HRESULT SEALCALL PublicKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
@@ -95,8 +95,13 @@ SEALNETNATIVE HRESULT SEALCALL PublicKey_SaveSize(void *thisptr, int64_t *result
 
     try
     {
-        *result = static_cast<int64_t>(pkey->save_size());
+        *result = static_cast<int64_t>(
+            pkey->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
     }
     catch (const logic_error &)
     {

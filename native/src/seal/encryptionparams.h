@@ -340,24 +340,29 @@ namespace seal
         Returns an upper bound on the size of the EncryptionParameters, as if it
         was written to an output stream.
 
+        @param[in] compr_mode The compression mode
+        @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the size does not fit in the return type
         */
-        SEAL_NODISCARD inline std::streamoff save_size() const
+        SEAL_NODISCARD inline std::streamoff save_size(
+            compr_mode_type compr_mode) const
         {
             std::size_t coeff_modulus_total_size = coeff_modulus_.empty() ?
                 std::size_t(0) :
-                util::safe_cast<std::size_t>(coeff_modulus_[0].save_size());
+                util::safe_cast<std::size_t>(
+                    coeff_modulus_[0].save_size(compr_mode_type::none));
             coeff_modulus_total_size = util::mul_safe(
                 coeff_modulus_total_size, coeff_modulus_.size());
 
-            std::size_t members_size = util::ztools::deflate_size_bound(
+            std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
                     sizeof(scheme_),
                     sizeof(std::uint64_t), // poly_modulus_degree_
                     sizeof(std::uint64_t), // coeff_mod_count
                     coeff_modulus_total_size,
-                    util::safe_cast<std::size_t>(plain_modulus_.save_size())
-            ));
+                    util::safe_cast<std::size_t>(
+                        plain_modulus_.save_size(compr_mode_type::none))),
+                compr_mode);
 
             return util::safe_cast<std::streamoff>(util::add_safe(
                 sizeof(Serialization::SEALHeader),
@@ -382,6 +387,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&EncryptionParameters::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 stream, compr_mode);
         }
 
@@ -426,6 +432,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&EncryptionParameters::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 out, size, compr_mode);
         }
 

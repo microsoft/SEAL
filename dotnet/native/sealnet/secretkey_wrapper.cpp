@@ -87,7 +87,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Pool(void *thisptr, void **pool)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_SaveSize(void *thisptr, int64_t *result)
+SEALNETNATIVE HRESULT SEALCALL SecretKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     SecretKey* skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -95,8 +95,13 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_SaveSize(void *thisptr, int64_t *result
 
     try
     {
-        *result = static_cast<int64_t>(skey->save_size());
+        *result = static_cast<int64_t>(
+            skey->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
     }
     catch (const logic_error &)
     {

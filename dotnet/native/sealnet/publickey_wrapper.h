@@ -27,7 +27,7 @@ SEALNETNATIVE HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool);
 
 SEALNETNATIVE HRESULT SEALCALL PublicKey_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_SaveSize(void *thisptr, int64_t *result);
+SEALNETNATIVE HRESULT SEALCALL PublicKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
 
 SEALNETNATIVE HRESULT SEALCALL PublicKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
 

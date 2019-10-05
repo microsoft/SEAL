@@ -13,22 +13,6 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-namespace seal
-{
-    struct Serialization::SerializationPrivateHelper
-    {
-        inline static bool IsSupportedComprMode(std::uint8_t compr_mode)
-        {
-            return Serialization::IsSupportedComprMode(compr_mode);
-        }
-
-        inline static bool IsValidHeader(const SEALHeader &header)
-        {
-            return Serialization::IsValidHeader(header);
-        }
-    };
-}
-
 SEALNETNATIVE HRESULT SEALCALL Serialization_SEALMagic(uint16_t *result)
 {
     IfNullRet(result, E_POINTER);
@@ -41,7 +25,7 @@ SEALNETNATIVE HRESULT SEALCALL Serialization_IsSupportedComprMode(uint8_t compr_
 {
     IfNullRet(result, E_POINTER);
 
-    *result = Serialization::SerializationPrivateHelper::IsSupportedComprMode(compr_mode);
+    *result = Serialization::IsSupportedComprMode(compr_mode);
     return S_OK;
 }
 
@@ -67,6 +51,6 @@ SEALNETNATIVE HRESULT SEALCALL Serialization_IsValidHeader(uint8_t *headerptr, u
         reinterpret_cast<SEAL_BYTE*>(&header),
         reinterpret_cast<SEAL_BYTE*>(headerptr),
         sizeof(Serialization::SEALHeader));
-    *result = Serialization::SerializationPrivateHelper::IsValidHeader(header);
+    *result = Serialization::IsValidHeader(header);
     return S_OK;
 }

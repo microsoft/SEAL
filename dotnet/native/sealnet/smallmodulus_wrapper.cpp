@@ -167,7 +167,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals2(void *thisptr, uint64_t othe
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_SaveSize(void *thisptr, int64_t *result)
+SEALNETNATIVE HRESULT SEALCALL SmallModulus_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -175,8 +175,13 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_SaveSize(void *thisptr, int64_t *res
 
     try
     {
-        *result = static_cast<int64_t>(sm->save_size());
+        *result = static_cast<int64_t>(
+            sm->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
     }
     catch (const logic_error &)
     {
