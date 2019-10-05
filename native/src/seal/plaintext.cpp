@@ -284,7 +284,7 @@ namespace seal
             new_data.data_.load(stream);
 
             // Verify that the buffer is still correct
-            if (!is_buffer_valid_for(new_data))
+            if (!is_buffer_valid(new_data))
             {
                 throw logic_error("plaintext data is invalid");
             }

@@ -203,7 +203,7 @@ namespace seal
         return metadata_check && size_check;
     }
 
-    bool is_buffer_valid_for(const Plaintext &in)
+    bool is_buffer_valid(const Plaintext &in)
     {
         if (in.coeff_count() != in.int_array().size())
         {
@@ -213,7 +213,7 @@ namespace seal
         return true;
     }
 
-    bool is_buffer_valid_for(const Ciphertext &in)
+    bool is_buffer_valid(const Ciphertext &in)
     {
         // Check that the buffer size is correct
         if (in.int_array().size() != mul_safe(
@@ -225,23 +225,23 @@ namespace seal
         return true;
     }
 
-    bool is_buffer_valid_for(const SecretKey &in)
+    bool is_buffer_valid(const SecretKey &in)
     {
-        return is_buffer_valid_for(in.data());
+        return is_buffer_valid(in.data());
     }
 
-    bool is_buffer_valid_for(const PublicKey &in)
+    bool is_buffer_valid(const PublicKey &in)
     {
-        return is_buffer_valid_for(in.data());
+        return is_buffer_valid(in.data());
     }
 
-    bool is_buffer_valid_for(const KSwitchKeys &in)
+    bool is_buffer_valid(const KSwitchKeys &in)
     {
         for (auto &a : in.data())
         {
             for (auto &b : a)
             {
-                if (!is_buffer_valid_for(b))
+                if (!is_buffer_valid(b))
                 {
                     return false;
                 }
@@ -251,14 +251,14 @@ namespace seal
         return true;
     }
 
-    bool is_buffer_valid_for(const RelinKeys &in)
+    bool is_buffer_valid(const RelinKeys &in)
     {
-        return is_buffer_valid_for(static_cast<const KSwitchKeys &>(in));
+        return is_buffer_valid(static_cast<const KSwitchKeys &>(in));
     }
 
-    bool is_buffer_valid_for(const GaloisKeys &in)
+    bool is_buffer_valid(const GaloisKeys &in)
     {
-        return is_buffer_valid_for(static_cast<const KSwitchKeys &>(in));
+        return is_buffer_valid(static_cast<const KSwitchKeys &>(in));
     }
 
     bool is_data_valid_for(

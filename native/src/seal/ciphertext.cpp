@@ -284,7 +284,7 @@ namespace seal
             }
 
             // Verify that the buffer is now correct after expanding the seed
-            if (!is_buffer_valid_for(new_data))
+            if (!is_buffer_valid(new_data))
             {
                 throw logic_error("ciphertext data is invalid");
             }
