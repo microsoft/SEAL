@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include <algorithm>
 #include "seal/ciphertext.h"
 #include "seal/randomgen.h"
 #include "seal/util/defines.h"
@@ -139,12 +140,10 @@ namespace seal
         auto context_data_ptr = context->get_context_data(parms_id_);
         auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
 
-        // 
-        auto poly_uint64_count = util::mul_safe(poly_modulus_degree_, coeff_mod_count_);
-        auto data_ptr = data_.begin() + util::safe_cast<std::size_t>(poly_uint64_count);
+        auto data_1_ptr = data(1);
         // Set up the BlakePRNG with a given seed.
         // Rejection sampling to generate a uniform random polynomial.
-        sample_poly_uniform(make_shared<BlakePRNG>(seed), context_data_ptr->parms(), data_ptr);
+        sample_poly_uniform(make_shared<BlakePRNG>(seed), context_data_ptr->parms(), data_1_ptr);
     }
 
     void Ciphertext::save_members(ostream &stream) const
@@ -166,8 +165,26 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
-            // Save the IntArray
-            data_.save(stream, compr_mode_type::none);
+            const uint64_t *data_1_ptr = data(1);
+            if (static_cast<uint64_t>(0xffffffffffffffffULL) == data_1_ptr[0])
+            {
+                random_seed_type seed;
+                copy_n(data_1_ptr + 1, seed.size(), seed.begin());
+
+                // Create and serialize a half copy of data_.
+                // Alternatively, save_members cannot be constant.
+                IntArray<uint64_t> copy_data(data_.size() / 2);
+                copy_n(data_.cbegin(), copy_data.size(), copy_data.begin());
+                copy_data.save(stream, compr_mode_type::none);
+
+                // Save the seed
+                stream.write(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+            }
+            else
+            {
+                // Save the IntArray
+                data_.save(stream, compr_mode_type::none);
+            }
         }
         catch (const ios_base::failure &)
         {
