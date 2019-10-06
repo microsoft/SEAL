@@ -468,12 +468,16 @@ namespace seal
 
         switch (compr_mode)
         {
+#ifdef SEAL_USE_ZLIB
         case compr_mode_type::deflate:
             return ztools::deflate_size_bound(in_size);
-
-        default:
+#endif
+        case compr_mode_type::none:
             // No compression
             return in_size;
+
+        default:
+            throw logic_error("unsupported compression mode");
         }
     }
 
