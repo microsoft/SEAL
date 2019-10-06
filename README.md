@@ -259,9 +259,9 @@ enabled if it is compiled with support for specific third-party libraries.
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements
 two convenient (templated) data types: `gsl::span` and `gsl::multi_span`. These
 are *view types* that provide safe (bounds-checked) array access to memory. For
-example, if Microsoft GSL is available, Microsoft SEAL can allows `BatchEncoder`
+example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder`
 and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`,
-which can have significant performance benefits. Additionally, `BatchEncoder` allows
+which can have significant benefit in performance. Additionally, `BatchEncoder` allows
 access to the slot data alternatively through a two-dimensional `gsl::multi_span`,
 reflecting the batching slot structure. Also the `Ciphertext` class allows the
 ciphertext data to be accessed hierarchically through a `gsl::multi_span`.
@@ -271,8 +271,8 @@ ciphertext data to be accessed hierarchically through a `gsl::multi_span`.
 To build Microsoft SEAL with support for Microsoft GSL, clone first the Microsoft GSL
 library from [GitHub.com/Microsoft/GSL](https://GitHub.com/Microsoft/GSL) to some
 convenient directory, e.g., `native\GSL` in this example. Then open the Microsoft
-SEAL solution file in Visual Studio, right-click on the project SEAL in the *Solution
-Explorer*, click *Properties*, and add (for all configurations and all platforms)
+SEAL solution file in Visual Studio, right-click on the project SEAL in the
+*Solution Explorer*, click *Properties*, and add (for all configurations and all platforms)
 the following directory to the list of *Include Directories* on the *VC++ Directories*
 tab:
 ````
@@ -292,43 +292,43 @@ Alternatively, you can simply clone it from
 [GitHub.com/Microsoft/GSL](https://github.com/Microsoft/GSL). When installed with
 a package manager, CMake will likely detect the Microsoft GSL location automatically.
 Otherwise, if Microsoft GSL is cloned to `~/mylibs/GSL`, you need to provide CMake
-this location when building Microsoft SEAL as follows:
+with this location when building Microsoft SEAL as follows:
 ````
 cd native/src
 cmake . -DMSGSL_ROOT=~/mylibs/GSL/include
 make
 ````
-Note that you may need to now give the same `-DMSGSL_ROOT=~/mylibs/GSL/include` hint
+Note that you may need to give the same `-DMSGSL_ROOT=~/mylibs/GSL/include` hint
 to CMake when configuring your own applications linking with Microsoft SEAL.
 
 ### ZLIB
 
 ZLIB is a widely used compression library that implements the DEFLATE compression
-algorithm. If present, Microsoft SEAL can use ZLIB to automatically compress data
+algorithm. Microsoft SEAL can use ZLIB (if present) to automatically compress data
 that is serialized. For example, in some cases `Ciphertext` objects consist of a large
 number of integers modulo specific prime numbers (`coeff_modulus` primes). When using
-the CKKS scheme these prime numbers can often be quite small (e.g., 30 bits), but the
-numbers will nevertheless be serialized as 64-bit integers. Thus, in this case more than
-half of the ciphertext data consists of zeros, which a compression library, such as ZLIB,
-can compress away. The BFV scheme benefits typically less from this technique, because
-the prime numbers used for the `coeff_modulus` encryption parameter tend to be larger
-so integers modulo these prime numbers fill more of each 64-bit word. The compression is
+the CKKS scheme, although these prime numbers can often be quite small (e.g., 30 bits),
+the numbers are nevertheless serialized as 64-bit integers. In this case, more than
+half of data in a ciphertext are zeros that can be compressed away with a compression
+library, such as ZLIB. The BFV scheme benefits typically less from this technique, because
+the prime numbers used for the `coeff_modulus` encryption parameter tend to be larger,
+and integers modulo these prime numbers fill more of each 64-bit word. The compression is
 not only applied to `Ciphertext` objects, but to every serializable Microsoft SEAL object.
 
 If ZLIB is detected by CMake, it will be automatically used for serialization (see
-`Serialization::compr_mode_default` in `native/src/seal/serialization.h`. Howeve, it is
+`Serialization::compr_mode_default` in `native/src/seal/serialization.h`. However, it is
 always possible to explicitly pass `compr_mode_type::none` to serialization methods to
 disable compression.
 
 **WARNING: The compression rate for a `SecretKey` can (in theory at least) reveal
 information about the key. In most common applications of Microsoft SEAL the size of
-a `SecretKey` would not be deliberately revealed to untrusted parties, but if this is
-a concern we recommend saving the `SecretKey` in an uncompressed form by passing
+a `SecretKey` would not be deliberately revealed to untrusted parties. But if this is
+a concern, we recommend saving the `SecretKey` in an uncompressed form by passing
 `compr_mode_type::none` to `SecretKey::save`.**
 
 #### ZLIB in Windows
 
-ZLIB is usually not found on a typical Windows system, but you can clone it from
+ZLIB is usually not found on a typical Windows system. You can clone it from
 [GitHub.com/madler/zlib](https://github.com/madler/zlib) to some convenient
 directory, e.g., `native\zlib` in this example. To build ZLIB on Windows, open the
 *Developer Command Prompt for VS 2019*, go to your `SEAL` directory, and execute the
@@ -340,18 +340,12 @@ cmake --build . --config Release
 copy Release\zlib.dll ..\bin
 ````
 Then open the Microsoft SEAL solution file in Visual Studio, right-click on the
-project SEAL in the *Solution Explorer*, click *Properties*, and add (for all
-configurations and all platforms) on the *VC++ Directories* tab the following
-directory to the list of *Include Directories*:
-````
-$(SolutionDir)native\zlib
-````
-and the following directory to the list of *Library Directories*:
-````
-$(SolutionDir)native\zlib\Release
-````
+project SEAL in the *Solution Explorer*, click *Properties*, and on the
+*VC++ Directories* tab (for all configurations and all platforms) add the directory
+`$(SolutionDir)native\zlib` to the list of *Include Directories* and
+the directory `$(SolutionDir)native\zlib\Release` to the list of *Library Directories*.
 Next, open the *Librarian* tab and add `zlib.lib` to *Additional Dependencies*.
-Rebuilding Microsoft SEAL should now automatically detect that ZLIB is available,
+Rebuilding Microsoft SEAL should now automatically detect that ZLIB is available
 and enable support for using `compr_mode_type::deflate` in serialization.
 
 When running applications built against a ZLIB-enabled Microsoft SEAL you will
@@ -362,19 +356,17 @@ directory where the application executable is.
 
 The ZLIB (development package) can be conveniently obtained through a package manager
 on most Linux distributions, e.g., on Ubuntu it suffices to install the package
-`zlib1g-dev`. Alternatively, you can simply clone it from
-[GitHub.com/madler/zlib](GitHub.com/madler/zlib) and build it yourself.
-For example, suppose you have cloned ZLIB to `~/mylibs/zlib`. To build ZLIB, simply
-execute:
+`zlib1g-dev`. Alternatively, clone from [GitHub.com/madler/zlib](GitHub.com/madler/zlib)
+and build it yourself. For example, suppose you have cloned ZLIB to `~/mylibs/zlib`.
+To build ZLIB, simply execute:
 ````
 cd ~/mylibs/zlib
 cmake .
 make
 ````
-When installed with
-a package manager, CMake will likely detect the ZLIB location automatically. Otherwise,
-if ZLIB was built in `~/mylibs/zlib`, you need to provide CMake this location when
-building Microsoft SEAL as follows:
+If ZLIB was installed with a package manager, CMake will likely detect the location
+of ZLIB automatically. Otherwise, if ZLIB was built in `~/mylibs/zlib`, you need
+to provide CMake with this location when building Microsoft SEAL as follows:
 ````
 cd native/src
 cmake . -DZLIB_ROOT=~/mylibs/zlib
@@ -557,7 +549,7 @@ to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simpl
 the instructions provided by the bot. You will only need to do this once across all
 repos using our CLA.
 
-Pull requests must be submitted to the branch called `contrib`.
+Pull requests must be submitted to the branch called *contrib*.
 
 This project has adopted the
 [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
