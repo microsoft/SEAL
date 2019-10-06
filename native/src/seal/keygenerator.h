@@ -99,7 +99,7 @@ namespace seal
         human-readable.
 
         @param[out] stream The stream to save the relinearization keys to
-        @param[in] compr_mode The desired compressoin mode
+        @param[in] compr_mode The desired compression mode
         */
         inline std::streamoff relin_keys_save(
             std::ostream &stream,
@@ -124,6 +124,8 @@ namespace seal
         to Enc(plain(x^p)).
 
         @param[in] galois_elts The Galois elements for which to generate keys
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
         SEAL_NODISCARD inline GaloisKeys galois_keys(
@@ -139,8 +141,10 @@ namespace seal
         The output is in binary format and not human-readable.
 
         @param[out] stream The stream to save the Galois keys to
-        @param[in] compr_mode The desired compressoin mode
+        @param[in] compr_mode The desired compression mode
         @param[in] galois_elts The Galois elements for which to generate keys
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -177,7 +181,7 @@ namespace seal
         The output is in binary format and not human-readable.
 
         @param[out] stream The stream to save the Galois keys to
-        @param[in] compr_mode The desired compressoin mode
+        @param[in] compr_mode The desired compression mode
         @param[in] galois_steps The rotation step counts for which to generate keys
         @throws std::logic_error if the encryption parameters do not support batching
         and scheme is scheme_type::BFV
@@ -196,6 +200,9 @@ namespace seal
         many (in degree of the polynomial modulus) Galois keys that is sufficient
         to apply any Galois automorphism (e.g. rotations) on encrypted data. Most
         users will want to use this overload of the function.
+
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
         */
         SEAL_NODISCARD GaloisKeys galois_keys()
         {
@@ -209,7 +216,9 @@ namespace seal
         The output is in binary format and not human-readable.
 
         @param[out] stream The stream to save the relinearization keys to
-        @param[in] compr_mode The desired compressoin mode
+        @param[in] compr_mode The desired compression mode
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
         */
         inline std::streamoff galois_keys_save(
             std::ostream &stream,

@@ -160,10 +160,21 @@ namespace Microsoft.Research.SEAL
         /// any Galois automorphism (e.g. rotations) on encrypted data. Most users
         /// will want to use this overload of the function.
         /// </remarks>
+        /// <exception cref="InvalidOperationException">if the encryption parameters
+        /// do not support batching and scheme is SchemeType.BFV</exception>
         public GaloisKeys GaloisKeys()
         {
-            NativeMethods.KeyGenerator_GaloisKeys(NativePtr, out IntPtr galoisKeysPtr);
-            return new GaloisKeys(galoisKeysPtr);
+            try
+            {
+                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, out IntPtr galoisKeysPtr);
+                return new GaloisKeys(galoisKeysPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
         /// <summary>
@@ -185,6 +196,8 @@ namespace Microsoft.Research.SEAL
         /// a Galois element p changes Enc(plain(x)) to Enc(plain(x^p)).
         /// </remarks>
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
+        /// <exception cref="InvalidOperationException">if the encryption parameters
+        /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not
         /// valid</exception>
         public GaloisKeys GaloisKeys(IEnumerable<ulong> galoisElts)
@@ -192,10 +205,19 @@ namespace Microsoft.Research.SEAL
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
 
-            ulong[] galoisEltsArr = galoisElts.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeys(NativePtr,
-                (ulong)galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
-            return new GaloisKeys(galoisKeysPtr);
+            try
+            {
+                ulong[] galoisEltsArr = galoisElts.ToArray();
+                NativeMethods.KeyGenerator_GaloisKeys(NativePtr,
+                    (ulong)galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
+                return new GaloisKeys(galoisKeysPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
         /// <summary>

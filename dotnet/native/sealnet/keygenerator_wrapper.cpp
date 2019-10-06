@@ -122,6 +122,10 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys1(void *thisptr, void **ga
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys2(void *thisptr, uint64_t count, uint64_t *galois_elts, void **galois_keys)
@@ -143,6 +147,10 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys2(void *thisptr, uint64_t 
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error&)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
