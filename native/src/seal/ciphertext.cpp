@@ -168,15 +168,18 @@ namespace seal
                 random_seed_type seed;
                 copy_n(data(1) + 1, seed.size(), seed.begin());
 
+                size_t data_size = data_.size();
+                size_t half_size = data_size / 2;
                 // Save_members must be a const method.
                 // Create an alias of data_, must be handled with care.
                 // Alternatively, create and serialize a half copy of data_.
                 IntArray<ct_coeff_type> alias_data(data_.pool_);
-                alias_data.capacity_ = alias_data.size_ = data_.size_ / 2;
+                alias_data.size_ = half_size;
+                alias_data.capacity_ = half_size;
                 auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(
                     const_cast<ct_coeff_type *>(data_.cbegin()));
                 swap(alias_data.data_, alias_ptr);
-                data_.save(stream, compr_mode_type::none);
+                alias_data.save(stream, compr_mode_type::none);
 
                 // Save the seed
                 stream.write(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
@@ -276,6 +279,7 @@ namespace seal
                 // seeded ciphertext case. Next load the seed.
                 random_seed_type seed;
                 stream.read(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+                new_data.data_.resize(total_uint64_count);
                 new_data.expand_seed(move(context), seed);
             }
 

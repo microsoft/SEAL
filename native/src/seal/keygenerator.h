@@ -101,7 +101,7 @@ namespace seal
         @param[out] stream The stream to save the relinearization keys to
         @param[in] compr_mode The desired compressoin mode
         */
-        SEAL_NODISCARD inline std::streamoff relin_keys_save(
+        inline std::streamoff relin_keys_save(
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default)
         {
@@ -143,7 +143,7 @@ namespace seal
         @param[in] galois_elts The Galois elements for which to generate keys
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        SEAL_NODISCARD inline std::streamoff galois_keys_save(
+        inline std::streamoff galois_keys_save(
             const std::vector<std::uint64_t> &galois_elts,
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default)
@@ -183,7 +183,7 @@ namespace seal
         and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
         */
-        SEAL_NODISCARD inline std::streamoff galois_keys_save(
+        inline std::streamoff galois_keys_save(
             const std::vector<int> &steps,
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default)
@@ -211,7 +211,7 @@ namespace seal
         @param[out] stream The stream to save the relinearization keys to
         @param[in] compr_mode The desired compressoin mode
         */
-        SEAL_NODISCARD inline std::streamoff galois_keys_save(
+        inline std::streamoff galois_keys_save(
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default)
         {

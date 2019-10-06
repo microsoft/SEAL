@@ -121,7 +121,7 @@ namespace seal
             for (size_t j = 0; j < coeff_mod_count; j++)
             {
                 auto &modulus = coeff_modulus[j];
-                uint64_t max_multiple = max_random - barrett_reduce_63(max_random, modulus);
+                uint64_t max_multiple = max_random - barrett_reduce_63(max_random, modulus) - 1;
                 for (size_t i = 0; i < coeff_count; i++)
                 {
                     // This ensures uniform distribution.
@@ -279,6 +279,7 @@ namespace seal
             {
                 rng_ciphertext = rng_error;
             }
+            rng_ciphertext = BlakePRNGFactory().create();
             
             // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
             uint64_t *c0 = destination.data();
