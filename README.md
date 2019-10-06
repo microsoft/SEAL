@@ -114,7 +114,7 @@ the only choice.
 
 Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln`
 that can be used to conveniently build the library, examples, and unit tests. Visual
-Studio 2017 version 15.3 or newer is required.
+Studio 2017 version 15.3 or newer is required to build Microsoft SEAL.
 
 #### Platform
 
@@ -130,19 +130,19 @@ SEAL should be built in `Debug` mode (no optimizations) or in `Release` mode. Pl
 note that `Debug` mode should not be used except for debugging Microsoft SEAL itself,
 as the performance will be orders of magnitude worse than in `Release` mode.
 
-#### Library
+#### Building Microsoft SEAL
 
 Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`. This results in
 the static library `seal.lib` to be created in `native\lib\$(Platform)\$(Configuration)`.
 When linking with applications, you need to add `native\src\` (full path) as an
 include directory for Microsoft SEAL header files.
 
-#### Examples
+#### Building Examples
 
 Build the SEALExamples project `native\examples\SEALExamples.vcxproj` from `SEAL.sln`.
 This results in an executable `sealexamples.exe` to be created in `native\bin\$(Platform)\$(Configuration)`.
 
-#### Unit tests
+#### Building Unit Tests
 
 The unit tests require the Google Test framework to be installed. The appropriate
 NuGet package is already listed in `native\tests\packages.config`, so once you
@@ -157,7 +157,8 @@ Xcode toolchain (>= 9.3) will work.
 
 In macOS you will need CMake with command line tools. For this, you can either
 1. install the cmake package with [Homebrew](https://brew.sh), or
-2. download CMake directly from [cmake.org/download](https://cmake.org/download) and [enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
+2. download CMake directly from [cmake.org/download](https://cmake.org/download) and
+[enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
 
 Below we give instructions for how to configure, build, and install Microsoft SEAL either
 system-wide (global install), or for a single user (local install). A system-wide
@@ -194,7 +195,7 @@ cd ../..
 ````
 The `sealexamples` executable can now be found in `native/bin/`.
 
-#### Building Unit tests
+#### Building Unit Tests
 
 To build the unit tests you will need the [GoogleTest](https://github.com/google/googletest)
 framework, which is included in Microsoft SEAL as a git submodule. To download the GoogleTest
@@ -455,7 +456,7 @@ make
 cd ../..
 ````
 
-#### .NET library
+#### Building Microsoft SEAL for .NET
 
 To build the .NET Standard library, do the following:
 ````
@@ -468,7 +469,7 @@ a `Debug` or `Release` version of the assembly. This will result in a `SEALNet.d
 assembly to be created in `dotnet/lib/$(Configuration)/netstandard2.0`. This assembly
 is the one you will want to reference in your own projects.
 
-#### Examples
+#### Building Examples
 
 To build and run the .NET examples, do:
 ````
@@ -480,7 +481,7 @@ As mentioned before, the .NET project will copy the shared native library to the
 output directory. You can use the `dotnet` parameter `--configuration <Debug|Release>` to
 run either `Debug` or `Release` versions of the examples.
 
-#### Unit tests
+#### Building Unit Tests
 
 To build and run the .NET unit tests, do:
 ````
@@ -492,11 +493,13 @@ All unit tests should pass. You can use the `dotnet` parameter `--configuration 
 to run `Debug` or `Relase` unit tests, and you can use `--verbosity detailed` to print the list
 of unit tests that are being run.
 
-### Using Microsoft SEAL for .NET in your own application
+### Using Microsoft SEAL for .NET
 
 To use Microsoft SEAL for .NET in your own application you need to:
 1. add a reference in your project to `SEALNet.dll`;
-2. ensure the native shared library is available for your application when run. The easiest way to ensure this is to copy `libsealnetnative.so` to the same directory where your application's executable is located.
+2. ensure the native shared library is available for your application when run. The easiest way
+to ensure this is to copy `libsealnetnative.so` to the same directory where your application's
+executable is located.
 
 In Linux or macOS, if you have root access to the system, you have the option to install the
 native shared library globally. Then your application will always be able to find and load it.
