@@ -280,11 +280,14 @@ namespace seal
             // Reserve memory now that the metadata is checked for validity.
             new_data.data_.reserve(new_data.coeff_count_);
 
-            // Load the data
-            new_data.data_.load(stream);
+            // Load the data. Note that we are supplying also the expected maximum
+            // size of the loaded IntArray. This is an important security measure to
+            // prevent a malformed IntArray from causing arbitrarily large memory
+            // allocations.
+            new_data.data_.load(stream, new_data.coeff_count_);
 
-            // Verify that the buffer is still correct
-            if (!is_buffer_valid_for(new_data))
+            // Verify that the buffer is correct
+            if (!is_buffer_valid(new_data))
             {
                 throw logic_error("plaintext data is invalid");
             }

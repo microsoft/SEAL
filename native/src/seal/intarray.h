@@ -13,7 +13,6 @@
 #include "seal/util/pointer.h"
 #include "seal/util/defines.h"
 #include "seal/util/common.h"
-#include "seal/util/ztools.h"
 #ifdef SEAL_USE_MSGSL_SPAN
 #include <gsl/span>
 #endif
@@ -21,6 +20,12 @@
 namespace seal
 {
     class Ciphertext;
+
+    // Forward-declaring the deflate_size_bound function
+    namespace util::ztools
+    {
+        SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
+    }
 
     /**
     A resizable container for storing an array of arithmetic data types or
@@ -69,7 +74,6 @@ namespace seal
 
         @param[in] size The size of the array
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if size is less than zero
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit IntArray(std::size_t size,
@@ -92,8 +96,6 @@ namespace seal
         @param[in] size The size of the array
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if capacity is less than size
-        @throws std::invalid_argument if capacity is less than zero
-        @throws std::invalid_argument if size is less than zero
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit IntArray(std::size_t capacity, std::size_t size,
@@ -112,6 +114,72 @@ namespace seal
             // Reserve memory, resize, and set to zero
             reserve(capacity);
             resize(size);
+        }
+
+        /**
+        Creates a new IntArray with given size wrapping a given pointer. This
+        constructor allocates no memory. If the IntArray goes out of scope, the
+        Pointer object given here is destroyed. On resizing the IntArray to larger
+        size, the data will be copied over to a new allocation from the memory pool
+        pointer to by the given MemoryPoolHandle and the Pointer object given here
+        will subsequently be destroyed. Unlike the other constructors, this one
+        exposes the option of not automatically zero-filling the allocated memory.
+
+        @param[in] ptr An initial Pointer object to wrap
+        @param[in] capacity The capacity of the array
+        @param[in] size The size of the array
+        @param[in] fill_zero If true, fills ptr with zeros
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if ptr is null and capacity is positive
+        @throws std::invalid_argument if capacity is less than size
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        explicit IntArray(util::Pointer<T> &&ptr,
+            std::size_t capacity, std::size_t size, bool fill_zero,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) :
+            pool_(std::move(pool)),
+            capacity_(capacity)
+        {
+            if (!ptr && capacity)
+            {
+                throw std::invalid_argument("ptr cannot be null");
+            }
+            if (!pool_)
+            {
+                throw std::invalid_argument("pool is uninitialized");
+            }
+            if (capacity < size)
+            {
+                throw std::invalid_argument("capacity cannot be smaller than size");
+            }
+
+            // Grab the given Pointer
+            data_ = std::move(ptr);
+
+            // Resize, and optionally set to zero
+            resize(size, fill_zero);
+        }
+
+        /**
+        Creates a new IntArray with given size wrapping a given pointer. This
+        constructor allocates no memory. If the IntArray goes out of scope, the
+        Pointer object given here is destroyed. On resizing the IntArray to larger
+        size, the data will be copied over to a new allocation from the memory pool
+        pointer to by the given MemoryPoolHandle and the Pointer object given here
+        will subsequently be destroyed. Unlike the other constructors, this one
+        exposes the option of not automatically zero-filling the allocated memory.
+
+        @param[in] ptr An initial Pointer object to wrap
+        @param[in] size The size of the array
+        @param[in] fill_zero If true, fills ptr with zeros 
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if ptr is null and size is positive
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        explicit IntArray(util::Pointer<T> &&ptr, std::size_t size, bool fill_zero,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) :
+            IntArray(std::move(ptr), size, size, fill_zero, std::move(pool))
+        {
         }
 
         /**
@@ -140,6 +208,14 @@ namespace seal
             size_(source.size_),
             data_(std::move(source.data_))
         {
+        }
+
+        /**
+        Destroys the IntArray.
+        */
+        ~IntArray()
+        {
+            release();
         }
 
         /**
@@ -344,7 +420,7 @@ namespace seal
         enough to hold the new size, the array is also reallocated.
 
         @param[in] size The size of the array
-        @param[in] fill_zero If true, append zeros.
+        @param[in] fill_zero If true, fills expanded space with zeros
         */
         inline void resize(std::size_t size, bool fill_zero = true)
         {
@@ -419,15 +495,18 @@ namespace seal
         Returns an upper bound on the size of the IntArray, as if it was written
         to an output stream.
 
+        @param[in] compr_mode The compression mode
+        @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the size does not fit in the return type
         */
-        SEAL_NODISCARD inline std::streamoff save_size() const
+        SEAL_NODISCARD inline std::streamoff save_size(
+            compr_mode_type compr_mode) const
         {
-            std::size_t members_size = util::ztools::deflate_size_bound(
+            std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
                     sizeof(std::uint64_t), // size_
-                    util::mul_safe(size_, sizeof(T)) // data_
-            ));
+                    util::mul_safe(size_, sizeof(T))), // data_
+                compr_mode);
 
             return util::safe_cast<std::streamoff>(util::add_safe(
                 sizeof(Serialization::SEALHeader),
@@ -452,22 +531,28 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&IntArray<T_>::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 stream, compr_mode);
         }
 
         /**
         Loads a IntArray from an input stream overwriting the current IntArray.
+        This function takes optionally a bound on the size for the loaded IntArray
+        and throws an exception if the size indicated by the loaded metadata exceeds
+        the provided value. The check is omitted if in_size_bound is zero.
 
         @param[in] stream The stream to load the IntArray from
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @param[in] in_size_bound A bound on the size of the loaded IntArray
+        @throws std::logic_error if the loaded data is invalid, if the loaded size
+        exceeds in_size_bound, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::istream &stream)
+        inline std::streamoff load(
+            std::istream &stream, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&IntArray<T_>::load_members, this, _1),
+                std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound),
                 stream);
         }
 
@@ -492,26 +577,32 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&IntArray<T_>::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 out, size, compr_mode);
         }
 
         /**
         Loads a IntArray from a given memory location overwriting the current
-        IntArray.
+        IntArray. This function takes optionally a bound on the size for the loaded
+        IntArray and throws an exception if the size indicated by the loaded
+        metadata exceeds the provided value. The check is omitted if in_size_bound
+        is zero.
 
         @param[in] in The memory location to load the SmallModulus from
         @param[in] size The number of bytes available in the given memory location
+        @param[in] in_size_bound A bound on the size of the loaded IntArray
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the loaded data is invalid, if the loaded size
+        exceeds in_size_bound, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(
+            const SEAL_BYTE *in, std::size_t size, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&IntArray<T_>::load_members, this, _1),
+                std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound),
                 in, size);
         }
 
@@ -545,7 +636,7 @@ namespace seal
             stream.exceptions(old_except_mask);
         }
 
-        void load_members(std::istream &stream)
+        void load_members(std::istream &stream, std::size_t in_size_bound)
         {
             auto old_except_mask = stream.exceptions();
             try
@@ -556,8 +647,15 @@ namespace seal
                 std::uint64_t size64 = 0;
                 stream.read(reinterpret_cast<char*>(&size64), sizeof(std::uint64_t));
 
-                // Set new size
-                // WARNING: THIS IS POSSIBLY UNSAFE IF size64 IS LARGE!
+                // Check (optionally) that the size in the metadata does not exceed
+                // in_size_bound
+                if (in_size_bound && util::unsigned_gt(size64, in_size_bound))
+                {
+                    throw std::logic_error("unexpected size");
+                }
+
+                // Set new size; this is potentially unsafe if size64 was not checked
+                // against expected_size
                 resize(util::safe_cast<std::size_t>(size64));
 
                 // Read data

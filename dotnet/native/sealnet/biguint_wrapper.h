@@ -119,7 +119,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_OperatorShiftRight(void *thisptr, int shi
 
 SEALNETNATIVE HRESULT SEALCALL BigUInt_ToDouble(void *thisptr, double *result);
 
-SEALNETNATIVE HRESULT SEALCALL BigUInt_SaveSize(void *thisptr, int64_t *result);
+SEALNETNATIVE HRESULT SEALCALL BigUInt_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
 
 SEALNETNATIVE HRESULT SEALCALL BigUInt_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
 

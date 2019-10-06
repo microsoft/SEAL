@@ -296,9 +296,11 @@ namespace seal
                 // Size is too large to currently fit, so resize.
                 resize(read_bit_count);
             }
+
             size_t read_uint64_count = safe_cast<size_t>(
                 divide_round_up(read_bit_count, bits_per_uint64));
-            streamsize data_size = safe_cast<streamsize>(mul_safe(read_uint64_count, sizeof(uint64_t)));
+            streamsize data_size = safe_cast<streamsize>(
+                mul_safe(read_uint64_count, sizeof(uint64_t)));
             if (data_size)
             {
                 stream.read(reinterpret_cast<char*>(value_.get()), data_size);

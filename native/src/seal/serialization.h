@@ -73,6 +73,72 @@ namespace seal
         };
 
         /**
+        Returns true if the given byte corresponds to a supported compression mode.
+
+        @param[in] compr_mode The compression mode to validate
+        */
+        SEAL_NODISCARD static bool IsSupportedComprMode(
+            std::uint8_t compr_mode) noexcept
+        {
+            switch (compr_mode)
+            {
+            case static_cast<std::uint8_t>(compr_mode_type::none) :
+                /* fall through */
+#ifdef SEAL_USE_ZLIB
+            case static_cast<std::uint8_t>(compr_mode_type::deflate) :
+#endif
+                return true;
+            }
+            return false;
+        }
+
+        /**
+        Returns true if the given byte corresponds to a supported compression mode.
+
+        @param[in] compr_mode The compression mode to validate
+        */
+        SEAL_NODISCARD static inline bool IsSupportedComprMode(
+            compr_mode_type compr_mode) noexcept
+        {
+            return IsSupportedComprMode(static_cast<uint8_t>(compr_mode));
+        }
+
+        /**
+        Returns an upper bound on the output size of data compressed according to
+        a given compression mode with given input size. If compr_mode is
+        compr_mode_type::none, the return value is exactly in_size.
+
+        @param[in] in_size The input size to a compression algorithm
+        @param[in] in_size The compression mode
+        @throws std::invalid_argument if the compression mode is not supported
+        */
+        SEAL_NODISCARD static std::size_t ComprSizeEstimate(
+            std::size_t in_size, compr_mode_type compr_mode);
+
+        /**
+        Returns true if the given SEALHeader is valid.
+
+        @param[in] header The SEALHeader 
+        */
+        SEAL_NODISCARD static bool IsValidHeader(
+            const SEALHeader &header) noexcept
+        {
+            if (header.magic != seal_magic)
+            {
+                return false;
+            }
+            if (header.zero_byte != 0x00)
+            {
+                return false;
+            }
+            if (!IsSupportedComprMode(static_cast<uint8_t>(header.compr_mode)))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /**
         Saves a SEALHeader to a given stream. The output is in binary format and
         not human-readable. The output stream must have the "binary" flag set.
 
@@ -100,17 +166,24 @@ namespace seal
         deserialization. In typical use-cases save_members would be a function
         that serializes the member variables of an object to the given stream.
 
+        For any given compression mode, raw_size must be the exact right size
+        (in bytes) of what save_members writes to a stream in the uncompressed
+        mode. Otherwise the behavior of Save is unspecified.
+
         @param[in] save_members A function taking an std::ostream reference as an
         argument, possibly writing some number of bytes into it
+        @param[in] raw_size The exact uncompressed output size of save_members
         @param[out] stream The stream to write to
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if save_members is invalid
+        @throws std::invalid_argument if raw_size is smaller than SEALHeader size
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
             std::function<void(std::ostream &stream)> save_members,
+            std::streamoff raw_size,
             std::ostream &stream,
             compr_mode_type compr_mode);
 
@@ -141,19 +214,25 @@ namespace seal
         be a function that serializes the member variables of an object to the
         given stream.
 
+        For any given compression mode, raw_size must be the exact right size
+        (in bytes) of what save_members writes to a stream in the uncompressed
+        mode. Otherwise the behavior of Save is unspecified.
+
         @param[in] save_members A function that takes an std::ostream reference as
         an argument and writes some number of bytes into it
+        @param[in] raw_size The exact uncompressed output size of save_members
         @param[out] out The memory location to write to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
-        @throws std::invalid_argument if save_members is invalid, if out is null,
-        or if size is too small to contain a SEALHeader
+        @throws std::invalid_argument if save_members is invalid, if raw_size or
+        size is smaller than SEALHeader size, or if out is null
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
             std::function<void(std::ostream &stream)> save_members,
+            std::streamoff raw_size,
             SEAL_BYTE *out,
             std::size_t size,
             compr_mode_type compr_mode);
@@ -180,51 +259,7 @@ namespace seal
             const SEAL_BYTE *in,
             std::size_t size);
 
-        /**
-        Enables access to private members of seal::Serialization for .NET wrapper.
-        */
-        struct SerializationPrivateHelper;
-
     private:
         Serialization() = delete;
-
-        SEAL_NODISCARD static bool IsSupportedComprMode(
-            std::uint8_t compr_mode) noexcept
-        {
-            switch (compr_mode)
-            {
-            case static_cast<std::uint8_t>(compr_mode_type::none) :
-                /* fall through */
-#ifdef SEAL_USE_ZLIB
-            case static_cast<std::uint8_t>(compr_mode_type::deflate) :
-#endif
-                return true;
-            }
-            return false;
-        }
-
-        SEAL_NODISCARD static inline bool IsSupportedComprMode(
-            compr_mode_type compr_mode) noexcept
-        {
-            return IsSupportedComprMode(static_cast<uint8_t>(compr_mode));
-        }
-
-        SEAL_NODISCARD static bool IsValidHeader(
-            const SEALHeader &header) noexcept
-        {
-            if (header.magic != seal_magic)
-            {
-                return false;
-            }
-            if (header.zero_byte != 0x00)
-            {
-                return false;
-            }
-            if (!IsSupportedComprMode(static_cast<uint8_t>(header.compr_mode)))
-            {
-                return false;
-            }
-            return true;
-        }
     };
 }

@@ -131,6 +131,7 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
 
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Save(null));
+
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(context, null));
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
             Utilities.AssertThrows<EndOfStreamException>(() => keys.Load(context, new MemoryStream()));

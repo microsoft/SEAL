@@ -63,7 +63,7 @@ namespace seal
     void Evaluator::negate_inplace(Ciphertext &encrypted)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -97,11 +97,11 @@ namespace seal
     void Evaluator::add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted1, context_))
+        if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
         }
-        if (!is_metadata_valid_for(encrypted2, context_))
+        if (!is_metadata_valid_for(encrypted2, context_) || !is_buffer_valid(encrypted2))
         {
             throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
@@ -190,11 +190,11 @@ namespace seal
     void Evaluator::sub_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted1, context_))
+        if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
         }
-        if (!is_metadata_valid_for(encrypted2, context_))
+        if (!is_metadata_valid_for(encrypted2, context_) || !is_buffer_valid(encrypted2))
         {
             throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
@@ -267,11 +267,11 @@ namespace seal
         const Ciphertext &encrypted2, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted1, context_))
+        if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
         }
-        if (!is_metadata_valid_for(encrypted2, context_))
+        if (!is_metadata_valid_for(encrypted2, context_) || !is_buffer_valid(encrypted2))
         {
             throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
@@ -702,7 +702,7 @@ namespace seal
     void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1403,7 +1403,7 @@ namespace seal
         Ciphertext &destination, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1499,7 +1499,7 @@ namespace seal
         MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1538,7 +1538,7 @@ namespace seal
         MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1700,7 +1700,7 @@ namespace seal
     void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1779,7 +1779,7 @@ namespace seal
     void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1859,7 +1859,7 @@ namespace seal
         const Plaintext &plain, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2226,7 +2226,7 @@ namespace seal
     void Evaluator::transform_to_ntt_inplace(Ciphertext &encrypted)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2281,7 +2281,8 @@ namespace seal
     void Evaluator::transform_from_ntt_inplace(Ciphertext &encrypted_ntt)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted_ntt, context_))
+        if (!is_metadata_valid_for(encrypted_ntt, context_) ||
+            !is_buffer_valid(encrypted_ntt))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2336,7 +2337,7 @@ namespace seal
         const GaloisKeys &galois_keys, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2541,7 +2542,7 @@ namespace seal
         auto scheme = parms.scheme();
 
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2599,7 +2600,8 @@ namespace seal
         // Check only the used component in KSwitchKeys.
         for (auto &each_key : key_vector)
         {
-            if (!is_metadata_valid_for(each_key, context_))
+            if (!is_metadata_valid_for(each_key, context_) ||
+                !is_buffer_valid(each_key))
             {
                 throw invalid_argument(
                     "kswitch_keys is not valid for encryption parameters");

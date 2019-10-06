@@ -33,15 +33,6 @@ namespace Microsoft.Research.SEAL
     /// </remarks>
     public abstract class Serialization
     {
-        private static bool IsSupportedComprMode(byte comprMode)
-        {
-            NativeMethods.Serialization_IsSupportedComprMode(comprMode, out bool result);
-            return result;
-        }
-
-        private static bool IsSupportedComprMode(ComprModeType comprMode) =>
-            IsSupportedComprMode((byte)comprMode);
-
         /// <summary>
         /// The compression mode used by default.
         /// </summary>
@@ -49,7 +40,7 @@ namespace Microsoft.Research.SEAL
             NativeMethods.Serialization_ComprModeDefault(out byte comprMode);
             return (ComprModeType)comprMode;
         }))();
-      
+        
         /// <summary>The magic value indicating a Microsoft SEAL header.</summary>
         public static readonly ushort SEALMagic = ((Func<ushort>)(() => {
             NativeMethods.Serialization_SEALMagic(out ushort sealMagic);
@@ -87,6 +78,15 @@ namespace Microsoft.Research.SEAL
             /// <summary>Reserved for future use (8 bytes)</summary>
             public uint Reserved = 0;
         };
+
+        private static bool IsSupportedComprMode(byte comprMode)
+        {
+            NativeMethods.Serialization_IsSupportedComprMode(comprMode, out bool result);
+            return result;
+        }
+
+        private static bool IsSupportedComprMode(ComprModeType comprMode) =>
+            IsSupportedComprMode((byte)comprMode);
 
         private static bool IsValidHeader(SEALHeader header)
         {

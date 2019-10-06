@@ -555,17 +555,21 @@ namespace seal
         Returns an upper bound on the size of the plaintext, as if it was written
         to an output stream.
 
+        @param[in] compr_mode The compression mode
+        @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the size does not fit in the return type
         */
-        SEAL_NODISCARD inline std::streamoff save_size() const
+        SEAL_NODISCARD inline std::streamoff save_size(
+            compr_mode_type compr_mode) const
         {
-            std::size_t members_size = util::ztools::deflate_size_bound(
+            std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
                     sizeof(parms_id_),
                     sizeof(coeff_count_),
                     sizeof(scale_),
-                    util::safe_cast<std::size_t>(data_.save_size())
-            ));
+                    util::safe_cast<std::size_t>(
+                        data_.save_size(compr_mode_type::none))),
+                compr_mode);
 
             return util::safe_cast<std::streamoff>(util::add_safe(
                 sizeof(Serialization::SEALHeader),
@@ -590,6 +594,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&Plaintext::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 stream, compr_mode);
         }
 
@@ -664,6 +669,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&Plaintext::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 out, size, compr_mode);
         }
 

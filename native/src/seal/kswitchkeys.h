@@ -156,9 +156,12 @@ namespace seal
         Returns an upper bound on the size of the KSwitchKeys, as if it was written
         to an output stream.
 
+        @param[in] compr_mode The compression mode
+        @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the size does not fit in the return type
         */
-        SEAL_NODISCARD inline std::streamoff save_size() const
+        SEAL_NODISCARD inline std::streamoff save_size(
+            compr_mode_type compr_mode) const
         {
             std::size_t total_key_size =
                 util::mul_safe(keys_.size(), sizeof(std::uint64_t)); // keys_dim2
@@ -167,16 +170,17 @@ namespace seal
                 for (auto &key_dim2 : key_dim1)
                 {
                     total_key_size = util::add_safe(total_key_size,
-                        util::safe_cast<std::size_t>(key_dim2.save_size()));
+                        util::safe_cast<std::size_t>(
+                            key_dim2.save_size(compr_mode_type::none)));
                 }
             }
 
-            std::size_t members_size = util::ztools::deflate_size_bound(
+            std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
                     sizeof(parms_id_),
                     sizeof(std::uint64_t), // keys_dim1
-                    total_key_size
-            ));
+                    total_key_size),
+                compr_mode);
 
             return util::safe_cast<std::streamoff>(util::add_safe(
                 sizeof(Serialization::SEALHeader),
@@ -202,6 +206,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&KSwitchKeys::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 stream, compr_mode);
         }
 
@@ -277,6 +282,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&KSwitchKeys::save_members, this, _1),
+                save_size(compr_mode_type::none),
                 out, size, compr_mode);
         }
 
