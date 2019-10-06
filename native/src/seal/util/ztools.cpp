@@ -164,18 +164,7 @@ namespace seal
                 out_stream.exceptions(ios_base::goodbit);
 
                 auto in_stream_start_pos = in_stream.tellg();
-                in_stream.seekg(0, in_stream.end);
-                auto in_stream_end_pos = in_stream.tellg();
-                if (in_stream_end_pos - in_stream_start_pos < in_size)
-                {
-                    in_stream.exceptions(in_stream_except_mask);
-                    out_stream.exceptions(out_stream_except_mask);
-                    return Z_ERRNO;
-                }
-                in_stream.seekg(in_stream_start_pos);
-                in_stream.seekg(in_size, in_stream.cur);
-                in_stream_end_pos = in_stream.tellg();
-                in_stream.seekg(in_stream_start_pos);
+                auto in_stream_end_pos = in_stream_start_pos + in_size;
 
                 int result;
                 size_t have;
