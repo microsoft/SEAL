@@ -88,7 +88,24 @@ namespace seal
         */
         SEAL_NODISCARD inline RelinKeys relin_keys()
         {
-            return relin_keys(1);
+            return relin_keys(1, false);
+        }
+
+        /**
+        Generates and saves relinearization keys to an output stream.
+        
+        Half of the polynomials in Galois keys are randomly generated and are replaced
+        with the seed used to compress output size. The output stream must have the
+        "binary" flag set. The output is in binary format and not human-readable.
+
+        @param[out] stream The stream to save the relinearization keys to
+        @param[in] compr_mode The desired compression mode
+        */
+        inline std::streamoff relin_keys_save(
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return relin_keys(1, true).save(stream, compr_mode);
         }
 
         /**
@@ -107,10 +124,72 @@ namespace seal
         to Enc(plain(x^p)).
 
         @param[in] galois_elts The Galois elements for which to generate keys
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        SEAL_NODISCARD GaloisKeys galois_keys(
-            const std::vector<std::uint64_t> &galois_elts);
+        SEAL_NODISCARD inline GaloisKeys galois_keys(
+            const std::vector<std::uint64_t> &galois_elts)
+        {
+            return galois_keys(galois_elts, false);
+        }
+
+        /**
+        Generates and saves Galois keys to an output stream. This function creates
+        specific Galois keys that can be used to apply specific Galois automorphisms
+        on encrypted data. The user needs to give as input a vector of Galois
+        elements corresponding to the keys that are to be created.
+        
+        Half of the polynomials in Galois keys are randomly generated and are replaced
+        with the seed used to compress output size. The output stream must have the
+        "binary" flag set. The output is in binary format and not human-readable.
+
+        @param[out] stream The stream to save the Galois keys to
+        @param[in] compr_mode The desired compression mode
+        @param[in] galois_elts The Galois elements for which to generate keys
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
+        @throws std::invalid_argument if the Galois elements are not valid
+        */
+        inline std::streamoff galois_keys_save(
+            const std::vector<std::uint64_t> &galois_elts,
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys(galois_elts, true).save(stream, compr_mode);
+        }
+
+        /**
+        Generates and writes Galois keys to a given memory location. This function
+        creates specific Galois keys that can be used to apply specific Galois
+        automorphisms on encrypted data. The user needs to give as input a vector
+        of Galois elements corresponding to the keys that are to be created.
+        
+        Half of the polynomials in Galois keys are randomly generated and are replaced
+        with the seed used to compress output size. The output stream must have the
+        "binary" flag set. The output is in binary format and not human-readable.
+
+        @param[out] out The memory location to write the KSwitchKeys to
+        @param[in] galois_elts The Galois elements for which to generate keys
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
+        @throws std::invalid_argument if the Galois elements are not valid
+        */
+        inline std::streamoff galois_keys_save(
+            const std::vector<std::uint64_t> &galois_elts,
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys(galois_elts, true).save(out, size, compr_mode);
+        }
 
         /**
         Generates and returns Galois keys. This function creates specific Galois
@@ -121,20 +200,145 @@ namespace seal
         A step count of zero can be used to indicate a column rotation in the BFV
         scheme complex conjugation in the CKKS scheme.
 
-        @param[in] galois_elts The rotation step counts for which to generate keys
+        @param[in] galois_steps The rotation step counts for which to generate keys
         @throws std::logic_error if the encryption parameters do not support batching
         and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
         */
-        SEAL_NODISCARD GaloisKeys galois_keys(const std::vector<int> &steps);
+        SEAL_NODISCARD GaloisKeys galois_keys(const std::vector<int> &steps)
+        {
+            return galois_keys(galois_elts_from_steps(steps));
+        }
+
+        /**
+        Generates and saves Galois keys to an output stream. This function creates
+        specific Galois keys that can be used to apply specific Galois automorphisms
+        on encrypted data. The user needs to give as input a vector of desired
+        Galois rotation step counts, where negative step counts correspond to
+        rotations to the right and positive step counts correspond to rotations to
+        the left. A step count of zero can be used to indicate a column rotation
+        in the BFV scheme complex conjugation in the CKKS scheme.
+        
+        Half of the polynomials in Galois keys are randomly generated and are replaced
+        with the seed used to compress output size. The output stream must have the
+        "binary" flag set. The output is in binary format and not human-readable.
+
+        @param[out] stream The stream to save the Galois keys to
+        @param[in] compr_mode The desired compression mode
+        @param[in] galois_steps The rotation step counts for which to generate keys
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
+        @throws std::invalid_argument if the step counts are not valid
+        */
+        inline std::streamoff galois_keys_save(
+            const std::vector<int> &steps,
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys_save(galois_elts_from_steps(steps), stream, compr_mode);
+        }
+
+        /**
+        Generates and writes Galois keys to a given memory location. This function
+        creates specific Galois keys that can be used to apply specific Galois
+        automorphisms on encrypted data. The user needs to give as input a vector
+        of desired Galois rotation step counts, where negative step counts correspond
+        to rotations to the right and positive step counts correspond to rotations to
+        the left. A step count of zero can be used to indicate a column rotation
+        in the BFV scheme complex conjugation in the CKKS scheme.
+        
+        Half of the polynomials in Galois keys are randomly generated and are replaced
+        with the seed used to compress output size. The output stream must have the
+        "binary" flag set. The output is in binary format and not human-readable.
+
+        @param[out] out The memory location to write the KSwitchKeys to
+        @param[in] galois_steps The rotation step counts for which to generate keys
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
+        @throws std::invalid_argument if the Galois elements are not valid
+        */
+        inline std::streamoff galois_keys_save(
+            const std::vector<int> &steps,
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys_save(galois_elts_from_steps(steps), out, size, compr_mode);
+        }
 
         /**
         Generates and returns Galois keys. This function creates logarithmically
         many (in degree of the polynomial modulus) Galois keys that is sufficient
         to apply any Galois automorphism (e.g. rotations) on encrypted data. Most
         users will want to use this overload of the function.
+
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
         */
-        SEAL_NODISCARD GaloisKeys galois_keys();
+        SEAL_NODISCARD GaloisKeys galois_keys()
+        {
+            return galois_keys(galois_elts_all());
+        }
+
+        /**
+        Generates and saves Galois keys to an output stream. This function creates
+        logarithmically many (in degree of the polynomial modulus) Galois keys
+        that is sufficient to apply any Galois automorphism (e.g. rotations) on
+        encrypted data. Most users will want to use this overload of the function.
+        
+        Half of the polynomials in Galois keys are randomly generated and are replaced
+        with the seed used to compress output size. The output stream must have the
+        "binary" flag set. The output is in binary format and not human-readable.
+
+        @param[out] stream The stream to save the relinearization keys to
+        @param[in] compr_mode The desired compression mode
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
+        */
+        inline std::streamoff galois_keys_save(
+            std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys_save(galois_elts_all(), stream, compr_mode);
+        }
+
+        /**
+        Generates and writes Galois keys to a given memory location. This function
+        creates logarithmically many (in degree of the polynomial modulus) Galois
+        keys that is sufficient to apply any Galois automorphism (e.g. rotations)
+        on encrypted data. Most users will want to use this overload of the function.
+        
+        Half of the polynomials in Galois keys are randomly generated and are replaced
+        with the seed used to compress output size. The output stream must have the
+        "binary" flag set. The output is in binary format and not human-readable.
+
+        @param[out] out The memory location to write the KSwitchKeys to
+        @param[in] galois_steps The rotation step counts for which to generate keys
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
+        @throws std::logic_error if the encryption parameters do not support batching
+        and scheme is scheme_type::BFV
+        @throws std::invalid_argument if the Galois elements are not valid
+        */
+        inline std::streamoff galois_keys_save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return galois_keys_save(galois_elts_all(), out, size, compr_mode);
+        }
 
     private:
         KeyGenerator(const KeyGenerator &copy) = delete;
@@ -169,22 +373,54 @@ namespace seal
         void generate_kswitch_keys(
             const std::uint64_t *new_keys,
             std::size_t num_keys,
-            KSwitchKeys &destination);
+            KSwitchKeys &destination,
+            bool save_seed = false);
 
         /**
         Generates one key switching key for a new key.
         */
         void generate_one_kswitch_key(
             const uint64_t *new_key,
-            std::vector<PublicKey> &destination);
+            std::vector<PublicKey> &destination,
+            bool save_seed = false);
 
         /**
         Generates and returns the specified number of relinearization keys.
 
         @param[in] count The number of relinearization keys to generate
+        @param[in] save_seed If true, save seed instead of a polynomial.
         @throws std::invalid_argument if count is zero or too large
         */
-        RelinKeys relin_keys(std::size_t count);
+        RelinKeys relin_keys(std::size_t count, bool save_seed);
+
+        /**
+        Generates and returns Galois keys. This function creates specific Galois
+        keys that can be used to apply specific Galois automorphisms on encrypted
+        data. The user needs to give as input a vector of Galois elements
+        corresponding to the keys that are to be created.
+
+        The Galois elements are odd integers in the interval [1, M-1], where
+        M = 2*N, and N = poly_modulus_degree. Used with batching, a Galois element
+        3^i % M corresponds to a cyclic row rotation i steps to the left, and
+        a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation i
+        steps to the right. The Galois element M-1 corresponds to a column rotation
+        (row swap) in BFV, and complex conjugation in CKKS. In the polynomial view
+        (not batching), a Galois automorphism by a Galois element p changes Enc(plain(x))
+        to Enc(plain(x^p)).
+
+        @param[in] galois_elts The Galois elements for which to generate keys
+        @param[in] save_seed If true, replace second poly in Ciphertext with seed
+        @throws std::invalid_argument if the Galois elements are not valid
+        */
+        GaloisKeys galois_keys(
+            const std::vector<std::uint64_t> &galois_elts,
+            bool save_seed);
+
+        // Get a vector of galois_elts from a vector of steps.
+        std::vector<std::uint64_t> galois_elts_from_steps(const std::vector<int> &steps);
+
+        // Get a vector all necesssary galois_etls.
+        std::vector<std::uint64_t> galois_elts_all();
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);

@@ -167,7 +167,9 @@ namespace seal
             -> std::shared_ptr<UniformRandomGenerator>
         {
             return use_random_seed_ ?
-                create_impl({ random_uint64(), random_uint64() }) :
+                create_impl({
+                    random_uint64(), random_uint64(), random_uint64(), random_uint64(),
+                    random_uint64(), random_uint64(), random_uint64(), random_uint64()}) :
                 create_impl(default_seed_);
         }
 

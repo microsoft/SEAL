@@ -19,6 +19,8 @@
 
 namespace seal
 {
+    class Ciphertext;
+
     // Forward-declaring the deflate_size_bound function
     namespace util::ztools
     {
@@ -47,6 +49,8 @@ namespace seal
             std::is_same<typename std::decay<T_>::type, SEAL_BYTE>::value>>
     class IntArray
     {
+        friend class Ciphertext;
+
     public:
         using T = typename std::decay<T_>::type;
 

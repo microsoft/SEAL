@@ -219,13 +219,13 @@ namespace seal
             }
         }
 
-        uint64_t steps_to_galois_elt(int steps, size_t coeff_count)
+        uint64_t galois_elt_from_step(int step, size_t coeff_count)
         {
             uint32_t n = safe_cast<uint32_t>(coeff_count);
             uint32_t m32 = mul_safe(n, uint32_t(2));
             uint64_t m = static_cast<uint64_t>(m32);
 
-            if (steps == 0)
+            if (step == 0)
             {
                 return m - 1;
             }
@@ -233,28 +233,28 @@ namespace seal
             {
                 // Extract sign of steps. When steps is positive, the rotation
                 // is to the left; when steps is negative, it is to the right.
-                bool sign = steps < 0;
-                uint32_t pos_steps = safe_cast<uint32_t>(abs(steps));
+                bool sign = step < 0;
+                uint32_t pos_step = safe_cast<uint32_t>(abs(step));
 
-                if (pos_steps >= (n >> 1))
+                if (pos_step >= (n >> 1))
                 {
                     throw invalid_argument("step count too large");
                 }
 
-                pos_steps &= m32 - 1;
+                pos_step &= m32 - 1;
                 if (sign)
                 {
-                    steps = safe_cast<int>(n >> 1) - safe_cast<int>(pos_steps);
+                    step = safe_cast<int>(n >> 1) - safe_cast<int>(pos_step);
                 }
                 else
                 {
-                    steps = safe_cast<int>(pos_steps);
+                    step = safe_cast<int>(pos_step);
                 }
 
                 // Construct Galois element for row rotation
                 uint64_t gen = 3;
                 uint64_t galois_elt = 1;
-                while(steps--)
+                while(step--)
                 {
                     galois_elt *= gen;
                     galois_elt &= m - 1;
