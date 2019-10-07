@@ -106,6 +106,23 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, void **reli
     }
 }
 
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeysSave(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+{
+    KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
+    IfNullRet(keygen, E_POINTER);
+    IfNullRet(outptr, E_POINTER);
+    IfNullRet(out_bytes, E_POINTER);
+
+    try
+    {
+        return keygen->relin_keys_save(outptr, size, comprMode);
+    }
+    catch (const invalid_argument&)
+    {
+        return E_INVALIDARG;
+    }
+}
+
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeys1(void *thisptr, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);

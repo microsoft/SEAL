@@ -4,6 +4,7 @@
 using Microsoft.Research.SEAL.Tools;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -149,6 +150,32 @@ namespace Microsoft.Research.SEAL
         {
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr);
+        }
+
+        /// <summary>
+        /// Generates and saves relinearization keys to an output stream.
+        /// </summary>
+        /// <remarks>
+        /// Half of the polynomials in relinearization keys are randomly generated
+        /// and are replaced with the seed used to compress output size. The output
+        /// is in binary format and not human-readable. The output stream must have
+        /// the "binary" flag set.
+        /// </remarks>
+        /// <param name="stream">The stream to save the relinearization keys to</param>
+        /// <param name="comprMode">The desired compression mode</param>
+        public long RelinKeysSave(Stream stream,  ComprModeType? comprMode = null)
+        {
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            ComprModeType comprModeValue = comprMode.Value;
+            return Serialization.Save(
+                (byte[] outptr, ulong size, byte cm, out long outBytes) =>
+                    NativeMethods.KSwitchKeys_Save(NativePtr, outptr, size,
+                    cm, out outBytes),
+                SaveSize(comprModeValue), comprModeValue, stream);
+            return NativeMethods.KeyGenerator_RelinKeysSave(
+                    NativeMethods.KSwitchKeys_Save(NativePtr, outptr, size,
+                    cm, out outBytes),
+                SaveSize(comprModeValue), comprModeValue, stream);
         }
 
         /// <summary>
