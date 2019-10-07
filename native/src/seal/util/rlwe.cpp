@@ -286,8 +286,25 @@ namespace seal
             uint64_t *c1 = destination.data(1);
 
             // Sample a uniformly at random
-            // Set c[1] = a (we sample the NTT form directly)
-            sample_poly_uniform(rng_ciphertext, parms, c1);
+            if (is_ntt_form || !save_seed)
+            {
+                // sample the NTT form directly
+                sample_poly_uniform(rng_ciphertext, parms, c1);
+            }
+            else if (save_seed)
+            {
+                // sample non-NTT form and store the seed
+                sample_poly_uniform(rng_ciphertext, parms, c1);
+                for (size_t i = 0; i < coeff_mod_count; i++)
+                {
+                    // Transform the c1 into NTT representation.
+                    ntt_negacyclic_harvey(
+                        c1 + i * coeff_count,
+                        small_ntt_tables[i]);                    
+                }
+            }            
+            
+
 
             // Sample e <-- chi
             auto noise(allocate_poly(coeff_count, coeff_mod_count, pool));
@@ -326,6 +343,17 @@ namespace seal
                     coeff_count,
                     coeff_modulus[i],
                     c0 + i * coeff_count);
+            }
+
+            if (!is_ntt_form && !save_seed)
+            {
+                for (size_t i = 0; i < coeff_mod_count; i++)
+                {
+                    // Transform the c1 into non-NTT representation.
+                    inverse_ntt_negacyclic_harvey(
+                        c1 + i * coeff_count,
+                        small_ntt_tables[i]);                    
+                }
             }
 
             if (save_seed)

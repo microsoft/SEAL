@@ -201,16 +201,50 @@ namespace SEALTest
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext ct;
+        Plaintext pt;
+        parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
         encryptor.encrypt_zero(ct);
         ASSERT_FALSE(ct.is_ntt_form());
         ASSERT_FALSE(ct.is_transparent());
         ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-        Plaintext pt;
         decryptor.decrypt(ct, pt);
         ASSERT_TRUE(pt.is_zero());
 
-        parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
         encryptor.encrypt_zero(next_parms, ct);
+        ASSERT_FALSE(ct.is_ntt_form());
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        ASSERT_EQ(ct.parms_id(), next_parms);
+        decryptor.decrypt(ct, pt);
+        ASSERT_TRUE(pt.is_zero());
+
+        encryptor.set_secret_key(keygen.secret_key());
+        encryptor.encrypt_zero_symmetric(ct);
+        ASSERT_FALSE(ct.is_ntt_form());
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        decryptor.decrypt(ct, pt);
+        ASSERT_TRUE(pt.is_zero());
+
+        encryptor.encrypt_zero_symmetric(next_parms, ct);
+        ASSERT_FALSE(ct.is_ntt_form());
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        ASSERT_EQ(ct.parms_id(), next_parms);
+        decryptor.decrypt(ct, pt);
+        ASSERT_TRUE(pt.is_zero());
+
+        stringstream stream;
+        encryptor.encrypt_zero_symmetric_save(stream);
+        ct.load(context, stream);
+        ASSERT_FALSE(ct.is_ntt_form());
+        ASSERT_FALSE(ct.is_transparent());
+        ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+        decryptor.decrypt(ct, pt);
+        ASSERT_TRUE(pt.is_zero());
+
+        encryptor.encrypt_zero_symmetric_save(next_parms, stream);
+        ct.load(context, stream);
         ASSERT_FALSE(ct.is_ntt_form());
         ASSERT_FALSE(ct.is_transparent());
         ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
