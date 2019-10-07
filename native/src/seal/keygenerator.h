@@ -94,9 +94,10 @@ namespace seal
         /**
         Generates and saves relinearization keys to an output stream.
         
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in relinearization keys are randomly generated
+        and are replaced with the seed used to compress output size. The output
+        is in binary format and not human-readable. The output stream must have
+        the "binary" flag set.
 
         @param[out] stream The stream to save the relinearization keys to
         @param[in] compr_mode The desired compression mode
@@ -106,6 +107,31 @@ namespace seal
             compr_mode_type compr_mode = Serialization::compr_mode_default)
         {
             return relin_keys(1, true).save(stream, compr_mode);
+        }
+
+        /**
+        Generates and saves relinearization keys to a given memory location.
+        
+        Half of the polynomials in relinearization keys are randomly generated
+        and are replaced with the seed used to compress output size. The output
+        is in binary format and not human-readable.
+
+        @param[out] out The memory location to write the RelinKeys to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
+        @param[in] compr_mode The desired compression mode
+        */
+        inline std::streamoff relin_keys_save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = Serialization::compr_mode_default)
+        {
+            return relin_keys(1, true).save(out, size, compr_mode);
         }
 
         /**
@@ -140,13 +166,14 @@ namespace seal
         on encrypted data. The user needs to give as input a vector of Galois
         elements corresponding to the keys that are to be created.
         
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output is in
+        binary format and not human-readable. The output stream must have the
+        "binary" flag set.
 
+        @param[in] galois_elts The Galois elements for which to generate keys
         @param[out] stream The stream to save the Galois keys to
         @param[in] compr_mode The desired compression mode
-        @param[in] galois_elts The Galois elements for which to generate keys
         @throws std::logic_error if the encryption parameters do not support batching
         and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
@@ -165,12 +192,12 @@ namespace seal
         automorphisms on encrypted data. The user needs to give as input a vector
         of Galois elements corresponding to the keys that are to be created.
         
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output is in
+        binary format and not human-readable.
 
-        @param[out] out The memory location to write the KSwitchKeys to
         @param[in] galois_elts The Galois elements for which to generate keys
+        @param[out] out The memory location to write the GaloisKeys to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
@@ -219,13 +246,14 @@ namespace seal
         the left. A step count of zero can be used to indicate a column rotation
         in the BFV scheme complex conjugation in the CKKS scheme.
         
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output is in
+        binary format and not human-readable. The output stream must have the
+        "binary" flag set.
 
+        @param[in] galois_steps The rotation step counts for which to generate keys
         @param[out] stream The stream to save the Galois keys to
         @param[in] compr_mode The desired compression mode
-        @param[in] galois_steps The rotation step counts for which to generate keys
         @throws std::logic_error if the encryption parameters do not support batching
         and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
@@ -247,12 +275,12 @@ namespace seal
         the left. A step count of zero can be used to indicate a column rotation
         in the BFV scheme complex conjugation in the CKKS scheme.
         
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output is in
+        binary format and not human-readable.
 
-        @param[out] out The memory location to write the KSwitchKeys to
         @param[in] galois_steps The rotation step counts for which to generate keys
+        @param[out] out The memory location to write the GaloisKeys to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
@@ -293,11 +321,12 @@ namespace seal
         that is sufficient to apply any Galois automorphism (e.g. rotations) on
         encrypted data. Most users will want to use this overload of the function.
         
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output is in
+        binary format and not human-readable. The output stream must have the
+        "binary" flag set.
 
-        @param[out] stream The stream to save the relinearization keys to
+        @param[out] stream The stream to save the Galois keys to
         @param[in] compr_mode The desired compression mode
         @throws std::logic_error if the encryption parameters do not support batching
         and scheme is scheme_type::BFV
@@ -315,12 +344,11 @@ namespace seal
         keys that is sufficient to apply any Galois automorphism (e.g. rotations)
         on encrypted data. Most users will want to use this overload of the function.
         
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output is in
+        binary format and not human-readable.
 
-        @param[out] out The memory location to write the KSwitchKeys to
-        @param[in] galois_steps The rotation step counts for which to generate keys
+        @param[out] out The memory location to write the GaloisKeys to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
