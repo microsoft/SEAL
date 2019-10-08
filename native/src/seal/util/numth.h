@@ -8,13 +8,37 @@
 #include "seal/util/common.h"
 #include <stdexcept>
 #include <cstdint>
+#include <cmath>
 #include <vector>
 #include <tuple>
+#include <algorithm>
 
 namespace seal
 {
     namespace util
     {
+        SEAL_NODISCARD inline std::vector<int> naf(int value)
+        {
+          std::vector<int> res;
+
+          // Record the sign of the original value and compute abs
+          bool sign = value < 0;
+          value = std::abs(value);
+
+          // Transform to non-adjacent form (NAF)
+          for (int i = 0; value; i++)
+          {
+            int zi = (value % 2) ? 2 - (value % 4) : 0;
+            value = (value - zi) / 2;
+            if (zi)
+            {
+              res.push_back((sign ? -zi : zi) * (1 << i));
+            }
+          }
+
+          return res;
+        }
+
         SEAL_NODISCARD inline std::uint64_t gcd(
             std::uint64_t x, std::uint64_t y)
         {
