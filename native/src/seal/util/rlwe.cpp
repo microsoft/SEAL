@@ -142,17 +142,16 @@ namespace seal
             shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             bool is_ntt_form,
-            Ciphertext &destination,
-            MemoryPoolHandle pool)
+            Ciphertext &destination)
         {
-            if (!pool)
+#ifdef SEAL_DEBUG
+            if (is_valid_for(public_key, context))
             {
-                throw invalid_argument("pool is uninitialized");
+                throw invalid_argument("public key is not valid for the encryption parameters");
             }
-            if (public_key.parms_id() != context->key_parms_id())
-            {
-                throw invalid_argument("key_parms_id mismatch");
-            }
+#endif
+            // We use a fresh memory pool with `clear_on_destruction' enabled.
+            MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
             auto &context_data = *context->get_context_data(parms_id);
             auto &parms = context_data.parms();
@@ -161,11 +160,6 @@ namespace seal
             size_t coeff_count = parms.poly_modulus_degree();
             auto &small_ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = public_key.data().size();
-
-            if (encrypted_size < 2)
-            {
-                throw invalid_argument("public_key has less than 2 parts");
-            }
 
             // Make destination have right size and parms_id
             // Ciphertext (c_0,c_1, ...)
@@ -236,18 +230,17 @@ namespace seal
             shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             bool is_ntt_form,
-            Ciphertext &destination,
-            MemoryPoolHandle pool,
-            bool save_seed)
+            bool save_seed,
+            Ciphertext &destination)
         {
-            if (!pool)
+#ifdef SEAL_DEBUG
+            if (is_valid_for(secret_key, context))
             {
-                throw invalid_argument("pool is uninitialized");
+                throw invalid_argument("secret key is not valid for the encryption parameters");
             }
-            if (secret_key.parms_id() != context->key_parms_id())
-            {
-                throw invalid_argument("key_parms_id mismatch");
-            }
+#endif
+            // We use a fresh memory pool with `clear_on_destruction' enabled.
+            MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
             auto &context_data = *context->get_context_data(parms_id);
             auto &parms = context_data.parms();
@@ -271,14 +264,6 @@ namespace seal
 
             auto rng_error = parms.random_generator()->create();
             shared_ptr<UniformRandomGenerator> rng_ciphertext;
-            if (save_seed)
-            {
-                rng_ciphertext = BlakePRNGFactory().create();
-            }
-            else
-            {
-                rng_ciphertext = rng_error;
-            }
             rng_ciphertext = BlakePRNGFactory().create();
             
             // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
@@ -304,8 +289,6 @@ namespace seal
                 }
             }            
             
-
-
             // Sample e <-- chi
             auto noise(allocate_poly(coeff_count, coeff_mod_count, pool));
             sample_poly_normal(rng_error, parms, noise.get());

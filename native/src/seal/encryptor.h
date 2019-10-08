@@ -97,7 +97,7 @@ namespace seal
             {
                 throw std::invalid_argument("invalid context");
             }
-            if (public_key.parms_id() != context_->key_parms_id())
+            if (!is_valid_for(public_key, context_))
             {
                 throw std::invalid_argument("public key is not valid for encryption parameters");
             }
@@ -116,7 +116,7 @@ namespace seal
             {
                 throw std::invalid_argument("invalid context");
             }
-            if (secret_key.parms_id() != context_->key_parms_id())
+            if (!is_valid_for(secret_key, context_))
             {
                 throw std::invalid_argument("secret key is not valid for encryption parameters");
             }
@@ -139,7 +139,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt(const Plaintext &plain, Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_custom(plain, destination, true, false, pool);
         }
@@ -179,7 +179,7 @@ namespace seal
         }
 
         /**
-        Encrypts a plaintext with secret key and stores the result in destination.
+        Encrypts a plaintext with the secret key and stores the result in destination.
         The encryption parameters for the resulting ciphertext correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
@@ -200,7 +200,7 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with secret key and stores the result in destination.
+        Encrypts a zero plaintext with the secret key and stores the result in destination.
         The encryption parameters for the resulting ciphertext correspond to the
         highest (data) level in the modulus switching chain. Dynamic memory allocations in
         the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
@@ -216,7 +216,7 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with secret key and stores the result in destination.
+        Encrypts a zero plaintext with the secret key and stores the result in destination.
         The encryption parameters for the resulting ciphertext correspond to the given
         parms_id. Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
@@ -234,7 +234,7 @@ namespace seal
         }
 
         /**
-        Encrypts a plaintext with secret key and saves result to an output stream.
+        Encrypts a plaintext with the secret key and saves result to an output stream.
         The encryption parameters for the resulting ciphertext correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
@@ -253,7 +253,8 @@ namespace seal
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline std::streamoff encrypt_symmetric_save(const Plaintext &plain,
+        inline std::streamoff encrypt_symmetric_save(
+            const Plaintext &plain,
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
             MemoryPoolHandle pool = MemoryManager::GetPool())
@@ -264,7 +265,7 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with secret key and saves result to an output stream.
+        Encrypts a zero plaintext with the secret key and saves result to an output stream.
         The encryption parameters for the resulting ciphertext correspond to the
         highest (data) level in the modulus switching chain. Dynamic memory allocations in
         the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
@@ -288,7 +289,7 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with secret key and saves result to an output stream.
+        Encrypts a zero plaintext with the secret key and saves result to an output stream.
         The encryption parameters for the resulting ciphertext correspond to the given
         parms_id. Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
@@ -304,7 +305,8 @@ namespace seal
         @throws std::invalid_argument if parms_id is not valid for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline std::streamoff encrypt_zero_symmetric_save(parms_id_type parms_id,
+        inline std::streamoff encrypt_zero_symmetric_save(
+            parms_id_type parms_id,
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
             MemoryPoolHandle pool = MemoryManager::GetPool())
@@ -315,7 +317,7 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with secret key and saves result to a given memory location.
+        Encrypts a zero plaintext with the secret key and saves result to a given memory location.
         The encryption parameters for the resulting ciphertext correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
@@ -340,7 +342,8 @@ namespace seal
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline std::streamoff encrypt_symmetric_save(const Plaintext &plain,
+        inline std::streamoff encrypt_symmetric_save(
+            const Plaintext &plain,
             SEAL_BYTE *out,
             std::size_t size,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
@@ -352,7 +355,7 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with secret key and saves result to a given memory location.
+        Encrypts a zero plaintext with the secret key and saves result to a given memory location.
         The encryption parameters for the resulting ciphertext correspond to the
         highest (data) level in the modulus switching chain. Dynamic memory allocations in
         the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
@@ -383,7 +386,7 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with secret key and saves result to a given memory location.
+        Encrypts a zero plaintext with the secret key and saves result to a given memory location.
         The encryption parameters for the resulting ciphertext correspond to the given
         parms_id. Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
@@ -425,7 +428,7 @@ namespace seal
 
         Encryptor &operator =(Encryptor &&assign) = delete;
 
-        MemoryPoolHandle pool_ = MemoryManager::GetPool();
+        MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
         void encrypt_zero_custom(parms_id_type parms_id, Ciphertext &destination,
             bool is_asymmetric, bool save_seed,

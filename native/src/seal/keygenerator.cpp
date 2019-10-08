@@ -307,8 +307,10 @@ namespace seal
     {
         vector<uint64_t> galois_elts;
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
+
         transform(steps.begin(), steps.end(), back_inserter(galois_elts),
             [&](auto s) { return galois_elt_from_step(s, coeff_count); });
+
         return galois_elts;
     }
 

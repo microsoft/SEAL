@@ -32,12 +32,7 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        // Verify and set public_key
-        if (public_key.parms_id() != context_->key_parms_id())
-        {
-            throw invalid_argument("public key is not valid for encryption parameters");
-        }
-        public_key_ = public_key;
+        set_public_key(public_key);
 
         auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
@@ -64,12 +59,7 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        // Verify and set secret_key
-        if (secret_key.parms_id() != context_->key_parms_id())
-        {
-            throw invalid_argument("secret key is not valid for encryption parameters");
-        }
-        secret_key_ = secret_key;
+        set_secret_key(secret_key);
 
         auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
@@ -97,19 +87,8 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        // Verify and set public_key
-        if (public_key.parms_id() != context_->key_parms_id())
-        {
-            throw invalid_argument("public key is not valid for encryption parameters");
-        }
-        public_key_ = public_key;
-
-        // Verify and set secret_key
-        if (secret_key.parms_id() != context_->key_parms_id())
-        {
-            throw invalid_argument("secret key is not valid for encryption parameters");
-        }
-        secret_key_ = secret_key;
+        set_public_key(public_key);
+        set_secret_key(secret_key);
 
         auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
@@ -131,16 +110,19 @@ namespace seal
         {
             throw invalid_argument("pool is uninitialized");
         }
+
         auto context_data_ptr = context_->get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");
         }
+
         auto &context_data = *context_->get_context_data(parms_id);
         auto &parms = context_data.parms();
         size_t coeff_mod_count = parms.coeff_modulus().size();
         size_t coeff_count = parms.poly_modulus_degree();
         bool is_ntt_form = false;
+
         if (parms.scheme() == scheme_type::CKKS)
         {
             is_ntt_form = true;
@@ -163,9 +145,9 @@ namespace seal
             }
 
             auto prev_context_data_ptr = context_data.prev_context_data();
-            // Requires modulus switching
             if (prev_context_data_ptr)
             {
+                // Requires modulus switching
                 auto &prev_context_data = *prev_context_data_ptr;
                 auto &prev_parms_id = prev_context_data.parms_id();
                 auto &base_converter = prev_context_data.base_converter();
@@ -200,9 +182,9 @@ namespace seal
                 destination.is_ntt_form() = is_ntt_form;
                 destination.scale() = temp.scale();
             }
-            // Does not require modulus switching
             else
             {
+                // Does not require modulus switching
                 util::encrypt_zero_asymmetric(public_key_, context_, parms_id,
                     is_ntt_form, destination, pool);
             }
@@ -214,6 +196,7 @@ namespace seal
             {
                 throw logic_error("secret key is not valid for encryption parameters");
             }
+
             util::encrypt_zero_symmetric(secret_key_, context_, parms_id,
                 is_ntt_form, destination, pool, save_seed);
             // Does not require modulus switching
@@ -228,6 +211,7 @@ namespace seal
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
+
         auto scheme = context_->key_context_data()->parms().scheme();
         if (scheme == scheme_type::BFV)
         {
@@ -235,6 +219,7 @@ namespace seal
             {
                 throw invalid_argument("plain cannot be in NTT form");
             }
+
             encrypt_zero_custom(context_->first_parms_id(), destination,
                 is_asymmetric, save_seed, pool);
             
@@ -249,6 +234,7 @@ namespace seal
             {
                 throw invalid_argument("plain must be in NTT form");
             }
+
             auto context_data_ptr = context_->get_context_data(plain.parms_id());
             if (!context_data_ptr)
             {
@@ -261,6 +247,7 @@ namespace seal
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
+
             // The plaintext gets added into the c_0 term of ciphertext (c_0,c_1).
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
@@ -271,6 +258,7 @@ namespace seal
                     coeff_modulus[i],
                     destination.data() + (i * coeff_count));
             }
+
             destination.scale() = plain.scale();
         }
         else

@@ -32,7 +32,7 @@ namespace seal
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-        if (secret_key.parms_id() != context_->key_parms_id())
+        if (!is_valid_for(secret_key, context_))
         {
             throw invalid_argument("secret key is not valid for encryption parameters");
         }
