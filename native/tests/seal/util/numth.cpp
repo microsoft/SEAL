@@ -4,6 +4,7 @@
 #include "gtest/gtest.h"
 #include "seal/util/numth.h"
 #include <cstdint>
+#include <numeric>
 
 using namespace seal::util;
 using namespace std;
@@ -106,6 +107,45 @@ namespace SEALTest
             ASSERT_FALSE(is_prime(72307ULL * 59399ULL));
             ASSERT_TRUE(is_prime(36893488147419103ULL));
             ASSERT_FALSE(is_prime(36893488147419107ULL));
+        }
+
+        TEST(NumberTheoryTest, NAF)
+        {
+            auto naf_vec = naf(0);
+            ASSERT_EQ(0, naf_vec.size());
+
+            naf_vec = naf(1);
+            ASSERT_EQ(1, naf_vec.size());
+            ASSERT_EQ(1, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+            naf_vec = naf(-1);
+            ASSERT_EQ(1, naf_vec.size());
+            ASSERT_EQ(-1, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+
+            naf_vec = naf(2);
+            ASSERT_EQ(1, naf_vec.size());
+            ASSERT_EQ(2, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+            naf_vec = naf(-2);
+            ASSERT_EQ(1, naf_vec.size());
+            ASSERT_EQ(-2, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+
+            naf_vec = naf(3);
+            ASSERT_EQ(2, naf_vec.size());
+            ASSERT_EQ(3, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+            naf_vec = naf(-3);
+            ASSERT_EQ(2, naf_vec.size());
+            ASSERT_EQ(-3, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+
+            naf_vec = naf(127);
+            ASSERT_EQ(2, naf_vec.size());
+            ASSERT_EQ(127, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+            naf_vec = naf(-127);
+            ASSERT_EQ(2, naf_vec.size());
+            ASSERT_EQ(-127, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+
+            naf_vec = naf(123);
+            ASSERT_EQ(123, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+            naf_vec = naf(-123);
+            ASSERT_EQ(-123, accumulate(naf_vec.begin(), naf_vec.end(), 0));
         }
     }
 }
