@@ -483,10 +483,10 @@ namespace seal
         */
         IntArray<T> &operator =(IntArray<T> &&assign) noexcept
         {
-            pool_ = std::move(assign.pool_);
             capacity_ = assign.capacity_;
             size_ = assign.size_;
             data_ = std::move(assign.data_);
+            pool_ = std::move(assign.pool_);
 
             return *this;
         }
