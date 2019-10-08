@@ -90,7 +90,6 @@ namespace SEALTest
                     size_t coeff_count = parms.poly_modulus_degree();
                     size_t coeff_mod_count = coeff_modulus.size();
                     size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_mod_count);
-                    auto &small_ntt_tables = context_data.small_ntt_tables();
 
                     IntArray<Ciphertext::ct_coeff_type> error;
                     error.resize(rns_poly_uint64_count);

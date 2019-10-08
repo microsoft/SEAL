@@ -561,6 +561,10 @@ For more information see the
 or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional
 questions or comments.
 
+# Pull Requests
+
+For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 # Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
