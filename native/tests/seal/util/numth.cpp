@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "seal/util/numth.h"
 #include <cstdint>
-#include <algorithm>
+#include <numeric>
 
 using namespace seal::util;
 using namespace std;
