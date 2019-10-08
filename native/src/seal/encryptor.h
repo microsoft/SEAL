@@ -124,17 +124,20 @@ namespace seal
         }
 
         /**
-        Encrypts a plaintext with the public key and stores the result in destination.
-        The encryption parameters for the resulting ciphertext correspond to:
+        Encrypts a plaintext with the public key and stores the result in
+        destination. The encryption parameters for the resulting ciphertext
+        correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
 
         @param[in] plain The plaintext to encrypt
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is not valid for the encryption
+        parameters
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -145,12 +148,14 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the public key and stores the result in destination.
-        The encryption parameters for the resulting ciphertext correspond to the
-        highest (data) level in the modulus switching chain. Dynamic memory allocations in
-        the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the public key and stores the result in
+        destination. The encryption parameters for the resulting ciphertext
+        correspond to the highest (data) level in the modulus switching chain.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
 
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -161,15 +166,17 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the public key and stores the result in destination.
-        The encryption parameters for the resulting ciphertext correspond to the given
-        parms_id. Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the public key and stores the result in
+        destination. The encryption parameters for the resulting ciphertext
+        correspond to the given parms_id. Dynamic memory allocations in the process
+        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] parms_id The parms_id for the resulting ciphertext
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if parms_id is not valid for the encryption parameters
+        @throws std::invalid_argument if parms_id is not valid for the encryption
+        parameters
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_zero(parms_id_type parms_id, Ciphertext &destination,
@@ -179,77 +186,91 @@ namespace seal
         }
 
         /**
-        Encrypts a plaintext with the secret key and stores the result in destination.
-        The encryption parameters for the resulting ciphertext correspond to:
+        Encrypts a plaintext with the secret key and stores the result in
+        destination. The encryption parameters for the resulting ciphertext
+        correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
 
         @param[in] plain The plaintext to encrypt
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is not valid for the encryption
+        parameters
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt_symmetric(const Plaintext &plain, Ciphertext &destination,
+        inline void encrypt_symmetric(const Plaintext &plain,
+            Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_custom(plain, destination, false, false, pool);
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and stores the result in destination.
-        The encryption parameters for the resulting ciphertext correspond to the
-        highest (data) level in the modulus switching chain. Dynamic memory allocations in
-        the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and stores the result in
+        destination. The encryption parameters for the resulting ciphertext
+        correspond to the highest (data) level in the modulus switching chain.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
 
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_zero_symmetric(Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_zero_symmetric(context_->first_parms_id(), destination, pool);
+            encrypt_zero_symmetric(
+                context_->first_parms_id(),
+                destination, pool);
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and stores the result in destination.
-        The encryption parameters for the resulting ciphertext correspond to the given
-        parms_id. Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and stores the result in
+        destination. The encryption parameters for the resulting ciphertext
+        correspond to the given parms_id. Dynamic memory allocations in the process
+        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] parms_id The parms_id for the resulting ciphertext
-        @param[out] destination The ciphertext to overwrite with the encrypted plaintext
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if parms_id is not valid for the encryption parameters
+        @throws std::invalid_argument if parms_id is not valid for the encryption
+        parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt_zero_symmetric(parms_id_type parms_id, Ciphertext &destination,
+        inline void encrypt_zero_symmetric(parms_id_type parms_id,
+            Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_zero_custom(parms_id, destination, false, false, pool);
         }
 
         /**
-        Encrypts a plaintext with the secret key and saves result to an output stream.
-        The encryption parameters for the resulting ciphertext correspond to:
+        Encrypts a plaintext with the secret key and saves result to an output
+        stream. The encryption parameters for the resulting ciphertext correspond
+        to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
 
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output stream
+        must have the "binary" flag set. The output is in binary format and not
+        human-readable.
 
         @param[in] plain The plaintext to encrypt
         @param[out] stream The stream to save the result to
         @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is not valid for the encryption
+        parameters
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -265,10 +286,11 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to an output stream.
-        The encryption parameters for the resulting ciphertext correspond to the
-        highest (data) level in the modulus switching chain. Dynamic memory allocations in
-        the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and saves result to an output
+        stream. The encryption parameters for the resulting ciphertext correspond
+        to the highest (data) level in the modulus switching chain. Dynamic memory
+        allocations in the process are allocated from the memory pool pointed to by
+        the given MemoryPoolHandle.
 
         Half of the polynomials in Galois keys are randomly generated and are replaced
         with the seed used to compress output size. The output stream must have the
@@ -289,10 +311,10 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to an output stream.
-        The encryption parameters for the resulting ciphertext correspond to the given
-        parms_id. Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and saves result to an output
+        stream. The encryption parameters for the resulting ciphertext correspond to
+        the given parms_id. Dynamic memory allocations in the process are allocated
+        from the memory pool pointed to by the given MemoryPoolHandle.
 
         Half of the polynomials in Galois keys are randomly generated and are replaced
         with the seed used to compress output size. The output stream must have the
@@ -302,7 +324,8 @@ namespace seal
         @param[out] stream The stream to save the result to
         @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if parms_id is not valid for the encryption parameters
+        @throws std::invalid_argument if parms_id is not valid for the encryption
+        parameters
         @throws std::invalid_argument if pool is uninitialized
         */
         inline std::streamoff encrypt_zero_symmetric_save(
@@ -317,8 +340,9 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to a given memory location.
-        The encryption parameters for the resulting ciphertext correspond to:
+        Encrypts a zero plaintext with the secret key and saves result to a given
+        memory location. The encryption parameters for the resulting ciphertext
+        correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
@@ -338,7 +362,8 @@ namespace seal
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is not valid for the encryption
+        parameters
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -355,10 +380,11 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to a given memory location.
-        The encryption parameters for the resulting ciphertext correspond to the
-        highest (data) level in the modulus switching chain. Dynamic memory allocations in
-        the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and saves result to a given
+        memory location. The encryption parameters for the resulting ciphertext
+        correspond to the highest (data) level in the modulus switching chain.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
 
         The second polynomial in result is randomly generated and are replaced
         with the seed used to compress output size. The output is in binary format
@@ -386,10 +412,10 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to a given memory location.
-        The encryption parameters for the resulting ciphertext correspond to the given
-        parms_id. Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and saves result to a given
+        memory location. The encryption parameters for the resulting ciphertext
+        correspond to the given parms_id. Dynamic memory allocations in the process
+        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         The second polynomial in result is randomly generated and are replaced
         with the seed used to compress output size. The output is in binary format
@@ -405,7 +431,8 @@ namespace seal
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
-        @throws std::invalid_argument if parms_id is not valid for the encryption parameters
+        @throws std::invalid_argument if parms_id is not valid for the encryption
+        parameters
         @throws std::invalid_argument if pool is uninitialized
         */
         inline std::streamoff encrypt_zero_symmetric_save(

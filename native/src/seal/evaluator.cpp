@@ -12,6 +12,7 @@
 #include "seal/util/polycore.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/scalingvariant.h"
+#include "seal/util/numth.h"
 
 using namespace std;
 using namespace seal::util;
@@ -2361,8 +2362,13 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
+        // Check if Galois key is generated or not.
+        if (!galois_keys.has_key(galois_elt))
+        {
+            throw invalid_argument("Galois key not present");
+        }
+
         uint64_t m = mul_safe(static_cast<uint64_t>(coeff_count), uint64_t(2));
-        uint64_t subgroup_size = static_cast<uint64_t>(coeff_count >> 1);
         int n_power_of_two = get_power_of_two(static_cast<uint64_t>(coeff_count));
 
         // Verify parameters
@@ -2373,49 +2379,6 @@ namespace seal
         if (encrypted_size > 2)
         {
             throw invalid_argument("encrypted size must be 2");
-        }
-
-        // Check if Galois key is generated or not.
-        // If not, attempt a bit decomposition; maybe we have log(n) many keys
-        if (!galois_keys.has_key(galois_elt))
-        {
-            // galois_elt = 3^order1 * (-1)^order2
-            uint64_t order1 = Zmstar_to_generator_.at(galois_elt).first;
-            uint64_t order2 = Zmstar_to_generator_.at(galois_elt).second;
-
-            // We use either 3 or -3 as our generator, depending on which gives smaller HW
-            uint64_t two_power_of_gen = 3;
-
-            // Does order1 or n/2-order1 have smaller Hamming weight?
-            if (hamming_weight(subgroup_size - order1) < hamming_weight(order1))
-            {
-                order1 = subgroup_size - order1;
-                try_mod_inverse(3, m, two_power_of_gen);
-            }
-
-            while(order1)
-            {
-                if (order1 & 1)
-                {
-                    if (!galois_keys.has_key(two_power_of_gen))
-                    {
-                        throw invalid_argument("Galois key not present");
-                    }
-                    apply_galois_inplace(encrypted, two_power_of_gen, galois_keys, pool);
-                }
-                two_power_of_gen = mul_safe(two_power_of_gen, two_power_of_gen);
-                two_power_of_gen &= (m - 1);
-                order1 >>= 1;
-            }
-            if (order2)
-            {
-                if (!galois_keys.has_key(m - 1))
-                {
-                    throw invalid_argument("Galois key not present");
-                }
-                apply_galois_inplace(encrypted, m - 1, galois_keys, pool);
-            }
-            return;
         }
 
         auto temp(allocate_poly(coeff_count, coeff_mod_count, pool));
@@ -2521,10 +2484,40 @@ namespace seal
 
         size_t coeff_count = context_data_ptr->parms().poly_modulus_degree();
 
+        // Check if Galois key is generated or not.
+        if (galois_keys.has_key(galois_elt_from_step(steps, coeff_count)))
+        {
         // Perform rotation and key switching
         apply_galois_inplace(encrypted,
             galois_elt_from_step(steps, coeff_count),
             galois_keys, move(pool));
+    }
+        else
+        {
+            // Convert the steps to NAF: guarantees using smallest HW
+            vector<int> naf_steps = naf(steps);
+
+            // If naf_steps contains only one element, then this is a power-of-two
+            // rotation and we would have expected not to get to this part of the
+            // if-statement.
+            if (naf_steps.size() == 1)
+            {
+                throw invalid_argument("Galois key not present");
+            }
+
+            for (size_t i = 0; i < naf_steps.size(); i++)
+            {
+                // We might have a NAF-term of size coeff_count / 2; this corresponds
+                // to no rotation so we skip it.
+                if (safe_cast<size_t>(abs(naf_steps[i])) == (coeff_count >> 1))
+                {
+                    continue;
+                }
+
+                // Apply rotation for this step
+                rotate_internal(encrypted, naf_steps[i], galois_keys, pool);
+            }
+        }
     }
 
     void Evaluator::switch_key_inplace(

@@ -964,7 +964,6 @@ namespace seal
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
 
-
         The desired Galois automorphism is given as a Galois element, and must be
         an odd integer in the interval [1, M-1], where M = 2*N, and N = poly_modulus_degree.
         Used with batching, a Galois element 3^i % M corresponds to a cyclic row

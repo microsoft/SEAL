@@ -146,8 +146,8 @@ namespace seal
         a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation i
         steps to the right. The Galois element M-1 corresponds to a column rotation
         (row swap) in BFV, and complex conjugation in CKKS. In the polynomial view
-        (not batching), a Galois automorphism by a Galois element p changes Enc(plain(x))
-        to Enc(plain(x^p)).
+        (not batching), a Galois automorphism by a Galois element p changes
+        Enc(plain(x)) to Enc(plain(x^p)).
 
         @param[in] galois_elts The Galois elements for which to generate keys
         @throws std::logic_error if the encryption parameters do not support batching
@@ -174,8 +174,8 @@ namespace seal
         @param[in] galois_elts The Galois elements for which to generate keys
         @param[out] stream The stream to save the Galois keys to
         @param[in] compr_mode The desired compression mode
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -205,8 +205,8 @@ namespace seal
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -228,8 +228,8 @@ namespace seal
         scheme complex conjugation in the CKKS scheme.
 
         @param[in] galois_steps The rotation step counts for which to generate keys
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
         */
         SEAL_NODISCARD GaloisKeys galois_keys(const std::vector<int> &steps)
@@ -254,8 +254,8 @@ namespace seal
         @param[in] galois_steps The rotation step counts for which to generate keys
         @param[out] stream The stream to save the Galois keys to
         @param[in] compr_mode The desired compression mode
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the step counts are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -263,7 +263,8 @@ namespace seal
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default)
         {
-            return galois_keys_save(galois_elts_from_steps(steps), stream, compr_mode);
+            return galois_keys_save(
+                galois_elts_from_steps(steps), stream, compr_mode);
         }
 
         /**
@@ -288,8 +289,8 @@ namespace seal
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -298,7 +299,8 @@ namespace seal
             std::size_t size,
             compr_mode_type compr_mode = Serialization::compr_mode_default)
         {
-            return galois_keys_save(galois_elts_from_steps(steps), out, size, compr_mode);
+            return galois_keys_save(
+                galois_elts_from_steps(steps), out, size, compr_mode);
         }
 
         /**
@@ -307,8 +309,8 @@ namespace seal
         to apply any Galois automorphism (e.g. rotations) on encrypted data. Most
         users will want to use this overload of the function.
 
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         */
         SEAL_NODISCARD GaloisKeys galois_keys()
         {
@@ -328,8 +330,8 @@ namespace seal
 
         @param[out] stream The stream to save the Galois keys to
         @param[in] compr_mode The desired compression mode
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         */
         inline std::streamoff galois_keys_save(
             std::ostream &stream,
@@ -341,8 +343,8 @@ namespace seal
         /**
         Generates and writes Galois keys to a given memory location. This function
         creates logarithmically many (in degree of the polynomial modulus) Galois
-        keys that is sufficient to apply any Galois automorphism (e.g. rotations)
-        on encrypted data. Most users will want to use this overload of the function.
+        keys that is sufficient to apply any Galois automorphism (e.g. rotations) on
+        encrypted data. Most users will want to use this overload of the function.
         
         Half of the polynomials in Galois keys are randomly generated and are
         replaced with the seed used to compress output size. The output is in
@@ -356,8 +358,8 @@ namespace seal
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -389,9 +391,9 @@ namespace seal
         /**
         Generates new secret key.
 
-        @param[in] is_initialized True if the secret_key_ has already been initialized so that only the
-         secret_key_array_ should be initialized (it may be the case, for instance, if the secret_key_
-         was provided in the constructor
+        @param[in] is_initialized True if the secret key has already been
+        initialized so that only the secret_key_array_ should be initialized, for
+        example, if the secret key was provided in the constructor
         */
         void generate_sk(bool is_initialized = false);
 
@@ -438,8 +440,8 @@ namespace seal
         a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation i
         steps to the right. The Galois element M-1 corresponds to a column rotation
         (row swap) in BFV, and complex conjugation in CKKS. In the polynomial view
-        (not batching), a Galois automorphism by a Galois element p changes Enc(plain(x))
-        to Enc(plain(x^p)).
+        (not batching), a Galois automorphism by a Galois element p changes
+        Enc(plain(x)) to Enc(plain(x^p)).
 
         @param[in] galois_elts The Galois elements for which to generate keys
         @param[in] save_seed If true, replace second poly in Ciphertext with seed
