@@ -368,6 +368,11 @@ namespace seal
             return galois_keys_save(galois_elts_all(), out, size, compr_mode);
         }
 
+        /**
+        Enables access to private members of seal::KeyGenerator for .NET wrapper.
+        */
+        struct KeyGeneratorPrivateHelper;
+
     private:
         KeyGenerator(const KeyGenerator &copy) = delete;
 

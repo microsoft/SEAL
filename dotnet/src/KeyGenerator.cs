@@ -148,7 +148,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public RelinKeys RelinKeys()
         {
-            NativeMethods.KeyGenerator_RelinKeys(NativePtr, out IntPtr relinKeysPtr);
+            NativeMethods.KeyGenerator_RelinKeys(NativePtr, 1, false, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr);
         }
 
@@ -165,27 +165,17 @@ namespace Microsoft.Research.SEAL
         /// <param name="comprMode">The desired compression mode</param>
         public long RelinKeysSave(Stream stream,  ComprModeType? comprMode = null)
         {
-            comprMode = comprMode ?? Serialization.ComprModeDefault;
-            ComprModeType comprModeValue = comprMode.Value;
-            return Serialization.Save(
-                (byte[] outptr, ulong size, byte cm, out long outBytes) =>
-                    NativeMethods.KSwitchKeys_Save(NativePtr, outptr, size,
-                    cm, out outBytes),
-                SaveSize(comprModeValue), comprModeValue, stream);
-            return NativeMethods.KeyGenerator_RelinKeysSave(
-                    NativeMethods.KSwitchKeys_Save(NativePtr, outptr, size,
-                    cm, out outBytes),
-                SaveSize(comprModeValue), comprModeValue, stream);
+            NativeMethods.KeyGenerator_RelinKeys(NativePtr, 1, true, out IntPtr relinKeysPtr);
+            return new RelinKeys(relinKeysPtr).Save(stream, comprMode);
         }
 
         /// <summary>
-        /// Generates Galois keys.
+        /// Generates and returns Galois keys.
         /// </summary>
         /// <remarks>
-        /// Generates Galois keys. This function creates logarithmically many (in
-        /// degree of the polynomial modulus) Galois keys that is sufficient to apply
-        /// any Galois automorphism (e.g. rotations) on encrypted data. Most users
-        /// will want to use this overload of the function.
+        /// This function creates logarithmically many (in degree of the polynomial modulus)
+        /// Galois keys that is sufficient to apply any Galois automorphism (e.g. rotations)
+        /// on encrypted data. Most users will want to use this overload of the function.
         /// </remarks>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
@@ -193,7 +183,7 @@ namespace Microsoft.Research.SEAL
         {
             try
             {
-                NativeMethods.KeyGenerator_GaloisKeys(NativePtr, out IntPtr galoisKeysPtr);
+                NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, false, out IntPtr galoisKeysPtr);
                 return new GaloisKeys(galoisKeysPtr);
             }
             catch (COMException ex)
@@ -205,14 +195,45 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Generates Galois keys.
+        /// Generates and saves Galois keys to an output stream.
+        /// </summary>
+        /// <remarks>
+        /// This function creates logarithmically many (in degree of the polynomial modulus)
+        /// Galois keys that is sufficient to apply any Galois automorphism (e.g. rotations)
+        /// on encrypted data. Most users will want to use this overload of the function.
+        ///
+        /// Half of the polynomials in relinearization keys are randomly generated
+        /// and are replaced with the seed used to compress output size. The output
+        /// is in binary format and not human-readable. The output stream must have
+        /// the "binary" flag set.
+        /// </remarks>
+        /// <param name="stream">The stream to save the Galois keys to</param>
+        /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="InvalidOperationException">if the encryption parameters
+        /// do not support batching and scheme is SchemeType.BFV</exception>
+        public long GaloisKeysSave(Stream stream,  ComprModeType? comprMode = null)
+        {
+            try
+            {
+                NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, true, out IntPtr galoisKeysPtr);
+                return new GaloisKeys(galoisKeysPtr).Save(stream, comprMode);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+        }
+
+        /// <summary>
+        /// Generates and returns Galois keys.
         /// </summary>
         ///
         /// <remarks>
-        /// Generates Galois keys. This function creates specific Galois keys that
-        /// can be used to apply specific Galois automorphisms on encrypted data.
-        /// The user needs to give as input a vector of Galois elements corresponding
-        /// to the keys that are to be created.
+        /// This function creates specific Galois keys that can be used to apply specific
+        /// Galois automorphisms on encrypted data. The user needs to give as input a vector
+        /// of Galois elements corresponding to the keys that are to be created.
         ///
         /// The Galois elements are odd integers in the interval [1, M-1], where
         /// M = 2*N, and N = PolyModulusDegree. Used with batching, a Galois element
@@ -225,8 +246,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if the Galois elements are not
-        /// valid</exception>
+        /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
         public GaloisKeys GaloisKeys(IEnumerable<ulong> galoisElts)
         {
             if (null == galoisElts)
@@ -235,9 +255,57 @@ namespace Microsoft.Research.SEAL
             try
             {
                 ulong[] galoisEltsArr = galoisElts.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeys(NativePtr,
-                    (ulong)galoisEltsArr.Length, galoisEltsArr, out IntPtr galoisKeysPtr);
+                NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
+                    (ulong)galoisEltsArr.Length, galoisEltsArr, false, out IntPtr galoisKeysPtr);
                 return new GaloisKeys(galoisKeysPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+        }
+
+        /// <summary>
+        /// Generates and saves Galois keys to an output stream.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// This function creates specific Galois keys that can be used to apply specific
+        /// Galois automorphisms on encrypted data. The user needs to give as input a vector
+        /// of Galois elements corresponding to the keys that are to be created.
+        ///
+        /// The Galois elements are odd integers in the interval [1, M-1], where
+        /// M = 2*N, and N = PolyModulusDegree. Used with batching, a Galois element
+        /// 3^i % M corresponds to a cyclic row rotation i steps to the left, and
+        /// a Galois element 3^(N/2-i) % M corresponds to a cyclic row rotation i
+        /// steps to the right. The Galois element M-1 corresponds to a column rotation
+        /// (row swap). In the polynomial view (not batching), a Galois automorphism by
+        /// a Galois element p changes Enc(plain(x)) to Enc(plain(x^p)).
+        ///
+        /// Half of the polynomials in relinearization keys are randomly generated
+        /// and are replaced with the seed used to compress output size. The output
+        /// is in binary format and not human-readable. The output stream must have
+        /// the "binary" flag set.
+        /// </remarks>
+        /// <param name="galoisElts">The Galois elements for which to generate keys</param>
+        /// <param name="stream">The stream to save the Galois keys to</param>
+        /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="InvalidOperationException">if the encryption parameters
+        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
+        public long GaloisKeysSave(IEnumerable<ulong> galoisElts, Stream stream,  ComprModeType? comprMode = null)
+        {
+            if (null == galoisElts)
+                throw new ArgumentNullException(nameof(galoisElts));
+
+            try
+            {
+                ulong[] galoisEltsArr = galoisElts.ToArray();
+                NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
+                    (ulong)galoisEltsArr.Length, galoisEltsArr, true, out IntPtr galoisKeysPtr);
+                return new GaloisKeys(galoisKeysPtr).Save(stream, comprMode);
             }
             catch (COMException ex)
             {
@@ -259,13 +327,11 @@ namespace Microsoft.Research.SEAL
         /// indicate a column rotation in the BFV scheme complex conjugation in the
         /// CKKS scheme.
         /// </remarks>
-        /// <param name="steps">The rotation step counts for which to generate
-        /// keys</param>
+        /// <param name="steps">The rotation step counts for which to generate keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
-        /// <exception cref="ArgumentException">if the step counts are not
-        /// valid</exception>
+        /// <exception cref="ArgumentException">if the step counts are not valid</exception>
         public GaloisKeys GaloisKeys(IEnumerable<int> steps)
         {
             if (null == steps)
@@ -274,9 +340,53 @@ namespace Microsoft.Research.SEAL
             try
             {
                 int[] stepsArr = steps.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeys(NativePtr,
-                    (ulong)stepsArr.Length, stepsArr, out IntPtr galoisKeysPtr);
+                NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
+                    (ulong)stepsArr.Length, stepsArr, false, out IntPtr galoisKeysPtr);
                 return new GaloisKeys(galoisKeysPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+        }
+
+        /// <summary>
+        /// Generates and saves Galois keys to an output stream.
+        /// </summary>
+        /// <remarks>
+        /// This function creates specific Galois keys that can be used to apply
+        /// specific Galois automorphisms on encrypted data. The user needs to give
+        /// as input a vector of desired Galois rotation step counts, where negative
+        /// step counts correspond to rotations to the right and positive step counts
+        /// correspond to rotations to the left. A step count of zero can be used to
+        /// indicate a column rotation in the BFV scheme complex conjugation in the
+        /// CKKS scheme.
+        ///
+        /// Half of the polynomials in relinearization keys are randomly generated
+        /// and are replaced with the seed used to compress output size. The output
+        /// is in binary format and not human-readable. The output stream must have
+        /// the "binary" flag set.
+        /// </remarks>
+        /// <param name="steps">The rotation step counts for which to generate keys</param>
+        /// <param name="stream">The stream to save the Galois keys to</param>
+        /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if steps is null</exception>
+        /// <exception cref="InvalidOperationException">if the encryption parameters
+        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="ArgumentException">if the step counts are not valid</exception>
+        public long GaloisKeysSave(IEnumerable<int> steps, Stream stream,  ComprModeType? comprMode = null)
+        {
+            if (null == steps)
+                throw new ArgumentNullException(nameof(steps));
+
+            try
+            {
+                int[] stepsArr = steps.ToArray();
+                NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
+                    (ulong)stepsArr.Length, stepsArr, true, out IntPtr galoisKeysPtr);
+                return new GaloisKeys(galoisKeysPtr).Save(stream, comprMode);
             }
             catch (COMException ex)
             {

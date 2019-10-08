@@ -831,19 +831,16 @@ namespace Microsoft.Research.SEAL
         internal static extern void KeyGenerator_Destroy(IntPtr thisptr);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, out IntPtr relinKeys);
-        
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KeyGenerator_RelinKeysSave(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, ulong count, bool save_seed, out IntPtr relin_keys);
 
-        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys1", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, out IntPtr galoisKeys);
+        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeysAll", PreserveSig = false)]
+        internal static extern void KeyGenerator_GaloisKeysAll(IntPtr thisptr, bool save_seed, out IntPtr galoisKeys);
 
-        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys2", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, ulong count, ulong[] galoisElts, out IntPtr galoisKeys);
+        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeysFromElts", PreserveSig = false)]
+        internal static extern void KeyGenerator_GaloisKeysFromElts(IntPtr thisptr, ulong count, ulong[] galoisElts, bool save_seed, out IntPtr galoisKeys);
 
-        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys3", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, ulong count, int[] steps, out IntPtr galoisKeys);
+        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeysFromSteps", PreserveSig = false)]
+        internal static extern void KeyGenerator_GaloisKeysFromSteps(IntPtr thisptr, ulong count, int[] steps, bool save_seed, out IntPtr galoisKeys);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KeyGenerator_PublicKey(IntPtr thisptr, out IntPtr publicKey);
