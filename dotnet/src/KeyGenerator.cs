@@ -163,7 +163,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the relinearization keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
-        public long RelinKeysSave(Stream stream,  ComprModeType? comprMode = null)
+        public long RelinKeysSave(Stream stream, ComprModeType? comprMode = null)
         {
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, 1, true, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr).Save(stream, comprMode);
@@ -211,7 +211,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="comprMode">The desired compression mode</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
-        public long GaloisKeysSave(Stream stream,  ComprModeType? comprMode = null)
+        public long GaloisKeysSave(Stream stream, ComprModeType? comprMode = null)
         {
             try
             {
@@ -295,7 +295,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
-        public long GaloisKeysSave(IEnumerable<ulong> galoisElts, Stream stream,  ComprModeType? comprMode = null)
+        public long GaloisKeysSave(IEnumerable<ulong> galoisElts, Stream stream, ComprModeType? comprMode = null)
         {
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
@@ -376,7 +376,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
-        public long GaloisKeysSave(IEnumerable<int> steps, Stream stream,  ComprModeType? comprMode = null)
+        public long GaloisKeysSave(IEnumerable<int> steps, Stream stream, ComprModeType? comprMode = null)
         {
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));

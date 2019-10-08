@@ -1009,7 +1009,13 @@ namespace Microsoft.Research.SEAL
         #region Encryptor methods
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void Encryptor_Create(IntPtr context, IntPtr publicKey, out IntPtr encryptor);
+        internal static extern void Encryptor_Create(IntPtr context, IntPtr publicKey, IntPtr secretKey, out IntPtr encryptor);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_SetPublicKey(IntPtr thisptr, IntPtr publicKey);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_SetSecretKey(IntPtr thisptr, IntPtr secretKey);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_Encrypt(IntPtr thisptr, IntPtr plaintext, IntPtr destination, IntPtr poolHandle);
@@ -1019,6 +1025,15 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_EncryptZero2(IntPtr thisptr, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptSymmetric(IntPtr thisptr, IntPtr plaintext, bool save_seed, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptZeroSymmetric1(IntPtr thisptr, ulong[] parmsId, bool save_seed, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptZeroSymmetric2(IntPtr thisptr, bool save_seed, IntPtr destination, IntPtr poolHandle);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_Destroy(IntPtr thisptr);

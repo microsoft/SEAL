@@ -420,6 +420,11 @@ namespace seal
             return destination.save(out, size, compr_mode);
         }
 
+        /**
+        Enables access to private members of seal::Encryptor for .NET wrapper.
+        */
+        struct EncryptorPrivateHelper;
+
     private:
         Encryptor(const Encryptor &copy) = delete;
 
