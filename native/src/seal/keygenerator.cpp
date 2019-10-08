@@ -170,7 +170,7 @@ namespace seal
 
         shared_ptr<UniformRandomGenerator> random(
             parms.random_generator()->create());
-        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, public_key_.data(), pool_);
+        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, false, public_key_.data());
 
         // Set the parms_id for public key
         public_key_.parms_id() = context_data.parms_id();
@@ -307,8 +307,10 @@ namespace seal
     {
         vector<uint64_t> galois_elts;
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
+
         transform(steps.begin(), steps.end(), back_inserter(galois_elts),
             [&](auto s) { return galois_elt_from_step(s, coeff_count); });
+
         return galois_elts;
     }
 
@@ -471,8 +473,8 @@ namespace seal
         for (size_t j = 0; j < decomp_mod_count; j++)
         {
             encrypt_zero_symmetric(secret_key_, context_,
-                key_context_data.parms_id(), true,
-                destination[j].data(), pool_, save_seed);
+                key_context_data.parms_id(), true, save_seed,
+                destination[j].data());
             factor = key_modulus.back().value() % key_modulus[j].value();
             multiply_poly_scalar_coeffmod(
                 new_key + j * coeff_count,

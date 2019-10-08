@@ -59,7 +59,6 @@ namespace seal
         @param[in] context The SEALContext containing a chain of ContextData.
         @param[in] parms_id Indicates the level of encryption.
         @param[in] is_ntt_form If true, store Ciphertext in NTT form.
-        @param[in] pool Memory pool to allocate temporary space.
         @param[out] destination The output ciphertext - an encryption of zero.
         */
         void encrypt_zero_asymmetric(
@@ -67,8 +66,7 @@ namespace seal
             std::shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             bool is_ntt_form,
-            Ciphertext &destination,
-            MemoryPoolHandle pool);
+            Ciphertext &destination);
 
         /**
         Create an encryption of zero with a secret key and store in a ciphertext.
@@ -78,7 +76,6 @@ namespace seal
         @param[in] context The SEALContext containing a chain of ContextData.
         @param[in] parms_id Indicates the level of encryption.
         @param[in] is_ntt_form If true, store Ciphertext in NTT form.
-        @param[in] pool Memory pool to allocate temporary space.
         @param[in] save_seed If true, The second component of ciphertext is
         replaced with the random seed used to sample this component.
         */
@@ -87,8 +84,7 @@ namespace seal
             std::shared_ptr<SEALContext> context,
             parms_id_type parms_id,
             bool is_ntt_form,
-            Ciphertext &destination,
-            MemoryPoolHandle pool,
-            bool save_seed = false);
+            bool save_seed,
+            Ciphertext &destination);
     }
 }
