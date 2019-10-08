@@ -103,7 +103,7 @@ namespace seal
     }
 
     void Encryptor::encrypt_zero_custom(parms_id_type parms_id, Ciphertext &destination,
-        bool is_asymmetric, bool save_seed, MemoryPoolHandle pool)
+        bool is_asymmetric, bool save_seed, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!pool)
@@ -155,7 +155,7 @@ namespace seal
                 // Zero encryption without modulus switching
                 Ciphertext temp(pool);
                 util::encrypt_zero_asymmetric(public_key_, context_, prev_parms_id,
-                    is_ntt_form, temp, pool);
+                    is_ntt_form, temp);
 
                 // Modulus switching
                 for (size_t j = 0; j < 2; j++)
@@ -186,7 +186,7 @@ namespace seal
             {
                 // Does not require modulus switching
                 util::encrypt_zero_asymmetric(public_key_, context_, parms_id,
-                    is_ntt_form, destination, pool);
+                    is_ntt_form, destination);
             }
         }
         else
@@ -198,13 +198,13 @@ namespace seal
             }
 
             util::encrypt_zero_symmetric(secret_key_, context_, parms_id,
-                is_ntt_form, destination, pool, save_seed);
+                is_ntt_form, save_seed, destination);
             // Does not require modulus switching
         }
     }
 
     void Encryptor::encrypt_custom(const Plaintext &plain, Ciphertext &destination,
-        bool is_asymmetric, bool save_seed, MemoryPoolHandle pool)
+        bool is_asymmetric, bool save_seed, MemoryPoolHandle pool) const
     {
         // Verify that plain is valid.
         if (!is_valid_for(plain, context_))

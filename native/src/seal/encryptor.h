@@ -155,7 +155,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_zero(Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_zero(context_->first_parms_id(), destination, pool);
         }
@@ -173,7 +173,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_zero(parms_id_type parms_id, Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_zero_custom(parms_id, destination, true, false, pool);
         }
@@ -194,7 +194,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_symmetric(const Plaintext &plain, Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_custom(plain, destination, false, false, pool);
         }
@@ -210,7 +210,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_zero_symmetric(Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_zero_symmetric(context_->first_parms_id(), destination, pool);
         }
@@ -228,7 +228,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_zero_symmetric(parms_id_type parms_id, Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_zero_custom(parms_id, destination, false, false, pool);
         }
@@ -257,7 +257,7 @@ namespace seal
             const Plaintext &plain,
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
             encrypt_custom(plain, destination, false, true, pool);
@@ -282,7 +282,7 @@ namespace seal
         inline std::streamoff encrypt_zero_symmetric_save(
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             return encrypt_zero_symmetric_save(
                 context_->first_parms_id(), stream, compr_mode, pool);
@@ -309,7 +309,7 @@ namespace seal
             parms_id_type parms_id,
             std::ostream &stream,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
             encrypt_zero_custom(parms_id, destination, false, true, pool);
@@ -347,7 +347,7 @@ namespace seal
             SEAL_BYTE *out,
             std::size_t size,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
             encrypt_custom(plain, destination, false, true, pool);
@@ -379,7 +379,7 @@ namespace seal
             SEAL_BYTE *out,
             std::size_t size,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             return encrypt_zero_symmetric_save(
                 context_->first_parms_id(), out, size, compr_mode, pool);
@@ -408,11 +408,12 @@ namespace seal
         @throws std::invalid_argument if parms_id is not valid for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline std::streamoff encrypt_zero_symmetric_save(parms_id_type parms_id,
+        inline std::streamoff encrypt_zero_symmetric_save(
+            parms_id_type parms_id,
             SEAL_BYTE *out,
             std::size_t size,
             compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
             encrypt_zero_custom(parms_id, destination, false, true, pool);
@@ -432,11 +433,11 @@ namespace seal
 
         void encrypt_zero_custom(parms_id_type parms_id, Ciphertext &destination,
             bool is_asymmetric, bool save_seed,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         void encrypt_custom(const Plaintext &plain, Ciphertext &destination,
             bool is_asymmetric, bool save_seed,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         std::shared_ptr<SEALContext> context_{ nullptr };
 
