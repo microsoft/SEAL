@@ -1,0 +1,13 @@
+{
+    "Registrations": [
+        {
+            "component": {
+                "type": "git",
+                "git": {
+                    "repositoryUrl": "https://github.com/BLAKE2/BLAKE2",
+                    "commitHash": "997fa5ba1e14b52c554fb03ce39e579e6f27b90c"
+                }
+            }
+        }
+    ]
+}
