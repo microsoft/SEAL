@@ -40,7 +40,7 @@ namespace Microsoft.Research.SEAL
             NativeMethods.Serialization_ComprModeDefault(out byte comprMode);
             return (ComprModeType)comprMode;
         }))();
-        
+
         /// <summary>The magic value indicating a Microsoft SEAL header.</summary>
         public static readonly ushort SEALMagic = ((Func<ushort>)(() => {
             NativeMethods.Serialization_SEALMagic(out ushort sealMagic);
@@ -229,7 +229,7 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Loads data from a given binary stream.</summary>
         /// <remarks>
-        /// This function calls the <see cref="LoadHeader" /> function to first load 
+        /// This function calls the <see cref="LoadHeader" /> function to first load
         /// a <see cref="SEALHeader" /> object from <paramref name="stream"/>. The
         /// <see cref="SEALHeader.Size"/> is then read from the <see cref="SEALHeader" />
         /// and a buffer of corresponding size is allocated. Next, the buffer is

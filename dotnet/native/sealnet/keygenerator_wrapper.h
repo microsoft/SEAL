@@ -21,7 +21,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create3(void *sealContext, void *sec
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, uint64_t count, bool save_seed, void **relin_keys);
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys);
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromElts(void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys);
 

@@ -32,7 +32,7 @@ namespace SEALNetTest
             Assert.IsNotNull(cipher);
             Assert.AreEqual(2ul, cipher.Size);
 
-            cipher = new Ciphertext();            
+            cipher = new Ciphertext();
             Assert.AreEqual(0ul, cipher.Size);
             encryptor.Encrypt(plain, cipher);
             Assert.IsNotNull(cipher);

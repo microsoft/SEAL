@@ -148,7 +148,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public RelinKeys RelinKeys()
         {
-            NativeMethods.KeyGenerator_RelinKeys(NativePtr, 1, false, out IntPtr relinKeysPtr);
+            NativeMethods.KeyGenerator_RelinKeys(NativePtr, false, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr);
         }
 
@@ -165,7 +165,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="comprMode">The desired compression mode</param>
         public long RelinKeysSave(Stream stream, ComprModeType? comprMode = null)
         {
-            NativeMethods.KeyGenerator_RelinKeys(NativePtr, 1, true, out IntPtr relinKeysPtr);
+            NativeMethods.KeyGenerator_RelinKeys(NativePtr, true, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr).Save(stream, comprMode);
         }
 

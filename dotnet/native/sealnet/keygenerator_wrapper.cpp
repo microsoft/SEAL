@@ -21,9 +21,9 @@ using namespace seal::util;
 
 struct seal::KeyGenerator::KeyGeneratorPrivateHelper
 {
-    static RelinKeys relin_keys(KeyGenerator *keygen, uint64_t count, bool save_seed)
+    static RelinKeys relin_keys(KeyGenerator *keygen, bool save_seed)
     {
-        return keygen->relin_keys(static_cast<size_t>(count), save_seed);
+        return keygen->relin_keys(size_t(1), save_seed);
     }
 
     static GaloisKeys galois_keys(KeyGenerator *keygen, const vector<uint64_t> &galois_elts, bool save_seed)
@@ -111,7 +111,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, uint64_t count, bool save_seed, void **relin_keys)
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -119,7 +119,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, uint64_t co
 
     try
     {
-        RelinKeys *relinKeys = new RelinKeys(KeyGenerator::KeyGeneratorPrivateHelper::relin_keys(keygen, count, save_seed));
+        RelinKeys *relinKeys = new RelinKeys(KeyGenerator::KeyGeneratorPrivateHelper::relin_keys(keygen, save_seed));
         *relin_keys = relinKeys;
         return S_OK;
     }
