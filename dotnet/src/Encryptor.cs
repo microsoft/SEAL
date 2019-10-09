@@ -293,7 +293,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(poolHandle))
+            using (Ciphertext destination = new Ciphertext(pool))
             {
                 NativeMethods.Encryptor_EncryptSymmetric(NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
                 return destination.Save(stream, comprMode);
@@ -328,7 +328,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(poolHandle))
+            using (Ciphertext destination = new Ciphertext(pool))
             {
                 NativeMethods.Encryptor_EncryptZeroSymmetric1(NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
                 return destination.Save(stream, comprMode);
@@ -359,7 +359,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(poolHandle))
+            using (Ciphertext destination = new Ciphertext(pool))
             {
                 NativeMethods.Encryptor_EncryptZeroSymmetric2(NativePtr, true, destination.NativePtr, poolHandle);
                 return destination.Save(stream, comprMode);
