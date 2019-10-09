@@ -166,7 +166,10 @@ namespace Microsoft.Research.SEAL
         public long RelinKeysSave(Stream stream, ComprModeType? comprMode = null)
         {
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, true, out IntPtr relinKeysPtr);
-            return new RelinKeys(relinKeysPtr).Save(stream, comprMode);
+            using (RelinKeys relinKeys = new RelinKeys(relinKeysPtr))
+            {
+                return relinKeys.Save(stream, comprMode);
+            }
         }
 
         /// <summary>
@@ -216,7 +219,10 @@ namespace Microsoft.Research.SEAL
             try
             {
                 NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, true, out IntPtr galoisKeysPtr);
-                return new GaloisKeys(galoisKeysPtr).Save(stream, comprMode);
+                using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
+                {
+                    return galoisKeys.Save(stream, comprMode);
+                }
             }
             catch (COMException ex)
             {
@@ -305,7 +311,10 @@ namespace Microsoft.Research.SEAL
                 ulong[] galoisEltsArr = galoisElts.ToArray();
                 NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
                     (ulong)galoisEltsArr.Length, galoisEltsArr, true, out IntPtr galoisKeysPtr);
-                return new GaloisKeys(galoisKeysPtr).Save(stream, comprMode);
+                using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
+                {
+                    return galoisKeys.Save(stream, comprMode);
+                }
             }
             catch (COMException ex)
             {
@@ -386,7 +395,10 @@ namespace Microsoft.Research.SEAL
                 int[] stepsArr = steps.ToArray();
                 NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
                     (ulong)stepsArr.Length, stepsArr, true, out IntPtr galoisKeysPtr);
-                return new GaloisKeys(galoisKeysPtr).Save(stream, comprMode);
+                using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
+                {
+                    return galoisKeys.Save(stream, comprMode);
+                }
             }
             catch (COMException ex)
             {

@@ -125,25 +125,13 @@ namespace SEALNetTest
 
             Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeys(elts_null));
             Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeys(elts));
-            {
-                MemoryStream stream = new MemoryStream();
-                Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(elts_null, stream));
-            }
-            {
-                MemoryStream stream = new MemoryStream();
-                Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(elts, stream));
-            }
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(elts_null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(elts, new MemoryStream()));
 
             Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeys(steps_null));
             Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeys(steps));
-            {
-                MemoryStream stream = new MemoryStream();
-                Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(steps_null, stream));
-            }
-            {
-                MemoryStream stream = new MemoryStream();
-                Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(steps, stream));
-            }
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(steps_null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(steps, new MemoryStream()));
         }
     }
 }

@@ -110,12 +110,13 @@ namespace SEALNetTest
             Evaluator evaluator = new Evaluator(context);
             BatchEncoder encoder = new BatchEncoder(context);
 
-            MemoryStream stream = new MemoryStream();
             GaloisKeys galoisKeys = new GaloisKeys();
-            keygen.GaloisKeysSave(stream);
-            stream.Seek(0, SeekOrigin.Begin);
-            galoisKeys.Load(context, stream);
-
+            using (MemoryStream stream = new MemoryStream())
+            {
+                keygen.GaloisKeysSave(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                galoisKeys.Load(context, stream);
+            }
 
             Plaintext plain = new Plaintext();
             List<ulong> vec = new List<ulong>

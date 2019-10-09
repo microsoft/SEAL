@@ -115,11 +115,13 @@ namespace SEALNetTest
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
-            MemoryStream stream = new MemoryStream();
-            keygen.RelinKeysSave(stream);
             RelinKeys relinKeys = new RelinKeys();
-            stream.Seek(0, SeekOrigin.Begin);
-            relinKeys.Load(context, stream);
+            using (MemoryStream stream = new MemoryStream())
+            {
+                keygen.RelinKeysSave(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                relinKeys.Load(context, stream);
+            }
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
