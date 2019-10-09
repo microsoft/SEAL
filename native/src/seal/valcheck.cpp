@@ -195,7 +195,7 @@ namespace seal
         const GaloisKeys &in,
         shared_ptr<const SEALContext> context)
     {
-        // Check the metadata; then we know context is OK 
+        // Check the metadata; then we know context is OK
         bool metadata_check = is_metadata_valid_for(
             static_cast<const KSwitchKeys&>(in), context);
         bool size_check = !in.size() ||

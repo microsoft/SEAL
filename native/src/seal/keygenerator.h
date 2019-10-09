@@ -93,7 +93,7 @@ namespace seal
 
         /**
         Generates and saves relinearization keys to an output stream.
-        
+
         Half of the polynomials in relinearization keys are randomly generated
         and are replaced with the seed used to compress output size. The output
         is in binary format and not human-readable. The output stream must have
@@ -111,7 +111,7 @@ namespace seal
 
         /**
         Generates and saves relinearization keys to a given memory location.
-        
+
         Half of the polynomials in relinearization keys are randomly generated
         and are replaced with the seed used to compress output size. The output
         is in binary format and not human-readable.
@@ -165,7 +165,7 @@ namespace seal
         specific Galois keys that can be used to apply specific Galois automorphisms
         on encrypted data. The user needs to give as input a vector of Galois
         elements corresponding to the keys that are to be created.
-        
+
         Half of the polynomials in Galois keys are randomly generated and are
         replaced with the seed used to compress output size. The output is in
         binary format and not human-readable. The output stream must have the
@@ -191,7 +191,7 @@ namespace seal
         creates specific Galois keys that can be used to apply specific Galois
         automorphisms on encrypted data. The user needs to give as input a vector
         of Galois elements corresponding to the keys that are to be created.
-        
+
         Half of the polynomials in Galois keys are randomly generated and are
         replaced with the seed used to compress output size. The output is in
         binary format and not human-readable.
@@ -245,7 +245,7 @@ namespace seal
         rotations to the right and positive step counts correspond to rotations to
         the left. A step count of zero can be used to indicate a column rotation
         in the BFV scheme complex conjugation in the CKKS scheme.
-        
+
         Half of the polynomials in Galois keys are randomly generated and are
         replaced with the seed used to compress output size. The output is in
         binary format and not human-readable. The output stream must have the
@@ -275,7 +275,7 @@ namespace seal
         to rotations to the right and positive step counts correspond to rotations to
         the left. A step count of zero can be used to indicate a column rotation
         in the BFV scheme complex conjugation in the CKKS scheme.
-        
+
         Half of the polynomials in Galois keys are randomly generated and are
         replaced with the seed used to compress output size. The output is in
         binary format and not human-readable.
@@ -322,7 +322,7 @@ namespace seal
         logarithmically many (in degree of the polynomial modulus) Galois keys
         that is sufficient to apply any Galois automorphism (e.g. rotations) on
         encrypted data. Most users will want to use this overload of the function.
-        
+
         Half of the polynomials in Galois keys are randomly generated and are
         replaced with the seed used to compress output size. The output is in
         binary format and not human-readable. The output stream must have the
@@ -345,7 +345,7 @@ namespace seal
         creates logarithmically many (in degree of the polynomial modulus) Galois
         keys that is sufficient to apply any Galois automorphism (e.g. rotations) on
         encrypted data. Most users will want to use this overload of the function.
-        
+
         Half of the polynomials in Galois keys are randomly generated and are
         replaced with the seed used to compress output size. The output is in
         binary format and not human-readable.

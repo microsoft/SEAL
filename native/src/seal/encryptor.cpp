@@ -222,7 +222,7 @@ namespace seal
 
             encrypt_zero_custom(context_->first_parms_id(), destination,
                 is_asymmetric, save_seed, pool);
-            
+
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
             util::multiply_add_plain_with_scaling_variant(

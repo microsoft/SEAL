@@ -30,7 +30,7 @@ namespace seal
             @param[out] out_stream The stream to write to
             @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
             @throws std::invalid_argument if pool is uninitialized
-            @throws std::logic_error if compression failed 
+            @throws std::logic_error if compression failed
             */
             void write_header_deflate_buffer(
                 const IntArray<SEAL_BYTE> &in,

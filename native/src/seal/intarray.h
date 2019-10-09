@@ -171,7 +171,7 @@ namespace seal
 
         @param[in] ptr An initial Pointer object to wrap
         @param[in] size The size of the array
-        @param[in] fill_zero If true, fills ptr with zeros 
+        @param[in] fill_zero If true, fills ptr with zeros
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if ptr is null and size is positive
         @throws std::invalid_argument if pool is uninitialized

@@ -584,7 +584,7 @@ namespace seal
                     save_members(temp_stream);
 
                     auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
-                    
+
                     // Create temporary aliasing IntArray to wrap safe_buffer
                     IntArray<SEAL_BYTE> safe_buffer_array(
                         Pointer<SEAL_BYTE>::Aliasing(safe_buffer.data()),
