@@ -99,7 +99,9 @@ namespace SEALNetTest
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     decryptor.Decrypt(cipher, plain);
                     Assert.IsTrue(plain.IsZero);
-
+                }
+                using (MemoryStream stream = new MemoryStream())
+                {
                     encryptor.EncryptZeroSymmetricSave(nextParms, stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
@@ -190,9 +192,10 @@ namespace SEALNetTest
                         Assert.AreEqual(val.Imaginary, 0.0, 0.01);
                     }
                 }
+                using (MemoryStream stream = new MemoryStream())
                 {
-                    MemoryStream stream = new MemoryStream();
                     encryptor.EncryptZeroSymmetricSave(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
                     Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
@@ -206,8 +209,11 @@ namespace SEALNetTest
                         Assert.AreEqual(val.Real, 0.0, 0.01);
                         Assert.AreEqual(val.Imaginary, 0.0, 0.01);
                     }
-
+                }
+                using (MemoryStream stream = new MemoryStream())
+                {
                     encryptor.EncryptZeroSymmetricSave(nextParms, stream);
+                    stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
                     Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
