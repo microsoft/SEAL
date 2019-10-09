@@ -93,6 +93,86 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void SeededKeyTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 8,
+                PlainModulus = new SmallModulus(257),
+                CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
+            };
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                secLevel: SecLevelType.None);
+            KeyGenerator keygen = new KeyGenerator(context);
+            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
+            Evaluator evaluator = new Evaluator(context);
+            BatchEncoder encoder = new BatchEncoder(context);
+
+            MemoryStream stream = new MemoryStream();
+            GaloisKeys galoisKeys = new GaloisKeys();
+            keygen.GaloisKeysSave(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            galoisKeys.Load(context, stream);
+
+
+            Plaintext plain = new Plaintext();
+            List<ulong> vec = new List<ulong>
+            {
+                1, 2, 3, 4,
+                5, 6, 7, 8
+            };
+
+            encoder.Encode(vec, plain);
+
+            Ciphertext encrypted = new Ciphertext();
+            Ciphertext encdest = new Ciphertext();
+            Plaintext plaindest = new Plaintext();
+
+            encryptor.Encrypt(plain, encrypted);
+            evaluator.RotateColumns(encrypted, galoisKeys, encdest);
+            decryptor.Decrypt(encdest, plaindest);
+            encoder.Decode(plaindest, vec);
+
+            Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+            {
+                5, 6, 7, 8,
+                1, 2, 3, 4
+            }));
+
+            evaluator.RotateRows(encdest, -1, galoisKeys, encrypted);
+            decryptor.Decrypt(encrypted, plaindest);
+            encoder.Decode(plaindest, vec);
+
+            Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+            {
+                8, 5, 6, 7,
+                4, 1, 2, 3
+            }));
+
+            evaluator.RotateRowsInplace(encrypted, 2, galoisKeys);
+            decryptor.Decrypt(encrypted, plaindest);
+            encoder.Decode(plaindest, vec);
+
+            Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+            {
+                6, 7, 8, 5,
+                2, 3, 4, 1
+            }));
+
+            evaluator.RotateColumnsInplace(encrypted, galoisKeys);
+            decryptor.Decrypt(encrypted, plaindest);
+            encoder.Decode(plaindest, vec);
+
+            Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+            {
+                2, 3, 4, 1,
+                6, 7, 8, 5
+            }));
+        }
+
+        [TestMethod]
         public void SetTest()
         {
             SEALContext context = GlobalContext.BFVContext;
@@ -212,6 +292,29 @@ namespace SEALNetTest
 
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(context, null));
             Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
+        }
+
+        /// <summary>
+        /// Returns true if the two given collections have equivalent elements, false otherwise
+        /// </summary>
+        private static bool AreCollectionsEqual<T>(IEnumerable<T> coll1, IEnumerable<T> coll2)
+        {
+            int size1 = coll1.Count();
+            int size2 = coll2.Count();
+
+            if (size1 != size2)
+                return false;
+
+            IEnumerator<T> en1 = coll1.GetEnumerator();
+            IEnumerator<T> en2 = coll2.GetEnumerator();
+
+            while (en1.MoveNext() && en2.MoveNext())
+            {
+                if (!en1.Current.Equals(en2.Current))
+                    return false;
+            }
+
+            return true;
         }
     }
 }

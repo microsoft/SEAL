@@ -102,6 +102,61 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void SeededKeyTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 128,
+                PlainModulus = new SmallModulus(1 << 6),
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
+            };
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                secLevel: SecLevelType.None);
+            KeyGenerator keygen = new KeyGenerator(context);
+
+            MemoryStream stream = new MemoryStream();
+            keygen.RelinKeysSave(stream);
+            RelinKeys relinKeys = new RelinKeys();
+            stream.Seek(0, SeekOrigin.Begin);
+            relinKeys.Load(context, stream);
+
+            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
+            Evaluator evaluator = new Evaluator(context);
+
+            Ciphertext encrypted1 = new Ciphertext(context);
+            Ciphertext encrypted2 = new Ciphertext(context);
+            Plaintext plain1 = new Plaintext();
+            Plaintext plain2 = new Plaintext();
+
+            plain1.Set(0);
+            encryptor.Encrypt(plain1, encrypted1);
+            evaluator.SquareInplace(encrypted1);
+            evaluator.RelinearizeInplace(encrypted1, relinKeys);
+            decryptor.Decrypt(encrypted1, plain2);
+
+            Assert.AreEqual(1ul, plain2.CoeffCount);
+            Assert.AreEqual(0ul, plain2[0]);
+
+            plain1.Set("1x^10 + 2");
+            encryptor.Encrypt(plain1, encrypted1);
+            evaluator.SquareInplace(encrypted1);
+            evaluator.RelinearizeInplace(encrypted1, relinKeys);
+            evaluator.SquareInplace(encrypted1);
+            evaluator.Relinearize(encrypted1, relinKeys, encrypted2);
+            decryptor.Decrypt(encrypted2, plain2);
+
+            // {1x^40 + 8x^30 + 18x^20 + 20x^10 + 10}
+            Assert.AreEqual(41ul, plain2.CoeffCount);
+            Assert.AreEqual(16ul, plain2[0]);
+            Assert.AreEqual(32ul, plain2[10]);
+            Assert.AreEqual(24ul, plain2[20]);
+            Assert.AreEqual(8ul,  plain2[30]);
+            Assert.AreEqual(1ul,  plain2[40]);
+        }
+
+        [TestMethod]
         public void GetKeyTest()
         {
             SEALContext context = GlobalContext.BFVContext;
