@@ -165,17 +165,10 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromSteps(void *thisptr, u
     vector<int> steps_vec;
     copy_n(steps, count, back_inserter(steps_vec));
     vector<uint64_t> galois_elts_vec;
-    try
-    {
-        galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_elts_from_steps(keygen, steps_vec);
-    }
-    catch(const invalid_argument& e)
-    {
-        return E_INVALIDARG;
-    }
 
     try
     {
+        galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_elts_from_steps(keygen, steps_vec);
         GaloisKeys *keys = new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
