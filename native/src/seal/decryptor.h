@@ -128,6 +128,8 @@ namespace seal
         void compose(const SEALContext::ContextData &context_data,
             std::uint64_t *value);
 
+	
+
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 

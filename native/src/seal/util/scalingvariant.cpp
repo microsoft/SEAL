@@ -3,6 +3,7 @@
 
 #include "seal/util/scalingvariant.h"
 #include "seal/util/polyarithsmallmod.h"
+#include "seal/encryptor.h"
 
 using namespace std;
 
@@ -25,23 +26,57 @@ namespace seal
             auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
             auto upper_half_increment = context_data.upper_half_increment();
 
+
+			auto temp1 = allocate_uint(2, MemoryPoolHandle::Global());
+			auto temp2 = allocate_uint(2, MemoryPoolHandle::Global());
+
+
+			// need to get the rtq.
+			auto rtq_decomposed = context_data.upper_half_increment();
+
+
+			auto rtq_decomposed_copy = allocate_uint(coeff_mod_count, MemoryPoolHandle::Global());
+			for (size_t i = 0; i < coeff_mod_count; i++) {
+				rtq_decomposed_copy[i] = rtq_decomposed[i];
+			}
+
+			Encryptor::compose_single_coeff(context_data, rtq_decomposed_copy.get());
+
+			// cout << "rtq = " << rtq_decomposed_copy.get()[0] << endl;
+			uint64_t t2 = context_data.plain_upper_half_threshold();
+			auto res = allocate_uint(2, MemoryPoolHandle::Global());
+			auto plain_modulus = context_data.parms().plain_modulus().value();
+
             // Multiply plain by scalar coeff_div_plain_modulus_ and reposition if in upper-half.
             for (size_t i = 0; i < plain_coeff_count; i++, destination++)
             {
-                if (plain[i] >= plain_upper_half_threshold)
-                {
+                //if (plain[i] >= plain_upper_half_threshold)
+                //{
                     // Loop over primes
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        unsigned long long temp[2]{ 0, 0 };
-                        multiply_uint64(coeff_div_plain_modulus[j], plain[i], temp);
-                        temp[1] += add_uint64(temp[0], upper_half_increment[j], 0, temp);
-                        uint64_t scaled_plain_coeff = barrett_reduce_128(temp, coeff_modulus[j]);
-                        destination[j * coeff_count] = add_uint_uint_mod(
-                            destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
-                    }
+                multiply_uint64(plain[i], rtq_decomposed_copy.get()[0], temp1.get());
+
+                // compute r_t(q) * m[i]  + (t+1) / 2
+                add_uint_uint64(temp1.get(), t2, 2, temp2.get());
+
+                // divide.
+                divide_uint128_uint64_inplace_generic(temp2.get(), plain_modulus, res.get());
+
+
+
+                for (size_t j = 0; j < coeff_mod_count; j++)
+                {
+                    uint64_t scaled_plain_coeff = multiply_uint_uint_mod(
+                        coeff_div_plain_modulus[j], plain[i], coeff_modulus[j]);
+                    destination[j * coeff_count] = add_uint_uint_mod(
+                        destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
+
+                    uint64_t scaled_plain_coeff_correction = res.get()[0] % coeff_modulus[j].value();
+                    destination[j * coeff_count] = add_uint_uint_mod(
+                        destination[j * coeff_count], scaled_plain_coeff_correction, coeff_modulus[j]);
+
                 }
-                else
+                //}
+               /* else
                 {
                     for (size_t j = 0; j < coeff_mod_count; j++)
                     {
@@ -50,8 +85,28 @@ namespace seal
                         destination[j * coeff_count] = add_uint_uint_mod(
                             destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
                     }
-                }
+                }*/
             }
+
+
+			//for (size_t i = 0; i < plain_coeff_count; i++, destination++) {
+			//	//	// add in round( r_t(q) * m[i] /t)
+			//	//	// compute r_t(q) * m[i]
+			//	multiply_uint64(plain[i], rtq_decomposed_copy.get()[0], temp1.get());
+
+			//	// compute r_t(q) * m[i]  + (t+1) / 2
+			//	add_uint_uint64(temp1.get(), t2, 2, temp2.get());
+
+			//	// divide.
+			//	divide_uint128_uint64_inplace_generic(temp2.get(), plain_modulus, res.get());
+
+			//	for (size_t j = 0; j < coeff_mod_count; j++)
+			//	{
+			//		uint64_t scaled_plain_coeff_correction = res.get()[0] % coeff_modulus[j].value();
+			//		destination[j * coeff_count] = add_uint_uint_mod(
+			//			destination[j * coeff_count], scaled_plain_coeff_correction, coeff_modulus[j]);
+			//	}
+			//}
         }
 
         void multiply_sub_plain_with_scaling_variant(

@@ -8,6 +8,9 @@
 #include "seal/randomtostd.h"
 #include "seal/smallmodulus.h"
 #include "seal/util/common.h"
+#include "seal/util/uintcore.h"
+#include "seal/util/uintarithmod.h"
+#include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/clipnormal.h"
@@ -16,6 +19,8 @@
 #include "seal/util/scalingvariant.h"
 
 using namespace std;
+using namespace seal::util;
+
 
 namespace seal
 {
@@ -255,4 +260,42 @@ namespace seal
             throw invalid_argument("unsupported scheme");
         }
     }
+
+    void Encryptor::compose_single_coeff(
+        const SEALContext::ContextData& context_data, uint64_t* value) {
+
+        auto& parms = context_data.parms();
+        auto& coeff_modulus = parms.coeff_modulus();
+        size_t coeff_count = parms.poly_modulus_degree();
+        size_t coeff_mod_count = coeff_modulus.size();
+
+        auto& base_converter = context_data.base_converter();
+        auto coeff_products_array = base_converter->get_coeff_products_array();
+        auto& inv_coeff_mod_coeff_array = base_converter->get_inv_coeff_mod_coeff_array();
+
+        auto copy(allocate_uint(coeff_mod_count, MemoryPoolHandle::Global()));
+        for (size_t j = 0; j < coeff_mod_count; j++)
+        {
+            copy[j] = value[j];
+        }
+
+
+        auto temp(allocate_uint(coeff_mod_count, MemoryPoolHandle::Global()));
+        set_zero_uint(coeff_mod_count, value);
+
+        for (size_t j = 0; j < coeff_mod_count; j++)
+        {
+            uint64_t tmp = multiply_uint_uint_mod(copy.get()[j],
+                inv_coeff_mod_coeff_array[j], coeff_modulus[j]);
+            multiply_uint_uint64(coeff_products_array + (j * coeff_mod_count),
+                coeff_mod_count, tmp, coeff_mod_count, temp.get());
+            add_uint_uint_mod(temp.get(), value,
+                context_data.total_coeff_modulus(),
+                coeff_mod_count, value);
+        }
+        set_zero_uint(coeff_mod_count, temp.get());
+    }
+
+
+
 }
