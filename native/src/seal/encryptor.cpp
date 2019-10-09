@@ -138,12 +138,6 @@ namespace seal
         // If asymmetric key encryption
         if (is_asymmetric)
         {
-            // Verify public_key
-            if (public_key_.parms_id() != context_->key_parms_id())
-            {
-                throw logic_error("public key is not valid for encryption parameters");
-            }
-
             auto prev_context_data_ptr = context_data.prev_context_data();
             if (prev_context_data_ptr)
             {
@@ -191,12 +185,6 @@ namespace seal
         }
         else
         {
-            // Verify secret_key
-            if (secret_key_.parms_id() != context_->key_parms_id())
-            {
-                throw logic_error("secret key is not valid for encryption parameters");
-            }
-
             util::encrypt_zero_symmetric(secret_key_, context_, parms_id,
                 is_ntt_form, save_seed, destination);
             // Does not require modulus switching

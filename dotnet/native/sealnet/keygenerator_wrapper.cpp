@@ -169,7 +169,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromSteps(void *thisptr, u
     {
         galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_elts_from_steps(keygen, steps_vec);
     }
-    catch(const invalid_argument& e)
+    catch(const invalid_argument&)
     {
         return E_INVALIDARG;
     }

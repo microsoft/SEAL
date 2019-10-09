@@ -343,7 +343,7 @@ namespace seal
             {
                 random_seed_type seed = rng_ciphertext->seed();
                 // Write random seed to destination.data(1).
-                c1[0] = static_cast<uint64_t>(0xffffffffffffffffULL);
+                c1[0] = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
                 copy_n(seed.cbegin(), seed.size(), c1 + 1);
             }
         }

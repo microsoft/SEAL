@@ -92,6 +92,7 @@ namespace SEALNetTest
                 using (MemoryStream stream = new MemoryStream())
                 {
                     encryptor.EncryptZeroSymmetricSave(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
                     Assert.IsFalse(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
@@ -100,6 +101,7 @@ namespace SEALNetTest
                     Assert.IsTrue(plain.IsZero);
 
                     encryptor.EncryptZeroSymmetricSave(nextParms, stream);
+                    stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
                     Assert.IsFalse(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
