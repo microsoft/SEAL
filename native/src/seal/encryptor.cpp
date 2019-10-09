@@ -175,6 +175,7 @@ namespace seal
                 }
                 destination.is_ntt_form() = is_ntt_form;
                 destination.scale() = temp.scale();
+                destination.parms_id() = parms_id;
             }
             else
             {
