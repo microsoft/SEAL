@@ -32,7 +32,8 @@ namespace seal
     SEAL_NODISCARD bool is_metadata_valid_for(
         const Plaintext& in,
         std::shared_ptr<const SEALContext> context,
-        bool allow_pure_key_levels = false); 
+        bool allow_pure_key_levels = false);
+
     /**
     Check whether the given ciphertext is valid for a given SEALContext. If the
     given SEALContext is not set, the encryption parameters are invalid, or the

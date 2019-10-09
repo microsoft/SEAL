@@ -138,12 +138,6 @@ namespace seal
         // If asymmetric key encryption
         if (is_asymmetric)
         {
-            // Verify public_key
-            if (public_key_.parms_id() != context_->key_parms_id())
-            {
-                throw logic_error("public key is not valid for encryption parameters");
-            }
-
             auto prev_context_data_ptr = context_data.prev_context_data();
             if (prev_context_data_ptr)
             {
@@ -181,6 +175,7 @@ namespace seal
                 }
                 destination.is_ntt_form() = is_ntt_form;
                 destination.scale() = temp.scale();
+                destination.parms_id() = parms_id;
             }
             else
             {
@@ -191,12 +186,6 @@ namespace seal
         }
         else
         {
-            // Verify secret_key
-            if (secret_key_.parms_id() != context_->key_parms_id())
-            {
-                throw logic_error("secret key is not valid for encryption parameters");
-            }
-
             util::encrypt_zero_symmetric(secret_key_, context_, parms_id,
                 is_ntt_form, save_seed, destination);
             // Does not require modulus switching
@@ -222,7 +211,7 @@ namespace seal
 
             encrypt_zero_custom(context_->first_parms_id(), destination,
                 is_asymmetric, save_seed, pool);
-            
+
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
             util::multiply_add_plain_with_scaling_variant(

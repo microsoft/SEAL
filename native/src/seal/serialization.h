@@ -118,7 +118,7 @@ namespace seal
         /**
         Returns true if the given SEALHeader is valid.
 
-        @param[in] header The SEALHeader 
+        @param[in] header The SEALHeader
         */
         SEAL_NODISCARD static bool IsValidHeader(
             const SEALHeader &header) noexcept

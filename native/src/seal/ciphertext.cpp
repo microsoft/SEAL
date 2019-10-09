@@ -168,7 +168,7 @@ namespace seal
             data_size = safe_cast<size_t>(
                 data_.save_size(compr_mode_type::none)); // data_
         }
-            
+
         size_t members_size = Serialization::ComprSizeEstimate(
             add_safe(
                 sizeof(parms_id_),

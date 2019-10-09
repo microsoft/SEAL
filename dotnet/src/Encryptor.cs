@@ -281,7 +281,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="stream">The stream to save the Ciphertext to</param>
         /// <param name="comprMode">The desired compression mode</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if plain is null</exception>
+        /// <exception cref="ArgumentNullException">if plain or stream is null</exception>
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is not in default NTT form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
@@ -289,6 +289,8 @@ namespace Microsoft.Research.SEAL
         {
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
             Ciphertext destination = new Ciphertext(poolHandle);
@@ -313,16 +315,18 @@ namespace Microsoft.Research.SEAL
         /// <param name="stream">The stream to save the Ciphertext to</param>
         /// <param name="comprMode">The desired compression mode</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if parmsId is null</exception>
+        /// <exception cref="ArgumentNullException">if parmsId or stream is null</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public long EncryptZeroSymmetricSave(ParmsId parmsId, Stream stream, ComprModeType? comprMode = null, MemoryPoolHandle pool = null)
         {
             if (null == parmsId)
                 throw new ArgumentNullException(nameof(parmsId));
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            Ciphertext destination = new Ciphertext(poolHandle);
+            Ciphertext destination = new Ciphertext(pool);
             NativeMethods.Encryptor_EncryptZeroSymmetric1(NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
             return destination.Save(stream, comprMode);
         }
@@ -343,11 +347,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="stream">The stream to save the Ciphertext to</param>
         /// <param name="comprMode">The desired compression mode</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public long EncryptZeroSymmetricSave(Stream stream, ComprModeType? comprMode = null, MemoryPoolHandle pool = null)
         {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            Ciphertext destination = new Ciphertext(poolHandle);
+            Ciphertext destination = new Ciphertext(pool);
             NativeMethods.Encryptor_EncryptZeroSymmetric2(NativePtr, true, destination.NativePtr, poolHandle);
             return destination.Save(stream, comprMode);
         }
