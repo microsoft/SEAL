@@ -79,6 +79,8 @@ ciphertexts are fresh (reported in [issue 59](https://github.com/microsoft/SEAL/
 - Fixed comments in [native/src/seal/util/smallntt.cpp](native/src/seal/util/smallntt.cpp) as
 reported in [issue 56](https://github.com/microsoft/SEAL/issues/56).
 - `GaloisKeys` can no longer be created with encryption parameters that do not support batching.
+- `IntArray::Load` methods requires a hint on the size of stream to be loaded to prevent unknowingly
+allocating an unexpected large amount of memory.
 
 ## Version 3.3.2 (patch)
 
