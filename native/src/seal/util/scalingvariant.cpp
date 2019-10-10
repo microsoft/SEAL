@@ -3,6 +3,7 @@
 
 #include "seal/util/scalingvariant.h"
 #include "seal/util/polyarithsmallmod.h"
+#include "seal/util/uintarith.h"
 #include "seal/encryptor.h"
 
 using namespace std;
@@ -23,28 +24,17 @@ namespace seal
             size_t plain_coeff_count = plain.coeff_count();
 
             auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
-            auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
-            auto upper_half_increment = context_data.upper_half_increment();
 
-
-			auto temp1 = allocate_uint(2, MemoryPoolHandle::Global());
 			auto temp2 = allocate_uint(2, MemoryPoolHandle::Global());
-
 
 			// need to get the rtq.
 			auto rtq_decomposed = context_data.upper_half_increment();
-
-
 			auto rtq_decomposed_copy = allocate_uint(coeff_mod_count, MemoryPoolHandle::Global());
-			for (size_t i = 0; i < coeff_mod_count; i++) {
-				rtq_decomposed_copy[i] = rtq_decomposed[i];
-			}
-
+            set_uint_uint(rtq_decomposed, coeff_mod_count, rtq_decomposed_copy.get());
 			Encryptor::compose_single_coeff(context_data, rtq_decomposed_copy.get());
-
 			// cout << "rtq = " << rtq_decomposed_copy.get()[0] << endl;
-			uint64_t t2 = context_data.plain_upper_half_threshold();
-			auto res = allocate_uint(2, MemoryPoolHandle::Global());
+
+			uint64_t plain_upper_half = context_data.plain_upper_half_threshold();
 			auto plain_modulus = context_data.parms().plain_modulus().value();
 
             // Multiply plain by scalar coeff_div_plain_modulus_ and reposition if in upper-half.
@@ -52,16 +42,16 @@ namespace seal
             {
                 //if (plain[i] >= plain_upper_half_threshold)
                 //{
-                    // Loop over primes
-                multiply_uint64(plain[i], rtq_decomposed_copy.get()[0], temp1.get());
-
                 // compute r_t(q) * m[i]  + (t+1) / 2
-                add_uint_uint64(temp1.get(), t2, 2, temp2.get());
+                unsigned long long prod[2] { 0, 0 };
+                uint64_t temp[2] { 0, 0 };
+                uint64_t res[2] { 0, 0 };
+                multiply_uint64(plain[i], rtq_decomposed_copy.get()[0], prod);
+                unsigned char carry = add_uint64(prod[0], plain_upper_half, temp);
+                temp[1] = static_cast<uint64_t>(prod[1] + carry);
 
                 // divide.
-                divide_uint128_uint64_inplace_generic(temp2.get(), plain_modulus, res.get());
-
-
+                divide_uint128_uint64_inplace_generic(temp, plain_modulus, res);
 
                 for (size_t j = 0; j < coeff_mod_count; j++)
                 {
@@ -69,11 +59,10 @@ namespace seal
                         coeff_div_plain_modulus[j], plain[i], coeff_modulus[j]);
                     destination[j * coeff_count] = add_uint_uint_mod(
                         destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
-
-                    uint64_t scaled_plain_coeff_correction = res.get()[0] % coeff_modulus[j].value();
+                    // \todo see if we can replace this with barrett_63
+                    uint64_t scaled_plain_coeff_correction = res[0] % coeff_modulus[j].value();
                     destination[j * coeff_count] = add_uint_uint_mod(
                         destination[j * coeff_count], scaled_plain_coeff_correction, coeff_modulus[j]);
-
                 }
                 //}
                /* else
@@ -87,26 +76,6 @@ namespace seal
                     }
                 }*/
             }
-
-
-			//for (size_t i = 0; i < plain_coeff_count; i++, destination++) {
-			//	//	// add in round( r_t(q) * m[i] /t)
-			//	//	// compute r_t(q) * m[i]
-			//	multiply_uint64(plain[i], rtq_decomposed_copy.get()[0], temp1.get());
-
-			//	// compute r_t(q) * m[i]  + (t+1) / 2
-			//	add_uint_uint64(temp1.get(), t2, 2, temp2.get());
-
-			//	// divide.
-			//	divide_uint128_uint64_inplace_generic(temp2.get(), plain_modulus, res.get());
-
-			//	for (size_t j = 0; j < coeff_mod_count; j++)
-			//	{
-			//		uint64_t scaled_plain_coeff_correction = res.get()[0] % coeff_modulus[j].value();
-			//		destination[j * coeff_count] = add_uint_uint_mod(
-			//			destination[j * coeff_count], scaled_plain_coeff_correction, coeff_modulus[j]);
-			//	}
-			//}
         }
 
         void multiply_sub_plain_with_scaling_variant(

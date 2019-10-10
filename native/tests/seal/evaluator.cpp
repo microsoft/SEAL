@@ -1099,7 +1099,6 @@ namespace SEALTest
             cout << tempplain.to_string() << endl;
             cout << decryptor.invariant_noise_budget(encrypted2) << endl;
 
-
             evaluator.multiply_inplace(encrypted1, encrypted2);
 
             decryptor.decrypt(encrypted1, plain);

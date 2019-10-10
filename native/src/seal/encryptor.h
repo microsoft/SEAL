@@ -455,7 +455,6 @@ namespace seal
         static void compose_single_coeff(
             const SEALContext::ContextData& context_data, uint64_t* value);
 
-
     private:
         Encryptor(const Encryptor &copy) = delete;
 
@@ -476,8 +475,6 @@ namespace seal
             MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         std::shared_ptr<SEALContext> context_{ nullptr };
-
-      
 
         PublicKey public_key_;
 

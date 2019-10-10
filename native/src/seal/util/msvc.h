@@ -19,8 +19,6 @@
 // In Visual Studio redefine std::byte (SEAL_BYTE)
 #undef SEAL_USE_STD_BYTE
 
-#undef SEAL_USE_ZLIB
-
 // In Visual Studio for now we disable the use of std::shared_mutex
 #undef SEAL_USE_SHARED_MUTEX
 
