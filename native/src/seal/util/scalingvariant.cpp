@@ -15,7 +15,8 @@ namespace seal
         void multiply_add_plain_with_scaling_variant(
             const Plaintext &plain,
             const SEALContext::ContextData &context_data,
-            uint64_t *destination)
+            uint64_t *destination,
+            MemoryPoolHandle pool)
         {
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
@@ -25,13 +26,11 @@ namespace seal
 
             auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
 
-			auto temp2 = allocate_uint(2, MemoryPoolHandle::Global());
-
 			// need to get the rtq.
 			auto rtq_decomposed = context_data.upper_half_increment();
 			auto rtq_decomposed_copy = allocate_uint(coeff_mod_count, MemoryPoolHandle::Global());
             set_uint_uint(rtq_decomposed, coeff_mod_count, rtq_decomposed_copy.get());
-			Encryptor::compose_single_coeff(context_data, rtq_decomposed_copy.get());
+			Encryptor::compose_single_coeff(context_data, rtq_decomposed_copy.get(), pool);
 			// cout << "rtq = " << rtq_decomposed_copy.get()[0] << endl;
 
 			uint64_t plain_upper_half = context_data.plain_upper_half_threshold();

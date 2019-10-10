@@ -453,7 +453,8 @@ namespace seal
         struct EncryptorPrivateHelper;
 
         static void compose_single_coeff(
-            const SEALContext::ContextData& context_data, uint64_t* value);
+            const SEALContext::ContextData &context_data, std::uint64_t *value,
+            MemoryPoolHandle pool);
 
     private:
         Encryptor(const Encryptor &copy) = delete;

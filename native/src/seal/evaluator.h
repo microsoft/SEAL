@@ -739,7 +739,8 @@ namespace seal
         @throws std::invalid_argument if encrypted or plain is in NTT form
         @throws std::logic_error if result ciphertext is transparent
         */
-        void add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain);
+        void add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain,
+            MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
         Adds a ciphertext and a plaintext. This function adds a ciphertext and
@@ -755,10 +756,10 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void add_plain(const Ciphertext &encrypted, const Plaintext &plain,
-            Ciphertext &destination)
+            Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
             destination = encrypted;
-            add_plain_inplace(destination, plain);
+            add_plain_inplace(destination, plain, pool);
         }
 
         /**

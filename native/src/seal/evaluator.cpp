@@ -1698,7 +1698,8 @@ namespace seal
         multiply_many(exp_vector, relin_keys, encrypted, move(pool));
     }
 
-    void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
+    void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain,
+        MemoryPoolHandle pool)
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1750,7 +1751,7 @@ namespace seal
         case scheme_type::BFV:
         {
             multiply_add_plain_with_scaling_variant(
-                plain, context_data, encrypted.data());
+                plain, context_data, encrypted.data(), pool);
             break;
         }
 
