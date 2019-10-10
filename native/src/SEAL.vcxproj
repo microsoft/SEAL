@@ -162,6 +162,9 @@
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
+  <PropertyGroup>
+    <ZlibLib Condition="'$(ZLIB_ROOT)'!=''">zdll.lib</ZlibLib>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -231,7 +234,9 @@
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
     <Lib>
-      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;$(ZlibLib)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ZLIB_ROOT)\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -260,7 +265,9 @@
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
     <Lib>
-      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;$(ZlibLib)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ZLIB_ROOT)\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -293,7 +300,9 @@
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
     <Lib>
-      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;$(ZlibLib)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ZLIB_ROOT)\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -325,7 +334,9 @@
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
     <Lib>
-      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;$(ZlibLib)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ZLIB_ROOT)\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

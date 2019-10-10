@@ -51,7 +51,7 @@ if "%VSVERSION%"=="15.0" (
 	exit 1
 )
 
-set CONFIGDIR=".config\%VSVERSION%"
+set CONFIGDIR=".config\%VSVERSION%\%PROJECTPLATFORM%"
 cd %~dp0
 if not exist %CONFIGDIR% (
 	mkdir %CONFIGDIR%
@@ -63,7 +63,6 @@ rem Determine if ZLIB should be enabled
 set USE_ZLIB=0
 if defined ZLIB_ROOT (
 	set USE_ZLIB=1
-	set ZLIB_LIBRARY_PATH=%ZLIB_ROOT%\..\lib\%PROJECTPLATFORM%
 )
 
 rem Determine if MSGSL should be enabled
@@ -73,15 +72,15 @@ if defined MSGSL_ROOT (
 )
 
 rem Call CMake.
-"%CMAKEPATH%" ..\..	                            ^
-	-G %CMAKEGEN%                               ^
-	-A x64                                      ^
-	-DALLOW_COMMAND_LINE_BUILD=1                ^
-	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%" ^
-	-DSEAL_LIB_BUILD_TYPE="Static_PIC"          ^
-	-DSEAL_USE_MSGSL=%USE_MSGSL%                ^
-	-DMSGSL_ROOT="%MSGSL_ROOT%"                 ^
-	-DSEAL_USE_ZLIB=%USE_ZLIB%                  ^
-	-DZLIB_ROOT="%ZLIB_ROOT%"                   ^
-	-DZLIB_LIBRARY="%ZLIB_LIBRARY_PATH%"        ^
+"%CMAKEPATH%" ..\..\..	                                       ^
+	-G %CMAKEGEN%                                              ^
+	-A %PROJECTPLATFORM%                                       ^
+	-DALLOW_COMMAND_LINE_BUILD=1                               ^
+	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%"                ^
+	-DSEAL_LIB_BUILD_TYPE="Static_PIC"                         ^
+	-DSEAL_USE_MSGSL=%USE_MSGSL%                               ^
+	-DMSGSL_ROOT="%MSGSL_ROOT%"                                ^
+	-DSEAL_USE_ZLIB=%USE_ZLIB%                                 ^
+	-DZLIB_ROOT="%ZLIB_ROOT%"                                  ^
+	-DCMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX="%PROJECTPLATFORM%" ^
 	--no-warn-unused-cli
