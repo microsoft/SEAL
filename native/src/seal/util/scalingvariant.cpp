@@ -3,6 +3,7 @@
 
 #include "seal/util/scalingvariant.h"
 #include "seal/util/polyarithsmallmod.h"
+#include "seal/util/uintarith.h"
 #include "seal/encryptor.h"
 
 using namespace std;
@@ -27,8 +28,8 @@ namespace seal
             auto upper_half_increment = context_data.upper_half_increment();
 
 
-			auto temp1 = allocate_uint(2, MemoryPoolHandle::Global());
-			auto temp2 = allocate_uint(2, MemoryPoolHandle::Global());
+			unsigned long long temp1[2];
+			unsigned long long temp2[2];
 
 
 			// need to get the rtq.
@@ -40,7 +41,8 @@ namespace seal
 				rtq_decomposed_copy[i] = rtq_decomposed[i];
 			}
 
-			Encryptor::compose_single_coeff(context_data, rtq_decomposed_copy.get());
+            auto pool = MemoryPoolHandle::Global();
+			Encryptor::compose_single_coeff(context_data, rtq_decomposed_copy.get(), pool);
 
 			// cout << "rtq = " << rtq_decomposed_copy.get()[0] << endl;
 			uint64_t t2 = context_data.plain_upper_half_threshold();
@@ -53,13 +55,13 @@ namespace seal
                 //if (plain[i] >= plain_upper_half_threshold)
                 //{
                     // Loop over primes
-                multiply_uint64(plain[i], rtq_decomposed_copy.get()[0], temp1.get());
+                multiply_uint64(plain[i], rtq_decomposed_copy.get()[0], temp1);
 
                 // compute r_t(q) * m[i]  + (t+1) / 2
-                add_uint_uint64(temp1.get(), t2, 2, temp2.get());
+                add_uint_uint64(temp1, t2, 2, temp2);
 
                 // divide.
-                divide_uint128_uint64_inplace_generic(temp2.get(), plain_modulus, res.get());
+                divide_uint128_uint64_inplace_generic(temp2, plain_modulus, res.get());
 
 
 
