@@ -11,9 +11,10 @@ rem when the user installs the "Desktop Development with C++" workload.
 
 set VSVERSION=%~1
 set PROJECTCONFIGURATION=%~2
-set VSDEVENVDIR=%~3
-set INCLUDEPATH=%~4
-set LIBRARYPATH=%~5
+set PROJECTPLATFORM=%~3
+set VSDEVENVDIR=%~4
+set INCLUDEPATH=%~5
+set LIBRARYPATH=%~6
 
 echo Configuring Microsoft SEAL through CMake
 
@@ -50,7 +51,7 @@ if "%VSVERSION%"=="15.0" (
 	exit 1
 )
 
-set CONFIGDIR=".config\%VSVERSION%"
+set CONFIGDIR=".config\%VSVERSION%\%PROJECTPLATFORM%"
 cd %~dp0
 if not exist %CONFIGDIR% (
 	mkdir %CONFIGDIR%
@@ -58,15 +59,28 @@ if not exist %CONFIGDIR% (
 cd %CONFIGDIR%
 echo Running CMake configuration in %cd%
 
+rem Determine if ZLIB should be enabled
+set USE_ZLIB=0
+if defined ZLIB_ROOT (
+	set USE_ZLIB=1
+)
+
+rem Determine if MSGSL should be enabled
+set USE_MSGSL=0
+if defined MSGSL_ROOT (
+	set USE_MSGSL=1
+)
+
 rem Call CMake.
-"%CMAKEPATH%" ..\..	                            ^
-	-G %CMAKEGEN%                               ^
-	-A x64                                      ^
-	-DALLOW_COMMAND_LINE_BUILD=1                ^
-	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%" ^
-	-DSEAL_LIB_BUILD_TYPE="Static_PIC"          ^
-	-DSEAL_USE_MSGSL=1                          ^
-	-DMSGSL_ROOT="%INCLUDEPATH%"                ^
-	-DSEAL_USE_ZLIB=1                           ^
-	-DZLIB_ROOT="%LIBRARYPATH%;%INCLUDEPATH%"   ^
+"%CMAKEPATH%" ..\..\..	                                       ^
+	-G %CMAKEGEN%                                              ^
+	-A %PROJECTPLATFORM%                                       ^
+	-DALLOW_COMMAND_LINE_BUILD=1                               ^
+	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%"                ^
+	-DSEAL_LIB_BUILD_TYPE="Static_PIC"                         ^
+	-DSEAL_USE_MSGSL=%USE_MSGSL%                               ^
+	-DMSGSL_ROOT="%MSGSL_ROOT%"                                ^
+	-DSEAL_USE_ZLIB=%USE_ZLIB%                                 ^
+	-DZLIB_ROOT="%ZLIB_ROOT%"                                  ^
+	-DCMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX="%PROJECTPLATFORM%" ^
 	--no-warn-unused-cli

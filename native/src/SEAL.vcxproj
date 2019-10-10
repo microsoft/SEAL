@@ -162,6 +162,9 @@
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
+  <PropertyGroup>
+    <ZlibLib Condition="'$(ZLIB_ROOT)'!=''">zdll.lib</ZlibLib>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -209,7 +212,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(ProjectDir)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -225,13 +228,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(Platform)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
     <Lib>
-      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;$(ZlibLib)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ZLIB_ROOT)\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -239,7 +244,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(ProjectDir)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -254,13 +259,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(Platform)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
     <Lib>
-      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;$(ZlibLib)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ZLIB_ROOT)\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -270,7 +277,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(ProjectDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -287,13 +294,15 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(Platform)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
     <Lib>
-      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;$(ZlibLib)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ZLIB_ROOT)\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -303,7 +312,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(ProjectDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -319,13 +328,15 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
+      <Command>"$(ProjectDir)CMakeConfig.cmd" "$(VisualStudioVersion)" "$(Configuration)" "$(Platform)" "$(DevEnvDir)" "$(IncludePath)" "$(LibraryPath)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Configure Microsoft SEAL through CMake</Message>
     </PreBuildEvent>
     <Lib>
-      <AdditionalDependencies>Bcrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;$(ZlibLib)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ZLIB_ROOT)\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
