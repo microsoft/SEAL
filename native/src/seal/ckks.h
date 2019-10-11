@@ -134,10 +134,10 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext polynomial.
-        The number repeats for N/2 times to fill all slots. Dynamic memory
-        allocations in the process are allocated from the memory pool pointed to
-        by the given MemoryPoolHandle.
+        Encodes a double-precision floating-point real number into a plaintext
+        polynomial. The number repeats for N/2 times to fill all slots. Dynamic
+        memory allocations in the process are allocated from the memory pool
+        pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
         @param[in] parms_id parms_id determining the encryption parameters to be
@@ -161,11 +161,11 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext polynomial.
-        The number repeats for N/2 times to fill all slots.The encryption parameters
-        used are the top level parameters for the given context. Dynamic memory
-        allocations in the process are allocated from the memory pool pointed to
-        by the given MemoryPoolHandle.
+        Encodes a double-precision floating-point real number into a plaintext
+        polynomial. The number repeats for N/2 times to fill all slots. The
+        encryption parameters used are the top level parameters for the given
+        context. Dynamic memory allocations in the process are allocated from
+        the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
         @param[in] scale Scaling parameter defining encoding precision
@@ -187,8 +187,8 @@ namespace seal
 
         /**
         Encodes a double-precision complex number into a plaintext polynomial.
-        Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Append zeros to fill all slots. Dynamic memory allocations in the process
+        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision complex number to encode
         @param[in] parms_id parms_id determining the encryption parameters to be
@@ -213,9 +213,10 @@ namespace seal
 
         /**
         Encodes a double-precision complex number into a plaintext polynomial.
-        The encryption parameters used are the top level parameters for the
-        given context. Dynamic memory allocations in the process are allocated
-        from the memory pool pointed to by the given MemoryPoolHandle.
+        Append zeros to fill all slots. The encryption parameters used are the
+        top level parameters for the given context. Dynamic memory allocations
+        in the process are allocated from the memory pool pointed to by the
+        given MemoryPoolHandle.
 
         @param[in] value The double-precision complex number to encode
         @param[in] scale Scaling parameter defining encoding precision
@@ -237,7 +238,7 @@ namespace seal
 
         /**
         Encodes an integer number into a plaintext polynomial without any scaling.
-
+        The number repeats for N/2 times to fill all slots.
         @param[in] value The integer number to encode
         @param[in] parms_id parms_id determining the encryption parameters to be
         used by the result plaintext
@@ -254,8 +255,8 @@ namespace seal
 
         /**
         Encodes an integer number into a plaintext polynomial without any scaling.
-        The encryption parameters used are the top level parameters for the given
-        context.
+        The number repeats for N/2 times to fill all slots. The encryption
+        parameters used are the top level parameters for the given context.
 
         @param[in] value The integer number to encode
         @param[out] destination The plaintext polynomial to overwrite with the
