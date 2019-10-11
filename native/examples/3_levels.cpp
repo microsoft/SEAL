@@ -88,7 +88,7 @@ void example_levels()
     In this example the plain_modulus does not play much of a role; we choose
     some reasonable value.
     */
-    parms.set_plain_modulus(1 << 20);
+    parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 20));
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);

@@ -242,10 +242,10 @@ void example_bfv_basics()
     consumption is proportional to the multiplicative depth. For example, for
     our example computation it is advantageous to factorize the polynomial as
 
-        2x^4 + 4x^3 + 4x^2 + 4x + 2 = 2(x + 1)^2 * (x^2 + 1)
+        4x^4 + 8x^3 + 8x^2 + 8x + 4 = 4(x + 1)^2 * (x^2 + 1)
 
     to obtain a simple depth 2 representation. Thus, we compute (x + 1)^2 and
-    (x^2 + 1) separately, before multiplying them, and multiplying by 2.
+    (x^2 + 1) separately, before multiplying them, and multiplying by 4.
 
     First, we compute x^2 and add a plaintext "1". We can clearly see from the
     print-out that multiplication has consumed a lot of noise budget. The user
@@ -296,13 +296,13 @@ void example_bfv_basics()
     cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
 
     /*
-    Finally, we multiply (x^2 + 1) * (x + 1)^2 * 2.
+    Finally, we multiply (x^2 + 1) * (x + 1)^2 * 4.
     */
     print_line(__LINE__);
-    cout << "Compute encrypted_result (2(x^2+1)(x+1)^2)." << endl;
+    cout << "Compute encrypted_result (4(x^2+1)(x+1)^2)." << endl;
     Ciphertext encrypted_result;
-    Plaintext plain_two("2");
-    evaluator.multiply_plain_inplace(x_sq_plus_one, plain_two);
+    Plaintext plain_four("4");
+    evaluator.multiply_plain_inplace(x_sq_plus_one, plain_four);
     evaluator.multiply(x_sq_plus_one, x_plus_one_sq, encrypted_result);
     cout << "    + size of encrypted_result: " << encrypted_result.size() << endl;
     cout << "    + noise budget in encrypted_result: "
@@ -310,7 +310,7 @@ void example_bfv_basics()
     cout << "NOTE: Decryption can be incorrect if noise budget is zero." << endl;
 
     cout << endl;
-    cout << "~~~~~~ A better way to calculate 2(x^2+1)(x+1)^2. ~~~~~~" << endl;
+    cout << "~~~~~~ A better way to calculate 4(x^2+1)(x+1)^2. ~~~~~~" << endl;
 
     /*
     Noise budget has reached 0, which means that decryption cannot be expected
@@ -377,8 +377,8 @@ void example_bfv_basics()
     cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
 
     print_line(__LINE__);
-    cout << "Compute and relinearize encrypted_result (2(x^2+1)(x+1)^2)." << endl;
-    evaluator.multiply_plain_inplace(x_sq_plus_one, plain_two);
+    cout << "Compute and relinearize encrypted_result (4(x^2+1)(x+1)^2)." << endl;
+    evaluator.multiply_plain_inplace(x_sq_plus_one, plain_four);
     evaluator.multiply(x_sq_plus_one, x_plus_one_sq, encrypted_result);
     cout << "    + size of encrypted_result: " << encrypted_result.size() << endl;
     evaluator.relinearize_inplace(encrypted_result, relin_keys);
@@ -395,15 +395,15 @@ void example_bfv_basics()
     of noise budget left, so we can expect the correct answer when decrypting.
     */
     print_line(__LINE__);
-    cout << "Decrypt encrypted_result (2(x^2+1)(x+1)^2)." << endl;
+    cout << "Decrypt encrypted_result (4(x^2+1)(x+1)^2)." << endl;
     decryptor.decrypt(encrypted_result, decrypted_result);
-    cout << "    + decryption of 2(x^2+1)(x+1)^2 = 0x"
+    cout << "    + decryption of 4(x^2+1)(x+1)^2 = 0x"
         << decrypted_result.to_string() << " ...... Correct." << endl;
     cout << endl;
 
     /*
-    For x=6, 2(x^2+1)(x+1)^2 = 3626. Since the plaintext modulus is set to 256,
+    For x=6, 4(x^2+1)(x+1)^2 = 7252. Since the plaintext modulus is set to 256,
     this result is computed in integers modulo 256. Therefore the expected output
-    should be 3626 % 256 == 42, or 0x2A in hexadecimal.
+    should be 7252 % 256 == 84, or 0x54 in hexadecimal.
     */
 }
