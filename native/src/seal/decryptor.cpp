@@ -376,6 +376,7 @@ namespace seal
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
+        auto &plain_modulus = parms.plain_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_mod_count = coeff_modulus.size();
 
@@ -394,18 +395,14 @@ namespace seal
         // The secret key powers are already NTT transformed.
         dot_product_ct_sk_array(encrypted, noise_poly.get(), pool_);
 
-        // Storage for the plaintext
-        Plaintext plain(coeff_count, pool_);
-
-        // Divide scaling variant using Bajard FullRNS techniques.
-        divide_phase_by_scaling_variant(noise_poly.get(), context_data,
-            plain.data(), pool_);
-        size_t plain_coeff_count = get_significant_uint64_count_uint(
-            plain.data(), coeff_count);
-        plain.resize(max(plain_coeff_count, size_t(1)));
-
-        // Multiply plain with scaling variant and substract from noise_poly.
-        multiply_sub_plain_with_scaling_variant(plain, context_data, noise_poly.get());
+        for (size_t i = 0; i < coeff_mod_count; i++)
+        {
+            // Multiply by plain_modulus and reduce mod coeff_modulus to get
+            // coeff_modulus()*noise.
+            multiply_poly_scalar_coeffmod(noise_poly.get() + i * coeff_count,
+                coeff_count, plain_modulus.value(), coeff_modulus[i],
+                noise_poly.get() + i * coeff_count);
+        }
 
         // Compose the noise
         compose(context_data, noise_poly.get());
