@@ -1086,24 +1086,10 @@ namespace SEALTest
             Ciphertext encrypted1;
             Ciphertext encrypted2;
             Plaintext plain;
-            Plaintext tempplain;
             encryptor.encrypt(encoder.encode(0x12345678), encrypted1);
             encryptor.encrypt(encoder.encode(0x54321), encrypted2);
-
-            // Hao
-            decryptor.decrypt(encrypted1, tempplain);
-            //(encoder.encode(0x54321), encrypted2);
-            cout << tempplain.to_string() << endl;
-            cout << decryptor.invariant_noise_budget(encrypted1) << endl;
-            decryptor.decrypt(encrypted2, tempplain);
-            cout << tempplain.to_string() << endl;
-            cout << decryptor.invariant_noise_budget(encrypted2) << endl;
-
             evaluator.multiply_inplace(encrypted1, encrypted2);
-
             decryptor.decrypt(encrypted1, plain);
-            cout << plain.to_string() << endl;
-
             ASSERT_EQ(static_cast<uint64_t>(0x5FCBBBB88D78), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());

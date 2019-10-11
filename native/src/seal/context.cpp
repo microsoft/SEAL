@@ -189,7 +189,8 @@ namespace seal
                 wide_plain_modulus.get(), coeff_mod_count,
                 context_data.coeff_div_plain_modulus_.get(),
                 context_data.upper_half_increment_.get(), pool_);
-
+            // store the non-RNS form of upper_half_increment for BFV encryption
+            context_data.coeff_mod_plain_modulus_ = context_data.upper_half_increment_[0];
             // Decompose coeff_div_plain_modulus into RNS factors
             for (size_t i = 0; i < coeff_mod_count; i++)
             {

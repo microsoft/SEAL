@@ -15,65 +15,43 @@ namespace seal
         void multiply_add_plain_with_scaling_variant(
             const Plaintext &plain,
             const SEALContext::ContextData &context_data,
-            uint64_t *destination,
-            MemoryPoolHandle pool)
+            uint64_t *destination)
         {
             auto &parms = context_data.parms();
-            auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_count = parms.poly_modulus_degree();
-            size_t coeff_mod_count = coeff_modulus.size();
             size_t plain_coeff_count = plain.coeff_count();
-
+            auto &coeff_modulus = parms.coeff_modulus();
+            size_t coeff_mod_count = coeff_modulus.size();
+            auto plain_modulus = context_data.parms().plain_modulus();
             auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
+            uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
+            uint64_t q_mod_t = context_data.coeff_mod_plain_modulus();
 
-			// need to get the rtq.
-			auto rtq_decomposed = context_data.upper_half_increment();
-			auto rtq_decomposed_copy = allocate_uint(coeff_mod_count, MemoryPoolHandle::Global());
-            set_uint_uint(rtq_decomposed, coeff_mod_count, rtq_decomposed_copy.get());
-			Encryptor::compose_single_coeff(context_data, rtq_decomposed_copy.get(), pool);
-			// cout << "rtq = " << rtq_decomposed_copy.get()[0] << endl;
-
-			uint64_t plain_upper_half = context_data.plain_upper_half_threshold();
-			auto plain_modulus = context_data.parms().plain_modulus().value();
-
-            // Multiply plain by scalar coeff_div_plain_modulus_ and reposition if in upper-half.
+            // Coefficients of plain m multiplied by coeff_modulus q, divided by plain_modulus t,
+            // and rounded to the nearest integer (rounded up in case of a tie). Equivalent to
+            // floor((q * m + floor((t+1) / 2)) / t).
             for (size_t i = 0; i < plain_coeff_count; i++, destination++)
             {
-                //if (plain[i] >= plain_upper_half_threshold)
-                //{
-                // compute r_t(q) * m[i]  + (t+1) / 2
+                // compute numerator = (q mod t) * m[i] + (t+1)/2
                 unsigned long long prod[2] { 0, 0 };
-                uint64_t temp[2] { 0, 0 };
-                uint64_t res[2] { 0, 0 };
-                multiply_uint64(plain[i], rtq_decomposed_copy.get()[0], prod);
-                unsigned char carry = add_uint64(prod[0], plain_upper_half, temp);
-                temp[1] = static_cast<uint64_t>(prod[1] + carry);
+                uint64_t numerator[2] { 0, 0 };
+                multiply_uint64(plain[i], q_mod_t, prod);
+                unsigned char carry = add_uint64(*prod, plain_upper_half_threshold, numerator);
+                numerator[1] = static_cast<uint64_t>(prod[1]) + static_cast<uint64_t>(carry);
+                // compute fix[0] = floor( numerator / t )
+                uint64_t fix[2] = { 0, 0 };
+                divide_uint128_uint64_inplace(numerator, plain_modulus.value(), fix);
 
-                // divide.
-                divide_uint128_uint64_inplace_generic(temp, plain_modulus, res);
-
+                // Add to ciphertext: floor(q / t) * m + increment
                 for (size_t j = 0; j < coeff_mod_count; j++)
                 {
-                    uint64_t scaled_plain_coeff = multiply_uint_uint_mod(
-                        coeff_div_plain_modulus[j], plain[i], coeff_modulus[j]);
+                    unsigned long long temp[2] { 0, 0 };
+                    multiply_uint64(coeff_div_plain_modulus[j], plain[i], temp);
+                    temp[1] += static_cast<unsigned long long>(add_uint64(*temp, fix[0], 0, temp));
+                    uint64_t scaled_plain_coeff = barrett_reduce_128(temp, coeff_modulus[j]);
                     destination[j * coeff_count] = add_uint_uint_mod(
                         destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
-                    // \todo see if we can replace this with barrett_63
-                    uint64_t scaled_plain_coeff_correction = res[0] % coeff_modulus[j].value();
-                    destination[j * coeff_count] = add_uint_uint_mod(
-                        destination[j * coeff_count], scaled_plain_coeff_correction, coeff_modulus[j]);
                 }
-                //}
-               /* else
-                {
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        uint64_t scaled_plain_coeff = multiply_uint_uint_mod(
-                            coeff_div_plain_modulus[j], plain[i], coeff_modulus[j]);
-                        destination[j * coeff_count] = add_uint_uint_mod(
-                            destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
-                    }
-                }*/
             }
         }
 
@@ -83,40 +61,39 @@ namespace seal
             uint64_t *destination)
         {
             auto &parms = context_data.parms();
-            auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_count = parms.poly_modulus_degree();
-            size_t coeff_mod_count = coeff_modulus.size();
             size_t plain_coeff_count = plain.coeff_count();
-
+            auto &coeff_modulus = parms.coeff_modulus();
+            size_t coeff_mod_count = coeff_modulus.size();
+            auto plain_modulus = context_data.parms().plain_modulus();
             auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
-            auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
-            auto upper_half_increment = context_data.upper_half_increment();
+            uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
+            uint64_t q_mod_t = context_data.coeff_mod_plain_modulus();
 
-            // Multiply plain by scalar coeff_div_plain_modulus_ and reposition if in upper-half.
+            // Coefficients of plain m multiplied by coeff_modulus q, divided by plain_modulus t,
+            // and rounded to the nearest integer (rounded up in case of a tie). Equivalent to
+            // floor((q * m + floor((t+1) / 2)) / t).
             for (size_t i = 0; i < plain_coeff_count; i++, destination++)
             {
-                if (plain[i] >= plain_upper_half_threshold)
+                // compute numerator = (q mod t) * m[i] + (t+1)/2
+                unsigned long long prod[2] { 0, 0 };
+                uint64_t numerator[2] { 0, 0 };
+                multiply_uint64(plain[i], q_mod_t, prod);
+                unsigned char carry = add_uint64(*prod, plain_upper_half_threshold, numerator);
+                numerator[1] = static_cast<uint64_t>(prod[1]) + static_cast<uint64_t>(carry);
+                // compute fix[0] = floor( numerator / t )
+                uint64_t fix[2] = { 0, 0 };
+                divide_uint128_uint64_inplace(numerator, plain_modulus.value(), fix);
+
+                // Add to ciphertext: floor(q / t) * m + increment
+                for (size_t j = 0; j < coeff_mod_count; j++)
                 {
-                    // Loop over primes
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        unsigned long long temp[2]{ 0, 0 };
-                        multiply_uint64(coeff_div_plain_modulus[j], plain[i], temp);
-                        temp[1] += add_uint64(temp[0], upper_half_increment[j], 0, temp);
-                        uint64_t scaled_plain_coeff = barrett_reduce_128(temp, coeff_modulus[j]);
-                        destination[j * coeff_count] = sub_uint_uint_mod(
-                            destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
-                    }
-                }
-                else
-                {
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        uint64_t scaled_plain_coeff = multiply_uint_uint_mod(
-                            coeff_div_plain_modulus[j], plain[i], coeff_modulus[j]);
-                        destination[j * coeff_count] = sub_uint_uint_mod(
-                            destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
-                    }
+                    unsigned long long temp[2] { 0, 0 };
+                    multiply_uint64(coeff_div_plain_modulus[j], plain[i], temp);
+                    temp[1] += static_cast<unsigned long long>(add_uint64(*temp, fix[0], 0, temp));
+                    uint64_t scaled_plain_coeff = barrett_reduce_128(temp, coeff_modulus[j]);
+                    destination[j * coeff_count] = sub_uint_uint_mod(
+                        destination[j * coeff_count], scaled_plain_coeff, coeff_modulus[j]);
                 }
             }
         }

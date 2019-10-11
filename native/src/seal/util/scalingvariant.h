@@ -15,8 +15,7 @@ namespace seal
         void multiply_add_plain_with_scaling_variant(
             const Plaintext &plain,
             const SEALContext::ContextData &context_data,
-            std::uint64_t *destination,
-            MemoryPoolHandle pool);
+            std::uint64_t *destination);
 
         void multiply_sub_plain_with_scaling_variant(
             const Plaintext &plain,

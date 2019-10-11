@@ -11,7 +11,7 @@ mechanism in [README.md](README.md#zlib). Microsoft SEAL does not redistribute Z
 - AES-128 is replaced with the BLAKE2 family of hash functions in the pseudorandom number generator,
 as BLAKE2 provides better cross-platform support. Microsoft SEAL redistributes the
 [reference implementation of BLAKE2](https://github.com/BLAKE2/BLAKE2)
-with light modifications to silence some misleading warnings in Visual Studio. The reference
+with light modifications to silent some misleading warnings in Visual Studio. The reference
 implementation of BLAKE2 is licensed under
 [CC0 1.0 Universal](https://github.com/BLAKE2/BLAKE2/blob/master/COPYING); see license boilerplates
 in files [native/src/seal/util/blake*](native/src/seal/util/).
@@ -33,6 +33,13 @@ has methods that serialize ciphertexts (compressed with a seed) to a C++ stream 
 installed on the same system easily, as the default installation directory and library filename now
 depend on the version of Microsoft SEAL. Examples and unit tests can now be built without installing
 the library.
+- The `Encryptor::encrypt` and `Evaluator::add_plain` operations for the BFV scheme are modified.
+Each coefficient of a plaintext message is first multiplied with the ciphertext modulus, then
+divided by the plaintext modulus, and at last rounded to the nearest integer. In comparison with the
+previous method, where each coefficient of a plaintext message is multiplied with the flooring of
+the coefficient modulus divided by the plaintext modulus, the new method reduces the noise introduced
+in encryption, increases a noise budget of a fresh encryption, slightly slows down encryption, and
+has no impact on the security at all.
 
 ### API Changes
 
@@ -73,7 +80,7 @@ Removed files:
 ### Minor Bug and Typo Fixes
 
 - Function `encrypt_zero_asymmetric` in [native/src/seal/util/rlwe.h](native/src/seal/util/rlwe.h)
-handles `is_ntt_form == false` correctly.
+handles the condition `is_ntt_form == false` correctly.
 - Invariant noise calculation in BFV is now correct when the plaintext modulus is large and
 ciphertexts are fresh (reported in [issue 59](https://github.com/microsoft/SEAL/issues/59)).
 - Fixed comments in [native/src/seal/util/smallntt.cpp](native/src/seal/util/smallntt.cpp) as

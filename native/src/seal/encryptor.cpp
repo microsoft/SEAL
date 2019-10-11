@@ -218,7 +218,7 @@ namespace seal
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
             util::multiply_add_plain_with_scaling_variant(
-                plain, *context_->first_context_data(), destination.data(), pool);
+                plain, *context_->first_context_data(), destination.data());
         }
         else if (scheme == scheme_type::CKKS)
         {
@@ -257,39 +257,5 @@ namespace seal
         {
             throw invalid_argument("unsupported scheme");
         }
-    }
-
-    void Encryptor::compose_single_coeff(
-        const SEALContext::ContextData &context_data, uint64_t *value,
-        MemoryPoolHandle pool) {
-
-        auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_mod_count = coeff_modulus.size();
-
-        auto &base_converter = context_data.base_converter();
-        auto coeff_products_array = base_converter->get_coeff_products_array();
-        auto &inv_coeff_mod_coeff_array = base_converter->get_inv_coeff_mod_coeff_array();
-
-        auto value_copy(util::allocate_uint(coeff_mod_count, pool));
-        for (size_t j = 0; j < coeff_mod_count; j++)
-        {
-            value_copy[j] = value[j];
-        }
-
-        auto temp(util::allocate_uint(coeff_mod_count, pool));
-        util::set_zero_uint(coeff_mod_count, value);
-
-        for (size_t j = 0; j < coeff_mod_count; j++)
-        {
-            uint64_t tmp = util::multiply_uint_uint_mod(value_copy.get()[j],
-                inv_coeff_mod_coeff_array[j], coeff_modulus[j]);
-            util::multiply_uint_uint64(coeff_products_array + (j * coeff_mod_count),
-                coeff_mod_count, tmp, coeff_mod_count, temp.get());
-            util::add_uint_uint_mod(temp.get(), value,
-                context_data.total_coeff_modulus(),
-                coeff_mod_count, value);
-        }
-        util::set_zero_uint(coeff_mod_count, temp.get());
     }
 }
