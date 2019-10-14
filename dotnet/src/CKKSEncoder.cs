@@ -173,7 +173,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes a vector of double-precision floating-point complex numbers into a plaintext polynomial.
+        /// Encodes a vector of double-precision floating-point complex numbers into a plaintext
+        /// polynomial.
         /// </summary>
         /// <remark>
         /// Append zeros if vector size is less than N/2. Dynamic memory allocations in the process
