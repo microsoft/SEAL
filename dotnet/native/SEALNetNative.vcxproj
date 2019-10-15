@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SEALNETNATIVE_EXPORTS;NOMINMAX;_ENABLE_EXTENDED_ALIGNED_STORAGE;_SCL_SECURE_NO_WARNING;NDEBUG;SEALDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(ProjectDir);$(ProjectDir)..\..\native\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSGSL_ROOT);$(ProjectDir);$(ProjectDir)..\..\native\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>sealnet/stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
@@ -129,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SEALNETNATIVE_EXPORTS;NOMINMAX;_ENABLE_EXTENDED_ALIGNED_STORAGE;_SCL_SECURE_NO_WARNING;NDEBUG;SEALDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(ProjectDir);$(ProjectDir)..\..\native\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSGSL_ROOT);$(ProjectDir);$(ProjectDir)..\..\native\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>sealnet/stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
@@ -152,7 +152,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SEALNETNATIVE_EXPORTS;NOMINMAX;_ENABLE_EXTENDED_ALIGNED_STORAGE;_SCL_SECURE_NO_WARNING;_DEBUG;SEALDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(ProjectDir);$(ProjectDir)..\..\native\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSGSL_ROOT);$(ProjectDir);$(ProjectDir)..\..\native\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>sealnet/stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
@@ -173,7 +173,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SEALNETNATIVE_EXPORTS;NOMINMAX;_ENABLE_EXTENDED_ALIGNED_STORAGE;_SCL_SECURE_NO_WARNING;_DEBUG;SEALDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(ProjectDir);$(ProjectDir)..\..\native\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSGSL_ROOT);$(ProjectDir);$(ProjectDir)..\..\native\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>sealnet/stdafx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>

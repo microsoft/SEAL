@@ -140,7 +140,8 @@ include directory for Microsoft SEAL header files.
 #### Building Examples
 
 Build the SEALExamples project `native\examples\SEALExamples.vcxproj` from `SEAL.sln`.
-This results in an executable `sealexamples.exe` to be created in `native\bin\$(Platform)\$(Configuration)`.
+This results in an executable `sealexamples.exe` to be created in
+`native\bin\$(Platform)\$(Configuration)`.
 
 #### Building Unit Tests
 
@@ -152,8 +153,8 @@ Visual Studio will automatically download and install it for you.
 ## Linux and macOS
 
 Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake
-(>= 3.12). A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed. In macOS the
-Xcode toolchain (>= 9.3) will work.
+(>= 3.12). A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed. In macOS
+the Xcode toolchain (>= 9.3) will work.
 
 In macOS you will need CMake with command line tools. For this, you can either
 1. install the cmake package with [Homebrew](https://brew.sh), or
@@ -166,15 +167,15 @@ install requires elevated (root) privileges.
 
 #### Debug and Release Modes
 
-You can easily switch from CMake configuration options whether Microsoft SEAL should be built in
-`Debug` mode (no optimizations) or in `Release` mode. Please note that `Debug` mode should not
-be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude
-worse than in `Release` mode.
+You can easily switch from CMake configuration options whether Microsoft SEAL should be
+built in `Debug` mode (no optimizations) or in `Release` mode. Please note that `Debug`
+mode should not be used except for debugging Microsoft SEAL itself, as the performance
+will be orders of magnitude worse than in `Release` mode.
 
 #### Building Microsoft SEAL
 
-We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and all commands
-presented below are assumed to be executed in the directory `SEAL`.
+We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and all
+commands presented below are assumed to be executed in the directory `SEAL`.
 
 You can build Microsoft SEAL for your machine by executing the following commands:
 ````
@@ -235,16 +236,16 @@ cd ../..
 
 ### Linking with Microsoft SEAL through CMake
 
-It is very easy to link your own applications and libraries with Microsoft SEAL if you use
-CMake. Simply add the following to your `CMakeLists.txt`:
+It is very easy to link your own applications and libraries with Microsoft SEAL if
+you use CMake. Simply add the following to your `CMakeLists.txt`:
 ````
-find_package(SEAL 3.4.0 EXACT REQUIRED)
+find_package(SEAL 3.4.1 EXACT REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ````
-If Microsoft SEAL was installed globally, the above `find_package` command will likely find
-the library automatically. To link with a locally installed Microsoft SEAL, e.g., installed
-in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL
-when you configure your application by running:
+If Microsoft SEAL was installed globally, the above `find_package` command will likely
+find the library automatically. To link with a locally installed Microsoft SEAL, e.g.,
+installed in `~/mylibs` as described above, you may need to tell CMake where to look for
+Microsoft SEAL when you configure your application by running:
 ````
 cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
@@ -271,19 +272,23 @@ ciphertext data to be accessed hierarchically through a `gsl::multi_span`.
 
 To build Microsoft SEAL with support for Microsoft GSL, clone first the Microsoft GSL
 library from [GitHub.com/Microsoft/GSL](https://GitHub.com/Microsoft/GSL) to some
-convenient directory, e.g., `native\GSL` in this example. Then open the Microsoft
-SEAL solution file in Visual Studio, right-click on the project SEAL in the
-*Solution Explorer*, click *Properties*, and add (for all configurations and all platforms)
-the following directory to the list of *Include Directories* on the *VC++ Directories*
-tab:
-````
-$(SolutionDir)native\GSL\include
-````
+convenient directory, e.g., `C:\MyLibs\GSL` in this example.
+
+Next, you will need to signal Microsoft SEAL to enable Microsoft GSL support by
+creating a new Windows environment variable `MSGSL_ROOT`, and setting its value to
+`C:\MyLibs\GSL\include`. Restart Visual Studio at this point if you had it open,
+otherwise it will not have captured the newly created environment variable.
 Rebuilding Microsoft SEAL should now automatically detect that Microsoft GSL is
-available, and enable both `gsl::span` and `gsl::multi_span` support. Note that
-any programs or libraries consuming Microsoft SEAL will now also need access to
-the Microsoft GSL header files, so you might need to add the `native\GSL\include`
-directory to *Include Directories* in your other projects as well.
+available, and enable both `gsl::span` and `gsl::multi_span` support. To disable
+Microsoft GSL support, delete the `MSGSL_ROOT` environment variable, restart Visual
+Studio, and rebuild Microsoft SEAL.
+
+If Microsoft SEAL is built with Microsoft GSL support, any programs or libraries
+consuming Microsoft SEAL will need access to the Microsoft GSL header files, so you
+need to add `$(MSGSL_ROOT)` to *Additional Include Directories* under the *C/C++* tab
+in your Visual Studio project properties. Note that in the Microsoft SEAL projects
+this has already been set for you, so all projects in `SEAL.sln` should work without
+change.
 
 #### Microsoft GSL in Linux and macOS
 
@@ -321,37 +326,30 @@ If ZLIB is detected by CMake, it will be automatically used for serialization (s
 always possible to explicitly pass `compr_mode_type::none` to serialization methods to
 disable compression.
 
-**WARNING: The compression rate for a `SecretKey` can (in theory at least) reveal
+**WARNING:** The compression rate for a `SecretKey` can (in theory at least) reveal
 information about the key. In most common applications of Microsoft SEAL the size of
-a `SecretKey` would not be deliberately revealed to untrusted parties. But if this is
-a concern, we recommend saving the `SecretKey` in an uncompressed form by passing
-`compr_mode_type::none` to `SecretKey::save`.**
+a `SecretKey` would not be deliberately revealed to untrusted parties. If this is
+a concern, one can always save the `SecretKey` in an uncompressed form by passing
+`compr_mode_type::none` to `SecretKey::save`.
 
 #### ZLIB in Windows
 
 ZLIB is usually not found on a typical Windows system. You can clone it from
-[GitHub.com/madler/zlib](https://github.com/madler/zlib) to some convenient
-directory, e.g., `native\zlib` in this example. To build ZLIB on Windows, open the
-*Developer Command Prompt for VS 2019*, go to your `SEAL` directory, and execute the
-following:
+[GitHub.com/madler/zlib](https://github.com/madler/zlib) to some convenient directory,
+e.g., `C:\MyLibs\zlib` in this example. You need to build ZLIB first by opening
+*Developer Command Prompt for VS 2019*, go to `C:\MyLibs\zlib`, and run
 ````
-cd native\zlib
 cmake .
 cmake --build . --config Release
-copy Release\zlib.dll ..\bin
 ````
-Then open the Microsoft SEAL solution file in Visual Studio, right-click on the
-project SEAL in the *Solution Explorer*, click *Properties*, and on the
-*VC++ Directories* tab (for all configurations and all platforms) add the directory
-`$(SolutionDir)native\zlib` to the list of *Include Directories* and
-the directory `$(SolutionDir)native\zlib\Release` to the list of *Library Directories*.
-Next, open the *Librarian* tab and add `zlib.lib` to *Additional Dependencies*.
-Rebuilding Microsoft SEAL should now automatically detect that ZLIB is available
-and enable support for using `compr_mode_type::deflate` in serialization.
 
-When running applications built against a ZLIB-enabled Microsoft SEAL you will
-need to ensure that a copy of `native\zlib\Release\zlib.dll` resides in the same
-directory where the application executable is.
+Next, you will need to signal Microsoft SEAL to enable ZLIB support by creating a new
+Windows environment variable `ZLIB_ROOT`, and setting its value to `C:\MyLibs\zlib`.
+Restart Visual Studio at this point if you had it open, otherwise it will not have
+captured the newly created environment variable. Rebuilding Microsoft SEAL should now
+automatically detect that ZLIB is available, and enable support for
+`compr_mode_type::deflate`. To disable ZLIB support, delete the `ZLIB_ROOT` environment
+variable, restart Visual Studio, and rebuild Microsoft SEAL.
 
 #### ZLIB in Linux and macOS
 
@@ -376,22 +374,23 @@ make
 
 # Building Microsoft SEAL for .NET
 
-Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL
-for use in .NET development.
+Microsoft SEAL provides a .NET Standard library that wraps the functionality in
+Microsoft SEAL for use in .NET development.
 
 ## Windows
 
 The Microsoft Visual Studio 2019 solution file `SEAL.sln` contains the projects necessary
-to build the .NET assembly, a backing native shared library, .NET examples, and unit tests.
+to build the .NET assembly, a backing native shared library, .NET examples, and unit
+tests.
 
 #### Native library
 
-Microsoft SEAL for .NET requires a native library that is invoked by the managed .NET library.
-Build the SEALNetNative project `dotnet\native\SEALNetNative.vcxproj` from `SEAL.sln`.
-Building SEALNetNative results in the dynamic library `sealnetnative.dll` to be created
-in `dotnet\lib\$(Platform)\$(Configuration)`. This library is meant to be used only by the
-.NET library, not by end users, and needs to be present in the same directory as your
-executable when developing a .NET application.
+Microsoft SEAL for .NET requires a native library that is invoked by the managed .NET
+library. Build the SEALNetNative project `dotnet\native\SEALNetNative.vcxproj` from
+`SEAL.sln`. Building SEALNetNative results in the dynamic library `sealnetnative.dll`
+to be created in `dotnet\lib\$(Platform)\$(Configuration)`. This library is meant to
+be used only by the .NET library, not by end users, and needs to be present in the same
+directory as your executable when running a .NET application.
 
 #### .NET library
 
@@ -402,35 +401,38 @@ is the assembly you can reference in your application.
 
 #### .NET examples
 
-Build the SEALNetExamples project `dotnet\examples\SEALNetExamples.csproj` from `SEAL.sln`.
-This results in the assembly `SEALNetExamples.dll` to be created in
+Build the SEALNetExamples project `dotnet\examples\SEALNetExamples.csproj` from
+`SEAL.sln`. This results in the assembly `SEALNetExamples.dll` to be created in
 `dotnet\bin\$(Configuration)\netcoreapp2.1`. The project takes care of copying the
 native SEALNetNative library to the output directory.
 
 #### .NET unit tests
 
-Build the SEALNet Test project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`. This results
-in the `SEALNetTest.dll` assembly to be created in `dotnet\lib\$(Configuration)\netcoreapp2.1`.
-The project takes care of copying the native SEALNetNative library to the output directory.
+Build the SEALNet Test project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`. This
+results in the `SEALNetTest.dll` assembly to be created in
+`dotnet\lib\$(Configuration)\netcoreapp2.1`. The project takes care of copying the
+native SEALNetNative library to the output directory.
 
 ### Using Microsoft SEAL for .NET in your own application
 
 To use Microsoft SEAL for .NET in your own application you need to:
 1. add a reference in your project to `SEALNet.dll`;
-2. ensure `sealnetnative.dll` is available for your application when run. The easiest way to ensure
-   this is to copy `sealnetnative.dll` to the same directory where your application's executable
-   is located.
+2. ensure `sealnetnative.dll` is available for your application when run. The easiest
+way to ensure this is to copy `sealnetnative.dll` to the same directory where your
+application's executable is located.
 
-Alternatively, you can build and use a NuGet package; see instructions in [NUGET.md](dotnet/nuget/NUGET.md).
+Alternatively, you can build and use a NuGet package; see instructions in
+[NUGET.md](dotnet/nuget/NUGET.md).
 
 ## Linux and macOS
 
-Microsoft SEAL for .NET relies on a native shared library that can be easily configured and built
-using CMake (>= 3.12) and a modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0). In macOS
-the Xcode toolchain (>= 9.3) will work.
+Microsoft SEAL for .NET relies on a native shared library that can be easily
+configured and built using CMake (>= 3.12) and a modern version of GNU G++ (>= 6.0)
+or Clang++ (>= 5.0). In macOS the Xcode toolchain (>= 9.3) will work.
 
-For compiling .NET code you will need to install a .NET Core SDK (>= 2.1). You can follow
-these [instructions for installing in Linux](https://dotnet.microsoft.com/download?initial-os=linux),
+For compiling .NET code you will need to install a .NET Core SDK (>= 2.1). You can
+follow these
+[instructions for installing in Linux](https://dotnet.microsoft.com/download?initial-os=linux),
 or for [installing in macOS](https://dotnet.microsoft.com/download?initial-os=macos).
 
 ### Local use of shared native library

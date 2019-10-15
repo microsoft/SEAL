@@ -24,7 +24,7 @@ cd ..\..
 After the package is created, copy it from `dotnet\nuget\Release` to a known location (e.g., `C:\NuGetPackages`).
 
 To add a reference to the NuGet package, you will need to configure Visual Studio so it can find
-packages in this known location. In Microsoft Visual Studio 2017, for example, you can:
+packages in this known location. In Microsoft Visual Studio 2019, for example, you can:
 1. Select the menu uption `Tools / Options...`
 2. On the left pane of the Options dialog, navigate to `NuGet Package Manager / Package Sources`
 3. On the right pane of the Options dialog, add a new package source that points to the directory
