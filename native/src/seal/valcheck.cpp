@@ -19,7 +19,8 @@ namespace seal
 {
     bool is_metadata_valid_for(
         const Plaintext &in,
-        shared_ptr<const SEALContext> context)
+        shared_ptr<const SEALContext> context,
+        bool allow_pure_key_levels)
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -29,13 +30,17 @@ namespace seal
 
         if (in.is_ntt_form())
         {
-
-            // Are the parameters valid for given plaintext? This check is slightly
-            // non-trivial because we need to consider both the case where key_parms_id
-            // equals first_parms_id, and cases where they are different.
+            // Are the parameters valid for the plaintext?
             auto context_data_ptr = context->get_context_data(in.parms_id());
-            if (!context_data_ptr ||
-                context_data_ptr->chain_index() > context->first_context_data()->chain_index())
+            if (!context_data_ptr)
+            {
+                return false;
+            }
+
+            // Check whether the parms_id is in the pure key range
+            bool is_parms_pure_key = context_data_ptr->chain_index() >
+                context->first_context_data()->chain_index();
+            if (!allow_pure_key_levels && is_parms_pure_key)
             {
                 return false;
             }
@@ -43,6 +48,8 @@ namespace seal
             auto &parms = context_data_ptr->parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t poly_modulus_degree = parms.poly_modulus_degree();
+
+            // Check that coeff_count is appropriately set
             if (mul_safe(coeff_modulus.size(), poly_modulus_degree) != in.coeff_count())
             {
                 return false;
@@ -51,11 +58,6 @@ namespace seal
         else
         {
             auto &parms = context->first_context_data()->parms();
-            if (parms.scheme() != scheme_type::BFV)
-            {
-                return false;
-            }
-
             size_t poly_modulus_degree = parms.poly_modulus_degree();
             if (in.coeff_count() > poly_modulus_degree)
             {
@@ -68,7 +70,8 @@ namespace seal
 
     bool is_metadata_valid_for(
         const Ciphertext &in,
-        shared_ptr<const SEALContext> context)
+        shared_ptr<const SEALContext> context,
+        bool allow_pure_key_levels)
     {
         // Verify parameters
         if (!context || !context->parameters_set())
@@ -76,12 +79,17 @@ namespace seal
             return false;
         }
 
-        // Are the parameters valid for given ciphertext? This check is slightly
-        // non-trivial because we need to consider both the case where key_parms_id
-        // equals first_parms_id, and cases where they are different.
+        // Are the parameters valid for the ciphertext?
         auto context_data_ptr = context->get_context_data(in.parms_id());
-        if (!context_data_ptr ||
-            context_data_ptr->chain_index() > context->first_context_data()->chain_index())
+        if (!context_data_ptr)
+        {
+            return false;
+        }
+
+        // Check whether the parms_id is in the pure key range
+        bool is_parms_pure_key = context_data_ptr->chain_index() >
+            context->first_context_data()->chain_index();
+        if (!allow_pure_key_levels && is_parms_pure_key)
         {
             return false;
         }
@@ -110,63 +118,26 @@ namespace seal
         const SecretKey &in,
         shared_ptr<const SEALContext> context)
     {
-        // Verify parameters
-        if (!context || !context->parameters_set())
-        {
-            return false;
-        }
-
-        // Are the parameters valid for given secret key?
-        if (in.parms_id() != context->key_parms_id())
-        {
-            return false;
-        }
-
-        auto context_data_ptr = context->key_context_data();
-        auto &parms = context_data_ptr->parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t poly_modulus_degree = parms.poly_modulus_degree();
-        if (mul_safe(coeff_modulus.size(), poly_modulus_degree) != in.data().coeff_count())
-        {
-            return false;
-        }
-
-        return true;
+        // Note: we check the underlying Plaintext and allow pure key levels in
+        // this check. Then, also need to check that the parms_id matches the
+        // key level parms_id; this also means the Plaintext is in NTT form.
+        auto key_parms_id = context->key_parms_id();
+        return is_metadata_valid_for(in.data(), move(context), true) &&
+            (in.parms_id() == key_parms_id);
     }
 
     bool is_metadata_valid_for(
         const PublicKey &in,
         shared_ptr<const SEALContext> context)
     {
-        // Verify parameters
-        if (!context || !context->parameters_set())
-        {
-            return false;
-        }
-
-        // Are the parameters valid for given public key?
-        if (in.parms_id() != context->key_parms_id() || !in.data().is_ntt_form())
-        {
-            return false;
-        }
-
-        // Check that the metadata matches
-        auto context_data_ptr = context->key_context_data();
-        auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
-        size_t poly_modulus_degree = context_data_ptr->parms().poly_modulus_degree();
-        if ((coeff_modulus.size() != in.data().coeff_mod_count()) ||
-            (poly_modulus_degree != in.data().poly_modulus_degree()))
-        {
-            return false;
-        }
-
-        // Check that size is right; for public key it should be exactly 2
-        if (in.data().size() != SEAL_CIPHERTEXT_SIZE_MIN)
-        {
-            return false;
-        }
-
-        return true;
+        // Note: we check the underlying Ciphertext and allow pure key levels in
+        // this check. Then, also need to check that the parms_id matches the
+        // key level parms_id, that the Ciphertext is in NTT form, and that the
+        // size is minimal (i.e., SEAL_CIPHERTEXT_SIZE_MIN).
+        auto key_parms_id = context->key_parms_id();
+        return is_metadata_valid_for(in.data(), move(context), true) &&
+            in.data().is_ntt_form() && (in.parms_id() == key_parms_id) &&
+            (in.data().size() == SEAL_CIPHERTEXT_SIZE_MIN);
     }
 
     bool is_metadata_valid_for(
@@ -179,14 +150,21 @@ namespace seal
             return false;
         }
 
-        // Are the parameters valid for given relinearization keys?
+        // Are the parameters valid and at key level?
         if (in.parms_id() != context->key_parms_id())
         {
             return false;
         }
 
+        size_t decomp_mod_count =
+            context->first_context_data()->parms().coeff_modulus().size();
         for (auto &a : in.data())
         {
+            // Check that each highest level component has right size
+            if (a.size() && (a.size() != decomp_mod_count))
+            {
+                return false;
+            }
             for (auto &b : a)
             {
                 // Check that b is a valid public key (metadata only); this also
@@ -210,18 +188,80 @@ namespace seal
             (in.size() <= SEAL_CIPHERTEXT_SIZE_MAX - 2 &&
                 in.size() >= SEAL_CIPHERTEXT_SIZE_MIN - 2);
         return is_metadata_valid_for(
-            static_cast<const KSwitchKeys &>(in), move(context)) && size_check;
+            static_cast<const KSwitchKeys&>(in), move(context)) && size_check;
     }
 
     bool is_metadata_valid_for(
         const GaloisKeys &in,
         shared_ptr<const SEALContext> context)
     {
-        return is_metadata_valid_for(
-            static_cast<const KSwitchKeys &>(in), move(context));
+        // Check the metadata; then we know context is OK
+        bool metadata_check = is_metadata_valid_for(
+            static_cast<const KSwitchKeys&>(in), context);
+        bool size_check = !in.size() ||
+            in.size() <= context->key_context_data()->parms().poly_modulus_degree();
+        return metadata_check && size_check;
     }
 
-    bool is_valid_for(
+    bool is_buffer_valid(const Plaintext &in)
+    {
+        if (in.coeff_count() != in.int_array().size())
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool is_buffer_valid(const Ciphertext &in)
+    {
+        // Check that the buffer size is correct
+        if (in.int_array().size() != mul_safe(
+            in.size(), in.coeff_mod_count(), in.poly_modulus_degree()))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool is_buffer_valid(const SecretKey &in)
+    {
+        return is_buffer_valid(in.data());
+    }
+
+    bool is_buffer_valid(const PublicKey &in)
+    {
+        return is_buffer_valid(in.data());
+    }
+
+    bool is_buffer_valid(const KSwitchKeys &in)
+    {
+        for (auto &a : in.data())
+        {
+            for (auto &b : a)
+            {
+                if (!is_buffer_valid(b))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    bool is_buffer_valid(const RelinKeys &in)
+    {
+        return is_buffer_valid(static_cast<const KSwitchKeys &>(in));
+    }
+
+    bool is_buffer_valid(const GaloisKeys &in)
+    {
+        return is_buffer_valid(static_cast<const KSwitchKeys &>(in));
+    }
+
+    bool is_data_valid_for(
         const Plaintext &in,
         shared_ptr<const SEALContext> context)
     {
@@ -271,7 +311,7 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const Ciphertext &in,
         shared_ptr<const SEALContext> context)
     {
@@ -308,7 +348,7 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const SecretKey &in,
         shared_ptr<const SEALContext> context)
     {
@@ -341,7 +381,7 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const PublicKey &in,
         shared_ptr<const SEALContext> context)
     {
@@ -378,7 +418,7 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const KSwitchKeys &in,
         shared_ptr<const SEALContext> context)
     {
@@ -400,7 +440,7 @@ namespace seal
             {
                 // Check that b is a valid public key; this also checks that its
                 // parms_id matches key_parms_id.
-                if (!is_valid_for(b, context))
+                if (!is_data_valid_for(b, context))
                 {
                     return false;
                 }
@@ -410,17 +450,17 @@ namespace seal
         return true;
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const RelinKeys &in,
         shared_ptr<const SEALContext> context)
     {
-        return is_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
+        return is_data_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
     }
 
-    bool is_valid_for(
+    bool is_data_valid_for(
         const GaloisKeys &in,
         shared_ptr<const SEALContext> context)
     {
-        return is_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
+        return is_data_valid_for(static_cast<const KSwitchKeys &>(in), move(context));
     }
 }

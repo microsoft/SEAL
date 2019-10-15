@@ -5,6 +5,7 @@ using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace SEALNetTest
 {
@@ -209,7 +210,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Utilities.AssertThrows<ArgumentException>(() =>
             {
                 BatchEncoder encoder = new BatchEncoder(context);
             });
@@ -237,27 +238,27 @@ namespace SEALNetTest
             Plaintext plain_null = null;
             MemoryPoolHandle pool_uninit = new MemoryPoolHandle();
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc = new BatchEncoder(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc = new BatchEncoder(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(valu, plain_null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(valu_null, plain));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(valu, plain_null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(valu_null, plain));
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(vall, plain_null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(vall_null, plain));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(vall, plain_null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(vall_null, plain));
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(plain_null));
-            Assert.ThrowsException<ArgumentException>(() => enc.Encode(plain, pool_uninit));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(plain_null));
+            Utilities.AssertThrows<ArgumentException>(() => enc.Encode(plain, pool_uninit));
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Decode(plain, valu_null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Decode(plain_null, valu));
-            Assert.ThrowsException<ArgumentException>(() => enc.Decode(plain, valu, pool_uninit));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Decode(plain, valu_null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Decode(plain_null, valu));
+            Utilities.AssertThrows<ArgumentException>(() => enc.Decode(plain, valu, pool_uninit));
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Decode(plain, vall_null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Decode(plain_null, vall));
-            Assert.ThrowsException<ArgumentException>(() => enc.Decode(plain, vall, pool_uninit));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Decode(plain, vall_null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Decode(plain_null, vall));
+            Utilities.AssertThrows<ArgumentException>(() => enc.Decode(plain, vall, pool_uninit));
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Decode(plain_null));
-            Assert.ThrowsException<ArgumentException>(() => enc.Decode(plain, pool_uninit));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Decode(plain_null));
+            Utilities.AssertThrows<ArgumentException>(() => enc.Decode(plain, pool_uninit));
         }
     }
 }

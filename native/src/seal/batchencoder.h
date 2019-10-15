@@ -11,6 +11,12 @@
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/plaintext.h"
 #include "seal/context.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
+#ifdef SEAL_USE_MSGSL_MULTISPAN
+#include <gsl/multi_span>
+#endif
 
 namespace seal
 {
@@ -49,7 +55,7 @@ namespace seal
     @see EncryptionParameterQualifiers for more information about parameter qualifiers.
     @see Evaluator for rotating rows and columns of encrypted matrices.
     */
-    class SEAL_NODISCARD BatchEncoder
+    class BatchEncoder
     {
     public:
         /**
@@ -102,7 +108,7 @@ namespace seal
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
         of integers modulo the plaintext modulus into a plaintext element, and stores
-        the result in the destination parameter. The input vector must have size at most equal
+        the result in the destination parameter. The input must have size at most equal
         to the degree of the polynomial modulus. The first half of the elements represent the
         first row of the matrix, and the second half represent the second row. The numbers
         in the matrix can be at most equal to the plaintext modulus for it to represent
@@ -120,7 +126,7 @@ namespace seal
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
         of integers modulo the plaintext modulus into a plaintext element, and stores
-        the result in the destination parameter. The input vector must have size at most equal
+        the result in the destination parameter. The input must have size at most equal
         to the degree of the polynomial modulus. The first half of the elements represent the
         first row of the matrix, and the second half represent the second row. The numbers
         in the matrix can be at most equal to the plaintext modulus for it to represent
@@ -449,6 +455,6 @@ namespace seal
 
         util::Pointer<std::uint64_t> roots_of_unity_;
 
-        util::Pointer<std::uint64_t> matrix_reps_index_map_;
+        util::Pointer<std::size_t> matrix_reps_index_map_;
     };
 }

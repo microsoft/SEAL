@@ -42,10 +42,6 @@ namespace Microsoft.Research.SEAL
     /// storing the relinearization keys not being thread-safe.
     /// </para>
     /// </remarks>
-    /// <see cref="SecretKey">see SecretKey for the class that stores the secret key.</see>
-    /// <see cref="PublicKey">see PublicKey for the class that stores the public key.</see>
-    /// <see cref="GaloisKeys">see GaloisKeys for the class that stores the Galois keys.</see>
-    /// <see cref="KeyGenerator">see KeyGenerator for the class that generates the relinearization keys.</see>
     public class RelinKeys : KSwitchKeys
     {
         /// <summary>

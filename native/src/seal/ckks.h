@@ -11,15 +11,19 @@
 #include <limits>
 #include "seal/plaintext.h"
 #include "seal/context.h"
+#include "seal/util/defines.h"
 #include "seal/util/common.h"
 #include "seal/util/uintcore.h"
 #include "seal/util/uintarithsmallmod.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
 
 namespace seal
 {
-    template<typename T_out,
-        typename = std::enable_if_t<std::is_same<T_out, double>::value ||
-        std::is_same<T_out, std::complex<double>>::value>>
+    template<typename T_out, typename = std::enable_if_t<
+        std::is_same<std::remove_cv_t<T_out>, double>::value ||
+        std::is_same<std::remove_cv_t<T_out>, std::complex<double>>::value>>
     SEAL_NODISCARD inline T_out from_complex(std::complex<double> in);
 
     template<>
@@ -56,7 +60,7 @@ namespace seal
     group, we can effectively enable cyclic rotations and complex conjugations
     of the encrypted complex vectors.
     */
-    class SEAL_NODISCARD CKKSEncoder
+    class CKKSEncoder
     {
     public:
         /**
@@ -70,9 +74,10 @@ namespace seal
         CKKSEncoder(std::shared_ptr<SEALContext> context);
 
         /**
-        Encodes double-precision floating-point real or complex numbers into
-        a plaintext polynomial. Dynamic memory allocations in the process are
-        allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        Encodes a vector of double-precision floating-point real or complex numbers
+        into a plaintext polynomial. Append zeros if vector size is less than N/2.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
         @param[in] values The vector of double-precision floating-point numbers
@@ -91,22 +96,23 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T,
-            typename = std::enable_if_t<std::is_same<T, double>::value ||
-            std::is_same<T, std::complex<double>>::value>>
+        template<typename T, typename = std::enable_if_t<
+            std::is_same<std::remove_cv_t<T>, double>::value ||
+            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         inline void encode(const std::vector<T> &values,
             parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode_internal(values, parms_id, scale, destination, std::move(pool));
+            encode_internal(values.data(), values.size(), parms_id, scale,
+                destination, std::move(pool));
         }
 
         /**
-        Encodes double-precision floating-point real or complex numbers into
-        a plaintext polynomial. The encryption parameters used are the top
-        level parameters for the given context. Dynamic memory allocations in
-        the process are allocated from the memory pool pointed to by the given
-        MemoryPoolHandle.
+        Encodes a vector of double-precision floating-point real or complex numbers
+        into a plaintext polynomial. Append zeros if vector size is less than N/2.
+        The encryption parameters used are the top level parameters for the given
+        context. Dynamic memory allocations in the process are allocated from the
+        memory pool pointed to by the given MemoryPoolHandle.
 
         @tparam T Vector value type (double or std::complex<double>)
         @param[in] values The vector of double-precision floating-point numbers
@@ -121,9 +127,9 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T,
-            typename = std::enable_if_t<std::is_same<T, double>::value ||
-            std::is_same<T, std::complex<double>>::value>>
+        template<typename T, typename = std::enable_if_t<
+            std::is_same<std::remove_cv_t<T>, double>::value ||
+            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         inline void encode(const std::vector<T> &values,
             double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
@@ -131,11 +137,78 @@ namespace seal
             encode(values, context_->first_parms_id(), scale,
                 destination, std::move(pool));
         }
+#ifdef SEAL_USE_MSGSL_SPAN
+        /**
+        Encodes a vector of double-precision floating-point real or complex numbers
+        into a plaintext polynomial. Append zeros if vector size is less than N/2.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
+
+        @tparam T Array value type (double or std::complex<double>)
+        @param[in] values The array of double-precision floating-point numbers
+        (of type T) to encode
+        @param[in] parms_id parms_id determining the encryption parameters to
+        be used by the result plaintext
+        @param[in] scale Scaling parameter defining encoding precision
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if values has invalid size
+        @throws std::invalid_argument if parms_id is not valid for the encryption
+        parameters
+        @throws std::invalid_argument if scale is not strictly positive
+        @throws std::invalid_argument if encoding is too large for the encryption
+        parameters
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        template<typename T, typename = std::enable_if_t<
+            std::is_same<std::remove_cv_t<T>, double>::value ||
+            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void encode(gsl::span<const T> values,
+            parms_id_type parms_id, double scale, Plaintext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+        {
+            encode_internal(
+                values.data(),
+                static_cast<std::size_t>(values.size()),
+                parms_id, scale, destination, std::move(pool));
+        }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext
-        polynomial. Dynamic memory allocations in the process are allocated from
-        the memory pool pointed to by the given MemoryPoolHandle.
+        Encodes a vector of double-precision floating-point real or complex numbers
+        into a plaintext polynomial. Append zeros if vector size is less than N/2.
+        The encryption parameters used are the top level parameters for the given
+        context. Dynamic memory allocations in the process are allocated from the
+        memory pool pointed to by the given MemoryPoolHandle.
+
+        @tparam T Array value type (double or std::complex<double>)
+        @param[in] values The array of double-precision floating-point numbers
+        (of type T) to encode
+        @param[in] scale Scaling parameter defining encoding precision
+        @param[out] destination The plaintext polynomial to overwrite with the
+        result
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if values has invalid size
+        @throws std::invalid_argument if scale is not strictly positive
+        @throws std::invalid_argument if encoding is too large for the encryption
+        parameters
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        template<typename T, typename = std::enable_if_t<
+            std::is_same<std::remove_cv_t<T>, double>::value ||
+            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void encode(gsl::span<const T> values, double scale,
+            Plaintext &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
+        {
+            encode(values, context_->first_parms_id(), scale,
+                destination, std::move(pool));
+        }
+#endif
+        /**
+        Encodes a double-precision floating-point real number into a plaintext
+        polynomial. The number repeats for N/2 times to fill all slots. Dynamic
+        memory allocations in the process are allocated from the memory pool
+        pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
         @param[in] parms_id parms_id determining the encryption parameters to be
@@ -159,10 +232,11 @@ namespace seal
         }
 
         /**
-        Encodes a double-precision floating-point number into a plaintext
-        polynomial. The encryption parameters used are the top level parameters
-        for the given context. Dynamic memory allocations in the process are
-        allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        Encodes a double-precision floating-point real number into a plaintext
+        polynomial. The number repeats for N/2 times to fill all slots. The
+        encryption parameters used are the top level parameters for the given
+        context. Dynamic memory allocations in the process are allocated from
+        the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision floating-point number to encode
         @param[in] scale Scaling parameter defining encoding precision
@@ -184,8 +258,8 @@ namespace seal
 
         /**
         Encodes a double-precision complex number into a plaintext polynomial.
-        Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Append zeros to fill all slots. Dynamic memory allocations in the process
+        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] value The double-precision complex number to encode
         @param[in] parms_id parms_id determining the encryption parameters to be
@@ -210,9 +284,10 @@ namespace seal
 
         /**
         Encodes a double-precision complex number into a plaintext polynomial.
-        The encryption parameters used are the top level parameters for the
-        given context. Dynamic memory allocations in the process are allocated
-        from the memory pool pointed to by the given MemoryPoolHandle.
+        Append zeros to fill all slots. The encryption parameters used are the
+        top level parameters for the given context. Dynamic memory allocations
+        in the process are allocated from the memory pool pointed to by the
+        given MemoryPoolHandle.
 
         @param[in] value The double-precision complex number to encode
         @param[in] scale Scaling parameter defining encoding precision
@@ -234,7 +309,7 @@ namespace seal
 
         /**
         Encodes an integer number into a plaintext polynomial without any scaling.
-
+        The number repeats for N/2 times to fill all slots.
         @param[in] value The integer number to encode
         @param[in] parms_id parms_id determining the encryption parameters to be
         used by the result plaintext
@@ -251,8 +326,8 @@ namespace seal
 
         /**
         Encodes an integer number into a plaintext polynomial without any scaling.
-        The encryption parameters used are the top level parameters for the given
-        context.
+        The number repeats for N/2 times to fill all slots. The encryption
+        parameters used are the top level parameters for the given context.
 
         @param[in] value The integer number to encode
         @param[out] destination The plaintext polynomial to overwrite with the
@@ -337,15 +412,43 @@ namespace seal
         for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T,
-            typename = std::enable_if_t<std::is_same<T, double>::value ||
-            std::is_same<T, std::complex<double>>::value>>
-            inline void decode(const Plaintext &plain, std::vector<T> &destination,
-                MemoryPoolHandle pool = MemoryManager::GetPool())
+        template<typename T, typename = std::enable_if_t<
+            std::is_same<std::remove_cv_t<T>, double>::value ||
+            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void decode(const Plaintext &plain, std::vector<T> &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            decode_internal(plain, destination, std::move(pool));
+            destination.resize(slots_);
+            decode_internal(plain, destination.data(), std::move(pool));
         }
+#ifdef SEAL_USE_MSGSL_SPAN
+        /**
+        Decodes a plaintext polynomial into double-precision floating-point
+        real or complex numbers. Dynamic memory allocations in the process are
+        allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
+        @tparam T Array value type (double or std::complex<double>)
+        @param[in] plain The plaintext to decode
+        @param[out] destination The array to be overwritten with the values in
+        the slots
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if plain is not in NTT form or is invalid
+        for the encryption parameters
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        template<typename T, typename = std::enable_if_t<
+            std::is_same<std::remove_cv_t<T>, double>::value ||
+            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void decode(const Plaintext &plain, gsl::span<T> destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+        {
+            if (destination.size() != slots_)
+            {
+                throw std::invalid_argument("destination has invalid size");
+            }
+            decode_internal(plain, destination.data(), std::move(pool));
+        }
+#endif
         /**
         Returns the number of complex numbers encoded.
         */
@@ -404,12 +507,12 @@ namespace seal
             }
         }
 
-        template<typename T,
-            typename = std::enable_if_t<std::is_same<T, double>::value ||
-            std::is_same<T, std::complex<double>>::value>>
-        void encode_internal(const std::vector<T> &values,
-                parms_id_type parms_id, double scale, Plaintext &destination,
-                MemoryPoolHandle pool)
+        template<typename T, typename = std::enable_if_t<
+            std::is_same<std::remove_cv_t<T>, double>::value ||
+            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        void encode_internal(const T *values, std::size_t values_size,
+            parms_id_type parms_id, double scale, Plaintext &destination,
+            MemoryPoolHandle pool)
         {
             // Verify parameters.
             auto context_data_ptr = context_->get_context_data(parms_id);
@@ -417,9 +520,13 @@ namespace seal
             {
                 throw std::invalid_argument("parms_id is not valid for encryption parameters");
             }
-            if (values.size() > slots_)
+            if (!values && values_size > 0)
             {
-                throw std::invalid_argument("values has invalid size");
+                throw std::invalid_argument("values cannot be null");
+            }
+            if (values_size > slots_)
+            {
+                throw std::invalid_argument("values_size is too large");
             }
             if (!pool)
             {
@@ -447,12 +554,11 @@ namespace seal
 
             auto &small_ntt_tables = context_data.small_ntt_tables();
 
-            // input_size is guaranteed to be no bigger than slots_
-            std::size_t input_size = values.size();
+            // values_size is guaranteed to be no bigger than slots_
             std::size_t n = util::mul_safe(slots_, std::size_t(2));
 
             auto conj_values = util::allocate<std::complex<double>>(n, pool, 0);
-            for (std::size_t i = 0; i < input_size; i++)
+            for (std::size_t i = 0; i < values_size; i++)
             {
                 conj_values[matrix_reps_index_map_[i]] = values[i];
                 conj_values[matrix_reps_index_map_[i + slots_]] = std::conj(values[i]);
@@ -628,10 +734,10 @@ namespace seal
             destination.scale() = scale;
         }
 
-        template<typename T,
-            typename = std::enable_if_t<std::is_same<T, double>::value ||
-            std::is_same<T, std::complex<double>>::value>>
-        void decode_internal(const Plaintext &plain, std::vector<T> &destination,
+        template<typename T, typename = std::enable_if_t<
+            std::is_same<std::remove_cv_t<T>, double>::value ||
+            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        void decode_internal(const Plaintext &plain, T *destination,
             MemoryPoolHandle pool)
         {
             // Verify parameters.
@@ -642,6 +748,10 @@ namespace seal
             if (!plain.is_ntt_form())
             {
                 throw std::invalid_argument("plain is not in NTT form");
+            }
+            if (!destination)
+            {
+                throw std::invalid_argument("destination cannot be null");
             }
             if (!pool)
             {
@@ -784,12 +894,10 @@ namespace seal
                 }
             }
 
-            destination.clear();
-            destination.reserve(slots_);
             for (std::size_t i = 0; i < slots_; i++)
             {
-                destination.emplace_back(
-                    from_complex<T>(res[matrix_reps_index_map_[i]]));
+                destination[i] = from_complex<T>(
+                    res[static_cast<std::size_t>(matrix_reps_index_map_[i])]);
             }
         }
 
@@ -800,16 +908,16 @@ namespace seal
             parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool)
         {
-            encode_internal(std::vector<std::complex<double>>(1, value),
-                parms_id, scale, destination, std::move(pool));
+            auto input = util::allocate<std::complex<double>>(
+                slots_, pool_, value);
+            encode_internal(input.get(), slots_, parms_id, scale,
+                destination, std::move(pool));
         }
 
         void encode_internal(std::int64_t value,
             parms_id_type parms_id, Plaintext &destination);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
-
-        static constexpr double PI_ = 3.1415926535897932384626433832795028842;
 
         std::shared_ptr<SEALContext> context_{ nullptr };
 
@@ -819,6 +927,6 @@ namespace seal
 
         util::Pointer<std::complex<double>> inv_roots_;
 
-        util::Pointer<std::uint64_t> matrix_reps_index_map_;
+        util::Pointer<std::size_t> matrix_reps_index_map_;
     };
 }

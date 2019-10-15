@@ -26,3 +26,11 @@ SEALNETNATIVE HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_
 SEALNETNATIVE HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool);
 
 SEALNETNATIVE HRESULT SEALCALL PublicKey_Destroy(void *thisptr);
+
+SEALNETNATIVE HRESULT SEALCALL PublicKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
+
+SEALNETNATIVE HRESULT SEALCALL PublicKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
+
+SEALNETNATIVE HRESULT SEALCALL PublicKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
+
+SEALNETNATIVE HRESULT SEALCALL PublicKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);

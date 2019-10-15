@@ -10,6 +10,7 @@
 #include "seal/encryptionparams.h"
 #include "seal/smallmodulus.h"
 #include "seal/util/hash.h"
+#include "seal/util/common.h"
 
 using namespace std;
 using namespace seal;
@@ -153,9 +154,9 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_GetParmsId(void *thisptr, uint64_t *par
     IfNullRet(params, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
 
-    // We will assume the array is always size sha3_block_uint64_count
+    // We will assume the array is always size hash_block_uint64_count
     auto parmsid = EncryptionParameters::EncryptionParametersPrivateHelper::parms_id(*params);
-    for (size_t i = 0; i < util::HashFunction::sha3_block_uint64_count; i++)
+    for (size_t i = 0; i < util::HashFunction::hash_block_uint64_count; i++)
     {
         parms_id[i] = parmsid[i];
     }
@@ -192,14 +193,14 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus1(void *thisptr, void *m
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus2(void *thisptr, uint64_t plainModulus)
+SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus2(void *thisptr, uint64_t plain_modulus)
 {
     EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
 
     try
     {
-        params->set_plain_modulus(plainModulus);
+        params->set_plain_modulus(plain_modulus);
         return S_OK;
     }
     catch (const logic_error&)
@@ -218,4 +219,83 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_Equals(void *thisptr, void *otherptr, b
 
     *result = (*params == *other);
     return S_OK;
+}
+
+SEALNETNATIVE HRESULT SEALCALL EncParams_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
+{
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
+    IfNullRet(params, E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    try
+    {
+        *result = static_cast<int64_t>(
+            params->save_size(static_cast<compr_mode_type>(compr_mode)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+}
+
+SEALNETNATIVE HRESULT SEALCALL EncParams_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
+{
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
+    IfNullRet(params, E_POINTER);
+    IfNullRet(outptr, E_POINTER);
+    IfNullRet(out_bytes, E_POINTER);
+
+    try
+    {
+        *out_bytes = util::safe_cast<int64_t>(params->save(
+            reinterpret_cast<SEAL_BYTE *>(outptr),
+            util::safe_cast<size_t>(size),
+            static_cast<compr_mode_type>(compr_mode)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+    catch (const runtime_error &)
+    {
+        return COR_E_IO;
+    }
+}
+
+SEALNETNATIVE HRESULT SEALCALL EncParams_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+{
+    EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
+    IfNullRet(params, E_POINTER);
+    IfNullRet(inptr, E_POINTER);
+    IfNullRet(in_bytes, E_POINTER);
+
+    try
+    {
+        *in_bytes = util::safe_cast<int64_t>(params->load(
+            reinterpret_cast<SEAL_BYTE *>(inptr),
+            util::safe_cast<size_t>(size)));
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
+    catch (const runtime_error &)
+    {
+        return COR_E_IO;
+    }
 }

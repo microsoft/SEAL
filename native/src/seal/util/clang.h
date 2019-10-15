@@ -13,11 +13,6 @@
 // Read in config.h
 #include "seal/util/config.h"
 
-// Are we using MSGSL?
-#ifdef SEAL_USE_MSGSL
-#include <gsl/gsl>
-#endif
-
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
 #include <x86intrin.h>

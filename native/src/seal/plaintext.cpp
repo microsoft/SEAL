@@ -203,7 +203,7 @@ namespace seal
         return *this;
     }
 
-    void Plaintext::save(ostream &stream) const
+    void Plaintext::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -212,20 +212,36 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             stream.write(reinterpret_cast<const char*>(&parms_id_), sizeof(parms_id_type));
+            uint64_t coeff_count64 = static_cast<uint64_t>(coeff_count_);
+            stream.write(reinterpret_cast<const char*>(&coeff_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
-            data_.save(stream);
+            data_.save(stream, compr_mode_type::none);
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
     }
 
-    void Plaintext::unsafe_load(istream &stream)
+    void Plaintext::load_members(shared_ptr<SEALContext> context, istream &stream)
     {
+        // Verify parameters
+        if (!context)
+        {
+            throw invalid_argument("invalid context");
+        }
+        if (!context->parameters_set())
+        {
+            throw invalid_argument("encryption parameters are not set correctly");
+        }
+
         Plaintext new_data(data_.pool());
 
         auto old_except_mask = stream.exceptions();
@@ -237,19 +253,51 @@ namespace seal
             parms_id_type parms_id{};
             stream.read(reinterpret_cast<char*>(&parms_id), sizeof(parms_id_type));
 
+            uint64_t coeff_count64 = 0;
+            stream.read(reinterpret_cast<char*>(&coeff_count64), sizeof(uint64_t));
+
             double scale = 0;
             stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
 
-            // Load the data
-            new_data.data_.load(stream);
-
-            // Set the parms_id
+            // Set the metadata
             new_data.parms_id_ = parms_id;
-
-            // Set the scale
+            new_data.coeff_count_ = safe_cast<size_t>(coeff_count64);
             new_data.scale_ = scale;
+
+            // Checking the validity of loaded metadata
+            // Note: We allow pure key levels here! This is to allow load_members
+            // to be used also when loading derived objects like SecretKey. This
+            // further means that functions reading in Plaintext objects must check
+            // that for those use-cases the Plaintext truly is at the data level
+            // if it is supposed to be. In other words, one cannot assume simply
+            // based on load_members succeeding that the Plaintext is valid for
+            // computations.
+            if (!is_metadata_valid_for(new_data, context, true))
+            {
+                throw logic_error("plaintext data is invalid");
+            }
+
+            // Reserve memory now that the metadata is checked for validity.
+            new_data.data_.reserve(new_data.coeff_count_);
+
+            // Load the data. Note that we are supplying also the expected maximum
+            // size of the loaded IntArray. This is an important security measure to
+            // prevent a malformed IntArray from causing arbitrarily large memory
+            // allocations.
+            new_data.data_.load(stream, new_data.coeff_count_);
+
+            // Verify that the buffer is correct
+            if (!is_buffer_valid(new_data))
+            {
+                throw logic_error("plaintext data is invalid");
+            }
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;

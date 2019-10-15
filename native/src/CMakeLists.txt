@@ -1,12 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
-project(SEAL VERSION 3.3.2 LANGUAGES CXX C)
+project(SEAL VERSION 3.4.0 LANGUAGES CXX C)
 
-if(DEFINED MSVC)
-    if(DEFINED ALLOW_COMMAND_LINE_BUILD)
+if(MSVC)
+    if(ALLOW_COMMAND_LINE_BUILD)
         message(STATUS "Configuring for Visual Studio")
     else()
         message(FATAL_ERROR "Please build Microsoft SEAL using the attached Visual Studio solution/project files")
@@ -18,8 +18,8 @@ set(SEAL_DEFAULT_BUILD_TYPE "Release")
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE ${SEAL_DEFAULT_BUILD_TYPE} CACHE
         STRING "Build type" FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-        "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
+        STRINGS "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
@@ -31,15 +31,17 @@ else()
 endif()
 
 # Required files and directories
+include(GNUInstallDirs)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/../lib)
 set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/../bin)
-set(SEAL_INCLUDES_INSTALL_DIR include)
+set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
-set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
-set(SEAL_CONFIG_INSTALL_DIR lib/cmake/SEAL)
+set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+set(MSGSL_FIND_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake/FindMSGSL.cmake)
 
 # For extra modules we might have
 list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
@@ -100,8 +102,8 @@ set(SEAL_DEFAULT_LIB_BUILD_TYPE "Static_PIC")
 if(NOT SEAL_LIB_BUILD_TYPE)
     set(SEAL_LIB_BUILD_TYPE ${SEAL_DEFAULT_LIB_BUILD_TYPE} CACHE
         STRING "Library build type" FORCE)
-    set_property(CACHE SEAL_LIB_BUILD_TYPE PROPERTY STRINGS
-        "Static" "Static_PIC" "Shared")
+    set_property(CACHE SEAL_LIB_BUILD_TYPE PROPERTY
+        STRINGS "Static" "Static_PIC" "Shared")
 endif()
 message(STATUS "Library build type (SEAL_LIB_BUILD_TYPE): ${SEAL_LIB_BUILD_TYPE}")
 
@@ -125,23 +127,26 @@ option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 
+# Use zlib if available
+set(SEAL_USE_ZLIB_OPTION_STR "Use zlib for compressed serialization")
+option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
+
 # Check for intrin.h or x64intrin.h
 if(SEAL_USE_INTRIN)
-    if(DEFINED MSVC)
+    if(MSVC)
         set(SEAL_INTRIN_HEADER "intrin.h")
     else()
         set(SEAL_INTRIN_HEADER "x86intrin.h")
     endif()
 
     check_include_file_cxx(${SEAL_INTRIN_HEADER} HAVE_INTRIN_HEADER)
-
     if(NOT HAVE_INTRIN_HEADER)
         set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
     endif()
 endif()
 
 # Specific intrinsics depending on SEAL_USE_INTRIN
-if(DEFINED MSVC)
+if(MSVC)
     set(SEAL_USE__UMUL128_OPTION_STR "Use _umul128")
     cmake_dependent_option(SEAL_USE__UMUL128 SEAL_USE__UMUL128_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
 
@@ -161,17 +166,14 @@ cmake_dependent_option(SEAL_USE__ADDCARRY_U64 SEAL_USE__ADDCARRY_U64_OPTION_STR 
 set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
 cmake_dependent_option(SEAL_USE__SUBBORROW_U64 SEAL_USE__SUBBORROW_U64_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
 
-set(SEAL_USE_AES_NI_PRNG_OPTION_STR "Use fast AES-NI PRNG")
-cmake_dependent_option(SEAL_USE_AES_NI_PRNG SEAL_USE_AES_NI_PRNG_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
-
 if(SEAL_USE_INTRIN)
     cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_QUIET TRUE)
-    if(NOT DEFINED MSVC)
+    if(NOT MSVC)
         set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
     endif()
 
-    if(DEFINED MSVC)
+    if(MSVC)
         # Check for presence of _umul128
         if(SEAL_USE__UMUL128)
             check_cxx_source_runs("
@@ -261,37 +263,18 @@ if(SEAL_USE_INTRIN)
         endif()
     endif()
 
-    check_include_file_cxx("wmmintrin.h" HAVE_WMMINTRIN_HEADER)
-    if(NOT HAVE_WMMINTRIN_HEADER)
-        set(SEAL_USE_AES_NI_PRNG OFF CACHE BOOL ${SEAL_USE_AES_NI_PRNG_OPTION_STR} FORCE)
-    endif()
-
-    # Check that AES-NI runs
-    if(SEAL_USE_AES_NI_PRNG)
-        if(NOT DEFINED MSVC)
-            set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -maes")
-        endif()
-        check_cxx_source_runs("
-            #include <wmmintrin.h>
-            int main() {
-                __m128i a{ 0 };
-                volatile auto b = _mm_aeskeygenassist_si128(a, 0);
-                return 0;
-            }"
-            USE_AES_KEYGEN_ASSIST
-        )
-        if(NOT USE_AES_KEYGEN_ASSIST EQUAL 1)
-            set(SEAL_USE_AES_NI_PRNG OFF CACHE BOOL ${SEAL_USE_AES_NI_PRNG_OPTION_STR} FORCE)
-        endif()
-    endif()
-
     cmake_pop_check_state()
 endif()
 
 # Try to find MSGSL if requested
 if(SEAL_USE_MSGSL)
-    find_package(msgsl MODULE)
-    if(NOT msgsl_FOUND)
+    if(MSGSL_ROOT)
+        unset(MSGSL_INCLUDE_DIR CACHE)
+    endif()
+
+    # Find MSGSL and create an interface target
+    find_package(MSGSL MODULE)
+    if(NOT MSGSL_FOUND)
         set(SEAL_USE_MSGSL OFF CACHE BOOL ${SEAL_USE_MSGSL_OPTION_STR} FORCE)
     endif()
 endif()
@@ -299,35 +282,34 @@ endif()
 # Specific options depending on SEAL_USE_MSGSL
 set(SEAL_USE_MSGSL_SPAN_OPTION_STR "Use gsl::span")
 cmake_dependent_option(SEAL_USE_MSGSL_SPAN ${SEAL_USE_MSGSL_SPAN_OPTION_STR} ON "SEAL_USE_MSGSL" OFF)
+if(SEAL_USE_MSGSL_SPAN)
+    # Detect gsl::span
+    if(NOT HAVE_MSGSL_SPAN)
+        set(SEAL_USE_MSGSL_SPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_SPAN_OPTION_STR} FORCE)
+    endif()
+endif()
 
 set(SEAL_USE_MSGSL_MULTISPAN_OPTION_STR "Use gsl::multi_span")
 cmake_dependent_option(SEAL_USE_MSGSL_MULTISPAN ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} ON "SEAL_USE_MSGSL" OFF)
-
-if(SEAL_USE_MSGSL)
-    # Now check for individual classes
-    cmake_push_check_state(RESET)
-    set(CMAKE_REQUIRED_INCLUDES ${MSGSL_INCLUDE_DIR})
-    set(CMAKE_EXTRA_INCLUDE_FILES gsl/gsl)
-    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
-    set(CMAKE_REQUIRED_QUIET TRUE)
-
-    # Detect gsl::span
-    if(SEAL_USE_MSGSL_SPAN)
-        check_type_size("gsl::span<std::uint64_t>" MSGSL_SPAN LANGUAGE CXX)
-        if(NOT MSGSL_SPAN GREATER 0)
-            set(SEAL_USE_MSGSL_SPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_SPAN_OPTION_STR} FORCE)
-        endif()
-    endif()
-
+if(SEAL_USE_MSGSL_MULTISPAN)
     # Detect gsl::multi_span
-    if(SEAL_USE_MSGSL_MULTISPAN)
-        check_type_size("gsl::multi_span<std::uint64_t, 1, gsl::dynamic_range>" MSGSL_MULTISPAN LANGUAGE CXX)
-        if(NOT MSGSL_MULTISPAN GREATER 0)
-            set(SEAL_USE_MSGSL_MULTISPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} FORCE)
-        endif()
+    if(NOT HAVE_MSGSL_MULTISPAN)
+        set(SEAL_USE_MSGSL_MULTISPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} FORCE)
+    endif()
+endif()
+
+# Try to find zlib if requested
+if(SEAL_USE_ZLIB)
+    if(ZLIB_ROOT)
+        unset(ZLIB_INCLUDE_DIR CACHE)
+        unset(ZLIB_LIBRARY_DEBUG CACHE)
+        unset(ZLIB_LIBRARY_RELEASE CACHE)
     endif()
 
-    cmake_pop_check_state()
+    find_package(ZLIB 1.2.11 EXACT)
+    if(NOT ZLIB_FOUND)
+        set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)
+    endif()
 endif()
 
 # Create library but add no source files yet
@@ -339,6 +321,9 @@ if(SEAL_LIB_BUILD_TYPE STREQUAL "Shared")
         SOVERSION ${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 else()
     add_library(seal STATIC "")
+
+    # For a static library indicate version in the filename
+    set_target_properties(seal PROPERTIES OUTPUT_NAME seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 endif()
 
 # Set VERSION for all library build types
@@ -348,18 +333,15 @@ set_target_properties(seal PROPERTIES VERSION ${SEAL_VERSION})
 add_subdirectory(seal)
 
 # Add local include directories for build
-target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${SEAL_SOURCE_DIR}>)
+target_include_directories(seal PUBLIC
+    $<BUILD_INTERFACE:${SEAL_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${SEAL_INCLUDES_INSTALL_DIR}>)
 
 # We require at least C++14
 if(SEAL_USE_CXX17)
     target_compile_features(seal PUBLIC cxx_std_17)
 else()
     target_compile_features(seal PUBLIC cxx_std_14)
-endif()
-
-# Add -maes flag if needed
-if(SEAL_USE_AES_NI_PRNG)
-    target_compile_options(seal PUBLIC "-maes")
 endif()
 
 # Require thread library
@@ -370,52 +352,51 @@ find_package(Threads REQUIRED)
 # Link Threads with seal
 target_link_libraries(seal PUBLIC Threads::Threads)
 
-# Create msgsl interface target
 if(SEAL_USE_MSGSL)
-    # Create interface target
-    add_library(msgsl INTERFACE)
-    set_target_properties(msgsl PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${MSGSL_INCLUDE_DIR})
-
-    # Associate msgsl with export seal_export
-    install(TARGETS msgsl EXPORT seal_export)
-
-    # Link with seal
-    target_link_libraries(seal PUBLIC msgsl)
+    # Link MSGSL with seal
+    target_link_libraries(seal PUBLIC MSGSL::MSGSL)
 endif()
 
-# Associate seal to export seal_export
-install(TARGETS seal EXPORT seal_export
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
+if(SEAL_USE_ZLIB)
+    # Link ZLIB::ZLIB with seal
+    target_link_libraries(seal PRIVATE ZLIB::ZLIB)
+endif()
 
-# Export the targets
-export(EXPORT seal_export
-    FILE ${SEAL_TARGETS_FILENAME}
-    NAMESPACE SEAL::)
+# Associate seal to export SEALTargets
+install(TARGETS seal EXPORT SEALTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Create the CMake config file
-configure_file(${SEAL_CONFIG_IN_FILENAME} ${SEAL_CONFIG_FILENAME} @ONLY)
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${SEAL_CONFIG_IN_FILENAME} ${SEAL_CONFIG_FILENAME}
+    INSTALL_DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
 # Install the export
 install(
-    EXPORT seal_export
-    FILE SEALTargets.cmake
+    EXPORT SEALTargets
     NAMESPACE SEAL::
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
 # Version file; we require exact version match for downstream
-include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     ${SEAL_CONFIG_VERSION_FILENAME}
     VERSION ${SEAL_VERSION}
     COMPATIBILITY ExactVersion)
 
-# Install other files
+# Install config and module files
 install(
     FILES
         ${SEAL_CONFIG_FILENAME}
         ${SEAL_CONFIG_VERSION_FILENAME}
+        ${MSGSL_FIND_MODULE_PATH}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
+
+# We export SEALTargets from the build tree so it can be used by other projects
+# without requiring an install.
+export(
+    EXPORT SEALTargets
+    NAMESPACE SEAL::
+    FILE ${SEAL_TARGETS_FILENAME})

@@ -5,6 +5,7 @@ using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SEALNetTest
 {
@@ -27,7 +28,6 @@ namespace SEALNetTest
 
             Ciphertext cipher = pubKey.Data;
             Assert.IsNotNull(cipher);
-            Assert.AreEqual(81920ul, cipher.UInt64Count);
 
             Plaintext plain = secKey.Data;
             Assert.IsNotNull(plain);
@@ -112,22 +112,26 @@ namespace SEALNetTest
             List<int> steps = new List<int> { 4096 };
             List<int> steps_null = null;
 
-            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(context, null));
-            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey));
-            Assert.ThrowsException<ArgumentException>(() => keygen = new KeyGenerator(context, secret));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey));
+            Utilities.AssertThrows<ArgumentException>(() => keygen = new KeyGenerator(context, secret));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(context, keygen.SecretKey, null));
-            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(context, null, keygen.PublicKey));
-            Assert.ThrowsException<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey, keygen.PublicKey));
-            Assert.ThrowsException<ArgumentException>(() => keygen = new KeyGenerator(context, secret, keygen.PublicKey));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(context, keygen.SecretKey, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(context, null, keygen.PublicKey));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey, keygen.PublicKey));
+            Utilities.AssertThrows<ArgumentException>(() => keygen = new KeyGenerator(context, secret, keygen.PublicKey));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(elts_null));
-            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(elts));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeys(elts_null));
+            Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeys(elts));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(elts_null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(elts, new MemoryStream()));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keygen.GaloisKeys(steps_null));
-            Assert.ThrowsException<ArgumentException>(() => keygen.GaloisKeys(steps));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeys(steps_null));
+            Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeys(steps));
+            Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(steps_null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(steps, new MemoryStream()));
         }
     }
 }

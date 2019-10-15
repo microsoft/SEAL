@@ -20,7 +20,7 @@ namespace SEALTest
         EncryptionParameters parms(scheme_type::BFV);
         {
             parms.set_poly_modulus_degree(64);
-            parms.set_plain_modulus(1 << 6);
+            parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -75,7 +75,7 @@ namespace SEALTest
         }
         {
             parms.set_poly_modulus_degree(256);
-            parms.set_plain_modulus(1 << 6);
+            parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
@@ -250,7 +250,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(128);
-        parms.set_plain_modulus(1 << 6);
+        parms.set_plain_modulus(65537);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 60, 50, 40 }));
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         Evaluator evaluator(context);
@@ -299,7 +299,7 @@ namespace SEALTest
         auto sk3 = keygen3.secret_key();
         auto pk3 = keygen3.public_key();
         ASSERT_EQ(sk3.data(), sk2.data());
-        for (size_t i = 0; i < pk3.data().uint64_count(); i++)
+        for (size_t i = 0; i < pk3.data().int_array().size(); i++)
         {
             ASSERT_EQ(pk3.data().data()[i], pk2.data().data()[i]);
         }

@@ -173,6 +173,15 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void BigUInt_ToDouble(IntPtr thisptr, out double result);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void BigUInt_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void BigUInt_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void BigUInt_Load(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
+
         #endregion
 
         #region EncryptionParameterQualifiers methods
@@ -250,6 +259,15 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, EntryPoint = "SmallModulus_Equals2", PreserveSig = false)]
         internal static extern void SmallModulus_Equals(IntPtr thisptr, ulong other, out bool result);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SmallModulus_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SmallModulus_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SmallModulus_Load(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
+
         #endregion
 
         #region EncryptionParameters methods
@@ -301,6 +319,15 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void EncParams_Equals(IntPtr thisptr, IntPtr otherptr, out bool result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void EncParams_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void EncParams_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void EncParams_Load(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 
@@ -598,6 +625,18 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Ciphertext_Pool(IntPtr thisptr, out IntPtr pool);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Ciphertext_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Ciphertext_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Ciphertext_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Ciphertext_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
+
         #endregion
 
         #region Plaintext methods
@@ -678,6 +717,12 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_Capacity(IntPtr thisptr, out ulong capacity);
 
         [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_UInt64Count(IntPtr thisptr, out ulong uint64Count);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_UInt64CountCapacity(IntPtr thisptr, out ulong uint64CountCapacity);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Plaintext_SignificantCoeffCount(IntPtr thisptr, out ulong significantCoeffCount);
 
         [DllImport(sealnetnative, PreserveSig = false)]
@@ -697,6 +742,18 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Plaintext_Pool(IntPtr thisptr, out IntPtr pool);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Plaintext_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 
@@ -738,6 +795,18 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KSwitchKeys_Pool(IntPtr thisptr, out IntPtr pool);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void KSwitchKeys_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void KSwitchKeys_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void KSwitchKeys_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void KSwitchKeys_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
+
         #endregion
 
         #region GaloisKeys methods
@@ -762,16 +831,16 @@ namespace Microsoft.Research.SEAL
         internal static extern void KeyGenerator_Destroy(IntPtr thisptr);
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, out IntPtr relinKeys);
+        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, bool save_seed, out IntPtr relin_keys);
 
-        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys1", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, out IntPtr galoisKeys);
+        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeysAll", PreserveSig = false)]
+        internal static extern void KeyGenerator_GaloisKeysAll(IntPtr thisptr, bool save_seed, out IntPtr galoisKeys);
 
-        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys2", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, ulong count, ulong[] galoisElts, out IntPtr galoisKeys);
+        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeysFromElts", PreserveSig = false)]
+        internal static extern void KeyGenerator_GaloisKeysFromElts(IntPtr thisptr, ulong count, ulong[] galoisElts, bool save_seed, out IntPtr galoisKeys);
 
-        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeys3", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeys(IntPtr thisptr, ulong count, int[] steps, out IntPtr galoisKeys);
+        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_GaloisKeysFromSteps", PreserveSig = false)]
+        internal static extern void KeyGenerator_GaloisKeysFromSteps(IntPtr thisptr, ulong count, int[] steps, bool save_seed, out IntPtr galoisKeys);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KeyGenerator_PublicKey(IntPtr thisptr, out IntPtr publicKey);
@@ -811,6 +880,18 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void PublicKey_Destroy(IntPtr thisptr);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void PublicKey_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void PublicKey_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void PublicKey_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void PublicKey_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
+
         #endregion
 
         #region SecretKey methods
@@ -835,6 +916,18 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void SecretKey_Pool(IntPtr thisptr, out IntPtr pool);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SecretKey_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SecretKey_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SecretKey_Load(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void SecretKey_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 
@@ -916,7 +1009,13 @@ namespace Microsoft.Research.SEAL
         #region Encryptor methods
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void Encryptor_Create(IntPtr context, IntPtr publicKey, out IntPtr encryptor);
+        internal static extern void Encryptor_Create(IntPtr context, IntPtr publicKey, IntPtr secretKey, out IntPtr encryptor);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_SetPublicKey(IntPtr thisptr, IntPtr publicKey);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_SetSecretKey(IntPtr thisptr, IntPtr secretKey);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_Encrypt(IntPtr thisptr, IntPtr plaintext, IntPtr destination, IntPtr poolHandle);
@@ -926,6 +1025,15 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_EncryptZero2(IntPtr thisptr, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptSymmetric(IntPtr thisptr, IntPtr plaintext, bool save_seed, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptZeroSymmetric1(IntPtr thisptr, ulong[] parmsId, bool save_seed, IntPtr destination, IntPtr poolHandle);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Encryptor_EncryptZeroSymmetric2(IntPtr thisptr, bool save_seed, IntPtr destination, IntPtr poolHandle);
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void Encryptor_Destroy(IntPtr thisptr);
@@ -1059,27 +1167,6 @@ namespace Microsoft.Research.SEAL
         #region ValCheck methods
 
         [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_Plaintext_IsMetadataValidFor(IntPtr plaintext, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_Ciphertext_IsMetadataValidFor(IntPtr ciphertext, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_SecretKey_IsMetadataValidFor(IntPtr secretKey, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_PublicKey_IsMetadataValidFor(IntPtr publicKey, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_KSwitchKeys_IsMetadataValidFor(IntPtr kswitchKeys, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_RelinKeys_IsMetadataValidFor(IntPtr relinKeys, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
-        internal static extern void ValCheck_GaloisKeys_IsMetadataValidFor(IntPtr galoisKeys, IntPtr context, out bool result);
-
-        [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void ValCheck_Plaintext_IsValidFor(IntPtr plaintext, IntPtr context, out bool result);
 
         [DllImport(sealnetnative, PreserveSig = false)]
@@ -1099,6 +1186,22 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void ValCheck_GaloisKeys_IsValidFor(IntPtr galoisKeys, IntPtr context, out bool result);
+
+        #endregion
+
+        #region Serialization methods
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Serialization_SEALMagic(out ushort result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Serialization_IsSupportedComprMode(byte comprMode, out bool result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Serialization_ComprModeDefault(out byte result);
+
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void Serialization_IsValidHeader(byte[] headerptr, ulong size, out bool result);
 
         #endregion
 

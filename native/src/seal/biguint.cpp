@@ -252,7 +252,7 @@ namespace seal
         return quotient;
     }
 
-    void BigUInt::save(ostream &stream) const
+    void BigUInt::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -263,18 +263,25 @@ namespace seal
             int32_t bit_count32 = safe_cast<int32_t>(bit_count_);
             streamsize data_size = safe_cast<streamsize>(mul_safe(uint64_count(), sizeof(uint64_t)));
             stream.write(reinterpret_cast<const char*>(&bit_count32), sizeof(int32_t));
-            stream.write(reinterpret_cast<const char*>(value_.get()), data_size);
+            if (data_size)
+            {
+                stream.write(reinterpret_cast<const char*>(value_.get()), data_size);
+            }
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
     }
 
-    void BigUInt::load(istream &stream)
+    void BigUInt::load_members(istream &stream)
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -289,10 +296,15 @@ namespace seal
                 // Size is too large to currently fit, so resize.
                 resize(read_bit_count);
             }
+
             size_t read_uint64_count = safe_cast<size_t>(
                 divide_round_up(read_bit_count, bits_per_uint64));
-            streamsize data_size = safe_cast<streamsize>(mul_safe(read_uint64_count, sizeof(uint64_t)));
-            stream.read(reinterpret_cast<char*>(value_.get()), data_size);
+            streamsize data_size = safe_cast<streamsize>(
+                mul_safe(read_uint64_count, sizeof(uint64_t)));
+            if (data_size)
+            {
+                stream.read(reinterpret_cast<char*>(value_.get()), data_size);
+            }
 
             // Zero any extra space.
             if (uint64_count() > read_uint64_count)
@@ -301,12 +313,16 @@ namespace seal
                     value_.get() + read_uint64_count);
             }
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
     }
 }

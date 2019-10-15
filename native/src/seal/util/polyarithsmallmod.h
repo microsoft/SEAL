@@ -63,7 +63,8 @@ namespace seal
             // modulo_poly_coeffs that allows also 64-bit coefficients.
             std::transform(poly, poly + coeff_count, result,
                 [&](auto coeff) {
-                    return barrett_reduce_63(coeff, modulus); });
+                    return barrett_reduce_63(coeff, modulus);
+                });
         }
 
         inline void negate_poly_coeffmod(const std::uint64_t *poly,

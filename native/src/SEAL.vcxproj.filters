@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Source Files\util">
       <UniqueIdentifier>{a119ce23-aae9-4b06-be2c-1c8aada4ab20}</UniqueIdentifier>
     </Filter>
@@ -30,9 +26,6 @@
     </Filter>
     <Filter Include="Other\seal\util">
       <UniqueIdentifier>{497d5f96-98a3-44e9-8b38-a2ea4bbea366}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Resource Files">
-      <UniqueIdentifier>{87bf64a4-84f1-44c7-af13-5fce86d49abc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -108,10 +101,13 @@
     <ClInclude Include="seal\valcheck.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\util\aes.h">
+    <ClInclude Include="seal\util\baseconverter.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="seal\util\baseconverter.h">
+    <ClInclude Include="seal\util\blake2.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\blake2-impl.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\util\clang.h">
@@ -121,6 +117,9 @@
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\util\common.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\croots.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\util\defines.h">
@@ -168,6 +167,9 @@
     <ClInclude Include="seal\util\rlwe.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="seal\util\scalingvariant.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
     <ClInclude Include="seal\util\smallntt.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -185,6 +187,12 @@
     </ClInclude>
     <ClInclude Include="seal\modulus.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\serialization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\util\ztools.h">
+      <Filter>Header Files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -227,10 +235,16 @@
     <ClCompile Include="seal\memorymanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="seal\modulus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="seal\plaintext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\randomgen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\serialization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\smallmodulus.cpp">
@@ -239,19 +253,16 @@
     <ClCompile Include="seal\valcheck.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\util\aes.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
     <ClCompile Include="seal\util\baseconverter.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\clipnormal.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="seal\util\globals.cpp">
+    <ClCompile Include="seal\util\croots.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="seal\util\hash.cpp">
+    <ClCompile Include="seal\util\globals.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\mempool.cpp">
@@ -272,6 +283,9 @@
     <ClCompile Include="seal\util\rlwe.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="seal\util\scalingvariant.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
     <ClCompile Include="seal\util\smallntt.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -287,8 +301,14 @@
     <ClCompile Include="seal\util\uintcore.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="seal\modulus.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="seal\util\ztools.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\blake2xb.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\blake2b.c">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -309,7 +329,7 @@
     <None Include="seal\util\config.h.in">
       <Filter>Other\seal\util</Filter>
     </None>
-    <None Include="cmake\Findmsgsl.cmake">
+    <None Include="cmake\FindMSGSL.cmake">
       <Filter>Other\cmake</Filter>
     </None>
     <None Include="CMakeConfig.cmd">

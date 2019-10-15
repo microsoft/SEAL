@@ -5,8 +5,7 @@ using Microsoft.Research.SEAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
@@ -33,8 +32,6 @@ namespace Microsoft.Research.SEAL
     /// data structure storing the keyswitching keys not being thread-safe.
     /// </para>
     /// </remarks>
-    /// <see cref="RelinKeys">see RelinKeys for the class that stores the relinearization keys.</see>
-    /// <see cref="GaloisKeys">see GaloisKeys for the class that stores the Galois keys.</see>
     public class KSwitchKeys : NativeObject
     {
         /// <summary>
@@ -136,7 +133,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a copy of ParmsId.
         /// </summary>
-        /// <see cref="EncryptionParameters">see EncryptionParameters for more information about parmsId.</see>
         public ParmsId ParmsId
         {
             get
@@ -152,143 +148,118 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Saves the KSwitchKeys instance to an output stream.
+        /// Returns an upper bound on the size of the KSwitchKeys, as if it was written
+        /// to an output stream.
         /// </summary>
+        /// <param name="comprMode">The compression mode</param>
+        /// <exception cref="ArgumentException">if the compression mode is not
+        /// supported</exception>
+        /// <exception cref="InvalidOperationException">if the size does not fit in
+        /// the return type</exception>
+        public long SaveSize(ComprModeType comprMode)
+        {
+            try
+            {
+                NativeMethods.KSwitchKeys_SaveSize(
+                    NativePtr, (byte)comprMode, out long outBytes);
+                return outBytes;
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("The size does not fit in the return type", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+        }
+
+        /// <summary>Saves the KSwitchKeys to an output stream.</summary>
         /// <remarks>
-        /// Saves the KSwitchKeys instance to an output stream. The output is in binary
-        /// format and not human-readable. The output stream must have the "binary" flag set.
+        /// Saves the KSwitchKeys to an output stream. The output is in binary format
+        /// and not human-readable.
         /// </remarks>
         /// <param name="stream">The stream to save the KSwitchKeys to</param>
+        /// <param name="comprMode">The desired compression mode</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if the KSwitchKeys could not be written to stream</exception>
-        public void Save(Stream stream)
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the data to be saved
+        /// is invalid, if compression mode is not supported, or if compression
+        /// failed</exception>
+        public long Save(Stream stream, ComprModeType? comprMode = null)
         {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            try
-            {
-                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
-                {
-                    // Save the ParmsId
-                    ParmsId.Save(writer.BaseStream);
-
-                    // Save the size of Keys
-                    IEnumerable<IEnumerable<PublicKey>> data = Data;
-                    writer.Write((ulong)data.LongCount());
-
-                    // Loop over entries in the first list
-                    foreach (IEnumerable<PublicKey> key in data)
-                    {
-                        writer.Write((ulong)key.LongCount());
-
-                        // Loop over keys and save all
-                        foreach (PublicKey pkey in key)
-                        {
-                            pkey.Save(writer.BaseStream);
-                        }
-                    }
-                }
-            }
-            catch (IOException ex)
-            {
-                throw new ArgumentException("Could not write KSwitchKeys", ex);
-            }
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            ComprModeType comprModeValue = comprMode.Value;
+            return Serialization.Save(
+                (byte[] outptr, ulong size, byte cm, out long outBytes) =>
+                    NativeMethods.KSwitchKeys_Save(NativePtr, outptr, size,
+                    cm, out outBytes),
+                SaveSize(comprModeValue), comprModeValue, stream);
         }
 
-        /// <summary>
-        /// Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
-        /// </summary>
+        /// <summary>Loads a KSwitchKeys from an input stream overwriting the current
+        /// KSwitchKeys.</summary>
         /// <remarks>
-        /// Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
-        /// No checking of the validity of the KSwitchKeys data against encryption
-        /// parameters is performed. This function should not be used unless the
-        /// KSwitchKeys comes from a fully trusted source.
-        /// </remarks>
-        /// <param name="stream">The stream to load the KSwitchKeys from</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if KSwitchKeys could not be read from
-        /// stream</exception>
-        public void UnsafeLoad(Stream stream)
-        {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            try
-            {
-                // Read the ParmsId
-                ParmsId parmsId = new ParmsId();
-                parmsId.Load(stream);
-                ParmsId = parmsId;
-
-                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
-                {
-                    // Read the size
-                    ulong size = reader.ReadUInt64();
-
-                    // Clear current data and reserve new size
-                    NativeMethods.KSwitchKeys_ClearDataAndReserve(NativePtr, size);
-
-                    // Read all lists
-                    for (ulong i = 0; i < size; i++)
-                    {
-                        // Read size of second list
-                        ulong keySize = reader.ReadUInt64();
-                        List<PublicKey> key = new List<PublicKey>(checked((int)keySize));
-
-                        // Load all ciphertexts
-                        for (ulong j = 0; j < keySize; j++)
-                        {
-                            PublicKey pkey = new PublicKey();
-                            pkey.UnsafeLoad(reader.BaseStream);
-                            key.Add(pkey);
-                        }
-
-                        IntPtr[] pointers = key.Select(c =>
-                        {
-                            return c.NativePtr;
-                        }).ToArray();
-
-                        NativeMethods.KSwitchKeys_AddKeyList(NativePtr, (ulong)pointers.LongLength, pointers);
-                    }
-                }
-            }
-            catch (EndOfStreamException ex)
-            {
-                throw new ArgumentException("Stream ended unexpectedly", ex);
-            }
-            catch (IOException ex)
-            {
-                throw new ArgumentException("Could not load KSwitchKeys", ex);
-            }
-        }
-
-        /// <summary>
-        /// Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
-        /// </summary>
-        /// <remarks>
-        /// Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
-        /// The loaded GaloisKeys is verified to be valid for the given SEALContext.
+        /// Loads a KSwitchKeys from an input stream overwriting the current
+        /// KSwitchKeys. No checking of the validity of the KSwitchKeys data against
+        /// encryption parameters is performed. This function should not be used
+        /// unless the KSwitchKeys comes from a fully trusted source.
         /// </remarks>
         /// <param name="context">The SEALContext</param>
-        /// <param name="stream">The stream to load the KSwitchKeys instance from</param>
-        /// <exception cref="ArgumentNullException">if either stream or context are null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
+        /// <param name="stream">The stream to load the KSwitchKeys from</param>
+        /// <exception cref="ArgumentNullException">if context or stream is
+        /// null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support reading</exception>
+        /// <exception cref="ArgumentException">if context is not set or encryption
         /// parameters are not valid</exception>
-        /// <exception cref="ArgumentException">if KSwitchKeys could not be read from
-        /// stream or is invalid for the context</exception>
-        public void Load(SEALContext context, Stream stream)
+        /// <exception cref="EndOfStreamException">if the stream ended
+        /// unexpectedly</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is invalid
+        /// or if the loaded compression mode is not supported</exception>
+        public long UnsafeLoad(SEALContext context, Stream stream)
         {
             if (null == context)
                 throw new ArgumentNullException(nameof(context));
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
 
-            UnsafeLoad(stream);
-            if (!ValCheck.IsValidFor(this, context))
-            {
-                throw new ArgumentException("KSwitchKeys data is invalid for the context");
-            }
+            return Serialization.Load(
+                (byte[] outptr, ulong size, out long outBytes) =>
+                    NativeMethods.KSwitchKeys_UnsafeLoad(NativePtr, context.NativePtr,
+                    outptr, size, out outBytes),
+                stream);
+        }
+
+        /// <summary>Loads a KSwitchKeys from an input stream overwriting the current
+        /// KSwitchKeys.</summary>
+        /// <remarks>
+        /// Loads a KSwitchKeys from an input stream overwriting the current
+        /// KSwitchKeys. The loaded KSwitchKeys is verified to be valid for the given
+        /// SEALContext.
+        /// </remarks>
+        /// <param name="context">The SEALContext</param>
+        /// <param name="stream">The stream to load the KSwitchKeys from</param>
+        /// <exception cref="ArgumentNullException">if context or stream is
+        /// null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support reading</exception>
+        /// <exception cref="ArgumentException">if context is not set or encryption
+        /// parameters are not valid</exception>
+        /// <exception cref="EndOfStreamException">if the stream ended
+        /// unexpectedly</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is invalid
+        /// or if the loaded compression mode is not supported</exception>
+        public long Load(SEALContext context, Stream stream)
+        {
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
+
+            return Serialization.Load(
+                (byte[] outptr, ulong size, out long outBytes) =>
+                    NativeMethods.KSwitchKeys_Load(NativePtr, context.NativePtr,
+                    outptr, size, out outBytes),
+                stream);
         }
 
         /// <summary>

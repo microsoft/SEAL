@@ -83,46 +83,52 @@ namespace SEALTest
     TEST(PlaintextTest, SaveLoadPlaintext)
     {
         stringstream stream;
-
         Plaintext plain;
         Plaintext plain2;
-        plain.save(stream);
-        plain2.unsafe_load(stream);
-        ASSERT_TRUE(plain.data() == plain2.data());
-        ASSERT_TRUE(plain2.data() == nullptr);
-        ASSERT_EQ(0ULL, plain2.capacity());
-        ASSERT_EQ(0ULL, plain2.coeff_count());
-        ASSERT_FALSE(plain2.is_ntt_form());
 
-        plain.reserve(20);
-        plain.resize(5);
-        plain[0] = 1;
-        plain[1] = 2;
-        plain[2] = 3;
-        plain.save(stream);
-        plain2.unsafe_load(stream);
-        ASSERT_TRUE(plain.data() != plain2.data());
-        ASSERT_EQ(5ULL, plain2.capacity());
-        ASSERT_EQ(5ULL, plain2.coeff_count());
-        ASSERT_EQ(1ULL, plain2[0]);
-        ASSERT_EQ(2ULL, plain2[1]);
-        ASSERT_EQ(3ULL, plain2[2]);
-        ASSERT_EQ(0ULL, plain2[3]);
-        ASSERT_EQ(0ULL, plain2[4]);
-        ASSERT_FALSE(plain2.is_ntt_form());
+        {
+            EncryptionParameters parms(scheme_type::CKKS);
+            parms.set_poly_modulus_degree(4);
+            parms.set_coeff_modulus(CoeffModulus::Create(4, { 20 }));
 
-        plain.parms_id() = { 1, 2, 3, 4 };
-        plain.save(stream);
-        plain2.unsafe_load(stream);
-        ASSERT_TRUE(plain2.is_ntt_form());
-        ASSERT_TRUE(plain2.parms_id() == plain.parms_id());
+            auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
+            plain.save(stream);
+            plain2.unsafe_load(context, stream);
+            ASSERT_TRUE(plain.data() == plain2.data());
+            ASSERT_TRUE(plain2.data() == nullptr);
+            ASSERT_EQ(0ULL, plain2.capacity());
+            ASSERT_EQ(0ULL, plain2.coeff_count());
+            ASSERT_FALSE(plain2.is_ntt_form());
+
+            plain.reserve(20);
+            plain.resize(4);
+            plain[0] = 1;
+            plain[1] = 2;
+            plain[2] = 3;
+            plain.save(stream);
+            plain2.unsafe_load(context, stream);
+            ASSERT_TRUE(plain.data() != plain2.data());
+            ASSERT_EQ(4ULL, plain2.capacity());
+            ASSERT_EQ(4ULL, plain2.coeff_count());
+            ASSERT_EQ(1ULL, plain2[0]);
+            ASSERT_EQ(2ULL, plain2[1]);
+            ASSERT_EQ(3ULL, plain2[2]);
+            ASSERT_EQ(0ULL, plain2[3]);
+            ASSERT_FALSE(plain2.is_ntt_form());
+
+            plain.parms_id() = context->first_parms_id();
+            plain.save(stream);
+            plain2.unsafe_load(context, stream);
+            ASSERT_TRUE(plain2.is_ntt_form());
+            ASSERT_TRUE(plain2.parms_id() == plain.parms_id());
+        }
         {
             EncryptionParameters parms(scheme_type::BFV);
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
-
             parms.set_plain_modulus(65537);
+
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
             plain.parms_id() = parms_id_zero;

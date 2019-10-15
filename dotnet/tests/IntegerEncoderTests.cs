@@ -140,22 +140,22 @@ namespace SEALNetTest
             BigUInt bui = new BigUInt(5ul);
             Plaintext plain = new Plaintext();
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc = new IntegerEncoder(context_null));
-            Assert.ThrowsException<ArgumentException>(() => enc = new IntegerEncoder(GlobalContext.CKKSContext));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc = new IntegerEncoder(context_null));
+            Utilities.AssertThrows<ArgumentException>(() => enc = new IntegerEncoder(GlobalContext.CKKSContext));
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1ul, null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1L, null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(1u, null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(bui_null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(bui, null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.Encode(bui_null, plain));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(1ul, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(1L, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(1u, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(bui_null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(bui, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.Encode(bui_null, plain));
 
-            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeUInt32(null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeUInt64(null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeInt32(null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeInt64(null));
-            Assert.ThrowsException<ArgumentNullException>(() => enc.DecodeBigUInt(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.DecodeUInt32(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.DecodeUInt64(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.DecodeInt32(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.DecodeInt64(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => enc.DecodeBigUInt(null));
         }
     }
 }

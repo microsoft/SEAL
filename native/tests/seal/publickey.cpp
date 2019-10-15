@@ -31,8 +31,8 @@ namespace SEALTest
             PublicKey pk2;
             pk2.load(context, stream);
 
-            ASSERT_EQ(pk.data().uint64_count(), pk2.data().uint64_count());
-            for (size_t i = 0; i < pk.data().uint64_count(); i++)
+            ASSERT_EQ(pk.data().int_array().size(), pk2.data().int_array().size());
+            for (size_t i = 0; i < pk.data().int_array().size(); i++)
             {
                 ASSERT_EQ(pk.data().data()[i], pk2.data().data()[i]);
             }
@@ -54,8 +54,8 @@ namespace SEALTest
             PublicKey pk2;
             pk2.load(context, stream);
 
-            ASSERT_EQ(pk.data().uint64_count(), pk2.data().uint64_count());
-            for (size_t i = 0; i < pk.data().uint64_count(); i++)
+            ASSERT_EQ(pk.data().int_array().size(), pk2.data().int_array().size());
+            for (size_t i = 0; i < pk.data().int_array().size(); i++)
             {
                 ASSERT_EQ(pk.data().data()[i], pk2.data().data()[i]);
             }

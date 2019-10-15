@@ -376,7 +376,7 @@ namespace SEALNetTest
             Assert.AreEqual(1ul, plaindest.CoeffCount);
             Assert.AreEqual(24ul, plaindest[0]);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Utilities.AssertThrows<ArgumentException>(() =>
             {
                 // Uninitialized memory pool handle
                 MemoryPoolHandle pool = new MemoryPoolHandle();
@@ -448,7 +448,7 @@ namespace SEALNetTest
             Assert.AreEqual(9ul, plaindest[5]);
             Assert.AreEqual(12ul, plaindest[6]);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Utilities.AssertThrows<ArgumentException>(() =>
             {
                 // Uninitialized pool
                 MemoryPoolHandle pool = new MemoryPoolHandle();
@@ -1169,7 +1169,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new SmallModulus(65537ul),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -1177,7 +1177,7 @@ namespace SEALNetTest
                 secLevel: SecLevelType.None);
 
             Evaluator evaluator = null;
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator = new Evaluator(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator = new Evaluator(null));
             evaluator = new Evaluator(context);
 
             KeyGenerator keygen = new KeyGenerator(context);
@@ -1193,196 +1193,196 @@ namespace SEALNetTest
 
             MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Add(null, encrypted2, encrypted3));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Add(encrypted1, null, encrypted3));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Add(encrypted1, encrypted2, null));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.Add(encrypted1, encrypted2, encrypted3));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Add(null, encrypted2, encrypted3));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Add(encrypted1, null, encrypted3));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Add(encrypted1, encrypted2, null));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.Add(encrypted1, encrypted2, encrypted3));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddInplace(null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddInplace(null, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddMany(encrypteds, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddMany(null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddMany(encrypteds, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddMany(null, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddPlain(encrypted1, plain1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddPlain(encrypted1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddPlain(null, plain1, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.AddPlain(encrypted1, plain1, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddPlain(encrypted1, plain1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddPlain(encrypted1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddPlain(null, plain1, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.AddPlain(encrypted1, plain1, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddPlainInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.AddPlainInplace(null, plain1));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddPlainInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddPlainInplace(null, plain1));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ApplyGalois(encrypted1, 1, galoisKeys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ApplyGalois(encrypted1, 1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ApplyGalois(null, 1, galoisKeys, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.ApplyGalois(encrypted1, 1, galoisKeys, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ApplyGalois(encrypted1, 1, galoisKeys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ApplyGalois(encrypted1, 1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ApplyGalois(null, 1, galoisKeys, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.ApplyGalois(encrypted1, 1, galoisKeys, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ApplyGaloisInplace(encrypted1, 1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ApplyGaloisInplace(null, 1, galoisKeys));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ApplyGaloisInplace(encrypted1, 1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ApplyGaloisInplace(null, 1, galoisKeys));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ComplexConjugate(encrypted1, galoisKeys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ComplexConjugate(encrypted1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ComplexConjugate(null, galoisKeys, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ComplexConjugate(encrypted1, galoisKeys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ComplexConjugate(encrypted1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ComplexConjugate(null, galoisKeys, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ComplexConjugateInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ComplexConjugateInplace(null, galoisKeys));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ComplexConjugateInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ComplexConjugateInplace(null, galoisKeys));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Exponentiate(encrypted1, 2, relinKeys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Exponentiate(encrypted1, 2, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Exponentiate(null, 2, relinKeys, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Exponentiate(encrypted1, 2, relinKeys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Exponentiate(encrypted1, 2, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Exponentiate(null, 2, relinKeys, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ExponentiateInplace(encrypted1, 2, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ExponentiateInplace(null, 2, relinKeys));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ExponentiateInplace(encrypted1, 2, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ExponentiateInplace(null, 2, relinKeys));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchTo(plain1, ParmsId.Zero, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchTo(plain1, null, plain2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchTo(null, ParmsId.Zero, plain2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchTo(plain1, ParmsId.Zero, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchTo(plain1, null, plain2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchTo(null, ParmsId.Zero, plain2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchTo(encrypted1, ParmsId.Zero, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchTo(encrypted1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchTo(null, ParmsId.Zero, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.ModSwitchTo(encrypted1, ParmsId.Zero, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchTo(encrypted1, ParmsId.Zero, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchTo(encrypted1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchTo(null, ParmsId.Zero, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.ModSwitchTo(encrypted1, ParmsId.Zero, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToInplace(encrypted: null, parmsId: ParmsId.Zero));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.ModSwitchToInplace(encrypted1, ParmsId.Zero, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToInplace(encrypted: null, parmsId: ParmsId.Zero));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.ModSwitchToInplace(encrypted1, ParmsId.Zero, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToInplace(plain1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToInplace(plain: null, parmsId: ParmsId.Zero));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToInplace(plain1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToInplace(plain: null, parmsId: ParmsId.Zero));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToNext(plain1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToNext(null, plain2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToNext(plain1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToNext(null, plain2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToNextInplace(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToNextInplace(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToNext(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToNext(null, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.ModSwitchToNext(encrypted1, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToNext(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToNext(null, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.ModSwitchToNext(encrypted1, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.ModSwitchToNextInplace(encrypted: null));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.ModSwitchToNextInplace(encrypted1, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ModSwitchToNextInplace(encrypted: null));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.ModSwitchToNextInplace(encrypted1, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Multiply(encrypted1, encrypted2, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Multiply(encrypted1, null, encrypted3));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Multiply(null, encrypted2, encrypted3));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.Multiply(encrypted1, encrypted2, encrypted3, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Multiply(encrypted1, encrypted2, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Multiply(encrypted1, null, encrypted3));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Multiply(null, encrypted2, encrypted3));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.Multiply(encrypted1, encrypted2, encrypted3, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyInplace(null, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.MultiplyInplace(encrypted1, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyInplace(null, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.MultiplyInplace(encrypted1, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyMany(encrypteds, relinKeys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyMany(encrypteds, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyMany(null, relinKeys, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.MultiplyMany(encrypteds, relinKeys, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyMany(encrypteds, relinKeys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyMany(encrypteds, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyMany(null, relinKeys, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.MultiplyMany(encrypteds, relinKeys, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyPlain(encrypted1, plain1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyPlain(encrypted1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyPlain(null, plain1, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.MultiplyPlain(encrypted1, plain1, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyPlain(encrypted1, plain1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyPlain(encrypted1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyPlain(null, plain1, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.MultiplyPlain(encrypted1, plain1, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyPlainInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.MultiplyPlainInplace(null, plain1));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyPlainInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.MultiplyPlainInplace(null, plain1));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Negate(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Negate(null, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.Negate(encrypted1, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Negate(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Negate(null, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.Negate(encrypted1, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.NegateInplace(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.NegateInplace(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Relinearize(encrypted1, relinKeys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Relinearize(encrypted1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Relinearize(null, relinKeys, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.Relinearize(encrypted1, relinKeys, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Relinearize(encrypted1, relinKeys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Relinearize(encrypted1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Relinearize(null, relinKeys, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.Relinearize(encrypted1, relinKeys, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RelinearizeInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RelinearizeInplace(null, relinKeys));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RelinearizeInplace(encrypted1, relinKeys, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RelinearizeInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RelinearizeInplace(null, relinKeys));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RelinearizeInplace(encrypted1, relinKeys, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RescaleTo(encrypted1, ParmsId.Zero, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RescaleTo(encrypted1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RescaleTo(null, ParmsId.Zero, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RescaleTo(encrypted1, ParmsId.Zero, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RescaleTo(encrypted1, ParmsId.Zero, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RescaleTo(encrypted1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RescaleTo(null, ParmsId.Zero, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RescaleTo(encrypted1, ParmsId.Zero, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RescaleToInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RescaleToInplace(null, ParmsId.Zero));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RescaleToInplace(encrypted1, ParmsId.Zero, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RescaleToInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RescaleToInplace(null, ParmsId.Zero));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RescaleToInplace(encrypted1, ParmsId.Zero, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RescaleToNext(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RescaleToNext(null, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RescaleToNext(encrypted1, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RescaleToNext(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RescaleToNext(null, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RescaleToNext(encrypted1, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RescaleToNextInplace(null));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RescaleToNextInplace(encrypted1, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RescaleToNextInplace(null));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RescaleToNextInplace(encrypted1, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateColumns(encrypted1, galoisKeys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateColumns(encrypted1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateColumns(null, galoisKeys, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RotateColumns(encrypted1, galoisKeys, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateColumns(encrypted1, galoisKeys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateColumns(encrypted1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateColumns(null, galoisKeys, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateColumns(encrypted1, galoisKeys, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateColumnsInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateColumnsInplace(null, galoisKeys));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RotateColumnsInplace(encrypted1, galoisKeys, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateColumnsInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateColumnsInplace(null, galoisKeys));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateColumnsInplace(encrypted1, galoisKeys, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, 1, galoisKeys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, 1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateRows(null, 1, galoisKeys, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RotateRows(encrypted1, 1, galoisKeys, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, 1, galoisKeys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, 1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(null, 1, galoisKeys, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted1, 1, galoisKeys, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateRowsInplace(encrypted1, 1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateRowsInplace(null, 1, galoisKeys));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.RotateRowsInplace(encrypted1, 1, galoisKeys, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRowsInplace(encrypted1, 1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRowsInplace(null, 1, galoisKeys));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRowsInplace(encrypted1, 1, galoisKeys, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, 1, galoisKeys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, 1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateVector(null, 1, galoisKeys, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, 1, galoisKeys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, 1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(null, 1, galoisKeys, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateVectorInplace(encrypted1, 1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.RotateVectorInplace(null, 1, galoisKeys));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVectorInplace(encrypted1, 1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVectorInplace(null, 1, galoisKeys));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Square(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Square(null, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.Square(encrypted1, encrypted2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Square(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Square(null, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.Square(encrypted1, encrypted2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.SquareInplace(null));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.SquareInplace(encrypted1, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SquareInplace(null));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.SquareInplace(encrypted1, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Sub(encrypted1, encrypted2, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Sub(encrypted1, null, encrypted3));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.Sub(null, encrypted2, encrypted3));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.Sub(encrypted1, encrypted2, encrypted3));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Sub(encrypted1, encrypted2, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Sub(encrypted1, null, encrypted3));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Sub(null, encrypted2, encrypted3));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.Sub(encrypted1, encrypted2, encrypted3));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.SubInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.SubInplace(null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubInplace(null, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.SubPlain(encrypted1, plain1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.SubPlain(encrypted1, null, encrypted2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.SubPlain(null, plain1, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.SubPlain(encrypted1, plain1, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubPlain(encrypted1, plain1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubPlain(encrypted1, null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubPlain(null, plain1, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.SubPlain(encrypted1, plain1, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.SubPlainInplace(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.SubPlainInplace(null, plain1));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.SubPlainInplace(encrypted1, plain1));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubPlainInplace(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubPlainInplace(null, plain1));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.SubPlainInplace(encrypted1, plain1));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformFromNTT(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformFromNTT(null, encrypted2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.TransformFromNTT(encrypted1, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformFromNTT(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformFromNTT(null, encrypted2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.TransformFromNTT(encrypted1, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformFromNTTInplace(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformFromNTTInplace(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformToNTT(encrypted1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformToNTT(null, encrypted2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformToNTT(encrypted1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformToNTT(null, encrypted2));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformToNTTInplace(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformToNTTInplace(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformToNTT(plain1, ParmsId.Zero, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformToNTT(plain1, null, plain2));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformToNTT(null, ParmsId.Zero, plain2));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.TransformToNTT(plain1, ParmsId.Zero, plain2, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformToNTT(plain1, ParmsId.Zero, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformToNTT(plain1, null, plain2));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformToNTT(null, ParmsId.Zero, plain2));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.TransformToNTT(plain1, ParmsId.Zero, plain2, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformToNTTInplace(plain1, null));
-            Assert.ThrowsException<ArgumentNullException>(() => evaluator.TransformToNTTInplace(null, ParmsId.Zero));
-            Assert.ThrowsException<ArgumentException>(() => evaluator.TransformToNTTInplace(plain1, ParmsId.Zero, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformToNTTInplace(plain1, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformToNTTInplace(null, ParmsId.Zero));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.TransformToNTTInplace(plain1, ParmsId.Zero, pool));
         }
 
         /// <summary>

@@ -60,10 +60,13 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes double-precision floating-point real numbers into a plaintext
-        /// polynomial. Dynamic memory allocations in the process are allocated from the
-        /// memory pool pointed to by the given MemoryPoolHandle.
+        /// Encodes a vector of double-precision floating-point real numbers into a plaintext
+        /// polynomial.
         /// </summary>
+        /// <remark>
+        /// Append zeros if vector size is less than N/2. Dynamic memory allocations in the process
+        /// are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </remark>
         /// <param name="values">The enumeration of double-precision floating-point numbers
         /// to encode</param>
         /// <param name="parmsId">parmsId determining the encryption parameters to be used
@@ -96,10 +99,13 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes double-precision floating-point complex numbers into a plaintext
-        /// polynomial. Dynamic memory allocations in the process are allocated from the
-        /// memory pool pointed to by the given MemoryPoolHandle.
+        /// Encodes a vector of double-precision floating-point complex numbers into a plaintext
+        /// polynomial.
         /// </summary>
+        /// <remark>
+        /// Append zeros if vector size is less than N/2. Dynamic memory allocations in the process
+        /// are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </remark>
         /// <param name="values">The enumeration of double-precision complex numbers
         /// to encode</param>
         /// <param name="parmsId">parmsId determining the encryption parameters to be used
@@ -141,11 +147,14 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes double-precision floating-point real numbers into
-        /// a plaintext polynomial. The encryption parameters used are the top level
-        /// parameters for the given context. Dynamic memory allocations in the process
-        /// are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// Encodes a vector of double-precision floating-point real numbers into a plaintext
+        /// polynomial.
         /// </summary>
+        /// <remark>
+        /// Append zeros if vector size is less than N/2. Dynamic memory allocations in the process
+        /// are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// The encryption parameters used are the top level parameters for the given context.
+        /// </remark>
         /// <param name="values">The enumeration of double-precision floating-point numbers
         /// to encode</param>
         /// <param name="scale">Scaling parameter defining encoding precision</param>
@@ -164,11 +173,14 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes double-precision floating-point complex numbers into
-        /// a plaintext polynomial. The encryption parameters used are the top level
-        /// parameters for the given context. Dynamic memory allocations in the process
-        /// are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// Encodes a vector of double-precision floating-point complex numbers into a plaintext
+        /// polynomial.
         /// </summary>
+        /// <remark>
+        /// Append zeros if vector size is less than N/2. Dynamic memory allocations in the process
+        /// are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// The encryption parameters used are the top level parameters for the given context.
+        /// </remark>
         /// <param name="values">The enumeration of double-precision floating-point numbers
         /// to encode</param>
         /// <param name="scale">Scaling parameter defining encoding precision</param>
@@ -187,10 +199,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes a double-precision floating-point number into a plaintext polynomial.
-        /// Dynamic memory allocations in the process are allocated from the memory pool
-        /// pointed to by the given MemoryPoolHandle.
+        /// Encodes a double-precision floating-point real number into a plaintext polynomial.
         /// </summary>
+        /// <remark>
+        /// The number repeats for N/2 times to fill all slots. Dynamic memory allocations in the
+        /// process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </remark>
         /// <param name="value">The double-precision floating-point number to encode</param>
         /// <param name="parmsId">parmsId determining the encryption parameters to be used
         /// by the result plaintext</param>
@@ -218,11 +232,13 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes a double-precision floating-point number into a plaintext polynomial.
-        /// The encryption parameters used are the top level parameters for the given context.
-        /// Dynamic memory allocations in the process are allocated from the memory pool
-        /// pointed to by the given MemoryPoolHandle.
+        /// Encodes a double-precision floating-point real number into a plaintext polynomial.
         /// </summary>
+        /// <remark>
+        /// The number repeats for N/2 times to fill all slots. Dynamic memory allocations in the
+        /// process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// The encryption parameters used are the top level parameters for the given context.
+        /// </remark>
         /// <param name="value">The double-precision floating-point number to encode</param>
         /// <param name="scale">Scaling parameter defining encoding precision</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
@@ -239,10 +255,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes a double-precision complex number into a plaintext polynomial. Dynamic
-        /// memory allocations in the process are allocated from the memory pool pointed to
-        /// by the given MemoryPoolHandle.
+        /// Encodes a double-precision floating-point complex number into a plaintext polynomial.
         /// </summary>
+        /// <remark>
+        /// The number repeats for N/2 times to fill all slots. Dynamic memory allocations in the
+        /// process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </remark>
         /// <param name="value">The double-precision complex number to encode</param>
         /// <param name="parmsId">parmsId determining the encryption parameters to be used
         /// by the result plaintext</param>
@@ -269,11 +287,13 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes a double-precision complex number into a plaintext polynomial. The
-        /// encryption parameters used are the top level parameters for the given context.
-        /// Dynamic memory allocations in the process are allocated from the memory pool
-        /// pointed to by the given MemoryPoolHandle.
+        /// Encodes a double-precision floating-point complex number into a plaintext polynomial.
         /// </summary>
+        /// <remark>
+        /// The number repeats for N/2 times to fill all slots. Dynamic memory allocations in the
+        /// process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// The encryption parameters used are the top level parameters for the given context.
+        /// </remark>
         /// <param name="value">The double-precision complex number to encode</param>
         /// <param name="scale">Scaling parameter defining encoding precision</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
@@ -292,6 +312,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Encodes an integer number into a plaintext polynomial without any scaling.
         /// </summary>
+        /// <remark>
+        /// The number repeats for N/2 times to fill all slots.
+        /// </remark>
         /// <param name="value">The integer number to encode</param>
         /// <param name="parmsId">parmsId determining the encryption parameters to be used
         /// by the result plaintext</param>
@@ -310,9 +333,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encodes an integer number into a plaintext polynomial without any scaling. The
-        /// encryption parameters used are the top level parameters for the given context.
+        /// Encodes an integer number into a plaintext polynomial without any scaling.
         /// </summary>
+        /// <remark>
+        /// The number repeats for N/2 times to fill all slots. The encryption parameters used are
+        /// the top level parameters for the given context.
+        /// </remark>
         /// <param name="value">The integer number to encode</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <exception cref="ArgumentNullException">if destination is null</exception>
@@ -322,10 +348,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial into double-precision floating-point real
-        /// numbers. Dynamic memory allocations in the process are allocated from
-        /// the memory pool pointed to by the given MemoryPoolHandle.
+        /// Decodes a plaintext polynomial into double-precision floating-point real numbers.
         /// </summary>
+        /// <remark>
+        /// Dynamic memory allocations in the process are allocated from the memory pool pointed to
+        /// by the given MemoryPoolHandle.
+        /// </remark>
         /// <param name="plain">plain The plaintext to decode</param>
         /// <param name="destination">The collection to be overwritten with the values in the slots</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
@@ -360,10 +388,12 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decodes a plaintext polynomial into double-precision floating-point complex
-        /// numbers. Dynamic memory allocations in the process are allocated from
-        /// the memory pool pointed to by the given MemoryPoolHandle.
+        /// Decodes a plaintext polynomial into double-precision floating-point complex numbers.
         /// </summary>
+        /// <remark>
+        /// Dynamic memory allocations in the process are allocated from the memory pool pointed to
+        /// by the given MemoryPoolHandle.
+        /// </remark>
         /// <param name="plain">plain The plaintext to decode</param>
         /// <param name="destination">The collection to be overwritten with the values in the slots</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>

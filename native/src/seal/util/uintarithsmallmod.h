@@ -238,11 +238,16 @@ namespace seal
             const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
-            if (!value && value_uint64_count > 0)
+            if (!value)
             {
                 throw std::invalid_argument("value");
             }
+            if (!value_uint64_count)
+            {
+                throw std::invalid_argument("value_uint64_count");
+            }
 #endif
+
             if (value_uint64_count == 1)
             {
                 value[0] %= modulus.value();
@@ -321,7 +326,7 @@ namespace seal
             std::size_t uint64_count, std::uint64_t *quotient,
             MemoryPool &pool);
 
-        SEAL_NODISCARD std::uint64_t steps_to_galois_elt(
+        SEAL_NODISCARD std::uint64_t galois_elt_from_step(
             int steps, std::size_t coeff_count);
     }
 }

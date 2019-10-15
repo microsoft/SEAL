@@ -81,9 +81,9 @@ namespace SEALTest
         BatchEncoder batch_encoder(context);
         ASSERT_EQ(64ULL, batch_encoder.slot_count());
         vector<int64_t> plain_vec;
-        for (size_t i = 0; i < batch_encoder.slot_count(); i++)
+        for (uint64_t i = 0; i < static_cast<uint64_t>(batch_encoder.slot_count()); i++)
         {
-            plain_vec.push_back(static_cast<int64_t>(i * (1 - 2 * (i % 2))));
+            plain_vec.push_back(static_cast<int64_t>(i * (1 - (i % 2) * 2)));
         }
 
         Plaintext plain;
@@ -102,9 +102,9 @@ namespace SEALTest
         ASSERT_TRUE(plain_vec == plain_vec2);
 
         vector<int64_t> short_plain_vec;
-        for (int i = 0; i < 20; i++)
+        for (int64_t i = 0; i < 20; i++)
         {
-            short_plain_vec.push_back(static_cast<int64_t>(i * (1 - 2 * (i % 2))));
+            short_plain_vec.push_back(i * (int64_t(1) - (i & 1) * 2));
         }
         batch_encoder.encode(short_plain_vec, plain);
         vector<int64_t> short_plain_vec2;

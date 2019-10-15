@@ -6,6 +6,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using Microsoft.Research.SEAL.Tools;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
@@ -79,7 +80,8 @@ namespace Microsoft.Research.SEAL
     {
         /// <summary>Creates an empty BigUInt with zero bit width.</summary>
         /// <remarks>
-        /// Creates an empty BigUInt with zero bit width. No memory is allocated by this constructor.
+        /// Creates an empty BigUInt with zero bit width. No memory is allocated by
+        /// this constructor.
         /// </remarks>
         public BigUInt()
         {
@@ -88,7 +90,8 @@ namespace Microsoft.Research.SEAL
             NativePtr = ptr;
         }
 
-        /// <summary>Creates a zero-initialized BigUInt of the specified bit width.</summary>
+        /// <summary>Creates a zero-initialized BigUInt of the specified bit
+        /// width.</summary>
         /// <param name="bitCount">The bit width</param>
         /// <exception cref="ArgumentException">if bitCount is negative</exception>
         public BigUInt(int bitCount)
@@ -101,19 +104,23 @@ namespace Microsoft.Research.SEAL
             NativePtr = ptr;
         }
 
-        /// <summary>Creates a BigUInt of the specified bit width and initializes it with the unsigned hexadecimal
-        /// integer specified by the string.</summary>
+        /// <summary>Creates a BigUInt of the specified bit width and initializes
+        /// it with the unsigned hexadecimal integer specified by the string.</summary>
         /// <remarks>
-        /// Creates a BigUInt of the specified bit width and initializes it with the unsigned hexadecimal integer
-        /// specified by the string. The string must match the format returned by <see cref="ToString()"/> and must
-        /// consist of only the characters 0-9, A-F, or a-f, most-significant nibble first.
+        /// Creates a BigUInt of the specified bit width and initializes it with
+        /// the unsigned hexadecimal integer specified by the string. The string
+        /// must match the format returned by <see cref="ToString()"/> and must
+        /// consist of only the characters 0-9, A-F, or a-f, most-significant nibble
+        /// first.
         /// </remarks>
         ///
         /// <param name="bitCount">The bit width</param>
-        /// <param name="hexString">The hexadecimal integer string specifying the initial value</param>
+        /// <param name="hexString">The hexadecimal integer string specifying the
+        /// initial value</param>
         /// <exception cref="ArgumentNullException">if hexString is null</exception>
         /// <exception cref="ArgumentException">if bitCount is negative</exception>
-        /// <exception cref="ArgumentException">if hexString does not adhere to the expected format</exception>
+        /// <exception cref="ArgumentException">if hexString does not adhere to the
+        /// expected format</exception>
         public BigUInt(int bitCount, string hexString)
         {
             if (null == hexString)
@@ -126,8 +133,8 @@ namespace Microsoft.Research.SEAL
             NativePtr = ptr;
         }
 
-        /// <summary>Creates a BigUInt of the specified bit width and initializes it to the specified unsigned integer
-        /// value.</summary>
+        /// <summary>Creates a BigUInt of the specified bit width and initializes it
+        /// to the specified unsigned integer value.</summary>
         ///
         /// <param name="bitCount"> The bit width</param>
         /// <param name="value"> The initial value to set the BigUInt</param>
@@ -142,18 +149,19 @@ namespace Microsoft.Research.SEAL
             NativePtr = ptr;
         }
 
-        /// <summary>Creates a BigUInt initialized and minimally sized to fit the unsigned hexadecimal integer specified
-        /// by the string.</summary>
-        ///
+        /// <summary>Creates a BigUInt initialized and minimally sized to fit the
+        /// unsigned hexadecimal integer specified by the string.</summary>
         /// <remarks>
-        /// Creates a BigUInt initialized and minimally sized to fit the unsigned hexadecimal integer specified by
-        /// the string. The string matches the format returned by<see cref= "ToString()" /> and must consist of only
-        /// the characters 0-9, A-F, or a-f, most-significant nibble first.
+        /// Creates a BigUInt initialized and minimally sized to fit the unsigned
+        /// hexadecimal integer specified by the string. The string matches the format
+        /// returned by<see cref= "ToString()" /> and must consist of only the characters
+        /// 0-9, A-F, or a-f, most-significant nibble first.
         /// </remarks>
-        ///
-        /// <param name="hexString"> The hexadecimal integer string specifying the initial value</param>
+        /// <param name="hexString"> The hexadecimal integer string specifying the
+        /// initial value</param>
         /// <exception cref="ArgumentNullException">if hexString is null</exception>
-        /// <exception cref="ArgumentException">if hexString does not adhere to the expected format</exception>
+        /// <exception cref="ArgumentException">if hexString does not adhere to the
+        /// expected format</exception>
         public BigUInt(string hexString)
         {
             if (null == hexString)
@@ -166,9 +174,9 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Creates a deep copy of a BigUInt.</summary>
         /// <remarks>
-        /// Creates a deep copy of a BigUInt. The created BigUInt will have the same bit count and value as the original.
+        /// Creates a deep copy of a BigUInt. The created BigUInt will have the same
+        /// bit count and value as the original.
         /// </remarks>
-        ///
         /// <param name="copy">The BigUInt to copy from</param>
         /// <exception cref="ArgumentNullException">if copy is null</exception>
         public BigUInt(BigUInt copy)
@@ -182,10 +190,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a BigUInt initialized and minimally sized to fit the unsigned hexadecimal integer specified
-        /// by the<see cref= "System.Numerics.BigInteger" />.
+        /// Creates a BigUInt initialized and minimally sized to fit the unsigned
+        /// hexadecimal integer specified by the <see cref= "System.Numerics.BigInteger" />.
         /// </summary >
-        ///
         /// <param name= "bigInteger"> The initial value of the BigUInt</param>
         /// <exception cref="ArgumentNullException">if bigInteger is null</exception>
         public BigUInt(BigInteger bigInteger)
@@ -203,15 +210,14 @@ namespace Microsoft.Research.SEAL
         /// Creates a BigUInt from an IntPtr.
         /// </summary>
         /// <param name="ptr">Native pointer</param>
-        /// <param name="owned">Whether this BigUInt instance owns the native pointer</param>
+        /// <param name="owned">Whether this BigUInt instance owns the native
+        /// pointer</param>
         internal BigUInt(IntPtr ptr, bool owned = true)
             : base(ptr, owned)
         {
         }
 
         /// <summary>Returns whether or not the BigUInt is an alias.</summary>
-        ///
-        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of aliased BigUInt.</seealso>
         public bool IsAlias
         {
             get
@@ -222,8 +228,6 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>Returns the bit count for the BigUInt.</summary>
-        ///
-        /// <seealso cref = "GetSignificantBitCount()"> See GetSignificantBitCount() to instead ignore leading zero bits.</seealso>
         public int BitCount
         {
             get
@@ -233,9 +237,8 @@ namespace Microsoft.Research.SEAL
             }
         }
 
-        /// <summary>Returns the number of bytes in the backing array used to store the BigUInt value.</summary>
-        ///
-        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of the format of the backing array.</seealso>
+        /// <summary>Returns the number of bytes in the backing array used to store
+        /// the BigUInt value.</summary>
         public ulong ByteCount
         {
             get
@@ -245,9 +248,8 @@ namespace Microsoft.Research.SEAL
             }
         }
 
-        /// <summary>Returns the number of System.UInt64 in the backing array used to store the BigUInt value.</summary>
-        ///
-        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of the format of the backing array.</seealso>
+        /// <summary>Returns the number of System.UInt64 in the backing array used
+        /// to store the BigUInt value.</summary>
         public ulong UInt64Count
         {
             get
@@ -257,15 +259,15 @@ namespace Microsoft.Research.SEAL
             }
         }
 
-        /// <summary>Gets/sets the byte at the corresponding byte index of the BigUInt's integer value.</summary>
+        /// <summary>Gets/sets the byte at the corresponding byte index of the BigUInt's
+        /// integer value.</summary>
         /// <remarks>
-        /// Gets/sets the byte at the corresponding byte index of the BigUInt's integer value. The bytes of the BigUInt
-        /// are indexed least-significant byte first.
+        /// Gets/sets the byte at the corresponding byte index of the BigUInt's integer
+        /// value. The bytes of the BigUInt are indexed least-significant byte first.
         /// </remarks>
-        ///
         /// <param name="index"> The index of the byte to get/set</param>
-        /// <exception cref="ArgumentOutOfRangeException">if index is not within [0, <see cref="ByteCount"/>)</exception>
-        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of the format of the backing array.</seealso>
+        /// <exception cref="ArgumentOutOfRangeException">if index is not within
+        /// [0, <see cref="ByteCount"/>)</exception>
         public byte this[ulong index]
         {
             get
@@ -286,17 +288,16 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Returns the ulong value at a given position in the backing array storing the BigUInt value.
+        /// Returns the ulong value at a given position in the backing array storing
+        /// the BigUInt value.
         /// </summary>
         /// <remarks>
-        /// Returns the <see cref="ulong"/> value that is at position <paramref name="index"/> in the backing
-        /// array storing the BigUInt value.
-        /// <seealso cref = "UInt64Count"> See UInt64Count to determine the number of System.UInt64 values in the
-        /// backing array.</seealso>
-        /// <seealso cref = "BigUInt"> See BigUInt for a detailed description of the format of the backing array.</seealso>
+        /// Returns the <see cref="ulong"/> value that is at position <paramref name="index"/>
+        /// in the backing array storing the BigUInt value.
         /// </remarks>
         /// <param name="index"></param>
-        /// <exception cref="ArgumentOutOfRangeException">if index is not within [0, <see cref="UInt64Count"/>)</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if index is not within
+        /// [0, <see cref="UInt64Count"/>)</exception>
         public ulong Data(ulong index)
         {
             if (index >= UInt64Count)
@@ -321,9 +322,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the number of significant bits for the BigUInt.
         /// </summary>
-        /// <seealso cref="BitCount">See BitCount to instead return the bit count
-        /// regardless of leading zero bits.</seealso>
-        /// <returns>Number of significant bits for the BigUInt.</returns>
         public int GetSignificantBitCount()
         {
             NativeMethods.BigUInt_GetSignificantBitCount(NativePtr, out int result);
@@ -339,10 +337,11 @@ namespace Microsoft.Research.SEAL
         /// if needed to fit the assigned value. Only significant bits are used to size
         /// the BigUInt.
         /// </remarks>
-        /// <param name="assign"> The BigUInt whose value should be assigned to the current BigUInt</param>
+        /// <param name="assign"> The BigUInt whose value should be assigned to the
+        /// current BigUInt</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
-        /// <exception cref="InvalidOperationException">if BigUInt is an alias and the assigned BigUInt is too large to fit
-        /// the current bit width</exception>
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and
+        /// the assigned BigUInt is too large to fit the current bit width</exception>
         public void Set(BigUInt assign)
         {
             if (null == assign)
@@ -363,11 +362,13 @@ namespace Microsoft.Research.SEAL
         /// match the format returned by<see cref="ToString()"/> and must consist of
         /// only the characters 0-9, A-F, or a-f, most-significant nibble first.
         /// </remarks>
-        /// <param name="assign"> The hexadecimal integer string specifying the value to assign</param>
+        /// <param name="assign"> The hexadecimal integer string specifying the value
+        /// to assign</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
-        /// <exception cref="ArgumentException">if assign does not adhere to the expected format</exception>
-        /// <exception cref="InvalidOperationException">if BigUInt is an alias and the assigned value is too large to fit
-        /// the current bit width</exception>
+        /// <exception cref="ArgumentException">if assign does not adhere to the
+        /// expected format</exception>
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and
+        /// the assigned value is too large to fit the current bit width</exception>
         public void Set(string assign)
         {
             if (null == assign)
@@ -378,11 +379,13 @@ namespace Microsoft.Research.SEAL
             NativeMethods.BigUInt_Set(NativePtr, assign);
         }
 
-        /// <summary>Overwrites the BigUInt with the specified integer value, enlarging if needed to fit the value.</summary>
+        /// <summary>Overwrites the BigUInt with the specified integer value, enlarging
+        /// if needed to fit the value.</summary>
         ///
         /// <param name="assign"> The value to assign</param>
-        /// <exception cref="InvalidOperationException">if BigUInt is an alias and the significant bit count of assign is
-        /// too large to fit the current bit width</exception>
+        /// <exception cref="InvalidOperationException">if BigUInt is an alias and
+        /// the significant bit count of assign is too large to fit the current bit
+        /// width</exception>
         public void Set(ulong assign)
         {
             NativeMethods.BigUInt_Set(NativePtr, assign);
@@ -397,87 +400,76 @@ namespace Microsoft.Research.SEAL
             NativeMethods.BigUInt_SetZero(NativePtr);
         }
 
-        /// <summary>Saves the BigUInt to an output stream.</summary>
-        /// <remarks>
-        /// Saves the BigUInt to an output stream. The full state of the BigUInt is serialized, including insignificant bits. The
-        /// output is in binary format and not human-readable. The output stream must have the "binary" flag set.
-        /// </remarks>
-        ///
-        /// <param name="stream">The stream to save the BigUInt to</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="ArgumentException">if the BigUInt could not be written to stream</exception>
-        public void Save(Stream stream)
+        /// <summary>
+        /// Returns an upper bound on the size of the BigUInt, as if it was written
+        /// to an output stream.
+        /// </summary>
+        /// <param name="comprMode">The compression mode</param>
+        /// <exception cref="ArgumentException">if the compression mode is not
+        /// supported</exception>
+        /// <exception cref="InvalidOperationException">if the size does not fit in
+        /// the return type</exception>
+        public long SaveSize(ComprModeType comprMode)
         {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
             try
             {
-                using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
-                {
-                    writer.Write(BitCount);
-                    ulong byteCount = ByteCount;
-
-                    for (ulong i = 0; i < byteCount; i++)
-                    {
-                        writer.Write(this[i]);
-                    }
-                }
+                NativeMethods.BigUInt_SaveSize(
+                    NativePtr, (byte)comprMode, out long outBytes);
+                return outBytes;
             }
-            catch (IOException ex)
+            catch (COMException ex)
             {
-                throw new ArgumentException("Could not write BigUInt", ex);
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("The size does not fit in the return type", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
+        /// <summary>Saves the BigUInt to an output stream.</summary>
+        /// <remarks>
+        /// Saves the BigUInt to an output stream. The full state of the BigUInt is
+        /// serialized, including insignificant bits. The output is in binary format
+        /// and not human-readable.
+        /// </remarks>
+        /// <param name="stream">The stream to save the BigUInt to</param>
+        /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the data to be saved
+        /// is invalid, if compression mode is not supported, or if compression
+        /// failed</exception>
+        public long Save(Stream stream, ComprModeType? comprMode = null)
+        {
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            ComprModeType comprModeValue = comprMode.Value;
+            return Serialization.Save(
+                (byte[] outptr, ulong size, byte cm, out long outBytes) =>
+                    NativeMethods.BigUInt_Save(NativePtr, outptr, size,
+                    cm, out outBytes),
+                SaveSize(comprModeValue), comprModeValue, stream);
+        }
+
         /// <summary>
-        /// Loads a BigUInt from an input stream overwriting the current BigUInt and
-        /// enlarging if needed to fit the loaded BigUInt.
+        /// Loads a BigUInt from an input stream overwriting the current BigUInt.
         /// </summary>
         /// <param name="stream">The stream to load the BigUInt from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
-        /// <exception cref="InvalidOperationException">if BigUInt is an alias and
-        /// the loaded BigUInt is too large to fit
-        /// with the current bit width</exception>
-        /// <exception cref="ArgumentException">if a valid BigUInt could not be read
-        /// from stream</exception>
-        public void Load(Stream stream)
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support reading</exception>
+        /// <exception cref="EndOfStreamException">if the stream ended
+        /// unexpectedly</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is invalid,
+        /// if the loaded compression mode is not supported, or if the loaded BigUInt
+        /// is too large for an aliased BigUInt</exception>
+        public long Load(Stream stream)
         {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-            if (IsAlias)
-                throw new InvalidOperationException("Cannot load to an Alias");
-
-            try
-            {
-                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
-                {
-                    int bitCount = reader.ReadInt32();
-                    if (bitCount < 0)
-                        throw new ArgumentException("bitCount cannot be negative");
-
-                    if (bitCount > BitCount)
-                    {
-                        // We need to resize.
-                        Resize(bitCount);
-                    }
-
-                    SetZero();
-                    ulong byteCount = checked((ulong)Utilities.DivideRoundUp(bitCount, Utilities.BitsPerUInt8));
-                    for (ulong i = 0; i < byteCount; i++)
-                    {
-                        this[i] = reader.ReadByte();
-                    }
-                }
-            }
-            catch (EndOfStreamException ex)
-            {
-                throw new ArgumentException("End of stream reached", ex);
-            }
-            catch (IOException ex)
-            {
-                throw new ArgumentException("Could not load BigUInt", ex);
-            }
+            return Serialization.Load(
+                (byte[] outptr, ulong size, out long outBytes) =>
+                    NativeMethods.BigUInt_Load(NativePtr, outptr, size, out outBytes),
+                stream);
         }
 
         /// <summary>
@@ -486,7 +478,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="bitCount">The bit width</param>
         /// <exception cref="ArgumentException">if bitCount is negative</exception>
-        /// <exception cref="InvalidOperationException">if the BigUInt is an alias</exception>
+        /// <exception cref="InvalidOperationException">if the BigUInt is an
+        /// alias</exception>
         public void Resize(int bitCount)
         {
             if (bitCount < 0)
@@ -500,7 +493,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns the BigUInt value as a <see cref="System.Numerics.BigInteger"/>.
         /// </summary>
-        /// <returns></returns>
         public BigInteger ToBigInteger()
         {
             ulong byteCount = ByteCount;
@@ -523,7 +515,7 @@ namespace Microsoft.Research.SEAL
             ulong length = 0;
 
             // Get string length
-            NativeMethods.BigUInt_ToDecimalString(NativePtr, outstr: null, length: ref length);
+            NativeMethods.BigUInt_ToDecimalString(NativePtr, null, ref length);
 
             // Now get the string
             StringBuilder buffer = new StringBuilder(checked((int)length));
@@ -531,13 +523,11 @@ namespace Microsoft.Research.SEAL
             return buffer.ToString();
         }
 
-        /// <summary>Compares a BigUInt and an unsigned integer and returns -1, 0, or 1 if the BigUInt is less-than, equal-to, or
-        /// greater-than the second operand respectively.</summary>
-        ///
-        /// <remarks>
-        /// Compares a BigUInt and an unsigned integer and returns -1, 0, or 1 if the BigUInt is less-than, equal-to, or
-        /// greater-than the second operand respectively. The input operands are not modified.
-        /// </remarks>
+        /// <summary>
+        /// Compares a BigUInt and an unsigned integer and returns -1, 0, or 1 if
+        /// the BigUInt is less-than, equal-to, or greater-than the second operand
+        /// respectively. The input operands are not modified.
+        /// </summary>
         /// <param name="compare">The value to compare against</param>
         public int CompareTo(ulong compare)
         {
@@ -545,19 +535,21 @@ namespace Microsoft.Research.SEAL
             return result;
         }
 
-        /// <summary>Divides two BigUInts and returns the quotient and sets the remainder parameter to the remainder.</summary>
-        ///
+        /// <summary>Divides two BigUInts and returns the quotient and sets the
+        /// remainder parameter to the remainder.</summary>
         /// <remarks>
-        /// Divides two BigUInts and returns the quotient and sets the remainder parameter to the remainder. The bit count of the
-        /// quotient is set to be the significant bit count of the BigUInt. The remainder is resized if and only if it is smaller
-        /// than the bit count of the BigUInt.
+        /// Divides two BigUInts and returns the quotient and sets the remainder
+        /// parameter to the remainder. The bit count of the quotient is set to be
+        /// the significant bit count of the BigUInt. The remainder is resized if
+        /// and only if it is smaller than the bit count of the BigUInt.
         /// </remarks>
         /// <param name="operand2">The second operand to divide</param>
         /// <param name="remainder">The BigUInt to store the remainder</param>
-        /// <exception cref="ArgumentNullException">if operand2 or remainder is null</exception>
+        /// <exception cref="ArgumentNullException">if operand2 or remainder is
+        /// null</exception>
         /// <exception cref="ArgumentException">if operand2 is zero</exception>
-        /// <exception cref="InvalidOperationException">if the remainder is an alias and the operator attempts to enlarge
-        /// the BigUInt to fit the result</exception>
+        /// <exception cref="InvalidOperationException">if the remainder is an alias
+        /// and the operator attempts to enlarge the BigUInt to fit the result</exception>
         public BigUInt DivideRemainder(BigUInt operand2, BigUInt remainder)
         {
             if (null == operand2)
@@ -569,25 +561,27 @@ namespace Microsoft.Research.SEAL
             if (remainder.IsAlias)
                 throw new InvalidOperationException("remainder is an alias");
 
-            NativeMethods.BigUInt_DivideRemainder(NativePtr, operand2.NativePtr, remainder.NativePtr, out IntPtr resultptr);
+            NativeMethods.BigUInt_DivideRemainder(NativePtr, operand2.NativePtr,
+                remainder.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
 
-        /// <summary>Divides a BigUInt and an unsigned integer and returns the quotient and sets the remainder parameter to the
-        /// remainder.</summary>
+        /// <summary>Divides a BigUInt and an unsigned integer and returns the quotient
+        /// and sets the remainder parameter to the remainder.</summary>
         ///
         /// <remarks>
-        /// Divides a BigUInt and an unsigned integer and returns the quotient and sets the remainder parameter to the remainder.
-        /// The bit count of the quotient is set to be the significant bit count of the BigUInt. The remainder is resized if and
-        /// only if it is smaller than the bit count of the BigUInt.
+        /// Divides a BigUInt and an unsigned integer and returns the quotient and
+        /// sets the remainder parameter to the remainder. The bit count of the quotient
+        /// is set to be the significant bit count of the BigUInt. The remainder is
+        /// resized if and only if it is smaller than the bit count of the BigUInt.
         /// </remarks>
         /// <param name="operand2">The second operand to divide</param>
         /// <param name="remainder">The BigUInt to store the remainder</param>
         /// <exception cref="ArgumentNullException">if remainder is null</exception>
         /// <exception cref="ArgumentException">if operand2 is zero</exception>
-        /// <exception cref="InvalidOperationException">if the remainder is an alias which the function attempts to enlarge
-        /// to fit the result</exception>
+        /// <exception cref="InvalidOperationException">if the remainder is an alias
+        /// which the function attempts to enlarge to fit the result</exception>
         public BigUInt DivideRemainder(ulong operand2, BigUInt remainder)
         {
             if (null == remainder)
@@ -597,66 +591,91 @@ namespace Microsoft.Research.SEAL
             if (remainder.IsAlias)
                 throw new InvalidOperationException("remainder is an alias");
 
-            NativeMethods.BigUInt_DivideRemainder(NativePtr, operand2, remainder.NativePtr, out IntPtr resultptr);
+            NativeMethods.BigUInt_DivideRemainder(NativePtr, operand2,
+                remainder.NativePtr, out IntPtr resultptr);
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
 
-        /// <summary>Returns the inverse of a BigUInt with respect to the specified modulus.</summary>
-        ///
+        /// <summary>Returns the inverse of a BigUInt with respect to the specified
+        /// modulus.</summary>
         /// <remarks>
-        /// Returns the inverse of a BigUInt with respect to the specified modulus. The original BigUInt is not modified. The bit
-        /// count of the inverse is set to be the significant bit count of the modulus.
+        /// Returns the inverse of a BigUInt with respect to the specified modulus.
+        /// The original BigUInt is not modified. The bit count of the inverse is
+        /// set to be the significant bit count of the modulus.
         /// </remarks>
-        /// <param name="modulus">The modulus to calculate the inverse with respect to</param>
+        /// <param name="modulus">The modulus to calculate the inverse with respect
+        /// to</param>
         /// <exception cref="ArgumentNullException">if modulus is null</exception>
         /// <exception cref="ArgumentException">if modulus is zero</exception>
-        /// <exception cref="ArgumentException">if modulus is not greater than the BigUInt value</exception>
-        /// <exception cref="ArgumentException">if the BigUInt value and modulus are not co-prime</exception>
+        /// <exception cref="ArgumentException">if modulus is not greater than the
+        /// BigUInt value</exception>
+        /// <exception cref="ArgumentException">if the BigUInt value and modulus
+        /// are not co-prime</exception>
+        /// <exception cref="InvalidOperationException">if the BigUInt value is
+        /// zero</exception>
         public BigUInt ModuloInvert(BigUInt modulus)
         {
             if (null == modulus)
                 throw new ArgumentNullException(nameof(modulus));
 
-            NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus.NativePtr, out IntPtr resultptr);
-
-            BigUInt result = new BigUInt(resultptr);
-            return result;
+            BigUInt result = null;
+            try
+            {
+                NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus.NativePtr,
+                    out IntPtr resultptr);
+                result = new BigUInt(resultptr);
+                return result;
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("BigUInt value cannot be zero", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
-        /// <summary>Returns the inverse of a BigUInt with respect to the specified modulus.</summary>
-        ///
+        /// <summary>Returns the inverse of a BigUInt with respect to the specified
+        /// modulus.</summary>
         /// <remarks>
-        /// Returns the inverse of a BigUInt with respect to the specified modulus. The original BigUInt is not modified. The bit
-        /// count of the inverse is set to be the significant bit count of the modulus.
+        /// Returns the inverse of a BigUInt with respect to the specified modulus.
+        /// The original BigUInt is not modified. The bit count of the inverse is set
+        /// to be the significant bit count of the modulus.
         /// </remarks>
-        /// <param name="modulus">The modulus to calculate the inverse with respect to</param>
+        /// <param name="modulus">The modulus to calculate the inverse with respect
+        /// to</param>
         /// <exception cref="ArgumentException">if modulus is zero</exception>
-        /// <exception cref="ArgumentException">if modulus is not greater than the BigUInt value</exception>
-        /// <exception cref="ArgumentException">if the BigUInt value and modulus are not co-prime</exception>
+        /// <exception cref="ArgumentException">if modulus is not greater than the
+        /// BigUInt value</exception>
+        /// <exception cref="ArgumentException">if the BigUInt value and modulus
+        /// are not co-prime</exception>
         public BigUInt ModuloInvert(ulong modulus)
         {
             NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus, out IntPtr resultptr);
-
             BigUInt result = new BigUInt(resultptr);
             return result;
         }
 
-        /// <summary>Attempts to calculate the inverse of a BigUInt with respect to the specified modulus, returning whether or not
-        /// the inverse was successful and setting the inverse parameter to the inverse.</summary>
-        ///
+        /// <summary>Attempts to calculate the inverse of a BigUInt with respect to
+        /// the specified modulus, returning whether or not the inverse was successful
+        /// and setting the inverse parameter to the inverse.</summary>
         /// <remarks>
-        /// Attempts to calculate the inverse of a BigUInt with respect to the specified modulus, returning whether or not the
-        /// inverse was successful and setting the inverse parameter to the inverse. The original BigUInt is not modified. The
-        /// inverse parameter is resized if and only if its bit count is smaller than the significant bit count of the modulus.
+        /// Attempts to calculate the inverse of a BigUInt with respect to the specified
+        /// modulus, returning whether or not the inverse was successful and setting
+        /// the inverse parameter to the inverse. The original BigUInt is not modified.
+        /// The inverse parameter is resized if and only if its bit count is smaller
+        /// than the significant bit count of the modulus.
         /// </remarks>
-        /// <param name="modulus">The modulus to calculate the inverse with respect to</param>
-        /// <param name="inverse">Stores the inverse if the inverse operation was successful</param>
+        /// <param name="modulus">The modulus to calculate the inverse with respect
+        /// to</param>
+        /// <param name="inverse">Stores the inverse if the inverse operation was
+        /// successful</param>
         /// <exception cref="ArgumentNullException">if modulus or inverse is null</exception>
         /// <exception cref="ArgumentException">if modulus is zero</exception>
-        /// <exception cref="ArgumentException">if modulus is not greater than the BigUInt value</exception>
-        /// <exception cref="InvalidOperationException">if the inverse is an alias which the function attempts to enlarge
-        /// to fit the result</exception>
+        /// <exception cref="ArgumentException">if modulus is not greater than the
+        /// BigUInt value</exception>
+        /// <exception cref="InvalidOperationException">if the inverse is an alias
+        /// which the function attempts to enlarge to fit the result</exception>
         public bool TryModuloInvert(BigUInt modulus, BigUInt inverse)
         {
             if (null == modulus)
@@ -666,25 +685,31 @@ namespace Microsoft.Research.SEAL
             if (inverse.IsAlias)
                 throw new InvalidOperationException("inverse is an alias");
 
-            NativeMethods.BigUInt_TryModuloInvert(NativePtr, modulus.NativePtr, inverse.NativePtr, out bool result);
+            NativeMethods.BigUInt_TryModuloInvert(NativePtr, modulus.NativePtr,
+                inverse.NativePtr, out bool result);
             return result;
         }
 
-        /// <summary>Attempts to calculate the inverse of a BigUInt with respect to the specified modulus, returning whether or not
-        /// the inverse was successful and setting the inverse parameter to the inverse.</summary>
-        ///
+        /// <summary>Attempts to calculate the inverse of a BigUInt with respect to
+        /// the specified modulus, returning whether or not the inverse was successful
+        /// and setting the inverse parameter to the inverse.</summary>
         /// <remarks>
-        /// Attempts to calculate the inverse of a BigUInt with respect to the specified modulus, returning whether or not the
-        /// inverse was successful and setting the inverse parameter to the inverse. The original BigUInt is not modified. The
-        /// inverse parameter is resized if and only if its bit count is smaller than the significant bit count of the modulus.
+        /// Attempts to calculate the inverse of a BigUInt with respect to the
+        /// specified modulus, returning whether or not the inverse was successful
+        /// and setting the inverse parameter to the inverse. The original BigUInt
+        /// is not modified. The inverse parameter is resized if and only if its bit
+        /// count is smaller than the significant bit count of the modulus.
         /// </remarks>
-        /// <param name="modulus">The modulus to calculate the inverse with respect to</param>
-        /// <param name="inverse">Stores the inverse if the inverse operation was successful</param>
+        /// <param name="modulus">The modulus to calculate the inverse with respect
+        /// to</param>
+        /// <param name="inverse">Stores the inverse if the inverse operation was
+        /// successful</param>
         /// <exception cref="ArgumentNullException">if inverse is null</exception>
         /// <exception cref="ArgumentException">if modulus is zero</exception>
-        /// <exception cref="ArgumentException">if modulus is not greater than the BigUInt value</exception>
-        /// <exception cref="InvalidOperationException">if the inverse is an alias which the function attempts to enlarge
-        /// to fit the result</exception>
+        /// <exception cref="ArgumentException">if modulus is not greater than the
+        /// BigUInt value</exception>
+        /// <exception cref="InvalidOperationException">if the inverse is an alias
+        /// which the function attempts to enlarge to fit the result</exception>
         public bool TryModuloInvert(ulong modulus, BigUInt inverse)
         {
             if (null == inverse)
@@ -692,18 +717,20 @@ namespace Microsoft.Research.SEAL
             if (inverse.IsAlias)
                 throw new InvalidOperationException("inverse is an alias");
 
-            NativeMethods.BigUInt_TryModuloInvert(NativePtr, modulus, inverse.NativePtr, out bool result);
+            NativeMethods.BigUInt_TryModuloInvert(NativePtr, modulus,
+                inverse.NativePtr, out bool result);
             return result;
         }
 
         /// <summary>Duplicates the current BigUInt.</summary>
         /// <remarks>
-        /// Duplicates the current BigUInt. The bit count and the value of the given BigUInt are set to be exactly the same as in
-        /// the current one.
+        /// Duplicates the current BigUInt. The bit count and the value of the given
+        /// BigUInt are set to be exactly the same as in the current one.
         /// </remarks>
         /// <param name="destination">The BigUInt to overwrite with the duplicate</param>
         /// <exception cref="ArgumentNullException">if destination is null</exception>
-        /// <exception cref="InvalidOperationException">if the destination BigUInt is an alias</exception>
+        /// <exception cref="InvalidOperationException">if the destination BigUInt
+        /// is an alias</exception>
         public void DuplicateTo(BigUInt destination)
         {
             if (null == destination)
@@ -716,12 +743,13 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Duplicates a given BigUInt.</summary>
         /// <remarks>
-        /// Duplicates a given BigUInt. The bit count and the value of the current BigUInt
-        /// are set to be exactly the same as in the given one.
+        /// Duplicates a given BigUInt. The bit count and the value of the current
+        /// BigUInt are set to be exactly the same as in the given one.
         /// </remarks>
         /// <param name="value">The BigUInt to duplicate</param>
         /// <exception cref="ArgumentNullException">if value is null</exception>
-        /// <exception cref="InvalidOperationException">if the current BigUInt is an alias</exception>
+        /// <exception cref="InvalidOperationException">if the current BigUInt is
+        /// an alias</exception>
         public void DuplicateFrom(BigUInt value)
         {
             if (null == value)

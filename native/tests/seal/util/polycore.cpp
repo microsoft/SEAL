@@ -124,12 +124,20 @@ namespace SEALTest
             ASSERT_EQ(static_cast<uint64_t>(0), ptr2[10]);
             ASSERT_EQ(static_cast<uint64_t>(0), ptr2[11]);
 
-            ptr2 = allocate_poly(1, 2, pool);
-            ptr2[0] = 1;
+            ptr2 = allocate_poly(2, 2, pool);
             ptr2[1] = 1;
-            set_poly_poly(ptr1.get(), 2, 3, 1, 2, ptr2.get());
-            ASSERT_EQ(1ULL, ptr2[0]);
-            ASSERT_EQ(static_cast<uint64_t>(2), ptr2[1]);
+            ptr2[2] = 1;
+
+            // Canary
+            ptr2[0] = 0xDEADBEEFDEADBEEF;
+            ptr2[3] = 0xDEADBEEFDEADBEEF;
+
+            set_poly_poly(ptr1.get(), 2, 3, 1, 2, ptr2.get() + 1);
+            ASSERT_EQ(1ULL, ptr2[1]);
+            ASSERT_EQ(static_cast<uint64_t>(2), ptr2[2]);
+
+            ASSERT_EQ(0xDEADBEEFDEADBEEF, ptr2[0]);
+            ASSERT_EQ(0xDEADBEEFDEADBEEF, ptr2[3]);
         }
 
         TEST(PolyCore, IsZeroPoly)

@@ -17,11 +17,6 @@
 #pragma GCC error "g++-6 cannot compile Microsoft SEAL as C++17; set CMake build option `SEAL_USE_CXX17' to OFF"
 #endif
 
-// Are we using MSGSL?
-#ifdef SEAL_USE_MSGSL
-#include <gsl/gsl>
-#endif
-
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
 #include <x86intrin.h>

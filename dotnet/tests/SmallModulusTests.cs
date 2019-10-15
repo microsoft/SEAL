@@ -77,19 +77,17 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFail1Test()
         {
             // Should fail if value is 1
-            SmallModulus sm = new SmallModulus(1);
+            Utilities.AssertThrows<ArgumentException>(() => { SmallModulus sm = new SmallModulus(1); });
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFail2Test()
         {
             // Should fail if value is larger than 62 bits
-            SmallModulus sm = new SmallModulus(0x7FFFFFFFFFFFFFFFul);
+            Utilities.AssertThrows<ArgumentException>(() => { SmallModulus sm = new SmallModulus(0x7FFFFFFFFFFFFFFFul); });
         }
 
         [TestMethod]
@@ -119,21 +117,19 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void SetFail1Test()
         {
             // Should faile if set to 1
             SmallModulus sm = new SmallModulus();
-            sm.Set(1);
+            Utilities.AssertThrows<ArgumentException>(() => sm.Set(1));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void SetFail2Test()
         {
             // Should fail if set to bigger than 62 bits
             SmallModulus sm = new SmallModulus();
-            sm.Set(0x7FFFFFFFFFFFFFFFul);
+            Utilities.AssertThrows<ArgumentException>(() => sm.Set(0x7FFFFFFFFFFFFFFFul));
         }
 
         [TestMethod]
@@ -206,13 +202,10 @@ namespace SEALNetTest
             Assert.AreNotEqual(sm1, sm2);
             Assert.AreNotEqual(sm1.IsPrime, sm2.IsPrime);
 
-
             using (MemoryStream stream = new MemoryStream())
             {
                 sm1.Save(stream);
-
                 stream.Seek(offset: 0, loc: SeekOrigin.Begin);
-
                 sm2.Load(stream);
             }
 
@@ -230,15 +223,12 @@ namespace SEALNetTest
         public void ExceptionsTest()
         {
             SmallModulus sm = new SmallModulus(0x12345ul);
-            MemoryStream ms_empty = new MemoryStream();
 
-            Assert.ThrowsException<ArgumentNullException>(() => sm = new SmallModulus(null));
-
-            Assert.ThrowsException<ArgumentNullException>(() => sm.Set(null));
-
-            Assert.ThrowsException<ArgumentNullException>(() => sm.Save(null));
-            Assert.ThrowsException<ArgumentNullException>(() => sm.Load(null));
-            Assert.ThrowsException<ArgumentException>(() => sm.Load(ms_empty));
+            Utilities.AssertThrows<ArgumentNullException>(() => sm = new SmallModulus(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => sm.Set(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => sm.Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => sm.Load(null));
+            Utilities.AssertThrows<EndOfStreamException>(() => sm.Load(new MemoryStream()));
         }
     }
 }

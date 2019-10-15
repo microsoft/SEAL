@@ -177,4 +177,19 @@ namespace SEALTest
         ASSERT_EQ(arr[0], arr2[0]);
         ASSERT_EQ(arr[1], arr2[1]);
     }
+
+    TEST(IntArrayTest, Assign)
+    {
+        IntArray<char> arr(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
+        IntArray<char> arr2(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
+        ASSERT_NE(&static_cast<util::MemoryPool&>(arr.pool()), &static_cast<util::MemoryPool&>(arr2.pool()));
+
+        arr = arr2;
+        util::MemoryPool *addr = &static_cast<util::MemoryPool&>(arr.pool());
+        ASSERT_EQ(&static_cast<util::MemoryPool&>(arr.pool()), addr);
+
+        addr = &static_cast<util::MemoryPool&>(arr2.pool());
+        arr = move(arr2);
+        ASSERT_EQ(&static_cast<util::MemoryPool&>(arr.pool()), addr);
+    }
 }

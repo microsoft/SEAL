@@ -26,4 +26,4 @@ optionally attach with your bug report.
 
 ## Critical security issues
 
-For reporting critical security issues, see [Security.md](Security.md).
+For reporting critical security issues, see [SECURITY.md](SECURITY.md).

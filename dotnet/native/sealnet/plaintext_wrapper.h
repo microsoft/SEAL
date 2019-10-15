@@ -76,3 +76,11 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Equals(void *thisptr, void *other, bool
 SEALNETNATIVE HRESULT SEALCALL Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data);
 
 SEALNETNATIVE HRESULT SEALCALL Plaintext_Pool(void *thisptr, void **pool);
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
+
+SEALNETNATIVE HRESULT SEALCALL Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);

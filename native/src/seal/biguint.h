@@ -7,12 +7,17 @@
 #include <cstdint>
 #include <string>
 #include "seal/memorymanager.h"
+#include "seal/serialization.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
 #include "seal/util/common.h"
 #include "seal/util/uintcore.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
+#include "seal/util/ztools.h"
+#ifdef SEAL_USE_MSGSL_SPAN
+#include <gsl/span>
+#endif
 
 namespace seal
 {
@@ -192,8 +197,6 @@ namespace seal
 
         /**
         Returns whether or not the BigUInt is an alias.
-
-        @see BigUInt for a detailed description of aliased BigUInt.
         */
         SEAL_NODISCARD inline bool is_alias() const noexcept
         {
@@ -202,8 +205,6 @@ namespace seal
 
         /**
         Returns the bit count for the BigUInt.
-
-        @see significant_bit_count() to instead ignore leading zero bits.
         */
         SEAL_NODISCARD inline int bit_count() const noexcept
         {
@@ -218,8 +219,6 @@ namespace seal
         @warning The pointer is valid only until the backing array is freed,
         which occurs when the BigUInt is resized, destroyed, or the alias()
         function is called.
-        @see uint64_count() to determine the number of std::uint64_t values
-        in the backing array.
         */
         SEAL_NODISCARD inline std::uint64_t *data()
         {
@@ -234,8 +233,6 @@ namespace seal
         @warning The pointer is valid only until the backing array is freed, which
         occurs when the BigUInt is resized, destroyed, or the alias() function is
         called.
-        @see uint64_count() to determine the number of std::uint64_t values in the
-        backing array.
         */
         SEAL_NODISCARD inline const std::uint64_t *data() const noexcept
         {
@@ -271,8 +268,6 @@ namespace seal
         /**
         Returns the number of bytes in the backing array used to store the BigUInt
         value.
-
-        @see BigUInt for a detailed description of the format of the backing array.
         */
         SEAL_NODISCARD inline std::size_t byte_count() const
         {
@@ -283,8 +278,6 @@ namespace seal
         /**
         Returns the number of std::uint64_t in the backing array used to store
         the BigUInt value.
-
-        @see BigUInt for a detailed description of the format of the backing array.
         */
         SEAL_NODISCARD inline std::size_t uint64_count() const
         {
@@ -294,9 +287,6 @@ namespace seal
 
         /**
         Returns the number of significant bits for the BigUInt.
-
-        @see bit_count() to instead return the bit count regardless of leading zero
-        bits.
         */
         SEAL_NODISCARD inline int significant_bit_count() const
         {
@@ -351,7 +341,6 @@ namespace seal
 
         @param[in] index The index of the byte to read
         @throws std::out_of_range if index is not within [0, byte_count())
-        @see BigUInt for a detailed description of the format of the backing array.
         */
         SEAL_NODISCARD inline const SEAL_BYTE &operator [](
             std::size_t index) const
@@ -374,7 +363,6 @@ namespace seal
 
         @param[in] index The index of the byte to read
         @throws std::out_of_range if index is not within [0, byte_count())
-        @see BigUInt for a detailed description of the format of the backing array.
         */
         SEAL_NODISCARD inline SEAL_BYTE &operator [](std::size_t index)
         {
@@ -1396,7 +1384,7 @@ namespace seal
         count and the shift amount.
 
         @param[in] shift The number of bits to shift by
-        @throws std::Invalid_argument if shift is negative
+        @throws std::invalid_argument if shift is negative
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
@@ -1420,7 +1408,7 @@ namespace seal
         resized.
 
         @param[in] shift The number of bits to shift by
-        @throws std::Invalid_argument if shift is negative
+        @throws std::invalid_argument if shift is negative
         */
         inline BigUInt &operator >>=(int shift)
         {
@@ -1445,7 +1433,7 @@ namespace seal
 
         @param[in] operand2 The second operand to divide
         @param[out] remainder The BigUInt to store the remainder
-        @throws std::Invalid_argument if operand2 is zero
+        @throws std::invalid_argument if operand2 is zero
         @throws std::logic_error if the remainder is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
@@ -1460,7 +1448,7 @@ namespace seal
 
         @param[in] operand2 The second operand to divide
         @param[out] remainder The BigUInt to store the remainder
-        @throws std::Invalid_argument if operand2 is zero
+        @throws std::invalid_argument if operand2 is zero
         @throws std::logic_error if the remainder is an alias which the
         function attempts to enlarge to fit the result
         */
@@ -1477,15 +1465,20 @@ namespace seal
         set to be the significant bit count of the modulus.
 
         @param[in] modulus The modulus to calculate the inverse with respect to
-        @throws std::Invalid_argument if modulus is zero
-        @throws std::Invalid_argument if modulus is not greater than the BigUInt value
-        @throws std::Invalid_argument if the BigUInt value and modulus are not co-prime
+        @throws std::invalid_argument if modulus is zero
+        @throws std::invalid_argument if modulus is not greater than the BigUInt value
+        @throws std::invalid_argument if the BigUInt value and modulus are not co-prime
+        @throws std::logic_error if the BigUInt value is zero
         */
         SEAL_NODISCARD inline BigUInt modinv(const BigUInt &modulus) const
         {
             if (modulus.is_zero())
             {
                 throw std::invalid_argument("modulus must be positive");
+            }
+            if (is_zero())
+            {
+                throw std::logic_error("BigUInt value cannot be zero");
             }
             int result_bits = modulus.significant_bit_count();
             if (*this >= modulus)
@@ -1508,9 +1501,10 @@ namespace seal
         to be the significant bit count of the modulus.
 
         @param[in] modulus The modulus to calculate the inverse with respect to
-        @throws std::Invalid_argument if modulus is zero
-        @throws std::Invalid_argument if modulus is not greater than the BigUInt value
-        @throws std::Invalid_argument if the BigUInt value and modulus are not co-prime
+        @throws std::invalid_argument if modulus is zero
+        @throws std::invalid_argument if modulus is not greater than the BigUInt value
+        @throws std::invalid_argument if the BigUInt value and modulus are not co-prime
+        @throws std::logic_error if the BigUInt value is zero
         */
         SEAL_NODISCARD inline BigUInt modinv(std::uint64_t modulus) const
         {
@@ -1529,8 +1523,8 @@ namespace seal
         @param[in] modulus The modulus to calculate the inverse with respect to
         @param[out] inverse Stores the inverse if the inverse operation was
         successful
-        @throws std::Invalid_argument if modulus is zero
-        @throws std::Invalid_argument if modulus is not greater than the BigUInt
+        @throws std::invalid_argument if modulus is zero
+        @throws std::invalid_argument if modulus is not greater than the BigUInt
         value
         @throws std::logic_error if the inverse is an alias which the function
         attempts to enlarge to fit the result
@@ -1540,6 +1534,10 @@ namespace seal
             if (modulus.is_zero())
             {
                 throw std::invalid_argument("modulus must be positive");
+            }
+            if (is_zero())
+            {
+                return false;
             }
             int result_bits = modulus.significant_bit_count();
             if (*this >= modulus)
@@ -1565,8 +1563,8 @@ namespace seal
         @param[in] modulus The modulus to calculate the inverse with respect to
         @param[out] inverse Stores the inverse if the inverse operation was
         successful
-        @throws std::Invalid_argument if modulus is zero
-        @throws std::Invalid_argument if modulus is not greater than the BigUInt
+        @throws std::invalid_argument if modulus is zero
+        @throws std::invalid_argument if modulus is not greater than the BigUInt
         value
         @throws std::logic_error if the inverse is an alias which the function
         attempts to enlarge to fit the result
@@ -1579,25 +1577,109 @@ namespace seal
         }
 
         /**
+        Returns an upper bound on the size of the BigUInt, as if it was written
+        to an output stream.
+
+        @param[in] compr_mode The compression mode
+        @throws std::invalid_argument if the compression mode is not supported
+        @throws std::logic_error if the size does not fit in the return type
+        */
+        SEAL_NODISCARD inline std::streamoff save_size(
+            compr_mode_type compr_mode) const
+        {
+            std::size_t members_size = Serialization::ComprSizeEstimate(
+                util::add_safe(
+                    util::mul_safe(uint64_count(), sizeof(std::uint64_t)), // value_
+                    sizeof(std::int32_t)), // bit_count_
+                compr_mode);
+
+            return util::safe_cast<std::streamoff>(util::add_safe(
+                sizeof(Serialization::SEALHeader),
+                members_size
+            ));
+        }
+
+        /**
         Saves the BigUInt to an output stream. The full state of the BigUInt is
         serialized, including insignificant bits. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
-        @param[in] stream The stream to save the BigUInt to
-        @throws std::exception if the BigUInt could not be written to stream
+        @param[out] stream The stream to save the BigUInt to
+        @param[in] compr_mode The desired compression mode
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
-        void save(std::ostream &stream) const;
+        inline std::streamoff save(std::ostream &stream,
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&BigUInt::save_members, this, _1),
+                save_size(compr_mode_type::none),
+                stream, compr_mode);
+        }
 
         /**
-        Loads a BigUInt from an input stream overwriting the current BigUInt
-        and enlarging if needed to fit the loaded BigUInt.
+        Loads a BigUInt from an input stream overwriting the current BigUInt.
 
         @param[in] stream The stream to load the BigUInt from
-        @throws std::logic_error if BigUInt is an alias and the loaded BigUInt
-        is too large to fit with the current bit
-        @throws std::exception if a valid BigUInt could not be read from stream
+        @throws std::logic_error if the loaded data is invalid, if decompression
+        failed, or if the loaded BigUInt is too large for an aliased BigUInt
+        @throws std::runtime_error if I/O operations failed
         */
-        void load(std::istream &stream);
+        inline std::streamoff load(std::istream &stream)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&BigUInt::load_members, this, _1),
+                stream);
+        }
+
+        /**
+        Saves the BigUInt to a given memory location. The full state of the
+        BigUInt is serialized, including insignificant bits. The output is in
+        binary format and not human-readable.
+
+        @param[out] out The memory location to write the BigUInt to
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] compr_mode The desired compression mode
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
+        */
+        inline std::streamoff save(
+            SEAL_BYTE *out,
+            std::size_t size,
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+        {
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&BigUInt::save_members, this, _1),
+                save_size(compr_mode_type::none),
+                out, size, compr_mode);
+        }
+
+        /**
+        Loads a BigUInt from a memory location overwriting the current BigUInt.
+
+        @param[in] in The memory location to load the BigUInt from
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if in is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if the loaded data is invalid, if decompression
+        failed, or if the loaded BigUInt is too large for an aliased BigUInt
+        @throws std::runtime_error if I/O operations failed
+        */
+        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        {
+            using namespace std::placeholders;
+            return Serialization::Load(
+                std::bind(&BigUInt::load_members, this, _1),
+                in, size);
+        }
 
         /**
         Creates a minimally sized BigUInt initialized to the specified unsigned
@@ -1652,6 +1734,10 @@ namespace seal
             bit_count_ = 0;
         }
 
+        void save_members(std::ostream &stream) const;
+
+        void load_members(std::istream &stream);
+
         /**
         Points to the backing array for the BigUInt. This pointer will be set
         to nullptr if and only if the bit count is zero. This pointer is
@@ -1659,9 +1745,6 @@ namespace seal
         the BigUInt is not an alias. If the BigUInt is an alias, then the
         pointer was passed-in to a constructor or alias() call, and will not be
         deallocated by the BigUInt.
-
-        @see BigUInt for more information about aliased BigUInts or the format
-        of the backing array.
         */
         util::Pointer<std::uint64_t> value_;
 

@@ -69,7 +69,7 @@ namespace SEALNetTest
             }
 
             Assert.AreEqual(1ul, other.Size);
-            Assert.IsTrue(ValCheck.IsMetadataValidFor(other, context));
+            Assert.IsTrue(ValCheck.IsValidFor(other, context));
             Assert.IsTrue(handle.AllocByteCount > 0ul);
 
             List<IEnumerable<PublicKey>> keysData = new List<IEnumerable<PublicKey>>(keys.Data);
@@ -102,6 +102,63 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void SeededKeyTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 128,
+                PlainModulus = new SmallModulus(1 << 6),
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
+            };
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                secLevel: SecLevelType.None);
+            KeyGenerator keygen = new KeyGenerator(context);
+
+            RelinKeys relinKeys = new RelinKeys();
+            using (MemoryStream stream = new MemoryStream())
+            {
+                keygen.RelinKeysSave(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                relinKeys.Load(context, stream);
+            }
+
+            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
+            Evaluator evaluator = new Evaluator(context);
+
+            Ciphertext encrypted1 = new Ciphertext(context);
+            Ciphertext encrypted2 = new Ciphertext(context);
+            Plaintext plain1 = new Plaintext();
+            Plaintext plain2 = new Plaintext();
+
+            plain1.Set(0);
+            encryptor.Encrypt(plain1, encrypted1);
+            evaluator.SquareInplace(encrypted1);
+            evaluator.RelinearizeInplace(encrypted1, relinKeys);
+            decryptor.Decrypt(encrypted1, plain2);
+
+            Assert.AreEqual(1ul, plain2.CoeffCount);
+            Assert.AreEqual(0ul, plain2[0]);
+
+            plain1.Set("1x^10 + 2");
+            encryptor.Encrypt(plain1, encrypted1);
+            evaluator.SquareInplace(encrypted1);
+            evaluator.RelinearizeInplace(encrypted1, relinKeys);
+            evaluator.SquareInplace(encrypted1);
+            evaluator.Relinearize(encrypted1, relinKeys, encrypted2);
+            decryptor.Decrypt(encrypted2, plain2);
+
+            // {1x^40 + 8x^30 + 18x^20 + 20x^10 + 10}
+            Assert.AreEqual(41ul, plain2.CoeffCount);
+            Assert.AreEqual(16ul, plain2[0]);
+            Assert.AreEqual(32ul, plain2[10]);
+            Assert.AreEqual(24ul, plain2[20]);
+            Assert.AreEqual(8ul,  plain2[30]);
+            Assert.AreEqual(1ul,  plain2[40]);
+        }
+
+        [TestMethod]
         public void GetKeyTest()
         {
             SEALContext context = GlobalContext.BFVContext;
@@ -111,8 +168,8 @@ namespace SEALNetTest
             Assert.IsTrue(relinKeys.HasKey(2));
             Assert.IsFalse(relinKeys.HasKey(3));
 
-            Assert.ThrowsException<ArgumentException>(() => relinKeys.Key(0));
-            Assert.ThrowsException<ArgumentException>(() => relinKeys.Key(1));
+            Utilities.AssertThrows<ArgumentException>(() => relinKeys.Key(0));
+            Utilities.AssertThrows<ArgumentException>(() => relinKeys.Key(1));
 
             List<PublicKey> key1 = new List<PublicKey>(relinKeys.Key(2));
             Assert.AreEqual(4, key1.Count);
@@ -125,19 +182,18 @@ namespace SEALNetTest
             RelinKeys keys = new RelinKeys();
             SEALContext context = GlobalContext.BFVContext;
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys = new RelinKeys(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys = new RelinKeys(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.Set(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys.Set(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
-            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(keys, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.Save(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => keys.Save(null));
-
-            Assert.ThrowsException<ArgumentNullException>(() => keys.Load(context, null));
-            Assert.ThrowsException<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
-            Assert.ThrowsException<ArgumentException>(() => keys.Load(context, new MemoryStream()));
-            Assert.ThrowsException<ArgumentNullException>(() => keys.UnsafeLoad(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
+            Utilities.AssertThrows<EndOfStreamException>(() => keys.Load(context, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(context, null));
         }
     }
 }

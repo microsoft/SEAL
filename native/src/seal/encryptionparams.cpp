@@ -10,7 +10,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    void EncryptionParameters::Save(const EncryptionParameters &parms, ostream &stream)
+    void EncryptionParameters::save_members(ostream &stream) const
     {
         // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
         auto old_except_mask = stream.exceptions();
@@ -18,31 +18,35 @@ namespace seal
         {
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            uint64_t poly_modulus_degree64 = static_cast<uint64_t>(parms.poly_modulus_degree());
-            uint64_t coeff_mod_count64 = static_cast<uint64_t>(parms.coeff_modulus().size());
-            uint8_t scheme = static_cast<uint8_t>(parms.scheme());
+            uint64_t poly_modulus_degree64 = static_cast<uint64_t>(poly_modulus_degree_);
+            uint64_t coeff_mod_count64 = static_cast<uint64_t>(coeff_modulus_.size());
+            uint8_t scheme = static_cast<uint8_t>(scheme_);
 
             stream.write(reinterpret_cast<const char*>(&scheme), sizeof(uint8_t));
             stream.write(reinterpret_cast<const char*>(&poly_modulus_degree64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
-            for (const auto &mod : parms.coeff_modulus())
+            for (const auto &mod : coeff_modulus_)
             {
-                mod.save(stream);
+                mod.save(stream, compr_mode_type::none);
             }
-            // CKKS does not use plain_modulus
-            if (parms.scheme() == scheme_type::BFV)
-            {
-                parms.plain_modulus().save(stream);
-            }
+
+            // Only BFV uses plain_modulus but save it in any case for simplicity
+            plain_modulus_.save(stream, compr_mode_type::none);
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
+        stream.exceptions(old_except_mask);
     }
 
-    EncryptionParameters EncryptionParameters::Load(istream &stream)
+    void EncryptionParameters::load_members(istream &stream)
     {
         // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
         auto old_except_mask = stream.exceptions();
@@ -60,58 +64,59 @@ namespace seal
             // Read the poly_modulus_degree
             uint64_t poly_modulus_degree64 = 0;
             stream.read(reinterpret_cast<char*>(&poly_modulus_degree64), sizeof(uint64_t));
-            if (poly_modulus_degree64 < SEAL_POLY_MOD_DEGREE_MIN ||
-                poly_modulus_degree64 > SEAL_POLY_MOD_DEGREE_MAX)
+
+            // Only check for upper bound; lower bound is zero for scheme_type::none
+            if (poly_modulus_degree64 > SEAL_POLY_MOD_DEGREE_MAX)
             {
-                throw invalid_argument("poly_modulus_degree is invalid");
+                throw logic_error("poly_modulus_degree is invalid");
             }
 
             // Read the coeff_modulus size
             uint64_t coeff_mod_count64 = 0;
             stream.read(reinterpret_cast<char*>(&coeff_mod_count64), sizeof(uint64_t));
-            if (coeff_mod_count64 > SEAL_COEFF_MOD_COUNT_MAX ||
-                coeff_mod_count64 < SEAL_COEFF_MOD_COUNT_MIN)
+
+            // Only check for upper bound; lower bound is zero for scheme_type::none
+            if (coeff_mod_count64 > SEAL_COEFF_MOD_COUNT_MAX)
             {
-                throw invalid_argument("coeff_modulus is invalid");
+                throw logic_error("coeff_modulus is invalid");
             }
 
             // Read the coeff_modulus
-            vector<SmallModulus> coeff_modulus(coeff_mod_count64);
-            for (auto &mod : coeff_modulus)
+            vector<SmallModulus> coeff_modulus;
+            for (uint64_t i = 0; i < coeff_mod_count64; i++)
             {
-                mod.load(stream);
+                coeff_modulus.emplace_back();
+                coeff_modulus.back().load(stream);
             }
 
             // Read the plain_modulus
             SmallModulus plain_modulus;
-            // CKKS does not use plain_modulus
-            if (parms.scheme() == scheme_type::BFV)
-            {
-                plain_modulus.load(stream);
-            }
+            plain_modulus.load(stream);
 
             // Supposedly everything worked so set the values of member variables
             parms.set_poly_modulus_degree(safe_cast<size_t>(poly_modulus_degree64));
             parms.set_coeff_modulus(coeff_modulus);
-            // CKKS does not use plain_modulus
-            if (parms.scheme() == scheme_type::BFV)
-            {
-                parms.set_plain_modulus(plain_modulus);
-            }
+
+            // Only BFV uses plain_modulus; set_plain_modulus checks that for
+            // other schemes it is zero
+            parms.set_plain_modulus(plain_modulus);
+
+            // Set the loaded parameters
+            swap(*this, parms);
 
             stream.exceptions(old_except_mask);
-            return parms;
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
         {
             stream.exceptions(old_except_mask);
-            throw;
+            throw runtime_error("I/O error");
         }
         catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
+        stream.exceptions(old_except_mask);
     }
 
     void EncryptionParameters::compute_parms_id()
@@ -142,7 +147,7 @@ namespace seal
         set_uint_uint(plain_modulus_.data(), plain_modulus_.uint64_count(), param_data_ptr);
         param_data_ptr += plain_modulus_.uint64_count();
 
-        HashFunction::sha3_hash(param_data.get(), total_uint64_count, parms_id_);
+        HashFunction::hash(param_data.get(), total_uint64_count, parms_id_);
 
         // Did we somehow manage to get a zero block as result? This is reserved for
         // plaintexts to indicate non-NTT-transformed form.

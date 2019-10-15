@@ -11,6 +11,8 @@
 #include "seal/util/uintarith.h"
 #include "seal/util/polycore.h"
 #include "seal/util/polyarithsmallmod.h"
+#include "seal/util/scalingvariant.h"
+#include "seal/util/numth.h"
 
 using namespace std;
 using namespace seal::util;
@@ -62,7 +64,7 @@ namespace seal
     void Evaluator::negate_inplace(Ciphertext &encrypted)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -96,11 +98,11 @@ namespace seal
     void Evaluator::add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted1, context_))
+        if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
         }
-        if (!is_metadata_valid_for(encrypted2, context_))
+        if (!is_metadata_valid_for(encrypted2, context_) || !is_buffer_valid(encrypted2))
         {
             throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
@@ -189,11 +191,11 @@ namespace seal
     void Evaluator::sub_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted1, context_))
+        if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
         }
-        if (!is_metadata_valid_for(encrypted2, context_))
+        if (!is_metadata_valid_for(encrypted2, context_) || !is_buffer_valid(encrypted2))
         {
             throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
@@ -266,11 +268,11 @@ namespace seal
         const Ciphertext &encrypted2, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted1, context_))
+        if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
         {
             throw invalid_argument("encrypted1 is not valid for encryption parameters");
         }
-        if (!is_metadata_valid_for(encrypted2, context_))
+        if (!is_metadata_valid_for(encrypted2, context_) || !is_buffer_valid(encrypted2))
         {
             throw invalid_argument("encrypted2 is not valid for encryption parameters");
         }
@@ -701,7 +703,7 @@ namespace seal
     void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1402,7 +1404,7 @@ namespace seal
         Ciphertext &destination, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1498,7 +1500,7 @@ namespace seal
         MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1537,7 +1539,7 @@ namespace seal
         MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1692,14 +1694,14 @@ namespace seal
         }
 
         // Create a vector of copies of encrypted
-        vector<Ciphertext> exp_vector(exponent, encrypted);
+        vector<Ciphertext> exp_vector(static_cast<size_t>(exponent), encrypted);
         multiply_many(exp_vector, relin_keys, encrypted, move(pool));
     }
 
     void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1747,41 +1749,8 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
-            auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
-            auto upper_half_increment = context_data.upper_half_increment();
-
-            for (size_t i = 0; i < plain.coeff_count(); i++)
-            {
-                // This is Encryptor::preencrypt
-                // Multiply plain by scalar coeff_div_plain_modulus and reposition
-                // if in upper-half.
-                if (plain[i] >= plain_upper_half_threshold)
-                {
-                    // Loop over primes
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        unsigned long long temp[2]{ 0, 0 };
-                        multiply_uint64(coeff_div_plain_modulus[j], plain[i], temp);
-                        temp[1] += add_uint64(temp[0], upper_half_increment[j], temp);
-                        uint64_t scaled_plain_coeff = barrett_reduce_128(temp, coeff_modulus[j]);
-                        *(encrypted.data() + i + (j * coeff_count)) = add_uint_uint_mod(
-                            *(encrypted.data() + i + (j * coeff_count)),
-                            scaled_plain_coeff, coeff_modulus[j]);
-                    }
-                }
-                else
-                {
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        uint64_t scaled_plain_coeff = multiply_uint_uint_mod(
-                            coeff_div_plain_modulus[j], plain[i], coeff_modulus[j]);
-                        *(encrypted.data() + i + (j * coeff_count)) = add_uint_uint_mod(
-                            *(encrypted.data() + i + (j * coeff_count)),
-                            scaled_plain_coeff, coeff_modulus[j]);
-                    }
-                }
-            }
+            multiply_add_plain_with_scaling_variant(
+                plain, context_data, encrypted.data());
             break;
         }
 
@@ -1811,7 +1780,7 @@ namespace seal
     void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -1859,41 +1828,8 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
-            auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
-            auto upper_half_increment = context_data.upper_half_increment();
-
-            for (size_t i = 0; i < plain.coeff_count(); i++)
-            {
-                // This is Encryptor::preencrypt changed to subtract instead
-                // Multiply plain by scalar coeff_div_plain_modulus and reposition
-                // if in upper-half.
-                if (plain[i] >= plain_upper_half_threshold)
-                {
-                    // Loop over primes
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        unsigned long long temp[2]{ 0, 0 };
-                        multiply_uint64(coeff_div_plain_modulus[j], plain[i], temp);
-                        temp[1] += add_uint64(temp[0], upper_half_increment[j], temp);
-                        uint64_t scaled_plain_coeff = barrett_reduce_128(temp, coeff_modulus[j]);
-                        *(encrypted.data() + i + (j * coeff_count)) = sub_uint_uint_mod(
-                            *(encrypted.data() + i + (j * coeff_count)),
-                            scaled_plain_coeff, coeff_modulus[j]);
-                    }
-                }
-                else
-                {
-                    for (size_t j = 0; j < coeff_mod_count; j++)
-                    {
-                        uint64_t scaled_plain_coeff = multiply_uint_uint_mod(
-                            coeff_div_plain_modulus[j], plain[i], coeff_modulus[j]);
-                        *(encrypted.data() + i + (j * coeff_count)) = sub_uint_uint_mod(
-                            *(encrypted.data() + i + (j * coeff_count)),
-                            scaled_plain_coeff, coeff_modulus[j]);
-                    }
-                }
-            }
+            multiply_sub_plain_with_scaling_variant(
+                plain, context_data, encrypted.data());
             break;
         }
 
@@ -1924,7 +1860,7 @@ namespace seal
         const Plaintext &plain, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2291,7 +2227,7 @@ namespace seal
     void Evaluator::transform_to_ntt_inplace(Ciphertext &encrypted)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2346,7 +2282,8 @@ namespace seal
     void Evaluator::transform_from_ntt_inplace(Ciphertext &encrypted_ntt)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted_ntt, context_))
+        if (!is_metadata_valid_for(encrypted_ntt, context_) ||
+            !is_buffer_valid(encrypted_ntt))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2401,7 +2338,7 @@ namespace seal
         const GaloisKeys &galois_keys, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2425,8 +2362,13 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
+        // Check if Galois key is generated or not.
+        if (!galois_keys.has_key(galois_elt))
+        {
+            throw invalid_argument("Galois key not present");
+        }
+
         uint64_t m = mul_safe(static_cast<uint64_t>(coeff_count), uint64_t(2));
-        uint64_t subgroup_size = static_cast<uint64_t>(coeff_count >> 1);
         int n_power_of_two = get_power_of_two(static_cast<uint64_t>(coeff_count));
 
         // Verify parameters
@@ -2437,49 +2379,6 @@ namespace seal
         if (encrypted_size > 2)
         {
             throw invalid_argument("encrypted size must be 2");
-        }
-
-        // Check if Galois key is generated or not.
-        // If not, attempt a bit decomposition; maybe we have log(n) many keys
-        if (!galois_keys.has_key(galois_elt))
-        {
-            // galois_elt = 3^order1 * (-1)^order2
-            uint64_t order1 = Zmstar_to_generator_.at(galois_elt).first;
-            uint64_t order2 = Zmstar_to_generator_.at(galois_elt).second;
-
-            // We use either 3 or -3 as our generator, depending on which gives smaller HW
-            uint64_t two_power_of_gen = 3;
-
-            // Does order1 or n/2-order1 have smaller Hamming weight?
-            if (hamming_weight(subgroup_size - order1) < hamming_weight(order1))
-            {
-                order1 = subgroup_size - order1;
-                try_mod_inverse(3, m, two_power_of_gen);
-            }
-
-            while(order1)
-            {
-                if (order1 & 1)
-                {
-                    if (!galois_keys.has_key(two_power_of_gen))
-                    {
-                        throw invalid_argument("Galois key not present");
-                    }
-                    apply_galois_inplace(encrypted, two_power_of_gen, galois_keys, pool);
-                }
-                two_power_of_gen = mul_safe(two_power_of_gen, two_power_of_gen);
-                two_power_of_gen &= (m - 1);
-                order1 >>= 1;
-            }
-            if (order2)
-            {
-                if (!galois_keys.has_key(m - 1))
-                {
-                    throw invalid_argument("Galois key not present");
-                }
-                apply_galois_inplace(encrypted, m - 1, galois_keys, pool);
-            }
-            return;
         }
 
         auto temp(allocate_poly(coeff_count, coeff_mod_count, pool));
@@ -2585,10 +2484,40 @@ namespace seal
 
         size_t coeff_count = context_data_ptr->parms().poly_modulus_degree();
 
+        // Check if Galois key is generated or not.
+        if (galois_keys.has_key(galois_elt_from_step(steps, coeff_count)))
+        {
         // Perform rotation and key switching
         apply_galois_inplace(encrypted,
-            steps_to_galois_elt(steps, coeff_count),
+            galois_elt_from_step(steps, coeff_count),
             galois_keys, move(pool));
+    }
+        else
+        {
+            // Convert the steps to NAF: guarantees using smallest HW
+            vector<int> naf_steps = naf(steps);
+
+            // If naf_steps contains only one element, then this is a power-of-two
+            // rotation and we would have expected not to get to this part of the
+            // if-statement.
+            if (naf_steps.size() == 1)
+            {
+                throw invalid_argument("Galois key not present");
+            }
+
+            for (size_t i = 0; i < naf_steps.size(); i++)
+            {
+                // We might have a NAF-term of size coeff_count / 2; this corresponds
+                // to no rotation so we skip it.
+                if (safe_cast<size_t>(abs(naf_steps[i])) == (coeff_count >> 1))
+                {
+                    continue;
+                }
+
+                // Apply rotation for this step
+                rotate_internal(encrypted, naf_steps[i], galois_keys, pool);
+            }
+        }
     }
 
     void Evaluator::switch_key_inplace(
@@ -2606,7 +2535,7 @@ namespace seal
         auto scheme = parms.scheme();
 
         // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_))
+        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
@@ -2664,7 +2593,8 @@ namespace seal
         // Check only the used component in KSwitchKeys.
         for (auto &each_key : key_vector)
         {
-            if (!is_metadata_valid_for(each_key, context_))
+            if (!is_metadata_valid_for(each_key, context_) ||
+                !is_buffer_valid(each_key))
             {
                 throw invalid_argument(
                     "kswitch_keys is not valid for encryption parameters");

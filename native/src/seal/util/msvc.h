@@ -16,19 +16,6 @@
 // Do not throw when Evaluator produces transparent ciphertexts
 //#undef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
 
-// Try to check presence of additional headers using __has_include
-#ifdef __has_include
-
-// Check for MSGSL
-#if __has_include(<gsl/gsl>)
-#include <gsl/gsl>
-#define SEAL_USE_MSGSL
-#else
-#undef SEAL_USE_MSGSL
-#endif //__has_include(<gsl/gsl>)
-
-#endif
-
 // In Visual Studio redefine std::byte (SEAL_BYTE)
 #undef SEAL_USE_STD_BYTE
 

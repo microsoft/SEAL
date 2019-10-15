@@ -1,8 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include <algorithm>
 #include "seal/ciphertext.h"
-#include "seal/util/polycore.h"
+#include "seal/randomgen.h"
+#include "seal/util/defines.h"
+#include "seal/util/pointer.h"
+#include "seal/util/polyarithsmallmod.h"
+#include "seal/util/rlwe.h"
 
 using namespace std;
 using namespace seal::util;
@@ -33,7 +38,7 @@ namespace seal
     }
 
     void Ciphertext::reserve(shared_ptr<SEALContext> context,
-        parms_id_type parms_id, size_type size_capacity)
+        parms_id_type parms_id, size_t size_capacity)
     {
         // Verify parameters
         if (!context)
@@ -55,12 +60,12 @@ namespace seal
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
-        reserve_internal(size_capacity, parms.poly_modulus_degree(),
-            safe_cast<size_type>(parms.coeff_modulus().size()));
+        reserve_internal(size_capacity,
+            parms.poly_modulus_degree(), parms.coeff_modulus().size());
     }
 
-    void Ciphertext::reserve_internal(size_type size_capacity,
-        size_type poly_modulus_degree, size_type coeff_mod_count)
+    void Ciphertext::reserve_internal(size_t size_capacity,
+        size_t poly_modulus_degree, size_t coeff_mod_count)
     {
         if (size_capacity < SEAL_CIPHERTEXT_SIZE_MIN ||
             size_capacity > SEAL_CIPHERTEXT_SIZE_MAX)
@@ -68,22 +73,22 @@ namespace seal
             throw invalid_argument("invalid size_capacity");
         }
 
-        size_type new_data_capacity =
+        size_t new_data_capacity =
             mul_safe(size_capacity, poly_modulus_degree, coeff_mod_count);
-        size_type new_data_size = min<size_type>(new_data_capacity, data_.size());
+        size_t new_data_size = min<size_t>(new_data_capacity, data_.size());
 
         // First reserve, then resize
         data_.reserve(new_data_capacity);
         data_.resize(new_data_size);
 
         // Set the size
-        size_ = min<size_type>(size_capacity, size_);
+        size_ = min<size_t>(size_capacity, size_);
         poly_modulus_degree_ = poly_modulus_degree;
         coeff_mod_count_ = coeff_mod_count;
     }
 
     void Ciphertext::resize(shared_ptr<SEALContext> context,
-        parms_id_type parms_id, size_type size)
+        parms_id_type parms_id, size_t size)
     {
         // Verify parameters
         if (!context)
@@ -105,12 +110,12 @@ namespace seal
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
-        resize_internal(size, parms.poly_modulus_degree(),
-            safe_cast<size_type>(parms.coeff_modulus().size()));
+        resize_internal(size,
+            parms.poly_modulus_degree(), parms.coeff_modulus().size());
     }
 
-    void Ciphertext::resize_internal(size_type size,
-        size_type poly_modulus_degree, size_type coeff_mod_count)
+    void Ciphertext::resize_internal(size_t size,
+        size_t poly_modulus_degree, size_t coeff_mod_count)
     {
         if ((size < SEAL_CIPHERTEXT_SIZE_MIN && size != 0) ||
             size > SEAL_CIPHERTEXT_SIZE_MAX)
@@ -119,7 +124,7 @@ namespace seal
         }
 
         // Resize the data
-        size_type new_data_size =
+        size_t new_data_size =
             mul_safe(size, poly_modulus_degree, coeff_mod_count);
         data_.resize(new_data_size);
 
@@ -129,7 +134,58 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
-    void Ciphertext::save(ostream &stream) const
+    void Ciphertext::expand_seed(
+        shared_ptr<SEALContext> context,
+        const random_seed_type &seed)
+    {
+        auto context_data_ptr = context->get_context_data(parms_id_);
+
+        // Set up the BlakePRNG with a given seed.
+        // Rejection sampling to generate a uniform random polynomial.
+        sample_poly_uniform(make_shared<BlakePRNG>(seed), context_data_ptr->parms(), data(1));
+    }
+
+    streamoff Ciphertext::save_size(compr_mode_type compr_mode) const
+    {
+        // We need to consider two cases: seeded and unseeded; these have very
+        // different size characteristics and we need the exact size when
+        // compr_mode is compr_mode_type::none.
+        size_t data_size;
+        if (has_seed_marker())
+        {
+            // Create a temporary aliased IntArray of smaller size
+            IntArray<ct_coeff_type> alias_data(
+                Pointer<ct_coeff_type>::Aliasing(
+                    const_cast<ct_coeff_type*>(data_.cbegin())),
+                data_.size() / 2, false, data_.pool());
+
+            data_size = add_safe(safe_cast<size_t>(
+                alias_data.save_size(compr_mode_type::none)), // data_(0)
+                sizeof(random_seed_type)); // seed
+        }
+        else
+        {
+            data_size = safe_cast<size_t>(
+                data_.save_size(compr_mode_type::none)); // data_
+        }
+
+        size_t members_size = Serialization::ComprSizeEstimate(
+            add_safe(
+                sizeof(parms_id_),
+                sizeof(SEAL_BYTE), // is_ntt_form_
+                sizeof(uint64_t), // size_
+                sizeof(uint64_t), // poly_modulus_degree_
+                sizeof(uint64_t), // coeff_mod_count_
+                sizeof(scale_),
+                data_size),
+            compr_mode);
+
+        return safe_cast<streamoff>(add_safe(
+            sizeof(Serialization::SEALHeader),
+            members_size));
+    }
+
+    void Ciphertext::save_members(ostream &stream) const
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -148,20 +204,58 @@ namespace seal
             stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
 
-            // Save the data
-            data_.save(stream);
+            if (has_seed_marker())
+            {
+                random_seed_type seed;
+                copy_n(data(1) + 1, seed.size(), seed.begin());
+
+                size_t data_size = data_.size();
+                size_t half_size = data_size / 2;
+                // Save_members must be a const method.
+                // Create an alias of data_, must be handled with care.
+                // Alternatively, create and serialize a half copy of data_.
+                IntArray<ct_coeff_type> alias_data(data_.pool_);
+                alias_data.size_ = half_size;
+                alias_data.capacity_ = half_size;
+                auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(
+                    const_cast<ct_coeff_type *>(data_.cbegin()));
+                swap(alias_data.data_, alias_ptr);
+                alias_data.save(stream, compr_mode_type::none);
+
+                // Save the seed
+                stream.write(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+            }
+            else
+            {
+                // Save the IntArray
+                data_.save(stream, compr_mode_type::none);
+            }
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;
         }
-
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::unsafe_load(istream &stream)
+    void Ciphertext::load_members(shared_ptr<SEALContext> context, istream &stream)
     {
+        // Verify parameters
+        if (!context)
+        {
+            throw invalid_argument("invalid context");
+        }
+        if (!context->parameters_set())
+        {
+            throw invalid_argument("encryption parameters are not set correctly");
+        }
+
         Ciphertext new_data(data_.pool());
 
         auto old_except_mask = stream.exceptions();
@@ -183,23 +277,70 @@ namespace seal
             double scale = 0;
             stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
 
-            // Load the data
-            new_data.data_.load(stream);
-            if (unsigned_neq(new_data.data_.size(),
-                mul_safe(size64, poly_modulus_degree64, coeff_mod_count64)))
-            {
-                throw invalid_argument("ciphertext data is invalid");
-            }
-
-            // Set values
+            // Set values already at this point for the metadata validity check
             new_data.parms_id_ = parms_id;
             new_data.is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
-            new_data.size_ = safe_cast<size_type>(size64);
-            new_data.poly_modulus_degree_ = safe_cast<size_type>(poly_modulus_degree64);
-            new_data.coeff_mod_count_ = safe_cast<size_type>(coeff_mod_count64);
+            new_data.size_ = safe_cast<size_t>(size64);
+            new_data.poly_modulus_degree_ = safe_cast<size_t>(poly_modulus_degree64);
+            new_data.coeff_mod_count_ = safe_cast<size_t>(coeff_mod_count64);
             new_data.scale_ = scale;
+
+            // Checking the validity of loaded metadata
+            // Note: We allow pure key levels here! This is to allow load_members
+            // to be used also when loading derived objects like PublicKey. This
+            // further means that functions reading in Ciphertext objects must check
+            // that for those use-cases the Ciphertext truly is at the data level
+            // if it is supposed to be. In other words, one cannot assume simply
+            // based on load_members succeeding that the Ciphertext is valid for
+            // computations.
+            if (!is_metadata_valid_for(new_data, context, true))
+            {
+                throw logic_error("ciphertext data is invalid");
+            }
+
+            // Compute the total uint64 count required and reserve memory.
+            // Note that this must be done after the metadata is checked for validity.
+            auto total_uint64_count = mul_safe(
+                new_data.size_,
+                new_data.poly_modulus_degree_,
+                new_data.coeff_mod_count_);
+
+            // Reserve memory for the entire (expected) ciphertext data
+            new_data.data_.reserve(total_uint64_count);
+
+            // Load the data. Note that we are supplying also the expected maximum
+            // size of the loaded IntArray. This is an important security measure to
+            // prevent a malformed IntArray from causing arbitrarily large memory
+            // allocations.
+            new_data.data_.load(stream, total_uint64_count);
+
+            // Expected buffer size in the seeded case
+            auto seeded_uint64_count = poly_modulus_degree64 * coeff_mod_count64;
+
+            // This is the case where we need to expand a seed, otherwise full
+            // ciphertext data was (possibly) loaded and do nothing
+            if (unsigned_eq(new_data.data_.size(), seeded_uint64_count))
+            {
+                // Single polynomial size data was loaded, so we are in the
+                // seeded ciphertext case. Next load the seed.
+                random_seed_type seed;
+                stream.read(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+                new_data.data_.resize(total_uint64_count);
+                new_data.expand_seed(move(context), seed);
+            }
+
+            // Verify that the buffer is correct
+            if (!is_buffer_valid(new_data))
+            {
+                throw logic_error("ciphertext data is invalid");
+            }
         }
-        catch (const exception &)
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
         {
             stream.exceptions(old_except_mask);
             throw;

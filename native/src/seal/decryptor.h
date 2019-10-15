@@ -47,7 +47,7 @@ namespace seal
     to be in the default NTT form, and will throw an exception if this is not the
     case.
     */
-    class SEAL_NODISCARD Decryptor
+    class Decryptor
     {
     public:
         /**
@@ -116,6 +116,14 @@ namespace seal
         Decryptor &operator =(Decryptor &&assign) = delete;
 
         void compute_secret_key_array(std::size_t max_power);
+
+        // Compute c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q.
+        // Store result in destination in RNS form.
+        // destination has the size of an RNS polynomial.
+        void dot_product_ct_sk_array(
+            const Ciphertext &encrypted,
+            std::uint64_t *destination,
+            MemoryPoolHandle pool);
 
         void compose(const SEALContext::ContextData &context_data,
             std::uint64_t *value);

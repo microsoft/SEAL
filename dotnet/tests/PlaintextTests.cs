@@ -290,7 +290,7 @@ namespace SEALNetTest
 
             Assert.AreNotSame(plain, other);
             Assert.AreEqual(plain, other);
-            Assert.IsTrue(ValCheck.IsMetadataValidFor(other, context));
+            Assert.IsTrue(ValCheck.IsValidFor(other, context));
         }
 
         [TestMethod]
@@ -318,26 +318,26 @@ namespace SEALNetTest
             MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
             MemoryPoolHandle pool_uninit = new MemoryPoolHandle();
 
-            Assert.ThrowsException<ArgumentException>(() => plain = new Plaintext(pool_uninit));
-            Assert.ThrowsException<ArgumentNullException>(() => plain = new Plaintext((string)null, pool));
+            Utilities.AssertThrows<ArgumentException>(() => plain = new Plaintext(pool_uninit));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain = new Plaintext((string)null, pool));
 
-            Assert.ThrowsException<ArgumentNullException>(() => plain.Set((Plaintext)null));
-            Assert.ThrowsException<ArgumentNullException>(() => plain.Set((string)null));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((Plaintext)null));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((string)null));
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(100000));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(1, 100000));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
+            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000));
+            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(1, 100000));
+            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
 
-            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsValidFor(plain, null));
-            Assert.ThrowsException<ArgumentNullException>(() => ValCheck.IsMetadataValidFor(plain, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(plain, null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => plain.Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Save(null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => plain.UnsafeLoad(null));
-            Assert.ThrowsException<ArgumentException>(() => plain.UnsafeLoad(new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(context, null));
+            Utilities.AssertThrows<EndOfStreamException>(() => plain.UnsafeLoad(context, new MemoryStream()));
 
-            Assert.ThrowsException<ArgumentNullException>(() => plain.Load(context, null));
-            Assert.ThrowsException<ArgumentNullException>(() => plain.Load(null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(null, new MemoryStream()));
         }
     }
 }
