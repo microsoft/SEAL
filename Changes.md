@@ -2,9 +2,12 @@
 
 ## Version 3.4.1
 
-- Fixed mistake in `native/src/CMakeConfig.cmd` where the CMake library search path
-suffix was incompatible with the instructions given in `README.md`.
-- Corrected ZLIB support instructions for Windows in `README.md`.
+This patch fixes a few issues with ZLIB support on Windows. Specifically,
+
+- Fixed a mistake in `native/src/CMakeConfig.cmd` where the CMake library search path
+suffix was incorrect.
+- Switched to using a static version of ZLIB on Windows.
+- Corrected instructions in [README.md](README.md) for enabling ZLIB support on Windows.
 
 ## Version 3.4.0
 
@@ -45,9 +48,9 @@ plaintext message is multiplied with the flooring of the coefficient modulus div
 modulus, the new method reduces the noise introduced in encryption, increases a noise budget of a
 fresh encryption, slightly slows down encryption, and has no impact on the security at all.
 
-- Merged [PR 62](https://github.com/microsoft/SEAL/pull/62) that uses a NAF decomposition for
-random rotations to perform them in a minimal way from power-of-two rotations in both directions.
-This improves performance for random rotations.
+- Merged [PR 62](https://github.com/microsoft/SEAL/pull/62) that uses a non-adjacent form (NAF)
+decomposition of random rotations to perform them in a minimal way from power-of-two rotations in
+both directions. This improves performance of random rotations.
 
 ### API Changes
 
