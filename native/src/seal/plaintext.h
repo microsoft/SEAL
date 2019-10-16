@@ -768,13 +768,14 @@ namespace seal
             std::string decoded = base64_decode(encoded);
             std::istringstream is(decoded);
 
-            Plaintext new_data(pool());
-            new_data.unsafe_load(is);
-            if (!is_valid_for(new_data, std::move(context)))
-            {
-                throw std::invalid_argument("Plaintext data is invalid");
-            }
-            std::swap(*this, new_data);
+            this->load(context, is);
+            //Plaintext new_data(pool());
+            //new_data.unsafe_load(is);
+            //if (!is_valid_for(new_data, std::move(context)))
+            //{
+            //    throw std::invalid_argument("Plaintext data is invalid");
+            //}
+            //std::swap(*this, new_data);
         }
 #endif
         /**

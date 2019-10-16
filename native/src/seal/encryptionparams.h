@@ -475,10 +475,14 @@ namespace seal
         */
         inline static std::string SaveToString(const EncryptionParameters &ep)
         {
-            std::ostringstream  buffer; // no growth specification necessary
+
+            std::ostringstream buffer; // Initialize an output stringstream
+            ep.save(buffer); // Save to the output stringstream
+
+            // std::ostringstream  buffer; // no growth specification necessary
 
             // Write to the output stream
-            EncryptionParameters::Save(ep, buffer);
+            //EncryptionParameters::Save(ep, buffer);
 
             std::string contents = buffer.str();
             size_t bufferSize = contents.size();
@@ -500,8 +504,11 @@ namespace seal
             std::istringstream is(decoded);
 
             // Create the Enc Parms from the input stream
-            EncryptionParameters ep = EncryptionParameters::Load(is);
+            EncryptionParameters ep;
+            ep.load(is);
             return ep;
+            //EncryptionParameters ep = EncryptionParameters::load(is);
+            //return ep;
         }
 
 #endif

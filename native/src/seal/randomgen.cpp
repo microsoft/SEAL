@@ -18,7 +18,7 @@ namespace seal
     uint64_t random_uint64()
     {
         uint64_t result;
-#if defined(__linux__) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__linux__) || (defined(__APPLE__) && defined(__MACH__) || defined(EMSCRIPTEN))
         random_device rd("/dev/urandom");
         result = (static_cast<uint64_t>(rd()) << 32)
             + static_cast<uint64_t>(rd());

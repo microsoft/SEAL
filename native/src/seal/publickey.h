@@ -114,53 +114,6 @@ namespace seal
             return pk_.save(stream, compr_mode);
         }
 
-
-#ifdef EMSCRIPTEN
-        /**
-        Saves the PublicKey to a string. The output is in base64 format
-        and is human-readable.
-
-        @throws std::exception if the PublicKey could not be written to stream
-        */
-        inline const std::string SaveToString()
-        {
-            std::ostringstream buffer;
-
-            this->save(buffer);
-
-            std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
-            return encoded;
-        }
-
-        /**
-        Loads a PublicKey from an input string overwriting the current PublicKey.
-        The loaded PublicKey is verified to be valid for the given SEALContext.
-
-        @param[in] context The SEALContext
-        @param[in] encoded The base64 string to load the PublicKey from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
-        @throws std::exception if a valid PublicKey could not be read from stream
-        @throws std::invalid_argument if the loaded PublicKey is invalid for the
-        context
-        */
-        inline void LoadFromString(std::shared_ptr<SEALContext> context,
-            const std::string &encoded)
-        {
-            std::string decoded = base64_decode(encoded);
-            std::istringstream is(decoded);
-
-            PublicKey new_pk;
-            new_pk.unsafe_load(is);
-            if (!is_valid_for(new_pk, std::move(context)))
-            {
-                throw std::invalid_argument("PublicKey data is invalid");
-            }
-            std::swap(*this, new_pk);
-        }
-#endif
         /**
         Loads a PublicKey from an input stream overwriting the current PublicKey.
         No checking of the validity of the PublicKey data against encryption
@@ -288,6 +241,57 @@ namespace seal
             std::swap(*this, new_pk);
             return in_size;
         }
+
+#ifdef EMSCRIPTEN
+        /**
+        Saves the PublicKey to a string. The output is in base64 format
+        and is human-readable.
+
+        @returns std::string The base64 encoded string of the PublicKey
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
+        */
+        inline const std::string SaveToString()
+        {
+            std::ostringstream buffer;
+
+            this->save(buffer);
+
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+        }
+
+        /**
+        Loads a PublicKey from an input string overwriting the current PublicKey.
+        The loaded SecretKey is verified to be valid for the given SEALContext.
+
+        @param[in] context The SEALContext
+        @param[in] encoded The base64 string to load the PublicKey from
+        @throws std::invalid_argument if the context is not set or encryption
+        parameters are not valid
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
+        */
+        inline void LoadFromString(std::shared_ptr<SEALContext> context,
+            const std::string &encoded)
+        {
+            std::string decoded = base64_decode(encoded);
+            std::istringstream is(decoded);
+
+            this->load(context, is);
+            //PublicKey new_pk;
+            //new_pk.unsafe_load(is);
+            //if (!is_valid_for(new_pk, std::move(context)))
+            //{
+            //    throw std::invalid_argument("PublicKey data is invalid");
+            //}
+            //std::swap(*this, new_pk);
+        }
+#endif
 
         /**
         Returns a reference to parms_id.

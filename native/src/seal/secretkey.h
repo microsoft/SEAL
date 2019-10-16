@@ -274,7 +274,10 @@ namespace seal
         Saves the SecretKey to a string. The output is in base64 format
         and is human-readable.
 
-        @throws std::exception if the SecretKey could not be written to stream
+        @returns std::string The base64 encoded string of the SecretKey
+        @throws std::logic_error if the data to be saved is invalid, if compression
+        mode is not supported, or if compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline const std::string SaveToString()
         {
@@ -296,9 +299,9 @@ namespace seal
         @param[in] encoded The base64 string to load the SecretKey from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::exception if a valid SecretKey could not be read from stream
-        @throws std::invalid_argument if the loaded SecretKey is invalid for the
-        context
+        @throws std::logic_error if the loaded data is invalid or if decompression
+        failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline void LoadFromString(std::shared_ptr<SEALContext> context,
             const std::string &encoded)
@@ -306,13 +309,14 @@ namespace seal
             std::string decoded = base64_decode(encoded);
             std::istringstream is(decoded);
 
-            SecretKey new_sk;
-            new_sk.unsafe_load(is);
-            if (!is_valid_for(new_sk, std::move(context)))
-            {
-                throw std::invalid_argument("SecretKey data is invalid");
-            }
-            std::swap(*this, new_sk);
+            this->load(context, is);
+            //SecretKey new_sk;
+            //new_sk.unsafe_load(is);
+            //if (!is_valid_for(new_sk, std::move(context)))
+            //{
+            //    throw std::invalid_argument("SecretKey data is invalid");
+            //}
+            //std::swap(*this, new_sk);
         }
 #endif
         /**

@@ -743,13 +743,16 @@ namespace seal
             std::string decoded = base64_decode(encoded);
             std::istringstream is(decoded);
 
-            Ciphertext new_data(pool());
-            new_data.unsafe_load(is);
-            if (!is_valid_for(new_data, std::move(context)))
-            {
-                throw std::invalid_argument("ciphertext data is invalid");
-            }
-            std::swap(*this, new_data);
+            this->load(context, is);
+            //Ciphertext new_data(pool());
+            //auto in_size = new_data.unsafe_load(context, in, size);
+
+            //if (!is_valid_for(new_data, std::move(context)))
+            //{
+            //    throw std::logic_error("ciphertext data is invalid");
+            //}
+            //std::swap(*this, new_data);
+            //return in_size;
         }
 #endif
 

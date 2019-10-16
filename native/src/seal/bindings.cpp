@@ -468,21 +468,26 @@ EMSCRIPTEN_BINDINGS(bindings)
         ;
 
     class_<MemoryManager>("MemoryManager")
+        .function("GetPool", select_overload<MemoryPoolHandle(mm_prof_opt_t)>(&MemoryManager::GetPool))
         ;
 
     class_<MMProf>("MMProf")
         ;
 
     class_<MMProfGlobal, base<MMProf>>("MMProfGlobal")
+        .function("getPool", &MMProfGlobal::get_pool)
         ;
 
     class_<MMProfNew, base<MMProf>>("MMProfNew")
+        .function("getPool", &MMProfNew::get_pool)
         ;
 
     class_<MMProfFixed, base<MMProf>>("MMProfFixed")
+        .function("getPool", &MMProfFixed::get_pool)
         ;
 
     class_<MMProfThreadLocal, base<MMProf>>("MMProfThreadLocal")
+        .function("getPool", &MMProfThreadLocal::get_pool)
         ;
 
     class_<Encryptor>("Encryptor")
@@ -496,9 +501,17 @@ EMSCRIPTEN_BINDINGS(bindings)
         ;
 
     enum_<scheme_type>("SchemeType")
+        .value("NONE", scheme_type::none)
         .value("BFV", scheme_type::BFV)
         .value("CKKS", scheme_type::CKKS)
         ;
+
+    //enum_<mm_prof_opt>("mm_prof_opt")
+    //    .value("DEFAULT", mm_prof_opt::DEFAULT)
+    //    .value("FORCE_GLOBAL", mm_prof_opt::FORCE_GLOBAL)
+    //    .value("FORCE_NEW", mm_prof_opt::FORCE_NEW)
+    //    .value("FORCE_THREAD_LOCAL", mm_prof_opt::FORCE_THREAD_LOCAL)
+    //    ;
 }
 
 #endif
