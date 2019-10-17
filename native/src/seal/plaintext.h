@@ -569,7 +569,7 @@ namespace seal
             std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
                     sizeof(parms_id_),
-                    sizeof(coeff_count_),
+                    sizeof(uint64_t),
                     sizeof(scale_),
                     util::safe_cast<std::size_t>(
                         data_.save_size(compr_mode_type::none))),
@@ -746,7 +746,6 @@ namespace seal
             this->save(buffer);
 
             std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
             std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
             return encoded;
         }
@@ -769,13 +768,6 @@ namespace seal
             std::istringstream is(decoded);
 
             this->load(context, is);
-            //Plaintext new_data(pool());
-            //new_data.unsafe_load(is);
-            //if (!is_valid_for(new_data, std::move(context)))
-            //{
-            //    throw std::invalid_argument("Plaintext data is invalid");
-            //}
-            //std::swap(*this, new_data);
         }
 #endif
         /**
