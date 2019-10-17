@@ -72,15 +72,15 @@ if defined MSGSL_ROOT (
 )
 
 rem Call CMake.
-"%CMAKEPATH%" ..\..\..	                                       ^
-	-G %CMAKEGEN%                                              ^
-	-A %PROJECTPLATFORM%                                       ^
-	-DALLOW_COMMAND_LINE_BUILD=1                               ^
-	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%"                ^
-	-DSEAL_LIB_BUILD_TYPE="Static_PIC"                         ^
-	-DSEAL_USE_MSGSL=%USE_MSGSL%                               ^
-	-DMSGSL_ROOT="%MSGSL_ROOT%"                                ^
-	-DSEAL_USE_ZLIB=%USE_ZLIB%                                 ^
-	-DZLIB_ROOT="%ZLIB_ROOT%"                                  ^
-	-DCMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX="%PROJECTPLATFORM%" ^
+"%CMAKEPATH%" ..\..\..                                              ^
+	-G %CMAKEGEN%                                                   ^
+	-A %PROJECTPLATFORM%                                            ^
+	-DALLOW_COMMAND_LINE_BUILD=1                                    ^
+	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%"                     ^
+	-DSEAL_LIB_BUILD_TYPE="Static_PIC"                              ^
+	-DSEAL_USE_MSGSL=%USE_MSGSL%                                    ^
+	-DMSGSL_ROOT="%MSGSL_ROOT%"                                     ^
+	-DSEAL_USE_ZLIB=%USE_ZLIB%                                      ^
+	-DZLIB_ROOT="%ZLIB_ROOT%"                                       ^
+	-DCMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX="Release"                ^
 	--no-warn-unused-cli

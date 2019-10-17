@@ -85,10 +85,10 @@ namespace Microsoft.Research.SEAL
             return result;
         }
 
-        private static bool IsSupportedComprMode(ComprModeType comprMode) =>
+        internal static bool IsSupportedComprMode(ComprModeType comprMode) =>
             IsSupportedComprMode((byte)comprMode);
 
-        private static bool IsValidHeader(SEALHeader header)
+        internal static bool IsValidHeader(SEALHeader header)
         {
             byte[] headerArray = new byte[16];
             using (MemoryStream stream = new MemoryStream(headerArray))

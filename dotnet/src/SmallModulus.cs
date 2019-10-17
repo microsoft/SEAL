@@ -214,6 +214,9 @@ namespace Microsoft.Research.SEAL
         public long Save(Stream stream, ComprModeType? comprMode = null)
         {
             comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
             ComprModeType comprModeValue = comprMode.Value;
             return Serialization.Save(
                 (byte[] outptr, ulong size, byte cm, out long outBytes) =>

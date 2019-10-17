@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEAL VERSION 3.4.0 LANGUAGES CXX C)
+project(SEAL VERSION 3.4.1 LANGUAGES CXX C)
 
 if(MSVC)
     if(ALLOW_COMMAND_LINE_BUILD)
@@ -266,16 +266,21 @@ if(SEAL_USE_INTRIN)
     cmake_pop_check_state()
 endif()
 
-# Try to find MSGSL if requested
-if(SEAL_USE_MSGSL)
-    if(MSGSL_ROOT)
-        unset(MSGSL_INCLUDE_DIR CACHE)
-    endif()
+# Helper macro for clearing MSGSL cache
+macro(clear_msgsl_cache)
+    unset(MSGSL_INCLUDE_DIR CACHE)
+endmacro()
 
-    # Find MSGSL and create an interface target
+# Try to find MSGSL if requested; first clear the cache if SEAL_USE_MSGSL
+# is not set, or if SEAL_USE_MSGSL and MSGSL_ROOT are set (force search).
+if(NOT SEAL_USE_MSGSL OR MSGSL_ROOT)
+    clear_msgsl_cache()
+endif()
+if(SEAL_USE_MSGSL)
     find_package(MSGSL MODULE)
     if(NOT MSGSL_FOUND)
         set(SEAL_USE_MSGSL OFF CACHE BOOL ${SEAL_USE_MSGSL_OPTION_STR} FORCE)
+        clear_msgsl_cache()
     endif()
 endif()
 
@@ -298,19 +303,31 @@ if(SEAL_USE_MSGSL_MULTISPAN)
     endif()
 endif()
 
-# Try to find zlib if requested
-if(SEAL_USE_ZLIB)
-    if(ZLIB_ROOT)
-        unset(ZLIB_INCLUDE_DIR CACHE)
-        unset(ZLIB_LIBRARY_DEBUG CACHE)
-        unset(ZLIB_LIBRARY_RELEASE CACHE)
-    endif()
+# Helper macro for clearing zlib cache
+macro(clear_zlib_cache)
+    unset(ZLIB_INCLUDE_DIR CACHE)
+    unset(ZLIB_LIBRARY_DEBUG CACHE)
+    unset(ZLIB_LIBRARY_RELEASE CACHE)
+endmacro()
 
+# Try to find zlib if requested; first clear the cache if SEAL_USE_ZLIB
+# is not set, or if SEAL_USE_ZLIB and ZLIB_ROOT are set (force search).
+if(NOT SEAL_USE_ZLIB OR ZLIB_ROOT)
+    clear_zlib_cache()
+endif()
+if(SEAL_USE_ZLIB)
     find_package(ZLIB 1.2.11 EXACT)
     if(NOT ZLIB_FOUND)
         set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)
+        clear_zlib_cache()
     endif()
 endif()
+
+# Create SEALNet.nuspec from SEALNet.nuspec.in
+configure_file(
+    ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.nuspec.in
+    ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.nuspec
+    @ONLY)
 
 # Create library but add no source files yet
 if(SEAL_LIB_BUILD_TYPE STREQUAL "Shared")

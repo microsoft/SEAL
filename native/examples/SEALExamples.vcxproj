@@ -100,7 +100,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(SolutionDir)native\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSGSL_ROOT);$(SolutionDir)native\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <ControlFlowGuard>Guard</ControlFlowGuard>
@@ -121,7 +121,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(SolutionDir)native\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSGSL_ROOT);$(SolutionDir)native\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <ControlFlowGuard>Guard</ControlFlowGuard>
@@ -144,7 +144,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(SolutionDir)native\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSGSL_ROOT);$(SolutionDir)native\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <ControlFlowGuard>Guard</ControlFlowGuard>
@@ -169,7 +169,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ZLIB_ROOT);$(MSGSL_ROOT);$(SolutionDir)native\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSGSL_ROOT);$(SolutionDir)native\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <ControlFlowGuard>Guard</ControlFlowGuard>
