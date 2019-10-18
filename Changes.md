@@ -1,5 +1,9 @@
 # List of Changes
 
+## Version 3.4.2
+
+This patch fixes [Issue 66](https://github.com/microsoft/SEAL/issues/66) reported on GitHub.
+
 ## Version 3.4.1
 
 This patch fixes a few issues with ZLIB support on Windows. Specifically,

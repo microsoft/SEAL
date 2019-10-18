@@ -239,7 +239,7 @@ cd ../..
 It is very easy to link your own applications and libraries with Microsoft SEAL if
 you use CMake. Simply add the following to your `CMakeLists.txt`:
 ````
-find_package(SEAL 3.4.1 EXACT REQUIRED)
+find_package(SEAL 3.4 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ````
 If Microsoft SEAL was installed globally, the above `find_package` command will likely
