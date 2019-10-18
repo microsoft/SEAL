@@ -565,7 +565,7 @@ namespace seal
             std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
                     sizeof(parms_id_),
-                    sizeof(coeff_count_),
+                    sizeof(std::uint64_t), // coeff_count_
                     sizeof(scale_),
                     util::safe_cast<std::size_t>(
                         data_.save_size(compr_mode_type::none))),
