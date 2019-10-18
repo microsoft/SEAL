@@ -35,9 +35,7 @@ namespace SEALTest
                     reinterpret_cast<uint8_t*>(buffer_end_),
                     value);
 
-                // Avoiding MSVC warning C4309
-                size_t buffer_size = buffer_size_;
-                value += static_cast<uint8_t>(buffer_size);
+                value = static_cast<uint8_t>(static_cast<size_t>(value) + buffer_size_);
             }
 
         private:
