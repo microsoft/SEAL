@@ -2,7 +2,10 @@
 
 ## Version 3.4.2
 
-This patch fixes [Issue 66](https://github.com/microsoft/SEAL/issues/66) reported on GitHub.
+- Fixed bug reported in [Issue 66](https://github.com/microsoft/SEAL/issues/66) on GitHub.
+- CMake does version matching now (correctly) only on major and minor version, not patch version,
+so writing `find_package(SEAL 3.4)` works correctly and selects the newest version `3.4.x` it can
+find.
 
 ## Version 3.4.1
 
