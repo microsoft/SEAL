@@ -1,5 +1,12 @@
 # List of Changes
 
+## Version 3.4.2
+
+- Fixed bug reported in [Issue 66](https://github.com/microsoft/SEAL/issues/66) on GitHub.
+- CMake does version matching now (correctly) only on major and minor version, not patch version,
+so writing `find_package(SEAL 3.4)` works correctly and selects the newest version `3.4.x` it can
+find.
+
 ## Version 3.4.1
 
 This patch fixes a few issues with ZLIB support on Windows. Specifically,

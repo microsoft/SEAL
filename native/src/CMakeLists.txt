@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEAL VERSION 3.4.1 LANGUAGES CXX C)
+project(SEAL VERSION 3.4.2 LANGUAGES CXX C)
 
 if(MSVC)
     if(ALLOW_COMMAND_LINE_BUILD)
@@ -401,7 +401,7 @@ install(
 write_basic_package_version_file(
     ${SEAL_CONFIG_VERSION_FILENAME}
     VERSION ${SEAL_VERSION}
-    COMPATIBILITY ExactVersion)
+    COMPATIBILITY SameMinorVersion)
 
 # Install config and module files
 install(

@@ -569,7 +569,7 @@ namespace seal
             std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
                     sizeof(parms_id_),
-                    sizeof(uint64_t),
+                    sizeof(std::uint64_t), // coeff_count_
                     sizeof(scale_),
                     util::safe_cast<std::size_t>(
                         data_.save_size(compr_mode_type::none))),
@@ -732,6 +732,7 @@ namespace seal
             std::swap(*this, new_data);
             return in_size;
         }
+
 #ifdef EMSCRIPTEN
         /**
         Saves the plaintext to a string. The output is in base64 format
@@ -770,6 +771,7 @@ namespace seal
             this->load(context, is);
         }
 #endif
+
         /**
         Returns whether the plaintext is in NTT form.
         */
