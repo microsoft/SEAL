@@ -93,10 +93,6 @@ namespace seal
         */
         inline void set_public_key(const PublicKey &public_key)
         {
-            if (!context_)
-            {
-                throw std::invalid_argument("invalid context");
-            }
             if (!is_valid_for(public_key, context_))
             {
                 throw std::invalid_argument("public key is not valid for encryption parameters");
@@ -112,10 +108,6 @@ namespace seal
         */
         inline void set_secret_key(const SecretKey &secret_key)
         {
-            if (!context_)
-            {
-                throw std::invalid_argument("invalid context");
-            }
             if (!is_valid_for(secret_key, context_))
             {
                 throw std::invalid_argument("secret key is not valid for encryption parameters");
@@ -136,6 +128,7 @@ namespace seal
         @param[out] destination The ciphertext to overwrite with the encrypted
         plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a public key is not set
         @throws std::invalid_argument if plain is not valid for the encryption
         parameters
         @throws std::invalid_argument if plain is not in default NTT form
@@ -144,7 +137,7 @@ namespace seal
         inline void encrypt(const Plaintext &plain, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_custom(plain, destination, true, false, pool);
+            encrypt_internal(plain, true, false, destination, pool);
         }
 
         /**
@@ -157,6 +150,7 @@ namespace seal
         @param[out] destination The ciphertext to overwrite with the encrypted
         plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a public key is not set
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_zero(Ciphertext &destination,
@@ -175,6 +169,7 @@ namespace seal
         @param[out] destination The ciphertext to overwrite with the encrypted
         plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a public key is not set
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
@@ -182,7 +177,7 @@ namespace seal
         inline void encrypt_zero(parms_id_type parms_id, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_zero_custom(parms_id, destination, true, false, pool);
+            encrypt_zero_internal(parms_id, true, false, destination, pool);
         }
 
         /**
@@ -198,6 +193,7 @@ namespace seal
         @param[out] destination The ciphertext to overwrite with the encrypted
         plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
         @throws std::invalid_argument if plain is not valid for the encryption
         parameters
         @throws std::invalid_argument if plain is not in default NTT form
@@ -207,7 +203,7 @@ namespace seal
             Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_custom(plain, destination, false, false, pool);
+            encrypt_internal(plain, false, false, destination, pool);
         }
 
         /**
@@ -220,6 +216,7 @@ namespace seal
         @param[out] destination The ciphertext to overwrite with the encrypted
         plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encrypt_zero_symmetric(Ciphertext &destination,
@@ -240,6 +237,7 @@ namespace seal
         @param[out] destination The ciphertext to overwrite with the encrypted
         plaintext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
@@ -248,7 +246,7 @@ namespace seal
             Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_zero_custom(parms_id, destination, false, false, pool);
+            encrypt_zero_internal(parms_id, false, false, destination, pool);
         }
 
         /**
@@ -269,6 +267,10 @@ namespace seal
         @param[out] stream The stream to save the result to
         @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if plain is not valid for the encryption
         parameters
         @throws std::invalid_argument if plain is not in default NTT form
@@ -281,24 +283,29 @@ namespace seal
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
-            encrypt_custom(plain, destination, false, true, pool);
+            encrypt_internal(plain, false, true, destination, pool);
             return destination.save(stream, compr_mode);
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to an output
-        stream. The encryption parameters for the resulting ciphertext correspond
-        to the highest (data) level in the modulus switching chain. Dynamic memory
-        allocations in the process are allocated from the memory pool pointed to by
-        the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and saves result to
+        an output stream. The encryption parameters for the resulting ciphertext
+        correspond to the highest (data) level in the modulus switching chain.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
 
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output stream
+        must have the "binary" flag set. The output is in binary format and not
+        human-readable.
 
         @param[out] stream The stream to save the result to
         @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if pool is uninitialized
         */
         inline std::streamoff encrypt_zero_symmetric_save(
@@ -311,19 +318,25 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to an output
-        stream. The encryption parameters for the resulting ciphertext correspond to
-        the given parms_id. Dynamic memory allocations in the process are allocated
-        from the memory pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and saves result to
+        an output stream. The encryption parameters for the resulting ciphertext
+        correspond to the given parms_id. Dynamic memory allocations in the
+        process are allocated from the memory pool pointed to by the given
+        MemoryPoolHandle.
 
-        Half of the polynomials in Galois keys are randomly generated and are replaced
-        with the seed used to compress output size. The output stream must have the
-        "binary" flag set. The output is in binary format and not human-readable.
+        Half of the polynomials in Galois keys are randomly generated and are
+        replaced with the seed used to compress output size. The output stream
+        must have the "binary" flag set. The output is in binary format and not
+        human-readable.
 
         @param[in] parms_id The parms_id for the resulting ciphertext
         @param[out] stream The stream to save the result to
         @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
@@ -335,7 +348,7 @@ namespace seal
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
-            encrypt_zero_custom(parms_id, destination, false, true, pool);
+            encrypt_zero_internal(parms_id, false, true, destination, pool);
             return destination.save(stream, compr_mode);
         }
 
@@ -357,10 +370,11 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
         @throws std::invalid_argument if out is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if plain is not valid for the encryption
         parameters
@@ -375,7 +389,7 @@ namespace seal
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
-            encrypt_custom(plain, destination, false, true, pool);
+            encrypt_internal(plain, false, true, destination, pool);
             return destination.save(out, size, compr_mode);
         }
 
@@ -394,10 +408,11 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
         @throws std::invalid_argument if out is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if pool is uninitialized
         */
@@ -426,6 +441,7 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
         @throws std::invalid_argument if out is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data to be saved is invalid, if compression
@@ -443,7 +459,7 @@ namespace seal
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
-            encrypt_zero_custom(parms_id, destination, false, true, pool);
+            encrypt_zero_internal(parms_id, false, true, destination, pool);
             return destination.save(out, size, compr_mode);
         }
 
@@ -463,12 +479,16 @@ namespace seal
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
-        void encrypt_zero_custom(parms_id_type parms_id, Ciphertext &destination,
+        void encrypt_zero_internal(
+            parms_id_type parms_id,
             bool is_asymmetric, bool save_seed,
+            Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
-        void encrypt_custom(const Plaintext &plain, Ciphertext &destination,
+        void encrypt_internal(
+            const Plaintext &plain,
             bool is_asymmetric, bool save_seed,
+            Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         std::shared_ptr<SEALContext> context_{ nullptr };

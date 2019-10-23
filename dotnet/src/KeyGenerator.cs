@@ -163,12 +163,35 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the relinearization keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
+
         public long RelinKeysSave(Stream stream, ComprModeType? comprMode = null)
         {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, true, out IntPtr relinKeysPtr);
-            using (RelinKeys relinKeys = new RelinKeys(relinKeysPtr))
+            try
             {
-                return relinKeys.Save(stream, comprMode);
+                using (RelinKeys relinKeys = new RelinKeys(relinKeysPtr))
+                {
+                    return relinKeys.Save(stream, comprMode);
+                }
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Compression failed", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -212,13 +235,37 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the Galois keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
         public long GaloisKeysSave(Stream stream, ComprModeType? comprMode = null)
         {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
+            IntPtr galoisKeysPtr = IntPtr.Zero;
             try
             {
-                NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, true, out IntPtr galoisKeysPtr);
+                NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, true, out galoisKeysPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+
+            try
+            {
                 using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
                 {
                     return galoisKeys.Save(stream, comprMode);
@@ -227,7 +274,7 @@ namespace Microsoft.Research.SEAL
             catch (COMException ex)
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                    throw new InvalidOperationException("Compression failed", ex);
                 throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
@@ -298,19 +345,42 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <param name="stream">The stream to save the Galois keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if galoisElts or stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
         public long GaloisKeysSave(IEnumerable<ulong> galoisElts, Stream stream, ComprModeType? comprMode = null)
         {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
 
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
+            IntPtr galoisKeysPtr = IntPtr.Zero;
             try
             {
                 ulong[] galoisEltsArr = galoisElts.ToArray();
                 NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
-                    (ulong)galoisEltsArr.Length, galoisEltsArr, true, out IntPtr galoisKeysPtr);
+                    (ulong)galoisEltsArr.Length, galoisEltsArr, true, out galoisKeysPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+
+            try
+            {
                 using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
                 {
                     return galoisKeys.Save(stream, comprMode);
@@ -319,7 +389,7 @@ namespace Microsoft.Research.SEAL
             catch (COMException ex)
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                    throw new InvalidOperationException("Compression failed", ex);
                 throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
@@ -381,20 +451,42 @@ namespace Microsoft.Research.SEAL
         /// <param name="steps">The rotation step counts for which to generate keys</param>
         /// <param name="stream">The stream to save the Galois keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
-        /// <exception cref="ArgumentNullException">if steps is null</exception>
+        /// <exception cref="ArgumentNullException">if steps or stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
         public long GaloisKeysSave(IEnumerable<int> steps, Stream stream, ComprModeType? comprMode = null)
         {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
 
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
+            IntPtr galoisKeysPtr = IntPtr.Zero;
             try
             {
                 int[] stepsArr = steps.ToArray();
                 NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
-                    (ulong)stepsArr.Length, stepsArr, true, out IntPtr galoisKeysPtr);
+                    (ulong)stepsArr.Length, stepsArr, true, out galoisKeysPtr);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
+
+            try
+            {
                 using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
                 {
                     return galoisKeys.Save(stream, comprMode);
@@ -403,7 +495,7 @@ namespace Microsoft.Research.SEAL
             catch (COMException ex)
             {
                 if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
+                    throw new InvalidOperationException("Compression failed", ex);
                 throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }

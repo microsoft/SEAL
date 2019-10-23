@@ -101,6 +101,9 @@ namespace seal
 
         @param[out] stream The stream to save the relinearization keys to
         @param[in] compr_mode The desired compression mode
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff relin_keys_save(
             std::ostream &stream,
@@ -121,8 +124,8 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         @param[in] compr_mode The desired compression mode
         */
@@ -150,8 +153,8 @@ namespace seal
         Enc(plain(x)) to Enc(plain(x^p)).
 
         @param[in] galois_elts The Galois elements for which to generate keys
-        @throws std::logic_error if the encryption parameters do not support batching
-        and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
         SEAL_NODISCARD inline GaloisKeys galois_keys(
@@ -162,9 +165,9 @@ namespace seal
 
         /**
         Generates and saves Galois keys to an output stream. This function creates
-        specific Galois keys that can be used to apply specific Galois automorphisms
-        on encrypted data. The user needs to give as input a vector of Galois
-        elements corresponding to the keys that are to be created.
+        specific Galois keys that can be used to apply specific Galois
+        automorphisms on encrypted data. The user needs to give as input a vector
+        of Galois elements corresponding to the keys that are to be created.
 
         Half of the polynomials in Galois keys are randomly generated and are
         replaced with the seed used to compress output size. The output is in
@@ -177,6 +180,9 @@ namespace seal
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff galois_keys_save(
             const std::vector<std::uint64_t> &galois_elts,
@@ -200,13 +206,13 @@ namespace seal
         @param[out] out The memory location to write the GaloisKeys to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
-        @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
-        @throws std::runtime_error if I/O operations failed
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if the Galois elements are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -230,6 +236,9 @@ namespace seal
         @param[in] galois_steps The rotation step counts for which to generate keys
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if the step counts are not valid
         */
         SEAL_NODISCARD GaloisKeys galois_keys(const std::vector<int> &steps)
@@ -256,6 +265,9 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if the step counts are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -284,13 +296,13 @@ namespace seal
         @param[out] out The memory location to write the GaloisKeys to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
-        @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
-        @throws std::runtime_error if I/O operations failed
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if the Galois elements are not valid
         */
         inline std::streamoff galois_keys_save(
@@ -332,6 +344,9 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if compression mode is not supported, or if
+        compression failed
+        @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff galois_keys_save(
             std::ostream &stream,
@@ -353,13 +368,11 @@ namespace seal
         @param[out] out The memory location to write the GaloisKeys to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
-        @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
+        batching and scheme is scheme_type::BFV
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed
         @throws std::logic_error if the encryption parameters do not support
-        batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
         */
         inline std::streamoff galois_keys_save(

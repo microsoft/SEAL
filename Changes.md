@@ -1,5 +1,11 @@
 # List of Changes
 
+## Version 3.4.3
+
+- Fixed bug in .NET serialization code where an incorrect number of bytes was written when using
+ZLIB compression.
+- Added Linux and macOS support to NuGet package system.
+
 ## Version 3.4.2
 
 - Fixed bug reported in [Issue 66](https://github.com/microsoft/SEAL/issues/66) on GitHub.

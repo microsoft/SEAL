@@ -15,22 +15,22 @@ using namespace sealnet;
 
 struct seal::Encryptor::EncryptorPrivateHelper
 {
-    static void encrypt_symmetric_custom(Encryptor *encryptor, const Plaintext &plain, bool save_seed, Ciphertext &destination,
-        MemoryPoolHandle pool = MemoryManager::GetPool())
+    static void encrypt_symmetric_internal(Encryptor *encryptor, const Plaintext &plain,
+        bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
     {
-        encryptor->encrypt_custom(plain, destination, true, save_seed, pool);
+        encryptor->encrypt_internal(plain, false, save_seed, destination, pool);
     }
 
-    static void encrypt_zero_symmetric_custom(Encryptor *encryptor, parms_id_type parms_id, bool save_seed, Ciphertext &destination,
-        MemoryPoolHandle pool = MemoryManager::GetPool())
+    static void encrypt_zero_symmetric_internal(Encryptor *encryptor, parms_id_type parms_id,
+        bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
     {
-        encryptor->encrypt_zero_custom(parms_id, destination, true, save_seed, pool);
+        encryptor->encrypt_zero_internal(parms_id, false, save_seed, destination, pool);
     }
 
-    static void encrypt_zero_symmetric_custom(Encryptor *encryptor, bool save_seed, Ciphertext &destination,
-        MemoryPoolHandle pool = MemoryManager::GetPool())
+    static void encrypt_zero_symmetric_internal(Encryptor *encryptor, bool save_seed,
+        Ciphertext &destination, MemoryPoolHandle pool)
     {
-        encryptor->encrypt_zero_custom(encryptor->context_->first_parms_id(), destination, true, save_seed, pool);
+        encryptor->encrypt_zero_internal(encryptor->context_->first_parms_id(), false, save_seed, destination, pool);
     }
 };
 
@@ -125,6 +125,10 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_Encrypt(void *thisptr, void *plaintext,
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZero1(void *thisptr, uint64_t *parms_id, void *destination, void *pool_handle)
@@ -148,6 +152,10 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZero1(void *thisptr, uint64_t *p
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZero2(void *thisptr, void *destination, void *pool_handle)
@@ -167,6 +175,10 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZero2(void *thisptr, void *desti
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptSymmetric(void *thisptr, void *plaintext, bool save_seed, void *destination, void *pool_handle)
@@ -181,12 +193,16 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptSymmetric(void *thisptr, void *p
 
     try
     {
-        Encryptor::EncryptorPrivateHelper::encrypt_symmetric_custom(encryptor, *plain, save_seed, *cipher, *pool);
+        Encryptor::EncryptorPrivateHelper::encrypt_symmetric_internal(encryptor, *plain, save_seed, *cipher, *pool);
         return S_OK;
     }
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -204,12 +220,16 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZeroSymmetric1(void *thisptr, ui
 
     try
     {
-        Encryptor::EncryptorPrivateHelper::encrypt_zero_symmetric_custom(encryptor, parms, save_seed, *cipher, *pool);
+        Encryptor::EncryptorPrivateHelper::encrypt_zero_symmetric_internal(encryptor, parms, save_seed, *cipher, *pool);
         return S_OK;
     }
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -223,12 +243,16 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZeroSymmetric2(void *thisptr, bo
 
     try
     {
-        Encryptor::EncryptorPrivateHelper::encrypt_zero_symmetric_custom(encryptor, save_seed, *cipher, *pool);
+        Encryptor::EncryptorPrivateHelper::encrypt_zero_symmetric_internal(encryptor, save_seed, *cipher, *pool);
         return S_OK;
     }
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 

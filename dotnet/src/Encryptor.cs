@@ -4,6 +4,7 @@
 using Microsoft.Research.SEAL.Tools;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
@@ -59,14 +60,16 @@ namespace Microsoft.Research.SEAL
 
             if (null == secretKey)
             {
-                NativeMethods.Encryptor_Create(context.NativePtr, publicKey.NativePtr, IntPtr.Zero, out IntPtr ptr);
+                NativeMethods.Encryptor_Create(
+                    context.NativePtr, publicKey.NativePtr, IntPtr.Zero, out IntPtr ptr);
                 NativePtr = ptr;
             }
             else
             {
                 if (!ValCheck.IsValidFor(secretKey, context))
                     throw new ArgumentException("Secret key is not valid for encryption parameters");
-                NativeMethods.Encryptor_Create(context.NativePtr, publicKey.NativePtr, secretKey.NativePtr, out IntPtr ptr);
+                NativeMethods.Encryptor_Create(
+                    context.NativePtr, publicKey.NativePtr, secretKey.NativePtr, out IntPtr ptr);
                 NativePtr = ptr;
             }
         }
@@ -125,13 +128,21 @@ namespace Microsoft.Research.SEAL
         /// pool pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="plain">The plaintext to encrypt</param>
-        /// <param name="destination">The ciphertext to overwrite with the encrypted plaintext</param>
+        /// <param name="destination">The ciphertext to overwrite with the encrypted
+        /// plaintext</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either plain or destination are null</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if plain is not in default NTT form</exception>
+        /// <exception cref="ArgumentNullException">if either plain or destination
+        /// are null</exception>
+        /// <exception cref="InvalidOperationException">if a public key is not
+        /// set</exception>
+        /// <exception cref="ArgumentException">if plain is not valid for the
+        /// encryption parameters</exception>
+        /// <exception cref="ArgumentException">if plain is not in default NTT
+        /// form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void Encrypt(Plaintext plain, Ciphertext destination, MemoryPoolHandle pool = null)
+        public void Encrypt(
+            Plaintext plain, Ciphertext destination,
+            MemoryPoolHandle pool = null)
         {
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
@@ -139,24 +150,41 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Encryptor_Encrypt(NativePtr, plain.NativePtr, destination.NativePtr, poolHandle);
+            try
+            {
+                NativeMethods.Encryptor_Encrypt(
+                    NativePtr, plain.NativePtr, destination.NativePtr, poolHandle);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A public key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
         /// <summary>
-        /// Encrypts a zero plaintext with the public key and stores the result in destination.
+        /// Encrypts a zero plaintext with the public key and stores the result in
+        /// destination.
         /// </summary>
         /// <remarks>
-        /// The encryption parameters for the resulting ciphertext correspond to the given
-        /// parms_id. Dynamic memory allocations in the process are allocated from the memory
-        /// pool pointed to by the given MemoryPoolHandle.
+        /// The encryption parameters for the resulting ciphertext correspond to
+        /// the given parms_id. Dynamic memory allocations in the process are allocated
+        /// from the memory pool pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
-        /// <param name="destination">The ciphertext to overwrite with the encrypted plaintext</param>
+        /// <param name="destination">The ciphertext to overwrite with the encrypted
+        /// plaintext</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either parmsId or destination are null</exception>
-        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentNullException">if either parmsId or destination are
+        /// null</exception>
+        /// <exception cref="InvalidOperationException">if a public key is not set</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
+        /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void EncryptZero(ParmsId parmsId, Ciphertext destination, MemoryPoolHandle pool = null)
+        public void EncryptZero(
+            ParmsId parmsId, Ciphertext destination,
+            MemoryPoolHandle pool = null)
         {
             if (null == parmsId)
                 throw new ArgumentNullException(nameof(parmsId));
@@ -164,20 +192,34 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Encryptor_EncryptZero1(NativePtr, parmsId.Block, destination.NativePtr, poolHandle);
+            try
+            {
+                NativeMethods.Encryptor_EncryptZero1(
+                    NativePtr, parmsId.Block, destination.NativePtr, poolHandle);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A public key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
         /// <summary>
-        /// Encrypts a zero plaintext with the public key and stores the result in destination.
+        /// Encrypts a zero plaintext with the public key and stores the result in
+        /// destination.
         /// </summary>
         /// <remarks>
         /// The encryption parameters for the resulting ciphertext correspond to the
-        /// highest (data) level in the modulus switching chain. Dynamic memory allocations in
-        /// the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// highest (data) level in the modulus switching chain. Dynamic memory allocations
+        /// in the process are allocated from the memory pool pointed to by the given
+        /// MemoryPoolHandle.
         /// </remarks>
-        /// <param name="destination">The ciphertext to overwrite with the encrypted plaintext</param>
+        /// <param name="destination">The ciphertext to overwrite with the encrypted
+        /// plaintext</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if destination is null</exception>
+        /// <exception cref="InvalidOperationException">if a public key is not set</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void EncryptZero(Ciphertext destination, MemoryPoolHandle pool = null)
         {
@@ -185,7 +227,16 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Encryptor_EncryptZero2(NativePtr, destination.NativePtr, poolHandle);
+            try
+            {
+                NativeMethods.Encryptor_EncryptZero2(NativePtr, destination.NativePtr, poolHandle);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A public key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
         /// <summary>
@@ -199,13 +250,19 @@ namespace Microsoft.Research.SEAL
         /// pool pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="plain">The plaintext to encrypt</param>
-        /// <param name="destination">The ciphertext to overwrite with the encrypted plaintext</param>
+        /// <param name="destination">The ciphertext to overwrite with the encrypted
+        /// plaintext</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either plain or destination are null</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentNullException">if either plain or destination are
+        /// null</exception>
+        /// <exception cref="InvalidOperationException">if a secret key is not set</exception>
+        /// <exception cref="ArgumentException">if plain is not valid for the encryption
+        /// parameters</exception>
         /// <exception cref="ArgumentException">if plain is not in default NTT form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void EncryptSymmetric(Plaintext plain, Ciphertext destination, MemoryPoolHandle pool = null)
+        public void EncryptSymmetric(
+            Plaintext plain, Ciphertext destination,
+            MemoryPoolHandle pool = null)
         {
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
@@ -213,24 +270,41 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Encryptor_EncryptSymmetric(NativePtr, plain.NativePtr, false, destination.NativePtr, poolHandle);
+            try
+            {
+                NativeMethods.Encryptor_EncryptSymmetric(
+                    NativePtr, plain.NativePtr, false, destination.NativePtr, poolHandle);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A secret key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
         /// <summary>
-        /// Encrypts a zero plaintext with the secret key and stores the result in destination.
+        /// Encrypts a zero plaintext with the secret key and stores the result in
+        /// destination.
         /// </summary>
         /// <remarks>
         /// The encryption parameters for the resulting ciphertext correspond to the given
-        /// parms_id. Dynamic memory allocations in the process are allocated from the memory
-        /// pool pointed to by the given MemoryPoolHandle.
+        /// parms_id. Dynamic memory allocations in the process are allocated from the
+        /// memory pool pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
-        /// <param name="destination">The ciphertext to overwrite with the encrypted plaintext</param>
+        /// <param name="destination">The ciphertext to overwrite with the encrypted
+        /// plaintext</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either parmsId or destination are null</exception>
-        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentNullException">if either parmsId or destination are
+        /// null</exception>
+        /// <exception cref="InvalidOperationException">if a secret key is not set</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
+        /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void EncryptZeroSymmetric(ParmsId parmsId, Ciphertext destination, MemoryPoolHandle pool = null)
+        public void EncryptZeroSymmetric(
+            ParmsId parmsId, Ciphertext destination,
+            MemoryPoolHandle pool = null)
         {
             if (null == parmsId)
                 throw new ArgumentNullException(nameof(parmsId));
@@ -238,32 +312,59 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Encryptor_EncryptZeroSymmetric1(NativePtr, parmsId.Block, false, destination.NativePtr, poolHandle);
+            try
+            {
+                NativeMethods.Encryptor_EncryptZeroSymmetric1(
+                    NativePtr, parmsId.Block, false, destination.NativePtr, poolHandle);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A secret key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
         /// <summary>
-        /// Encrypts a zero plaintext with the secret key and stores the result in destination.
+        /// Encrypts a zero plaintext with the secret key and stores the result in
+        /// destination.
         /// </summary>
         /// <remarks>
         /// The encryption parameters for the resulting ciphertext correspond to the
-        /// highest (data) level in the modulus switching chain. Dynamic memory allocations in
-        /// the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// highest (data) level in the modulus switching chain. Dynamic memory allocations
+        /// in the process are allocated from the memory pool pointed to by the given 
+        /// MemoryPoolHandle.
         /// </remarks>
-        /// <param name="destination">The ciphertext to overwrite with the encrypted plaintext</param>
+        /// <param name="destination">The ciphertext to overwrite with the encrypted
+        /// plaintext</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if destination is null</exception>
+        /// <exception cref="InvalidOperationException">if a secret key is not set</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void EncryptZeroSymmetric(Ciphertext destination, MemoryPoolHandle pool = null)
+        public void EncryptZeroSymmetric(
+            Ciphertext destination,
+            MemoryPoolHandle pool = null)
         {
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.Encryptor_EncryptZeroSymmetric2(NativePtr, false, destination.NativePtr, poolHandle);
+            try
+            {
+                NativeMethods.Encryptor_EncryptZeroSymmetric2(
+                    NativePtr, false, destination.NativePtr, poolHandle);
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A secret key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
+            }
         }
 
         /// <summary>
-        /// Encrypts a plaintext with the secret key and stores the result in destination.
+        /// Encrypts a plaintext with the secret key and stores the result in
+        /// destination.
         /// </summary>
         /// <remarks>
         /// The encryption parameters for the resulting ciphertext correspond to:
@@ -282,31 +383,57 @@ namespace Microsoft.Research.SEAL
         /// <param name="comprMode">The desired compression mode</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if plain or stream is null</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if plain is not in default NTT form</exception>
+        /// <exception cref="InvalidOperationException">if a secret key is not set</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
+        /// <exception cref="ArgumentException">if plain is not valid for the encryption
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if plain is not in default NTT
+        /// form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public long EncryptSymmetricSave(Plaintext plain, Stream stream, ComprModeType? comprMode = null, MemoryPoolHandle pool = null)
+        public long EncryptSymmetricSave(
+            Plaintext plain, Stream stream,
+            ComprModeType? comprMode = null,
+            MemoryPoolHandle pool = null)
         {
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(pool))
+            try
             {
-                NativeMethods.Encryptor_EncryptSymmetric(NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
-                return destination.Save(stream, comprMode);
+                using (Ciphertext destination = new Ciphertext(pool))
+                {
+                    NativeMethods.Encryptor_EncryptSymmetric(
+                        NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
+                    return destination.Save(stream, comprMode);
+                }
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A secret key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
         /// <summary>
-        /// Encrypts a zero plaintext with the secret key and stores the result in destination.
+        /// Encrypts a zero plaintext with the secret key and stores the result in
+        /// destination.
         /// </summary>
         /// <remarks>
-        /// The encryption parameters for the resulting ciphertext correspond to the given
-        /// parms_id. Dynamic memory allocations in the process are allocated from the memory
-        /// pool pointed to by the given MemoryPoolHandle.
+        /// The encryption parameters for the resulting ciphertext correspond to
+        /// the given parms_id. Dynamic memory allocations in the process are allocated
+        /// from the memory pool pointed to by the given MemoryPoolHandle.
         ///
         /// Half of the polynomials in relinearization keys are randomly generated
         /// and are replaced with the seed used to compress output size. The output
@@ -316,32 +443,61 @@ namespace Microsoft.Research.SEAL
         /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
         /// <param name="stream">The stream to save the Ciphertext to</param>
         /// <param name="comprMode">The desired compression mode</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if parmsId or stream is null</exception>
-        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory
+        /// pool</param>
+        /// <exception cref="ArgumentNullException">if parmsId or stream is
+        /// null</exception>
+        /// <exception cref="InvalidOperationException">if a secret key is not
+        /// set</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the
+        /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public long EncryptZeroSymmetricSave(ParmsId parmsId, Stream stream, ComprModeType? comprMode = null, MemoryPoolHandle pool = null)
+        public long EncryptZeroSymmetricSave(
+            ParmsId parmsId, Stream stream,
+            ComprModeType? comprMode = null,
+            MemoryPoolHandle pool = null)
         {
             if (null == parmsId)
                 throw new ArgumentNullException(nameof(parmsId));
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(pool))
+            try
             {
-                NativeMethods.Encryptor_EncryptZeroSymmetric1(NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
-                return destination.Save(stream, comprMode);
+                using (Ciphertext destination = new Ciphertext(pool))
+                {
+                    NativeMethods.Encryptor_EncryptZeroSymmetric1(
+                        NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
+                    return destination.Save(stream, comprMode);
+                }
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A secret key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
         /// <summary>
-        /// Encrypts a zero plaintext with the secret key and stores the result in destination.
+        /// Encrypts a zero plaintext with the secret key and stores the result in
+        /// destination.
         /// </summary>
         /// <remarks>
         /// The encryption parameters for the resulting ciphertext correspond to the
-        /// highest (data) level in the modulus switching chain. Dynamic memory allocations in
-        /// the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// highest (data) level in the modulus switching chain. Dynamic memory
+        /// allocations in the process are allocated from the memory pool pointed to
+        /// by the given MemoryPoolHandle.
         ///
         /// Half of the polynomials in relinearization keys are randomly generated
         /// and are replaced with the seed used to compress output size. The output
@@ -350,19 +506,44 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the Ciphertext to</param>
         /// <param name="comprMode">The desired compression mode</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory
+        /// pool</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="InvalidOperationException">if a secret key is not
+        /// set</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public long EncryptZeroSymmetricSave(Stream stream, ComprModeType? comprMode = null, MemoryPoolHandle pool = null)
+        public long EncryptZeroSymmetricSave(
+            Stream stream, ComprModeType? comprMode = null,
+            MemoryPoolHandle pool = null)
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
 
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(pool))
+            try
             {
-                NativeMethods.Encryptor_EncryptZeroSymmetric2(NativePtr, true, destination.NativePtr, poolHandle);
-                return destination.Save(stream, comprMode);
+                using (Ciphertext destination = new Ciphertext(pool))
+                {
+                    NativeMethods.Encryptor_EncryptZeroSymmetric2(
+                        NativePtr, true, destination.NativePtr, poolHandle);
+
+                    return destination.Save(stream, comprMode);
+                }
+            }
+            catch (COMException ex)
+            {
+                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
+                    throw new InvalidOperationException("A secret key is not set", ex);
+                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 

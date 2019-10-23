@@ -16,27 +16,51 @@ namespace SEALNetTest
         [TestMethod]
         public void EncryptTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            KeyGenerator keyGen = new KeyGenerator(context);
-            PublicKey publicKey = keyGen.PublicKey;
-            SecretKey secretKey = keyGen.SecretKey;
-            Encryptor encryptor = new Encryptor(context, publicKey, secretKey);
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keyGen = new KeyGenerator(context);
+                PublicKey publicKey = keyGen.PublicKey;
+                SecretKey secretKey = keyGen.SecretKey;
+                Encryptor encryptor = new Encryptor(context, publicKey, secretKey);
 
-            Assert.IsNotNull(encryptor);
+                Assert.IsNotNull(encryptor);
 
-            Plaintext plain = new Plaintext("1x^1 + 1");
+                Plaintext plain = new Plaintext("1x^1 + 1");
 
-            Ciphertext cipher = new Ciphertext();
-            Assert.AreEqual(0ul, cipher.Size);
-            encryptor.Encrypt(plain, cipher);
-            Assert.IsNotNull(cipher);
-            Assert.AreEqual(2ul, cipher.Size);
+                Ciphertext cipher = new Ciphertext();
+                Assert.AreEqual(0ul, cipher.Size);
+                encryptor.Encrypt(plain, cipher);
+                Assert.IsNotNull(cipher);
+                Assert.AreEqual(2ul, cipher.Size);
 
-            cipher = new Ciphertext();
-            Assert.AreEqual(0ul, cipher.Size);
-            encryptor.Encrypt(plain, cipher);
-            Assert.IsNotNull(cipher);
-            Assert.AreEqual(2ul, cipher.Size);
+                cipher = new Ciphertext();
+                Assert.AreEqual(0ul, cipher.Size);
+                encryptor.Encrypt(plain, cipher);
+                Assert.IsNotNull(cipher);
+                Assert.AreEqual(2ul, cipher.Size);
+            }
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keyGen = new KeyGenerator(context);
+                SecretKey secretKey = keyGen.SecretKey;
+                Encryptor encryptor = new Encryptor(context, secretKey);
+
+                Assert.IsNotNull(encryptor);
+
+                Plaintext plain = new Plaintext("1x^1 + 1");
+
+                Ciphertext cipher = new Ciphertext();
+                Assert.AreEqual(0ul, cipher.Size);
+                encryptor.EncryptSymmetric(plain, cipher);
+                Assert.IsNotNull(cipher);
+                Assert.AreEqual(2ul, cipher.Size);
+
+                cipher = new Ciphertext();
+                Assert.AreEqual(0ul, cipher.Size);
+                encryptor.EncryptSymmetric(plain, cipher);
+                Assert.IsNotNull(cipher);
+                Assert.AreEqual(2ul, cipher.Size);
+            }
         }
 
         [TestMethod]
