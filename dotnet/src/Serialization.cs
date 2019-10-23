@@ -218,12 +218,6 @@ namespace Microsoft.Research.SEAL
             {
                 throw new ArgumentException($"{nameof(size)} is out of bounds", ex);
             }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Save operation failed", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
         }
 
         /// <summary>Loads data from a given binary stream.</summary>
@@ -289,12 +283,6 @@ namespace Microsoft.Research.SEAL
             catch (OverflowException ex)
             {
                 throw new InvalidOperationException("Size indicated by loaded SEALHeader is out of bounds", ex);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Save operation failed", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
     }

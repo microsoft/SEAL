@@ -411,18 +411,9 @@ namespace Microsoft.Research.SEAL
         /// the return type</exception>
         public long SaveSize(ComprModeType comprMode)
         {
-            try
-            {
-                NativeMethods.BigUInt_SaveSize(
-                    NativePtr, (byte)comprMode, out long outBytes);
-                return outBytes;
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("The size does not fit in the return type", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.BigUInt_SaveSize(
+                NativePtr, (byte)comprMode, out long outBytes);
+            return outBytes;
         }
 
         /// <summary>Saves the BigUInt to an output stream.</summary>
@@ -623,19 +614,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(modulus));
 
             BigUInt result = null;
-            try
-            {
-                NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus.NativePtr,
-                    out IntPtr resultptr);
-                result = new BigUInt(resultptr);
-                return result;
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("BigUInt value cannot be zero", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.BigUInt_ModuloInvert(NativePtr, modulus.NativePtr,
+                out IntPtr resultptr);
+            result = new BigUInt(resultptr);
+            return result;
         }
 
         /// <summary>Returns the inverse of a BigUInt with respect to the specified

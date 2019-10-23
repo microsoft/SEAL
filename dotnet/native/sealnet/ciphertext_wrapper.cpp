@@ -478,7 +478,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SaveSize(void *thisptr, uint8_t compr_
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -503,7 +503,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Save(void *thisptr, uint8_t *outptr, u
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
@@ -534,7 +534,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_UnsafeLoad(void *thisptr, void *contex
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
@@ -565,7 +565,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Load(void *thisptr, void *context, uin
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {

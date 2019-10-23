@@ -150,17 +150,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
-            {
-                NativeMethods.Encryptor_Encrypt(
-                    NativePtr, plain.NativePtr, destination.NativePtr, poolHandle);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A public key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Encryptor_Encrypt(
+                NativePtr, plain.NativePtr, destination.NativePtr, poolHandle);
         }
 
         /// <summary>
@@ -192,17 +183,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
-            {
-                NativeMethods.Encryptor_EncryptZero1(
-                    NativePtr, parmsId.Block, destination.NativePtr, poolHandle);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A public key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Encryptor_EncryptZero1(
+                NativePtr, parmsId.Block, destination.NativePtr, poolHandle);
         }
 
         /// <summary>
@@ -227,16 +209,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
-            {
-                NativeMethods.Encryptor_EncryptZero2(NativePtr, destination.NativePtr, poolHandle);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A public key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Encryptor_EncryptZero2(NativePtr, destination.NativePtr, poolHandle);
         }
 
         /// <summary>
@@ -270,17 +243,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
-            {
-                NativeMethods.Encryptor_EncryptSymmetric(
-                    NativePtr, plain.NativePtr, false, destination.NativePtr, poolHandle);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A secret key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Encryptor_EncryptSymmetric(
+                NativePtr, plain.NativePtr, false, destination.NativePtr, poolHandle);
         }
 
         /// <summary>
@@ -312,17 +276,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
-            {
-                NativeMethods.Encryptor_EncryptZeroSymmetric1(
-                    NativePtr, parmsId.Block, false, destination.NativePtr, poolHandle);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A secret key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Encryptor_EncryptZeroSymmetric1(
+                NativePtr, parmsId.Block, false, destination.NativePtr, poolHandle);
         }
 
         /// <summary>
@@ -349,17 +304,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
-            {
-                NativeMethods.Encryptor_EncryptZeroSymmetric2(
-                    NativePtr, false, destination.NativePtr, poolHandle);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A secret key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Encryptor_EncryptZeroSymmetric2(
+                NativePtr, false, destination.NativePtr, poolHandle);
         }
 
         /// <summary>
@@ -409,20 +355,11 @@ namespace Microsoft.Research.SEAL
                 throw new InvalidOperationException("Unsupported compression mode");
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
+            using (Ciphertext destination = new Ciphertext(pool))
             {
-                using (Ciphertext destination = new Ciphertext(pool))
-                {
-                    NativeMethods.Encryptor_EncryptSymmetric(
-                        NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
-                    return destination.Save(stream, comprMode);
-                }
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A secret key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
+                NativeMethods.Encryptor_EncryptSymmetric(
+                    NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
+                return destination.Save(stream, comprMode);
             }
         }
 
@@ -472,20 +409,11 @@ namespace Microsoft.Research.SEAL
                 throw new InvalidOperationException("Unsupported compression mode");
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
+            using (Ciphertext destination = new Ciphertext(pool))
             {
-                using (Ciphertext destination = new Ciphertext(pool))
-                {
-                    NativeMethods.Encryptor_EncryptZeroSymmetric1(
-                        NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
-                    return destination.Save(stream, comprMode);
-                }
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A secret key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
+                NativeMethods.Encryptor_EncryptZeroSymmetric1(
+                    NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
+                return destination.Save(stream, comprMode);
             }
         }
 
@@ -529,21 +457,12 @@ namespace Microsoft.Research.SEAL
                 throw new InvalidOperationException("Unsupported compression mode");
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            try
+            using (Ciphertext destination = new Ciphertext(pool))
             {
-                using (Ciphertext destination = new Ciphertext(pool))
-                {
-                    NativeMethods.Encryptor_EncryptZeroSymmetric2(
-                        NativePtr, true, destination.NativePtr, poolHandle);
+                NativeMethods.Encryptor_EncryptZeroSymmetric2(
+                    NativePtr, true, destination.NativePtr, poolHandle);
 
-                    return destination.Save(stream, comprMode);
-                }
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("A secret key is not set", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
+                return destination.Save(stream, comprMode);
             }
         }
 

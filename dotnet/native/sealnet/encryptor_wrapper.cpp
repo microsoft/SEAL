@@ -127,7 +127,7 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_Encrypt(void *thisptr, void *plaintext,
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -154,7 +154,7 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZero1(void *thisptr, uint64_t *p
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -177,7 +177,7 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZero2(void *thisptr, void *desti
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -202,7 +202,7 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptSymmetric(void *thisptr, void *p
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -229,7 +229,7 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZeroSymmetric1(void *thisptr, ui
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -252,7 +252,7 @@ SEALNETNATIVE HRESULT SEALCALL Encryptor_EncryptZeroSymmetric2(void *thisptr, bo
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 

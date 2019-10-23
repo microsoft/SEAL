@@ -77,7 +77,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Negate(void *thisptr, void *encrypted, 
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -103,7 +103,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Add(void *thisptr, void *encrypted1, vo
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -135,7 +135,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, uint64_t count, 
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -161,7 +161,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_AddPlain(void *thisptr, void *encrypted
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -187,7 +187,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Sub(void *thisptr, void *encrypted1, vo
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -213,7 +213,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_SubPlain(void *thisptr, void *encrypted
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -240,7 +240,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Multiply(void *thisptr, void *encrypted
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -275,7 +275,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, uint64_t co
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -302,7 +302,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyPlain(void *thisptr, void *encr
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -327,7 +327,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Square(void *thisptr, void *encrypted, 
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -354,7 +354,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Relinearize(void *thisptr, void *encryp
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -379,7 +379,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchToNext1(void *thisptr, void *e
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -428,7 +428,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo1(void *thisptr, void *encry
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -477,7 +477,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleToNext(void *thisptr, void *encr
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -506,7 +506,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleTo(void *thisptr, void *encrypte
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -533,7 +533,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Exponentiate(void *thisptr, void *encry
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -582,7 +582,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformToNTT2(void *thisptr, void *en
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -606,7 +606,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformFromNTT(void *thisptr, void *e
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -633,7 +633,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ApplyGalois(void *thisptr, void *encryp
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -660,7 +660,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateRows(void *thisptr, void *encrypt
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -687,7 +687,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateColumns(void *thisptr, void *encr
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -714,7 +714,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateVector(void *thisptr, void *encry
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -741,7 +741,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ComplexConjugate(void *thisptr, void *e
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
