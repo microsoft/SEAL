@@ -132,6 +132,14 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeys(steps));
             Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(steps_null, new MemoryStream()));
             Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(steps, new MemoryStream()));
+
+            EncryptionParameters smallParms = new EncryptionParameters(SchemeType.CKKS);
+            smallParms.PolyModulusDegree = 128;
+            smallParms.CoeffModulus = CoeffModulus.Create(smallParms.PolyModulusDegree, new int[] { 60 });
+            context = new SEALContext(smallParms, true, SecLevelType.None);
+            keygen = new KeyGenerator(context);
+            Utilities.AssertThrows<InvalidOperationException>(() => keygen.RelinKeys());
+            Utilities.AssertThrows<InvalidOperationException>(() => keygen.GaloisKeys());
         }
     }
 }

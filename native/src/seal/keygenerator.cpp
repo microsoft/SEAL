@@ -452,6 +452,11 @@ namespace seal
         std::vector<PublicKey> &destination,
         bool save_seed)
     {
+        if (!context_->using_keyswitching())
+        {
+            throw logic_error("keyswitching is not supported by the context");
+        }
+
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         size_t decomp_mod_count = context_->first_context_data()->parms().coeff_modulus().size();
         auto &key_context_data = *context_->key_context_data();

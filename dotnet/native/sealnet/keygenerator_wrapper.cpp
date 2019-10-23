@@ -40,6 +40,11 @@ struct seal::KeyGenerator::KeyGeneratorPrivateHelper
     {
         return keygen->galois_elts_all();
     }
+
+    static bool using_keyswitching(const KeyGenerator &keygen)
+    {
+        return keygen.context_->using_keyswitching();
+    }
 };
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create1(void *sealContext, void **key_generator)
@@ -126,6 +131,10 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, bool save_s
     catch (const invalid_argument&)
     {
         return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
     }
 }
 
@@ -226,5 +235,15 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_SecretKey(void *thisptr, void **secr
 
     SecretKey *key = new SecretKey(keygen->secret_key());
     *secret_key = key;
+    return S_OK;
+}
+
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching)
+{
+    KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
+    IfNullRet(keygen, E_POINTER);
+    IfNullRet(using_keyswitching, E_POINTER);
+
+    *using_keyswitching = KeyGenerator::KeyGeneratorPrivateHelper::using_keyswitching(*keygen);
     return S_OK;
 }

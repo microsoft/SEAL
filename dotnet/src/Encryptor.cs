@@ -332,7 +332,7 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// The encryption parameters for the resulting ciphertext correspond to the
         /// highest (data) level in the modulus switching chain. Dynamic memory allocations
-        /// in the process are allocated from the memory pool pointed to by the given 
+        /// in the process are allocated from the memory pool pointed to by the given
         /// MemoryPoolHandle.
         /// </remarks>
         /// <param name="destination">The ciphertext to overwrite with the encrypted

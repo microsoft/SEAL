@@ -85,6 +85,9 @@ namespace seal
 
         /**
         Generates and returns relinearization keys.
+
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         */
         SEAL_NODISCARD inline RelinKeys relin_keys()
         {
@@ -101,6 +104,8 @@ namespace seal
 
         @param[out] stream The stream to save the relinearization keys to
         @param[in] compr_mode The desired compression mode
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::logic_error if compression mode is not supported, or if
         compression failed
         @throws std::runtime_error if I/O operations failed
@@ -122,12 +127,13 @@ namespace seal
         @param[out] out The memory location to write the RelinKeys to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::invalid_argument if out is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if compression mode is not supported, or if
         compression failed
         @throws std::runtime_error if I/O operations failed
-        @param[in] compr_mode The desired compression mode
         */
         inline std::streamoff relin_keys_save(
             SEAL_BYTE *out,
@@ -155,6 +161,8 @@ namespace seal
         @param[in] galois_elts The Galois elements for which to generate keys
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::invalid_argument if the Galois elements are not valid
         */
         SEAL_NODISCARD inline GaloisKeys galois_keys(
@@ -180,6 +188,8 @@ namespace seal
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
         @throws std::invalid_argument if the Galois elements are not valid
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::logic_error if compression mode is not supported, or if
         compression failed
         @throws std::runtime_error if I/O operations failed
@@ -208,6 +218,8 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::invalid_argument if out is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if compression mode is not supported, or if
@@ -236,6 +248,8 @@ namespace seal
         @param[in] galois_steps The rotation step counts for which to generate keys
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::logic_error if compression mode is not supported, or if
         compression failed
         @throws std::runtime_error if I/O operations failed
@@ -265,6 +279,8 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::logic_error if compression mode is not supported, or if
         compression failed
         @throws std::runtime_error if I/O operations failed
@@ -298,6 +314,8 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::invalid_argument if out is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if compression mode is not supported, or if
@@ -344,6 +362,8 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::logic_error if compression mode is not supported, or if
         compression failed
         @throws std::runtime_error if I/O operations failed
@@ -369,6 +389,8 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         batching and scheme is scheme_type::BFV
+        @throws std::logic_error if the encryption parameters do not support
+        keyswitching
         @throws std::logic_error if the data to be saved is invalid, if compression
         mode is not supported, or if compression failed
         @throws std::runtime_error if I/O operations failed

@@ -145,9 +145,14 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Generates and returns relinearization keys.
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// </summary>
         public RelinKeys RelinKeys()
         {
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
+
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, false, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr);
         }
@@ -164,6 +169,8 @@ namespace Microsoft.Research.SEAL
         /// <param name="stream">The stream to save the relinearization keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support writing</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
@@ -174,6 +181,8 @@ namespace Microsoft.Research.SEAL
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             comprMode = comprMode ?? Serialization.ComprModeDefault;
             if (!Serialization.IsSupportedComprMode(comprMode.Value))
@@ -205,8 +214,13 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         public GaloisKeys GaloisKeys()
         {
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
+
             try
             {
                 NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, false, out IntPtr galoisKeysPtr);
@@ -238,6 +252,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support writing</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
@@ -247,6 +263,8 @@ namespace Microsoft.Research.SEAL
         {
             if (null == stream)
                 throw new ArgumentNullException(nameof(stream));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             comprMode = comprMode ?? Serialization.ComprModeDefault;
             if (!Serialization.IsSupportedComprMode(comprMode.Value))
@@ -299,11 +317,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
         public GaloisKeys GaloisKeys(IEnumerable<ulong> galoisElts)
         {
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             try
             {
@@ -348,6 +370,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if galoisElts or stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support writing</exception>
@@ -360,6 +384,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             comprMode = comprMode ?? Serialization.ComprModeDefault;
             if (!Serialization.IsSupportedComprMode(comprMode.Value))
@@ -410,11 +436,15 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
         public GaloisKeys GaloisKeys(IEnumerable<int> steps)
         {
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             try
             {
@@ -454,6 +484,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if steps or stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support writing</exception>
@@ -466,6 +498,8 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(stream));
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             comprMode = comprMode ?? Serialization.ComprModeDefault;
             if (!Serialization.IsSupportedComprMode(comprMode.Value))
@@ -506,6 +540,12 @@ namespace Microsoft.Research.SEAL
         protected override void DestroyNativeObject()
         {
             NativeMethods.KeyGenerator_Destroy(NativePtr);
+        }
+
+        internal bool UsingKeyswitching()
+        {
+            NativeMethods.KeyGenerator_ContextUsingKeyswitching(NativePtr, out bool result);
+            return result;
         }
     }
 }
