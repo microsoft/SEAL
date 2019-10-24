@@ -4,6 +4,10 @@
 
 - Fixed bug in .NET serialization code where an incorrect number of bytes was written when using
 ZLIB compression.
+- Fixed an issue with .NET functions `Encryptor.EncryptSymmetric...`, where asymmetric encryption
+was done instead of symmetric encryption.
+- Prevented `KeyGenerator::galois_keys` and `KeyGenerator::relin_keys` from being called when the
+encryption parameters do not support keyswitching.
 - Added Linux and macOS support to NuGet package system.
 
 ## Version 3.4.2
@@ -170,7 +174,8 @@ reported in [issue 56](https://github.com/microsoft/SEAL/issues/56).
 
 ### Minor Bug and Typo Fixes
 
-- Switched to using RNS rounding instead of RNS flooring to fix the CKKS accuracy issue reported in [issue 52](https://github.com/microsoft/SEAL/issues/52).
+- Switched to using RNS rounding instead of RNS flooring to fix the CKKS
+accuracy issue reported in [issue 52](https://github.com/microsoft/SEAL/issues/52).
 - Added support for QUIET option in CMake (`find_package(seal QUIET)`).
 - Using `[[nodiscard]]` attribute when compiling as C++17.
 - Fixed a bug in `Evaluator::multiply_many` where the input vector was changed.
@@ -179,8 +184,11 @@ reported in [issue 56](https://github.com/microsoft/SEAL/issues/56).
 
 ### Minor Bug and Typo Fixes
 
-- A bug was fixed that introduced significant extra inaccuracy in CKKS when compiled on Linux, at least with some versions of glibc; Windows and macOS were not affected.
-- A bug was fixed where, on 32-bit platforms, some versions of GCC resolved the util::reverse_bits function to the incorrect overload.
+- A bug was fixed that introduced significant extra inaccuracy in CKKS when
+compiled on Linux, at least with some versions of glibc; Windows and macOS
+were not affected.
+- A bug was fixed where, on 32-bit platforms, some versions of GCC resolved
+the util::reverse_bits function to the incorrect overload.
 
 ## Version 3.3.0
 
@@ -213,35 +221,54 @@ Deleted header files:
 - native/defaultparameters.h
 
 New header files:
-- [native/src/seal/kswitchkeys.h](native/src/seal/kswitchkeys.h): new base class for `RelinKeys` and `GaloisKeys`)
-- [native/src/seal/modulus.h](native/src/seal/modulus.h): static helper functions for parameter selection
-- [native/src/seal/valcheck.h](native/src/seal/valcheck.h): object validity check functionality
+- [native/src/seal/kswitchkeys.h](native/src/seal/kswitchkeys.h): new base
+class for `RelinKeys` and `GaloisKeys`)
+- [native/src/seal/modulus.h](native/src/seal/modulus.h): static helper
+functions for parameter selection
+- [native/src/seal/valcheck.h](native/src/seal/valcheck.h): object validity check
+functionality
 - [native/src/seal/util/rlwe.h](native/src/seal/util/rlwe.h)
 
 In class `SEALContext`:
 - Replaced `context_data(parms_id_type)` with `get_context_data(parms_id_type)`;
 - Removed `context_data()`;
-- Added `key_context_data()`, `key_parms_id()`, `first_context_data()`, and `last_context_data()`;
-- Added `using_keyswitching()` that indicates whether key switching is upported in this `SEALContext`;
-- `Create(...)` in C++, and constructor in C#, now accepts an optional security level based on
-[HomomorphicEncryption.org](https://HomomorphicEncryption.org) security standard, causing it to enforce the specified security level. By default a 128-bit security level is used.
-- Added `prev_context_data()` method to class `ContextData` (doubly linked modulus switching chain);
+- Added `key_context_data()`, `key_parms_id()`, `first_context_data()`, and
+`last_context_data()`;
+- Added `using_keyswitching()` that indicates whether key switching is supported
+in this `SEALContext`;
+- `Create(...)` in C++, and constructor in C#, now accepts an optional security
+level based on
+[HomomorphicEncryption.org](https://HomomorphicEncryption.org) security standard,
+causing it to enforce the specified security level. By default a 128-bit
+security level is used.
+- Added `prev_context_data()` method to class `ContextData` (doubly linked modulus
+switching chain);
 - In C# `SEALContext` now has a public constructor.
 
 Parameter selection:
 - Removed the `DefaultParams` class;
-- Default `coeff_modulus` for the BFV scheme are now accessed through the function `CoeffModulus::BFVDefault(...)`. These moduli are not recommended for the CKKS scheme;
-- Customized `coeff_modulus` for the CKKS scheme can be created using `CoeffModulus::Create(...)` which takes the `poly_modulus_degree` and a vector of bit-lengths of the prime factors as arguments. It samples suitable primes close to 2^bit_length and returns a vector of `SmallModulus` elements.
-- `PlainModulus::Batching(...)` can be used to sample a prime for `plain_modulus` that supports `BatchEncoder` for the BFV scheme.
+- Default `coeff_modulus` for the BFV scheme are now accessed through the function
+`CoeffModulus::BFVDefault(...)`. These moduli are not recommended for the CKKS scheme;
+- Customized `coeff_modulus` for the CKKS scheme can be created using
+`CoeffModulus::Create(...)` which takes the `poly_modulus_degree` and a vector of
+bit-lengths of the prime factors as arguments. It samples suitable primes close to
+2^bit_length and returns a vector of `SmallModulus` elements.
+- `PlainModulus::Batching(...)` can be used to sample a prime for `plain_modulus`
+that supports `BatchEncoder` for the BFV scheme.
 
 Other important changes:
 - Removed `size_capacity` function and data members from `Ciphertext` class;
-- Moved all validation methods such as `is_valid_for` and `is_metadata_valid_for` to `valcheck.h`;
-- Removed argument `decomposition_bit_count` from methods `relin_keys(...)` and `galois_keys(...)` in class `KeyGenerator`;
-- It is no longer possible to create more than one relinearization key. This is to simplify the API and reduce confusion. We have never seen a real use-case where more relinearization keys would be a good idea;
+- Moved all validation methods such as `is_valid_for` and `is_metadata_valid_for`
+to `valcheck.h`;
+- Removed argument `decomposition_bit_count` from methods `relin_keys(...)` and
+`galois_keys(...)` in class `KeyGenerator`;
+- It is no longer possible to create more than one relinearization key. This is
+to simplify the API and reduce confusion. We have never seen a real use-case where
+more relinearization keys would be a good idea;
 - Added methods to generate an encryption of zero to `Encryptor`;
 - Added comparison methods and primality check for `SmallModulus`;
-- Classes `RelinKeys` and `GaloisKeys` are now derived from a common base class `KSwitchKeys`;
+- Classes `RelinKeys` and `GaloisKeys` are now derived from a common base class
+`KSwitchKeys`;
 - GoogleTest framework is now included as a Git submodule;
 - Numerous bugs have been fixed, particularly in the .NET wrappers.
 
