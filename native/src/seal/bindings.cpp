@@ -501,7 +501,7 @@ EMSCRIPTEN_BINDINGS(bindings)
         ;
 
     enum_<scheme_type>("SchemeType")
-        .value("NONE", scheme_type::none)
+        .value("none", scheme_type::none)
         .value("BFV", scheme_type::BFV)
         .value("CKKS", scheme_type::CKKS)
         ;
