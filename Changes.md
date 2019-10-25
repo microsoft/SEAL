@@ -8,6 +8,8 @@ ZLIB compression.
 was done instead of symmetric encryption.
 - Prevented `KeyGenerator::galois_keys` and `KeyGenerator::relin_keys` from being called when the
 encryption parameters do not support keyswitching.
+- Fixed a bug in `Decryptor::invariant_noise_budget` where the computed noise budget was
+`log(plain_modulus)` bits smaller than it was supposed to be.
 - Added Linux and macOS support to NuGet package system.
 
 ## Version 3.4.2

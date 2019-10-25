@@ -117,7 +117,7 @@ void example_bfv_basics()
     The plaintext modulus is specific to the BFV scheme, and cannot be set when
     using the CKKS scheme.
     */
-    parms.set_plain_modulus(256);
+    parms.set_plain_modulus(1024);
 
     /*
     Now that all parameters are set, we are ready to construct a SEALContext
@@ -134,7 +134,7 @@ void example_bfv_basics()
     print_parameters(context);
 
     cout << endl;
-    cout << "~~~~~~ A naive way to calculate 2(x^2+1)(x+1)^2. ~~~~~~" << endl;
+    cout << "~~~~~~ A naive way to calculate 4(x^2+1)(x+1)^2. ~~~~~~" << endl;
 
     /*
     The encryption schemes in Microsoft SEAL are public key encryption schemes.
@@ -176,11 +176,11 @@ void example_bfv_basics()
     /*
     As an example, we evaluate the degree 4 polynomial
 
-        2x^4 + 4x^3 + 4x^2 + 4x + 2
+        4x^4 + 8x^3 + 8x^2 + 8x + 4
 
     over an encrypted x = 6. The coefficients of the polynomial can be considered
     as plaintext inputs, as we will see below. The computation is done modulo the
-    plain_modulus 256.
+    plain_modulus 1024.
 
     While this examples is simple and easy to understand, it does not have much
     practical value. In later examples we will demonstrate how to compute more
@@ -402,8 +402,8 @@ void example_bfv_basics()
     cout << endl;
 
     /*
-    For x=6, 4(x^2+1)(x+1)^2 = 7252. Since the plaintext modulus is set to 256,
-    this result is computed in integers modulo 256. Therefore the expected output
-    should be 7252 % 256 == 84, or 0x54 in hexadecimal.
+    For x=6, 4(x^2+1)(x+1)^2 = 7252. Since the plaintext modulus is set to 1024,
+    this result is computed in integers modulo 1024. Therefore the expected output
+    should be 7252 % 1024 == 84, or 0x54 in hexadecimal.
     */
 }
