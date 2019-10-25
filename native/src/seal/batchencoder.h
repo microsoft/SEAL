@@ -14,9 +14,6 @@
 #ifdef SEAL_USE_MSGSL_SPAN
 #include <gsl/span>
 #endif
-#ifdef SEAL_USE_MSGSL_MULTISPAN
-#include <gsl/multi_span>
-#endif
 
 namespace seal
 {
@@ -140,55 +137,6 @@ namespace seal
         @throws std::invalid_argument if values is too large
         */
         void encode(gsl::span<const std::int64_t> values, Plaintext &destination);
-#ifdef SEAL_USE_MSGSL_MULTISPAN
-        /**
-        Creates a plaintext from a given matrix. This function "batches" a given matrix
-        of integers modulo the plaintext modulus into a plaintext element, and stores
-        the result in the destination parameter. The input must have dimensions [2, N/2],
-        where N denotes the degree of the polynomial modulus, representing a 2 x (N/2)
-        matrix. The numbers in the matrix can be at most equal to the plaintext modulus for
-        it to represent a valid plaintext.
-
-        If the destination plaintext overlaps the input values in memory, the behavior of
-        this function is undefined.
-
-        @param[in] values The matrix of integers modulo plaintext modulus to batch
-        @param[out] destination The plaintext polynomial to overwrite with the result
-        @throws std::invalid_argument if values is too large or has incorrect size
-        */
-        inline void encode(gsl::multi_span<
-            const std::uint64_t,
-            static_cast<std::ptrdiff_t>(2),
-            gsl::dynamic_range> values, Plaintext &destination)
-        {
-            encode(gsl::span<const std::uint64_t>(values.data(), values.size()),
-                destination);
-        }
-
-        /**
-        Creates a plaintext from a given matrix. This function "batches" a given matrix
-        of integers modulo the plaintext modulus into a plaintext element, and stores
-        the result in the destination parameter. The input must have dimensions [2, N/2],
-        where N denotes the degree of the polynomial modulus, representing a 2 x (N/2)
-        matrix. The numbers in the matrix can be at most equal to the plaintext modulus for
-        it to represent a valid plaintext.
-
-        If the destination plaintext overlaps the input values in memory, the behavior of
-        this function is undefined.
-
-        @param[in] values The matrix of integers modulo plaintext modulus to batch
-        @param[out] destination The plaintext polynomial to overwrite with the result
-        @throws std::invalid_argument if values is too large or has incorrect size
-        */
-        inline void encode(gsl::multi_span<
-            const std::int64_t,
-            static_cast<std::ptrdiff_t>(2),
-            gsl::dynamic_range> values, Plaintext &destination)
-        {
-            encode(gsl::span<const std::int64_t>(values.data(), values.size()),
-                destination);
-        }
-#endif
 #endif
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
@@ -282,63 +230,6 @@ namespace seal
         */
         void decode(const Plaintext &plain, gsl::span<std::int64_t> destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
-#ifdef SEAL_USE_MSGSL_MULTISPAN
-        /**
-        Inverse of encode. This function "unbatches" a given plaintext into a matrix
-        of integers modulo the plaintext modulus, and stores the result in the destination
-        parameter. The destination must have dimensions [2, N/2], where N denotes the degree
-        of the polynomial modulus, representing a 2 x (N/2) matrix. The input plaintext must
-        have degress less than the polynomial modulus, and coefficients less than the
-        plaintext modulus, i.e. it must be a valid plaintext for the encryption parameters.
-        Dynamic memory allocations in the process are allocated from the memory pool pointed
-        to by the given MemoryPoolHandle.
-
-        @param[in] plain The plaintext polynomial to unbatch
-        @param[out] destination The matrix to be overwritten with the values in the slots
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is in NTT form
-        @throws std::invalid_argument if destination has incorrect size
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        inline void decode(const Plaintext &plain,
-            gsl::multi_span<std::uint64_t,
-                static_cast<std::ptrdiff_t>(2),
-                gsl::dynamic_range> destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
-        {
-            decode(plain, gsl::span<std::uint64_t>(destination.data(),
-                destination.size()), std::move(pool));
-        }
-
-        /**
-        Inverse of encode. This function "unbatches" a given plaintext into a matrix
-        of integers modulo the plaintext modulus, and stores the result in the destination
-        parameter. The destination must have dimensions [2, N/2], where N denotes the degree
-        of the polynomial modulus, representing a 2 x (N/2) matrix. The input plaintext must
-        have degress less than the polynomial modulus, and coefficients less than the
-        plaintext modulus, i.e. it must be a valid plaintext for the encryption parameters.
-        Dynamic memory allocations in the process are allocated from the memory pool pointed
-        to by the given MemoryPoolHandle.
-
-        @param[in] plain The plaintext polynomial to unbatch
-        @param[out] destination The matrix to be overwritten with the values in the slots
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is in NTT form
-        @throws std::invalid_argument if destination has incorrect size
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        inline void decode(const Plaintext &plain,
-            gsl::multi_span<std::int64_t,
-                static_cast<std::ptrdiff_t>(2),
-                gsl::dynamic_range> destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
-        {
-            decode(plain, gsl::span<std::int64_t>(destination.data(),
-                destination.size()), std::move(pool));
-        }
-#endif
 #endif
         /**
         Inverse of encode. This function "unbatches" a given plaintext in-place into

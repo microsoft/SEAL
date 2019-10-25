@@ -22,9 +22,6 @@ if(MSGSL_FOUND AND NOT TARGET MSGSL::MSGSL)
     # Detect gsl::span
     check_type_size("gsl::span<std::uint64_t>" MSGSL_SPAN LANGUAGE CXX)
 
-    # Detect gsl::multi_span
-    check_type_size("gsl::multi_span<std::uint64_t, 1, gsl::dynamic_range>" MSGSL_MULTISPAN LANGUAGE CXX)
-
     cmake_pop_check_state()
 
     # Create interface target for MSGSL

@@ -294,15 +294,6 @@ if(SEAL_USE_MSGSL_SPAN)
     endif()
 endif()
 
-set(SEAL_USE_MSGSL_MULTISPAN_OPTION_STR "Use gsl::multi_span")
-cmake_dependent_option(SEAL_USE_MSGSL_MULTISPAN ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} ON "SEAL_USE_MSGSL" OFF)
-if(SEAL_USE_MSGSL_MULTISPAN)
-    # Detect gsl::multi_span
-    if(NOT HAVE_MSGSL_MULTISPAN)
-        set(SEAL_USE_MSGSL_MULTISPAN OFF CACHE BOOL ${SEAL_USE_MSGSL_MULTISPAN_OPTION_STR} FORCE)
-    endif()
-endif()
-
 # Helper macro for clearing zlib cache
 macro(clear_zlib_cache)
     unset(ZLIB_INCLUDE_DIR CACHE)
