@@ -1,0 +1,72 @@
+parameters:
+    dir: ''
+    artifactName: 'nix-drop'
+
+steps:
+
+    - task: CMake@1
+      displayName: 'CMake SEAL'
+      inputs:
+          workingDirectory: native/src
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_LIB_BUILD_TYPE=Static_PIC ${{ parameters.dir }}'
+
+    - script: |
+          cd $BUILD_SOURCESDIRECTORY
+          cd native/src
+          make
+      displayName: 'Build SEAL'
+
+    - script: |
+          cd native/tests/thirdparty
+          git submodule update --init
+      displayName: 'Install Google Test'
+
+    - task: CMake@1
+      displayName: 'CMake SEALTest'
+      inputs:
+          workingDirectory: native/tests
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_DIR=../src/cmake ${{ parameters.dir }}'
+
+    - script: |
+          cd $BUILD_SOURCESDIRECTORY
+          cd native/tests
+          make
+      displayName: 'Build SEALTest'
+
+    - script: |
+          cd $BUILD_SOURCESDIRECTORY
+          cd native/bin
+          ./sealtest
+      displayName: 'Run unit tests'
+
+    - task: CMake@1
+      displayName: 'CMake SEALNetNative'
+      inputs:
+          workingDirectory: dotnet/native
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_DIR=../../native/src/cmake ${{ parameters.dir }}'
+
+    - script: |
+          cd $BUILD_SOURCESDIRECTORY
+          cd dotnet/native
+          make
+      displayName: 'Build SEALNetNative'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run dotnet unit tests'
+      inputs:
+          command: test
+          projects: '**/SEALNetTest.csproj'
+          arguments: '--configuration Release --verbosity detailed'
+
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/dotnet/lib'
+          Contents: 'libsealnetnative.*'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/dotnet/lib'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'
+      inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          artifactName: ${{ parameters.artifactName }}
