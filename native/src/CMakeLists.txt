@@ -297,6 +297,7 @@ endif()
 # Helper macro for clearing zlib cache
 macro(clear_zlib_cache)
     unset(ZLIB_INCLUDE_DIR CACHE)
+    unset(ZLIB_LIBRARY CACHE)
     unset(ZLIB_LIBRARY_DEBUG CACHE)
     unset(ZLIB_LIBRARY_RELEASE CACHE)
 endmacro()
