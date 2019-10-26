@@ -38,6 +38,7 @@ stages:
                 - template: templates/nix-build.yml
                   parameters:
                       artifactName: linux-drop
+                      ext: a
 
           - job: macOs
             displayName: Mac OS X
@@ -49,6 +50,7 @@ stages:
                   parameters:
                       dir: .
                       artifactName: macos-drop
+                      ext: so
 
           - job: Nuget
             displayName: Pack into Nuget

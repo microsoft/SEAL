@@ -86,14 +86,6 @@ steps:
               }
             ]
 
-    - task: NuGetCommand@2
-      displayName: 'Publish NuGet'
-      inputs:
-          command: 'push'
-          nuGetFeedType: 'internal'
-          publishVstsFeed: 'seal-ci'
-          packagesToPush: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\Release\**\*.nupkg'
-
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'
       inputs:

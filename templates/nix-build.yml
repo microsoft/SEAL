@@ -1,6 +1,7 @@
 parameters:
     dir: ''
     artifactName: 'nix-drop'
+    ext: ''
 
 steps:
 
@@ -8,7 +9,7 @@ steps:
       displayName: 'CMake SEAL'
       inputs:
           workingDirectory: native/src
-          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_LIB_BUILD_TYPE=Static_PIC ${{ parameters.dir }}'
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_LIB_BUILD_TYPE=Static_PIC -DZLIB_LIBRARY=./zlib-build/libz.${{parameters.ext}} -DZLIB_INCLUDE_DIR=./zlib-src/ ${{ parameters.dir }}'
 
     - script: |
           cd $BUILD_SOURCESDIRECTORY

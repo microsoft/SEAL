@@ -73,6 +73,20 @@ endfunction()
 # enable_cxx_compiler_flag_if_supported("-Wshadow")
 # enable_cxx_compiler_flag_if_supported("-pedantic")
 
+if(NOT MSVC)
+    include(ExternalProject)
+    ExternalProject_Add(zlib
+        GIT_REPOSITORY    https://github.com/madler/zlib.git
+        GIT_TAG           v1.2.11
+        SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/zlib-src"
+        BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/zlib-build"
+        INSTALL_COMMAND   ""
+    )
+    add_custom_command(TARGET zlib POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/zlib-build/zconf.h ${CMAKE_CURRENT_BINARY_DIR}/zlib-src/)
+endif()
+
 # Are we using SEAL_DEBUG?
 set(SEAL_DEBUG ${SEAL_DEBUG_DEFAULT})
 message(STATUS "Microsoft SEAL debug mode: ${SEAL_DEBUG}")
