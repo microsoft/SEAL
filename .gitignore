@@ -22,6 +22,7 @@ native/src/seal/util/config.h
 **/.DS_Store
 **/GSL
 **/zlib
+native/src/thirdparty
 dotnet/nuget/nuget.exe
 dotnet/nuget/SEALNet.nuspec
 
