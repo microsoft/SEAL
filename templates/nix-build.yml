@@ -6,10 +6,21 @@ parameters:
 steps:
 
     - task: CMake@1
+      displayName: 'CMake ZLIB'
+      inputs:
+          workingDirectory: native/zlib-cmake
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release'
+
+    - script: |
+          cd $BUILD_SOURCESDIRECTORY
+          cd native/zlib-cmake
+          make
+
+    - task: CMake@1
       displayName: 'CMake SEAL'
       inputs:
           workingDirectory: native/src
-          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_LIB_BUILD_TYPE=Static_PIC -DZLIB_LIBRARY=./zlib-build/libz.${{parameters.ext}} -DZLIB_INCLUDE_DIR=./zlib-src/ ${{ parameters.dir }}'
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_LIB_BUILD_TYPE=Static_PIC -DZLIB_LIBRARY=../zlib-cmake/zlib-src/libz.${{parameters.ext}} -DZLIB_INCLUDE_DIR=../zlib-cmake/zlib-src/ ${{ parameters.dir }}'
 
     - script: |
           cd $BUILD_SOURCESDIRECTORY
