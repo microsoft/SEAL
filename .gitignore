@@ -21,7 +21,8 @@ native/src/seal/util/config.h
 **/compile_commands.json
 **/.DS_Store
 **/GSL
-**/zlib
+native/src/thirdparty/zlib/*
+!native/src/thirdparty/zlib/CMakeLists.txt
 dotnet/nuget/nuget.exe
 dotnet/nuget/SEALNet.nuspec
 

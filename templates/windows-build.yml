@@ -31,13 +31,13 @@ steps:
     - task: CMake@1
       displayName: 'CMake ZLIB'
       inputs:
-          workingDirectory: native/zlib-cmake
+          workingDirectory: native/src/thirdparty/zlib
           cmakeArgs: '.'
 
     - task: CMake@1
       displayName: 'Build ZLIB'
       inputs:
-          workingDirectory: native/zlib-cmake
+          workingDirectory: native/src/thirdparty/zlib
           cmakeArgs: '--build . --config Release'
 
     - task: VSBuild@1

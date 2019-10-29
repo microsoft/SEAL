@@ -12,7 +12,7 @@ stages:
             pool:
                 vmImage: 'windows-latest'
             variables:
-                ZLIB_ROOT: '$(Build.SourcesDirectory)\native\zlib-cmake\zlib-src'
+                ZLIB_ROOT: '$(Build.SourcesDirectory)\native\src\thirdparty\zlib\zlib-src'
             steps:
                 - template: templates/windows-build.yml
                   parameters:
