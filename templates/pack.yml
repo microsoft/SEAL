@@ -59,7 +59,7 @@ steps:
           command: 'pack'
           packagesToPack: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\*.nuspec'
           packDestination: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\Release'
-          buildProperties: 'Configuration=Release;LINUX_SEALNETNATIVE=$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\lib\libsealnetnative.so;MAC_SEALNETNATIVE=$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\lib\libsealnetnative.dylib'
+          buildProperties: 'Configuration=Release;LINUX_SEALNETNATIVE=$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\lib\libsealnetnative.so;MACOS_SEALNETNATIVE=$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\lib\libsealnetnative.dylib'
 
     - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
       displayName: 'ESRP CodeSigning NuGet package'
