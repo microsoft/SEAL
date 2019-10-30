@@ -19,6 +19,7 @@ of the library should look at the [list of changes](Changes.md).
 - [Installing Microsoft SEAL](#installing-microsoft-seal)
   - [Windows](#windows)
   - [Linux and macOS](#linux-and-macos)
+  - [From NuGet package](#from-nuget-package)
 - [Enabling Optional Dependencies](#enabling-optional-dependencies)
   - [Microsoft GSL](#microsoft-gsl)
   - [ZLIB](#zlib)
@@ -109,14 +110,6 @@ best choice. For applications where exact values are necessary, the BFV scheme i
 the only choice.
 
 # Installing Microsoft SEAL
-
-## NuGet package for .NET developers
-For .NET developers the easiest way of installing Microsoft SEAL is by using the
-multi-platform NuGet package available at
-[NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Simply add
-this package into your .NET project as a dependency and you are ready to go. However,
-we still recommend reading through the below detailed installation instructions, as
-they will explain how to build and run the examples that come with the source code.
 
 ## Windows
 
@@ -259,12 +252,18 @@ cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ````
 
-## Enabling Optional Dependencies
+## From NuGet package
+For .NET developers the easiest way of installing Microsoft SEAL is by using the
+multi-platform NuGet package available at
+[NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Simply add
+this package into your .NET project as a dependency and you are ready to go.
+
+# Enabling Optional Dependencies
 
 Microsoft SEAL has no required dependencies, but certain optional features can be
 enabled if it is compiled with support for specific third-party libraries.
 
-### Microsoft GSL
+## Microsoft GSL
 
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements
 two convenient (templated) data types: `gsl::span` and `gsl::multi_span`. These
@@ -315,7 +314,7 @@ make
 Note that you may need to give the same `-DMSGSL_ROOT=~/mylibs/GSL/include` hint
 to CMake when configuring your own applications linking with Microsoft SEAL.
 
-### ZLIB
+## ZLIB
 
 ZLIB is a widely used compression library that implements the DEFLATE compression
 algorithm. Microsoft SEAL can use ZLIB (if present) to automatically compress data

@@ -3,7 +3,6 @@
 
 using Microsoft.Research.SEAL;
 using System;
-using System.IO;
 
 namespace SEALNetExamples
 {
