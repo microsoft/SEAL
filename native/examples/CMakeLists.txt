@@ -20,7 +20,7 @@ target_sources(sealexamples
 )
 
 # Import Microsoft SEAL
-find_package(SEAL 3.4.2 EXACT REQUIRED
+find_package(SEAL 3.4.3 EXACT REQUIRED
     # Providing a path so this can be built without installing Microsoft SEAL
     PATHS ${SEALExamples_SOURCE_DIR}/../src/cmake
 )

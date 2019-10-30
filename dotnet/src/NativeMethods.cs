@@ -848,6 +848,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KeyGenerator_SecretKey(IntPtr thisptr, out IntPtr secretKey);
 
+        [DllImport(sealnetnative, PreserveSig = false)]
+        internal static extern void KeyGenerator_ContextUsingKeyswitching(IntPtr thisptr, out bool result);
+
         #endregion
 
         #region RelinKeys methods

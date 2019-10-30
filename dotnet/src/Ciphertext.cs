@@ -492,18 +492,9 @@ namespace Microsoft.Research.SEAL
         /// the return type</exception>
         public long SaveSize(ComprModeType comprMode)
         {
-            try
-            {
-                NativeMethods.Ciphertext_SaveSize(
-                    NativePtr, (byte)comprMode, out long outBytes);
-                return outBytes;
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("The size does not fit in the return type", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Ciphertext_SaveSize(
+                NativePtr, (byte)comprMode, out long outBytes);
+            return outBytes;
         }
 
         /// <summary>Saves the ciphertext to an output stream.</summary>

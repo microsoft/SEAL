@@ -19,12 +19,6 @@
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/ztools.h"
-#ifdef SEAL_USE_MSGSL_SPAN
-#include <gsl/span>
-#endif
-#ifdef SEAL_USE_MSGSL_MULTISPAN
-#include <gsl/multi_span>
-#endif
 #ifdef EMSCRIPTEN
     #include "seal/base64.h"
     #include <sstream>
@@ -360,49 +354,7 @@ namespace seal
         {
             return data_.cbegin();
         }
-#ifdef SEAL_USE_MSGSL_MULTISPAN
-        /**
-        Returns the ciphertext data.
-        */
-        SEAL_NODISCARD inline auto data_span()
-            -> gsl::multi_span<
-                ct_coeff_type,
-                gsl::dynamic_range,
-                gsl::dynamic_range,
-                gsl::dynamic_range>
-        {
-            return gsl::as_multi_span<
-                ct_coeff_type,
-                gsl::dynamic_range,
-                gsl::dynamic_range,
-                gsl::dynamic_range>(
-                    data_.begin(),
-                    util::safe_cast<std::ptrdiff_t>(size_),
-                    util::safe_cast<std::ptrdiff_t>(coeff_mod_count_),
-                    util::safe_cast<std::ptrdiff_t>(poly_modulus_degree_));
-        }
 
-        /**
-        Returns the backing array storing all of the coefficient values.
-        */
-        SEAL_NODISCARD inline auto data_span() const
-            -> gsl::multi_span<
-                const ct_coeff_type,
-                gsl::dynamic_range,
-                gsl::dynamic_range,
-                gsl::dynamic_range>
-        {
-            return gsl::as_multi_span<
-                const ct_coeff_type,
-                gsl::dynamic_range,
-                gsl::dynamic_range,
-                gsl::dynamic_range>(
-                    data_.cbegin(),
-                    util::safe_cast<std::ptrdiff_t>(size_),
-                    util::safe_cast<std::ptrdiff_t>(coeff_mod_count_),
-                    util::safe_cast<std::ptrdiff_t>(poly_modulus_degree_));
-        }
-#endif
         /**
         Returns a pointer to a particular polynomial in the ciphertext
         data. Note that Microsoft SEAL stores each polynomial in the ciphertext

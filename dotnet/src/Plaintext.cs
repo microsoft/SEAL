@@ -219,16 +219,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the plaintext is NTT transformed</exception>
         public void Resize(ulong coeffCount)
         {
-            try
-            {
-                NativeMethods.Plaintext_Resize(NativePtr, coeffCount);
-            }
-            catch(COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Plaintext is NTT transformed", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Plaintext_Resize(NativePtr, coeffCount);
         }
 
         /// <summary>
@@ -485,18 +476,9 @@ namespace Microsoft.Research.SEAL
         /// the return type</exception>
         public long SaveSize(ComprModeType comprMode)
         {
-            try
-            {
-                NativeMethods.Plaintext_SaveSize(
-                    NativePtr, (byte)comprMode, out long outBytes);
-                return outBytes;
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("The size does not fit in the return type", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.Plaintext_SaveSize(
+                NativePtr, (byte)comprMode, out long outBytes);
+            return outBytes;
         }
 
         /// <summary>Saves the Plaintext to an output stream.</summary>

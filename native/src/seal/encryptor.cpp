@@ -105,8 +105,11 @@ namespace seal
         }
     }
 
-    void Encryptor::encrypt_zero_custom(parms_id_type parms_id, Ciphertext &destination,
-        bool is_asymmetric, bool save_seed, MemoryPoolHandle pool) const
+    void Encryptor::encrypt_zero_internal(
+        parms_id_type parms_id,
+        bool is_asymmetric, bool save_seed,
+        Ciphertext &destination,
+        MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!pool)
@@ -195,11 +198,30 @@ namespace seal
         }
     }
 
-    void Encryptor::encrypt_custom(const Plaintext &plain, Ciphertext &destination,
-        bool is_asymmetric, bool save_seed, MemoryPoolHandle pool) const
+    void Encryptor::encrypt_internal(
+        const Plaintext &plain,
+        bool is_asymmetric, bool save_seed,
+        Ciphertext &destination,
+        MemoryPoolHandle pool) const
     {
+        // Minimal verification that the keys are set
+        if (is_asymmetric)
+        {
+            if (!is_metadata_valid_for(public_key_, context_))
+            {
+                throw logic_error("public key is not set");
+            }
+        }
+        else
+        {
+            if (!is_metadata_valid_for(secret_key_, context_))
+            {
+                throw logic_error("secret key is not set");
+            }
+        }
+
         // Verify that plain is valid.
-        if (!is_valid_for(plain, context_))
+        if (!is_metadata_valid_for(plain, context_) || !is_buffer_valid(plain))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -212,8 +234,8 @@ namespace seal
                 throw invalid_argument("plain cannot be in NTT form");
             }
 
-            encrypt_zero_custom(context_->first_parms_id(), destination,
-                is_asymmetric, save_seed, pool);
+            encrypt_zero_internal(context_->first_parms_id(),
+                is_asymmetric, save_seed, destination, pool);
 
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
@@ -232,8 +254,8 @@ namespace seal
             {
                 throw invalid_argument("plain is not valid for encryption parameters");
             }
-            encrypt_zero_custom(plain.parms_id(), destination,
-                is_asymmetric, save_seed, pool);
+            encrypt_zero_internal(plain.parms_id(),
+                is_asymmetric, save_seed, destination, pool);
 
             auto &parms = context_->get_context_data(plain.parms_id())->parms();
             auto &coeff_modulus = parms.coeff_modulus();

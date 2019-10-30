@@ -234,16 +234,7 @@ namespace Microsoft.Research.SEAL
             }
             set
             {
-                try
-                {
-                    NativeMethods.EncParams_SetPlainModulus(NativePtr, value.NativePtr);
-                }
-                catch (COMException ex)
-                {
-                    if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                        throw new InvalidOperationException("Scheme is not SchemeType.BFV", ex);
-                    throw new InvalidOperationException("Unexpected native library error", ex);
-                }
+                NativeMethods.EncParams_SetPlainModulus(NativePtr, value.NativePtr);
             }
         }
 
@@ -264,16 +255,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if scheme is not CKKS</exception>
         public void SetPlainModulus(ulong plainModulus)
         {
-            try
-            {
-                NativeMethods.EncParams_SetPlainModulus(NativePtr, plainModulus);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Scheme is not SchemeType.BFV", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.EncParams_SetPlainModulus(NativePtr, plainModulus);
         }
 
         /// <summary>
@@ -299,18 +281,9 @@ namespace Microsoft.Research.SEAL
         /// the return type</exception>
         public long SaveSize(ComprModeType comprMode)
         {
-            try
-            {
-                NativeMethods.EncParams_SaveSize(
-                    NativePtr, (byte)comprMode, out long outBytes);
-                return outBytes;
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("The size does not fit in the return type", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            NativeMethods.EncParams_SaveSize(
+                NativePtr, (byte)comprMode, out long outBytes);
+            return outBytes;
         }
 
         /// <summary>Saves the EncryptionParameters to an output stream.</summary>

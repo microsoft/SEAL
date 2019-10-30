@@ -145,9 +145,14 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>
         /// Generates and returns relinearization keys.
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// </summary>
         public RelinKeys RelinKeys()
         {
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
+
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, false, out IntPtr relinKeysPtr);
             return new RelinKeys(relinKeysPtr);
         }
@@ -163,8 +168,26 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the relinearization keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
+
         public long RelinKeysSave(Stream stream, ComprModeType? comprMode = null)
         {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
+
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
             NativeMethods.KeyGenerator_RelinKeys(NativePtr, true, out IntPtr relinKeysPtr);
             using (RelinKeys relinKeys = new RelinKeys(relinKeysPtr))
             {
@@ -182,19 +205,15 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         public GaloisKeys GaloisKeys()
         {
-            try
-            {
-                NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, false, out IntPtr galoisKeysPtr);
-                return new GaloisKeys(galoisKeysPtr);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
+
+            NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, false, out IntPtr galoisKeysPtr);
+            return new GaloisKeys(galoisKeysPtr);
         }
 
         /// <summary>
@@ -212,23 +231,31 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="stream">The stream to save the Galois keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
         public long GaloisKeysSave(Stream stream, ComprModeType? comprMode = null)
         {
-            try
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
+
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
+            NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, true, out IntPtr galoisKeysPtr);
+            using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
             {
-                NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, true, out IntPtr galoisKeysPtr);
-                using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
-                {
-                    return galoisKeys.Save(stream, comprMode);
-                }
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
+                return galoisKeys.Save(stream, comprMode);
             }
         }
 
@@ -252,25 +279,20 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
         public GaloisKeys GaloisKeys(IEnumerable<ulong> galoisElts)
         {
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            try
-            {
-                ulong[] galoisEltsArr = galoisElts.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
-                    (ulong)galoisEltsArr.Length, galoisEltsArr, false, out IntPtr galoisKeysPtr);
-                return new GaloisKeys(galoisKeysPtr);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            ulong[] galoisEltsArr = galoisElts.ToArray();
+            NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
+                (ulong)galoisEltsArr.Length, galoisEltsArr, false, out IntPtr galoisKeysPtr);
+            return new GaloisKeys(galoisKeysPtr);
         }
 
         /// <summary>
@@ -298,29 +320,37 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <param name="stream">The stream to save the Galois keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
+        /// <exception cref="ArgumentNullException">if galoisElts or stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
         public long GaloisKeysSave(IEnumerable<ulong> galoisElts, Stream stream, ComprModeType? comprMode = null)
         {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            try
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
+            ulong[] galoisEltsArr = galoisElts.ToArray();
+            NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
+                (ulong)galoisEltsArr.Length, galoisEltsArr, true, out IntPtr galoisKeysPtr);
+
+            using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
             {
-                ulong[] galoisEltsArr = galoisElts.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
-                    (ulong)galoisEltsArr.Length, galoisEltsArr, true, out IntPtr galoisKeysPtr);
-                using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
-                {
-                    return galoisKeys.Save(stream, comprMode);
-                }
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
+                return galoisKeys.Save(stream, comprMode);
             }
         }
 
@@ -340,25 +370,20 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
         public GaloisKeys GaloisKeys(IEnumerable<int> steps)
         {
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            try
-            {
-                int[] stepsArr = steps.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
-                    (ulong)stepsArr.Length, stepsArr, false, out IntPtr galoisKeysPtr);
-                return new GaloisKeys(galoisKeysPtr);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
-            }
+            int[] stepsArr = steps.ToArray();
+            NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
+                (ulong)stepsArr.Length, stepsArr, false, out IntPtr galoisKeysPtr);
+            return new GaloisKeys(galoisKeysPtr);
         }
 
         /// <summary>
@@ -381,30 +406,37 @@ namespace Microsoft.Research.SEAL
         /// <param name="steps">The rotation step counts for which to generate keys</param>
         /// <param name="stream">The stream to save the Galois keys to</param>
         /// <param name="comprMode">The desired compression mode</param>
-        /// <exception cref="ArgumentNullException">if steps is null</exception>
+        /// <exception cref="ArgumentNullException">if steps or stream is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if the encryption
+        /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not
+        /// support writing</exception>
+        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="InvalidOperationException">if compression mode is not
+        /// supported, or if compression failed</exception>
         public long GaloisKeysSave(IEnumerable<int> steps, Stream stream, ComprModeType? comprMode = null)
         {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
+            if (!UsingKeyswitching())
+                throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            try
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new InvalidOperationException("Unsupported compression mode");
+
+            int[] stepsArr = steps.ToArray();
+            NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
+                (ulong)stepsArr.Length, stepsArr, true, out IntPtr galoisKeysPtr);
+
+            using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
             {
-                int[] stepsArr = steps.ToArray();
-                NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
-                    (ulong)stepsArr.Length, stepsArr, true, out IntPtr galoisKeysPtr);
-                using (GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr))
-                {
-                    return galoisKeys.Save(stream, comprMode);
-                }
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Encryption parameters do not support batching and scheme is SchemeType.BFV", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
+                return galoisKeys.Save(stream, comprMode);
             }
         }
 
@@ -414,6 +446,12 @@ namespace Microsoft.Research.SEAL
         protected override void DestroyNativeObject()
         {
             NativeMethods.KeyGenerator_Destroy(NativePtr);
+        }
+
+        internal bool UsingKeyswitching()
+        {
+            NativeMethods.KeyGenerator_ContextUsingKeyswitching(NativePtr, out bool result);
+            return result;
         }
     }
 }

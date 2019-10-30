@@ -118,7 +118,7 @@ namespace SEALNetExamples
             The plaintext modulus is specific to the BFV scheme, and cannot be set when
             using the CKKS scheme.
             */
-            parms.PlainModulus = new SmallModulus(256);
+            parms.PlainModulus = new SmallModulus(1024);
 
             /*
             Now that all parameters are set, we are ready to construct a SEALContext
@@ -135,7 +135,7 @@ namespace SEALNetExamples
             Utilities.PrintParameters(context);
 
             Console.WriteLine();
-            Console.WriteLine("~~~~~~ A naive way to calculate 2(x^2+1)(x+1)^2. ~~~~~~");
+            Console.WriteLine("~~~~~~ A naive way to calculate 4(x^2+1)(x+1)^2. ~~~~~~");
 
             /*
             The encryption schemes in Microsoft SEAL are public key encryption schemes.
@@ -177,11 +177,11 @@ namespace SEALNetExamples
             /*
             As an example, we evaluate the degree 4 polynomial
 
-                2x^4 + 4x^3 + 4x^2 + 4x + 2
+                4x^4 + 8x^3 + 8x^2 + 8x + 4
 
             over an encrypted x = 6. The coefficients of the polynomial can be considered
             as plaintext inputs, as we will see below. The computation is done modulo the
-            plain_modulus 256.
+            plain_modulus 1024.
 
             While this examples is simple and easy to understand, it does not have much
             practical value. In later examples we will demonstrate how to compute more
@@ -242,10 +242,10 @@ namespace SEALNetExamples
             consumption is proportional to the multiplicative depth. For example, for
             our example computation it is advantageous to factorize the polynomial as
 
-                2x^4 + 4x^3 + 4x^2 + 4x + 2 = 2(x + 1)^2 * (x^2 + 1)
+                4x^4 + 8x^3 + 8x^2 + 8x + 4 = 4(x + 1)^2 * (x^2 + 1)
 
             to obtain a simple depth 2 representation. Thus, we compute (x + 1)^2 and
-            (x^2 + 1) separately, before multiplying them, and multiplying by 2.
+            (x^2 + 1) separately, before multiplying them, and multiplying by 4.
 
             First, we compute x^2 and add a plaintext "1". We can clearly see from the
             print-out that multiplication has consumed a lot of noise budget. The user
@@ -295,13 +295,13 @@ namespace SEALNetExamples
             Console.WriteLine($"0x{decryptedResult} ...... Correct.");
 
             /*
-            Finally, we multiply (x^2 + 1) * (x + 1)^2 * 2.
+            Finally, we multiply (x^2 + 1) * (x + 1)^2 * 4.
             */
             Utilities.PrintLine();
-            Console.WriteLine("Compute encryptedResult (2(x^2+1)(x+1)^2).");
+            Console.WriteLine("Compute encryptedResult (4(x^2+1)(x+1)^2).");
             Ciphertext encryptedResult = new Ciphertext();
-            Plaintext plainTwo = new Plaintext("2");
-            evaluator.MultiplyPlainInplace(xSqPlusOne, plainTwo);
+            Plaintext plainFour = new Plaintext("4");
+            evaluator.MultiplyPlainInplace(xSqPlusOne, plainFour);
             evaluator.Multiply(xSqPlusOne, xPlusOneSq, encryptedResult);
             Console.WriteLine($"    + size of encrypted_result: {encryptedResult.Size}");
             Console.WriteLine("    + noise budget in encrypted_result: {0} bits",
@@ -309,7 +309,7 @@ namespace SEALNetExamples
             Console.WriteLine("NOTE: Decryption can be incorrect if noise budget is zero.");
 
             Console.WriteLine();
-            Console.WriteLine("~~~~~~ A better way to calculate 2(x^2+1)(x+1)^2. ~~~~~~");
+            Console.WriteLine("~~~~~~ A better way to calculate 4(x^2+1)(x+1)^2. ~~~~~~");
 
             /*
             Noise budget has reached 0, which means that decryption cannot be expected
@@ -376,8 +376,8 @@ namespace SEALNetExamples
             Console.WriteLine($"0x{decryptedResult} ...... Correct.");
 
             Utilities.PrintLine();
-            Console.WriteLine("Compute and relinearize encryptedResult (2(x^2+1)(x+1)^2).");
-            evaluator.MultiplyPlainInplace(xSqPlusOne, plainTwo);
+            Console.WriteLine("Compute and relinearize encryptedResult (4(x^2+1)(x+1)^2).");
+            evaluator.MultiplyPlainInplace(xSqPlusOne, plainFour);
             evaluator.Multiply(xSqPlusOne, xPlusOneSq, encryptedResult);
             Console.WriteLine($"    + size of encryptedResult: {encryptedResult.Size}");
             evaluator.RelinearizeInplace(encryptedResult, relinKeys);
@@ -394,15 +394,15 @@ namespace SEALNetExamples
             of noise budget left, so we can expect the correct answer when decrypting.
             */
             Utilities.PrintLine();
-            Console.WriteLine("Decrypt encrypted_result (2(x^2+1)(x+1)^2).");
+            Console.WriteLine("Decrypt encrypted_result (4(x^2+1)(x+1)^2).");
             decryptor.Decrypt(encryptedResult, decryptedResult);
-            Console.WriteLine("    + decryption of 2(x^2+1)(x+1)^2 = 0x{0} ...... Correct.",
+            Console.WriteLine("    + decryption of 4(x^2+1)(x+1)^2 = 0x{0} ...... Correct.",
                 decryptedResult);
 
             /*
-            For x=6, 2(x^2+1)(x+1)^2 = 3626. Since the plaintext modulus is set to 256,
-            this result is computed in integers modulo 256. Therefore the expected output
-            should be 3626 % 256 == 42, or 0x2A in hexadecimal.
+            For x=6, 4(x^2+1)(x+1)^2 = 7252. Since the plaintext modulus is set to 1024,
+            this result is computed in integers modulo 1024. Therefore the expected output
+            should be 7252 % 1024 == 84, or 0x54 in hexadecimal.
             */
         }
     }

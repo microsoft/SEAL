@@ -411,10 +411,11 @@ namespace seal
         poly_infty_norm_coeffmod(noise_poly.get(), coeff_count, coeff_mod_count,
             context_data.total_coeff_modulus(), norm.get(), pool_);
 
-        // The -1 accounts for scaling the invariant noise by 2
+        // The -1 accounts for scaling the invariant noise by 2;
+        // note that we already took plain_modulus into account in compose
+        // so no need to subtract log(plain_modulus) from this
         int bit_count_diff = context_data.total_coeff_modulus_bit_count() -
-            get_significant_bit_count_uint(norm.get(), coeff_mod_count) - 1 -
-            parms.plain_modulus().bit_count();
+            get_significant_bit_count_uint(norm.get(), coeff_mod_count) - 1;
         return max(0, bit_count_diff);
     }
 }

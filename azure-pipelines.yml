@@ -1,0 +1,65 @@
+name: $(TeamProject)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+pr:
+    - master
+
+stages:
+    - stage: build
+      displayName: Build
+      jobs:
+
+          - job: Windows
+            displayName: Windows
+            pool:
+                vmImage: 'windows-latest'
+            variables:
+                ZLIB_ROOT: '$(Build.SourcesDirectory)\native\src\thirdparty\zlib\zlib-src'
+            steps:
+                - template: templates/windows-build.yml
+                  parameters:
+                      nuget_version: 4.9.2
+
+          - job: Linux
+            displayName: Linux
+            dependsOn: []
+            pool:
+                vmImage: 'ubuntu-latest'
+            steps:
+                - script: |
+                      sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+                      sudo apt-get update
+                      sudo apt-get install gcc-7 g++-7
+                      gcc-7 --version
+                      g++-7 --version
+                      which gcc-7
+                      which g++-7
+                      
+                      sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-7 50
+                      sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-7 50
+                      
+                  displayName: 'Install GCC 7'
+                - template: templates/nix-build.yml
+                  parameters:
+                      artifactName: linux-drop
+                      ext: a
+
+          - job: macOs
+            displayName: Mac OS X
+            dependsOn: []
+            pool:
+                vmImage: 'macOS-latest'
+            steps:
+                - template: templates/nix-build.yml
+                  parameters:
+                      dir: .
+                      artifactName: macos-drop
+                      ext: so
+
+          - job: Nuget
+            displayName: Pack into Nuget
+            dependsOn: [Windows, Linux, macOs]
+            pool:
+                vmImage: 'windows-latest'
+            steps:
+                - template: templates/pack.yml
+                  parameters:
+                      nuget_version: 4.9.2

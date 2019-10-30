@@ -32,3 +32,5 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysAll(void *thisptr, bool sa
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_PublicKey(void *thisptr, void **public_key);
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_SecretKey(void *thisptr, void **secret_key);
+
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching);

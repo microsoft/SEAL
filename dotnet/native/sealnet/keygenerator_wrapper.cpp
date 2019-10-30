@@ -40,6 +40,11 @@ struct seal::KeyGenerator::KeyGeneratorPrivateHelper
     {
         return keygen->galois_elts_all();
     }
+
+    static bool using_keyswitching(const KeyGenerator &keygen)
+    {
+        return keygen.context_->using_keyswitching();
+    }
 };
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create1(void *sealContext, void **key_generator)
@@ -127,6 +132,10 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, bool save_s
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
 }
 
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromElts(void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys)
@@ -151,7 +160,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromElts(void *thisptr, ui
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -179,7 +188,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromSteps(void *thisptr, u
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -203,7 +212,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysAll(void *thisptr, bool sa
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -226,5 +235,15 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_SecretKey(void *thisptr, void **secr
 
     SecretKey *key = new SecretKey(keygen->secret_key());
     *secret_key = key;
+    return S_OK;
+}
+
+SEALNETNATIVE HRESULT SEALCALL KeyGenerator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching)
+{
+    KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
+    IfNullRet(keygen, E_POINTER);
+    IfNullRet(using_keyswitching, E_POINTER);
+
+    *using_keyswitching = KeyGenerator::KeyGeneratorPrivateHelper::using_keyswitching(*keygen);
     return S_OK;
 }

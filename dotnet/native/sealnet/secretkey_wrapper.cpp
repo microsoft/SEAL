@@ -105,7 +105,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_SaveSize(void *thisptr, uint8_t compr_m
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -130,7 +130,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Save(void *thisptr, uint8_t *outptr, ui
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
@@ -161,7 +161,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_UnsafeLoad(void *thisptr, void *context
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
@@ -192,7 +192,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Load(void *thisptr, void *context, uint
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {

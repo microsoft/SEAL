@@ -201,29 +201,22 @@ namespace Microsoft.Research.SEAL
 
             try
             {
-                int sizeInt = checked((int)size);
-                byte[] buffer = new byte[sizeInt];
+                byte[] buffer = new byte[size];
                 SaveData(buffer, checked((ulong)size), (byte)comprMode, out long outBytes);
-
+                int intOutBytes = checked((int)outBytes);
                 using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
                 {
-                    writer.Write(buffer, 0, sizeInt);
+                    writer.Write(buffer, 0, intOutBytes);
                 }
 
                 // Clear the buffer for safety reasons
-                Array.Clear(buffer, 0, sizeInt);
+                Array.Clear(buffer, 0, intOutBytes);
 
                 return outBytes;
             }
             catch (OverflowException ex)
             {
                 throw new ArgumentException($"{nameof(size)} is out of bounds", ex);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Save operation failed", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
 
@@ -290,12 +283,6 @@ namespace Microsoft.Research.SEAL
             catch (OverflowException ex)
             {
                 throw new InvalidOperationException("Size indicated by loaded SEALHeader is out of bounds", ex);
-            }
-            catch (COMException ex)
-            {
-                if ((uint)ex.HResult == NativeMethods.Errors.HRInvalidOperation)
-                    throw new InvalidOperationException("Save operation failed", ex);
-                throw new InvalidOperationException("Unexpected native library error", ex);
             }
         }
     }

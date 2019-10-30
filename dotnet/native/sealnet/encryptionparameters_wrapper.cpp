@@ -189,7 +189,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus1(void *thisptr, void *m
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -205,7 +205,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus2(void *thisptr, uint64_
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -239,7 +239,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_SaveSize(void *thisptr, uint8_t compr_m
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -264,7 +264,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_Save(void *thisptr, uint8_t *outptr, ui
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
@@ -292,7 +292,7 @@ SEALNETNATIVE HRESULT SEALCALL EncParams_Load(void *thisptr, uint8_t *inptr, uin
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {

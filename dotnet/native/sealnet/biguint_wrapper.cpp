@@ -245,7 +245,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_Set3(void *thisptr, uint64_t value)
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -268,7 +268,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_Set4(void *thisptr, char *assign)
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -414,7 +414,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_ModuloInvert1(void *thisptr, void *modulu
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -436,7 +436,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_ModuloInvert2(void *thisptr, uint64_t mod
     }
     catch (const logic_error&)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -720,7 +720,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_SaveSize(void *thisptr, uint8_t compr_mod
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -745,7 +745,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_Save(void *thisptr, uint8_t *outptr, uint
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
@@ -773,7 +773,7 @@ SEALNETNATIVE HRESULT SEALCALL BigUInt_Load(void *thisptr, uint8_t *inptr, uint6
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {

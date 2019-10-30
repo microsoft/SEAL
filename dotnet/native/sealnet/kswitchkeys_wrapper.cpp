@@ -202,7 +202,7 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_SaveSize(void *thisptr, uint8_t compr
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
 }
 
@@ -227,7 +227,7 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Save(void *thisptr, uint8_t *outptr, 
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
@@ -258,7 +258,7 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_UnsafeLoad(void *thisptr, void *conte
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
@@ -289,7 +289,7 @@ SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Load(void *thisptr, void *context, ui
     }
     catch (const logic_error &)
     {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION);
+        return COR_E_INVALIDOPERATION;
     }
     catch (const runtime_error &)
     {
