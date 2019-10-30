@@ -23,7 +23,9 @@
     <file src="@SEAL_WINDOWS_SEALNETNATIVE_PATH@" target="runtimes/win10-x64/native" />
     <file src="@SEAL_LINUX_SEALNETNATIVE_PATH@" target="runtimes/linux-x64/native" />
     <file src="@SEAL_MACOS_SEALNETNATIVE_PATH@" target="runtimes/osx-x64/native" />
-    <file src="../lib/$Configuration$/netstandard2.0/SEALNet.*" target="lib/netstandard2.0/" exclude="**/*.pdb" />
+    <file src="$LINUX_SEALNETNATIVE$" target="runtimes/linux-x64/native" />
+    <file src="$MAC_SEALNETNATIVE$" target="runtimes/osx-x64/native" />
+    <file src="../lib/$Configuration$/netstandard2.0/SEALNet.dll" target="lib/netstandard2.0/" />
     <file src="../../LICENSE" target="LICENSE" />
   </files>
 </package>
