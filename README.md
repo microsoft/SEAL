@@ -110,6 +110,14 @@ the only choice.
 
 # Installing Microsoft SEAL
 
+## NuGet package for .NET developers
+For .NET developers the easiest way of installing Microsoft SEAL is by using the
+multi-platform NuGet package available at
+[NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Simply add
+this package into your .NET project as a dependency and you are ready to go. However,
+we still recommend reading through the below detailed installation instructions, as
+they will explain how to build and run the examples that come with the source code.
+
 ## Windows
 
 Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln`
@@ -413,7 +421,7 @@ results in the `SEALNetTest.dll` assembly to be created in
 `dotnet\lib\$(Configuration)\netcoreapp2.1`. The project takes care of copying the
 native SEALNetNative library to the output directory.
 
-### Using Microsoft SEAL for .NET in your own application
+#### Using Microsoft SEAL for .NET in your own application
 
 To use Microsoft SEAL for .NET in your own application you need to:
 1. add a reference in your project to `SEALNet.dll`;
@@ -421,8 +429,9 @@ To use Microsoft SEAL for .NET in your own application you need to:
 way to ensure this is to copy `sealnetnative.dll` to the same directory where your
 application's executable is located.
 
-Alternatively, you can build and use a NuGet package; see instructions in
-[NUGET.md](dotnet/nuget/NUGET.md).
+#### Building your own NuGet package
+You can build your own NuGet package for Microsoft SEAL by following the instructions
+in [NUGET.md](dotnet/nuget/NUGET.md).
 
 ## Linux and macOS
 
@@ -435,7 +444,7 @@ follow these
 [instructions for installing in Linux](https://dotnet.microsoft.com/download?initial-os=linux),
 or for [installing in macOS](https://dotnet.microsoft.com/download?initial-os=macos).
 
-### Local use of shared native library
+#### Native library
 
 If you only intend to run the examples and unit tests provided with Microsoft SEAL,
 you do not need to install the native shared library, you only need to compile it.
@@ -458,12 +467,12 @@ make
 cd ../..
 ````
 
-#### Building Microsoft SEAL for .NET
+#### .NET library
 
 To build the .NET Standard library, do the following:
 ````
 cd dotnet/src
-dotnet build
+dotnet build --configuration <Debug|Release>
 cd ../..
 ````
 You can use the `dotnet` parameter `--configuration <Debug|Release>` to build either
@@ -471,7 +480,7 @@ a `Debug` or `Release` version of the assembly. This will result in a `SEALNet.d
 assembly to be created in `dotnet/lib/$(Configuration)/netstandard2.0`. This assembly
 is the one you will want to reference in your own projects.
 
-#### Building Examples
+#### .NET examples
 
 To build and run the .NET examples, do:
 ````
@@ -483,7 +492,7 @@ As mentioned before, the .NET project will copy the shared native library to the
 output directory. You can use the `dotnet` parameter `--configuration <Debug|Release>` to
 run either `Debug` or `Release` versions of the examples.
 
-#### Building Unit Tests
+#### .NET unit tests
 
 To build and run the .NET unit tests, do:
 ````
@@ -495,7 +504,7 @@ All unit tests should pass. You can use the `dotnet` parameter `--configuration 
 to run `Debug` or `Relase` unit tests, and you can use `--verbosity detailed` to print the list
 of unit tests that are being run.
 
-### Using Microsoft SEAL for .NET
+#### Using Microsoft SEAL for .NET in your own application
 
 To use Microsoft SEAL for .NET in your own application you need to:
 1. add a reference in your project to `SEALNet.dll`;

@@ -11,26 +11,6 @@ namespace SEALNetExamples
     {
         static void Main(string[] args)
         {
-            var parms = new EncryptionParameters(SchemeType.BFV);
-            parms.PolyModulusDegree = 4096;
-            parms.CoeffModulus = CoeffModulus.BFVDefault(4096);
-            parms.SetPlainModulus((1ul << 13) * 119 + 1);
-            var context = new SEALContext(parms);
-            SecretKey sk = new SecretKey();
-            using (FileStream fs = new FileStream("sk.seal", FileMode.Open))
-            {
-                sk.Load(context, fs);
-            }
-            Decryptor dec = new Decryptor(context, sk);
-
-            Ciphertext ctxt = new Ciphertext();
-            using (FileStream fs = new FileStream("ctxt.seal", FileMode.Open))
-            {
-                ctxt.Load(context, fs);
-            }
-
-            Console.WriteLine($"Noise budget: {dec.InvariantNoiseBudget(ctxt)}");
-
             while (true)
             {
                 Console.WriteLine("+---------------------------------------------------------+");
