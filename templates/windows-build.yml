@@ -189,6 +189,13 @@ steps:
           Contents: 'SEALNet.nuspec'
           TargetFolder: '$(Build.ArtifactStagingDirectory)\dotnet\nuget\'
 
+    - task: CopyFiles@2
+      displayName: 'Copy Targets File to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+          SourceFolder: '$(Build.SourcesDirectory)\dotnet\nuget\'
+          Contents: 'SEALNet.targets'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\dotnet\nuget\'
+
     - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
       displayName: 'Run BinSkim'
       inputs:
