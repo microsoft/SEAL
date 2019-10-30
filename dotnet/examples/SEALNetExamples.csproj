@@ -19,8 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Windows_NT'" Include="$(ProjectDir)../lib/x64/$(Configuration)/sealnetnative.*" />
-    <SEALNetNativeBinaryFiles Condition="'$(OS)' == 'Unix'" Include="$(ProjectDir)../lib/libsealnetnative.*" />
+    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="$(ProjectDir)../lib/x64/$(Configuration)/sealnetnative.dll" />
+    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="$(ProjectDir)../lib/libsealnetnative.so.*" />
+    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="$(ProjectDir)../lib/libsealnetnative.*.dylib" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

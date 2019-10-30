@@ -315,6 +315,9 @@ if(SEAL_USE_ZLIB)
     endif()
 endif()
 
+# Set the sealnetnative dynamic library file names to be included in creating
+# the NuGet package. When building a multi-platform package, all three paths
+# should be included.
 if(SEAL_MULTIPLATFORM_NUGET_BUILD)
     set(SEAL_WINDOWS_SEALNETNATIVE_PATH ../lib/x64/$Configuration$/sealnetnative.dll)
     set(SEAL_LINUX_SEALNETNATIVE_PATH ../lib/libsealnetnative.so.${SEAL_VERSION})
