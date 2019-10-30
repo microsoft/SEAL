@@ -315,10 +315,30 @@ if(SEAL_USE_ZLIB)
     endif()
 endif()
 
+if(SEAL_MULTIPLATFORM_NUGET_BUILD)
+    set(SEAL_WINDOWS_SEALNETNATIVE_PATH ../lib/x64/$Configuration$/sealnetnative.dll)
+    set(SEAL_LINUX_SEALNETNATIVE_PATH ../lib/libsealnetnative.so.${SEAL_VERSION})
+    set(SEAL_MACOS_SEALNETNATIVE_PATH ../lib/libsealnetnative.${SEAL_VERSION}.dylib)
+else()
+    if(MSVC)
+        set(SEAL_WINDOWS_SEALNETNATIVE_PATH ../lib/x64/$Configuration$/sealnetnative.dll)
+    elseif(APPLE)
+        set(SEAL_MACOS_SEALNETNATIVE_PATH ../lib/libsealnetnative.${SEAL_VERSION}.dylib)
+    elseif(UNIX)
+        set(SEAL_LINUX_SEALNETNATIVE_PATH ../lib/libsealnetnative.so.${SEAL_VERSION})
+    endif()
+endif()
+
 # Create SEALNet.nuspec from SEALNet.nuspec.in
 configure_file(
     ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.nuspec.in
     ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.nuspec
+    @ONLY)
+
+# Create SEALNet.targets from SEALNet.targets.in
+configure_file(
+    ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.targets.in
+    ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.targets
     @ONLY)
 
 # Create library but add no source files yet
