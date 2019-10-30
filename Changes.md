@@ -1,6 +1,6 @@
 # List of Changes
 
-## Version 3.4.3 -- Hotfix
+## Version 3.4.4
 
 - Fixed issues with `SEALNet.targets` file and `SEALNet.nuspec.in`.
 - Updated `README.md` with information about existing multi-platform

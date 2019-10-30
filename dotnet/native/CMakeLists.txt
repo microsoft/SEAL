@@ -3,10 +3,10 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEALNetNative VERSION 3.4.3 LANGUAGES CXX C)
+project(SEALNetNative VERSION 3.4.4 LANGUAGES CXX C)
 
 # Import Microsoft SEAL
-find_package(SEAL 3.4.3 EXACT REQUIRED
+find_package(SEAL 3.4.4 EXACT REQUIRED
     # Providing a path so this can be built without installing Microsoft SEAL
     PATHS ${SEALNetNative_SOURCE_DIR}/../../native/src/cmake
 )
