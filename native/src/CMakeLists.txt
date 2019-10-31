@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEAL VERSION 3.4.3 LANGUAGES CXX C)
+project(SEAL VERSION 3.4.4 LANGUAGES CXX C)
 
 if(MSVC)
     if(ALLOW_COMMAND_LINE_BUILD)
@@ -315,10 +315,33 @@ if(SEAL_USE_ZLIB)
     endif()
 endif()
 
+# Set the sealnetnative dynamic library file names to be included in creating
+# the NuGet package. When building a multi-platform package, all three paths
+# should be included.
+if(SEAL_MULTIPLATFORM_NUGET_BUILD)
+    set(SEAL_WINDOWS_SEALNETNATIVE_PATH ../lib/x64/$Configuration$/sealnetnative.dll)
+    set(SEAL_LINUX_SEALNETNATIVE_PATH ../lib/libsealnetnative.so.${SEAL_VERSION})
+    set(SEAL_MACOS_SEALNETNATIVE_PATH ../lib/libsealnetnative.${SEAL_VERSION}.dylib)
+else()
+    if(MSVC)
+        set(SEAL_WINDOWS_SEALNETNATIVE_PATH ../lib/x64/$Configuration$/sealnetnative.dll)
+    elseif(APPLE)
+        set(SEAL_MACOS_SEALNETNATIVE_PATH ../lib/libsealnetnative.${SEAL_VERSION}.dylib)
+    elseif(UNIX)
+        set(SEAL_LINUX_SEALNETNATIVE_PATH ../lib/libsealnetnative.so.${SEAL_VERSION})
+    endif()
+endif()
+
 # Create SEALNet.nuspec from SEALNet.nuspec.in
 configure_file(
     ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.nuspec.in
     ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.nuspec
+    @ONLY)
+
+# Create SEALNet.targets from SEALNet.targets.in
+configure_file(
+    ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.targets.in
+    ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.targets
     @ONLY)
 
 # Create library but add no source files yet

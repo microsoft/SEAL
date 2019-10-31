@@ -812,7 +812,7 @@ namespace Microsoft.Research.SEAL
             IntPtr[] encarray = encrypteds.Select(c => c.NativePtr).ToArray();
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.Evaluator_MultiplyMany(
-                NativePtr, (ulong)encarray.Length, encarray, relinKeys.NativePtr, 
+                NativePtr, (ulong)encarray.Length, encarray, relinKeys.NativePtr,
                 destination.NativePtr, poolPtr);
         }
 
@@ -888,7 +888,7 @@ namespace Microsoft.Research.SEAL
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.Evaluator_Exponentiate(
-                NativePtr, encrypted.NativePtr, exponent, relinKeys.NativePtr, 
+                NativePtr, encrypted.NativePtr, exponent, relinKeys.NativePtr,
                 destination.NativePtr, poolPtr);
         }
 

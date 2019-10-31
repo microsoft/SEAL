@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright (c) Microsoft Corporation. All rights reserved.
+     Licensed under the MIT license. -->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="$(MSBuildThisFileDirectory)../runtimes/win10-x64/native/sealnetnative.dll" />
+    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Linux'))" Include="$(MSBuildThisFileDirectory)../runtimes/linux-x64/native/libsealnetnative.so*" />
+    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform('OSX'))" Include="$(MSBuildThisFileDirectory)../runtimes/osx-x64/native/libsealnetnative*.dylib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="@(SEALNetNativeBinaryFiles)">
+      <Link Condition="$([MSBuild]::IsOsPlatform('Windows'))">sealnetnative.dll</Link>
+      <Link Condition="$([MSBuild]::IsOsPlatform('Linux'))">libsealnetnative.so</Link>
+      <Link Condition="$([MSBuild]::IsOsPlatform('OSX'))">libsealnetnative.dylib</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

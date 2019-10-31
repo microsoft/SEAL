@@ -6,6 +6,9 @@
     <Company>Microsoft Corporation</Company>
     <Description>.NET wrapper library for Microsoft SEAL</Description>
     <Copyright>Microsoft Corporation 2019</Copyright>
+    <SignAssembly Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</SignAssembly>
+    <AssemblyOriginatorKeyFile Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">SEALNetCert.snk</AssemblyOriginatorKeyFile>
+    <DelaySign Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
     <DocumentationFile>../lib/$(Configuration)/SEALNet.xml</DocumentationFile>
