@@ -233,9 +233,18 @@ void printContext(shared_ptr<SEALContext> context)
     std::cout << "\\" << std::endl;
 }
 
+/*
+ Gets the exception string from the thrown pointer
+*/
+std::string get_exception(intptr_t ptr) {
+  auto exception = reinterpret_cast<std::exception *>(ptr);
+  std::string error_string = exception->what();
+  return error_string;
+}
+
 EMSCRIPTEN_BINDINGS(bindings)
 {
-
+    emscripten::function("getException", &get_exception);
     emscripten::function("printContext", &printContext);
     emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromArray));
     emscripten::function("vecFromArrayUInt32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromArray));
