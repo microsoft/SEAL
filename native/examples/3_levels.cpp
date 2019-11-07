@@ -61,7 +61,7 @@ void example_levels()
     the first parameter set in the modulus switching chain is the only one that
     involves the special prime. All key objects, such as SecretKey, are created
     at this highest level. All data objects, such as Ciphertext, can be only at
-    lower levels. The special modulus should be as large as the largest of the
+    lower levels. The special prime should be as large as the largest of the
     other primes in the coeff_modulus, although this is not a strict requirement.
 
               special prime +---------+
