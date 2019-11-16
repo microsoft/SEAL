@@ -12,63 +12,31 @@ using namespace std;
 using namespace emscripten;
 using namespace seal;
 
-template<typename T>
-std::vector<T> vecFromArray(const val &v) {
-    auto l = v["length"].as<unsigned>();
+// Many methods require a thin layer of C++ glue which is elegantly expressed with a lambda.
+// However, passing a bare lambda into embind's daisy chain requires a cast to a function pointer.
+#define EMBIND_LAMBDA(retval, arglist, impl) (retval (*) arglist) [] arglist impl
 
+// Builder functions that return "this" have verbose binding declarations, this macro reduces
+// the amount of boilerplate.
+#define BUILDER_FUNCTION(name, btype, arglist, impl) \
+        function(name, EMBIND_LAMBDA(btype*, arglist, impl), allow_raw_pointers())
+
+/*
+  Transform a JS TypedArray into a Vector of the appropriate type
+*/
+template<typename T>
+std::vector<T> vecFromJSArray(const val &v) {
     std::vector<T> rv;
+    const auto l = v["length"].as<unsigned>();
     rv.reserve(l);
 
     if (internal::typeSupportsMemoryView<T>()) {
         rv.resize(l);
 
-        const char *arrayType;
-
-//        cout << "type of array: " << typeid(T).name() << endl;
-        switch (sizeof(T)) {
-            case 1:
-                if (std::is_unsigned<T>::value) {
-//                    cout << "Creating Uint8Array" << endl;
-                    arrayType = "Uint8Array";
-                } else {
-//                    cout << "Creating Int8Array" << endl;
-                    arrayType = "Int8Array";
-                }
-                break;
-            case 2:
-                if (std::is_unsigned<T>::value) {
-//                    cout << "Creating Uint16Array" << endl;
-                    arrayType = "Uint16Array";
-                } else {
-//                    cout << "Creating Int16Array" << endl;
-                    arrayType = "Int16Array";
-                }
-                break;
-            case 4:
-                if (std::is_unsigned<T>::value) {
-//                    cout << "Creating Uint32Array" << endl;
-                    arrayType = "Uint32Array";
-                } else if (std::is_integral<T>::value) {
-//                    cout << "Creating Int32Array" << endl;
-                    arrayType = "Int32Array";
-                } else {
-//                    cout << "Creating Float32Array" << endl;
-                    arrayType = "Float32Array";
-                }
-                break;
-            case 8:
-//                cout << "Creating Float64Array" << endl;
-                arrayType = "Float64Array";
-                break;
-            default:
-                //This should be never reached if the 'typeSupportsMemoryView' function returns true.
-                throw std::logic_error("Unreachable");
-        }
-
-        val memory = val::module_property("buffer");
-        val memoryView = val::global(arrayType).new_(memory, reinterpret_cast<std::uintptr_t>(rv.data()), l);
-
+        emscripten::val memoryView{emscripten::typed_memory_view(l, rv.data())};
         memoryView.call<void>("set", v);
+
+        return rv;
     } else {
         for (unsigned i = 0; i < l; ++i) {
             rv.push_back(v[i].as<T>());
@@ -76,6 +44,15 @@ std::vector<T> vecFromArray(const val &v) {
     }
 
     return rv;
+};
+
+/*
+  Get the underlying bytes from a Vector to a JS TypedArray.
+*/
+template<typename T>
+emscripten::val jsArrayFromVec(const std::vector<T> &vec) {
+    const auto length = vec.size();
+    return val(typed_memory_view(length, vec.data()));
 };
 
 /*
@@ -246,33 +223,42 @@ EMSCRIPTEN_BINDINGS(bindings)
 {
     emscripten::function("getException", &get_exception);
     emscripten::function("printContext", &printContext);
-    emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromArray));
-    emscripten::function("vecFromArrayUInt32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromArray));
-    emscripten::function("vecFromArrayInt64", select_overload<std::vector<int64_t>(const val &)>(&vecFromArray));
-    emscripten::function("vecFromArrayUInt64", select_overload<std::vector<uint64_t>(const val &)>(&vecFromArray));
-    emscripten::function("vecFromArrayDouble", select_overload<std::vector<double>(const val &)>(&vecFromArray));
+    emscripten::function("jsArrayInt32FromVec", select_overload<val(const std::vector<int32_t> &)>(&jsArrayFromVec));
+    emscripten::function("jsArrayUint32FromVec", select_overload<val(const std::vector<uint32_t> &)>(&jsArrayFromVec));
+    emscripten::function("jsArrayDoubleFromVec", select_overload<val(const std::vector<double> &)>(&jsArrayFromVec));
+
+    emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
+    emscripten::function("vecFromArrayUInt32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
+//    emscripten::function("vecFromArrayInt64", select_overload<std::vector<int64_t>(const val &)>(&vecFromJSArray));
+//    emscripten::function("vecFromArrayUInt64", select_overload<std::vector<uint64_t>(const val &)>(&vecFromJSArray));
+    emscripten::function("vecFromArrayDouble", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
     emscripten::function("printVectorInt32", select_overload<void(std::vector<int32_t>, size_t, int)>(&printVector));
     emscripten::function("printVectorUInt32", select_overload<void(std::vector<uint32_t>, size_t, int)>(&printVector));
-    emscripten::function("printVectorInt64", select_overload<void(std::vector<int64_t>, size_t, int)>(&printVector));
-    emscripten::function("printVectorUInt64", select_overload<void(std::vector<uint64_t>, size_t, int)>(&printVector));
+//    emscripten::function("printVectorInt64", select_overload<void(std::vector<int64_t>, size_t, int)>(&printVector));
+//    emscripten::function("printVectorUInt64", select_overload<void(std::vector<uint64_t>, size_t, int)>(&printVector));
     emscripten::function("printVectorDouble", select_overload<void(std::vector<double>, size_t, int)>(&printVector));
-    emscripten::function("printVectorComplexDouble", select_overload<void(std::vector<std::complex<double>>, size_t, int)>(&printVector));
+//    emscripten::function("printVectorComplexDouble", select_overload<void(std::vector<std::complex<double>>, size_t, int)>(&printVector));
     emscripten::function("printMatrixInt32", select_overload<void(std::vector<int32_t> &, size_t)>(&printMatrix));
     emscripten::function("printMatrixUInt32", select_overload<void(std::vector<uint32_t> &, size_t)>(&printMatrix));
 
     register_vector<SmallModulus>("std::vector<SmallModulus>");
+    register_vector<Ciphertext>("std::vector<Ciphertext>");
     register_vector<int32_t>("std::vector<int32_t>");
     register_vector<uint32_t>("std::vector<uint32_t>");
-    register_vector<int64_t>("std::vector<int64_t>");
-    register_vector<uint64_t>("std::vector<uint64_t>");
+//    register_vector<int64_t>("std::vector<int64_t>");
+//    register_vector<uint64_t>("std::vector<uint64_t>");
     register_vector<double>("std::vector<double>");
     register_vector<std::complex<double>>("std::vector<std::complex<double>>");
 
     // TODO: Finish defining this item as it just returns an empty array in the JS side
     // using sha3_block_type = std::array<std::uint64_t, sha3_block_uint64_count>;
-    value_array<parms_id_type>("parms_id_type")
-        // .element(&Point2f::y)
-        ;
+    value_array<parms_id_type>("parms_id_type");
+
+    class_<util::HashFunction>("util::HashFunction")
+        .class_property("hash_block_uint64_count", &util::HashFunction::hash_block_uint64_count)
+        .class_property("hash_block_byte_count", &util::HashFunction::hash_block_byte_count)
+        .class_function("hash", &util::HashFunction::hash, allow_raw_pointers())
+      ;
 
     enum_<sec_level_type>("SecLevelType")
         .value("none", sec_level_type::none)
@@ -316,12 +302,32 @@ EMSCRIPTEN_BINDINGS(bindings)
         .class_function("createFromString", &EncryptionParameters::CreateFromString)
         ;
 
+    class_<EncryptionParameterQualifiers>("EncryptionParameterQualifiers")
+        .property("parametersSet", &EncryptionParameterQualifiers::parameters_set)
+        .property("usingFFT", &EncryptionParameterQualifiers::using_fft)
+        .property("usingNTT", &EncryptionParameterQualifiers::using_ntt)
+        .property("usingBatching", &EncryptionParameterQualifiers::using_batching)
+        .property("usingFastPlainLift", &EncryptionParameterQualifiers::using_fast_plain_lift)
+        .property("usingDescendingModulusChain", &EncryptionParameterQualifiers::using_descending_modulus_chain)
+        .property("securityLevel", &EncryptionParameterQualifiers::sec_level)
+        ;
+
     class_<SEALContext::ContextData>("SEALContext::ContextData")
         .smart_ptr<std::shared_ptr<SEALContext::ContextData>>("std::shared_ptr<SEALContext::ContextData>")
         .function("parms", &SEALContext::ContextData::parms)
         .function("parmsId", &SEALContext::ContextData::parms_id)
         .function("qualifiers", &SEALContext::ContextData::qualifiers)
+        .function("totalCoeffModulus", &SEALContext::ContextData::total_coeff_modulus, allow_raw_pointers())
         .function("totalCoeffModulusBitCount", &SEALContext::ContextData::total_coeff_modulus_bit_count)
+//        .function("baseConverter", &SEALContext::ContextData::base_converter)
+//        .function("smallNttTables", &SEALContext::ContextData::small_ntt_tables)
+//        .function("plainNttTables", &SEALContext::ContextData::plain_ntt_tables)
+        .function("coeffDivPlainModulus", &SEALContext::ContextData::coeff_div_plain_modulus, allow_raw_pointers())
+        .function("plainUpperHalfThreshold", &SEALContext::ContextData::plain_upper_half_threshold, allow_raw_pointers())
+        .function("plainUpperHalfIncrement", &SEALContext::ContextData::plain_upper_half_increment, allow_raw_pointers())
+        .function("upperHalfThreshold", &SEALContext::ContextData::upper_half_threshold, allow_raw_pointers())
+        .function("upperHalfIncrement", &SEALContext::ContextData::upper_half_increment, allow_raw_pointers())
+        .function("coeffModPlainModulus", &SEALContext::ContextData::coeff_mod_plain_modulus)
         .function("prevContextData", &SEALContext::ContextData::prev_context_data)
         .function("nextContextData", &SEALContext::ContextData::next_context_data)
         .function("chainIndex", &SEALContext::ContextData::chain_index)
@@ -329,10 +335,13 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<SEALContext>("SEALContext")
         .smart_ptr_constructor("std::shared_ptr<SEALContext>", &SEALContext::Create)
-        // TODO: Get this helper to work so we can validate our context more easily
-//        .function("contextData", select_overload<const std::shared_ptr<const SEALContext::ContextData>(parms_id_type)>
-//        (&SEALContext::context_data))
-
+//        These two work below:
+//        .smart_ptr<std::shared_ptr<SEALContext>>("std::shared_ptr<SEALContext>")
+//        .constructor(&SEALContext::Create)
+//
+//        .smart_ptr<std::shared_ptr<SEALContext>>("&SEALContext::first_context_data")
+//        .smart_ptr<std::shared_ptr<SEALContext>>("&SEALContext::first_context_data")
+//        .smart_ptr_constructor("firstContextData", &SEALContext::first_context_data)
         .function("getContextData", &SEALContext::get_context_data)
         .function("keyContextData", &SEALContext::key_context_data)
         .function("firstContextData", &SEALContext::first_context_data)
@@ -411,6 +420,7 @@ EMSCRIPTEN_BINDINGS(bindings)
         .constructor<>()
         .function("saveToString", &Plaintext::SaveToString)
         .function("loadFromString", &Plaintext::LoadFromString)
+        .function("shrinkToFit", &Plaintext::shrink_to_fit)
         .function("isZero", &Plaintext::is_zero)
         .function("capacity", &Plaintext::capacity)
         .function("coeffCount", &Plaintext::coeff_count)
@@ -430,6 +440,7 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("coeffModCount", &Ciphertext::coeff_mod_count)
         .function("polyModulusDegree", &Ciphertext::poly_modulus_degree)
         .function("size", &Ciphertext::size)
+        .function("sizeCapacity", &Ciphertext::size_capacity)
         .function("isTransparent", &Ciphertext::is_transparent)
         .function("isNttForm", select_overload< bool () const>(&Ciphertext::is_ntt_form))
         .function("parmsId", select_overload< parms_id_type & ()>(&Ciphertext::parms_id))
@@ -437,27 +448,18 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("pool", &Ciphertext::pool)
         ;
 
-    class_<CKKSEncoder>("CKKSEncoder")
-        .constructor<std::shared_ptr<SEALContext>>()
-        .function("encodeVectorDouble", select_overload<void(const std::vector<double> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
-        .function("encodeVectorComplexDouble", select_overload<void(const std::vector<std::complex<double>> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
-        .function("decodeVectorDouble", select_overload<void(const Plaintext &, std::vector<double> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
-        .function("decodeVectorComplexDouble", select_overload<void(const Plaintext &, std::vector<std::complex<double>> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
-        ;
-
     class_<IntegerEncoder>("IntegerEncoder")
         .constructor<std::shared_ptr<SEALContext>>()
         .function("encodeInt32", select_overload<Plaintext(std::int32_t)>(&IntegerEncoder::encode))
-        .function("encodeInt64", select_overload<Plaintext(std::int64_t)>(&IntegerEncoder::encode))
         .function("encodeUInt32", select_overload<Plaintext(std::uint32_t)>(&IntegerEncoder::encode))
-        .function("encodeUInt64", select_overload<Plaintext(std::uint64_t)>(&IntegerEncoder::encode))
-        .function("encodeBigUInt", select_overload<Plaintext(const BigUInt &)>(&IntegerEncoder::encode))
-
         .function("decodeInt32", select_overload<std::int32_t(const Plaintext &)>(&IntegerEncoder::decode_int32))
-        .function("decodeInt64", select_overload<std::int64_t(const Plaintext &)>(&IntegerEncoder::decode_int64))
         .function("decodeUInt32", select_overload<std::uint32_t(const Plaintext &)>(&IntegerEncoder::decode_uint32))
-        .function("decodeUInt64", select_overload<std::uint64_t(const Plaintext &)>(&IntegerEncoder::decode_uint64))
-        .function("decodeBigUInt", select_overload<BigUInt(const Plaintext &)>(&IntegerEncoder::decode_biguint))
+//        .function("encodeInt64", select_overload<Plaintext(std::int64_t)>(&IntegerEncoder::encode))
+//        .function("encodeUInt64", select_overload<Plaintext(std::uint64_t)>(&IntegerEncoder::encode))
+//        .function("encodeBigUInt", select_overload<Plaintext(const BigUInt &)>(&IntegerEncoder::encode))
+//        .function("decodeInt64", select_overload<std::int64_t(const Plaintext &)>(&IntegerEncoder::decode_int64))
+//        .function("decodeUInt64", select_overload<std::uint64_t(const Plaintext &)>(&IntegerEncoder::decode_uint64))
+//        .function("decodeBigUInt", select_overload<BigUInt(const Plaintext &)>(&IntegerEncoder::decode_biguint))
         ;
 
     class_<BatchEncoder>("BatchEncoder")
@@ -467,6 +469,15 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("decodeVectorInt32", select_overload<void(const Plaintext &, std::vector<std::int32_t> &, MemoryPoolHandle)>(&BatchEncoder::decodeVector))
         .function("decodeVectorUInt32", select_overload<void(const Plaintext &, std::vector<std::uint32_t> &, MemoryPoolHandle)>(&BatchEncoder::decodeVector))
         .function("slotCount", &BatchEncoder::slot_count)
+        ;
+
+    class_<CKKSEncoder>("CKKSEncoder")
+        .constructor<std::shared_ptr<SEALContext>>()
+        .function("encodeVectorDouble", select_overload<void(const std::vector<double> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
+//        .function("encodeVectorComplexDouble", select_overload<void(const std::vector<std::complex<double>> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
+        .function("decodeVectorDouble", select_overload<void(const Plaintext &, std::vector<double> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
+//        .function("decodeVectorComplexDouble", select_overload<void(const Plaintext &, std::vector<std::complex<double>> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
+        .function("slotCount", &CKKSEncoder::slot_count)
         ;
 
     class_<MemoryPoolHandle>("MemoryPoolHandle")
@@ -501,8 +512,13 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<Encryptor>("Encryptor")
         .constructor<std::shared_ptr<SEALContext>, const PublicKey &>()
+        .constructor<std::shared_ptr<SEALContext>, const PublicKey &, const SecretKey &>() // embind caveat, have to use this overload as the contructor for symmetric encryption
+        .function("setPublicKey", &Encryptor::set_public_key)
+        .function("setSecretKey", &Encryptor::set_secret_key)
         .function("encrypt", &Encryptor::encrypt)
+        .function("encryptSymmetric", &Encryptor::encrypt_symmetric)
         ;
+
     class_<Decryptor>("Decryptor")
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
         .function("decrypt", &Decryptor::decrypt)
