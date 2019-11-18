@@ -310,13 +310,6 @@ namespace seal
             std::istringstream is(decoded);
 
             this->load(context, is);
-            //SecretKey new_sk;
-            //new_sk.unsafe_load(is);
-            //if (!is_valid_for(new_sk, std::move(context)))
-            //{
-            //    throw std::invalid_argument("SecretKey data is invalid");
-            //}
-            //std::swap(*this, new_sk);
         }
 #endif
         /**

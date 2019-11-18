@@ -283,13 +283,6 @@ namespace seal
             std::istringstream is(decoded);
 
             this->load(context, is);
-            //PublicKey new_pk;
-            //new_pk.unsafe_load(is);
-            //if (!is_valid_for(new_pk, std::move(context)))
-            //{
-            //    throw std::invalid_argument("PublicKey data is invalid");
-            //}
-            //std::swap(*this, new_pk);
         }
 #endif
 

@@ -728,6 +728,42 @@ namespace seal
             exponentiate_inplace(destination, exponent, relin_keys, std::move(pool));
         }
 
+#ifdef EMSCRIPTEN
+        /**
+        Exponentiates a ciphertext. This functions raises encrypted to a power and
+        stores the result in the destination parameter. Dynamic memory allocations
+        in the process are allocated from the memory pool pointed to by the given
+        MemoryPoolHandle. The exponentiation is done in a depth-optimal order, and
+        relinearization is performed automatically after every multiplication in
+        the process. In relinearization the given relinearization keys are used.
+
+        @param[in] encrypted The ciphertext to exponentiate
+        @param[in] exponent The power to raise the ciphertext to (string casted to uint64_t)
+        @param[in] relin_keys The relinearization keys
+        @param[out] destination The ciphertext to overwrite with the power
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::invalid_argument if encrypted or relin_keys is not valid for the
+        encryption parameters
+        @throws std::invalid_argument if encrypted is not in the default NTT form
+        @throws std::invalid_argument if, when using scheme_type::CKKS, the output scale
+        is too large for the encryption parameters
+        @throws std::invalid_argument if exponent is zero
+        @throws std::invalid_argument if the size of relin_keys is too small
+        @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
+        @throws std::logic_error if result ciphertext is transparent
+        */
+        inline void exponentiate_unsafe_cast(const Ciphertext &encrypted, std::string exponent,
+            const RelinKeys &relin_keys, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+        {
+            uint64_t exponent_uint64_t = std::stoull(exponent, nullptr, 10);
+            destination = encrypted;
+            exponentiate_inplace(destination, exponent_uint64_t, relin_keys, std::move(pool));
+        }
+#endif
+
         /**
         Adds a ciphertext and a plaintext. The plaintext must be valid for the current
         encryption parameters.
