@@ -754,7 +754,7 @@ namespace seal
         @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void exponentiate_unsafe_cast(const Ciphertext &encrypted, std::uint32_t exponent,
+        inline void exponentiate_cast(const Ciphertext &encrypted, std::uint32_t exponent,
             const RelinKeys &relin_keys, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
