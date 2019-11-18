@@ -738,7 +738,7 @@ namespace seal
         the process. In relinearization the given relinearization keys are used.
 
         @param[in] encrypted The ciphertext to exponentiate
-        @param[in] exponent The power to raise the ciphertext to (string casted to uint64_t)
+        @param[in] exponent The power to raise the ciphertext to (uint32_t casted to uint64_t)
         @param[in] relin_keys The relinearization keys
         @param[out] destination The ciphertext to overwrite with the power
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
@@ -754,11 +754,11 @@ namespace seal
         @throws std::logic_error if keyswitching is not supported by the context
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void exponentiate_unsafe_cast(const Ciphertext &encrypted, std::string exponent,
+        inline void exponentiate_unsafe_cast(const Ciphertext &encrypted, std::uint32_t exponent,
             const RelinKeys &relin_keys, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            uint64_t exponent_uint64_t = std::stoull(exponent, nullptr, 10);
+            uint64_t exponent_uint64_t = (uint64_t) exponent;
             destination = encrypted;
             exponentiate_inplace(destination, exponent_uint64_t, relin_keys, std::move(pool));
         }
