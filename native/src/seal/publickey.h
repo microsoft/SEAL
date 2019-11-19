@@ -8,10 +8,6 @@
 #include "seal/ciphertext.h"
 #include "seal/context.h"
 #include "seal/valcheck.h"
-#ifdef EMSCRIPTEN
-    #include "seal/base64.h"
-    #include <sstream>
-#endif
 
 namespace seal
 {
@@ -241,50 +237,6 @@ namespace seal
             std::swap(*this, new_pk);
             return in_size;
         }
-
-#ifdef EMSCRIPTEN
-        /**
-        Saves the PublicKey to a string. The output is in base64 format
-        and is human-readable.
-
-        @returns std::string The base64 encoded string of the PublicKey
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
-        @throws std::runtime_error if I/O operations failed
-        */
-        inline const std::string SaveToString()
-        {
-            std::ostringstream buffer;
-
-            this->save(buffer);
-
-            std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
-            return encoded;
-        }
-
-        /**
-        Loads a PublicKey from an input string overwriting the current PublicKey.
-        The loaded SecretKey is verified to be valid for the given SEALContext.
-
-        @param[in] context The SEALContext
-        @param[in] encoded The base64 string to load the PublicKey from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
-        @throws std::runtime_error if I/O operations failed
-        */
-        inline void LoadFromString(std::shared_ptr<SEALContext> context,
-            const std::string &encoded)
-        {
-            std::string decoded = base64_decode(encoded);
-            std::istringstream is(decoded);
-
-            this->load(context, is);
-        }
-#endif
 
         /**
         Returns a reference to parms_id.

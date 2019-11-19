@@ -404,14 +404,38 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<PublicKey>("PublicKey")
         .constructor<>()
-        .function("saveToString", &PublicKey::SaveToString)
-        .function("loadFromString", &PublicKey::LoadFromString)
+        .function("saveToString", optional_override([](PublicKey& self) {
+            std::ostringstream buffer;
+            self.save(buffer);
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+          }))
+        .function("loadFromString", optional_override([](PublicKey& self,
+            std::shared_ptr<SEALContext> context, const std::string &encoded) {
+               std::string decoded = base64_decode(encoded);
+               std::istringstream is(decoded);
+               self.load(context, is);
+          }))
         ;
 
     class_<SecretKey>("SecretKey")
         .constructor<>()
-        .function("saveToString", &SecretKey::SaveToString)
-        .function("loadFromString", &SecretKey::LoadFromString)
+        .function("saveToString", optional_override([](SecretKey& self) {
+            std::ostringstream buffer;
+            self.save(buffer);
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+          }))
+        .function("loadFromString", optional_override([](SecretKey& self,
+            std::shared_ptr<SEALContext> context, const std::string &encoded) {
+               std::string decoded = base64_decode(encoded);
+               std::istringstream is(decoded);
+               self.load(context, is);
+          }))
         ;
 
     class_<Plaintext>("Plaintext")
