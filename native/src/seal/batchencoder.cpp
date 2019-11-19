@@ -430,7 +430,6 @@ namespace seal
                 static_cast<int64_t>(curr_value);
         }
     }
-
 #ifdef SEAL_USE_MSGSL_SPAN
     void BatchEncoder::decode(const Plaintext &plain, gsl::span<uint64_t> destination,
         MemoryPoolHandle pool)
