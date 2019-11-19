@@ -381,8 +381,20 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<KSwitchKeys>("KSwitchKeys")
         .constructor<>()
-        .function("saveToString", &KSwitchKeys::SaveToString)
-        .function("loadFromString", &KSwitchKeys::LoadFromString)
+        .function("saveToString", optional_override([](KSwitchKeys& self) {
+            std::ostringstream buffer;
+            self.save(buffer);
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+          }))
+        .function("loadFromString", optional_override([](KSwitchKeys& self,
+            std::shared_ptr<SEALContext> context, const std::string &encoded) {
+               std::string decoded = base64_decode(encoded);
+               std::istringstream is(decoded);
+               self.load(context, is);
+          }))
         ;
 
     class_<RelinKeys, base<KSwitchKeys>>("RelinKeys")

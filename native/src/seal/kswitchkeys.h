@@ -10,10 +10,6 @@
 #include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
 #include "seal/valcheck.h"
-#ifdef EMSCRIPTEN
-    #include "seal/base64.h"
-    #include <sstream>
-#endif
 
 namespace seal
 {
@@ -347,46 +343,6 @@ namespace seal
             std::swap(*this, new_keys);
             return in_size;
         }
-
-#ifdef EMSCRIPTEN
-        /**
-        Saves the key (Relinearization or Galois) to a string. The output is in base64 format
-        and is human-readable.
-
-        @throws std::exception if the GaloisKeys could not be written to string
-        */
-        inline const std::string SaveToString()
-        {
-            std::ostringstream buffer;
-
-            this->save(buffer);
-
-            std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
-            return encoded;
-        }
-
-        /**
-        Loads a key from an input string overwriting the current key.
-        The loaded key is verified to be valid for the given SEALContext.
-
-        @param[in] context The SEALContext
-        @param[in] encoded The base64 string to load the key from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
-        @throws std::exception if a valid key could not be read from stream
-        @throws std::invalid_argument if the loaded key is invalid for the
-        context
-        */
-        inline void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded)
-        {
-            std::string decoded = base64_decode(encoded);
-            std::istringstream is(decoded);
-
-            this->load(context, is);
-        }
-#endif
 
         /**
         Returns the currently used MemoryPoolHandle.
