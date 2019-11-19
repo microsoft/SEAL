@@ -11,10 +11,6 @@
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
 #include "seal/util/ztools.h"
-#ifdef EMSCRIPTEN
-    #include "seal/base64.h"
-    #include <sstream>
-#endif
 
 namespace seal
 {
@@ -381,76 +377,6 @@ namespace seal
                 std::bind(&SmallModulus::load_members, this, _1),
                 in, size);
         }
-
-#ifdef EMSCRIPTEN
-        /**
-        Saves the SmallModulus to a string. The full state of the modulus is
-        serialized. The output is in base64 format and is human-readable.
-
-        @param[in] stream The stream to save the SmallModulus to
-        @throws std::exception if the SmallModulus could not be written to string
-        */
-        inline const std::string SaveToString()
-        {
-            std::ostringstream  buffer; // no growth specification necessary
-
-            // Write to the output stream
-            this->save(buffer);
-
-            std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
-            return encoded;
-        }
-
-
-        /**
-        Creates a SmallModulus from a base64 string.
-
-        @param[in] encoded The base64 string to load the SmallModulus from
-        @throws std::exception if a valid SmallModulus could not be read from string
-        */
-        inline SmallModulus CreateFromString(const std::string &encoded)
-        {
-            std::string decoded = base64_decode(encoded);
-            std::istringstream is(decoded);
-
-            SmallModulus sm;
-            sm.load(is);
-            return sm;
-        }
-
-        /**
-        Loads a SmallModulus from a string representing an uint64 value.
-
-        @param[in] encoded The string (desired uint64) to load into the SmallModulus
-        @throws std::exception if a valid SmallModulus could not be read from string
-        */
-        inline void LoadFromString(const std::string &encoded)
-        {
-            uint64_t value;
-            std::istringstream iss(encoded);
-            iss >> value;
-
-            set_value(value);
-        }
-
-       /**
-       Returns the string representation of a SmallModulus
-       **/
-        inline std::string Value()
-        {
-            uint64_t value;
-            value = this->value();
-            std::ostringstream oss;
-            oss << value;
-
-            std::string intAsString;
-            intAsString = oss.str();
-            return intAsString;
-        }
-#endif
 
     private:
         void set_value(std::uint64_t value);

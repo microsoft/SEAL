@@ -275,10 +275,37 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("isZero", &SmallModulus::is_zero)
         .function("isPrime", &SmallModulus::is_prime)
         .function("bitCount", &SmallModulus::bit_count)
-        .function("value", &SmallModulus::Value)
-        .function("loadFromString", &SmallModulus::LoadFromString)
-        .function("saveToString", &SmallModulus::SaveToString)
-        .function("createFromString", &SmallModulus::CreateFromString)
+        .function("saveToString", optional_override([](SmallModulus& self) {
+            std::ostringstream buffer;
+            self.save(buffer);
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+          }))
+        .function("loadFromString", optional_override([](SmallModulus& self,
+            const std::string &encoded) {
+               std::string decoded = base64_decode(encoded);
+               std::istringstream is(decoded);
+               self.load(is);
+          }))
+        .function("createFromString", optional_override([](SmallModulus& self,
+            const std::string &encoded) {
+               std::string decoded = base64_decode(encoded);
+               std::istringstream is(decoded);
+               SmallModulus sm;
+               sm.load(is);
+               return sm;
+          }))
+        .function("value", optional_override([](SmallModulus& self) {
+                uint64_t value;
+                value = self.value();
+                std::ostringstream oss;
+                oss << value;
+                std::string intAsString;
+                intAsString = oss.str();
+                return intAsString;
+          }))
         ;
 
     class_<EncryptionParameters>("EncryptionParameters")
@@ -290,8 +317,20 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("polyModulusDegree", &EncryptionParameters::poly_modulus_degree)
         .function("coeffModulus", &EncryptionParameters::coeff_modulus)
         .function("plainModulus", &EncryptionParameters::plain_modulus)
-        .class_function("saveToString", &EncryptionParameters::SaveToString)
-        .class_function("createFromString", &EncryptionParameters::CreateFromString)
+        .function("saveToString", optional_override([](EncryptionParameters& self) {
+            std::ostringstream buffer;
+            self.save(buffer);
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+          }))
+        .function("loadFromString", optional_override([](EncryptionParameters& self,
+            const std::string &encoded) {
+               std::string decoded = base64_decode(encoded);
+               std::istringstream is(decoded);
+               self.load(is);
+          }))
         ;
 
     class_<EncryptionParameterQualifiers>("EncryptionParameterQualifiers")

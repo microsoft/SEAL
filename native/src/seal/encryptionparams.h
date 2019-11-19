@@ -15,10 +15,6 @@
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
 #include "seal/util/ztools.h"
-#ifdef EMSCRIPTEN
-    #include "seal/base64.h"
-    #include <sstream>
-#endif
 
 namespace seal
 {
@@ -462,56 +458,6 @@ namespace seal
             std::swap(*this, new_parms);
             return in_size;
         }
-
-#ifdef EMSCRIPTEN
-
-        /**
-        Saves EncryptionParameters to a stream. The output is in base64
-        format and is human-readable.
-
-        @param[in] stream The stream to save the EncryptionParameters to
-        @throws std::exception if the EncryptionParameters could not be written
-        to stream
-        */
-        inline static std::string SaveToString(const EncryptionParameters &ep)
-        {
-
-            std::ostringstream buffer; // Initialize an output stringstream
-            ep.save(buffer); // Save to the output stringstream
-
-            // std::ostringstream  buffer; // no growth specification necessary
-
-            // Write to the output stream
-            //EncryptionParameters::Save(ep, buffer);
-
-            std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
-            return encoded;
-        }
-
-        /**
-        Create EncryptionParameters from a base64 string.
-
-        @param[in] encoded The base64 string to load the EncryptionParameters from
-        @throws std::exception if valid EncryptionParameters could not be read
-        from stream
-        */
-        inline static EncryptionParameters CreateFromString(const std::string &encoded)
-        {
-            std::string decoded = base64_decode(encoded);
-            std::istringstream is(decoded);
-
-            // Create the Enc Parms from the input stream
-            EncryptionParameters ep;
-            ep.load(is);
-            return ep;
-            //EncryptionParameters ep = EncryptionParameters::load(is);
-            //return ep;
-        }
-
-#endif
 
         /**
         Enables access to private members of seal::EncryptionParameters for .NET
