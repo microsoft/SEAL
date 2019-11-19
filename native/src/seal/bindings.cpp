@@ -29,19 +29,10 @@ std::vector<T> vecFromJSArray(const val &v) {
     std::vector<T> rv;
     const auto l = v["length"].as<unsigned>();
     rv.reserve(l);
+    rv.resize(l);
 
-    if (internal::typeSupportsMemoryView<T>()) {
-        rv.resize(l);
-
-        emscripten::val memoryView{emscripten::typed_memory_view(l, rv.data())};
-        memoryView.call<void>("set", v);
-
-        return rv;
-    } else {
-        for (unsigned i = 0; i < l; ++i) {
-            rv.push_back(v[i].as<T>());
-        }
-    }
+    emscripten::val memoryView{emscripten::typed_memory_view(l, rv.data())};
+    memoryView.call<void>("set", v);
 
     return rv;
 };
@@ -226,18 +217,12 @@ EMSCRIPTEN_BINDINGS(bindings)
     emscripten::function("jsArrayInt32FromVec", select_overload<val(const std::vector<int32_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayUint32FromVec", select_overload<val(const std::vector<uint32_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayDoubleFromVec", select_overload<val(const std::vector<double> &)>(&jsArrayFromVec));
-
     emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayUInt32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
-//    emscripten::function("vecFromArrayInt64", select_overload<std::vector<int64_t>(const val &)>(&vecFromJSArray));
-//    emscripten::function("vecFromArrayUInt64", select_overload<std::vector<uint64_t>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayDouble", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
     emscripten::function("printVectorInt32", select_overload<void(std::vector<int32_t>, size_t, int)>(&printVector));
     emscripten::function("printVectorUInt32", select_overload<void(std::vector<uint32_t>, size_t, int)>(&printVector));
-//    emscripten::function("printVectorInt64", select_overload<void(std::vector<int64_t>, size_t, int)>(&printVector));
-//    emscripten::function("printVectorUInt64", select_overload<void(std::vector<uint64_t>, size_t, int)>(&printVector));
     emscripten::function("printVectorDouble", select_overload<void(std::vector<double>, size_t, int)>(&printVector));
-//    emscripten::function("printVectorComplexDouble", select_overload<void(std::vector<std::complex<double>>, size_t, int)>(&printVector));
     emscripten::function("printMatrixInt32", select_overload<void(std::vector<int32_t> &, size_t)>(&printMatrix));
     emscripten::function("printMatrixUInt32", select_overload<void(std::vector<uint32_t> &, size_t)>(&printMatrix));
 
@@ -245,14 +230,13 @@ EMSCRIPTEN_BINDINGS(bindings)
     register_vector<Ciphertext>("std::vector<Ciphertext>");
     register_vector<int32_t>("std::vector<int32_t>");
     register_vector<uint32_t>("std::vector<uint32_t>");
-//    register_vector<int64_t>("std::vector<int64_t>");
-//    register_vector<uint64_t>("std::vector<uint64_t>");
     register_vector<double>("std::vector<double>");
     register_vector<std::complex<double>>("std::vector<std::complex<double>>");
 
-    // TODO: Finish defining this item as it just returns an empty array in the JS side
-    // using sha3_block_type = std::array<std::uint64_t, sha3_block_uint64_count>;
-    value_array<parms_id_type>("parms_id_type");
+    // TODO: parms_id_type always throws an exception for undefined types.
+    // using hash_block_type std::array<std::uint64_t, hash_block_uint64_count>;
+    // using parms_id_type = util::HashFunction::hash_block_type;
+//    value_object<parms_id_type>("parms_id_type");
 
     class_<util::HashFunction>("util::HashFunction")
         .class_property("hash_block_uint64_count", &util::HashFunction::hash_block_uint64_count)
@@ -428,7 +412,7 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("nonzeroCoeffCount", &Plaintext::nonzero_coeff_count)
         .function("toPolynomial", &Plaintext::to_string)
         .function("isNttForm", select_overload< bool () const>(&Plaintext::is_ntt_form))
-        .function("parmsId", select_overload< parms_id_type & ()>(&Plaintext::parms_id))
+        .function("parmsId", select_overload<parms_id_type & ()>(&Plaintext::parms_id))
         .function("scale", select_overload< double & ()>(&Plaintext::scale))
         .function("pool", &Plaintext::pool)
         ;
@@ -443,7 +427,7 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("sizeCapacity", &Ciphertext::size_capacity)
         .function("isTransparent", &Ciphertext::is_transparent)
         .function("isNttForm", select_overload< bool () const>(&Ciphertext::is_ntt_form))
-        .function("parmsId", select_overload< parms_id_type & ()>(&Ciphertext::parms_id))
+        .function("parmsId", select_overload<parms_id_type & ()>(&Ciphertext::parms_id))
         .function("scale", select_overload< double & ()>(&Ciphertext::scale))
         .function("pool", &Ciphertext::pool)
         ;
@@ -454,12 +438,6 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("encodeUInt32", select_overload<Plaintext(std::uint32_t)>(&IntegerEncoder::encode))
         .function("decodeInt32", select_overload<std::int32_t(const Plaintext &)>(&IntegerEncoder::decode_int32))
         .function("decodeUInt32", select_overload<std::uint32_t(const Plaintext &)>(&IntegerEncoder::decode_uint32))
-//        .function("encodeInt64", select_overload<Plaintext(std::int64_t)>(&IntegerEncoder::encode))
-//        .function("encodeUInt64", select_overload<Plaintext(std::uint64_t)>(&IntegerEncoder::encode))
-//        .function("encodeBigUInt", select_overload<Plaintext(const BigUInt &)>(&IntegerEncoder::encode))
-//        .function("decodeInt64", select_overload<std::int64_t(const Plaintext &)>(&IntegerEncoder::decode_int64))
-//        .function("decodeUInt64", select_overload<std::uint64_t(const Plaintext &)>(&IntegerEncoder::decode_uint64))
-//        .function("decodeBigUInt", select_overload<BigUInt(const Plaintext &)>(&IntegerEncoder::decode_biguint))
         ;
 
     class_<BatchEncoder>("BatchEncoder")
@@ -474,8 +452,8 @@ EMSCRIPTEN_BINDINGS(bindings)
     class_<CKKSEncoder>("CKKSEncoder")
         .constructor<std::shared_ptr<SEALContext>>()
         .function("encodeVectorDouble", select_overload<void(const std::vector<double> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
-//        .function("encodeVectorComplexDouble", select_overload<void(const std::vector<std::complex<double>> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
         .function("decodeVectorDouble", select_overload<void(const Plaintext &, std::vector<double> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
+//        .function("encodeVectorComplexDouble", select_overload<void(const std::vector<std::complex<double>> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
 //        .function("decodeVectorComplexDouble", select_overload<void(const Plaintext &, std::vector<std::complex<double>> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
         .function("slotCount", &CKKSEncoder::slot_count)
         ;
