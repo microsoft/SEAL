@@ -47,6 +47,14 @@ emscripten::val jsArrayFromVec(const std::vector<T> &vec) {
 };
 
 /*
+  Converts a Vector of type T1 to type T2
+*/
+template<typename T1, typename T2>
+void convert_vector(const std::vector<T1> &vector_input, std::vector<T2> &vector_output) {
+    std::copy(vector_input.begin(), vector_input.end(), std::back_inserter(vector_output));
+}
+
+/*
 Helper function: Prints a vector of floating-point values.
 */
 template<typename T>
@@ -351,7 +359,13 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("plainModSwitchTo", select_overload<void(const Plaintext &, parms_id_type, Plaintext &)>(&Evaluator::mod_switch_to))
         .function("rescaleToNext", &Evaluator::rescale_to_next)
         .function("rescaleTo", &Evaluator::rescale_to)
-        .function("exponentiate", &Evaluator::exponentiate_cast)
+        .function("exponentiate", optional_override([](Evaluator& self,
+            const Ciphertext &encrypted, std::uint32_t exponent,
+            const RelinKeys &relin_keys, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                std::uint64_t exponent_uint64 = (uint64_t) exponent;
+                return self.Evaluator::exponentiate(encrypted, exponent_uint64, relin_keys, destination, pool);
+            }))
         .function("addPlain", &Evaluator::add_plain)
         .function("subPlain", &Evaluator::sub_plain)
         .function("multiplyPlain", &Evaluator::multiply_plain)
@@ -442,10 +456,34 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<BatchEncoder>("BatchEncoder")
         .constructor<std::shared_ptr<SEALContext>>()
-        .function("encodeVectorInt32", select_overload<void(const std::vector<std::int32_t> &, Plaintext &)>(&BatchEncoder::encodeVector))
-        .function("encodeVectorUInt32", select_overload<void(const std::vector<std::uint32_t> &, Plaintext &)>(&BatchEncoder::encodeVector))
-        .function("decodeVectorInt32", select_overload<void(const Plaintext &, std::vector<std::int32_t> &, MemoryPoolHandle)>(&BatchEncoder::decodeVector))
-        .function("decodeVectorUInt32", select_overload<void(const Plaintext &, std::vector<std::uint32_t> &, MemoryPoolHandle)>(&BatchEncoder::decodeVector))
+        .function("encodeVectorInt32", optional_override([](BatchEncoder& self,
+                const std::vector<std::int32_t> &values, Plaintext &destination) {
+                std::vector<std::int64_t> values_int64;
+                convert_vector(values, values_int64);
+                return self.BatchEncoder::encode(values_int64, destination);
+            }))
+        .function("encodeVectorUInt32", optional_override([](BatchEncoder& self,
+                const std::vector<std::uint32_t> &values, Plaintext &destination) {
+                std::vector<std::uint64_t> values_uint64;
+                convert_vector(values, values_uint64);
+                return self.BatchEncoder::encode(values_uint64, destination);
+            }))
+        .function("decodeVectorInt32", optional_override([](BatchEncoder& self,
+                const Plaintext &plain, std::vector<std::int32_t> &destination,
+                    MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                std::vector<std::int64_t> destination_int64;
+                convert_vector(destination, destination_int64);
+                self.BatchEncoder::decode(plain, destination_int64, pool);
+                convert_vector(destination_int64, destination);
+            }))
+        .function("decodeVectorUInt32", optional_override([](BatchEncoder& self,
+                const Plaintext &plain, std::vector<std::uint32_t> &destination,
+                    MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                std::vector<std::uint64_t> destination_uint64;
+                convert_vector(destination, destination_uint64);
+                self.BatchEncoder::decode(plain, destination_uint64, pool);
+                convert_vector(destination_uint64, destination);
+            }))
         .function("slotCount", &BatchEncoder::slot_count)
         ;
 
