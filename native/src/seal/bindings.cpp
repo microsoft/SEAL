@@ -452,8 +452,20 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<Plaintext>("Plaintext")
         .constructor<>()
-        .function("saveToString", &Plaintext::SaveToString)
-        .function("loadFromString", &Plaintext::LoadFromString)
+        .function("saveToString", optional_override([](Plaintext& self) {
+            std::ostringstream buffer;
+            self.save(buffer);
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+          }))
+        .function("loadFromString", optional_override([](Plaintext& self,
+            std::shared_ptr<SEALContext> context, const std::string &encoded) {
+               std::string decoded = base64_decode(encoded);
+               std::istringstream is(decoded);
+               self.load(context, is);
+          }))
         .function("shrinkToFit", &Plaintext::shrink_to_fit)
         .function("isZero", &Plaintext::is_zero)
         .function("capacity", &Plaintext::capacity)
@@ -469,8 +481,20 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<Ciphertext>("Ciphertext")
         .constructor<>()
-        .function("saveToString", &Ciphertext::SaveToString)
-        .function("loadFromString", &Ciphertext::LoadFromString)
+        .function("saveToString", optional_override([](Ciphertext& self) {
+            std::ostringstream buffer;
+            self.save(buffer);
+            std::string contents = buffer.str();
+            size_t bufferSize = contents.size();
+            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            return encoded;
+          }))
+        .function("loadFromString", optional_override([](Ciphertext& self,
+            std::shared_ptr<SEALContext> context, const std::string &encoded) {
+               std::string decoded = base64_decode(encoded);
+               std::istringstream is(decoded);
+               self.load(context, is);
+          }))
         .function("coeffModCount", &Ciphertext::coeff_mod_count)
         .function("polyModulusDegree", &Ciphertext::poly_modulus_degree)
         .function("size", &Ciphertext::size)

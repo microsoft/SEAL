@@ -19,10 +19,6 @@
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/ztools.h"
-#ifdef EMSCRIPTEN
-    #include "seal/base64.h"
-    #include <sstream>
-#endif
 
 namespace seal
 {
@@ -658,46 +654,6 @@ namespace seal
             std::swap(*this, new_data);
             return in_size;
         }
-
-#ifdef EMSCRIPTEN
-        /**
-        Saves the ciphertext to a string. The output is in base64 format
-        and is human-readable.
-
-        @throws std::exception if the ciphertext could not be written to string
-        */
-        inline const std::string SaveToString()
-        {
-            std::ostringstream buffer;
-
-            this->save(buffer);
-
-            std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
-            return encoded;
-        }
-
-        /**
-        Loads a ciphertext from an input string overwriting the current ciphertext.
-        The loaded ciphertext is verified to be valid for the given SEALContext.
-
-        @param[in] context The SEALContext
-        @param[in] encoded The base64 string to load the ciphertext from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
-        @throws std::exception if a valid ciphertext could not be read from stream
-        @throws std::invalid_argument if the loaded ciphertext is invalid for the
-        context
-        */
-        inline void LoadFromString(std::shared_ptr<SEALContext> context, const std::string &encoded)
-        {
-            std::string decoded = base64_decode(encoded);
-            std::istringstream is(decoded);
-
-            this->load(context, is);
-        }
-#endif
 
         /**
         Returns whether the ciphertext is in NTT form.
