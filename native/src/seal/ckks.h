@@ -338,66 +338,6 @@ namespace seal
             encode(value, context_->first_parms_id(), destination);
         }
 
-#ifdef EMSCRIPTEN
-        /**
-        Encodes double-precision floating-point real or complex numbers into
-        a plaintext polynomial. The encryption parameters used are the top level
-        parameters for the given context. Dynamic memory allocations in the process
-        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
-
-        @tparam T Vector value type (double or std::complex<double>)
-        @param[in] values The vector of double-precision floating-point numbers
-        (of type T) to encode
-        @param[in] scale Scaling parameter defining encoding precision
-        @param[out] destination The plaintext polynomial to overwrite with the result
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if values has invalid size
-        @throws std::invalid_argument if scale is not strictly positive
-        @throws std::invalid_argument if encoding is too large for the encryption
-        parameters
-        @throws std::invalid_argument if pool is uninitialized
-        */
-
-        inline void encodeVector(const std::vector<double> &values,
-             double scale, Plaintext &destination,
-             MemoryPoolHandle pool = MemoryManager::GetPool())
-        {
-             encode(values, scale, destination, std::move(pool));
-        }
-
-        inline void encodeVector(const std::vector<std::complex<double>> &values,
-             double scale, Plaintext &destination,
-             MemoryPoolHandle pool = MemoryManager::GetPool())
-        {
-             encode(values, scale, destination, std::move(pool));
-        }
-
-        /**
-        Decodes a plaintext polynomial into double-precision floating-point real or
-        complex numbers. Dynamic memory allocations in the process are allocated from
-        the memory pool pointed to by the given MemoryPoolHandle.
-
-        @tparam T Vector value type (double or std::complex<double>)
-        @param[in] plain The plaintext to decode
-        @param[out] destination The vector to be overwritten with the values in the slots
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not in NTT form or is invalid for the
-        encryption parameters
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        inline void decodeVector(const Plaintext &plain, std::vector<double> &destination,
-                MemoryPoolHandle pool = MemoryManager::GetPool())
-        {
-            decode(plain, destination, std::move(pool));
-        }
-        inline void decodeVector(const Plaintext &plain, std::vector<std::complex<double>> &destination,
-                MemoryPoolHandle pool = MemoryManager::GetPool())
-        {
-            decode(plain, destination, std::move(pool));
-        }
-
-#endif
-
         /**
         Decodes a plaintext polynomial into double-precision floating-point
         real or complex numbers. Dynamic memory allocations in the process are

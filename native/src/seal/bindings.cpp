@@ -489,10 +489,17 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<CKKSEncoder>("CKKSEncoder")
         .constructor<std::shared_ptr<SEALContext>>()
-        .function("encodeVectorDouble", select_overload<void(const std::vector<double> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
-        .function("decodeVectorDouble", select_overload<void(const Plaintext &, std::vector<double> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
-//        .function("encodeVectorComplexDouble", select_overload<void(const std::vector<std::complex<double>> &, double, Plaintext &, MemoryPoolHandle)>(&CKKSEncoder::encodeVector))
-//        .function("decodeVectorComplexDouble", select_overload<void(const Plaintext &, std::vector<std::complex<double>> &, MemoryPoolHandle)>(&CKKSEncoder::decodeVector))
+        .function("encodeVectorDouble", optional_override([](CKKSEncoder& self,
+            const std::vector<double> &values,
+            double scale, Plaintext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                return self.CKKSEncoder::encode(values, scale, destination, pool);
+          }))
+        .function("decodeVectorDouble", optional_override([](CKKSEncoder& self,
+            const Plaintext &plain, std::vector<double> &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                return self.CKKSEncoder::decode(plain, destination, pool);
+          }))
         .function("slotCount", &CKKSEncoder::slot_count)
         ;
 
