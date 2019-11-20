@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <typeinfo>
 
+#include "base64.h"
 #include "seal.h"
 
 using namespace std;
@@ -272,9 +273,15 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<SmallModulus>("SmallModulus")
         .constructor<>()
-        .function("isZero", &SmallModulus::is_zero)
-        .function("isPrime", &SmallModulus::is_prime)
-        .function("bitCount", &SmallModulus::bit_count)
+        .function("isZero", optional_override([](SmallModulus& self) {
+               return self.is_zero();
+          }))
+        .function("isPrime", optional_override([](SmallModulus& self) {
+               return self.is_prime();
+          }))
+        .function("bitCount", optional_override([](SmallModulus& self) {
+               return self.bit_count();
+          }))
         .function("saveToString", optional_override([](SmallModulus& self) {
             std::ostringstream buffer;
             self.save(buffer);
@@ -313,10 +320,18 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("setPolyModulusDegree", &EncryptionParameters::set_poly_modulus_degree)
         .function("setCoeffModulus", &EncryptionParameters::set_coeff_modulus)
         .function("setPlainModulus", select_overload<void(const SmallModulus &)>(&EncryptionParameters::set_plain_modulus))
-        .function("scheme", &EncryptionParameters::scheme)
-        .function("polyModulusDegree", &EncryptionParameters::poly_modulus_degree)
-        .function("coeffModulus", &EncryptionParameters::coeff_modulus)
-        .function("plainModulus", &EncryptionParameters::plain_modulus)
+        .function("scheme", optional_override([](EncryptionParameters& self) {
+               return self.scheme();
+          }))
+        .function("polyModulusDegree", optional_override([](EncryptionParameters& self) {
+               return self.poly_modulus_degree();
+                       }))
+        .function("coeffModulus", optional_override([](EncryptionParameters& self) {
+               return self.coeff_modulus();
+          }))
+        .function("plainModulus", optional_override([](EncryptionParameters& self) {
+               return self.plain_modulus();
+          }))
         .function("saveToString", optional_override([](EncryptionParameters& self) {
             std::ostringstream buffer;
             self.save(buffer);
@@ -345,23 +360,51 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<SEALContext::ContextData>("SEALContext::ContextData")
         .smart_ptr<std::shared_ptr<SEALContext::ContextData>>("std::shared_ptr<SEALContext::ContextData>")
-        .function("parms", &SEALContext::ContextData::parms)
-        .function("parmsId", &SEALContext::ContextData::parms_id)
-        .function("qualifiers", &SEALContext::ContextData::qualifiers)
-        .function("totalCoeffModulus", &SEALContext::ContextData::total_coeff_modulus, allow_raw_pointers())
-        .function("totalCoeffModulusBitCount", &SEALContext::ContextData::total_coeff_modulus_bit_count)
+        .function("parms", optional_override([](SEALContext::ContextData& self) {
+               return self.parms();
+          }))
+        .function("parmsId", optional_override([](SEALContext::ContextData& self) {
+               return self.parms_id();
+          }))
+        .function("qualifiers", optional_override([](SEALContext::ContextData& self) {
+               return self.qualifiers();
+          }))
+        .function("totalCoeffModulus", optional_override([](SEALContext::ContextData& self) {
+               return self.total_coeff_modulus();
+          }), allow_raw_pointers())
+        .function("totalCoeffModulusBitCount", optional_override([](SEALContext::ContextData& self) {
+               return self.total_coeff_modulus_bit_count();
+          }))
+        .function("coeffDivPlainModulus", optional_override([](SEALContext::ContextData& self) {
+               return self.coeff_div_plain_modulus();
+          }), allow_raw_pointers())
 //        .function("baseConverter", &SEALContext::ContextData::base_converter)
 //        .function("smallNttTables", &SEALContext::ContextData::small_ntt_tables)
 //        .function("plainNttTables", &SEALContext::ContextData::plain_ntt_tables)
-        .function("coeffDivPlainModulus", &SEALContext::ContextData::coeff_div_plain_modulus, allow_raw_pointers())
-        .function("plainUpperHalfThreshold", &SEALContext::ContextData::plain_upper_half_threshold, allow_raw_pointers())
-        .function("plainUpperHalfIncrement", &SEALContext::ContextData::plain_upper_half_increment, allow_raw_pointers())
-        .function("upperHalfThreshold", &SEALContext::ContextData::upper_half_threshold, allow_raw_pointers())
-        .function("upperHalfIncrement", &SEALContext::ContextData::upper_half_increment, allow_raw_pointers())
-        .function("coeffModPlainModulus", &SEALContext::ContextData::coeff_mod_plain_modulus)
-        .function("prevContextData", &SEALContext::ContextData::prev_context_data)
-        .function("nextContextData", &SEALContext::ContextData::next_context_data)
-        .function("chainIndex", &SEALContext::ContextData::chain_index)
+        .function("plainUpperHalfThreshold", optional_override([](SEALContext::ContextData& self) {
+               return self.plain_upper_half_threshold();
+          }), allow_raw_pointers())
+        .function("plainUpperHalfIncrement", optional_override([](SEALContext::ContextData& self) {
+               return self.plain_upper_half_increment();
+          }), allow_raw_pointers())
+        .function("upperHalfThreshold", optional_override([](SEALContext::ContextData& self) {
+               return self.upper_half_threshold();
+          }), allow_raw_pointers())
+        .function("upperHalfIncrement", optional_override([](SEALContext::ContextData& self) {
+               return self.upper_half_increment();
+          }), allow_raw_pointers())
+        .function("coeffModPlainModulus", optional_override([](SEALContext::ContextData& self) {
+               return self.coeff_mod_plain_modulus();
+          }))
+        .function("prevContextData", optional_override([](SEALContext::ContextData& self) {
+               return self.prev_context_data();
+          }))
+        .function("nextContextData", optional_override([](SEALContext::ContextData& self) {
+               return self.next_context_data();
+          }))
+        .function("chainIndex", optional_override([](SEALContext::ContextData& self) {
+               return self.chain_index();
+          }))
         ;
 
     class_<SEALContext>("SEALContext")
@@ -378,10 +421,18 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("firstContextData", &SEALContext::first_context_data)
         .function("lastContextData", &SEALContext::last_context_data)
         .function("parametersSet", &SEALContext::parameters_set)
-        .function("keyParmsId", &SEALContext::key_parms_id)
-        .function("firstParmsId", &SEALContext::first_parms_id)
-        .function("lastParmsId", &SEALContext::last_parms_id)
-        .function("usingKeyswitching", &SEALContext::using_keyswitching)
+        .function("keyParmsId", optional_override([](SEALContext& self) {
+               return self.key_parms_id();
+          }))
+        .function("firstParmsId", optional_override([](SEALContext& self) {
+               return self.first_parms_id();
+          }))
+        .function("lastParmsId", optional_override([](SEALContext& self) {
+               return self.last_parms_id();
+          }))
+        .function("usingKeyswitching", optional_override([](SEALContext& self) {
+               return self.using_keyswitching();
+          }))
         ;
 
     class_<Evaluator>("Evaluator")
@@ -507,15 +558,21 @@ EMSCRIPTEN_BINDINGS(bindings)
           }))
         .function("shrinkToFit", &Plaintext::shrink_to_fit)
         .function("isZero", &Plaintext::is_zero)
-        .function("capacity", &Plaintext::capacity)
-        .function("coeffCount", &Plaintext::coeff_count)
+        .function("capacity", optional_override([](Plaintext& self) {
+               return self.capacity();
+          }))
+        .function("coeffCount", optional_override([](Plaintext& self) {
+               return self.coeff_count();
+          }))
         .function("significantCoeffCount", &Plaintext::significant_coeff_count)
         .function("nonzeroCoeffCount", &Plaintext::nonzero_coeff_count)
         .function("toPolynomial", &Plaintext::to_string)
         .function("isNttForm", select_overload< bool () const>(&Plaintext::is_ntt_form))
         .function("parmsId", select_overload<parms_id_type & ()>(&Plaintext::parms_id))
         .function("scale", select_overload< double & ()>(&Plaintext::scale))
-        .function("pool", &Plaintext::pool)
+        .function("pool", optional_override([](Plaintext& self) {
+               return self.pool();
+          }))
         ;
 
     class_<Ciphertext>("Ciphertext")
@@ -534,15 +591,25 @@ EMSCRIPTEN_BINDINGS(bindings)
                std::istringstream is(decoded);
                self.load(context, is);
           }))
-        .function("coeffModCount", &Ciphertext::coeff_mod_count)
-        .function("polyModulusDegree", &Ciphertext::poly_modulus_degree)
-        .function("size", &Ciphertext::size)
-        .function("sizeCapacity", &Ciphertext::size_capacity)
+        .function("coeffModCount", optional_override([](Ciphertext& self) {
+               return self.coeff_mod_count();
+          }))
+        .function("polyModulusDegree", optional_override([](Ciphertext& self) {
+               return self.poly_modulus_degree();
+          }))
+        .function("size", optional_override([](Ciphertext& self) {
+               return self.size();
+          }))
+        .function("sizeCapacity", optional_override([](Ciphertext& self) {
+               return self.size_capacity();
+          }))
         .function("isTransparent", &Ciphertext::is_transparent)
         .function("isNttForm", select_overload< bool () const>(&Ciphertext::is_ntt_form))
         .function("parmsId", select_overload<parms_id_type & ()>(&Ciphertext::parms_id))
         .function("scale", select_overload< double & ()>(&Ciphertext::scale))
-        .function("pool", &Ciphertext::pool)
+        .function("pool", optional_override([](Ciphertext& self) {
+               return self.pool();
+          }))
         ;
 
     class_<IntegerEncoder>("IntegerEncoder")
@@ -583,7 +650,10 @@ EMSCRIPTEN_BINDINGS(bindings)
                 self.BatchEncoder::decode(plain, destination_uint64, pool);
                 convert_vector(destination_uint64, destination);
             }))
-        .function("slotCount", &BatchEncoder::slot_count)
+
+        .function("slotCount", optional_override([](BatchEncoder& self) {
+               return self.slot_count();
+          }))
         ;
 
     class_<CKKSEncoder>("CKKSEncoder")
@@ -599,7 +669,9 @@ EMSCRIPTEN_BINDINGS(bindings)
             MemoryPoolHandle pool = MemoryManager::GetPool()) {
                 return self.CKKSEncoder::decode(plain, destination, pool);
           }))
-        .function("slotCount", &CKKSEncoder::slot_count)
+        .function("slotCount", optional_override([](CKKSEncoder& self) {
+               return self.slot_count();
+          }))
         ;
 
     class_<MemoryPoolHandle>("MemoryPoolHandle")

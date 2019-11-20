@@ -26,7 +26,3 @@
 #include "seal/serialization.h"
 #include "seal/smallmodulus.h"
 #include "seal/valcheck.h"
-
-#ifdef EMSCRIPTEN
-    #include "seal/base64.h"
-#endif
