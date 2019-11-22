@@ -11,9 +11,11 @@
 
 // SEAL
 #include "seal/context.h"
+#include "seal/util/locks.h"
 
 using namespace std;
 using namespace seal;
+using namespace seal::util;
 using namespace sealnet;
 
 namespace sealnet
@@ -23,6 +25,8 @@ namespace sealnet
     while they are being used as regular pointers in the managed world.
     */
     unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
+
+    ReaderWriterLocker pointer_store_locker_;
 }
 
 SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams,
@@ -34,6 +38,8 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_Create(void *encryptionParams,
 
     sec_level_type security_level = static_cast<sec_level_type>(sec_level);
     auto result = SEALContext::Create(*encParams, expand_mod_chain, security_level);
+
+    WriterLock lock(pointer_store_locker_.acquire_write());
     pointer_store_[result.get()] = result;
 
     *context = result.get();
@@ -45,6 +51,7 @@ SEALNETNATIVE HRESULT SEALCALL SEALContext_Destroy(void *thisptr)
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
 
+    WriterLock lock(pointer_store_locker_.acquire_write());
     pointer_store_.erase(context);
     return S_OK;
 }

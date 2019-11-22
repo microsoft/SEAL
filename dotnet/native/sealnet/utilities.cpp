@@ -14,6 +14,7 @@
 #include "seal/encryptionparams.h"
 #include "seal/context.h"
 #include "seal/util/common.h"
+#include "seal/util/locks.h"
 
 using namespace std;
 using namespace seal;
@@ -23,6 +24,8 @@ using namespace seal::util;
 namespace sealnet
 {
     extern unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
+
+    extern ReaderWriterLocker pointer_store_locker_;
 
     // This is here only so we have a null shared pointer to return.
     shared_ptr<SEALContext> null_context_;
@@ -61,6 +64,8 @@ const shared_ptr<SEALContext> &sealnet::SharedContextFromVoid(void *context)
     {
         return null_context_;
     }
+
+    ReaderLock lock(pointer_store_locker_.acquire_read());
 
     const auto &ctxiter = pointer_store_.find(ctx);
     if (ctxiter == pointer_store_.end())
