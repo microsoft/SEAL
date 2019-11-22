@@ -415,7 +415,7 @@ namespace SEALNetExamples
 
             In CKKS the message is stored modulo CoeffModulus (in BFV it is stored modulo
             PlainModulus), so the scaled message must not get too close to the total size
-            of CoeffModulus. In this case our CoeffModulus is quite large (218 bits) so
+            of CoeffModulus. In this case our CoeffModulus is quite large (200 bits) so
             we have little to worry about in this regard. For this simple example a 30-bit
             scale is more than enough.
             */

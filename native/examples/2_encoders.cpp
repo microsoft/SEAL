@@ -411,7 +411,7 @@ void example_ckks_encoder()
 
     In CKKS the message is stored modulo coeff_modulus (in BFV it is stored modulo
     plain_modulus), so the scaled message must not get too close to the total size
-    of coeff_modulus. In this case our coeff_modulus is quite large (218 bits) so
+    of coeff_modulus. In this case our coeff_modulus is quite large (200 bits) so
     we have little to worry about in this regard. For this simple example a 30-bit
     scale is more than enough.
     */

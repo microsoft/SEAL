@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma once
+
 #define SEAL_VERSION "@SEAL_VERSION@"
 #define SEAL_VERSION_MAJOR @SEAL_VERSION_MAJOR@
 #define SEAL_VERSION_MINOR @SEAL_VERSION_MINOR@
