@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEAL VERSION 3.4.4 LANGUAGES CXX C)
+project(SEAL VERSION 3.4.5 LANGUAGES CXX C)
 
 if(MSVC)
     if(ALLOW_COMMAND_LINE_BUILD)

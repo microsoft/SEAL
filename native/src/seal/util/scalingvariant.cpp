@@ -35,7 +35,7 @@ namespace seal
                 // compute numerator = (q mod t) * m[i] + (t+1)/2
                 unsigned long long prod[2] { 0, 0 };
                 uint64_t numerator[2] { 0, 0 };
-                multiply_uint64(plain[i], q_mod_t, prod);
+                multiply_uint64(plain.data()[i], q_mod_t, prod);
                 unsigned char carry = add_uint64(*prod, plain_upper_half_threshold, numerator);
                 numerator[1] = static_cast<uint64_t>(prod[1]) + static_cast<uint64_t>(carry);
                 // compute fix[0] = floor( numerator / t )
@@ -46,7 +46,7 @@ namespace seal
                 for (size_t j = 0; j < coeff_mod_count; j++)
                 {
                     unsigned long long temp[2] { 0, 0 };
-                    multiply_uint64(coeff_div_plain_modulus[j], plain[i], temp);
+                    multiply_uint64(coeff_div_plain_modulus[j], plain.data()[i], temp);
                     temp[1] += static_cast<unsigned long long>(add_uint64(*temp, fix[0], 0, temp));
                     uint64_t scaled_plain_coeff = barrett_reduce_128(temp, coeff_modulus[j]);
                     destination[j * coeff_count] = add_uint_uint_mod(

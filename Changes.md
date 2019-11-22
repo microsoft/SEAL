@@ -1,5 +1,12 @@
 # List of Changes
 
+## Version 3.4.5
+
+- Fixed a concurrency issue in SEALNet: the `unordered_map` storing `SEALContext` pointers was
+not locked appropriately on construction and destruction of new `SEALContext` objects.
+- Fixed a few typos in examples ([PR 71](https://github.com/microsoft/SEAL/pull/71)).
+- Added include guard to config.h.in.
+
 ## Version 3.4.4
 
 - Fixed issues with `SEALNet.targets` file and `SEALNet.nuspec.in`.
