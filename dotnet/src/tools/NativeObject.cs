@@ -61,13 +61,31 @@ namespace Microsoft.Research.SEAL.Tools
         /// </summary>
         internal IntPtr NativePtr
         {
-            get;
-            set;
+            get
+            {
+                if (IsDisposed)
+                {
+                    Type objType = this.GetType();
+                    string objName = objType?.FullName ?? "Unknown object name";
+                    throw new ObjectDisposedException(objName);
+                }
+
+                return nativePtr_;
+            }
+            set
+            {
+                nativePtr_ = value;
+            }
         }
 
         /// <summary>
         /// Whether this instance owns the native pointer.
         /// </summary>
         private readonly bool owned_ = true;
+
+        /// <summary>
+        /// Pointer to native object
+        /// </summary>
+        private IntPtr nativePtr_ = IntPtr.Zero;
     }
 }
