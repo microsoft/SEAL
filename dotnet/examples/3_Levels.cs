@@ -89,7 +89,7 @@ namespace SEALNetExamples
             In this example the PlainModulus does not play much of a role; we choose
             some reasonable value.
             */
-            parms.PlainModulus = PlainModulus.Batching(polyModulusDegree, 20);//new SmallModulus(1 << 20);
+            parms.PlainModulus = PlainModulus.Batching(polyModulusDegree, 20);
 
             SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);

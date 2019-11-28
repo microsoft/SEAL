@@ -1868,10 +1868,6 @@ namespace seal
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
-        if (!context_->get_context_data(encrypted.parms_id()))
-        {
-            throw invalid_argument("encrypted is not valid for encryption parameters");
-        }
         if (encrypted.is_ntt_form() != plain.is_ntt_form())
         {
             throw invalid_argument("NTT form mismatch");
