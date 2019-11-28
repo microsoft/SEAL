@@ -1705,7 +1705,7 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (!is_valid_for(plain, context_))
+        if (!is_metadata_valid_for(plain, context_) || !is_buffer_valid(plain))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -1784,7 +1784,7 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (!is_valid_for(plain, context_))
+        if (!is_metadata_valid_for(plain, context_) || !is_buffer_valid(plain))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
@@ -1864,7 +1864,7 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (!is_valid_for(plain, context_))
+        if (!is_metadata_valid_for(plain, context_) || !is_buffer_valid(plain))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
