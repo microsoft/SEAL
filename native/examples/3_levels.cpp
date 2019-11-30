@@ -239,20 +239,24 @@ void example_levels()
     parameters in the chain before sending it back to the secret key holder for
     decryption.
 
-    Also the lost noise budget is actually not as issue at all, if we do things
+    Also the lost noise budget is actually not an issue at all, if we do things
     right, as we will see below.
 
     First we recreate the original ciphertext and perform some computations.
     */
     cout << "Computation is more efficient with modulus switching." << endl;
     print_line(__LINE__);
-    cout << "Compute the fourth power." << endl;
+    cout << "Compute the 8th power." << endl;
     encryptor.encrypt(plain, encrypted);
-    cout << "    + Noise budget before squaring:         "
+    cout << "    + Noise budget fresh:                   "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
     evaluator.square_inplace(encrypted);
     evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "    + Noise budget after squaring:          "
+    cout << "    + Noise budget of the 2nd power:         "
+        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+    evaluator.square_inplace(encrypted);
+    evaluator.relinearize_inplace(encrypted, relin_keys);
+    cout << "    + Noise budget of the 4th power:         "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
     /*
@@ -260,23 +264,22 @@ void example_levels()
     noise budget.
     */
     evaluator.mod_switch_to_next_inplace(encrypted);
-    cout << "    + Noise budget after modulus switching: "
+    cout << "    + Noise budget after modulus switching:  "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
-
     /*
     This means that there is no harm at all in dropping some of the coefficient
     modulus after doing enough computations. In some cases one might want to
     switch to a lower level slightly earlier, actually sacrificing some of the
     noise budget in the process, to gain computational performance from having
     smaller parameters. We see from the print-out that the next modulus switch
-    should be done ideally when the noise budget is down to around 81 bits.
+    should be done ideally when the noise budget is down to around 25 bits.
     */
     evaluator.square_inplace(encrypted);
     evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "    + Noise budget after squaring:          "
+    cout << "    + Noise budget of the 8th power:         "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
     evaluator.mod_switch_to_next_inplace(encrypted);
-    cout << "    + Noise budget after modulus switching: "
+    cout << "    + Noise budget after modulus switching:  "
         << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
 
     /*
@@ -286,7 +289,7 @@ void example_levels()
     chain.
     */
     decryptor.decrypt(encrypted, plain);
-    cout << "    + Decryption of fourth power (hexadecimal) ...... Correct." << endl;
+    cout << "    + Decryption of the 8th power (hexadecimal) ...... Correct." << endl;
     cout << "    " << plain.to_string() << endl << endl;
 
     /*
