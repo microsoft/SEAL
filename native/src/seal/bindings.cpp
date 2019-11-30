@@ -292,19 +292,18 @@ EMSCRIPTEN_BINDINGS(bindings)
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            std::string encoded = b64encode(contents);
             return encoded;
           }))
         .function("loadFromString", optional_override([](SmallModulus& self,
             const std::string &encoded) {
-               std::string decoded = base64_decode(encoded);
+               std::string decoded = b64decode(encoded);
                std::istringstream is(decoded);
                self.load(is);
           }))
         .function("createFromString", optional_override([](SmallModulus& self,
             const std::string &encoded) {
-               std::string decoded = base64_decode(encoded);
+               std::string decoded = b64decode(encoded);
                std::istringstream is(decoded);
                SmallModulus sm;
                sm.load(is);
@@ -343,13 +342,12 @@ EMSCRIPTEN_BINDINGS(bindings)
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            std::string encoded = b64encode(contents);
             return encoded;
           }))
         .function("loadFromString", optional_override([](EncryptionParameters& self,
             const std::string &encoded) {
-               std::string decoded = base64_decode(encoded);
+               std::string decoded = b64decode(encoded);
                std::istringstream is(decoded);
                self.load(is);
           }))
@@ -483,13 +481,12 @@ EMSCRIPTEN_BINDINGS(bindings)
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            std::string encoded = b64encode(contents);
             return encoded;
           }))
         .function("loadFromString", optional_override([](KSwitchKeys& self,
             std::shared_ptr<SEALContext> context, const std::string &encoded) {
-               std::string decoded = base64_decode(encoded);
+               std::string decoded = b64decode(encoded);
                std::istringstream is(decoded);
                self.load(context, is);
           }))
@@ -519,13 +516,12 @@ EMSCRIPTEN_BINDINGS(bindings)
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            std::string encoded = b64encode(contents);
             return encoded;
           }))
         .function("loadFromString", optional_override([](PublicKey& self,
             std::shared_ptr<SEALContext> context, const std::string &encoded) {
-               std::string decoded = base64_decode(encoded);
+               std::string decoded = b64decode(encoded);
                std::istringstream is(decoded);
                self.load(context, is);
           }))
@@ -538,13 +534,12 @@ EMSCRIPTEN_BINDINGS(bindings)
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            std::string encoded = b64encode(contents);
             return encoded;
           }))
         .function("loadFromString", optional_override([](SecretKey& self,
             std::shared_ptr<SEALContext> context, const std::string &encoded) {
-               std::string decoded = base64_decode(encoded);
+               std::string decoded = b64decode(encoded);
                std::istringstream is(decoded);
                self.load(context, is);
           }))
@@ -557,13 +552,12 @@ EMSCRIPTEN_BINDINGS(bindings)
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            std::string encoded = b64encode(contents);
             return encoded;
           }))
         .function("loadFromString", optional_override([](Plaintext& self,
             std::shared_ptr<SEALContext> context, const std::string &encoded) {
-               std::string decoded = base64_decode(encoded);
+               std::string decoded = b64decode(encoded);
                std::istringstream is(decoded);
                self.load(context, is);
           }))
@@ -592,15 +586,13 @@ EMSCRIPTEN_BINDINGS(bindings)
            compr_mode_type compr_mode) {
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
-            self.save(buffer);
             std::string contents = buffer.str();
-            size_t bufferSize = contents.size();
-            std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+            std::string encoded = b64encode(contents);
             return encoded;
           }))
         .function("loadFromString", optional_override([](Ciphertext& self,
             std::shared_ptr<SEALContext> context, const std::string &encoded) {
-               std::string decoded = base64_decode(encoded);
+               std::string decoded = b64decode(encoded);
                std::istringstream is(decoded);
                self.load(context, is);
           }))

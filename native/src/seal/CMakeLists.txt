@@ -24,7 +24,6 @@ target_sources(seal
         ${CMAKE_CURRENT_LIST_DIR}/valcheck.cpp
 
         # Emscripten
-        ${CMAKE_CURRENT_LIST_DIR}/base64.cpp
         ${CMAKE_CURRENT_LIST_DIR}/bindings.cpp
 )
 
