@@ -260,6 +260,11 @@ EMSCRIPTEN_BINDINGS(bindings)
         .value("tc256", sec_level_type::tc256)
         ;
 
+    enum_<compr_mode_type>("ComprModeType")
+        .value("none", compr_mode_type::none)
+        .value("deflate", compr_mode_type::deflate)
+        ;
+
     class_<CoeffModulus>("CoeffModulus")
         .class_function("MaxBitCount", &CoeffModulus::MaxBitCount)
         .class_function("BFVDefault", &CoeffModulus::BFVDefault)
@@ -282,9 +287,10 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("bitCount", optional_override([](SmallModulus& self) {
                return self.bit_count();
           }))
-        .function("saveToString", optional_override([](SmallModulus& self) {
+        .function("saveToString", optional_override([](SmallModulus& self,
+           compr_mode_type compr_mode) {
             std::ostringstream buffer;
-            self.save(buffer);
+            self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             size_t bufferSize = contents.size();
             std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
@@ -332,9 +338,10 @@ EMSCRIPTEN_BINDINGS(bindings)
         .function("plainModulus", optional_override([](EncryptionParameters& self) {
                return self.plain_modulus();
           }))
-        .function("saveToString", optional_override([](EncryptionParameters& self) {
+        .function("saveToString", optional_override([](EncryptionParameters& self,
+           compr_mode_type compr_mode) {
             std::ostringstream buffer;
-            self.save(buffer);
+            self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             size_t bufferSize = contents.size();
             std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
@@ -471,9 +478,10 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<KSwitchKeys>("KSwitchKeys")
         .constructor<>()
-        .function("saveToString", optional_override([](KSwitchKeys& self) {
+        .function("saveToString", optional_override([](KSwitchKeys& self,
+           compr_mode_type compr_mode) {
             std::ostringstream buffer;
-            self.save(buffer);
+            self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             size_t bufferSize = contents.size();
             std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
@@ -506,9 +514,10 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<PublicKey>("PublicKey")
         .constructor<>()
-        .function("saveToString", optional_override([](PublicKey& self) {
+        .function("saveToString", optional_override([](PublicKey& self,
+           compr_mode_type compr_mode) {
             std::ostringstream buffer;
-            self.save(buffer);
+            self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             size_t bufferSize = contents.size();
             std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
@@ -524,9 +533,10 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<SecretKey>("SecretKey")
         .constructor<>()
-        .function("saveToString", optional_override([](SecretKey& self) {
+        .function("saveToString", optional_override([](SecretKey& self,
+           compr_mode_type compr_mode) {
             std::ostringstream buffer;
-            self.save(buffer);
+            self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             size_t bufferSize = contents.size();
             std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
@@ -542,9 +552,10 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<Plaintext>("Plaintext")
         .constructor<>()
-        .function("saveToString", optional_override([](Plaintext& self) {
+        .function("saveToString", optional_override([](Plaintext& self,
+           compr_mode_type compr_mode) {
             std::ostringstream buffer;
-            self.save(buffer);
+            self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             size_t bufferSize = contents.size();
             std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
@@ -577,8 +588,10 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<Ciphertext>("Ciphertext")
         .constructor<>()
-        .function("saveToString", optional_override([](Ciphertext& self) {
+        .function("saveToString", optional_override([](Ciphertext& self,
+           compr_mode_type compr_mode) {
             std::ostringstream buffer;
+            self.save(buffer, compr_mode);
             self.save(buffer);
             std::string contents = buffer.str();
             size_t bufferSize = contents.size();

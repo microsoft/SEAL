@@ -308,11 +308,13 @@ if(NOT SEAL_USE_ZLIB OR ZLIB_ROOT)
     clear_zlib_cache()
 endif()
 if(SEAL_USE_ZLIB)
-    find_package(ZLIB 1.2.11 EXACT)
-    if(NOT ZLIB_FOUND)
-        set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)
-        clear_zlib_cache()
-    endif()
+    message(STATUS "Including ZLIB_ROOT path")
+    include_directories(ZLIB_ROOT ${ZLIB_ROOT})
+#     find_package(ZLIB)
+#     if(NOT ZLIB_FOUND)
+#         set(SEAL_USE_ZLIB OFF CACHE BOOL ${SEAL_USE_ZLIB_OPTION_STR} FORCE)
+#         clear_zlib_cache()
+#     endif()
 endif()
 
 # Set the sealnetnative dynamic library file names to be included in creating
@@ -389,10 +391,10 @@ if(SEAL_USE_MSGSL)
     target_link_libraries(seal PUBLIC MSGSL::MSGSL)
 endif()
 
-if(SEAL_USE_ZLIB)
-    # Link ZLIB::ZLIB with seal
-    target_link_libraries(seal PRIVATE ZLIB::ZLIB)
-endif()
+# if(SEAL_USE_ZLIB)
+#     # Link ZLIB::ZLIB with seal
+#     target_link_libraries(seal PRIVATE ZLIB::ZLIB)
+# endif()
 
 # Associate seal to export SEALTargets
 install(TARGETS seal EXPORT SEALTargets
