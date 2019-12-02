@@ -262,7 +262,9 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     enum_<compr_mode_type>("ComprModeType")
         .value("none", compr_mode_type::none)
+#ifdef SEAL_USE_ZLIB
         .value("deflate", compr_mode_type::deflate)
+#endif
         ;
 
     class_<CoeffModulus>("CoeffModulus")
