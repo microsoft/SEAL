@@ -621,8 +621,8 @@ EMSCRIPTEN_BINDINGS(bindings)
 
     class_<IntegerEncoder>("IntegerEncoder")
         .constructor<std::shared_ptr<SEALContext>>()
-        .function("encodeInt32", select_overload<Plaintext(std::int32_t)>(&IntegerEncoder::encode))
-        .function("encodeUInt32", select_overload<Plaintext(std::uint32_t)>(&IntegerEncoder::encode))
+        .function("encodeInt32", select_overload<void(std::int32_t, Plaintext &)>(&IntegerEncoder::encode))
+        .function("encodeUInt32", select_overload<void(std::uint32_t, Plaintext &)>(&IntegerEncoder::encode))
         .function("decodeInt32", select_overload<std::int32_t(const Plaintext &)>(&IntegerEncoder::decode_int32))
         .function("decodeUInt32", select_overload<std::uint32_t(const Plaintext &)>(&IntegerEncoder::decode_uint32))
         ;
