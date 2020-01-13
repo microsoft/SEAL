@@ -101,7 +101,7 @@ This class unifies the serialization functionality for all serializable Microsof
 In class `Ciphertext`:
 - Added a method `int_array` for read-only access to the underlying `IntArray` object.
 - Removed methods `uint64_count_capacity` and `uint64_count` that can now be accessed in a more
-descriptive manner through the `int_arrar` return value.
+descriptive manner through the `int_array` return value.
 
 In class `CKKSEncoder`: added support for `gsl::span` type of input.
 
@@ -140,7 +140,7 @@ functions will validate all aspects fo the Microsoft SEAL ojects.
 New classes `BlakePRNG` and `BlakePRNGFactory`: uses Blake2 family of hash functions for PRNG.
 
 New class `Serialization`:
-- Gives a uniform serilization in Microsoft SEAL to save objects to a C++ stream or a memory buffer.
+- Gives a uniform serialization in Microsoft SEAL to save objects to a C++ stream or a memory buffer.
 - Can be configured to use ZLIB compression.
 
 New files:
