@@ -1,6 +1,6 @@
 name: $(TeamProject)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 pr:
-    - master
+    - contrib
 
 stages:
     - stage: build
