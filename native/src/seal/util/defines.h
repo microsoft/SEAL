@@ -40,6 +40,20 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #define SEAL_CIPHERTEXT_SIZE_MIN 2
 #define SEAL_CIPHERTEXT_SIZE_MAX 16
 
+// Detect system
+#define SEAL_SYSTEM_OTHER 1
+#define SEAL_SYSTEM_WINDOWS 2
+#define SEAL_SYSTEM_UNIX_LIKE 3
+
+#if defined(_WIN32)
+#define SEAL_SYSTEM SEAL_SYSTEM_WINDOWS
+#elif defined(__linux__) || defined(__FreeBSD__) || (defined(__APPLE__) && defined(__MACH__))
+#define SEAL_SYSTEM SEAL_SYSTEM_UNIX_LIKE
+#else
+#define SEAL_SYSTEM SEAL_SYSTEM_OTHER
+#error "Unsupported system"
+#endif
+
 // Detect compiler
 #define SEAL_COMPILER_MSVC 1
 #define SEAL_COMPILER_CLANG 2

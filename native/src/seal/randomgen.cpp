@@ -6,7 +6,7 @@
 #include <iostream>
 #include "seal/randomgen.h"
 #include "seal/util/blake2.h"
-#ifdef _WIN32
+#if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
 #include <Windows.h>
 #include <bcrypt.h>
 #endif
@@ -18,11 +18,11 @@ namespace seal
     uint64_t random_uint64()
     {
         uint64_t result;
-#if defined(__linux__) || defined(__FreeBSD__) || (defined(__APPLE__) && defined(__MACH__))
+#if SEAL_SYSTEM == SEAL_SYSTEM_UNIX_LIKE
         random_device rd("/dev/urandom");
         result = (static_cast<uint64_t>(rd()) << 32)
             + static_cast<uint64_t>(rd());
-#elif defined(_WIN32)
+#elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
         if (!BCRYPT_SUCCESS(BCryptGenRandom(
             NULL,
             reinterpret_cast<unsigned char*>(&result),
@@ -31,8 +31,11 @@ namespace seal
         {
             throw runtime_error("BCryptGenRandom failed");
         }
-#else
-#error "Unsupported target platform"
+#elif SEAL_SYSTEM == SEAL_SYSTEM_OTHER
+#warning "SECURITY WARNING: System detection failed; falling back to a potentially insecure randomness source!"
+        random_device rd;
+        result = (static_cast<uint64_t>(rd()) << 32)
+            + static_cast<uint64_t>(rd());
 #endif
         return result;
     }
