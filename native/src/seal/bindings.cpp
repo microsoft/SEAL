@@ -242,16 +242,27 @@ EMSCRIPTEN_BINDINGS(bindings)
     register_vector<double>("std::vector<double>");
     register_vector<std::complex<double>>("std::vector<std::complex<double>>");
 
-    // TODO: parms_id_type always throws an exception for undefined types.
-    // using hash_block_type std::array<std::uint64_t, hash_block_uint64_count>;
-    // using parms_id_type = util::HashFunction::hash_block_type;
-//    value_object<parms_id_type>("parms_id_type");
-
     class_<util::HashFunction>("util::HashFunction")
-        .class_property("hash_block_uint64_count", &util::HashFunction::hash_block_uint64_count)
-        .class_property("hash_block_byte_count", &util::HashFunction::hash_block_byte_count)
-        .class_function("hash", &util::HashFunction::hash, allow_raw_pointers())
-      ;
+         .class_property("hashBlockUint64Count", &util::HashFunction::hash_block_uint64_count)
+         .class_property("hashBlockByteCount", &util::HashFunction::hash_block_byte_count)
+         .class_function("hash", &util::HashFunction::hash, allow_raw_pointers())
+       ;
+
+    // using parms_id_type = util::HashFunction::hash_block_type
+    // using hash_block_type std::array<std::uint64_t, hash_block_uint64_count>;
+
+    class_<parms_id_type>("ParmsIdType")
+        .constructor<>()
+        .function("values", optional_override([](parms_id_type& self) {
+               std::ostringstream str;
+               std::string separator;
+               for (auto x : self) {
+                 str << separator << x;
+                 separator = ',';
+               }
+               return str.str();
+            }))
+        ;
 
     enum_<sec_level_type>("SecLevelType")
         .value("none", sec_level_type::none)
