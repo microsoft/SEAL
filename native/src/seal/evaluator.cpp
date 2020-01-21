@@ -2623,7 +2623,7 @@ namespace seal
                     small_ntt_tables[i]);
             }
             // Key RNS representation
-            for (size_t j = 0; j < rns_mod_count; j++)
+            for (size_t j = 0; j < decomp_mod_count; j++)
             {
                 size_t index = (j == decomp_mod_count ? key_mod_count - 1 : j);
                 if (scheme == scheme_type::CKKS && i == j)
