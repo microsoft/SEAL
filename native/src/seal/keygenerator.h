@@ -88,7 +88,7 @@ namespace seal
         Generates and returns relinearization keys. This function returns
         relinearization keys in a fully expanded form and is meant to be used
         primarily for demo, testing, and debugging purposes.
-        
+
         @throws std::logic_error if the encryption parameters do not support
         keyswitching
         */
@@ -104,7 +104,7 @@ namespace seal
         the object size. The resulting serializable object cannot be used
         directly and is meant to be serialized for the size reduction to have an
         impact.
-        
+
         @throws std::logic_error if the encryption parameters do not support
         keyswitching
         */

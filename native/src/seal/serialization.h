@@ -93,7 +93,7 @@ namespace seal
         }
 
         /**
-        Returns true if the given byte corresponds to a supported compression mode.
+        Returns true if the given value corresponds to a supported compression mode.
 
         @param[in] compr_mode The compression mode to validate
         */

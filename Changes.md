@@ -5,17 +5,21 @@
 ### API changes
 
 - New generic class `Serializable` wraps `Ciphertext`, `RelinKeys`, and `GaloisKeys` objects to provide a more flexible approach to the functionality provided in release 3.4 by `KeyGenerator::[relin|galois]_keys_save` and `Encryptor::encrypt_[zero_]symmetric_save` functions. Specifically, these functions have been removed and replaced with overloads of `KeyGenerator::[relin|galois]_keys` and `Encryptor::encrypt_[zero_]symmetric` that return `Serializable` objects. The `Serializable` objects cannot be used directly by Microsoft SEAL, and are instead intended to be serialized, which activates the compression functionalities introduced earlier in release 3.4.
+- Added examples for serialization.
 
 ### New files
 
 - [native/src/seal/serializable.h](native/src/seal/serializable.h)
 - [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
+- [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
 - [dotnet/src/Serializable.cs](dotnet/src/Serializable.cs)
+- [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
 
-### Other minor changes
+### Other changes
 
 - Microsoft SEAL now compiles also in FreeBSD ([PR 113](https://github.com/microsoft/SEAL/pull/113)).
 - In serialization, unsupported compression mode now throws `std::invalid_argument` (native) or `ArgumentException` (.NET).
+- Examples for serialization have been added.
 
 ## Version 3.4.5
 

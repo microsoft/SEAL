@@ -335,21 +335,12 @@ namespace SEALNetExamples
             in this example we continue using BFV. We repeat our computation from before,
             but this time relinearize after every multiplication.
 
-            Normally one should use KeyGenerator.RelinKeys() to create relinearization
-            keys. This produces keys that will be wrapped by a Serializable<RelinKeys>
-            object, which facilitates a certain compression functionality when serializing.
-            This makes sense in a normal production setting, where relinearization keys
-            will never be used locally and instead will always be serialized and sent to
-            a remote party (e.g. a server) to use. However, in this example we require
-            access to the RelinKeys object itself since both encryption and the encrypted
-            computation are taking place in the same function. The easiest way to do this
-            is to use the function KeyGenerator.RelinKeysLocal() instead to create
-            a RelinKeys object without the Serializable<RelinKeys> wrapper. However, we
-            stress that this function should not be used in production code as it results
-            in much larger serialized data size.
+            Here we use the function KeyGenerator.RelinKeysLocal(). In production code
+            it is much better to use KeyGenerator.RelinKeys() instead. We will explain
+            and discuss these differences in `6_Serialization.cs'.
             */
             Utilities.PrintLine();
-            Console.WriteLine("Generate relinearization keys.");
+            Console.WriteLine("Generate locally usable relinearization keys.");
             RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             /*

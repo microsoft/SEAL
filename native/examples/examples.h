@@ -29,6 +29,8 @@ void example_ckks_basics();
 
 void example_rotation();
 
+void example_serialization();
+
 void example_performance_test();
 
 /*

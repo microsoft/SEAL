@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.Research.SEAL
@@ -85,10 +84,18 @@ namespace Microsoft.Research.SEAL
             return result;
         }
 
-        internal static bool IsSupportedComprMode(ComprModeType comprMode) =>
+        /// <summary>
+        /// Returns true if the given value corresponds to a supported compression mode.
+        /// </summary>
+        /// <param name="comprMode">The compression mode to validate</param>
+        public static bool IsSupportedComprMode(ComprModeType comprMode) =>
             IsSupportedComprMode((byte)comprMode);
 
-        internal static bool IsValidHeader(SEALHeader header)
+        /// <summary>
+        /// Returns true if the given SEALHeader is valid.
+        /// </summary>
+        /// <param name="header">The SEALHeader</param>
+        public static bool IsValidHeader(SEALHeader header)
         {
             byte[] headerArray = new byte[16];
             using (MemoryStream stream = new MemoryStream(headerArray))
