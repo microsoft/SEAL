@@ -173,6 +173,9 @@
     <ClInclude Include="seal\util\smallntt.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="seal\util\streambuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="seal\util\uintarith.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -186,6 +189,9 @@
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\modulus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="seal\serializable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="seal\serialization.h">

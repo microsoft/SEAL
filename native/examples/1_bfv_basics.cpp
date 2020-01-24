@@ -336,11 +336,22 @@ void example_bfv_basics()
     in this example we continue using BFV. We repeat our computation from before,
     but this time relinearize after every multiplication.
 
-    We use KeyGenerator::relin_keys() to create relinearization keys.
+    Normally one should use KeyGenerator::relin_keys() to create relinearization
+    keys. This produces keys that will be wrapped by a Serializable<RelinKeys>
+    object, which facilitates a certain compression functionality when serializing.
+    This makes sense in a normal production setting, where relinearization keys
+    will never be used locally and instead will always be serialized and sent to
+    a remote party (e.g. a server) to use. However, in this example we require
+    access to the RelinKeys object itself since both encryption and the encrypted
+    computation are taking place in the same function. The easiest way to do this
+    is to use the function KeyGenerator::relin_keys_local() instead to create
+    a RelinKeys object without the Serializable<RelinKeys> wrapper. However, we
+    stress that this function should not be used in production code as it results
+    in much larger serialized data size.
     */
     print_line(__LINE__);
-    cout << "Generate relinearization keys." << endl;
-    auto relin_keys = keygen.relin_keys();
+    cout << "Generate locally usable relinearization keys." << endl;
+    auto relin_keys = keygen.relin_keys_local();
 
     /*
     We now repeat the computation relinearizing after each multiplication.

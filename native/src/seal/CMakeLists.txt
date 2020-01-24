@@ -50,6 +50,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/relinkeys.h
         ${CMAKE_CURRENT_LIST_DIR}/seal.h
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.h
+        ${CMAKE_CURRENT_LIST_DIR}/serializable.h
         ${CMAKE_CURRENT_LIST_DIR}/serialization.h
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.h
         ${CMAKE_CURRENT_LIST_DIR}/valcheck.h

@@ -200,7 +200,7 @@ void example_batch_encoder()
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
-    RelinKeys relin_keys = keygen.relin_keys();
+    RelinKeys relin_keys = keygen.relin_keys_local();
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
@@ -365,7 +365,7 @@ void example_ckks_encoder()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys();
+    auto relin_keys = keygen.relin_keys_local();
 
     /*
     We also set up an Encryptor, Evaluator, and Decryptor as usual.

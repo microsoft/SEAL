@@ -125,13 +125,8 @@ namespace SEALNetTest
 
             Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeys(elts_null));
             Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeys(elts));
-            Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(elts_null, new MemoryStream()));
-            Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(elts, new MemoryStream()));
-
             Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeys(steps_null));
             Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeys(steps));
-            Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeysSave(steps_null, new MemoryStream()));
-            Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeysSave(steps, new MemoryStream()));
 
             EncryptionParameters smallParms = new EncryptionParameters(SchemeType.CKKS);
             smallParms.PolyModulusDegree = 128;

@@ -409,10 +409,15 @@ namespace Microsoft.Research.SEAL
         /// supported</exception>
         /// <exception cref="InvalidOperationException">if the size does not fit in
         /// the return type</exception>
-        public long SaveSize(ComprModeType comprMode)
+        public long SaveSize(ComprModeType? comprMode = null)
         {
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new ArgumentException("Unsupported compression mode");
+
+            ComprModeType comprModeValue = comprMode.Value;
             NativeMethods.BigUInt_SaveSize(
-                NativePtr, (byte)comprMode, out long outBytes);
+                NativePtr, (byte)comprModeValue, out long outBytes);
             return outBytes;
         }
 
@@ -426,16 +431,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="comprMode">The desired compression mode</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support writing</exception>
+        /// support writing, or if compression mode is not supported</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         /// <exception cref="InvalidOperationException">if the data to be saved
-        /// is invalid, if compression mode is not supported, or if compression
-        /// failed</exception>
+        /// is invalid, or if compression failed</exception>
         public long Save(Stream stream, ComprModeType? comprMode = null)
         {
             comprMode = comprMode ?? Serialization.ComprModeDefault;
             if (!Serialization.IsSupportedComprMode(comprMode.Value))
-                throw new InvalidOperationException("Unsupported compression mode");
+                throw new ArgumentException("Unsupported compression mode");
 
             ComprModeType comprModeValue = comprMode.Value;
             return Serialization.Save(

@@ -167,8 +167,16 @@ namespace SEALNetExamples
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys();
-            GaloisKeys galoisKeys = keygen.GaloisKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
+
+            /*
+            In this example we create a local version of the GaloisKeys object using
+            KeyGenerator.GaloisKeysLocal(). In a production setting where the Galois
+            keys would need to be communicated to a server, it would be much better to
+            use KeyGenerator.GaloisKeys(), which outputs a Serializable<GaloisKeys>
+            object for compressed serialization.
+            */
+            GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
             Utilities.PrintLine();
             Console.WriteLine("Print the parameter IDs of generated elements.");
             Console.WriteLine($"    + publicKey:  {publicKey.ParmsId}");

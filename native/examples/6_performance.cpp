@@ -34,7 +34,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         */
         cout << "Generating relinearization keys: ";
         time_start = chrono::high_resolution_clock::now();
-        relin_keys = keygen.relin_keys();
+        relin_keys = keygen.relin_keys_local();
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
@@ -54,7 +54,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         */
         cout << "Generating Galois keys: ";
         time_start = chrono::high_resolution_clock::now();
-        gal_keys = keygen.galois_keys();
+        gal_keys = keygen.galois_keys_local();
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
@@ -327,7 +327,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     {
         cout << "Generating relinearization keys: ";
         time_start = chrono::high_resolution_clock::now();
-        relin_keys = keygen.relin_keys();
+        relin_keys = keygen.relin_keys_local();
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
@@ -340,7 +340,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
 
         cout << "Generating Galois keys: ";
         time_start = chrono::high_resolution_clock::now();
-        gal_keys = keygen.galois_keys();
+        gal_keys = keygen.galois_keys_local();
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;

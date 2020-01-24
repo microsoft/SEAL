@@ -500,7 +500,8 @@ namespace seal
         @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the size does not fit in the return type
         */
-        SEAL_NODISCARD std::streamoff save_size(compr_mode_type compr_mode) const;
+        SEAL_NODISCARD std::streamoff save_size(
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const;
 
         /**
         Saves the ciphertext to an output stream. The output is in binary format
@@ -508,8 +509,9 @@ namespace seal
 
         @param[out] stream The stream to save the ciphertext to
         @param[in] compr_mode The desired compression mode
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        @throws std::invalid_argument if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
@@ -581,9 +583,9 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        contain a SEALHeader, or if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(

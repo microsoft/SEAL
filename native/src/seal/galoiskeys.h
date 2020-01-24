@@ -19,20 +19,21 @@ namespace seal
     Class to store Galois keys.
 
     @par Slot Rotations
-    Galois keys are used together with batching (BatchEncoder). If the polynomial modulus
-    is a polynomial of degree N, in batching the idea is to view a plaintext polynomial as
-    a 2-by-(N/2) matrix of integers modulo plaintext modulus. Normal homomorphic computations
-    operate on such encrypted matrices element (slot) wise. However, special rotation
-    operations allow us to also rotate the matrix rows cyclically in either direction, and
-    rotate the columns (swap the rows). These operations require the Galois keys.
+    Galois keys are certain types of public keys that are needed to perform encrypted
+    vector rotation operations on batched ciphertexts. Batched ciphertexts encrypt
+    a 2-by-(N/2) matrix of modular integers in the BFV scheme, or an N/2-dimensional
+    vector of complex numbers in the CKKS scheme, where N denotes the degree of the
+    polynomial modulus. In the BFV scheme Galois keys can enable both cyclic rotations
+    of the encrypted matrix rows, as well as row swaps (column rotations). In the CKKS
+    scheme Galois keys can enable cyclic vector rotations, as well as a complex
+    conjugation operation.
+
 
     @par Thread Safety
     In general, reading from GaloisKeys is thread-safe as long as no other thread is
     concurrently mutating it. This is due to the underlying data structure storing the
     Galois keys not being thread-safe.
 
-    @see SecretKey for the class that stores the secret key.
-    @see PublicKey for the class that stores the public key.
     @see RelinKeys for the class that stores the relinearization keys.
     @see KeyGenerator for the class that generates the Galois keys.
     */

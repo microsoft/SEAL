@@ -204,7 +204,7 @@ namespace SEALNetExamples
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
             Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
             Decryptor decryptor = new Decryptor(context, secretKey);
@@ -369,7 +369,7 @@ namespace SEALNetExamples
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             /*
             We also set up an Encryptor, Evaluator, and Decryptor as usual.

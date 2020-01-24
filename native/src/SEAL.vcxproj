@@ -42,6 +42,7 @@
     <ClInclude Include="seal\relinkeys.h" />
     <ClInclude Include="seal\seal.h" />
     <ClInclude Include="seal\secretkey.h" />
+    <ClInclude Include="seal\serializable.h" />
     <ClInclude Include="seal\serialization.h" />
     <ClInclude Include="seal\smallmodulus.h" />
     <ClInclude Include="seal\util\baseconverter.h" />
@@ -68,6 +69,7 @@
     <ClInclude Include="seal\util\rlwe.h" />
     <ClInclude Include="seal\util\scalingvariant.h" />
     <ClInclude Include="seal\util\smallntt.h" />
+    <ClInclude Include="seal\util\streambuf.h" />
     <ClInclude Include="seal\util\uintarith.h" />
     <ClInclude Include="seal\util\uintarithmod.h" />
     <ClInclude Include="seal\util\uintarithsmallmod.h" />

@@ -28,7 +28,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys();
+            GaloisKeys keys = keygen.GaloisKeysLocal();
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(24ul, keys.Size);
@@ -45,7 +45,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keyGen = new KeyGenerator(context);
 
-            GaloisKeys keys = keyGen.GaloisKeys();
+            GaloisKeys keys = keyGen.GaloisKeysLocal();
             GaloisKeys other = new GaloisKeys();
 
             Assert.IsNotNull(keys);
@@ -113,7 +113,7 @@ namespace SEALNetTest
             GaloisKeys galoisKeys = new GaloisKeys();
             using (MemoryStream stream = new MemoryStream())
             {
-                keygen.GaloisKeysSave(stream);
+                keygen.GaloisKeys().Save(stream);
                 stream.Seek(0, SeekOrigin.Begin);
                 galoisKeys.Load(context, stream);
             }
@@ -179,7 +179,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys();
+            GaloisKeys keys = keygen.GaloisKeysLocal();
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(24ul, keys.Size);
@@ -201,7 +201,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys();
+            GaloisKeys keys = keygen.GaloisKeysLocal();
             MemoryPoolHandle handle = keys.Pool;
 
             Assert.IsNotNull(keys);
@@ -229,7 +229,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys(galoisElts: new ulong[] { 1, 3 });
+            GaloisKeys keys = keygen.GaloisKeysLocal(galoisElts: new ulong[] { 1, 3 });
             Assert.IsNotNull(keys);
 
             Assert.AreEqual(2ul, keys.Size);
@@ -252,7 +252,7 @@ namespace SEALNetTest
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeys(steps: new int[] { 1, 2, 3 });
+            GaloisKeys keys = keygen.GaloisKeysLocal(steps: new int[] { 1, 2, 3 });
             Assert.IsNotNull(keys);
 
             Assert.AreEqual(3ul, keys.Size);

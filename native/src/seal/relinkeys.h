@@ -44,8 +44,6 @@ namespace seal
     is concurrently mutating it. This is due to the underlying data structure
     storing the relinearization keys not being thread-safe.
 
-    @see SecretKey for the class that stores the secret key.
-    @see PublicKey for the class that stores the public key.
     @see GaloisKeys for the class that stores the Galois keys.
     @see KeyGenerator for the class that generates the relinearization keys.
     */

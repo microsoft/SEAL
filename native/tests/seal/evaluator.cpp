@@ -1237,7 +1237,7 @@ namespace SEALTest
 
         auto context = SEALContext::Create(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
-        RelinKeys rlk = keygen.relin_keys();
+        RelinKeys rlk = keygen.relin_keys_local();
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
@@ -1708,7 +1708,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1771,7 +1771,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1834,7 +1834,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1902,7 +1902,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -1958,7 +1958,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2014,7 +2014,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2078,7 +2078,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2147,7 +2147,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2214,7 +2214,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2344,7 +2344,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2404,7 +2404,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2642,7 +2642,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2726,7 +2726,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2807,7 +2807,7 @@ namespace SEALTest
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys();
+            GaloisKeys glk = keygen.galois_keys_local();
 
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
@@ -2882,7 +2882,7 @@ namespace SEALTest
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys();
+            GaloisKeys glk = keygen.galois_keys_local();
 
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
@@ -2963,7 +2963,7 @@ namespace SEALTest
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys();
+            GaloisKeys glk = keygen.galois_keys_local();
 
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
@@ -3042,7 +3042,7 @@ namespace SEALTest
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys();
+            GaloisKeys glk = keygen.galois_keys_local();
 
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
@@ -3193,7 +3193,7 @@ namespace SEALTest
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
-        RelinKeys rlk = keygen.relin_keys();
+        RelinKeys rlk = keygen.relin_keys_local();
 
         Ciphertext encrypted1, encrypted2, encrypted3, encrypted4, product;
         Plaintext plain;
@@ -3280,7 +3280,7 @@ namespace SEALTest
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
-        RelinKeys rlk = keygen.relin_keys();
+        RelinKeys rlk = keygen.relin_keys_local();
 
         Ciphertext encrypted;
         Plaintext plain;
@@ -3582,7 +3582,7 @@ namespace SEALTest
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
-        GaloisKeys glk = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 15 });
+        GaloisKeys glk = keygen.galois_keys_local(vector<uint64_t>{ 1, 3, 5, 15 });
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
@@ -3660,7 +3660,7 @@ namespace SEALTest
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
-        GaloisKeys glk = keygen.galois_keys();
+        GaloisKeys glk = keygen.galois_keys_local();
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);

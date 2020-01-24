@@ -167,8 +167,16 @@ void example_levels()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys();
-    auto galois_keys = keygen.galois_keys();
+    auto relin_keys = keygen.relin_keys_local();
+
+    /*
+    In this example we create a local version of the GaloisKeys object using
+    KeyGenerator::galois_keys_local(). In a production setting where the Galois
+    keys would need to be communicated to a server, it would be much better to
+    use KeyGenerator::galois_keys(), which outputs a Serializable<GaloisKeys>
+    object for compressed serialization.
+    */
+    auto galois_keys = keygen.galois_keys_local();
     print_line(__LINE__);
     cout << "Print the parameter IDs of generated elements." << endl;
     cout << "    + public_key:  " << public_key.parms_id() << endl;

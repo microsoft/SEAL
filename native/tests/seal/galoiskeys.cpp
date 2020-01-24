@@ -35,7 +35,7 @@ namespace SEALTest
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
             ASSERT_EQ(0ULL, keys.data().size());
 
-            keys = keygen.galois_keys();
+            keys = keygen.galois_keys_local();
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.data().size(), test_keys.data().size());
@@ -68,7 +68,7 @@ namespace SEALTest
             ASSERT_TRUE(keys.parms_id() == test_keys.parms_id());
             ASSERT_EQ(0ULL, keys.data().size());
 
-            keys = keygen.galois_keys();
+            keys = keygen.galois_keys_local();
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.data().size(), test_keys.data().size());
@@ -173,10 +173,10 @@ namespace SEALTest
             KeyGenerator keygen(context);
             SecretKey secret_key = keygen.secret_key();
 
-            keygen.galois_keys_save(stream);
+            keygen.galois_keys().save(stream);
             GaloisKeys test_keys;
             test_keys.load(context, stream);
-            GaloisKeys keys = keygen.galois_keys();
+            GaloisKeys keys = keygen.galois_keys_local();
             compare_kswitchkeys(keys, test_keys, secret_key, context);
         }
         {
@@ -195,10 +195,10 @@ namespace SEALTest
             KeyGenerator keygen(context);
             SecretKey secret_key = keygen.secret_key();
 
-            keygen.galois_keys_save(stream);
+            keygen.galois_keys().save(stream);
             GaloisKeys test_keys;
             test_keys.load(context, stream);
-            GaloisKeys keys = keygen.galois_keys();
+            GaloisKeys keys = keygen.galois_keys_local();
             compare_kswitchkeys(keys, test_keys, secret_key, context);
         }
     }

@@ -54,6 +54,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/rlwe.h
         ${CMAKE_CURRENT_LIST_DIR}/scalingvariant.h
         ${CMAKE_CURRENT_LIST_DIR}/smallntt.h
+        ${CMAKE_CURRENT_LIST_DIR}/streambuf.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarith.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.h
         ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.h

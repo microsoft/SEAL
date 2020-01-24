@@ -240,7 +240,7 @@ namespace SEALNetTest
                 expandModChain: true,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeys();
+            GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Evaluator evaluator = new Evaluator(context);
             CKKSEncoder encoder = new CKKSEncoder(context);

@@ -32,7 +32,7 @@ namespace SEALNetExamples
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
             Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
             Decryptor decryptor = new Decryptor(context, secretKey);
@@ -74,7 +74,7 @@ namespace SEALNetExamples
             Rotations require yet another type of special key called `Galois keys'. These
             are easily obtained from the KeyGenerator.
             */
-            GaloisKeys galKeys = keygen.GaloisKeys();
+            GaloisKeys galKeys = keygen.GaloisKeysLocal();
 
             /*
             Now rotate both matrix rows 3 steps to the left, decrypt, decode, and print.
@@ -144,8 +144,8 @@ namespace SEALNetExamples
             KeyGenerator keygen = new KeyGenerator(context);
             PublicKey publicKey = keygen.PublicKey;
             SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys();
-            GaloisKeys galKeys = keygen.GaloisKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
+            GaloisKeys galKeys = keygen.GaloisKeysLocal();
             Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
             Decryptor decryptor = new Decryptor(context, secretKey);

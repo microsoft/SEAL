@@ -28,7 +28,7 @@ namespace SEALTest
 
             RelinKeys keys;
             RelinKeys test_keys;
-            keys = keygen.relin_keys();
+            keys = keygen.relin_keys_local();
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
@@ -54,7 +54,7 @@ namespace SEALTest
 
             RelinKeys keys;
             RelinKeys test_keys;
-            keys = keygen.relin_keys();
+            keys = keygen.relin_keys_local();
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
@@ -158,10 +158,10 @@ namespace SEALTest
             KeyGenerator keygen(context);
             SecretKey secret_key = keygen.secret_key();
 
-            keygen.relin_keys_save(stream);
+            keygen.relin_keys().save(stream);
             RelinKeys test_keys;
             test_keys.load(context, stream);
-            RelinKeys keys = keygen.relin_keys();
+            RelinKeys keys = keygen.relin_keys_local();
             compare_kswitchkeys(keys, test_keys, secret_key, context);
         }
         {
@@ -180,10 +180,10 @@ namespace SEALTest
             KeyGenerator keygen(context);
             SecretKey secret_key = keygen.secret_key();
 
-            keygen.relin_keys_save(stream);
+            keygen.relin_keys().save(stream);
             RelinKeys test_keys;
             test_keys.load(context, stream);
-            RelinKeys keys = keygen.relin_keys();
+            RelinKeys keys = keygen.relin_keys_local();
             compare_kswitchkeys(keys, test_keys, secret_key, context);
         }
     }

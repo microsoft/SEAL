@@ -42,7 +42,10 @@ namespace Microsoft.Research.SEAL
     /// storing the relinearization keys not being thread-safe.
     /// </para>
     /// </remarks>
-    public class RelinKeys : KSwitchKeys
+    public class RelinKeys :
+        KSwitchKeys,
+        ISerializableObject,
+        ISettable<RelinKeys>
     {
         /// <summary>
         /// Creates an empty set of relinearization keys.
@@ -70,6 +73,17 @@ namespace Microsoft.Research.SEAL
         internal RelinKeys(IntPtr kswitchKeys, bool owned = true)
             : base(kswitchKeys, owned)
         {
+        }
+
+        /// <summary>
+        /// Copies a given RelinKeys instance to the current one.
+        /// </summary>
+        ///
+        /// <param name="assign">The RelinKeys to copy from</param>
+        /// <exception cref="ArgumentNullException">if assign is null</exception>
+        public void Set(RelinKeys assign)
+        {
+            base.Set(assign);
         }
 
         /// <summary>

@@ -9,6 +9,7 @@
 #include "seal/encryptionparams.h"
 #include "seal/plaintext.h"
 #include "seal/ciphertext.h"
+#include "seal/serializable.h"
 #include "seal/memorymanager.h"
 #include "seal/context.h"
 #include "seal/publickey.h"
@@ -117,8 +118,9 @@ namespace seal
 
         /**
         Encrypts a plaintext with the public key and stores the result in
-        destination. The encryption parameters for the resulting ciphertext
-        correspond to:
+        destination.
+        
+        The encryption parameters for the resulting ciphertext correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
@@ -142,10 +144,12 @@ namespace seal
 
         /**
         Encrypts a zero plaintext with the public key and stores the result in
-        destination. The encryption parameters for the resulting ciphertext
-        correspond to the highest (data) level in the modulus switching chain.
-        Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        destination.
+        
+        The encryption parameters for the resulting ciphertext correspond to the
+        highest (data) level in the modulus switching chain. Dynamic memory
+        allocations in the process are allocated from the memory pool pointed to
+        by the given MemoryPoolHandle.
 
         @param[out] destination The ciphertext to overwrite with the encrypted
         plaintext
@@ -161,9 +165,11 @@ namespace seal
 
         /**
         Encrypts a zero plaintext with the public key and stores the result in
-        destination. The encryption parameters for the resulting ciphertext
-        correspond to the given parms_id. Dynamic memory allocations in the process
-        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        destination.
+        
+        The encryption parameters for the resulting ciphertext correspond to the
+        given parms_id. Dynamic memory allocations in the process are allocated
+        from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] parms_id The parms_id for the resulting ciphertext
         @param[out] destination The ciphertext to overwrite with the encrypted
@@ -182,8 +188,9 @@ namespace seal
 
         /**
         Encrypts a plaintext with the secret key and stores the result in
-        destination. The encryption parameters for the resulting ciphertext
-        correspond to:
+        destination.
+        
+        The encryption parameters for the resulting ciphertext correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
@@ -208,10 +215,12 @@ namespace seal
 
         /**
         Encrypts a zero plaintext with the secret key and stores the result in
-        destination. The encryption parameters for the resulting ciphertext
-        correspond to the highest (data) level in the modulus switching chain.
-        Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        destination.
+
+        The encryption parameters for the resulting ciphertext correspond to the
+        highest (data) level in the modulus switching chain. Dynamic memory
+        allocations in the process are allocated from the memory pool pointed to
+        by the given MemoryPoolHandle.
 
         @param[out] destination The ciphertext to overwrite with the encrypted
         plaintext
@@ -229,9 +238,11 @@ namespace seal
 
         /**
         Encrypts a zero plaintext with the secret key and stores the result in
-        destination. The encryption parameters for the resulting ciphertext
-        correspond to the given parms_id. Dynamic memory allocations in the process
-        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        destination.
+
+        The encryption parameters for the resulting ciphertext correspond to the
+        given parms_id. Dynamic memory allocations in the process are allocated
+        from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] parms_id The parms_id for the resulting ciphertext
         @param[out] destination The ciphertext to overwrite with the encrypted
@@ -250,217 +261,88 @@ namespace seal
         }
 
         /**
-        Encrypts a plaintext with the secret key and saves result to an output
-        stream. The encryption parameters for the resulting ciphertext correspond
-        to:
+        Encrypts a plaintext with the secret key and returns the ciphertext as
+        a serializable object.
+        
+        The encryption parameters for the resulting ciphertext correspond to:
         1) in BFV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
 
-        Half of the polynomials in Galois keys are randomly generated and are
-        replaced with the seed used to compress output size. The output stream
-        must have the "binary" flag set. The output is in binary format and not
-        human-readable.
+        Half of the ciphertext data is pseudo-randomly generated from a seed to
+        reduce the object size. The resulting serializable object cannot be used
+        directly and is meant to be serialized for the size reduction to have an
+        impact.
 
         @param[in] plain The plaintext to encrypt
-        @param[out] stream The stream to save the result to
-        @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::logic_error if a secret key is not set
-        @throws std::logic_error if compression mode is not supported, or if
-        compression failed
-        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if plain is not valid for the encryption
         parameters
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline std::streamoff encrypt_symmetric_save(
+        SEAL_NODISCARD inline Serializable<Ciphertext> encrypt_symmetric(
             const Plaintext &plain,
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
             encrypt_internal(plain, false, true, destination, pool);
-            return destination.save(stream, compr_mode);
+            return std::move(destination);
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to
-        an output stream. The encryption parameters for the resulting ciphertext
-        correspond to the highest (data) level in the modulus switching chain.
-        Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and returns the ciphertext
+        as a serializable object.
 
-        Half of the polynomials in Galois keys are randomly generated and are
-        replaced with the seed used to compress output size. The output stream
-        must have the "binary" flag set. The output is in binary format and not
-        human-readable.
+        The encryption parameters for the resulting ciphertext correspond to the
+        given parms_id. Dynamic memory allocations in the process are allocated
+        from the memory pool pointed to by the given MemoryPoolHandle.
 
-        @param[out] stream The stream to save the result to
-        @param[in] compr_mode The desired compression mode
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if a secret key is not set
-        @throws std::logic_error if compression mode is not supported, or if
-        compression failed
-        @throws std::runtime_error if I/O operations failed
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        inline std::streamoff encrypt_zero_symmetric_save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            return encrypt_zero_symmetric_save(
-                context_->first_parms_id(), stream, compr_mode, pool);
-        }
-
-        /**
-        Encrypts a zero plaintext with the secret key and saves result to
-        an output stream. The encryption parameters for the resulting ciphertext
-        correspond to the given parms_id. Dynamic memory allocations in the
-        process are allocated from the memory pool pointed to by the given
-        MemoryPoolHandle.
-
-        Half of the polynomials in Galois keys are randomly generated and are
-        replaced with the seed used to compress output size. The output stream
-        must have the "binary" flag set. The output is in binary format and not
-        human-readable.
+        Half of the ciphertext data is pseudo-randomly generated from a seed to
+        reduce the object size. The resulting serializable object cannot be used
+        directly and is meant to be serialized for the size reduction to have an
+        impact.
 
         @param[in] parms_id The parms_id for the resulting ciphertext
-        @param[out] stream The stream to save the result to
-        @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::logic_error if a secret key is not set
-        @throws std::logic_error if compression mode is not supported, or if
-        compression failed
-        @throws std::runtime_error if I/O operations failed
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline std::streamoff encrypt_zero_symmetric_save(
+        SEAL_NODISCARD inline Serializable<Ciphertext> encrypt_zero_symmetric(
             parms_id_type parms_id,
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
             encrypt_zero_internal(parms_id, false, true, destination, pool);
-            return destination.save(stream, compr_mode);
+            return std::move(destination);
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and saves result to a given
-        memory location. The encryption parameters for the resulting ciphertext
-        correspond to:
-        1) in BFV, the highest (data) level in the modulus switching chain,
-        2) in CKKS, the encryption parameters of the plaintext.
-        Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and returns the ciphertext
+        as a serializable object.
+        
+        The encryption parameters for the resulting ciphertext correspond to the
+        highest (data) level in the modulus switching chain. Dynamic memory
+        allocations in the process are allocated from the memory pool pointed to
+        by the given MemoryPoolHandle.
 
-        The second polynomial in result is randomly generated and are replaced
-        with the seed used to compress output size. The output is in binary format
-        and not human-readable.
+        Half of the ciphertext data is pseudo-randomly generated from a seed to
+        reduce the object size. The resulting serializable object cannot be used
+        directly and is meant to be serialized for the size reduction to have an
+        impact.
 
-        @param[in] plain The plaintext to encrypt
-        @param[out] out The memory location to write the ciphertext to
-        @param[in] size The number of bytes available in the given memory location
-        @param[in] compr_mode The desired compression mode
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::logic_error if a secret key is not set
-        @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if compression mode is not supported, or if
-        compression failed
-        @throws std::runtime_error if I/O operations failed
-        @throws std::invalid_argument if plain is not valid for the encryption
-        parameters
-        @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline std::streamoff encrypt_symmetric_save(
-            const Plaintext &plain,
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default,
+        SEAL_NODISCARD inline Serializable<Ciphertext> encrypt_zero_symmetric(
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            Ciphertext destination;
-            encrypt_internal(plain, false, true, destination, pool);
-            return destination.save(out, size, compr_mode);
-        }
-
-        /**
-        Encrypts a zero plaintext with the secret key and saves result to a given
-        memory location. The encryption parameters for the resulting ciphertext
-        correspond to the highest (data) level in the modulus switching chain.
-        Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
-
-        The second polynomial in result is randomly generated and are replaced
-        with the seed used to compress output size. The output is in binary format
-        and not human-readable.
-
-        @param[out] out The memory location to write the ciphertext to
-        @param[in] size The number of bytes available in the given memory location
-        @param[in] compr_mode The desired compression mode
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if a secret key is not set
-        @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if compression mode is not supported, or if
-        compression failed
-        @throws std::runtime_error if I/O operations failed
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        inline std::streamoff encrypt_zero_symmetric_save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            return encrypt_zero_symmetric_save(
-                context_->first_parms_id(), out, size, compr_mode, pool);
-        }
-
-        /**
-        Encrypts a zero plaintext with the secret key and saves result to a given
-        memory location. The encryption parameters for the resulting ciphertext
-        correspond to the given parms_id. Dynamic memory allocations in the process
-        are allocated from the memory pool pointed to by the given MemoryPoolHandle.
-
-        The second polynomial in result is randomly generated and are replaced
-        with the seed used to compress output size. The output is in binary format
-        and not human-readable.
-
-        @param[in] parms_id The parms_id for the resulting ciphertext
-        @param[out] out The memory location to write the ciphertext to
-        @param[in] size The number of bytes available in the given memory location
-        @param[in] compr_mode The desired compression mode
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if a secret key is not set
-        @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
-        @throws std::runtime_error if I/O operations failed
-        @throws std::invalid_argument if parms_id is not valid for the encryption
-        parameters
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        inline std::streamoff encrypt_zero_symmetric_save(
-            parms_id_type parms_id,
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            Ciphertext destination;
-            encrypt_zero_internal(parms_id, false, true, destination, pool);
-            return destination.save(out, size, compr_mode);
+            return encrypt_zero_symmetric(context_->first_parms_id(), pool);
         }
 
         /**

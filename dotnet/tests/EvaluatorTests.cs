@@ -358,7 +358,7 @@ namespace SEALNetTest
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
             Evaluator evaluator = new Evaluator(context);
-            RelinKeys relinKeys = keygen.RelinKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             Ciphertext[] encrypteds = new Ciphertext[4];
             Ciphertext encdest = new Ciphertext();
@@ -401,7 +401,7 @@ namespace SEALNetTest
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
             Evaluator evaluator = new Evaluator(context);
-            RelinKeys relinKeys = keygen.RelinKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             Ciphertext encrypted = new Ciphertext();
             Ciphertext encdest = new Ciphertext();
@@ -519,7 +519,7 @@ namespace SEALNetTest
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
             Evaluator evaluator = new Evaluator(context);
-            RelinKeys relinKeys = keygen.RelinKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             Ciphertext encrypted = new Ciphertext();
             Ciphertext encdest = new Ciphertext();
@@ -573,7 +573,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeys(galoisElts: new ulong[] { 1ul, 3ul, 5ul, 15ul });
+            GaloisKeys galoisKeys = keygen.GaloisKeysLocal(galoisElts: new ulong[] { 1ul, 3ul, 5ul, 15ul });
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
@@ -868,7 +868,7 @@ namespace SEALNetTest
             KeyGenerator keygen = new KeyGenerator(context);
             SecretKey secretKey = keygen.SecretKey;
             PublicKey publicKey = keygen.PublicKey;
-            RelinKeys relinKeys = keygen.RelinKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
@@ -940,7 +940,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeys();
+            GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
@@ -1015,7 +1015,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            RelinKeys relinKeys = keygen.RelinKeys();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
@@ -1065,7 +1065,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeys();
+            GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
@@ -1128,7 +1128,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeys();
+            GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
@@ -1181,8 +1181,8 @@ namespace SEALNetTest
             evaluator = new Evaluator(context);
 
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeys();
-            RelinKeys relinKeys = keygen.RelinKeys();
+            GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
+            RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             Ciphertext encrypted1 = new Ciphertext();
             Ciphertext encrypted2 = new Ciphertext();

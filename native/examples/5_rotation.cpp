@@ -29,7 +29,7 @@ void example_rotation_bfv()
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
-    RelinKeys relin_keys = keygen.relin_keys();
+    RelinKeys relin_keys = keygen.relin_keys_local();
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
@@ -70,7 +70,7 @@ void example_rotation_bfv()
     Rotations require yet another type of special key called `Galois keys'. These
     are easily obtained from the KeyGenerator.
     */
-    GaloisKeys gal_keys = keygen.galois_keys();
+    GaloisKeys gal_keys = keygen.galois_keys_local();
 
     /*
     Now rotate both matrix rows 3 steps to the left, decrypt, decode, and print.
@@ -142,8 +142,8 @@ void example_rotation_ckks()
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
-    RelinKeys relin_keys = keygen.relin_keys();
-    GaloisKeys gal_keys = keygen.galois_keys();
+    RelinKeys relin_keys = keygen.relin_keys_local();
+    GaloisKeys gal_keys = keygen.galois_keys_local();
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
