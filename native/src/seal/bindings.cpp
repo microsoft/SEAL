@@ -235,12 +235,24 @@ EMSCRIPTEN_BINDINGS(bindings)
     emscripten::function("printMatrixInt32", select_overload<void(std::vector<int32_t> &, size_t)>(&printMatrix));
     emscripten::function("printMatrixUInt32", select_overload<void(std::vector<uint32_t> &, size_t)>(&printMatrix));
 
-    register_vector<SmallModulus>("std::vector<SmallModulus>");
     register_vector<Ciphertext>("std::vector<Ciphertext>");
     register_vector<int32_t>("std::vector<int32_t>");
     register_vector<uint32_t>("std::vector<uint32_t>");
     register_vector<double>("std::vector<double>");
     register_vector<std::complex<double>>("std::vector<std::complex<double>>");
+
+    class_<std::vector<SmallModulus>>("std::vector<SmallModulus>")
+        .constructor<>()
+        .function("values", optional_override([](std::vector<SmallModulus>& self) {
+               std::ostringstream str;
+               std::string separator;
+               for (auto x : self) {
+                 str << separator << x.value();
+                 separator = ',';
+               }
+               return str.str();
+            }))
+        ;
 
     class_<util::HashFunction>("util::HashFunction")
          .class_property("hashBlockUint64Count", &util::HashFunction::hash_block_uint64_count)
@@ -376,64 +388,56 @@ EMSCRIPTEN_BINDINGS(bindings)
         .property("securityLevel", &EncryptionParameterQualifiers::sec_level)
         ;
 
-    class_<SEALContext::ContextData>("SEALContext::ContextData")
-        .smart_ptr<std::shared_ptr<SEALContext::ContextData>>("std::shared_ptr<SEALContext::ContextData>")
-        .function("parms", optional_override([](SEALContext::ContextData& self) {
-               return self.parms();
+    class_<std::shared_ptr<const SEALContext::ContextData>>("ContextData")
+        .function("parms", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+               return self->parms(); // Returns a pointer to EncryptionParameters
           }))
-        .function("parmsId", optional_override([](SEALContext::ContextData& self) {
-               return self.parms_id();
+        .function("parmsId", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+               return self->parms_id(); // Returns a pointer to ParmsIdType
           }))
-        .function("qualifiers", optional_override([](SEALContext::ContextData& self) {
-               return self.qualifiers();
+        .function("qualifiers", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+               return self->qualifiers(); // Returns a pointer to EncryptionParameterQualifiers
           }))
-        .function("totalCoeffModulus", optional_override([](SEALContext::ContextData& self) {
-               return self.total_coeff_modulus();
-          }), allow_raw_pointers())
-        .function("totalCoeffModulusBitCount", optional_override([](SEALContext::ContextData& self) {
-               return self.total_coeff_modulus_bit_count();
+//        .function("totalCoeffModulus", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+//               return self->total_coeff_modulus();
+//          }), allow_raw_pointers())
+        .function("totalCoeffModulusBitCount", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+               return self->total_coeff_modulus_bit_count();
           }))
-        .function("coeffDivPlainModulus", optional_override([](SEALContext::ContextData& self) {
-               return self.coeff_div_plain_modulus();
-          }), allow_raw_pointers())
+//        .function("coeffDivPlainModulus", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+//               return self->coeff_div_plain_modulus();
+//          }), allow_raw_pointers())
 //        .function("baseConverter", &SEALContext::ContextData::base_converter)
 //        .function("smallNttTables", &SEALContext::ContextData::small_ntt_tables)
 //        .function("plainNttTables", &SEALContext::ContextData::plain_ntt_tables)
-        .function("plainUpperHalfThreshold", optional_override([](SEALContext::ContextData& self) {
-               return self.plain_upper_half_threshold();
-          }), allow_raw_pointers())
-        .function("plainUpperHalfIncrement", optional_override([](SEALContext::ContextData& self) {
-               return self.plain_upper_half_increment();
-          }), allow_raw_pointers())
-        .function("upperHalfThreshold", optional_override([](SEALContext::ContextData& self) {
-               return self.upper_half_threshold();
-          }), allow_raw_pointers())
-        .function("upperHalfIncrement", optional_override([](SEALContext::ContextData& self) {
-               return self.upper_half_increment();
-          }), allow_raw_pointers())
-        .function("coeffModPlainModulus", optional_override([](SEALContext::ContextData& self) {
-               return self.coeff_mod_plain_modulus();
+//        .function("plainUpperHalfThreshold", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+//               return self->plain_upper_half_threshold();
+//          }), allow_raw_pointers())
+//        .function("plainUpperHalfIncrement", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+//               return self->plain_upper_half_increment();
+//          }), allow_raw_pointers())
+//        .function("upperHalfThreshold", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+//               return self->upper_half_threshold();
+//          }), allow_raw_pointers())
+//        .function("upperHalfIncrement", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+//               return self->upper_half_increment();
+//          }), allow_raw_pointers())
+//        .function("coeffModPlainModulus", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+//               return self->coeff_mod_plain_modulus();
+//          }))
+        .function("prevContextData", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+               return self->prev_context_data(); // Returns a pointer to ContextData
           }))
-        .function("prevContextData", optional_override([](SEALContext::ContextData& self) {
-               return self.prev_context_data();
+        .function("nextContextData", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+               return self->next_context_data(); // Returns a pointer to ContextData
           }))
-        .function("nextContextData", optional_override([](SEALContext::ContextData& self) {
-               return self.next_context_data();
-          }))
-        .function("chainIndex", optional_override([](SEALContext::ContextData& self) {
-               return self.chain_index();
+        .function("chainIndex", optional_override([](std::shared_ptr<const SEALContext::ContextData>& self) {
+               return self->chain_index();
           }))
         ;
 
     class_<SEALContext>("SEALContext")
         .smart_ptr_constructor("std::shared_ptr<SEALContext>", &SEALContext::Create)
-//        These two work below:
-//        .smart_ptr<std::shared_ptr<SEALContext>>("std::shared_ptr<SEALContext>")
-//        .constructor(&SEALContext::Create)
-//
-//        .smart_ptr<std::shared_ptr<SEALContext>>("&SEALContext::first_context_data")
-//        .smart_ptr<std::shared_ptr<SEALContext>>("&SEALContext::first_context_data")
-//        .smart_ptr_constructor("firstContextData", &SEALContext::first_context_data)
         .function("getContextData", &SEALContext::get_context_data)
         .function("keyContextData", &SEALContext::key_context_data)
         .function("firstContextData", &SEALContext::first_context_data)
