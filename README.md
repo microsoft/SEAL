@@ -7,7 +7,7 @@ dependencies, making it easy to compile and run in many different environments.
 For more information about the Microsoft SEAL project, see
 [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 3.4. Users of previous versions
+This document pertains to Microsoft SEAL version 3.5. Users of previous versions
 of the library should look at the [list of changes](Changes.md).
 
 # Contents
@@ -578,6 +578,17 @@ For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md
 # Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
+
+### Version 3.5
+
+    @misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 3.5)},
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = ???,
+        year = 2020,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
 
 ### Version 3.4
 

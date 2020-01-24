@@ -11,7 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SEALTest_SOURCE_DIR}/../bin)
 add_executable(sealtest seal/testrunner.cpp)
 
 # Import Microsoft SEAL
-find_package(SEAL 3.4.5 EXACT REQUIRED
+find_package(SEAL 3.5.0 EXACT REQUIRED
     # Providing a path so this can be built without installing Microsoft SEAL
     PATHS ${SEALTest_SOURCE_DIR}/../src/cmake
 )

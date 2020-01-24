@@ -6,10 +6,11 @@
 
 - New generic class `Serializable` wraps `Ciphertext`, `RelinKeys`, and `GaloisKeys` objects to provide a more flexible approach to the functionality provided in release 3.4 by `KeyGenerator::[relin|galois]_keys_save` and `Encryptor::encrypt_[zero_]symmetric_save` functions. Specifically, these functions have been removed and replaced with overloads of `KeyGenerator::[relin|galois]_keys` and `Encryptor::encrypt_[zero_]symmetric` that return `Serializable` objects. The `Serializable` objects cannot be used directly by Microsoft SEAL, and are instead intended to be serialized, which activates the compression functionalities introduced earlier in release 3.4.
 
-### File changes
+### New files
 
 - [native/src/seal/serializable.h](native/src/seal/serializable.h)
 - [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
+- [dotnet/src/Serializable.cs](dotnet/src/Serializable.cs)
 
 ### Other minor changes
 
