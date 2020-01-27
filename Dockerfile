@@ -45,7 +45,7 @@ RUN echo "cd ~" >> /home/${user_name}/.bashrc && \
 # clone, checkout and build seal
 RUN mkdir -p /home/${user_name}/git && \
     cd ~/git && \
-    git clone "https://github.com/DreamingRaven/seal" && \
+    git clone "https://github.com/microsoft/seal" && \
     cd ~/git/seal && \
     git checkout ${branch} && \
     cd native/src && \
