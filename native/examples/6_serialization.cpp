@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 #include "examples.h"
-#include <sstream>
 
 using namespace std;
 using namespace seal;
@@ -24,9 +23,9 @@ void example_serialization()
     */
 #ifndef SEAL_USE_ZLIB
     cout << "ZLIB support is not enabled; this example is not available." << endl;
+    cout << endl;
     return;
-#endif
-
+#else
     /*
     To simulate client-server interaction, we set up a shared C++ stream. In real
     use-cases this can be a network buffer, a filestream, or any shared resource.
@@ -378,4 +377,5 @@ void example_serialization()
         cout << "Result: " << endl;
         print_vector(result, 3, 7);
     }
+#endif
 }
