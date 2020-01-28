@@ -68,22 +68,6 @@ For .NET Framework wrapper support (C++/CLI) we need to
             it easy for non-expert users to select secure parameters.
             */
             extern const std::map<std::size_t, std::vector<SmallModulus>> default_coeff_modulus_256;
-
-            // For internal use only, do not modify
-            namespace internal_mods
-            {
-                // Prime, 61 bits, and congruent to 1 mod 2^18
-                extern const SmallModulus m_sk;
-
-                // Non-prime; 2^32
-                extern const SmallModulus m_tilde;
-
-                // Prime, 61 bits, and congruent to 1 mod 2^18
-                extern const SmallModulus gamma;
-
-                // For internal use only, all primes 61 bits and congruent to 1 mod 2^18
-                extern const std::vector<SmallModulus> aux_small_mods;
-            }
         }
     }
 }

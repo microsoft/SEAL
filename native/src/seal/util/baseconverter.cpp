@@ -15,6 +15,7 @@
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/smallntt.h"
 #include "seal/util/globals.h"
+#include "seal/util/numth.h"
 #include "seal/smallmodulus.h"
 
 using namespace std;
@@ -57,9 +58,6 @@ namespace seal
             */
             reset();
 
-            m_sk_ = global_variables::internal_mods::m_sk;
-            m_tilde_ = global_variables::internal_mods::m_tilde;
-            gamma_ = global_variables::internal_mods::gamma;
             small_plain_mod_ = small_plain_mod;
             coeff_count_ = coeff_count;
             coeff_base_mod_count_ = coeff_base.size();
@@ -97,6 +95,18 @@ namespace seal
                 throw logic_error("invalid parameters");
             }
 
+            // Sample auxiliary primes; the aux base has size aux_base_mod_count_ and
+            // we need two more primes: one for m_sk and one for gamma.
+            auto baseconv_primes = get_primes(
+                    coeff_count_,
+                    SEAL_USER_MOD_BIT_COUNT_MAX + 1,
+                    aux_base_mod_count_ + 2);
+
+            auto baseconv_primes_iter = baseconv_primes.cbegin();
+            m_sk_ = *baseconv_primes_iter++;
+            gamma_ = *baseconv_primes_iter++;
+            m_tilde_ = uint64_t(1) << 32;
+
             // We use a reversed order here for performance reasons
             coeff_base_products_mod_aux_bsk_array_ =
                 allocate<Pointer<std::uint64_t>>(bsk_base_mod_count_, pool_);
@@ -126,8 +136,7 @@ namespace seal
             bsk_base_array_ = allocate<SmallModulus>(bsk_base_mod_count_, pool_);
 
             copy(coeff_base.cbegin(), coeff_base.cend(), coeff_base_array_.get());
-            copy_n(global_variables::internal_mods::aux_small_mods.cbegin(),
-                aux_base_mod_count_, aux_base_array_.get());
+            copy_n(baseconv_primes_iter, aux_base_mod_count_, aux_base_array_.get());
             copy_n(aux_base_array_.get(), aux_base_mod_count_, bsk_base_array_.get());
             bsk_base_array_[bsk_base_mod_count_ - 1] = m_sk_;
 
