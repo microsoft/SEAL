@@ -6,6 +6,7 @@ using Microsoft.Research.SEAL;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace SEALNetExamples
 {
@@ -93,10 +94,12 @@ namespace SEALNetExamples
             */
             ulong slotCount = batchEncoder.SlotCount;
             ulong[] podValues = new ulong[slotCount];
-            Random rnd = new Random();
+            RNGCryptoServiceProvider rnd = new RNGCryptoServiceProvider();
+            byte[] randomNumber = new byte[8]; //8 bytes = 64bit (length of ulong)
             for (ulong i = 0; i < batchEncoder.SlotCount; i++)
             {
-                podValues[i] = (ulong)rnd.Next() % plainModulus.Value;
+                rnd.GetBytes(randomNumber);
+                podValues[i] = (ulong)BitConverter.ToUInt64(randomNumber) % plainModulus.Value;
             }
 
             Console.Write("Running tests ");
@@ -223,7 +226,9 @@ namespace SEALNetExamples
                     expensive than rotating by just one step.
                     */
                     int rowSize = (int)batchEncoder.SlotCount / 2;
-                    int randomRotation = rnd.Next() % rowSize;
+                    randomNumber = new Byte[4]; //4 bytes = 32 bits (length of int)
+                    rnd.GetBytes(randomNumber);
+                    int randomRotation = (int)BitConverter.ToInt32(randomNumber) % rowSize;
                     timeRotateRowsRandomSum.Start();
                     evaluator.RotateRowsInplace(encrypted, randomRotation, galKeys);
                     timeRotateRowsRandomSum.Stop();
@@ -348,7 +353,7 @@ namespace SEALNetExamples
             Stopwatch timeRotateRandomSum = new Stopwatch();
             Stopwatch timeConjugateSum = new Stopwatch();
 
-            Random rnd = new Random();
+            RNGCryptoServiceProvider rnd = new RNGCryptoServiceProvider();
 
             /*
             How many times to run the test?
@@ -468,7 +473,9 @@ namespace SEALNetExamples
                     /*
                     [Rotate Vector Random]
                     */
-                    int randomRotation = rnd.Next() % (int)ckksEncoder.SlotCount;
+                    byte[] randomNumber = new byte[4]; //4 bytes = 32 bit (length of int)
+                    rnd.GetBytes(randomNumber);
+                    int randomRotation = (int)BitConverter.ToInt32(randomNumber) % (int)ckksEncoder.SlotCount;
                     timeRotateRandomSum.Start();
                     evaluator.RotateVectorInplace(encrypted, randomRotation, galKeys);
                     timeRotateRandomSum.Stop();

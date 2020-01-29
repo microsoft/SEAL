@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Security.Cryptography;
 
 namespace SEALNetTest
 {
@@ -108,13 +109,14 @@ namespace SEALNetTest
             CKKSEncoder encoder = new CKKSEncoder(context);
 
             List<Complex> values = new List<Complex>(slots);
-            Random rnd = new Random();
+            RNGCryptoServiceProvider rnd = new RNGCryptoServiceProvider();
             int dataBound = 1 << 30;
             double delta = 1ul << 40;
-
+            byte[] randomNumber = new byte[4];
             for (int i = 0; i < slots; i++)
             {
-                values.Add(new Complex(rnd.Next() % dataBound, 0));
+                rnd.GetBytes(randomNumber);
+                values.Add(new Complex((int)BitConverter.ToInt32(randomNumber) % dataBound, 0));
             }
 
             Plaintext plain = new Plaintext();
