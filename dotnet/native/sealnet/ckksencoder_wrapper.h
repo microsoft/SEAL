@@ -10,24 +10,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD CKKSEncoder_Create(void *context, void **ckks_encoder);
 
 SEALMETHOD CKKSEncoder_Destroy(void *thisptr);
 
 // Array of doubles
-SEALMETHOD CKKSEncoder_Encode1(void *thisptr, uint64_t value_count, double *values, uint64_t *parms_id, double scale, void *destination, void *pool);
+SEALMETHOD CKKSEncoder_Encode1(
+    void *thisptr, uint64_t value_count, double *values, uint64_t *parms_id, double scale, void *destination,
+    void *pool);
 
 // Array of complex numbers (two doubles per value)
-SEALMETHOD CKKSEncoder_Encode2(void *thisptr, uint64_t value_count, double *complex_values, uint64_t *parms_id, double scale, void *destination, void *pool);
+SEALMETHOD CKKSEncoder_Encode2(
+    void *thisptr, uint64_t value_count, double *complex_values, uint64_t *parms_id, double scale, void *destination,
+    void *pool);
 
 // Single double value
-SEALMETHOD CKKSEncoder_Encode3(void *thisptr, double value, uint64_t *parms_id, double scale, void *destination, void *pool);
+SEALMETHOD CKKSEncoder_Encode3(
+    void *thisptr, double value, uint64_t *parms_id, double scale, void *destination, void *pool);
 
 // Single complex value
-SEALMETHOD CKKSEncoder_Encode4(void *thisptr, double value_re, double value_im, uint64_t *parms_id, double scale, void *destination, void *pool);
+SEALMETHOD CKKSEncoder_Encode4(
+    void *thisptr, double value_re, double value_im, uint64_t *parms_id, double scale, void *destination, void *pool);
 
 // Single Int64 value
 SEALMETHOD CKKSEncoder_Encode5(void *thisptr, int64_t value, uint64_t *parms_id, void *destination);

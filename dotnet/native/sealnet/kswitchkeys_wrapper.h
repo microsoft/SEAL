@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD KSwitchKeys_Create1(void **kswitch_keys);
 

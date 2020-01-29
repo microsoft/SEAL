@@ -10,7 +10,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD GaloisKeys_GetIndex(uint64_t galois_elt, uint64_t *index);

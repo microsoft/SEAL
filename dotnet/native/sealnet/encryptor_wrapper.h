@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD Encryptor_Create(void *context, void *public_key, void *secret_key, void **encryptor);
 
@@ -25,9 +25,11 @@ SEALMETHOD Encryptor_EncryptZero1(void *thisptr, uint64_t *parms_id, void *desti
 
 SEALMETHOD Encryptor_EncryptZero2(void *thisptr, void *destination, void *pool_handle);
 
-SEALMETHOD Encryptor_EncryptSymmetric(void *thisptr, void *plaintext, bool save_seed, void *destination, void *pool_handle);
+SEALMETHOD Encryptor_EncryptSymmetric(
+    void *thisptr, void *plaintext, bool save_seed, void *destination, void *pool_handle);
 
-SEALMETHOD Encryptor_EncryptZeroSymmetric1(void *thisptr, uint64_t *parms_id, bool save_seed, void *destination, void *pool_handle);
+SEALMETHOD Encryptor_EncryptZeroSymmetric1(
+    void *thisptr, uint64_t *parms_id, bool save_seed, void *destination, void *pool_handle);
 
 SEALMETHOD Encryptor_EncryptZeroSymmetric2(void *thisptr, bool save_seed, void *destination, void *pool_handle);
 

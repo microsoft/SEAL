@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD EncParams_Create1(uint8_t scheme, void **enc_params);
 

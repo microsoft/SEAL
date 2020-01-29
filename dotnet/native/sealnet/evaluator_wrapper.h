@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD Evaluator_Create(void *sealContext, void **evaluator);
 
@@ -31,7 +31,8 @@ SEALMETHOD Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void 
 
 SEALMETHOD Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2, void *destination, void *pool);
 
-SEALMETHOD Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_MultiplyMany(
+    void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool);
 
 SEALMETHOD Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool);
 
@@ -51,7 +52,8 @@ SEALMETHOD Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destina
 
 SEALMETHOD Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool);
 
-SEALMETHOD Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_Exponentiate(
+    void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool);
 
 SEALMETHOD Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parms_id, void *destination_ntt, void *pool);
 
@@ -59,13 +61,16 @@ SEALMETHOD Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *desti
 
 SEALMETHOD Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *destination);
 
-SEALMETHOD Evaluator_ApplyGalois(void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_ApplyGalois(
+    void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool);
 
-SEALMETHOD Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool);
+SEALMETHOD Evaluator_RotateRows(
+    void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool);
 
 SEALMETHOD Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
 
-SEALMETHOD Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_RotateVector(
+    void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool);
 
 SEALMETHOD Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
 

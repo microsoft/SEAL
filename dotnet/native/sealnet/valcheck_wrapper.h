@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD ValCheck_Plaintext_IsValidFor(void *plaintext, void *context, bool *result);
 

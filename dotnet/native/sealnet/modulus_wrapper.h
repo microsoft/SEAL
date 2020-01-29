@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD CoeffModulus_MaxBitCount(uint64_t poly_modulus_degree, int sec_level, int *bit_count);
 

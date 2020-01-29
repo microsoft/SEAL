@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void **pool_handle);
 

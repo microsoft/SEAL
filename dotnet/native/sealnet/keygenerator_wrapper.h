@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
 SEALMETHOD KeyGenerator_Create1(void *sealContext, void **key_generator);
 
@@ -23,9 +23,11 @@ SEALMETHOD KeyGenerator_Destroy(void *thisptr);
 
 SEALMETHOD KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys);
 
-SEALMETHOD KeyGenerator_GaloisKeysFromElts(void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys);
+SEALMETHOD KeyGenerator_GaloisKeysFromElts(
+    void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys);
 
-SEALMETHOD KeyGenerator_GaloisKeysFromSteps(void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys);
+SEALMETHOD KeyGenerator_GaloisKeysFromSteps(
+    void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys);
 
 SEALMETHOD KeyGenerator_GaloisKeysAll(void *thisptr, bool save_seed, void **galois_keys);
 

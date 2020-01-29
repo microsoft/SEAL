@@ -10,11 +10,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
+#include "sealnet/defines.h"
 
-SEALMETHOD SEALContext_Create(void *encryptionParams,
-    bool expand_mod_chain, int sec_level, void **context);
+SEALMETHOD SEALContext_Create(void *encryptionParams, bool expand_mod_chain, int sec_level, void **context);
 
 SEALMETHOD SEALContext_Destroy(void *thisptr);
 

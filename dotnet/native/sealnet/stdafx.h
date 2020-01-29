@@ -11,23 +11,25 @@
 #ifdef _MSC_VER
 #include "sealnet/targetver.h"
 
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
-#include <windows.h>
 #include <CorError.h>
+#include <windows.h>
 #endif // _MSC_VER
 
-#define IfNullRet(expr, ret) {\
-    if ((expr) == nullptr) \
-    { \
-        return ret; \
-    } \
-}
+#define IfNullRet(expr, ret)   \
+    {                          \
+        if ((expr) == nullptr) \
+        {                      \
+            return ret;        \
+        }                      \
+    }
 
-#define IfFailRet(expr) { \
-    HRESULT __hr__ = (expr); \
-    if (FAILED(__hr__)) \
-    { \
-        return __hr__; \
-    } \
-}
+#define IfFailRet(expr)          \
+    {                            \
+        HRESULT __hr__ = (expr); \
+        if (FAILED(__hr__))      \
+        {                        \
+            return __hr__;       \
+        }                        \
+    }

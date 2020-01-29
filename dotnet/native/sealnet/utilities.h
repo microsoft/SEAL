@@ -4,11 +4,11 @@
 #pragma once
 
 // STD
-#include <vector>
-#include <memory>
-#include <unordered_map>
-#include <string>
 #include <algorithm>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 // SEALNet
 #include "sealnet/defines.h"
@@ -21,7 +21,7 @@ namespace seal
     class SmallModulus;
     class SEALContext;
     class MemoryPoolHandle;
-}
+} // namespace seal
 
 namespace sealnet
 {
@@ -31,7 +31,7 @@ namespace sealnet
     template <class T>
     inline T *FromVoid(void *voidptr)
     {
-        T *result = reinterpret_cast<T*>(voidptr);
+        T *result = reinterpret_cast<T *>(voidptr);
         return result;
     }
 
@@ -77,4 +77,4 @@ namespace sealnet
     Convert std::string to char*
     */
     HRESULT ToStringHelper(const std::string &str, char *outstr, uint64_t *length);
-}
+} // namespace sealnet

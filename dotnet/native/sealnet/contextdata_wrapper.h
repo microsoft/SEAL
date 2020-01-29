@@ -10,9 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "sealnet/defines.h"
 #include <stdint.h>
-
+#include "sealnet/defines.h"
 
 SEALMETHOD ContextData_Destroy(void *thisptr);
 
