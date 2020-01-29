@@ -67,14 +67,12 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks:   Merge
 IncludeCategories:
-  - Regex:           '^<ext/.*\.h>'
-    Priority:        2
-  - Regex:           '^<.*\.h>'
+  - Regex:           '<.*>'
     Priority:        1
-  - Regex:           '^<.*'
-    Priority:        2
-  - Regex:           '.*'
-    Priority:        3
+  - Regex:           '"seal/util/.*"'
+    Priority:        -2
+  - Regex:           '"seal/.*"'
+    Priority:        -3
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: false
 IndentPPDirectives: None
