@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <complex>
 #include "seal/util/croots.h"
+#include <complex>
 
 using namespace std;
 
@@ -12,11 +12,8 @@ namespace seal
     {
         if (index <= root_fidelity_ / 8)
         {
-            //return { complex_roots_re_[index], complex_roots_im_[index] };
-            return std::polar<double>(
-                1.0,
-                2 * PI_ * static_cast<double>(index) / root_fidelity_
-            );
+            // return { complex_roots_re_[index], complex_roots_im_[index] };
+            return std::polar<double>(1.0, 2 * PI_ * static_cast<double>(index) / root_fidelity_);
         }
         else if (index <= root_fidelity_ / 4)
         {
@@ -32814,4 +32811,4 @@ namespace seal
         0.70710678118654752440084436210484903928
     };
     */
-}
+} // namespace seal

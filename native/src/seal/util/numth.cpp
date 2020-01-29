@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <random>
 #include "seal/util/numth.h"
-#include "seal/util/uintcore.h"
 #include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
+#include <random>
 
 using namespace std;
 
@@ -12,11 +12,9 @@ namespace seal
 {
     namespace util
     {
-        vector<uint64_t> conjugate_classes(uint64_t modulus,
-            uint64_t subgroup_generator)
+        vector<uint64_t> conjugate_classes(uint64_t modulus, uint64_t subgroup_generator)
         {
-            if (!product_fits_in(modulus, subgroup_generator) ||
-                !fits_in<size_t>(modulus))
+            if (!product_fits_in(modulus, subgroup_generator) || !fits_in<size_t>(modulus))
             {
                 throw invalid_argument("inputs too large");
             }
@@ -42,8 +40,7 @@ namespace seal
                 if (classes[static_cast<size_t>(i)] < i)
                 {
                     // i is not a pivot, updated its pivot
-                    classes[static_cast<size_t>(i)] =
-                        classes[static_cast<size_t>(classes[static_cast<size_t>(i)])];
+                    classes[static_cast<size_t>(i)] = classes[static_cast<size_t>(classes[static_cast<size_t>(i)])];
                     continue;
                 }
                 // If i is a pivot, update other pivots to point to it
@@ -60,11 +57,9 @@ namespace seal
             return classes;
         }
 
-        vector<uint64_t> multiplicative_orders(
-            vector<uint64_t> conjugate_classes, uint64_t modulus)
+        vector<uint64_t> multiplicative_orders(vector<uint64_t> conjugate_classes, uint64_t modulus)
         {
-            if (!product_fits_in(modulus, modulus) ||
-                !fits_in<size_t>(modulus))
+            if (!product_fits_in(modulus, modulus) || !fits_in<size_t>(modulus))
             {
                 throw invalid_argument("inputs too large");
             }
@@ -77,14 +72,12 @@ namespace seal
             {
                 if (conjugate_classes[static_cast<size_t>(i)] <= 1)
                 {
-                    orders.push_back(
-                        conjugate_classes[static_cast<size_t>(i)]);
+                    orders.push_back(conjugate_classes[static_cast<size_t>(i)]);
                     continue;
                 }
                 if (conjugate_classes[static_cast<size_t>(i)] < i)
                 {
-                    orders.push_back(orders[static_cast<size_t>(
-                        conjugate_classes[static_cast<size_t>(i)])]);
+                    orders.push_back(orders[static_cast<size_t>(conjugate_classes[static_cast<size_t>(i)])]);
                     continue;
                 }
                 uint64_t j = (i * i) % modulus;
@@ -99,8 +92,7 @@ namespace seal
             return orders;
         }
 
-        void babystep_giantstep(uint64_t modulus,
-            vector<uint64_t> &baby_steps, vector<uint64_t> &giant_steps)
+        void babystep_giantstep(uint64_t modulus, vector<uint64_t> &baby_steps, vector<uint64_t> &giant_steps)
         {
             int exponent = get_power_of_two(modulus);
             if (exponent < 0)
@@ -136,9 +128,7 @@ namespace seal
         }
 
         pair<size_t, size_t> decompose_babystep_giantstep(
-            uint64_t modulus, uint64_t input,
-            const vector<uint64_t> &baby_steps,
-            const vector<uint64_t> &giant_steps)
+            uint64_t modulus, uint64_t input, const vector<uint64_t> &baby_steps, const vector<uint64_t> &giant_steps)
         {
             for (size_t i = 0; i < giant_steps.size(); i++)
             {
@@ -299,5 +289,5 @@ namespace seal
             }
             return destination;
         }
-    }
-}
+    } // namespace util
+} // namespace seal

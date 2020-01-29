@@ -2,10 +2,10 @@
 // Licensed under the MIT license.
 
 #include "seal/smallmodulus.h"
-#include "seal/util/uintarith.h"
-#include "seal/util/uintarithsmallmod.h"
 #include "seal/util/common.h"
 #include "seal/util/numth.h"
+#include "seal/util/uintarith.h"
+#include "seal/util/uintarithsmallmod.h"
 #include <stdexcept>
 
 using namespace seal::util;
@@ -21,7 +21,7 @@ namespace seal
             // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            stream.write(reinterpret_cast<const char*>(&value_), sizeof(uint64_t));
+            stream.write(reinterpret_cast<const char *>(&value_), sizeof(uint64_t));
         }
         catch (const ios_base::failure &)
         {
@@ -45,7 +45,7 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             uint64_t value;
-            stream.read(reinterpret_cast<char*>(&value), sizeof(uint64_t));
+            stream.read(reinterpret_cast<char *>(&value), sizeof(uint64_t));
             set_value(value);
         }
         catch (const ios_base::failure &)
@@ -72,8 +72,7 @@ namespace seal
             const_ratio_ = { { 0, 0, 0 } };
             is_prime_ = false;
         }
-        else if ((value >> 62 != 0) || (value == uint64_t(0x4000000000000000)) ||
-            (value == 1))
+        else if ((value >> 62 != 0) || (value == uint64_t(0x4000000000000000)) || (value == 1))
         {
             throw invalid_argument("value can be at most 62 bits and cannot be 1");
         }
@@ -102,4 +101,4 @@ namespace seal
             is_prime_ = util::is_prime(*this);
         }
     }
-}
+} // namespace seal

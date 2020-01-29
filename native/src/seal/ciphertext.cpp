@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <algorithm>
 #include "seal/ciphertext.h"
 #include "seal/randomgen.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rlwe.h"
+#include <algorithm>
 
 using namespace std;
 using namespace seal::util;
 
 namespace seal
 {
-    Ciphertext &Ciphertext::operator =(const Ciphertext &assign)
+    Ciphertext &Ciphertext::operator=(const Ciphertext &assign)
     {
         // Check for self-assignment
         if (this == &assign)
@@ -28,8 +28,7 @@ namespace seal
         scale_ = assign.scale_;
 
         // Then resize
-        resize_internal(assign.size_, assign.poly_modulus_degree_,
-            assign.coeff_mod_count_);
+        resize_internal(assign.size_, assign.poly_modulus_degree_, assign.coeff_mod_count_);
 
         // Size is guaranteed to be OK now so copy over
         copy(assign.data_.cbegin(), assign.data_.cend(), data_.begin());
@@ -37,8 +36,7 @@ namespace seal
         return *this;
     }
 
-    void Ciphertext::reserve(shared_ptr<SEALContext> context,
-        parms_id_type parms_id, size_t size_capacity)
+    void Ciphertext::reserve(shared_ptr<SEALContext> context, parms_id_type parms_id, size_t size_capacity)
     {
         // Verify parameters
         if (!context)
@@ -60,21 +58,17 @@ namespace seal
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
-        reserve_internal(size_capacity,
-            parms.poly_modulus_degree(), parms.coeff_modulus().size());
+        reserve_internal(size_capacity, parms.poly_modulus_degree(), parms.coeff_modulus().size());
     }
 
-    void Ciphertext::reserve_internal(size_t size_capacity,
-        size_t poly_modulus_degree, size_t coeff_mod_count)
+    void Ciphertext::reserve_internal(size_t size_capacity, size_t poly_modulus_degree, size_t coeff_mod_count)
     {
-        if (size_capacity < SEAL_CIPHERTEXT_SIZE_MIN ||
-            size_capacity > SEAL_CIPHERTEXT_SIZE_MAX)
+        if (size_capacity < SEAL_CIPHERTEXT_SIZE_MIN || size_capacity > SEAL_CIPHERTEXT_SIZE_MAX)
         {
             throw invalid_argument("invalid size_capacity");
         }
 
-        size_t new_data_capacity =
-            mul_safe(size_capacity, poly_modulus_degree, coeff_mod_count);
+        size_t new_data_capacity = mul_safe(size_capacity, poly_modulus_degree, coeff_mod_count);
         size_t new_data_size = min<size_t>(new_data_capacity, data_.size());
 
         // First reserve, then resize
@@ -87,8 +81,7 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
-    void Ciphertext::resize(shared_ptr<SEALContext> context,
-        parms_id_type parms_id, size_t size)
+    void Ciphertext::resize(shared_ptr<SEALContext> context, parms_id_type parms_id, size_t size)
     {
         // Verify parameters
         if (!context)
@@ -110,22 +103,18 @@ namespace seal
         auto &parms = context_data_ptr->parms();
         parms_id_ = context_data_ptr->parms_id();
 
-        resize_internal(size,
-            parms.poly_modulus_degree(), parms.coeff_modulus().size());
+        resize_internal(size, parms.poly_modulus_degree(), parms.coeff_modulus().size());
     }
 
-    void Ciphertext::resize_internal(size_t size,
-        size_t poly_modulus_degree, size_t coeff_mod_count)
+    void Ciphertext::resize_internal(size_t size, size_t poly_modulus_degree, size_t coeff_mod_count)
     {
-        if ((size < SEAL_CIPHERTEXT_SIZE_MIN && size != 0) ||
-            size > SEAL_CIPHERTEXT_SIZE_MAX)
+        if ((size < SEAL_CIPHERTEXT_SIZE_MIN && size != 0) || size > SEAL_CIPHERTEXT_SIZE_MAX)
         {
             throw invalid_argument("invalid size");
         }
 
         // Resize the data
-        size_t new_data_size =
-            mul_safe(size, poly_modulus_degree, coeff_mod_count);
+        size_t new_data_size = mul_safe(size, poly_modulus_degree, coeff_mod_count);
         data_.resize(new_data_size);
 
         // Set the size parameters
@@ -134,9 +123,7 @@ namespace seal
         coeff_mod_count_ = coeff_mod_count;
     }
 
-    void Ciphertext::expand_seed(
-        shared_ptr<SEALContext> context,
-        const random_seed_type &seed)
+    void Ciphertext::expand_seed(shared_ptr<SEALContext> context, const random_seed_type &seed)
     {
         auto context_data_ptr = context->get_context_data(parms_id_);
 
@@ -155,34 +142,29 @@ namespace seal
         {
             // Create a temporary aliased IntArray of smaller size
             IntArray<ct_coeff_type> alias_data(
-                Pointer<ct_coeff_type>::Aliasing(
-                    const_cast<ct_coeff_type*>(data_.cbegin())),
-                data_.size() / 2, false, data_.pool());
+                Pointer<ct_coeff_type>::Aliasing(const_cast<ct_coeff_type *>(data_.cbegin())), data_.size() / 2, false,
+                data_.pool());
 
-            data_size = add_safe(safe_cast<size_t>(
-                alias_data.save_size(compr_mode_type::none)), // data_(0)
-                sizeof(random_seed_type)); // seed
+            data_size = add_safe(
+                safe_cast<size_t>(alias_data.save_size(compr_mode_type::none)), // data_(0)
+                sizeof(random_seed_type));                                      // seed
         }
         else
         {
-            data_size = safe_cast<size_t>(
-                data_.save_size(compr_mode_type::none)); // data_
+            data_size = safe_cast<size_t>(data_.save_size(compr_mode_type::none)); // data_
         }
 
         size_t members_size = Serialization::ComprSizeEstimate(
             add_safe(
                 sizeof(parms_id_),
                 sizeof(SEAL_BYTE), // is_ntt_form_
-                sizeof(uint64_t), // size_
-                sizeof(uint64_t), // poly_modulus_degree_
-                sizeof(uint64_t), // coeff_mod_count_
-                sizeof(scale_),
-                data_size),
+                sizeof(uint64_t),  // size_
+                sizeof(uint64_t),  // poly_modulus_degree_
+                sizeof(uint64_t),  // coeff_mod_count_
+                sizeof(scale_), data_size),
             compr_mode);
 
-        return safe_cast<streamoff>(add_safe(
-            sizeof(Serialization::SEALHeader),
-            members_size));
+        return safe_cast<streamoff>(add_safe(sizeof(Serialization::SEALHeader), members_size));
     }
 
     void Ciphertext::save_members(ostream &stream) const
@@ -193,16 +175,16 @@ namespace seal
             // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            stream.write(reinterpret_cast<const char*>(&parms_id_), sizeof(parms_id_type));
+            stream.write(reinterpret_cast<const char *>(&parms_id_), sizeof(parms_id_type));
             SEAL_BYTE is_ntt_form_byte = static_cast<SEAL_BYTE>(is_ntt_form_);
-            stream.write(reinterpret_cast<const char*>(&is_ntt_form_byte), sizeof(SEAL_BYTE));
+            stream.write(reinterpret_cast<const char *>(&is_ntt_form_byte), sizeof(SEAL_BYTE));
             uint64_t size64 = safe_cast<uint64_t>(size_);
-            stream.write(reinterpret_cast<const char*>(&size64), sizeof(uint64_t));
+            stream.write(reinterpret_cast<const char *>(&size64), sizeof(uint64_t));
             uint64_t poly_modulus_degree64 = safe_cast<uint64_t>(poly_modulus_degree_);
-            stream.write(reinterpret_cast<const char*>(&poly_modulus_degree64), sizeof(uint64_t));
+            stream.write(reinterpret_cast<const char *>(&poly_modulus_degree64), sizeof(uint64_t));
             uint64_t coeff_mod_count64 = safe_cast<uint64_t>(coeff_mod_count_);
-            stream.write(reinterpret_cast<const char*>(&coeff_mod_count64), sizeof(uint64_t));
-            stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
+            stream.write(reinterpret_cast<const char *>(&coeff_mod_count64), sizeof(uint64_t));
+            stream.write(reinterpret_cast<const char *>(&scale_), sizeof(double));
 
             if (has_seed_marker())
             {
@@ -217,13 +199,12 @@ namespace seal
                 IntArray<ct_coeff_type> alias_data(data_.pool_);
                 alias_data.size_ = half_size;
                 alias_data.capacity_ = half_size;
-                auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(
-                    const_cast<ct_coeff_type *>(data_.cbegin()));
+                auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(const_cast<ct_coeff_type *>(data_.cbegin()));
                 swap(alias_data.data_, alias_ptr);
                 alias_data.save(stream, compr_mode_type::none);
 
                 // Save the seed
-                stream.write(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+                stream.write(reinterpret_cast<char *>(&seed), sizeof(random_seed_type));
             }
             else
             {
@@ -265,17 +246,17 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             parms_id_type parms_id{};
-            stream.read(reinterpret_cast<char*>(&parms_id), sizeof(parms_id_type));
+            stream.read(reinterpret_cast<char *>(&parms_id), sizeof(parms_id_type));
             SEAL_BYTE is_ntt_form_byte;
-            stream.read(reinterpret_cast<char*>(&is_ntt_form_byte), sizeof(SEAL_BYTE));
+            stream.read(reinterpret_cast<char *>(&is_ntt_form_byte), sizeof(SEAL_BYTE));
             uint64_t size64 = 0;
-            stream.read(reinterpret_cast<char*>(&size64), sizeof(uint64_t));
+            stream.read(reinterpret_cast<char *>(&size64), sizeof(uint64_t));
             uint64_t poly_modulus_degree64 = 0;
-            stream.read(reinterpret_cast<char*>(&poly_modulus_degree64), sizeof(uint64_t));
+            stream.read(reinterpret_cast<char *>(&poly_modulus_degree64), sizeof(uint64_t));
             uint64_t coeff_mod_count64 = 0;
-            stream.read(reinterpret_cast<char*>(&coeff_mod_count64), sizeof(uint64_t));
+            stream.read(reinterpret_cast<char *>(&coeff_mod_count64), sizeof(uint64_t));
             double scale = 0;
-            stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
+            stream.read(reinterpret_cast<char *>(&scale), sizeof(double));
 
             // Set values already at this point for the metadata validity check
             new_data.parms_id_ = parms_id;
@@ -300,10 +281,8 @@ namespace seal
 
             // Compute the total uint64 count required and reserve memory.
             // Note that this must be done after the metadata is checked for validity.
-            auto total_uint64_count = mul_safe(
-                new_data.size_,
-                new_data.poly_modulus_degree_,
-                new_data.coeff_mod_count_);
+            auto total_uint64_count =
+                mul_safe(new_data.size_, new_data.poly_modulus_degree_, new_data.coeff_mod_count_);
 
             // Reserve memory for the entire (expected) ciphertext data
             new_data.data_.reserve(total_uint64_count);
@@ -324,7 +303,7 @@ namespace seal
                 // Single polynomial size data was loaded, so we are in the
                 // seeded ciphertext case. Next load the seed.
                 random_seed_type seed;
-                stream.read(reinterpret_cast<char*>(&seed), sizeof(random_seed_type));
+                stream.read(reinterpret_cast<char *>(&seed), sizeof(random_seed_type));
                 new_data.data_.resize(total_uint64_count);
                 new_data.expand_seed(move(context), seed);
             }
@@ -349,4 +328,4 @@ namespace seal
 
         swap(*this, new_data);
     }
-}
+} // namespace seal

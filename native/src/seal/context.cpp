@@ -2,13 +2,13 @@
 // Licensed under the MIT license.
 
 #include "seal/context.h"
+#include "seal/util/numth.h"
 #include "seal/util/pointer.h"
 #include "seal/util/polycore.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
-#include "seal/util/numth.h"
-#include <utility>
 #include <stdexcept>
+#include <utility>
 
 using namespace std;
 using namespace seal::util;
@@ -32,8 +32,7 @@ namespace seal
 
         // The number of coeff moduli is restricted to 62 for lazy reductions
         // in baseconverter.cpp to work
-        if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX ||
-            coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
+        if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX || coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
         {
             context_data.qualifiers_.parameters_set = false;
             return context_data;
@@ -67,20 +66,18 @@ namespace seal
         set_uint(1, coeff_mod_count, context_data.total_coeff_modulus_.get());
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            multiply_uint_uint64(context_data.total_coeff_modulus_.get(),
-                coeff_mod_count, coeff_modulus[i].value(), coeff_mod_count,
+            multiply_uint_uint64(
+                context_data.total_coeff_modulus_.get(), coeff_mod_count, coeff_modulus[i].value(), coeff_mod_count,
                 temp.get());
-            set_uint_uint(temp.get(), coeff_mod_count,
-                context_data.total_coeff_modulus_.get());
+            set_uint_uint(temp.get(), coeff_mod_count, context_data.total_coeff_modulus_.get());
         }
-        context_data.total_coeff_modulus_bit_count_ = get_significant_bit_count_uint(
-            context_data.total_coeff_modulus_.get(), coeff_mod_count);
+        context_data.total_coeff_modulus_bit_count_ =
+            get_significant_bit_count_uint(context_data.total_coeff_modulus_.get(), coeff_mod_count);
 
         // Check polynomial modulus degree and create poly_modulus
         size_t poly_modulus_degree = parms.poly_modulus_degree();
         int coeff_count_power = get_power_of_two(poly_modulus_degree);
-        if (poly_modulus_degree < SEAL_POLY_MOD_DEGREE_MIN ||
-            poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX ||
+        if (poly_modulus_degree < SEAL_POLY_MOD_DEGREE_MIN || poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX ||
             coeff_count_power < 0)
         {
             // Parameters are not valid
@@ -103,8 +100,7 @@ namespace seal
 
         // Check if the parameters are secure according to HomomorphicEncryption.org
         // security standard
-        if (context_data.total_coeff_modulus_bit_count_ >
-            CoeffModulus::MaxBitCount(poly_modulus_degree, sec_level_))
+        if (context_data.total_coeff_modulus_bit_count_ > CoeffModulus::MaxBitCount(poly_modulus_degree, sec_level_))
         {
             // Not secure according to HomomorphicEncryption.org security standard
             context_data.qualifiers_.sec_level = sec_level_type::none;
@@ -118,12 +114,10 @@ namespace seal
 
         // Can we use NTT with coeff_modulus?
         context_data.qualifiers_.using_ntt = true;
-        context_data.small_ntt_tables_ =
-            allocate<SmallNTTTables>(coeff_mod_count, pool_, pool_);
+        context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_mod_count, pool_, pool_);
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            if (!context_data.small_ntt_tables_[i].generate(coeff_count_power,
-                coeff_modulus[i]))
+            if (!context_data.small_ntt_tables_[i].generate(coeff_count_power, coeff_modulus[i]))
             {
                 // Parameters are not valid
                 context_data.qualifiers_.using_ntt = false;
@@ -135,8 +129,7 @@ namespace seal
         if (parms.scheme() == scheme_type::BFV)
         {
             // Plain modulus must be at least 2 and at most 60 bits
-            if (plain_modulus.value() >> SEAL_PLAIN_MOD_MAX ||
-                !(plain_modulus.value() >> (SEAL_PLAIN_MOD_MIN - 1)))
+            if (plain_modulus.value() >> SEAL_PLAIN_MOD_MAX || !(plain_modulus.value() >> (SEAL_PLAIN_MOD_MIN - 1)))
             {
                 context_data.qualifiers_.parameters_set = false;
                 return context_data;
@@ -153,8 +146,9 @@ namespace seal
             }
 
             // Check that plain_modulus is smaller than total coeff modulus
-            if (!is_less_than_uint_uint(plain_modulus.data(), plain_modulus.uint64_count(),
-                context_data.total_coeff_modulus_.get(), coeff_mod_count))
+            if (!is_less_than_uint_uint(
+                    plain_modulus.data(), plain_modulus.uint64_count(), context_data.total_coeff_modulus_.get(),
+                    coeff_mod_count))
             {
                 // Parameters are not valid
                 context_data.qualifiers_.parameters_set = false;
@@ -175,59 +169,53 @@ namespace seal
             context_data.qualifiers_.using_fast_plain_lift = true;
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                context_data.qualifiers_.using_fast_plain_lift &=
-                    (coeff_modulus[i].value() > plain_modulus.value());
+                context_data.qualifiers_.using_fast_plain_lift &= (coeff_modulus[i].value() > plain_modulus.value());
             }
 
             // Calculate coeff_div_plain_modulus (BFV-"Delta") and the remainder
             // upper_half_increment
             context_data.coeff_div_plain_modulus_ = allocate_uint(coeff_mod_count, pool_);
             context_data.upper_half_increment_ = allocate_uint(coeff_mod_count, pool_);
-            auto wide_plain_modulus(duplicate_uint_if_needed(plain_modulus.data(),
-                plain_modulus.uint64_count(), coeff_mod_count, false, pool_));
-            divide_uint_uint(context_data.total_coeff_modulus_.get(),
-                wide_plain_modulus.get(), coeff_mod_count,
-                context_data.coeff_div_plain_modulus_.get(),
-                context_data.upper_half_increment_.get(), pool_);
+            auto wide_plain_modulus(duplicate_uint_if_needed(
+                plain_modulus.data(), plain_modulus.uint64_count(), coeff_mod_count, false, pool_));
+            divide_uint_uint(
+                context_data.total_coeff_modulus_.get(), wide_plain_modulus.get(), coeff_mod_count,
+                context_data.coeff_div_plain_modulus_.get(), context_data.upper_half_increment_.get(), pool_);
             // store the non-RNS form of upper_half_increment for BFV encryption
             context_data.coeff_mod_plain_modulus_ = context_data.upper_half_increment_[0];
             // Decompose coeff_div_plain_modulus into RNS factors
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                temp[i] = modulo_uint(context_data.coeff_div_plain_modulus_.get(),
-                    coeff_mod_count, coeff_modulus[i], pool_);
+                temp[i] =
+                    modulo_uint(context_data.coeff_div_plain_modulus_.get(), coeff_mod_count, coeff_modulus[i], pool_);
             }
-            set_uint_uint(temp.get(), coeff_mod_count,
-                context_data.coeff_div_plain_modulus_.get());
+            set_uint_uint(temp.get(), coeff_mod_count, context_data.coeff_div_plain_modulus_.get());
 
             // Decompose upper_half_increment into RNS factors
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                temp[i] = modulo_uint(context_data.upper_half_increment_.get(),
-                    coeff_mod_count, coeff_modulus[i], pool_);
+                temp[i] =
+                    modulo_uint(context_data.upper_half_increment_.get(), coeff_mod_count, coeff_modulus[i], pool_);
             }
-            set_uint_uint(temp.get(), coeff_mod_count,
-                context_data.upper_half_increment_.get());
+            set_uint_uint(temp.get(), coeff_mod_count, context_data.upper_half_increment_.get());
 
             // Calculate (plain_modulus + 1) / 2.
             context_data.plain_upper_half_threshold_ = (plain_modulus.value() + 1) >> 1;
 
             // Calculate coeff_modulus - plain_modulus.
-            context_data.plain_upper_half_increment_ =
-                allocate_uint(coeff_mod_count, pool_);
+            context_data.plain_upper_half_increment_ = allocate_uint(coeff_mod_count, pool_);
             if (context_data.qualifiers_.using_fast_plain_lift)
             {
                 // Calculate coeff_modulus[i] - plain_modulus if using_fast_plain_lift
                 for (size_t i = 0; i < coeff_mod_count; i++)
                 {
-                    context_data.plain_upper_half_increment_[i] =
-                        coeff_modulus[i].value() - plain_modulus.value();
+                    context_data.plain_upper_half_increment_[i] = coeff_modulus[i].value() - plain_modulus.value();
                 }
             }
             else
             {
-                sub_uint_uint(context_data.total_coeff_modulus(),
-                    wide_plain_modulus.get(), coeff_mod_count,
+                sub_uint_uint(
+                    context_data.total_coeff_modulus(), wide_plain_modulus.get(), coeff_mod_count,
                     context_data.plain_upper_half_increment_.get());
             }
         }
@@ -256,19 +244,16 @@ namespace seal
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 uint64_t tmp = (uint64_t(1) << 63) % coeff_modulus[i].value();
-                context_data.plain_upper_half_increment_[i] = multiply_uint_uint_mod(
-                    tmp,
-                    sub_safe(coeff_modulus[i].value(), uint64_t(2)),
-                    coeff_modulus[i]);
+                context_data.plain_upper_half_increment_[i] =
+                    multiply_uint_uint_mod(tmp, sub_safe(coeff_modulus[i].value(), uint64_t(2)), coeff_modulus[i]);
             }
 
             // Compute the upper_half_threshold for this modulus.
-            context_data.upper_half_threshold_ = allocate_uint(
-                coeff_mod_count, pool_);
-            increment_uint(context_data.total_coeff_modulus(),
-                coeff_mod_count, context_data.upper_half_threshold_.get());
-            right_shift_uint(context_data.upper_half_threshold_.get(), 1,
-                coeff_mod_count, context_data.upper_half_threshold_.get());
+            context_data.upper_half_threshold_ = allocate_uint(coeff_mod_count, pool_);
+            increment_uint(
+                context_data.total_coeff_modulus(), coeff_mod_count, context_data.upper_half_threshold_.get());
+            right_shift_uint(
+                context_data.upper_half_threshold_.get(), 1, coeff_mod_count, context_data.upper_half_threshold_.get());
         }
         else
         {
@@ -278,8 +263,7 @@ namespace seal
 
         // Create BaseConverter
         context_data.base_converter_ = allocate<BaseConverter>(pool_, pool_);
-        context_data.base_converter_->generate(coeff_modulus, poly_modulus_degree,
-            plain_modulus);
+        context_data.base_converter_->generate(coeff_modulus, poly_modulus_degree, plain_modulus);
         if (!context_data.base_converter_->is_generated())
         {
             // Parameters are not valid
@@ -292,16 +276,15 @@ namespace seal
         context_data.qualifiers_.using_descending_modulus_chain = true;
         for (size_t i = 0; i < coeff_mod_count - 1; i++)
         {
-            context_data.qualifiers_.using_descending_modulus_chain
-                &= (coeff_modulus[i].value() > coeff_modulus[i + 1].value());
+            context_data.qualifiers_.using_descending_modulus_chain &=
+                (coeff_modulus[i].value() > coeff_modulus[i + 1].value());
         }
 
         // Done with validation and pre-computations
         return context_data;
     }
 
-    parms_id_type SEALContext::create_next_context_data(
-        const parms_id_type &prev_parms_id)
+    parms_id_type SEALContext::create_next_context_data(const parms_id_type &prev_parms_id)
     {
         // Create the next set of parameters by removing last modulus
         auto next_parms = context_data_map_.at(prev_parms_id)->parms_;
@@ -320,24 +303,21 @@ namespace seal
         }
 
         // Add them to the context_data_map_
-        context_data_map_.emplace(make_pair(next_parms_id,
-            make_shared<const ContextData>(move(next_context_data))));
+        context_data_map_.emplace(make_pair(next_parms_id, make_shared<const ContextData>(move(next_context_data))));
 
         // Add pointer to next context_data to the previous one (linked list)
         // Add pointer to previous context_data to the next one (doubly linked list)
         // We need to remove constness first to modify this
-        const_pointer_cast<ContextData>(
-            context_data_map_.at(prev_parms_id))->next_context_data_ =
-                context_data_map_.at(next_parms_id);
-        const_pointer_cast<ContextData>(
-            context_data_map_.at(next_parms_id))->prev_context_data_ =
-                context_data_map_.at(prev_parms_id);
+        const_pointer_cast<ContextData>(context_data_map_.at(prev_parms_id))->next_context_data_ =
+            context_data_map_.at(next_parms_id);
+        const_pointer_cast<ContextData>(context_data_map_.at(next_parms_id))->prev_context_data_ =
+            context_data_map_.at(prev_parms_id);
 
         return next_parms_id;
     }
 
-    SEALContext::SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-        sec_level_type sec_level, MemoryPoolHandle pool)
+    SEALContext::SEALContext(
+        EncryptionParameters parms, bool expand_mod_chain, sec_level_type sec_level, MemoryPoolHandle pool)
         : pool_(move(pool)), sec_level_(sec_level)
     {
         if (!pool_)
@@ -348,32 +328,28 @@ namespace seal
         // Set random generator
         if (!parms.random_generator())
         {
-            parms.set_random_generator(
-                UniformRandomGeneratorFactory::DefaultFactory());
+            parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         }
 
         // Validate parameters and add new ContextData to the map
         // Note that this happens even if parameters are not valid
 
         // First create key_parms_id_.
-        context_data_map_.emplace(make_pair(parms.parms_id(),
-            make_shared<const ContextData>(validate(parms))));
+        context_data_map_.emplace(make_pair(parms.parms_id(), make_shared<const ContextData>(validate(parms))));
         key_parms_id_ = parms.parms_id();
 
         // Then create first_parms_id_ if the parameters are valid and there is
         // more than one modulus in coeff_modulus. This is equivalent to expanding
         // the chain by one step. Otherwise, we set first_parms_id_ to equal
         // key_parms_id_.
-        if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set ||
-            parms.coeff_modulus().size() == 1)
+        if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set || parms.coeff_modulus().size() == 1)
         {
             first_parms_id_ = key_parms_id_;
         }
         else
         {
             auto next_parms_id = create_next_context_data(key_parms_id_);
-            first_parms_id_ = (next_parms_id == parms_id_zero) ?
-                key_parms_id_ : next_parms_id;
+            first_parms_id_ = (next_parms_id == parms_id_zero) ? key_parms_id_ : next_parms_id;
         }
 
         // Set last_parms_id_ to point to first_parms_id_
@@ -384,8 +360,7 @@ namespace seal
 
         // If modulus switching chain is to be created, compute the remaining
         // parameter sets as long as they are valid to use (parameters_set == true)
-        if (expand_mod_chain &&
-            context_data_map_.at(first_parms_id_)->qualifiers_.parameters_set)
+        if (expand_mod_chain && context_data_map_.at(first_parms_id_)->qualifiers_.parameters_set)
         {
             auto prev_parms_id = first_parms_id_;
             while (context_data_map_.at(prev_parms_id)->parms().coeff_modulus().size() > 1)
@@ -406,9 +381,8 @@ namespace seal
         while (context_data_ptr)
         {
             // We need to remove constness first to modify this
-            const_pointer_cast<ContextData>(
-                context_data_ptr)->chain_index_ = --parms_count;
+            const_pointer_cast<ContextData>(context_data_ptr)->chain_index_ = --parms_count;
             context_data_ptr = context_data_ptr->next_context_data_;
         }
     }
-}
+} // namespace seal

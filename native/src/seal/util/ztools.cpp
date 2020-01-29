@@ -5,12 +5,12 @@
 
 #ifdef SEAL_USE_ZLIB
 
-#include <cstddef>
-#include <zlib.h>
-#include <unordered_map>
 #include "seal/serialization.h"
-#include "seal/util/ztools.h"
 #include "seal/util/pointer.h"
+#include "seal/util/ztools.h"
+#include <cstddef>
+#include <unordered_map>
+#include <zlib.h>
 
 using namespace std;
 
@@ -26,13 +26,12 @@ namespace seal
                 {
                 public:
                     PointerStorage(MemoryPoolHandle pool) : pool_(pool)
-                    {
-                    }
+                    {}
 
                     void *allocate(size_t size)
                     {
                         auto ptr = util::allocate<SEAL_BYTE>(size, pool_);
-                        void *addr = reinterpret_cast<void*>(ptr.get());
+                        void *addr = reinterpret_cast<void *>(ptr.get());
                         ptr_storage_[addr] = move(ptr);
                         return addr;
                     }
@@ -45,7 +44,7 @@ namespace seal
                 private:
                     MemoryPoolHandle pool_;
 
-                    unordered_map<void*, Pointer<SEAL_BYTE>> ptr_storage_;
+                    unordered_map<void *, Pointer<SEAL_BYTE>> ptr_storage_;
                 };
 
                 // Custom implementation for zlib zalloc
@@ -54,7 +53,7 @@ namespace seal
                     try
                     {
                         size_t total_size = safe_cast<size_t>(mul_safe(items, size));
-                        return reinterpret_cast<PointerStorage*>(ptr_storage)->allocate(total_size);
+                        return reinterpret_cast<PointerStorage *>(ptr_storage)->allocate(total_size);
                     }
                     catch (const invalid_argument &)
                     {
@@ -81,24 +80,16 @@ namespace seal
                 // Custom implementation for zlib zfree
                 void free_impl(voidpf ptr_storage, void *addr)
                 {
-                    reinterpret_cast<PointerStorage*>(ptr_storage)->free(addr);
+                    reinterpret_cast<PointerStorage *>(ptr_storage)->free(addr);
                 }
-            }
+            } // namespace
 
             size_t deflate_size_bound(size_t in_size) noexcept
             {
-                return util::add_safe(
-                    in_size,
-                    in_size >> 12,
-                    in_size >> 14,
-                    in_size >> 25,
-                    std::size_t(13));
+                return util::add_safe(in_size, in_size >> 12, in_size >> 14, in_size >> 25, std::size_t(13));
             }
 
-            int deflate_array(
-                const IntArray<SEAL_BYTE> &in,
-                IntArray<SEAL_BYTE> &out,
-                MemoryPoolHandle pool)
+            int deflate_array(const IntArray<SEAL_BYTE> &in, IntArray<SEAL_BYTE> &out, MemoryPoolHandle pool)
             {
                 if (!pool)
                 {
@@ -125,15 +116,13 @@ namespace seal
                 }
 
                 flush = Z_FINISH;
-                size_t out_size = safe_cast<size_t>(
-                    deflateBound(&zstream, safe_cast<uLong>(in_size)));
+                size_t out_size = safe_cast<size_t>(deflateBound(&zstream, safe_cast<uLong>(in_size)));
                 out.resize(out_size);
 
                 zstream.avail_in = safe_cast<uInt>(in_size);
-                zstream.next_in = reinterpret_cast<unsigned char*>(
-                    const_cast<SEAL_BYTE*>(in.cbegin()));
+                zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<SEAL_BYTE *>(in.cbegin()));
                 zstream.avail_out = safe_cast<uInt>(out_size);
-                zstream.next_out = reinterpret_cast<unsigned char*>(out.begin());
+                zstream.next_out = reinterpret_cast<unsigned char *>(out.begin());
 
                 result = deflate(&zstream, flush);
                 if (result != Z_STREAM_END)
@@ -152,9 +141,7 @@ namespace seal
                 return Z_OK;
             }
 
-            int inflate_stream(istream &in_stream,
-                streamoff in_size, ostream &out_stream,
-                MemoryPoolHandle pool)
+            int inflate_stream(istream &in_stream, streamoff in_size, ostream &out_stream, MemoryPoolHandle pool)
             {
                 // Clear the exception masks; this function returns an error code
                 // on failure rather than throws an IO exception.
@@ -192,17 +179,16 @@ namespace seal
 
                 do
                 {
-                    if (!in_stream.read(reinterpret_cast<char*>(in.get()),
-                        min(static_cast<streamoff>(buf_size),
-                            in_stream_end_pos - in_stream.tellg())))
+                    if (!in_stream.read(
+                            reinterpret_cast<char *>(in.get()),
+                            min(static_cast<streamoff>(buf_size), in_stream_end_pos - in_stream.tellg())))
                     {
                         inflateEnd(&zstream);
                         in_stream.exceptions(in_stream_except_mask);
                         out_stream.exceptions(out_stream_except_mask);
                         return Z_ERRNO;
                     }
-                    if (!(zstream.avail_in =
-                        static_cast<decltype(zstream.avail_in)>(in_stream.gcount())))
+                    if (!(zstream.avail_in = static_cast<decltype(zstream.avail_in)>(in_stream.gcount())))
                     {
                         break;
                     }
@@ -232,8 +218,7 @@ namespace seal
 
                         have = buf_size - static_cast<size_t>(zstream.avail_out);
 
-                        if (!out_stream.write(reinterpret_cast<const char*>(out.get()),
-                            static_cast<streamsize>(have)))
+                        if (!out_stream.write(reinterpret_cast<const char *>(out.get()), static_cast<streamsize>(have)))
                         {
                             inflateEnd(&zstream);
                             in_stream.exceptions(in_stream_except_mask);
@@ -250,13 +235,9 @@ namespace seal
             }
 
             void write_header_deflate_buffer(
-                const IntArray<SEAL_BYTE> &in,
-                void *header_ptr,
-                ostream &out_stream,
-                MemoryPoolHandle pool)
+                const IntArray<SEAL_BYTE> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
             {
-                Serialization::SEALHeader &header =
-                    *reinterpret_cast<Serialization::SEALHeader*>(header_ptr);
+                Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 
                 IntArray<SEAL_BYTE> out_array(pool);
                 auto ret = deflate_array(in, out_array, move(pool));
@@ -267,9 +248,7 @@ namespace seal
 
                 // Populate the header
                 header.compr_mode = compr_mode_type::deflate;
-                header.size = safe_cast<uint32_t>(add_safe(
-                    sizeof(Serialization::SEALHeader),
-                    out_array.size()));
+                header.size = safe_cast<uint32_t>(add_safe(sizeof(Serialization::SEALHeader), out_array.size()));
 
                 auto old_except_mask = out_stream.exceptions();
                 try
@@ -278,13 +257,9 @@ namespace seal
                     out_stream.exceptions(ios_base::badbit | ios_base::failbit);
 
                     // Write the header and the data
+                    out_stream.write(reinterpret_cast<const char *>(&header), sizeof(Serialization::SEALHeader));
                     out_stream.write(
-                        reinterpret_cast<const char*>(&header),
-                        sizeof(Serialization::SEALHeader));
-                    out_stream.write(
-                        reinterpret_cast<const char*>(out_array.cbegin()),
-                        safe_cast<streamsize>(out_array.size()));
-
+                        reinterpret_cast<const char *>(out_array.cbegin()), safe_cast<streamsize>(out_array.size()));
                 }
                 catch (...)
                 {
@@ -294,8 +269,8 @@ namespace seal
 
                 out_stream.exceptions(old_except_mask);
             }
-        }
-    }
-}
+        } // namespace ztools
+    }     // namespace util
+} // namespace seal
 
 #endif

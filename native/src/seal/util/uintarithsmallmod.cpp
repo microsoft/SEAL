@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/uintcore.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
 #include <random>
 
 using namespace std;
@@ -13,8 +13,7 @@ namespace seal
 {
     namespace util
     {
-        bool is_primitive_root(uint64_t root, uint64_t degree,
-            const SmallModulus &modulus)
+        bool is_primitive_root(uint64_t root, uint64_t degree, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if (modulus.bit_count() < 2)
@@ -38,12 +37,10 @@ namespace seal
             // We check if root is a degree-th root of unity in integers modulo
             // modulus, where degree is a power of two.
             // It suffices to check that root^(degree/2) is -1 modulo modulus.
-            return exponentiate_uint_mod(
-                root, degree >> 1, modulus) == (modulus.value() - 1);
+            return exponentiate_uint_mod(root, degree >> 1, modulus) == (modulus.value() - 1);
         }
 
-        bool try_primitive_root(uint64_t degree, const SmallModulus &modulus,
-            uint64_t &destination)
+        bool try_primitive_root(uint64_t degree, const SmallModulus &modulus, uint64_t &destination)
         {
 #ifdef SEAL_DEBUG
             if (modulus.bit_count() < 2)
@@ -79,22 +76,18 @@ namespace seal
                 attempt_counter++;
 
                 // Set destination to be a random number modulo modulus
-                destination = (static_cast<uint64_t>(rd()) << 32) |
-                    static_cast<uint64_t>(rd());
+                destination = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
                 destination %= modulus.value();
 
                 // Raise the random number to power the size of the quotient
                 // to get rid of irrelevant part
-                destination = exponentiate_uint_mod(
-                    destination, size_quotient_group, modulus);
-            } while (!is_primitive_root(destination, degree, modulus) &&
-                (attempt_counter < attempt_counter_max));
+                destination = exponentiate_uint_mod(destination, size_quotient_group, modulus);
+            } while (!is_primitive_root(destination, degree, modulus) && (attempt_counter < attempt_counter_max));
 
             return is_primitive_root(destination, degree, modulus);
         }
 
-        bool try_minimal_primitive_root(uint64_t degree,
-            const SmallModulus &modulus, uint64_t &destination)
+        bool try_minimal_primitive_root(uint64_t degree, const SmallModulus &modulus, uint64_t &destination)
         {
             uint64_t root;
             if (!try_primitive_root(degree, modulus, root))
@@ -115,16 +108,14 @@ namespace seal
                 }
 
                 // Then move on to the next generator
-                current_generator = multiply_uint_uint_mod(
-                    current_generator, generator_sq, modulus);
+                current_generator = multiply_uint_uint_mod(current_generator, generator_sq, modulus);
             }
 
             destination = root;
             return true;
         }
 
-        uint64_t exponentiate_uint_mod(uint64_t operand, uint64_t exponent,
-            const SmallModulus &modulus)
+        uint64_t exponentiate_uint_mod(uint64_t operand, uint64_t exponent, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if (modulus.is_zero())
@@ -172,9 +163,8 @@ namespace seal
             return intermediate;
         }
 
-        void divide_uint_uint_mod_inplace(uint64_t *numerator,
-            const SmallModulus &modulus, size_t uint64_count,
-            uint64_t *quotient, MemoryPool &pool)
+        void divide_uint_uint_mod_inplace(
+            uint64_t *numerator, const SmallModulus &modulus, size_t uint64_count, uint64_t *quotient, MemoryPool &pool)
         {
             // Handle base cases
             if (uint64_count == 2)
@@ -182,7 +172,7 @@ namespace seal
                 divide_uint128_uint64_inplace(numerator, modulus.value(), quotient);
                 return;
             }
-            else if(uint64_count == 1)
+            else if (uint64_count == 1)
             {
                 *numerator = *numerator % modulus.value();
                 *quotient = *numerator / modulus.value();
@@ -194,7 +184,7 @@ namespace seal
                 // x = numerator = x1 * 2^128 + x2.
                 // 2^128 = A*value + B.
 
-                auto x1_alloc(allocate_uint(uint64_count - 2 , pool));
+                auto x1_alloc(allocate_uint(uint64_count - 2, pool));
                 uint64_t *x1 = x1_alloc.get();
                 uint64_t x2[2];
                 auto quot_alloc(allocate_uint(uint64_count, pool));
@@ -204,10 +194,8 @@ namespace seal
                 set_uint_uint(numerator + 2, uint64_count - 2, x1);
                 set_uint_uint(numerator, 2, x2); // x2 = (num) % 2^128.
 
-                multiply_uint_uint(x1, uint64_count - 2, &modulus.const_ratio()[0], 2,
-                    uint64_count, quot); // x1*A.
-                multiply_uint_uint64(x1, uint64_count - 2, modulus.const_ratio()[2],
-                    uint64_count - 1, rem); // x1*B
+                multiply_uint_uint(x1, uint64_count - 2, &modulus.const_ratio()[0], 2, uint64_count, quot);  // x1*A.
+                multiply_uint_uint64(x1, uint64_count - 2, modulus.const_ratio()[2], uint64_count - 1, rem); // x1*B
                 add_uint_uint(rem, uint64_count - 1, x2, 2, 0, uint64_count, rem); // x1*B + x2;
 
                 size_t remainder_uint64_count = get_significant_uint64_count_uint(rem, uint64_count);
@@ -254,7 +242,7 @@ namespace seal
                 // Construct Galois element for row rotation
                 uint64_t gen = 3;
                 uint64_t galois_elt = 1;
-                while(step--)
+                while (step--)
                 {
                     galois_elt *= gen;
                     galois_elt &= m - 1;
@@ -262,5 +250,5 @@ namespace seal
                 return galois_elt;
             }
         }
-    }
-}
+    } // namespace util
+} // namespace seal

@@ -1,26 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <stdexcept>
-#include <cstdint>
-#include <type_traits>
-#include <utility>
-#include <algorithm>
 #include "seal/context.h"
 #include "seal/intarray.h"
-#include "seal/serialization.h"
 #include "seal/memorymanager.h"
+#include "seal/serialization.h"
 #include "seal/util/common.h"
 #include "seal/util/streambuf.h"
 #include "seal/util/ztools.h"
+#include <algorithm>
+#include <cstdint>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 using namespace std;
 using namespace seal::util;
 
 namespace seal
 {
-    size_t Serialization::ComprSizeEstimate(
-        size_t in_size, compr_mode_type compr_mode)
+    size_t Serialization::ComprSizeEstimate(size_t in_size, compr_mode_type compr_mode)
     {
         if (!IsSupportedComprMode(compr_mode))
         {
@@ -50,7 +49,7 @@ namespace seal
             // Throw exceptions on ios_base::badbit and ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            stream.write(reinterpret_cast<const char*>(&header), sizeof(SEALHeader));
+            stream.write(reinterpret_cast<const char *>(&header), sizeof(SEALHeader));
         }
         catch (const ios_base::failure &)
         {
@@ -73,7 +72,7 @@ namespace seal
             // Throw exceptions on ios_base::badbit and ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            stream.read(reinterpret_cast<char*>(&header), sizeof(SEALHeader));
+            stream.read(reinterpret_cast<char *>(&header), sizeof(SEALHeader));
         }
         catch (const ios_base::failure &)
         {
@@ -89,10 +88,7 @@ namespace seal
     }
 
     streamoff Serialization::Save(
-        function<void(ostream &stream)> save_members,
-        streamoff raw_size,
-        ostream &stream,
-        compr_mode_type compr_mode)
+        function<void(ostream &stream)> save_members, streamoff raw_size, ostream &stream, compr_mode_type compr_mode)
     {
         if (!save_members)
         {
@@ -134,30 +130,29 @@ namespace seal
                 break;
 #ifdef SEAL_USE_ZLIB
             case compr_mode_type::deflate:
-                {
-                    // First save_members to a temporary byte stream; set the size
-                    // of the temporary stream to be right from the start to avoid
-                    // extra reallocs.
-                    SafeByteBuffer safe_buffer(
-                        raw_size - static_cast<streamoff>(sizeof(SEALHeader)));
-                    iostream temp_stream(&safe_buffer);
-                    temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
-                    save_members(temp_stream);
+            {
+                // First save_members to a temporary byte stream; set the size
+                // of the temporary stream to be right from the start to avoid
+                // extra reallocs.
+                SafeByteBuffer safe_buffer(raw_size - static_cast<streamoff>(sizeof(SEALHeader)));
+                iostream temp_stream(&safe_buffer);
+                temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
+                save_members(temp_stream);
 
-                    auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
 
-                    // Create temporary aliasing IntArray to wrap safe_buffer
-                    IntArray<SEAL_BYTE> safe_buffer_array(
-                        Pointer<SEAL_BYTE>::Aliasing(safe_buffer.data()),
-                        static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
+                // Create temporary aliasing IntArray to wrap safe_buffer
+                IntArray<SEAL_BYTE> safe_buffer_array(
+                    Pointer<SEAL_BYTE>::Aliasing(safe_buffer.data()), static_cast<size_t>(temp_stream.tellp()), false,
+                    safe_pool);
 
-                    // After compression, write_header_deflate_buffer will write the
-                    // final size to the given header and write the header to stream,
-                    // before writing the compressed output.
-                    ztools::write_header_deflate_buffer(safe_buffer_array,
-                        reinterpret_cast<void*>(&header), stream, safe_pool);
-                    break;
-                }
+                // After compression, write_header_deflate_buffer will write the
+                // final size to the given header and write the header to stream,
+                // before writing the compressed output.
+                ztools::write_header_deflate_buffer(
+                    safe_buffer_array, reinterpret_cast<void *>(&header), stream, safe_pool);
+                break;
+            }
 #endif
             default:
                 throw invalid_argument("unsupported compression mode");
@@ -182,9 +177,7 @@ namespace seal
         return out_size;
     }
 
-    streamoff Serialization::Load(
-        function<void(istream &stream)> load_members,
-        istream &stream)
+    streamoff Serialization::Load(function<void(istream &stream)> load_members, istream &stream)
     {
         if (!load_members)
         {
@@ -222,26 +215,25 @@ namespace seal
                 break;
 #ifdef SEAL_USE_ZLIB
             case compr_mode_type::deflate:
+            {
+                auto compr_size = header.size - (stream.tellg() - stream_start_pos);
+
+                // We don't know the decompressed size, but use compr_size as
+                // starting point for the buffer.
+                SafeByteBuffer safe_buffer(safe_cast<streamsize>(compr_size));
+
+                iostream temp_stream(&safe_buffer);
+                temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
+
+                constexpr int Z_OK = 0;
+                if (ztools::inflate_stream(
+                        stream, compr_size, temp_stream, MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)) != Z_OK)
                 {
-                    auto compr_size = header.size - (stream.tellg() - stream_start_pos);
-
-                    // We don't know the decompressed size, but use compr_size as
-                    // starting point for the buffer.
-                    SafeByteBuffer safe_buffer(safe_cast<streamsize>(compr_size));
-
-                    iostream temp_stream(&safe_buffer);
-                    temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
-
-                    constexpr int Z_OK = 0;
-                    if (ztools::inflate_stream(
-                        stream, compr_size, temp_stream,
-                        MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)) != Z_OK)
-                    {
-                        throw logic_error("stream inflate failed");
-                    }
-                    load_members(temp_stream);
-                    break;
+                    throw logic_error("stream inflate failed");
                 }
+                load_members(temp_stream);
+                break;
+            }
 #endif
             default:
                 throw invalid_argument("unsupported compression mode");
@@ -265,10 +257,7 @@ namespace seal
     }
 
     streamoff Serialization::Save(
-        function<void(ostream &stream)> save_members,
-        streamoff raw_size,
-        SEAL_BYTE *out,
-        size_t size,
+        function<void(ostream &stream)> save_members, streamoff raw_size, SEAL_BYTE *out, size_t size,
         compr_mode_type compr_mode)
     {
         if (!out)
@@ -283,17 +272,12 @@ namespace seal
         {
             throw invalid_argument("size is too large");
         }
-        ArrayPutBuffer apbuf(
-            reinterpret_cast<char*>(out),
-            static_cast<streamsize>(size));
+        ArrayPutBuffer apbuf(reinterpret_cast<char *>(out), static_cast<streamsize>(size));
         ostream stream(&apbuf);
         return Save(save_members, raw_size, stream, compr_mode);
     }
 
-    streamoff Serialization::Load(
-        function<void(istream &stream)> load_members,
-        const SEAL_BYTE *in,
-        size_t size)
+    streamoff Serialization::Load(function<void(istream &stream)> load_members, const SEAL_BYTE *in, size_t size)
     {
         if (!in)
         {
@@ -307,10 +291,8 @@ namespace seal
         {
             throw invalid_argument("size is too large");
         }
-        ArrayGetBuffer agbuf(
-            reinterpret_cast<const char*>(in),
-            static_cast<streamsize>(size));
+        ArrayGetBuffer agbuf(reinterpret_cast<const char *>(in), static_cast<streamsize>(size));
         istream stream(&agbuf);
         return Load(load_members, stream);
     }
-}
+} // namespace seal

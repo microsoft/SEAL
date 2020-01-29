@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/smallntt.h"
-#include "seal/util/polyarith.h"
-#include "seal/util/uintarith.h"
 #include "seal/smallmodulus.h"
-#include "seal/util/uintarithsmallmod.h"
 #include "seal/util/defines.h"
+#include "seal/util/polyarith.h"
+#include "seal/util/smallntt.h"
+#include "seal/util/uintarith.h"
+#include "seal/util/uintarithsmallmod.h"
 #include <algorithm>
 
 using namespace std;
@@ -15,9 +15,8 @@ namespace seal
 {
     namespace util
     {
-        SmallNTTTables::SmallNTTTables(int coeff_count_power,
-            const SmallModulus &modulus, MemoryPoolHandle pool) :
-            pool_(move(pool))
+        SmallNTTTables::SmallNTTTables(int coeff_count_power, const SmallModulus &modulus, MemoryPoolHandle pool)
+            : pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
             if (!pool_)
@@ -49,8 +48,7 @@ namespace seal
             coeff_count_ = 0;
         }
 
-        bool SmallNTTTables::generate(int coeff_count_power,
-            const SmallModulus &modulus)
+        bool SmallNTTTables::generate(int coeff_count_power, const SmallModulus &modulus)
         {
             reset();
 
@@ -89,24 +87,20 @@ namespace seal
             // Populate the tables storing (scaled version of) powers of root
             // mod q in bit-scrambled order.
             ntt_powers_of_primitive_root(root_, root_powers_.get());
-            ntt_scale_powers_of_primitive_root(root_powers_.get(),
-                scaled_root_powers_.get());
+            ntt_scale_powers_of_primitive_root(root_powers_.get(), scaled_root_powers_.get());
 
             // Populate the tables storing (scaled version of) powers of
             // (root)^{-1} mod q in bit-scrambled order.
             ntt_powers_of_primitive_root(inverse_root, inv_root_powers_.get());
-            ntt_scale_powers_of_primitive_root(inv_root_powers_.get(),
-                scaled_inv_root_powers_.get());
+            ntt_scale_powers_of_primitive_root(inv_root_powers_.get(), scaled_inv_root_powers_.get());
 
             // Populate the tables storing (scaled version of ) 2 times
             // powers of roots^-1 mod q  in bit-scrambled order.
             for (size_t i = 0; i < coeff_count_; i++)
             {
-                inv_root_powers_div_two_[i] =
-                    div2_uint_mod(inv_root_powers_[i], modulus_);
+                inv_root_powers_div_two_[i] = div2_uint_mod(inv_root_powers_[i], modulus_);
             }
-            ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(),
-                scaled_inv_root_powers_div_two_.get());
+            ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(), scaled_inv_root_powers_div_two_.get());
 
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
@@ -120,25 +114,21 @@ namespace seal
             return true;
         }
 
-        void SmallNTTTables::ntt_powers_of_primitive_root(uint64_t root,
-            uint64_t *destination) const
+        void SmallNTTTables::ntt_powers_of_primitive_root(uint64_t root, uint64_t *destination) const
         {
             uint64_t *destination_start = destination;
             *destination_start = 1;
             for (size_t i = 1; i < coeff_count_; i++)
             {
-                uint64_t *next_destination =
-                    destination_start + reverse_bits(i, coeff_count_power_);
-                *next_destination =
-                    multiply_uint_uint_mod(*destination, root, modulus_);
+                uint64_t *next_destination = destination_start + reverse_bits(i, coeff_count_power_);
+                *next_destination = multiply_uint_uint_mod(*destination, root, modulus_);
                 destination = next_destination;
             }
         }
 
         // compute floor ( input * beta /q ), where beta is a 64k power of 2
         // and  0 < q < beta.
-        void SmallNTTTables::ntt_scale_powers_of_primitive_root(
-            const uint64_t *input, uint64_t *destination) const
+        void SmallNTTTables::ntt_scale_powers_of_primitive_root(const uint64_t *input, uint64_t *destination) const
         {
             for (size_t i = 0; i < coeff_count_; i++, input++, destination++)
             {
@@ -159,8 +149,7 @@ namespace seal
 
         For details, see Michael Naehrig and Patrick Longa.
         */
-        void ntt_negacyclic_harvey_lazy(uint64_t *operand,
-            const SmallNTTTables &tables)
+        void ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
         {
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus * 2;
@@ -185,25 +174,29 @@ namespace seal
                         unsigned long long Q;
                         for (size_t j = j1; j < j2; j += 4)
                         {
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                            currX = *X - (two_times_modulus &
+                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
                             *X++ = currX + Q;
                             *Y++ = currX + (two_times_modulus - Q);
 
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                            currX = *X - (two_times_modulus &
+                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
                             *X++ = currX + Q;
                             *Y++ = currX + (two_times_modulus - Q);
 
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                            currX = *X - (two_times_modulus &
+                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
                             *X++ = currX + Q;
                             *Y++ = currX + (two_times_modulus - Q);
 
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                            currX = *X - (two_times_modulus &
+                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
                             *X++ = currX + Q;
@@ -228,7 +221,8 @@ namespace seal
                         {
                             // The Harvey butterfly: assume X, Y in [0, 2p), and return X', Y' in [0, 4p).
                             // X', Y' = X + WY, X - WY (mod p).
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                            currX = *X - (two_times_modulus &
+                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = W * *Y - Q * modulus;
                             *X++ = currX + Q;
@@ -271,25 +265,29 @@ namespace seal
                         for (size_t j = j1; j < j2; j += 4)
                         {
                             T = two_times_modulus - *V + *U;
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
+                            currU = *U + *V -
+                                    (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
                             *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
                             multiply_uint64_hw64(Wprime, T, &H);
                             *V++ = T * W - H * modulus;
 
                             T = two_times_modulus - *V + *U;
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
+                            currU = *U + *V -
+                                    (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
                             *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
                             multiply_uint64_hw64(Wprime, T, &H);
                             *V++ = T * W - H * modulus;
 
                             T = two_times_modulus - *V + *U;
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
+                            currU = *U + *V -
+                                    (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
                             *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
                             multiply_uint64_hw64(Wprime, T, &H);
                             *V++ = T * W - H * modulus;
 
                             T = two_times_modulus - *V + *U;
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
+                            currU = *U + *V -
+                                    (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
                             *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
                             multiply_uint64_hw64(Wprime, T, &H);
                             *V++ = T * W - H * modulus;
@@ -319,16 +317,17 @@ namespace seal
                             T = two_times_modulus - *V + *U;
 
                             // Cleverly check whether currU + currV >= two_times_modulus
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
+                            currU = *U + *V -
+                                    (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
 
                             // Need to make it so that div2_uint_mod takes values that are > q.
-                            //div2_uint_mod(U, modulusptr, coeff_uint64_count, U);
+                            // div2_uint_mod(U, modulusptr, coeff_uint64_count, U);
                             // We use also the fact that parity of currU is same as parity of T.
                             // Since our modulus is always so small that currU + masked_modulus < 2^64,
                             // we never need to worry about wrapping around when adding masked_modulus.
-                            //uint64_t masked_modulus = modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1));
-                            //uint64_t carry = add_uint64(currU, masked_modulus, 0, &currU);
-                            //currU += modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1));
+                            // uint64_t masked_modulus = modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1));
+                            // uint64_t carry = add_uint64(currU, masked_modulus, 0, &currU);
+                            // currU += modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1));
                             *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
 
                             multiply_uint64_hw64(Wprime, T, &H);
@@ -341,5 +340,5 @@ namespace seal
                 t <<= 1;
             }
         }
-    }
-}
+    } // namespace util
+} // namespace seal

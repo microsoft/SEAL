@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 #include "seal/util/common.h"
-#include "seal/util/uintcore.h"
 #include "seal/util/uintarith.h"
+#include "seal/util/uintcore.h"
 #include <algorithm>
 #include <string>
 
@@ -22,8 +22,7 @@ namespace seal
             }
 #endif
             // Start with a string with a zero for each nibble in the array.
-            size_t num_nibbles =
-                mul_safe(uint64_count, static_cast<size_t>(nibbles_per_uint64));
+            size_t num_nibbles = mul_safe(uint64_count, static_cast<size_t>(nibbles_per_uint64));
             string output(num_nibbles, '0');
 
             // Iterate through each uint64 in array and set string with correct nibbles in hex.
@@ -61,8 +60,7 @@ namespace seal
             return output;
         }
 
-        string uint_to_dec_string(const uint64_t *value,
-            size_t uint64_count, MemoryPool &pool)
+        string uint_to_dec_string(const uint64_t *value, size_t uint64_count, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (uint64_count && !value)
@@ -85,10 +83,8 @@ namespace seal
             string output;
             while (!is_zero_uint(remainderptr, uint64_count))
             {
-                divide_uint_uint_inplace(remainderptr, baseptr,
-                    uint64_count, quotientptr, pool);
-                char digit = static_cast<char>(
-                    remainderptr[0] + static_cast<uint64_t>('0'));
+                divide_uint_uint_inplace(remainderptr, baseptr, uint64_count, quotientptr, pool);
+                char digit = static_cast<char>(remainderptr[0] + static_cast<uint64_t>('0'));
                 output += digit;
                 swap(remainderptr, quotientptr);
             }
@@ -102,5 +98,5 @@ namespace seal
 
             return output;
         }
-    }
-}
+    } // namespace util
+} // namespace seal

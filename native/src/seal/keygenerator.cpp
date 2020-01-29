@@ -1,26 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <algorithm>
 #include "seal/keygenerator.h"
 #include "seal/randomtostd.h"
+#include "seal/util/clipnormal.h"
 #include "seal/util/common.h"
-#include "seal/util/uintcore.h"
+#include "seal/util/polyarithsmallmod.h"
+#include "seal/util/polycore.h"
+#include "seal/util/rlwe.h"
+#include "seal/util/smallntt.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
-#include "seal/util/polyarithsmallmod.h"
-#include "seal/util/clipnormal.h"
-#include "seal/util/polycore.h"
-#include "seal/util/smallntt.h"
-#include "seal/util/rlwe.h"
+#include "seal/util/uintcore.h"
+#include <algorithm>
 
 using namespace std;
 using namespace seal::util;
 
 namespace seal
 {
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context) :
-        context_(move(context))
+    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context) : context_(move(context))
     {
         // Verify parameters
         if (!context_)
@@ -41,8 +40,7 @@ namespace seal
         generate_pk();
     }
 
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context,
-        const SecretKey &secret_key) : context_(move(context))
+    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context, const SecretKey &secret_key) : context_(move(context))
     {
         // Verify parameters
         if (!context_)
@@ -67,9 +65,9 @@ namespace seal
         generate_pk();
     }
 
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context,
-        const SecretKey &secret_key, const PublicKey &public_key) :
-        context_(move(context))
+    KeyGenerator::KeyGenerator(
+        shared_ptr<SEALContext> context, const SecretKey &secret_key, const PublicKey &public_key)
+        : context_(move(context))
     {
         // Verify parameters
         if (!context_)
@@ -135,8 +133,7 @@ namespace seal
 
         // Set the secret_key_array to have size 1 (first power of secret)
         secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count,
-            secret_key_array_.get());
+        set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count, secret_key_array_.get());
         secret_key_array_size_ = 1;
 
         // Secret key has been generated
@@ -168,8 +165,7 @@ namespace seal
         public_key_ = PublicKey();
         pk_generated_ = false;
 
-        shared_ptr<UniformRandomGenerator> random(
-            parms.random_generator()->create());
+        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
         encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, false, public_key_.data());
 
         // Set the parms_id for public key
@@ -213,9 +209,7 @@ namespace seal
 
         // Assume the secret key is already transformed into NTT form.
         generate_kswitch_keys(
-            secret_key_array_.get() + coeff_mod_count * coeff_count,
-            count,
-            static_cast<KSwitchKeys &>(relin_keys),
+            secret_key_array_.get() + coeff_mod_count * coeff_count, count, static_cast<KSwitchKeys &>(relin_keys),
             save_seed);
 
         // Set the parms_id
@@ -224,9 +218,7 @@ namespace seal
         return relin_keys;
     }
 
-    GaloisKeys KeyGenerator::galois_keys(
-        const vector<uint64_t> &galois_elts,
-        bool save_seed)
+    GaloisKeys KeyGenerator::galois_keys(const vector<uint64_t> &galois_elts, bool save_seed)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
@@ -262,8 +254,7 @@ namespace seal
         for (uint64_t galois_elt : galois_elts)
         {
             // Verify coprime conditions.
-            if (!(galois_elt & 1) ||
-                (galois_elt >= static_cast<uint64_t>(coeff_count) << 1))
+            if (!(galois_elt & 1) || (galois_elt >= static_cast<uint64_t>(coeff_count) << 1))
             {
                 throw invalid_argument("Galois element is not valid");
             }
@@ -275,14 +266,11 @@ namespace seal
             }
 
             // Rotate secret key for each coeff_modulus
-            auto rotated_secret_key(
-                allocate_poly(coeff_count, coeff_mod_count, pool_));
+            auto rotated_secret_key(allocate_poly(coeff_count, coeff_mod_count, pool_));
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 apply_galois_ntt(
-                    secret_key_.data().data() + i * coeff_count,
-                    coeff_count_power,
-                    galois_elt,
+                    secret_key_.data().data() + i * coeff_count, coeff_count_power, galois_elt,
                     rotated_secret_key.get() + i * coeff_count);
             }
 
@@ -292,9 +280,7 @@ namespace seal
             shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
             // Create Galois keys.
-            generate_one_kswitch_key(
-                rotated_secret_key.get(),
-                galois_keys.data()[index], save_seed);
+            generate_one_kswitch_key(rotated_secret_key.get(), galois_keys.data()[index], save_seed);
         }
 
         // Set the parms_id
@@ -308,16 +294,16 @@ namespace seal
         vector<uint64_t> galois_elts;
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
 
-        transform(steps.begin(), steps.end(), back_inserter(galois_elts),
-            [&](auto s) { return galois_elt_from_step(s, coeff_count); });
+        transform(steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) {
+            return galois_elt_from_step(s, coeff_count);
+        });
 
         return galois_elts;
     }
 
     vector<uint64_t> KeyGenerator::galois_elts_all()
     {
-        size_t coeff_count = static_cast<size_t>(
-            context_->key_context_data()->parms().poly_modulus_degree());
+        size_t coeff_count = static_cast<size_t>(context_->key_context_data()->parms().poly_modulus_degree());
         uint64_t m = static_cast<uint64_t>(coeff_count) << 1;
         int logn = get_power_of_two(static_cast<uint64_t>(coeff_count));
 
@@ -363,8 +349,7 @@ namespace seal
         return public_key_;
     }
 
-    void KeyGenerator::compute_secret_key_array(
-        const SEALContext::ContextData &context_data, size_t max_power)
+    void KeyGenerator::compute_secret_key_array(const SEALContext::ContextData &context_data, size_t max_power)
     {
 #ifdef SEAL_DEBUG
         if (max_power < 1)
@@ -402,14 +387,11 @@ namespace seal
 
         // Need to extend the array
         // Compute powers of secret key until max_power
-        auto new_secret_key_array(allocate_poly(
-            new_size * coeff_count, coeff_mod_count, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count,
-            coeff_mod_count, new_secret_key_array.get());
+        auto new_secret_key_array(allocate_poly(new_size * coeff_count, coeff_mod_count, pool_));
+        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_mod_count, new_secret_key_array.get());
 
         size_t poly_ptr_increment = coeff_count * coeff_mod_count;
-        uint64_t *prev_poly_ptr = new_secret_key_array.get() +
-            (old_size - 1) * poly_ptr_increment;
+        uint64_t *prev_poly_ptr = new_secret_key_array.get() + (old_size - 1) * poly_ptr_increment;
         uint64_t *next_poly_ptr = prev_poly_ptr + poly_ptr_increment;
 
         // Since all of the key powers in secret_key_array_ are already
@@ -421,10 +403,8 @@ namespace seal
             for (size_t j = 0; j < coeff_mod_count; j++)
             {
                 dyadic_product_coeffmod(
-                    prev_poly_ptr + (j * coeff_count),
-                    new_secret_key_array.get() + (j * coeff_count),
-                    coeff_count, coeff_modulus[j],
-                    next_poly_ptr + (j * coeff_count));
+                    prev_poly_ptr + (j * coeff_count), new_secret_key_array.get() + (j * coeff_count), coeff_count,
+                    coeff_modulus[j], next_poly_ptr + (j * coeff_count));
             }
             prev_poly_ptr = next_poly_ptr;
             next_poly_ptr += poly_ptr_increment;
@@ -448,9 +428,7 @@ namespace seal
     }
 
     void KeyGenerator::generate_one_kswitch_key(
-        const uint64_t *new_key,
-        std::vector<PublicKey> &destination,
-        bool save_seed)
+        const uint64_t *new_key, std::vector<PublicKey> &destination, bool save_seed)
     {
         if (!context_->using_keyswitching())
         {
@@ -477,30 +455,18 @@ namespace seal
         uint64_t factor = 0;
         for (size_t j = 0; j < decomp_mod_count; j++)
         {
-            encrypt_zero_symmetric(secret_key_, context_,
-                key_context_data.parms_id(), true, save_seed,
-                destination[j].data());
+            encrypt_zero_symmetric(
+                secret_key_, context_, key_context_data.parms_id(), true, save_seed, destination[j].data());
             factor = key_modulus.back().value() % key_modulus[j].value();
-            multiply_poly_scalar_coeffmod(
-                new_key + j * coeff_count,
-                coeff_count,
-                factor,
-                key_modulus[j],
-                temp.get());
+            multiply_poly_scalar_coeffmod(new_key + j * coeff_count, coeff_count, factor, key_modulus[j], temp.get());
             add_poly_poly_coeffmod(
-                destination[j].data().data() + j * coeff_count,
-                temp.get(),
-                coeff_count,
-                key_modulus[j],
+                destination[j].data().data() + j * coeff_count, temp.get(), coeff_count, key_modulus[j],
                 destination[j].data().data() + j * coeff_count);
         }
     }
 
     void KeyGenerator::generate_kswitch_keys(
-        const uint64_t *new_keys,
-        size_t num_keys,
-        KSwitchKeys &destination,
-        bool save_seed)
+        const uint64_t *new_keys, size_t num_keys, KSwitchKeys &destination, bool save_seed)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         auto &key_context_data = *context_->key_context_data();
@@ -522,4 +488,4 @@ namespace seal
             generate_one_kswitch_key(new_key_ptr, destination.data()[l], save_seed);
         }
     }
-}
+} // namespace seal

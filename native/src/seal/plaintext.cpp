@@ -86,9 +86,9 @@ namespace seal
             }
             return 3;
         }
-    }
+    } // namespace
 
-    Plaintext &Plaintext::operator =(const string &hex_poly)
+    Plaintext &Plaintext::operator=(const string &hex_poly)
     {
         if (is_ntt_form())
         {
@@ -105,8 +105,7 @@ namespace seal
 
         int assign_coeff_bit_count = 0;
         int pos = 0;
-        int last_power = safe_cast<int>(
-            min(data_.max_size(), safe_cast<size_t>(numeric_limits<int>::max())));
+        int last_power = safe_cast<int>(min(data_.max_size(), safe_cast<size_t>(numeric_limits<int>::max())));
         const char *hex_poly_ptr = hex_poly.data();
         while (pos < length)
         {
@@ -118,8 +117,7 @@ namespace seal
             }
 
             // Determine bit length of coefficient.
-            int coeff_bit_count =
-                get_hex_string_bit_count(hex_poly_ptr + pos, coeff_length);
+            int coeff_bit_count = get_hex_string_bit_count(hex_poly_ptr + pos, coeff_length);
             if (coeff_bit_count > assign_coeff_bit_count)
             {
                 assign_coeff_bit_count = coeff_bit_count;
@@ -211,10 +209,10 @@ namespace seal
             // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-            stream.write(reinterpret_cast<const char*>(&parms_id_), sizeof(parms_id_type));
+            stream.write(reinterpret_cast<const char *>(&parms_id_), sizeof(parms_id_type));
             uint64_t coeff_count64 = static_cast<uint64_t>(coeff_count_);
-            stream.write(reinterpret_cast<const char*>(&coeff_count64), sizeof(uint64_t));
-            stream.write(reinterpret_cast<const char*>(&scale_), sizeof(double));
+            stream.write(reinterpret_cast<const char *>(&coeff_count64), sizeof(uint64_t));
+            stream.write(reinterpret_cast<const char *>(&scale_), sizeof(double));
             data_.save(stream, compr_mode_type::none);
         }
         catch (const ios_base::failure &)
@@ -251,13 +249,13 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             parms_id_type parms_id{};
-            stream.read(reinterpret_cast<char*>(&parms_id), sizeof(parms_id_type));
+            stream.read(reinterpret_cast<char *>(&parms_id), sizeof(parms_id_type));
 
             uint64_t coeff_count64 = 0;
-            stream.read(reinterpret_cast<char*>(&coeff_count64), sizeof(uint64_t));
+            stream.read(reinterpret_cast<char *>(&coeff_count64), sizeof(uint64_t));
 
             double scale = 0;
-            stream.read(reinterpret_cast<char*>(&scale), sizeof(double));
+            stream.read(reinterpret_cast<char *>(&scale), sizeof(double));
 
             // Set the metadata
             new_data.parms_id_ = parms_id;
@@ -306,4 +304,4 @@ namespace seal
 
         swap(*this, new_data);
     }
-}
+} // namespace seal

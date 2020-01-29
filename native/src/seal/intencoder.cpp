@@ -1,23 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <stdexcept>
-#include <algorithm>
-#include <cmath>
 #include "seal/intencoder.h"
 #include "seal/util/common.h"
-#include "seal/util/polyarith.h"
-#include "seal/util/pointer.h"
 #include "seal/util/defines.h"
+#include "seal/util/pointer.h"
+#include "seal/util/polyarith.h"
 #include "seal/util/uintarithsmallmod.h"
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
 
 using namespace std;
 using namespace seal::util;
 
 namespace seal
 {
-    IntegerEncoder::IntegerEncoder(shared_ptr<SEALContext> context) :
-        context_(move(context))
+    IntegerEncoder::IntegerEncoder(shared_ptr<SEALContext> context) : context_(move(context))
     {
         // Verify parameters
         if (!context_)
@@ -60,8 +59,7 @@ namespace seal
 
     void IntegerEncoder::encode(uint64_t value, Plaintext &destination)
     {
-        size_t encode_coeff_count = safe_cast<size_t>(
-            get_significant_bit_count(value));
+        size_t encode_coeff_count = safe_cast<size_t>(get_significant_bit_count(value));
         destination.resize(encode_coeff_count);
         destination.set_zero();
 
@@ -89,8 +87,7 @@ namespace seal
         if (value < 0)
         {
             uint64_t pos_value = static_cast<uint64_t>(-value);
-            size_t encode_coeff_count = safe_cast<size_t>(
-                get_significant_bit_count(pos_value));
+            size_t encode_coeff_count = safe_cast<size_t>(get_significant_bit_count(pos_value));
             destination.resize(encode_coeff_count);
             destination.set_zero();
 
@@ -120,8 +117,7 @@ namespace seal
 
     void IntegerEncoder::encode(const BigUInt &value, Plaintext &destination)
     {
-        size_t encode_coeff_count = safe_cast<size_t>(
-            value.significant_bit_count());
+        size_t encode_coeff_count = safe_cast<size_t>(value.significant_bit_count());
         destination.resize(encode_coeff_count);
         destination.set_zero();
 
@@ -130,8 +126,7 @@ namespace seal
         size_t coeff_uint64_count = value.uint64_count();
         while (coeff_index < coeff_count)
         {
-            if (is_bit_set_uint(value.data(), coeff_uint64_count,
-                safe_cast<int>(coeff_index)))
+            if (is_bit_set_uint(value.data(), coeff_uint64_count, safe_cast<int>(coeff_index)))
             {
                 destination[coeff_index] = 1;
             }
@@ -170,7 +165,7 @@ namespace seal
     int64_t IntegerEncoder::decode_int64(const Plaintext &plain)
     {
         int64_t result = 0;
-        for (size_t bit_index = plain.significant_coeff_count(); bit_index--; )
+        for (size_t bit_index = plain.significant_coeff_count(); bit_index--;)
         {
             unsigned long long coeff = plain[bit_index];
 
@@ -214,7 +209,8 @@ namespace seal
             if ((next_result_was_negative == coeff_is_negative) &&
                 (next_result_was_negative != next_result_is_negative))
             {
-                // Accumulation and coefficient had same signs, but accumulator changed signs after addition, so must be overflow.
+                // Accumulation and coefficient had same signs, but accumulator changed signs after addition, so must be
+                // overflow.
                 throw invalid_argument("output out of range");
             }
             result = next_result;
@@ -230,13 +226,12 @@ namespace seal
         BigUInt resultint(safe_cast<int>(result_bit_capacity));
         bool result_is_negative = false;
         uint64_t *result = resultint.data();
-        for (size_t bit_index = plain.significant_coeff_count(); bit_index--; )
+        for (size_t bit_index = plain.significant_coeff_count(); bit_index--;)
         {
             unsigned long long coeff = plain[bit_index];
 
             // Left shift result, resizing if highest bit set.
-            if (is_bit_set_uint(result, result_uint64_count,
-                safe_cast<int>(result_bit_capacity) - 1))
+            if (is_bit_set_uint(result, result_uint64_count, safe_cast<int>(result_bit_capacity) - 1))
             {
                 // Resize to make bigger.
                 result_uint64_count++;
@@ -266,11 +261,9 @@ namespace seal
                 if (add_uint_uint64(result, pos_value, result_uint64_count, result))
                 {
                     // Add produced a carry that didn't fit, so resize and put it in.
-                    int carry_bit_index = safe_cast<int>(mul_safe(
-                        result_uint64_count, bits_per_uint64_sz));
+                    int carry_bit_index = safe_cast<int>(mul_safe(result_uint64_count, bits_per_uint64_sz));
                     result_uint64_count++;
-                    result_bit_capacity = mul_safe(
-                        result_uint64_count, bits_per_uint64_sz);
+                    result_bit_capacity = mul_safe(result_uint64_count, bits_per_uint64_sz);
                     resultint.resize(safe_cast<int>(result_bit_capacity));
                     result = resultint.data();
                     set_bit_uint(result, result_uint64_count, carry_bit_index);
@@ -296,4 +289,4 @@ namespace seal
         }
         return resultint;
     }
-}
+} // namespace seal
