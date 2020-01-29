@@ -4,7 +4,7 @@ parameters:
 
 steps:
 
-    - task: NuGetToolInstaller@0
+    - task: NuGetToolInstaller@1
       displayName: 'Use NuGet'
       inputs:
           versionSpec: ${{ parameters.nuget_version }}
