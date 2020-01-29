@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
-#include <vector>
-#include <map>
-#include <memory>
 #include "seal/util/defines.h"
 #include "seal/util/hestdparms.h"
+#include <cstddef>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <vector>
 
 namespace seal
 {
@@ -39,8 +39,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
 
             constexpr double noise_distribution_width_multiplier = 6;
 
-            constexpr double noise_max_deviation = noise_standard_deviation *
-                noise_distribution_width_multiplier;
+            constexpr double noise_max_deviation = noise_standard_deviation * noise_distribution_width_multiplier;
 
             /**
             This data structure is a key-value storage that maps degrees of the polynomial modulus
@@ -68,6 +67,6 @@ For .NET Framework wrapper support (C++/CLI) we need to
             it easy for non-expert users to select secure parameters.
             */
             extern const std::map<std::size_t, std::vector<SmallModulus>> default_coeff_modulus_256;
-        }
-    }
-}
+        } // namespace global_variables
+    }     // namespace util
+} // namespace seal

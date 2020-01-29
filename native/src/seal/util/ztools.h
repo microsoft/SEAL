@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <iostream>
-#include <ios>
-#include "seal/util/defines.h"
 #include "seal/intarray.h"
 #include "seal/memorymanager.h"
+#include "seal/util/defines.h"
+#include <ios>
+#include <iostream>
 
 namespace seal
 {
@@ -33,21 +33,14 @@ namespace seal
             @throws std::logic_error if compression failed
             */
             void write_header_deflate_buffer(
-                const IntArray<SEAL_BYTE> &in,
-                void *header_ptr,
-                std::ostream &out_stream,
-                MemoryPoolHandle pool);
+                const IntArray<SEAL_BYTE> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            int deflate_array(
-                const IntArray<SEAL_BYTE> &in,
-                IntArray<SEAL_BYTE> &out,
-                MemoryPoolHandle pool);
+            int deflate_array(const IntArray<SEAL_BYTE> &in, IntArray<SEAL_BYTE> &out, MemoryPoolHandle pool);
 
-            int inflate_stream(std::istream &in_stream,
-                std::streamoff in_size, std::ostream &out_stream,
-                MemoryPoolHandle pool);
+            int inflate_stream(
+                std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);
 
             SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
-        }
-    }
-}
+        } // namespace ztools
+    }     // namespace util
+} // namespace seal

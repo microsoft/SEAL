@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <cstddef>
-#include <complex>
-#include <stdexcept>
 #include "seal/util/defines.h"
 #include "seal/util/uintcore.h"
+#include <complex>
+#include <cstddef>
+#include <stdexcept>
 
 namespace seal
 {
@@ -39,8 +39,8 @@ namespace seal
 
         static constexpr double PI_ = 3.1415926535897932384626433832795028842;
 
-        //static const double complex_roots_re_[root_fidelity_ / 8 + 1];
+        // static const double complex_roots_re_[root_fidelity_ / 8 + 1];
 
-        //static const double complex_roots_im_[root_fidelity_ / 8 + 1];
+        // static const double complex_roots_im_[root_fidelity_ / 8 + 1];
     };
-}
+} // namespace seal

@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <limits>
-#include "seal/publickey.h"
-#include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
+#include "seal/memorymanager.h"
+#include "seal/publickey.h"
 #include "seal/valcheck.h"
+#include <iostream>
+#include <limits>
+#include <vector>
 
 namespace seal
 {
@@ -64,14 +64,14 @@ namespace seal
 
         @param[in] assign The KSwitchKeys to copy from
         */
-        KSwitchKeys &operator =(const KSwitchKeys &assign);
+        KSwitchKeys &operator=(const KSwitchKeys &assign);
 
         /**
         Moves a given KSwitchKeys instance to the current one.
 
         @param[in] assign The KSwitchKeys to move from
         */
-        KSwitchKeys &operator =(KSwitchKeys &&assign) = default;
+        KSwitchKeys &operator=(KSwitchKeys &&assign) = default;
 
         /**
         Returns the current number of keyswitching keys. Only keys that are
@@ -79,11 +79,9 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t size() const noexcept
         {
-            return std::accumulate(keys_.cbegin(), keys_.cend(), std::size_t(0),
-                [](std::size_t res, auto &next_key)
-                {
-                    return res + (next_key.empty() ? 0 : 1);
-                });
+            return std::accumulate(keys_.cbegin(), keys_.cend(), std::size_t(0), [](std::size_t res, auto &next_key) {
+                return res + (next_key.empty() ? 0 : 1);
+            });
         }
 
         /**
@@ -163,15 +161,13 @@ namespace seal
         SEAL_NODISCARD inline std::streamoff save_size(
             compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            std::size_t total_key_size =
-                util::mul_safe(keys_.size(), sizeof(std::uint64_t)); // keys_dim2
+            std::size_t total_key_size = util::mul_safe(keys_.size(), sizeof(std::uint64_t)); // keys_dim2
             for (auto &key_dim1 : keys_)
             {
                 for (auto &key_dim2 : key_dim1)
                 {
-                    total_key_size = util::add_safe(total_key_size,
-                        util::safe_cast<std::size_t>(
-                            key_dim2.save_size(compr_mode_type::none)));
+                    total_key_size = util::add_safe(
+                        total_key_size, util::safe_cast<std::size_t>(key_dim2.save_size(compr_mode_type::none)));
                 }
             }
 
@@ -182,10 +178,7 @@ namespace seal
                     total_key_size),
                 compr_mode);
 
-            return util::safe_cast<std::streamoff>(util::add_safe(
-                sizeof(Serialization::SEALHeader),
-                members_size
-            ));
+            return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
         }
 
         /**
@@ -201,14 +194,11 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&KSwitchKeys::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                stream, compr_mode);
+                std::bind(&KSwitchKeys::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -225,14 +215,10 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&KSwitchKeys::load_members, this, std::move(context), _1),
-                stream);
+            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, std::move(context), _1), stream);
         }
 
         /**
@@ -247,9 +233,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
@@ -276,15 +260,12 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&KSwitchKeys::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                out, size, compr_mode);
+                std::bind(&KSwitchKeys::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                compr_mode);
         }
 
         /**
@@ -304,14 +285,10 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&KSwitchKeys::load_members, this, std::move(context), _1),
-                in, size);
+            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, std::move(context), _1), in, size);
         }
 
         /**
@@ -330,9 +307,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
@@ -367,4 +342,4 @@ namespace seal
         */
         std::vector<std::vector<PublicKey>> keys_{};
     };
-}
+} // namespace seal

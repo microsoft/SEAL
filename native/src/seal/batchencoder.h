@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <vector>
-#include <limits>
-#include "seal/util/defines.h"
-#include "seal/util/common.h"
-#include "seal/util/uintcore.h"
-#include "seal/util/uintarithsmallmod.h"
-#include "seal/plaintext.h"
 #include "seal/context.h"
+#include "seal/plaintext.h"
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
+#include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
+#include <limits>
+#include <vector>
 #ifdef SEAL_USE_MSGSL_SPAN
 #include <gsl/span>
 #endif
@@ -172,7 +172,8 @@ namespace seal
         @throws std::invalid_argument if plain is in NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        void decode(const Plaintext &plain, std::vector<std::uint64_t> &destination,
+        void decode(
+            const Plaintext &plain, std::vector<std::uint64_t> &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
@@ -190,7 +191,8 @@ namespace seal
         @throws std::invalid_argument if plain is in NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        void decode(const Plaintext &plain, std::vector<std::int64_t> &destination,
+        void decode(
+            const Plaintext &plain, std::vector<std::int64_t> &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 #ifdef SEAL_USE_MSGSL_SPAN
         /**
@@ -209,7 +211,8 @@ namespace seal
         @throws std::invalid_argument if destination has incorrect size
         @throws std::invalid_argument if pool is uninitialized
         */
-        void decode(const Plaintext &plain, gsl::span<std::uint64_t> destination,
+        void decode(
+            const Plaintext &plain, gsl::span<std::uint64_t> destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
@@ -228,7 +231,8 @@ namespace seal
         @throws std::invalid_argument if destination has incorrect size
         @throws std::invalid_argument if pool is uninitialized
         */
-        void decode(const Plaintext &plain, gsl::span<std::int64_t> destination,
+        void decode(
+            const Plaintext &plain, gsl::span<std::int64_t> destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 #endif
         /**
@@ -260,12 +264,11 @@ namespace seal
 
         BatchEncoder(BatchEncoder &&source) = delete;
 
-        BatchEncoder &operator =(const BatchEncoder &assign) = delete;
+        BatchEncoder &operator=(const BatchEncoder &assign) = delete;
 
-        BatchEncoder &operator =(BatchEncoder &&assign) = delete;
+        BatchEncoder &operator=(BatchEncoder &&assign) = delete;
 
-        void populate_roots_of_unity_vector(
-            const SEALContext::ContextData &context_data);
+        void populate_roots_of_unity_vector(const SEALContext::ContextData &context_data);
 
         void populate_matrix_reps_index_map();
 
@@ -281,4 +284,4 @@ namespace seal
 
         util::Pointer<std::size_t> matrix_reps_index_map_;
     };
-}
+} // namespace seal

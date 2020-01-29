@@ -3,17 +3,17 @@
 
 #pragma once
 
-#include <iostream>
-#include <cstdint>
+#include "seal/memorymanager.h"
+#include "seal/plaintext.h"
+#include "seal/randomgen.h"
+#include "seal/valcheck.h"
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
 #include <cstddef>
+#include <cstdint>
+#include <iostream>
 #include <memory>
 #include <random>
-#include "seal/util/defines.h"
-#include "seal/randomgen.h"
-#include "seal/plaintext.h"
-#include "seal/memorymanager.h"
-#include "seal/util/common.h"
-#include "seal/valcheck.h"
 
 namespace seal
 {
@@ -73,7 +73,7 @@ namespace seal
 
         @param[in] assign The SecretKey to copy from
         */
-        SecretKey &operator =(const SecretKey &assign)
+        SecretKey &operator=(const SecretKey &assign)
         {
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
             new_sk = assign.sk_;
@@ -86,7 +86,7 @@ namespace seal
 
         @param[in] assign The SecretKey to move from
         */
-        SecretKey &operator =(SecretKey &&assign) = default;
+        SecretKey &operator=(SecretKey &&assign) = default;
 
         /**
         Returns a reference to the underlying polynomial.
@@ -130,8 +130,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return sk_.save(stream, compr_mode);
         }
@@ -150,9 +149,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
@@ -173,9 +170,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             SecretKey new_sk;
             auto in_size = new_sk.unsafe_load(context, stream);
@@ -201,9 +196,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return sk_.save(out, size, compr_mode);
         }
@@ -225,9 +218,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
@@ -252,9 +243,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             SecretKey new_sk;
             auto in_size = new_sk.unsafe_load(context, in, size);
@@ -298,4 +287,4 @@ namespace seal
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         Plaintext sk_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true) };
     };
-}
+} // namespace seal

@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include <memory>
-#include <random>
-#include "seal/util/defines.h"
 #include "seal/context.h"
-#include "seal/util/smallntt.h"
+#include "seal/galoiskeys.h"
 #include "seal/memorymanager.h"
 #include "seal/publickey.h"
-#include "seal/secretkey.h"
-#include "seal/relinkeys.h"
-#include "seal/galoiskeys.h"
-#include "seal/serializable.h"
 #include "seal/randomgen.h"
+#include "seal/relinkeys.h"
+#include "seal/secretkey.h"
+#include "seal/serializable.h"
+#include "seal/util/defines.h"
+#include "seal/util/smallntt.h"
+#include <memory>
+#include <random>
 
 namespace seal
 {
@@ -54,8 +54,7 @@ namespace seal
         @throws std::invalid_argument if secret_key or public_key is not valid
         for encryption parameters
         */
-        KeyGenerator(std::shared_ptr<SEALContext> context,
-            const SecretKey &secret_key);
+        KeyGenerator(std::shared_ptr<SEALContext> context, const SecretKey &secret_key);
 
         /**
         Creates an KeyGenerator instance initialized with the specified SEALContext
@@ -71,8 +70,7 @@ namespace seal
         @throws std::invalid_argument if secret_key or public_key is not valid
         for encryption parameters
         */
-        KeyGenerator(std::shared_ptr<SEALContext> context,
-            const SecretKey &secret_key, const PublicKey &public_key);
+        KeyGenerator(std::shared_ptr<SEALContext> context, const SecretKey &secret_key, const PublicKey &public_key);
 
         /**
         Returns a const reference to the secret key.
@@ -137,8 +135,7 @@ namespace seal
         keyswitching
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        SEAL_NODISCARD inline GaloisKeys galois_keys_local(
-            const std::vector<std::uint64_t> &galois_elts)
+        SEAL_NODISCARD inline GaloisKeys galois_keys_local(const std::vector<std::uint64_t> &galois_elts)
         {
             return galois_keys(galois_elts, false);
         }
@@ -170,8 +167,7 @@ namespace seal
         keyswitching
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys(
-            const std::vector<std::uint64_t> &galois_elts)
+        SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys(const std::vector<std::uint64_t> &galois_elts)
         {
             return galois_keys(galois_elts, true);
         }
@@ -192,8 +188,7 @@ namespace seal
         keyswitching
         @throws std::invalid_argument if the step counts are not valid
         */
-        SEAL_NODISCARD inline GaloisKeys galois_keys_local(
-            const std::vector<int> &steps)
+        SEAL_NODISCARD inline GaloisKeys galois_keys_local(const std::vector<int> &steps)
         {
             return galois_keys_local(galois_elts_from_steps(steps));
         }
@@ -219,8 +214,7 @@ namespace seal
         keyswitching
         @throws std::invalid_argument if the step counts are not valid
         */
-        SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys(
-            const std::vector<int> &steps)
+        SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys(const std::vector<int> &steps)
         {
             return galois_keys(galois_elts_from_steps(steps));
         }
@@ -272,15 +266,13 @@ namespace seal
     private:
         KeyGenerator(const KeyGenerator &copy) = delete;
 
-        KeyGenerator &operator =(const KeyGenerator &assign) = delete;
+        KeyGenerator &operator=(const KeyGenerator &assign) = delete;
 
         KeyGenerator(KeyGenerator &&source) = delete;
 
-        KeyGenerator &operator =(KeyGenerator &&assign) = delete;
+        KeyGenerator &operator=(KeyGenerator &&assign) = delete;
 
-        void compute_secret_key_array(
-            const SEALContext::ContextData &context_data,
-            std::size_t max_power);
+        void compute_secret_key_array(const SEALContext::ContextData &context_data, std::size_t max_power);
 
         /**
         Generates new secret key.
@@ -300,18 +292,13 @@ namespace seal
         Generates new key switching keys for an array of new keys.
         */
         void generate_kswitch_keys(
-            const std::uint64_t *new_keys,
-            std::size_t num_keys,
-            KSwitchKeys &destination,
-            bool save_seed = false);
+            const std::uint64_t *new_keys, std::size_t num_keys, KSwitchKeys &destination, bool save_seed = false);
 
         /**
         Generates one key switching key for a new key.
         */
         void generate_one_kswitch_key(
-            const uint64_t *new_key,
-            std::vector<PublicKey> &destination,
-            bool save_seed = false);
+            const uint64_t *new_key, std::vector<PublicKey> &destination, bool save_seed = false);
 
         /**
         Generates and returns the specified number of relinearization keys.
@@ -341,9 +328,7 @@ namespace seal
         @param[in] save_seed If true, replace second poly in Ciphertext with seed
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        GaloisKeys galois_keys(
-            const std::vector<std::uint64_t> &galois_elts,
-            bool save_seed);
+        GaloisKeys galois_keys(const std::vector<std::uint64_t> &galois_elts, bool save_seed);
 
         // Get a vector of galois_elts from a vector of steps.
         std::vector<std::uint64_t> galois_elts_from_steps(const std::vector<int> &steps);
@@ -370,4 +355,4 @@ namespace seal
 
         bool pk_generated_ = false;
     };
-}
+} // namespace seal

@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include <iostream>
-#include <numeric>
-#include <memory>
-#include <functional>
+#include "seal/memorymanager.h"
+#include "seal/randomgen.h"
+#include "seal/serialization.h"
+#include "seal/smallmodulus.h"
 #include "seal/util/defines.h"
 #include "seal/util/globals.h"
-#include "seal/randomgen.h"
-#include "seal/smallmodulus.h"
 #include "seal/util/hash.h"
-#include "seal/memorymanager.h"
-#include "seal/serialization.h"
 #include "seal/util/ztools.h"
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <numeric>
 
 namespace seal
 {
@@ -41,8 +41,7 @@ namespace seal
     /**
     A parms_id_type value consisting of zeros.
     */
-    static constexpr parms_id_type parms_id_zero =
-        util::HashFunction::hash_zero_block;
+    static constexpr parms_id_type parms_id_zero = util::HashFunction::hash_zero_block;
 
     /**
     Represents user-customizable encryption scheme settings. The parameters (most
@@ -91,8 +90,7 @@ namespace seal
         @param[in] scheme The encryption scheme to be used
         @see scheme_type for the supported schemes
         */
-        EncryptionParameters(scheme_type scheme = scheme_type::none) :
-            scheme_(scheme)
+        EncryptionParameters(scheme_type scheme = scheme_type::none) : scheme_(scheme)
         {
             compute_parms_id();
         }
@@ -127,7 +125,7 @@ namespace seal
 
         @param[in] assign The EncryptionParameters to copy from
         */
-        EncryptionParameters &operator =(const EncryptionParameters &assign) = default;
+        EncryptionParameters &operator=(const EncryptionParameters &assign) = default;
 
         /**
         Creates a new EncryptionParameters instance by moving a given instance.
@@ -141,7 +139,7 @@ namespace seal
 
         @param[in] assign The EncryptionParameters to move from
         */
-        EncryptionParameters &operator =(EncryptionParameters &&assign) = default;
+        EncryptionParameters &operator=(EncryptionParameters &&assign) = default;
 
         /**
         Sets the degree of the polynomial modulus parameter to the specified value.
@@ -193,8 +191,7 @@ namespace seal
                     throw std::logic_error("coeff_modulus is not supported for this scheme");
                 }
             }
-            else if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX ||
-                coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
+            else if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX || coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
             {
                 throw std::invalid_argument("coeff_modulus is invalid");
             }
@@ -260,8 +257,7 @@ namespace seal
 
         @param[in] random_generator Pointer to the random generator factory
         */
-        inline void set_random_generator(
-            std::shared_ptr<UniformRandomGeneratorFactory> random_generator) noexcept
+        inline void set_random_generator(std::shared_ptr<UniformRandomGeneratorFactory> random_generator) noexcept
         {
             random_generator_ = std::move(random_generator);
         }
@@ -285,8 +281,7 @@ namespace seal
         /**
         Returns a const reference to the currently set coefficient modulus parameter.
         */
-        SEAL_NODISCARD inline auto coeff_modulus() const noexcept
-            -> const std::vector<SmallModulus>&
+        SEAL_NODISCARD inline auto coeff_modulus() const noexcept -> const std::vector<SmallModulus> &
         {
             return coeff_modulus_;
         }
@@ -302,8 +297,7 @@ namespace seal
         /**
         Returns a pointer to the random number generator factory to use for encryption.
         */
-        SEAL_NODISCARD inline auto random_generator() const noexcept
-            -> std::shared_ptr<UniformRandomGeneratorFactory>
+        SEAL_NODISCARD inline auto random_generator() const noexcept -> std::shared_ptr<UniformRandomGeneratorFactory>
         {
             return random_generator_;
         }
@@ -316,8 +310,7 @@ namespace seal
 
         @parms[in] other The EncryptionParameters to compare against
         */
-        SEAL_NODISCARD inline bool operator ==(
-            const EncryptionParameters &other) const noexcept
+        SEAL_NODISCARD inline bool operator==(const EncryptionParameters &other) const noexcept
         {
             return (parms_id_ == other.parms_id_);
         }
@@ -330,8 +323,7 @@ namespace seal
 
         @parms[in] other The EncryptionParameters to compare against
         */
-        SEAL_NODISCARD inline bool operator !=(
-            const EncryptionParameters &other) const noexcept
+        SEAL_NODISCARD inline bool operator!=(const EncryptionParameters &other) const noexcept
         {
             return (parms_id_ != other.parms_id_);
         }
@@ -347,12 +339,11 @@ namespace seal
         SEAL_NODISCARD inline std::streamoff save_size(
             compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            std::size_t coeff_modulus_total_size = coeff_modulus_.empty() ?
-                std::size_t(0) :
-                util::safe_cast<std::size_t>(
-                    coeff_modulus_[0].save_size(compr_mode_type::none));
-            coeff_modulus_total_size = util::mul_safe(
-                coeff_modulus_total_size, coeff_modulus_.size());
+            std::size_t coeff_modulus_total_size =
+                coeff_modulus_.empty()
+                    ? std::size_t(0)
+                    : util::safe_cast<std::size_t>(coeff_modulus_[0].save_size(compr_mode_type::none));
+            coeff_modulus_total_size = util::mul_safe(coeff_modulus_total_size, coeff_modulus_.size());
 
             std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
@@ -360,14 +351,10 @@ namespace seal
                     sizeof(std::uint64_t), // poly_modulus_degree_
                     sizeof(std::uint64_t), // coeff_mod_count
                     coeff_modulus_total_size,
-                    util::safe_cast<std::size_t>(
-                        plain_modulus_.save_size(compr_mode_type::none))),
+                    util::safe_cast<std::size_t>(plain_modulus_.save_size(compr_mode_type::none))),
                 compr_mode);
 
-            return util::safe_cast<std::streamoff>(util::add_safe(
-                sizeof(Serialization::SEALHeader),
-                members_size
-            ));
+            return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
         }
 
         /**
@@ -382,14 +369,13 @@ namespace seal
         compression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff save(std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+        inline std::streamoff save(
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&EncryptionParameters::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                stream, compr_mode);
+                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::none), stream,
+                compr_mode);
         }
 
         /**
@@ -405,9 +391,7 @@ namespace seal
         {
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
-            auto in_size = Serialization::Load(
-                std::bind(&EncryptionParameters::load_members, &new_parms, _1),
-                stream);
+            auto in_size = Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1), stream);
             std::swap(*this, new_parms);
             return in_size;
         }
@@ -426,15 +410,12 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&EncryptionParameters::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                out, size, compr_mode);
+                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                compr_mode);
         }
 
         /**
@@ -453,9 +434,8 @@ namespace seal
         {
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
-            auto in_size = Serialization::Load(
-                std::bind(&EncryptionParameters::load_members, &new_parms, _1),
-                in, size);
+            auto in_size =
+                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1), in, size);
             std::swap(*this, new_parms);
             return in_size;
         }
@@ -476,13 +456,13 @@ namespace seal
         {
             switch (scheme)
             {
-            case static_cast<std::uint8_t>(scheme_type::none) :
+            case static_cast<std::uint8_t>(scheme_type::none):
                 /* fall through */
 
-            case static_cast<std::uint8_t>(scheme_type::BFV) :
+            case static_cast<std::uint8_t>(scheme_type::BFV):
                 /* fall through */
 
-            case static_cast<std::uint8_t>(scheme_type::CKKS) :
+            case static_cast<std::uint8_t>(scheme_type::CKKS):
                 return true;
             }
             return false;
@@ -517,18 +497,17 @@ namespace seal
 
         parms_id_type parms_id_ = parms_id_zero;
     };
-}
+} // namespace seal
 
 /**
 Specializes the std::hash template for parms_id_type.
 */
 namespace std
 {
-    template<>
+    template <>
     struct hash<seal::parms_id_type>
     {
-        std::size_t operator()(
-            const seal::parms_id_type &parms_id) const
+        std::size_t operator()(const seal::parms_id_type &parms_id) const
         {
             std::uint64_t result = 17;
             result = 31 * result + parms_id[0];
@@ -538,4 +517,4 @@ namespace std
             return static_cast<std::size_t>(result);
         }
     };
-}
+} // namespace std

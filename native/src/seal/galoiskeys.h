@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <numeric>
-#include "seal/util/defines.h"
 #include "seal/ciphertext.h"
-#include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
 #include "seal/kswitchkeys.h"
+#include "seal/memorymanager.h"
 #include "seal/util/common.h"
+#include "seal/util/defines.h"
+#include <iostream>
+#include <numeric>
+#include <vector>
 
 namespace seal
 {
@@ -48,8 +48,7 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if galois_elt is not valid
         */
-        SEAL_NODISCARD inline static std::size_t get_index(
-            std::uint64_t galois_elt)
+        SEAL_NODISCARD inline static std::size_t get_index(std::uint64_t galois_elt)
         {
             // Verify parameters
             if (!(galois_elt & 1))
@@ -83,4 +82,4 @@ namespace seal
             return KSwitchKeys::data(get_index(galois_elt));
         }
     };
-}
+} // namespace seal

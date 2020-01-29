@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <stdexcept>
-#include "seal/util/pointer.h"
 #include "seal/memorymanager.h"
 #include "seal/smallmodulus.h"
+#include "seal/util/pointer.h"
+#include <stdexcept>
 
 namespace seal
 {
@@ -15,8 +15,7 @@ namespace seal
         class SmallNTTTables
         {
         public:
-            SmallNTTTables(MemoryPoolHandle pool = MemoryManager::GetPool()) :
-                pool_(std::move(pool))
+            SmallNTTTables(MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
             {
 #ifdef SEAL_DEBUG
                 if (!pool_)
@@ -26,8 +25,8 @@ namespace seal
 #endif
             }
 
-            SmallNTTTables(int coeff_count_power, const SmallModulus &modulus,
-                MemoryPoolHandle pool = MemoryManager::GetPool());
+            SmallNTTTables(
+                int coeff_count_power, const SmallModulus &modulus, MemoryPoolHandle pool = MemoryManager::GetPool());
 
             SEAL_NODISCARD inline bool is_generated() const
             {
@@ -49,8 +48,7 @@ namespace seal
                 return root_;
             }
 
-            SEAL_NODISCARD inline auto get_from_root_powers(
-                std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline auto get_from_root_powers(std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -65,8 +63,7 @@ namespace seal
                 return root_powers_[index];
             }
 
-            SEAL_NODISCARD inline auto get_from_scaled_root_powers(
-                std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline auto get_from_scaled_root_powers(std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -81,8 +78,7 @@ namespace seal
                 return scaled_root_powers_[index];
             }
 
-            SEAL_NODISCARD inline auto get_from_inv_root_powers(
-                std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline auto get_from_inv_root_powers(std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -97,8 +93,7 @@ namespace seal
                 return inv_root_powers_[index];
             }
 
-            SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers(
-                std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers(std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -113,8 +108,7 @@ namespace seal
                 return scaled_inv_root_powers_[index];
             }
 
-            SEAL_NODISCARD inline auto get_from_inv_root_powers_div_two(
-                std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline auto get_from_inv_root_powers_div_two(std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -129,8 +123,7 @@ namespace seal
                 return inv_root_powers_div_two_[index];
             }
 
-            SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers_div_two(
-                std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers_div_two(std::size_t index) const -> std::uint64_t
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -145,8 +138,7 @@ namespace seal
                 return scaled_inv_root_powers_div_two_[index];
             }
 
-            SEAL_NODISCARD inline auto get_inv_degree_modulo() const
-                -> const std::uint64_t*
+            SEAL_NODISCARD inline auto get_inv_degree_modulo() const -> const std::uint64_t *
             {
 #ifdef SEAL_DEBUG
                 if (!generated_)
@@ -177,19 +169,17 @@ namespace seal
 
             SmallNTTTables(SmallNTTTables &&source) = delete;
 
-            SmallNTTTables &operator =(const SmallNTTTables &assign) = delete;
+            SmallNTTTables &operator=(const SmallNTTTables &assign) = delete;
 
-            SmallNTTTables &operator =(SmallNTTTables &&assign) = delete;
+            SmallNTTTables &operator=(SmallNTTTables &&assign) = delete;
 
             // Computed bit-scrambled vector of first 1 << coeff_count_power powers
             // of a primitive root.
-            void ntt_powers_of_primitive_root(std::uint64_t root,
-                std::uint64_t *destination) const;
+            void ntt_powers_of_primitive_root(std::uint64_t root, std::uint64_t *destination) const;
 
             // Scales the elements of a vector returned by powers_of_primitive_root(...)
             // by word_size/modulus and rounds down.
-            void ntt_scale_powers_of_primitive_root(const std::uint64_t *input,
-                std::uint64_t *destination) const;
+            void ntt_scale_powers_of_primitive_root(const std::uint64_t *input, std::uint64_t *destination) const;
 
             MemoryPoolHandle pool_;
 
@@ -222,14 +212,11 @@ namespace seal
             Pointer<decltype(root_)> scaled_inv_root_powers_;
 
             std::uint64_t inv_degree_modulo_ = 0;
-
         };
 
-        void ntt_negacyclic_harvey_lazy(std::uint64_t *operand,
-            const SmallNTTTables &tables);
+        void ntt_negacyclic_harvey_lazy(std::uint64_t *operand, const SmallNTTTables &tables);
 
-        inline void ntt_negacyclic_harvey(std::uint64_t *operand,
-            const SmallNTTTables &tables)
+        inline void ntt_negacyclic_harvey(std::uint64_t *operand, const SmallNTTTables &tables)
         {
             ntt_negacyclic_harvey_lazy(operand, tables);
 
@@ -253,11 +240,9 @@ namespace seal
             }
         }
 
-        void inverse_ntt_negacyclic_harvey_lazy(std::uint64_t *operand,
-            const SmallNTTTables &tables);
+        void inverse_ntt_negacyclic_harvey_lazy(std::uint64_t *operand, const SmallNTTTables &tables);
 
-        inline void inverse_ntt_negacyclic_harvey(std::uint64_t *operand,
-            const SmallNTTTables &tables)
+        inline void inverse_ntt_negacyclic_harvey(std::uint64_t *operand, const SmallNTTTables &tables)
         {
             inverse_ntt_negacyclic_harvey_lazy(operand, tables);
 
@@ -275,5 +260,5 @@ namespace seal
                 }
             }
         }
-    }
-}
+    } // namespace util
+} // namespace seal

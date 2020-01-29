@@ -4,8 +4,13 @@
 #pragma once
 
 // Debugging help
-#define SEAL_ASSERT(condition) { if(!(condition)){ std::cerr << "ASSERT FAILED: "   \
-    << #condition << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; } }
+#define SEAL_ASSERT(condition)                                                                                         \
+    {                                                                                                                  \
+        if (!(condition))                                                                                              \
+        {                                                                                                              \
+            std::cerr << "ASSERT FAILED: " << #condition << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; \
+        }                                                                                                              \
+    }
 
 // String expansion
 #define _SEAL_STRINGIZE(x) #x
@@ -95,7 +100,9 @@ namespace seal
 #else
 namespace seal
 {
-    enum class SEAL_BYTE : unsigned char {};
+    enum class SEAL_BYTE : unsigned char
+    {
+    };
 }
 #endif
 
@@ -129,25 +136,29 @@ namespace seal
 #endif
 
 #ifndef SEAL_SUB_BORROW_UINT64
-#define SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result) sub_uint64_generic(operand1, operand2, borrow, result)
+#define SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result) \
+    sub_uint64_generic(operand1, operand2, borrow, result)
 #endif
 
 #ifndef SEAL_MULTIPLY_UINT64
-#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128) {                      \
-    multiply_uint64_generic(operand1, operand2, result128);                        \
-}
+#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)     \
+    {                                                           \
+        multiply_uint64_generic(operand1, operand2, result128); \
+    }
 #endif
 
 #ifndef SEAL_DIVIDE_UINT128_UINT64
-#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result) {               \
-    divide_uint128_uint64_inplace_generic(numerator, denominator, result);         \
-}
+#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result)             \
+    {                                                                          \
+        divide_uint128_uint64_inplace_generic(numerator, denominator, result); \
+    }
 #endif
 
 #ifndef SEAL_MULTIPLY_UINT64_HW64
-#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) {                      \
-    multiply_uint64_hw64_generic(operand1, operand2, hw64);                        \
-}
+#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64)     \
+    {                                                           \
+        multiply_uint64_hw64_generic(operand1, operand2, hw64); \
+    }
 #endif
 
 #ifndef SEAL_MSB_INDEX_UINT64

@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <iostream>
-#include <memory>
 #include "seal/ciphertext.h"
 #include "seal/context.h"
 #include "seal/valcheck.h"
+#include <iostream>
+#include <memory>
 
 namespace seal
 {
@@ -54,14 +54,14 @@ namespace seal
 
         @param[in] assign The PublicKey to copy from
         */
-        PublicKey &operator =(const PublicKey &assign) = default;
+        PublicKey &operator=(const PublicKey &assign) = default;
 
         /**
         Moves an old PublicKey to the current one.
 
         @param[in] assign The PublicKey to move from
         */
-        PublicKey &operator =(PublicKey &&assign) = default;
+        PublicKey &operator=(PublicKey &&assign) = default;
 
         /**
         Returns a reference to the underlying data.
@@ -105,8 +105,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return pk_.save(stream, compr_mode);
         }
@@ -125,9 +124,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             Ciphertext new_pk(pk_.pool());
             auto in_size = new_pk.unsafe_load(std::move(context), stream);
@@ -147,9 +144,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(context, stream);
@@ -175,9 +170,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return pk_.save(out, size, compr_mode);
         }
@@ -199,9 +192,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             Ciphertext new_pk(pk_.pool());
             auto in_size = new_pk.unsafe_load(std::move(context), in, size);
@@ -225,9 +216,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(context, in, size);
@@ -276,11 +265,9 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        PublicKey(MemoryPoolHandle pool) :
-            pk_(std::move(pool))
-        {
-        }
+        PublicKey(MemoryPoolHandle pool) : pk_(std::move(pool))
+        {}
 
         Ciphertext pk_;
     };
-}
+} // namespace seal

@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <cstdint>
-#include "seal/context.h"
 #include "seal/biguint.h"
+#include "seal/context.h"
+#include "seal/memorymanager.h"
 #include "seal/plaintext.h"
 #include "seal/smallmodulus.h"
-#include "seal/memorymanager.h"
+#include <cstdint>
 
 namespace seal
 {
@@ -222,9 +222,9 @@ namespace seal
 
         IntegerEncoder(IntegerEncoder &&source) = delete;
 
-        IntegerEncoder &operator =(const IntegerEncoder &assign) = delete;
+        IntegerEncoder &operator=(const IntegerEncoder &assign) = delete;
 
-        IntegerEncoder &operator =(IntegerEncoder &&assign) = delete;
+        IntegerEncoder &operator=(IntegerEncoder &&assign) = delete;
 
         std::shared_ptr<SEALContext> context_{ nullptr };
 
@@ -232,4 +232,4 @@ namespace seal
 
         std::uint64_t neg_one_;
     };
-}
+} // namespace seal

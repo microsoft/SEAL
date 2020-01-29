@@ -3,21 +3,21 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <string>
-#include <iostream>
-#include <algorithm>
-#include <memory>
-#include <functional>
-#include "seal/util/common.h"
-#include "seal/util/polycore.h"
-#include "seal/util/defines.h"
-#include "seal/memorymanager.h"
+#include "seal/context.h"
 #include "seal/encryptionparams.h"
 #include "seal/intarray.h"
-#include "seal/context.h"
+#include "seal/memorymanager.h"
 #include "seal/valcheck.h"
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
+#include "seal/util/polycore.h"
 #include "seal/util/ztools.h"
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
 #ifdef SEAL_USE_MSGSL_SPAN
 #include <gsl/span>
 #endif
@@ -66,10 +66,8 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        Plaintext(MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(std::move(pool))
-        {
-        }
+        Plaintext(MemoryPoolHandle pool = MemoryManager::GetPool()) : data_(std::move(pool))
+        {}
 
         /**
         Constructs a plaintext representing a constant polynomial 0. The coefficient
@@ -82,12 +80,9 @@ namespace seal
         @throws std::invalid_argument if coeff_count is negative
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Plaintext(std::size_t coeff_count,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            coeff_count_(coeff_count),
-            data_(coeff_count_, std::move(pool))
-        {
-        }
+        explicit Plaintext(std::size_t coeff_count, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : coeff_count_(coeff_count), data_(coeff_count_, std::move(pool))
+        {}
 
         /**
         Constructs a plaintext representing a constant polynomial 0. The coefficient
@@ -101,12 +96,10 @@ namespace seal
         @throws std::invalid_argument if coeff_count is negative
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Plaintext(std::size_t capacity, std::size_t coeff_count,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            coeff_count_(coeff_count),
-            data_(capacity, coeff_count_, std::move(pool))
-        {
-        }
+        explicit Plaintext(
+            std::size_t capacity, std::size_t coeff_count, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : coeff_count_(coeff_count), data_(capacity, coeff_count_, std::move(pool))
+        {}
 
         /**
         Constructs a plaintext from a given hexadecimal string describing the
@@ -136,11 +129,10 @@ namespace seal
         format
         @throws std::invalid_argument if pool is uninitialized
         */
-        Plaintext(const std::string &hex_poly,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(std::move(pool))
+        Plaintext(const std::string &hex_poly, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : data_(std::move(pool))
         {
-            operator =(hex_poly);
+            operator=(hex_poly);
         }
 
         /**
@@ -164,8 +156,7 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        Plaintext(const Plaintext &copy, MemoryPoolHandle pool) :
-            Plaintext(std::move(pool))
+        Plaintext(const Plaintext &copy, MemoryPoolHandle pool) : Plaintext(std::move(pool))
         {
             *this = copy;
         }
@@ -235,14 +226,14 @@ namespace seal
 
         @param[in] assign The plaintext to copy from
         */
-        Plaintext &operator =(const Plaintext &assign) = default;
+        Plaintext &operator=(const Plaintext &assign) = default;
 
         /**
         Moves a given plaintext to the current one.
 
         @param[in] assign The plaintext to move from
         */
-        Plaintext &operator =(Plaintext &&assign) = default;
+        Plaintext &operator=(Plaintext &&assign) = default;
 
         /**
         Sets the value of the current plaintext to the polynomial represented by
@@ -270,7 +261,7 @@ namespace seal
         format
         @throws std::invalid_argument if the coefficients of hex_poly are too wide
         */
-        Plaintext &operator =(const std::string &hex_poly);
+        Plaintext &operator=(const std::string &hex_poly);
 
         /**
         Sets the value of the current plaintext to a given constant polynomial.
@@ -279,7 +270,7 @@ namespace seal
         @param[in] const_coeff The constant coefficient
         @throws std::logic_error if the plaintext is NTT transformed
         */
-        Plaintext &operator =(pt_coeff_type const_coeff)
+        Plaintext &operator=(pt_coeff_type const_coeff)
         {
             data_.resize(1);
             data_[0] = const_coeff;
@@ -303,7 +294,8 @@ namespace seal
             }
             if (start_coeff + length - 1 >= coeff_count_)
             {
-                throw std::out_of_range("length must be non-negative and start_coeff + length - 1 must be within [0, coeff_count)");
+                throw std::out_of_range(
+                    "length must be non-negative and start_coeff + length - 1 must be within [0, coeff_count)");
             }
             std::fill_n(data_.begin() + start_coeff, length, pt_coeff_type(0));
         }
@@ -360,8 +352,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<pt_coeff_type> data_span()
         {
-            return gsl::span<pt_coeff_type>(data_.begin(),
-                static_cast<std::ptrdiff_t>(coeff_count_));
+            return gsl::span<pt_coeff_type>(data_.begin(), static_cast<std::ptrdiff_t>(coeff_count_));
         }
 
         /**
@@ -369,8 +360,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<const pt_coeff_type> data_span() const
         {
-            return gsl::span<const pt_coeff_type>(data_.cbegin(),
-                static_cast<std::ptrdiff_t>(coeff_count_));
+            return gsl::span<const pt_coeff_type>(data_.cbegin(), static_cast<std::ptrdiff_t>(coeff_count_));
         }
 #endif
         /**
@@ -397,8 +387,7 @@ namespace seal
 
         @param[in] coeff_index The index of the coefficient in the plaintext polynomial
         */
-        SEAL_NODISCARD inline const pt_coeff_type *data(
-            std::size_t coeff_index) const
+        SEAL_NODISCARD inline const pt_coeff_type *data(std::size_t coeff_index) const
         {
             if (!coeff_count_)
             {
@@ -417,8 +406,7 @@ namespace seal
         @param[in] coeff_index The index of the coefficient in the plaintext polynomial
         @throws std::out_of_range if coeff_index is not within [0, coeff_count)
         */
-        SEAL_NODISCARD inline const pt_coeff_type &operator [](
-            std::size_t coeff_index) const
+        SEAL_NODISCARD inline const pt_coeff_type &operator[](std::size_t coeff_index) const
         {
             return data_.at(coeff_index);
         }
@@ -429,8 +417,7 @@ namespace seal
         @param[in] coeff_index The index of the coefficient in the plaintext polynomial
         @throws std::out_of_range if coeff_index is not within [0, coeff_count)
         */
-        SEAL_NODISCARD inline pt_coeff_type &operator [](
-            std::size_t coeff_index)
+        SEAL_NODISCARD inline pt_coeff_type &operator[](std::size_t coeff_index)
         {
             return data_.at(coeff_index);
         }
@@ -441,24 +428,20 @@ namespace seal
 
         @param[in] compare The plaintext to compare against
         */
-        SEAL_NODISCARD inline bool operator ==(const Plaintext &compare) const
+        SEAL_NODISCARD inline bool operator==(const Plaintext &compare) const
         {
             std::size_t sig_coeff_count = significant_coeff_count();
             std::size_t sig_coeff_count_compare = compare.significant_coeff_count();
-            bool parms_id_compare = (is_ntt_form() && compare.is_ntt_form()
-                && (parms_id_ == compare.parms_id_)) ||
-                (!is_ntt_form() && !compare.is_ntt_form());
-            return parms_id_compare
-                && (sig_coeff_count == sig_coeff_count_compare)
-                && std::equal(data_.cbegin(),
-                    data_.cbegin() + sig_coeff_count,
-                    compare.data_.cbegin(),
-                    compare.data_.cbegin() + sig_coeff_count)
-                && std::all_of(data_.cbegin() + sig_coeff_count,
-                    data_.cend(), util::is_zero<pt_coeff_type>)
-                && std::all_of(compare.data_.cbegin() + sig_coeff_count,
-                    compare.data_.cend(), util::is_zero<pt_coeff_type>)
-                && util::are_close(scale_, compare.scale_);
+            bool parms_id_compare = (is_ntt_form() && compare.is_ntt_form() && (parms_id_ == compare.parms_id_)) ||
+                                    (!is_ntt_form() && !compare.is_ntt_form());
+            return parms_id_compare && (sig_coeff_count == sig_coeff_count_compare) &&
+                   std::equal(
+                       data_.cbegin(), data_.cbegin() + sig_coeff_count, compare.data_.cbegin(),
+                       compare.data_.cbegin() + sig_coeff_count) &&
+                   std::all_of(data_.cbegin() + sig_coeff_count, data_.cend(), util::is_zero<pt_coeff_type>) &&
+                   std::all_of(
+                       compare.data_.cbegin() + sig_coeff_count, compare.data_.cend(), util::is_zero<pt_coeff_type>) &&
+                   util::are_close(scale_, compare.scale_);
         }
 
         /**
@@ -467,9 +450,9 @@ namespace seal
 
         @param[in] compare The plaintext to compare against
         */
-        SEAL_NODISCARD inline bool operator !=(const Plaintext &compare) const
+        SEAL_NODISCARD inline bool operator!=(const Plaintext &compare) const
         {
-            return !operator ==(compare);
+            return !operator==(compare);
         }
 
         /**
@@ -477,9 +460,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool is_zero() const
         {
-            return !coeff_count_ ||
-                std::all_of(data_.cbegin(), data_.cend(),
-                    util::is_zero<pt_coeff_type>);
+            return !coeff_count_ || std::all_of(data_.cbegin(), data_.cend(), util::is_zero<pt_coeff_type>);
         }
 
         /**
@@ -566,15 +547,10 @@ namespace seal
                 util::add_safe(
                     sizeof(parms_id_),
                     sizeof(std::uint64_t), // coeff_count_
-                    sizeof(scale_),
-                    util::safe_cast<std::size_t>(
-                        data_.save_size(compr_mode_type::none))),
+                    sizeof(scale_), util::safe_cast<std::size_t>(data_.save_size(compr_mode_type::none))),
                 compr_mode);
 
-            return util::safe_cast<std::streamoff>(util::add_safe(
-                sizeof(Serialization::SEALHeader),
-                members_size
-            ));
+            return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
         }
 
         /**
@@ -589,14 +565,11 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                stream, compr_mode);
+                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -613,14 +586,10 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&Plaintext::load_members, this, std::move(context), _1),
-                stream);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, std::move(context), _1), stream);
         }
 
         /**
@@ -635,9 +604,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             Plaintext new_data(pool());
             auto in_size = new_data.unsafe_load(context, stream);
@@ -663,15 +630,11 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                out, size, compr_mode);
+                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode);
         }
 
         /**
@@ -691,14 +654,10 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&Plaintext::load_members, this, std::move(context), _1),
-                in, size);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, std::move(context), _1), in, size);
         }
 
         /**
@@ -716,9 +675,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             Plaintext new_data(pool());
             auto in_size = new_data.unsafe_load(context, in, size);
@@ -805,4 +762,4 @@ namespace seal
 
         IntArray<pt_coeff_type> data_;
     };
-}
+} // namespace seal

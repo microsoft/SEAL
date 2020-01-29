@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <cstdint>
-#include <iostream>
-#include <array>
-#include "seal/util/defines.h"
-#include "seal/util/uintcore.h"
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
+#include "seal/util/defines.h"
+#include "seal/util/uintcore.h"
 #include "seal/util/ztools.h"
+#include <array>
+#include <cstdint>
+#include <iostream>
 
 namespace seal
 {
@@ -61,14 +61,14 @@ namespace seal
 
         @param[in] assign The SmallModulus to copy from
         */
-        SmallModulus &operator =(const SmallModulus &assign) = default;
+        SmallModulus &operator=(const SmallModulus &assign) = default;
 
         /**
         Moves a given SmallModulus to the current one.
 
         @param[in] assign The SmallModulus to move from
         */
-        SmallModulus &operator =(SmallModulus &&assign) = default;
+        SmallModulus &operator=(SmallModulus &&assign) = default;
 
         /**
         Sets the value of the SmallModulus.
@@ -76,7 +76,7 @@ namespace seal
         @param[in] value The new integer modulus
         @throws std::invalid_argument if value is 1 or more than 62 bits
         */
-        inline SmallModulus &operator =(std::uint64_t value)
+        inline SmallModulus &operator=(std::uint64_t value)
         {
             set_value(value);
             return *this;
@@ -145,8 +145,7 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        SEAL_NODISCARD inline bool operator ==(
-            const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator==(const SmallModulus &compare) const noexcept
         {
             return value_ == compare.value_;
         }
@@ -156,8 +155,7 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        SEAL_NODISCARD inline bool operator ==(
-            std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator==(std::uint64_t compare) const noexcept
         {
             return value_ == compare;
         }
@@ -167,8 +165,7 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        SEAL_NODISCARD inline bool operator !=(
-            const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator!=(const SmallModulus &compare) const noexcept
         {
             return !(value_ == compare.value_);
         }
@@ -178,8 +175,7 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        SEAL_NODISCARD inline bool operator !=(
-            std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator!=(std::uint64_t compare) const noexcept
         {
             return value_ != compare;
         }
@@ -189,8 +185,7 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        SEAL_NODISCARD inline bool operator <(
-            const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator<(const SmallModulus &compare) const noexcept
         {
             return value_ < compare.value_;
         }
@@ -200,8 +195,7 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        SEAL_NODISCARD inline bool operator <(
-            std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator<(std::uint64_t compare) const noexcept
         {
             return value_ < compare;
         }
@@ -211,8 +205,7 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        SEAL_NODISCARD inline bool operator <=(
-            const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator<=(const SmallModulus &compare) const noexcept
         {
             return value_ <= compare.value_;
         }
@@ -222,8 +215,7 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        SEAL_NODISCARD inline bool operator <=(
-            std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator<=(std::uint64_t compare) const noexcept
         {
             return value_ <= compare;
         }
@@ -233,8 +225,7 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        SEAL_NODISCARD inline bool operator >(
-            const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator>(const SmallModulus &compare) const noexcept
         {
             return value_ > compare.value_;
         }
@@ -244,8 +235,7 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        SEAL_NODISCARD inline bool operator >(
-            std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator>(std::uint64_t compare) const noexcept
         {
             return value_ > compare;
         }
@@ -255,8 +245,7 @@ namespace seal
 
         @param[in] compare The SmallModulus to compare against
         */
-        SEAL_NODISCARD inline bool operator >=(
-            const SmallModulus &compare) const noexcept
+        SEAL_NODISCARD inline bool operator>=(const SmallModulus &compare) const noexcept
         {
             return value_ >= compare.value_;
         }
@@ -266,8 +255,7 @@ namespace seal
 
         @param[in] compare The unsigned integer to compare against
         */
-        SEAL_NODISCARD inline bool operator >=(
-            std::uint64_t compare) const noexcept
+        SEAL_NODISCARD inline bool operator>=(std::uint64_t compare) const noexcept
         {
             return value_ >= compare;
         }
@@ -283,15 +271,9 @@ namespace seal
         SEAL_NODISCARD inline std::streamoff save_size(
             compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            std::size_t members_size = Serialization::ComprSizeEstimate(
-                util::add_safe(
-                    sizeof(value_)),
-                compr_mode);
+            std::size_t members_size = Serialization::ComprSizeEstimate(util::add_safe(sizeof(value_)), compr_mode);
 
-            return util::safe_cast<std::streamoff>(util::add_safe(
-                sizeof(Serialization::SEALHeader),
-                members_size
-            ));
+            return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
         }
 
         /**
@@ -307,14 +289,11 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&SmallModulus::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                stream, compr_mode);
+                std::bind(&SmallModulus::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -329,9 +308,7 @@ namespace seal
         inline std::streamoff load(std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&SmallModulus::load_members, this, _1),
-                stream);
+            return Serialization::Load(std::bind(&SmallModulus::load_members, this, _1), stream);
         }
 
         /**
@@ -348,15 +325,12 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&SmallModulus::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                out, size, compr_mode);
+                std::bind(&SmallModulus::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                compr_mode);
         }
 
         /**
@@ -374,9 +348,7 @@ namespace seal
         inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&SmallModulus::load_members, this, _1),
-                in, size);
+            return Serialization::Load(std::bind(&SmallModulus::load_members, this, _1), in, size);
         }
 
     private:
@@ -396,4 +368,4 @@ namespace seal
 
         bool is_prime_ = false;
     };
-}
+} // namespace seal

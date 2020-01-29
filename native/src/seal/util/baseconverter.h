@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <vector>
-#include <memory>
-#include "seal/util/pointer.h"
+#include "seal/biguint.h"
 #include "seal/memorymanager.h"
 #include "seal/smallmodulus.h"
+#include "seal/util/pointer.h"
 #include "seal/util/smallntt.h"
-#include "seal/biguint.h"
+#include <memory>
+#include <stdexcept>
+#include <vector>
 
 namespace seal
 {
@@ -27,69 +27,57 @@ namespace seal
                 }
             }
 
-            BaseConverter(const std::vector<SmallModulus> &coeff_base,
-                std::size_t coeff_count, const SmallModulus &small_plain_mod,
-                MemoryPoolHandle pool);
+            BaseConverter(
+                const std::vector<SmallModulus> &coeff_base, std::size_t coeff_count,
+                const SmallModulus &small_plain_mod, MemoryPoolHandle pool);
 
             /**
             Generates the pre-computations for the given parameters.
             */
-            void generate(const std::vector<SmallModulus> &coeff_base,
-                std::size_t coeff_count, const SmallModulus &small_plain_mod);
+            void generate(
+                const std::vector<SmallModulus> &coeff_base, std::size_t coeff_count,
+                const SmallModulus &small_plain_mod);
 
-            void floor_last_coeff_modulus_inplace(
-                std::uint64_t *rns_poly,
-                MemoryPoolHandle pool) const;
+            void floor_last_coeff_modulus_inplace(std::uint64_t *rns_poly, MemoryPoolHandle pool) const;
 
             void floor_last_coeff_modulus_ntt_inplace(
-                std::uint64_t *rns_poly,
-                const Pointer<SmallNTTTables> &rns_ntt_tables,
-                MemoryPoolHandle pool) const;
+                std::uint64_t *rns_poly, const Pointer<SmallNTTTables> &rns_ntt_tables, MemoryPoolHandle pool) const;
 
-            void round_last_coeff_modulus_inplace(
-                std::uint64_t *rns_poly,
-                MemoryPoolHandle pool) const;
+            void round_last_coeff_modulus_inplace(std::uint64_t *rns_poly, MemoryPoolHandle pool) const;
 
             void round_last_coeff_modulus_ntt_inplace(
-                std::uint64_t *rns_poly,
-                const Pointer<SmallNTTTables> &rns_ntt_tables,
-                MemoryPoolHandle pool) const;
+                std::uint64_t *rns_poly, const Pointer<SmallNTTTables> &rns_ntt_tables, MemoryPoolHandle pool) const;
 
             /**
             Fast base converter from q to Bsk
             */
-            void fastbconv(const std::uint64_t *input,
-                std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             /**
             Fast base converter from Bsk to q
             */
-            void fastbconv_sk(const std::uint64_t *input,
-                std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv_sk(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             /**
             Reduction from Bsk U {m_tilde} to Bsk
             */
-            void mont_rq(const std::uint64_t *input,
-                std::uint64_t *destination) const;
+            void mont_rq(const std::uint64_t *input, std::uint64_t *destination) const;
 
             /**
             Fast base converter from q U Bsk to Bsk
             */
-            void fast_floor(const std::uint64_t *input,
-                std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fast_floor(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             /**
             Fast base converter from q to Bsk U {m_tilde}
             */
-            void fastbconv_mtilde(const std::uint64_t *input,
-                std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv_mtilde(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             /**
             Fast base converter from q to plain_modulus U {gamma}
             */
-            void fastbconv_plain_gamma(const std::uint64_t *input,
-                std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv_plain_gamma(
+                const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             void reset() noexcept;
 
@@ -123,8 +111,7 @@ namespace seal
                 return plain_gamma_array_;
             }
 
-            SEAL_NODISCARD inline auto get_coeff_products_array() const noexcept
-                -> const std::uint64_t *
+            SEAL_NODISCARD inline auto get_coeff_products_array() const noexcept -> const std::uint64_t *
             {
                 return coeff_products_array_.get();
             }
@@ -189,9 +176,9 @@ namespace seal
 
             BaseConverter(BaseConverter &&source) = delete;
 
-            BaseConverter &operator =(const BaseConverter &assign) = delete;
+            BaseConverter &operator=(const BaseConverter &assign) = delete;
 
-            BaseConverter &operator =(BaseConverter &&assign) = delete;
+            BaseConverter &operator=(BaseConverter &&assign) = delete;
 
             MemoryPoolHandle pool_;
 
@@ -287,5 +274,5 @@ namespace seal
 
             SmallModulus gamma_;
         };
-    }
-}
+    } // namespace util
+} // namespace seal

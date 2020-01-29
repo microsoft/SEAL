@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <cstddef>
-#include <vector>
-#include <numeric>
 #include "seal/smallmodulus.h"
 #include "seal/util/hestdparms.h"
+#include <cstddef>
+#include <numeric>
+#include <vector>
 
 namespace seal
 {
@@ -69,8 +69,7 @@ namespace seal
         @param[in] sec_level The desired standard security level
         */
         SEAL_NODISCARD static constexpr int MaxBitCount(
-            std::size_t poly_modulus_degree,
-            sec_level_type sec_level = sec_level_type::tc128) noexcept
+            std::size_t poly_modulus_degree, sec_level_type sec_level = sec_level_type::tc128) noexcept
         {
             switch (sec_level)
             {
@@ -109,8 +108,7 @@ namespace seal
         @throws std::invalid_argument if sec_level is sec_level_type::none
         */
         SEAL_NODISCARD static std::vector<SmallModulus> BFVDefault(
-            std::size_t poly_modulus_degree,
-            sec_level_type sec_level = sec_level_type::tc128);
+            std::size_t poly_modulus_degree, sec_level_type sec_level = sec_level_type::tc128);
 
         /**
         Returns a custom coefficient modulus suitable for use with the specified
@@ -129,8 +127,7 @@ namespace seal
         @throws std::logic_error if not enough suitable primes could be found
         */
         SEAL_NODISCARD static std::vector<SmallModulus> Create(
-            std::size_t poly_modulus_degree,
-            std::vector<int> bit_sizes);
+            std::size_t poly_modulus_degree, std::vector<int> bit_sizes);
     };
 
     /**
@@ -153,13 +150,10 @@ namespace seal
         @throws std::invalid_argument if bit_size is out of bounds
         @throws std::logic_error if a suitable prime could not be found
         */
-        SEAL_NODISCARD static inline SmallModulus Batching(
-            std::size_t poly_modulus_degree,
-            int bit_size)
+        SEAL_NODISCARD static inline SmallModulus Batching(std::size_t poly_modulus_degree, int bit_size)
         {
             return CoeffModulus::Create(poly_modulus_degree, { bit_size })[0];
         }
-
 
         /**
         Creates several prime number SmallModulus elements that can be used as
@@ -176,10 +170,9 @@ namespace seal
         @throws std::logic_error if not enough suitable primes could be found
         */
         SEAL_NODISCARD static inline std::vector<SmallModulus> Batching(
-            std::size_t poly_modulus_degree,
-            std::vector<int> bit_sizes)
+            std::size_t poly_modulus_degree, std::vector<int> bit_sizes)
         {
             return CoeffModulus::Create(poly_modulus_degree, bit_sizes);
         }
     };
-}
+} // namespace seal

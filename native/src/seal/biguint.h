@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include <iostream>
-#include <cstdint>
-#include <string>
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
+#include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
-#include "seal/util/common.h"
-#include "seal/util/uintcore.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
+#include "seal/util/uintcore.h"
 #include "seal/util/ztools.h"
+#include <cstdint>
+#include <iostream>
+#include <string>
 #ifdef SEAL_USE_MSGSL_SPAN
 #include <gsl/span>
 #endif
@@ -248,8 +248,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<std::uint64_t> data_span()
         {
-            return gsl::span<std::uint64_t>(value_.get(),
-                static_cast<std::ptrdiff_t>(uint64_count()));
+            return gsl::span<std::uint64_t>(value_.get(), static_cast<std::ptrdiff_t>(uint64_count()));
         }
 
         /**
@@ -261,8 +260,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<const std::uint64_t> data_span() const
         {
-            return gsl::span<const std::uint64_t>(value_.get(),
-                static_cast<std::ptrdiff_t>(uint64_count()));
+            return gsl::span<const std::uint64_t>(value_.get(), static_cast<std::ptrdiff_t>(uint64_count()));
         }
 #endif
         /**
@@ -271,8 +269,7 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t byte_count() const
         {
-            return static_cast<std::size_t>(
-                util::divide_round_up(bit_count_, util::bits_per_byte));
+            return static_cast<std::size_t>(util::divide_round_up(bit_count_, util::bits_per_byte));
         }
 
         /**
@@ -281,8 +278,7 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t uint64_count() const
         {
-            return static_cast<std::size_t>(
-                util::divide_round_up(bit_count_, util::bits_per_uint64));
+            return static_cast<std::size_t>(util::divide_round_up(bit_count_, util::bits_per_uint64));
         }
 
         /**
@@ -305,7 +301,7 @@ namespace seal
         {
             const double TwoToThe64 = 18446744073709551616.0;
             double result = 0;
-            for (std::size_t i = uint64_count(); i--; )
+            for (std::size_t i = uint64_count(); i--;)
             {
                 result *= TwoToThe64;
                 result += static_cast<double>(value_[i]);
@@ -342,8 +338,7 @@ namespace seal
         @param[in] index The index of the byte to read
         @throws std::out_of_range if index is not within [0, byte_count())
         */
-        SEAL_NODISCARD inline const SEAL_BYTE &operator [](
-            std::size_t index) const
+        SEAL_NODISCARD inline const SEAL_BYTE &operator[](std::size_t index) const
         {
             if (index >= byte_count())
             {
@@ -364,7 +359,7 @@ namespace seal
         @param[in] index The index of the byte to read
         @throws std::out_of_range if index is not within [0, byte_count())
         */
-        SEAL_NODISCARD inline SEAL_BYTE &operator [](std::size_t index)
+        SEAL_NODISCARD inline SEAL_BYTE &operator[](std::size_t index)
         {
             if (index >= byte_count())
             {
@@ -439,7 +434,7 @@ namespace seal
         */
         inline void alias(gsl::span<std::uint64_t> value)
         {
-            if(util::unsigned_gt(value.size(), std::numeric_limits<int>::max()))
+            if (util::unsigned_gt(value.size(), std::numeric_limits<int>::max()))
             {
                 throw std::invalid_argument("value has too large size");
             }
@@ -449,7 +444,8 @@ namespace seal
 
             // Update class.
             value_ = util::Pointer<std::uint64_t>::Aliasing(value.data());
-            bit_count_ = static_cast<int>(value.size());;
+            bit_count_ = static_cast<int>(value.size());
+            ;
         }
 #endif
         /**
@@ -479,7 +475,7 @@ namespace seal
         @throws std::logic_error if BigUInt is an alias and the assigned BigUInt is
         too large to fit the current bit width
         */
-        BigUInt &operator =(const BigUInt &assign);
+        BigUInt &operator=(const BigUInt &assign);
 
         /**
         Overwrites the BigUInt with the unsigned hexadecimal value specified by
@@ -494,7 +490,7 @@ namespace seal
         @throws std::logic_error if BigUInt is an alias and the assigned value
         is too large to fit the current bit width
         */
-        BigUInt &operator =(const std::string &hex_value);
+        BigUInt &operator=(const std::string &hex_value);
 
         /**
         Overwrites the BigUInt with the specified integer value, enlarging if
@@ -505,7 +501,7 @@ namespace seal
         count of value is too large to fit the
         current bit width
         */
-        inline BigUInt &operator =(std::uint64_t value)
+        inline BigUInt &operator=(std::uint64_t value)
         {
             int assign_bit_count = util::get_significant_bit_count(value);
             if (assign_bit_count > bit_count_)
@@ -523,7 +519,7 @@ namespace seal
         /**
         Returns a copy of the BigUInt value resized to the significant bit count.
         */
-        SEAL_NODISCARD inline BigUInt operator +() const
+        SEAL_NODISCARD inline BigUInt operator+() const
         {
             BigUInt result;
             result = *this;
@@ -533,7 +529,7 @@ namespace seal
         /**
         Returns a negated copy of the BigUInt value. The bit count does not change.
         */
-        SEAL_NODISCARD inline BigUInt operator -() const
+        SEAL_NODISCARD inline BigUInt operator-() const
         {
             BigUInt result(bit_count_);
             util::negate_uint(value_.get(), result.uint64_count(), result.data());
@@ -544,7 +540,7 @@ namespace seal
         /**
         Returns an inverted copy of the BigUInt value. The bit count does not change.
         */
-        SEAL_NODISCARD inline BigUInt operator ~() const
+        SEAL_NODISCARD inline BigUInt operator~() const
         {
             BigUInt result(bit_count_);
             util::not_uint(value_.get(), result.uint64_count(), result.data());
@@ -559,7 +555,7 @@ namespace seal
         @throws std::logic_error if BigUInt is an alias and a carry occurs requiring
         the BigUInt to be resized
         */
-        inline BigUInt &operator ++()
+        inline BigUInt &operator++()
         {
             if (util::increment_uint(value_.get(), uint64_count(), value_.get()))
             {
@@ -574,7 +570,7 @@ namespace seal
         Decrements the BigUInt and returns the decremented value. The bit count
         does not change.
         */
-        inline BigUInt &operator --()
+        inline BigUInt &operator--()
         {
             util::decrement_uint(value_.get(), uint64_count(), value_.get());
             util::filter_highbits_uint(value_.get(), uint64_count(), bit_count_);
@@ -593,7 +589,7 @@ namespace seal
         Increments the BigUInt but returns its old value. The BigUInt will increment
         the bit count if needed to fit the carry.
         */
-        inline BigUInt operator ++(int postfix SEAL_MAYBE_UNUSED)
+        inline BigUInt operator++(int postfix SEAL_MAYBE_UNUSED)
         {
             BigUInt result;
             result = *this;
@@ -609,7 +605,7 @@ namespace seal
         /**
         Decrements the BigUInt but returns its old value. The bit count does not change.
         */
-        inline BigUInt operator --(int postfix SEAL_MAYBE_UNUSED)
+        inline BigUInt operator--(int postfix SEAL_MAYBE_UNUSED)
         {
             BigUInt result;
             result = *this;
@@ -631,13 +627,13 @@ namespace seal
 
         @param[in] operand2 The second operand to add
         */
-        SEAL_NODISCARD inline BigUInt operator +(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator+(const BigUInt &operand2) const
         {
-            int result_bits = util::add_safe(std::max(significant_bit_count(),
-                operand2.significant_bit_count()), 1);
+            int result_bits = util::add_safe(std::max(significant_bit_count(), operand2.significant_bit_count()), 1);
             BigUInt result(result_bits);
-            util::add_uint_uint(value_.get(), uint64_count(), operand2.data(),
-                operand2.uint64_count(), false, result.uint64_count(), result.data());
+            util::add_uint_uint(
+                value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), false, result.uint64_count(),
+                result.data());
             return result;
         }
 
@@ -648,7 +644,7 @@ namespace seal
 
         @param[in] operand2 The second operand to add
         */
-        SEAL_NODISCARD inline BigUInt operator +(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator+(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -662,12 +658,13 @@ namespace seal
 
         @param[in] operand2 The second operand to subtract
         */
-        SEAL_NODISCARD inline BigUInt operator -(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator-(const BigUInt &operand2) const
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
-            util::sub_uint_uint(value_.get(), uint64_count(), operand2.data(),
-                operand2.uint64_count(), false, result.uint64_count(), result.data());
+            util::sub_uint_uint(
+                value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), false, result.uint64_count(),
+                result.data());
             util::filter_highbits_uint(result.data(), result.uint64_count(), result_bits);
             return result;
         }
@@ -679,7 +676,7 @@ namespace seal
 
         @param[in] operand2 The second operand to subtract
         */
-        SEAL_NODISCARD inline BigUInt operator -(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator-(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -693,13 +690,13 @@ namespace seal
 
         @param[in] operand2 The second operand to multiply
         */
-        SEAL_NODISCARD inline BigUInt operator *(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator*(const BigUInt &operand2) const
         {
-            int result_bits = util::add_safe(significant_bit_count(),
-                operand2.significant_bit_count());
+            int result_bits = util::add_safe(significant_bit_count(), operand2.significant_bit_count());
             BigUInt result(result_bits);
-            util::multiply_uint_uint(value_.get(), uint64_count(), operand2.data(),
-                operand2.uint64_count(), result.uint64_count(), result.data());
+            util::multiply_uint_uint(
+                value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), result.uint64_count(),
+                result.data());
             return result;
         }
 
@@ -710,7 +707,7 @@ namespace seal
 
         @param[in] operand2 The second operand to multiply
         */
-        SEAL_NODISCARD inline BigUInt operator *(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator*(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -725,7 +722,7 @@ namespace seal
         @param[in] operand2 The second operand to divide
         @throws std::invalid_argument if operand2 is zero
         */
-        SEAL_NODISCARD BigUInt operator /(const BigUInt &operand2) const;
+        SEAL_NODISCARD BigUInt operator/(const BigUInt &operand2) const;
 
         /**
         Divides a BigUInt and an unsigned integer and returns the quotient. The
@@ -735,7 +732,7 @@ namespace seal
         @param[in] operand2 The second operand to divide
         @throws std::invalid_argument if operand2 is zero
         */
-        SEAL_NODISCARD inline BigUInt operator /(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator/(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -749,7 +746,7 @@ namespace seal
 
         @param[in] operand2 The second operand to XOR
         */
-        SEAL_NODISCARD inline BigUInt operator ^(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator^(const BigUInt &operand2) const
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
@@ -757,19 +754,16 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::xor_uint_uint(
-                    result.data(), operand2.data(), uint64_count, result.data());
+                util::xor_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::xor_uint_uint(
-                    result.data(), value_.get(), uint64_count, result.data());
+                util::xor_uint_uint(result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::xor_uint_uint(
-                    value_.get(), operand2.data(), uint64_count, result.data());
+                util::xor_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -782,7 +776,7 @@ namespace seal
 
         @param[in] operand2 The second operand to XOR
         */
-        SEAL_NODISCARD inline BigUInt operator ^(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator^(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -796,7 +790,7 @@ namespace seal
 
         @param[in] operand2 The second operand to AND
         */
-        SEAL_NODISCARD inline BigUInt operator &(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator&(const BigUInt &operand2) const
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
@@ -804,19 +798,16 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::and_uint_uint(
-                    result.data(), operand2.data(), uint64_count, result.data());
+                util::and_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::and_uint_uint(
-                    result.data(), value_.get(), uint64_count, result.data());
+                util::and_uint_uint(result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::and_uint_uint(
-                    value_.get(), operand2.data(), uint64_count, result.data());
+                util::and_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -829,7 +820,7 @@ namespace seal
 
         @param[in] operand2 The second operand to AND
         */
-        SEAL_NODISCARD inline BigUInt operator &(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator&(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -843,7 +834,7 @@ namespace seal
 
         @param[in] operand2 The second operand to OR
         */
-        SEAL_NODISCARD inline BigUInt operator |(const BigUInt &operand2) const
+        SEAL_NODISCARD inline BigUInt operator|(const BigUInt &operand2) const
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
@@ -851,19 +842,16 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::or_uint_uint(
-                    result.data(), operand2.data(), uint64_count, result.data());
+                util::or_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::or_uint_uint(
-                    result.data(), value_.get(), uint64_count, result.data());
+                util::or_uint_uint(result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::or_uint_uint(
-                    value_.get(), operand2.data(), uint64_count, result.data());
+                util::or_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -876,7 +864,7 @@ namespace seal
 
         @param[in] operand2 The second operand to OR
         */
-        SEAL_NODISCARD inline BigUInt operator |(std::uint64_t operand2) const
+        SEAL_NODISCARD inline BigUInt operator|(std::uint64_t operand2) const
         {
             BigUInt operand2uint;
             operand2uint = operand2;
@@ -892,8 +880,7 @@ namespace seal
         */
         SEAL_NODISCARD inline int compareto(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(),
-                compare.value_.get(), compare.uint64_count());
+            return util::compare_uint_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count());
         }
 
         /**
@@ -916,10 +903,10 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator <(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator<(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(),
-                compare.value_.get(), compare.uint64_count()) < 0;
+            return util::compare_uint_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) <
+                   0;
         }
 
         /**
@@ -928,7 +915,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator <(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator<(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -941,10 +928,10 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator >(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator>(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(),
-                compare.value_.get(), compare.uint64_count()) > 0;
+            return util::compare_uint_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) >
+                   0;
         }
 
         /**
@@ -953,7 +940,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator >(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator>(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -966,10 +953,10 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator <=(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator<=(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(),
-                compare.value_.get(), compare.uint64_count()) <= 0;
+            return util::compare_uint_uint(
+                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) <= 0;
         }
 
         /**
@@ -978,7 +965,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator <=(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator<=(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -991,10 +978,10 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator >=(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator>=(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(),
-                compare.value_.get(), compare.uint64_count()) >= 0;
+            return util::compare_uint_uint(
+                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) >= 0;
         }
 
         /**
@@ -1003,7 +990,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator >=(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator>=(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -1016,10 +1003,10 @@ namespace seal
 
         @param[in] compare The value to compare against
         */
-        SEAL_NODISCARD inline bool operator ==(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator==(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(),
-                compare.value_.get(), compare.uint64_count()) == 0;
+            return util::compare_uint_uint(
+                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) == 0;
         }
 
         /**
@@ -1028,7 +1015,7 @@ namespace seal
 
         @param[in] compare The value to compare against
         */
-        SEAL_NODISCARD inline bool operator ==(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator==(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -1041,9 +1028,9 @@ namespace seal
 
         @param[in] compare The value to compare against
         */
-        SEAL_NODISCARD inline bool operator !=(const BigUInt &compare) const
+        SEAL_NODISCARD inline bool operator!=(const BigUInt &compare) const
         {
-            return !(operator ==(compare));
+            return !(operator==(compare));
         }
 
         /**
@@ -1052,7 +1039,7 @@ namespace seal
 
         @param[in] operand2 The value to compare against
         */
-        SEAL_NODISCARD inline bool operator !=(std::uint64_t compare) const
+        SEAL_NODISCARD inline bool operator!=(std::uint64_t compare) const
         {
             BigUInt compareuint;
             compareuint = compare;
@@ -1067,7 +1054,7 @@ namespace seal
         @param[in] shift The number of bits to shift by
         @throws std::invalid_argument if shift is negative
         */
-        SEAL_NODISCARD inline BigUInt operator <<(int shift) const
+        SEAL_NODISCARD inline BigUInt operator<<(int shift) const
         {
             if (shift < 0)
             {
@@ -1076,8 +1063,7 @@ namespace seal
             int result_bits = util::add_safe(significant_bit_count(), shift);
             BigUInt result(result_bits);
             result = *this;
-            util::left_shift_uint(
-                result.data(), shift, result.uint64_count(), result.data());
+            util::left_shift_uint(result.data(), shift, result.uint64_count(), result.data());
             return result;
         }
 
@@ -1089,7 +1075,7 @@ namespace seal
         @param[in] shift The number of bits to shift by
         @throws std::invalid_argument if shift is negative
         */
-        SEAL_NODISCARD inline BigUInt operator >>(int shift) const
+        SEAL_NODISCARD inline BigUInt operator>>(int shift) const
         {
             if (shift < 0)
             {
@@ -1103,8 +1089,7 @@ namespace seal
             }
             BigUInt result(result_bits);
             result = *this;
-            util::right_shift_uint(
-                result.data(), shift, result.uint64_count(), result.data());
+            util::right_shift_uint(result.data(), shift, result.uint64_count(), result.data());
             return result;
         }
 
@@ -1119,16 +1104,16 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator +=(const BigUInt &operand2)
+        inline BigUInt &operator+=(const BigUInt &operand2)
         {
-            int result_bits = util::add_safe(std::max(
-                significant_bit_count(), operand2.significant_bit_count()), 1);
+            int result_bits = util::add_safe(std::max(significant_bit_count(), operand2.significant_bit_count()), 1);
             if (bit_count_ < result_bits)
             {
                 resize(result_bits);
             }
-            util::add_uint_uint(value_.get(), uint64_count(), operand2.data(),
-                operand2.uint64_count(), false, uint64_count(), value_.get());
+            util::add_uint_uint(
+                value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), false, uint64_count(),
+                value_.get());
             return *this;
         }
 
@@ -1143,11 +1128,11 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator +=(std::uint64_t operand2)
+        inline BigUInt &operator+=(std::uint64_t operand2)
         {
             BigUInt operand2uint;
             operand2uint = operand2;
-            return operator +=(operand2uint);
+            return operator+=(operand2uint);
         }
 
         /**
@@ -1160,15 +1145,16 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator -=(const BigUInt &operand2)
+        inline BigUInt &operator-=(const BigUInt &operand2)
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             if (bit_count_ < result_bits)
             {
                 resize(result_bits);
             }
-            util::sub_uint_uint(value_.get(), uint64_count(), operand2.data(),
-                operand2.uint64_count(), false, uint64_count(), value_.get());
+            util::sub_uint_uint(
+                value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), false, uint64_count(),
+                value_.get());
             util::filter_highbits_uint(value_.get(), uint64_count(), result_bits);
             return *this;
         }
@@ -1184,11 +1170,11 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator -=(std::uint64_t operand2)
+        inline BigUInt &operator-=(std::uint64_t operand2)
         {
             BigUInt operand2uint;
             operand2uint = operand2;
-            return operator -=(operand2uint);
+            return operator-=(operand2uint);
         }
 
         /**
@@ -1202,7 +1188,7 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator *=(const BigUInt &operand2)
+        inline BigUInt &operator*=(const BigUInt &operand2)
         {
             *this = *this * operand2;
             return *this;
@@ -1219,11 +1205,11 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator *=(std::uint64_t operand2)
+        inline BigUInt &operator*=(std::uint64_t operand2)
         {
             BigUInt operand2uint;
             operand2uint = operand2;
-            return operator *=(operand2uint);
+            return operator*=(operand2uint);
         }
 
         /**
@@ -1234,7 +1220,7 @@ namespace seal
         @param[in] operand2 The second operand to divide
         @throws std::invalid_argument if operand2 is zero
         */
-        inline BigUInt &operator /=(const BigUInt &operand2)
+        inline BigUInt &operator/=(const BigUInt &operand2)
         {
             *this = *this / operand2;
             return *this;
@@ -1248,11 +1234,11 @@ namespace seal
         @param[in] operand2 The second operand to divide
         @throws std::invalid_argument if operand2 is zero
         */
-        inline BigUInt &operator /=(std::uint64_t operand2)
+        inline BigUInt &operator/=(std::uint64_t operand2)
         {
             BigUInt operand2uint;
             operand2uint = operand2;
-            return operator /=(operand2uint);
+            return operator/=(operand2uint);
         }
 
         /**
@@ -1266,15 +1252,14 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator ^=(const BigUInt &operand2)
+        inline BigUInt &operator^=(const BigUInt &operand2)
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             if (bit_count_ != result_bits)
             {
                 resize(result_bits);
             }
-            util::xor_uint_uint(
-                value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
+            util::xor_uint_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
             return *this;
         }
 
@@ -1289,11 +1274,11 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator ^=(std::uint64_t operand2)
+        inline BigUInt &operator^=(std::uint64_t operand2)
         {
             BigUInt operand2uint;
             operand2uint = operand2;
-            return operator ^=(operand2uint);
+            return operator^=(operand2uint);
         }
 
         /**
@@ -1307,15 +1292,14 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator &=(const BigUInt &operand2)
+        inline BigUInt &operator&=(const BigUInt &operand2)
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             if (bit_count_ != result_bits)
             {
                 resize(result_bits);
             }
-            util::and_uint_uint(
-                value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
+            util::and_uint_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
             return *this;
         }
 
@@ -1330,11 +1314,11 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator &=(std::uint64_t operand2)
+        inline BigUInt &operator&=(std::uint64_t operand2)
         {
             BigUInt operand2uint;
             operand2uint = operand2;
-            return operator &=(operand2uint);
+            return operator&=(operand2uint);
         }
 
         /**
@@ -1348,15 +1332,14 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator |=(const BigUInt &operand2)
+        inline BigUInt &operator|=(const BigUInt &operand2)
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             if (bit_count_ != result_bits)
             {
                 resize(result_bits);
             }
-            util::or_uint_uint(value_.get(), operand2.data(),
-                operand2.uint64_count(), value_.get());
+            util::or_uint_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
             return *this;
         }
 
@@ -1371,11 +1354,11 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator |=(std::uint64_t operand2)
+        inline BigUInt &operator|=(std::uint64_t operand2)
         {
             BigUInt operand2uint;
             operand2uint = operand2;
-            return operator |=(operand2uint);
+            return operator|=(operand2uint);
         }
 
         /**
@@ -1388,7 +1371,7 @@ namespace seal
         @throws std::logic_error if the BigUInt is an alias and the operator
         attempts to enlarge the BigUInt to fit the result
         */
-        inline BigUInt &operator <<=(int shift)
+        inline BigUInt &operator<<=(int shift)
         {
             if (shift < 0)
             {
@@ -1410,7 +1393,7 @@ namespace seal
         @param[in] shift The number of bits to shift by
         @throws std::invalid_argument if shift is negative
         */
-        inline BigUInt &operator >>=(int shift)
+        inline BigUInt &operator>>=(int shift)
         {
             if (shift < 0)
             {
@@ -1487,8 +1470,7 @@ namespace seal
             }
             BigUInt result(result_bits);
             result = *this;
-            if (!util::try_invert_uint_mod(result.data(), modulus.data(),
-                result.uint64_count(), result.data(), pool_))
+            if (!util::try_invert_uint_mod(result.data(), modulus.data(), result.uint64_count(), result.data(), pool_))
             {
                 throw std::invalid_argument("BigUInt and modulus are not co-prime");
             }
@@ -1549,8 +1531,8 @@ namespace seal
                 inverse.resize(result_bits);
             }
             inverse = *this;
-            return util::try_invert_uint_mod(inverse.data(), modulus.data(),
-                inverse.uint64_count(), inverse.data(), pool_);
+            return util::try_invert_uint_mod(
+                inverse.data(), modulus.data(), inverse.uint64_count(), inverse.data(), pool_);
         }
 
         /**
@@ -1590,13 +1572,10 @@ namespace seal
             std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
                     util::mul_safe(uint64_count(), sizeof(std::uint64_t)), // value_
-                    sizeof(std::int32_t)), // bit_count_
+                    sizeof(std::int32_t)),                                 // bit_count_
                 compr_mode);
 
-            return util::safe_cast<std::streamoff>(util::add_safe(
-                sizeof(Serialization::SEALHeader),
-                members_size
-            ));
+            return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
         }
 
         /**
@@ -1611,14 +1590,12 @@ namespace seal
         compression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff save(std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+        inline std::streamoff save(
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&BigUInt::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                stream, compr_mode);
+                std::bind(&BigUInt::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -1632,9 +1609,7 @@ namespace seal
         inline std::streamoff load(std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&BigUInt::load_members, this, _1),
-                stream);
+            return Serialization::Load(std::bind(&BigUInt::load_members, this, _1), stream);
         }
 
         /**
@@ -1652,15 +1627,11 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&BigUInt::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                out, size, compr_mode);
+                std::bind(&BigUInt::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode);
         }
 
         /**
@@ -1677,9 +1648,7 @@ namespace seal
         inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&BigUInt::load_members, this, _1),
-                in, size);
+            return Serialization::Load(std::bind(&BigUInt::load_members, this, _1), in, size);
         }
 
         /**
@@ -1754,4 +1723,4 @@ namespace seal
         */
         int bit_count_ = 0;
     };
-}
+} // namespace seal

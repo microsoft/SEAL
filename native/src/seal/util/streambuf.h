@@ -3,16 +3,16 @@
 
 #pragma once
 
-#include <cstddef>
-#include <stdexcept>
-#include <ios>
-#include <streambuf>
-#include <algorithm>
-#include <iterator>
-#include "seal/util/defines.h"
-#include "seal/util/common.h"
 #include "seal/intarray.h"
 #include "seal/memorymanager.h"
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
+#include <algorithm>
+#include <cstddef>
+#include <ios>
+#include <iterator>
+#include <stdexcept>
+#include <streambuf>
 
 namespace seal
 {
@@ -36,16 +36,16 @@ namespace seal
 
             SafeByteBuffer(const SafeByteBuffer &copy) = delete;
 
-            SafeByteBuffer &operator =(const SafeByteBuffer &assign) = delete;
+            SafeByteBuffer &operator=(const SafeByteBuffer &assign) = delete;
 
             SEAL_NODISCARD const SEAL_BYTE *data() const noexcept
             {
-                return reinterpret_cast<const SEAL_BYTE*>(buf_.cbegin());
+                return reinterpret_cast<const SEAL_BYTE *>(buf_.cbegin());
             }
 
             SEAL_NODISCARD SEAL_BYTE *data() noexcept
             {
-                return reinterpret_cast<SEAL_BYTE*>(buf_.begin());
+                return reinterpret_cast<SEAL_BYTE *>(buf_.begin());
             }
 
         private:
@@ -80,17 +80,15 @@ namespace seal
 
             std::streamsize xsgetn(char_type *s, std::streamsize count) override
             {
-                std::streamsize avail =
-                    std::max(std::streamsize(0), std::min(
-                        count, safe_cast<std::streamsize>(std::distance(gptr(), egptr()))));
+                std::streamsize avail = std::max(
+                    std::streamsize(0), std::min(count, safe_cast<std::streamsize>(std::distance(gptr(), egptr()))));
                 std::copy_n(gptr(), avail, s);
                 gbump(safe_cast<int>(avail));
                 return avail;
             }
 
             pos_type seekpos(
-                pos_type pos,
-                std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override
+                pos_type pos, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override
             {
                 if (pos < 0 || pos > size_)
                 {
@@ -109,14 +107,12 @@ namespace seal
             }
 
             pos_type seekoff(
-                off_type off,
-                std::ios_base::seekdir dir,
+                off_type off, std::ios_base::seekdir dir,
                 std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override
             {
                 // Cannot seek relative to current position for both input and
                 // output heads if they are in different positions.
-                if (which == (std::ios_base::in | std::ios_base::out) &&
-                    dir == std::ios_base::cur && gptr() != pptr())
+                if (which == (std::ios_base::in | std::ios_base::out) && dir == std::ios_base::cur && gptr() != pptr())
                 {
                     return pos_type(off_type(-1));
                 }
@@ -131,13 +127,11 @@ namespace seal
                 case std::ios_base::cur:
                     if (which == std::ios_base::in)
                     {
-                        newoff = add_safe(newoff,
-                            safe_cast<std::streamoff>(std::distance(eback(), gptr())));
+                        newoff = add_safe(newoff, safe_cast<std::streamoff>(std::distance(eback(), gptr())));
                     }
                     else
                     {
-                        newoff = add_safe(newoff,
-                            safe_cast<std::streamoff>(std::distance(pbase(), pptr())));
+                        newoff = add_safe(newoff, safe_cast<std::streamoff>(std::distance(pbase(), pptr())));
                     }
                     break;
 
@@ -154,16 +148,14 @@ namespace seal
             void expand_size()
             {
                 // Compute expanded size
-                size_ = safe_cast<std::streamsize>(
-                    ceil(safe_cast<double>(buf_.size()) * expansion_factor_));
+                size_ = safe_cast<std::streamsize>(ceil(safe_cast<double>(buf_.size()) * expansion_factor_));
 
                 // Store the old offsets for both put and get heads
                 std::streamsize old_poff = std::distance(pbase(), pptr());
                 std::streamsize old_goff = std::distance(eback(), gptr());
 
                 // Copy entire buffer to new location and reserve extra byte
-                buf_.resize(safe_cast<std::size_t>(
-                    add_safe<std::streamsize>(size_, std::streamsize(1))));
+                buf_.resize(safe_cast<std::size_t>(add_safe<std::streamsize>(size_, std::streamsize(1))));
 
                 // Set the get and put pointers appropriately
                 setp(buf_.begin(), buf_.begin() + size_);
@@ -173,8 +165,8 @@ namespace seal
 
             int_type overflow(int_type ch = traits_type::eof()) override
             {
-                if (traits_type::eq_int_type(eof_, ch) || !fits_in<int>(
-                    ceil(static_cast<double>(buf_.size()) * expansion_factor_) + 1))
+                if (traits_type::eq_int_type(eof_, ch) ||
+                    !fits_in<int>(ceil(static_cast<double>(buf_.size()) * expansion_factor_) + 1))
                 {
                     return eof_;
                 }
@@ -198,8 +190,9 @@ namespace seal
                     {
                         expand_size();
                     }
-                    std::streamsize avail = std::max(std::streamsize(0), std::min(
-                        remaining, safe_cast<std::streamsize>(std::distance(pptr(), epptr()))));
+                    std::streamsize avail = std::max(
+                        std::streamsize(0),
+                        std::min(remaining, safe_cast<std::streamsize>(std::distance(pptr(), epptr()))));
                     std::copy_n(s, avail, pptr());
                     pbump(safe_cast<int>(avail));
                     remaining -= avail;
@@ -220,9 +213,7 @@ namespace seal
         class ArrayGetBuffer final : public std::streambuf
         {
         public:
-            ArrayGetBuffer(const char_type *buf, std::streamsize size) :
-                buf_(buf),
-                size_(size)
+            ArrayGetBuffer(const char_type *buf, std::streamsize size) : buf_(buf), size_(size)
             {
                 if (!buf)
                 {
@@ -241,7 +232,7 @@ namespace seal
 
             ArrayGetBuffer(const ArrayGetBuffer &copy) = delete;
 
-            ArrayGetBuffer &operator =(const ArrayGetBuffer &assign) = delete;
+            ArrayGetBuffer &operator=(const ArrayGetBuffer &assign) = delete;
 
         private:
             int_type underflow() override
@@ -283,16 +274,14 @@ namespace seal
 
             std::streamsize xsgetn(char_type *s, std::streamsize count) override
             {
-                std::streamsize avail = std::max(std::streamsize(0), std::min(
-                    count, safe_cast<std::streamsize>(std::distance(head_, end_))));
+                std::streamsize avail = std::max(
+                    std::streamsize(0), std::min(count, safe_cast<std::streamsize>(std::distance(head_, end_))));
                 std::copy_n(head_, avail, s);
                 std::advance(head_, avail);
                 return avail;
             }
 
-            pos_type seekpos(
-                pos_type pos,
-                std::ios_base::openmode which = std::ios_base::in) override
+            pos_type seekpos(pos_type pos, std::ios_base::openmode which = std::ios_base::in) override
             {
                 if (which != std::ios_base::in)
                 {
@@ -308,9 +297,7 @@ namespace seal
             }
 
             pos_type seekoff(
-                off_type off,
-                std::ios_base::seekdir dir,
-                std::ios_base::openmode which = std::ios_base::in) override
+                off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which = std::ios_base::in) override
             {
                 off_type newoff = off;
                 switch (dir)
@@ -319,8 +306,7 @@ namespace seal
                     break;
 
                 case std::ios_base::cur:
-                    newoff = add_safe(newoff,
-                        safe_cast<off_type>(std::distance(begin_, head_)));
+                    newoff = add_safe(newoff, safe_cast<off_type>(std::distance(begin_, head_)));
                     break;
 
                 case std::ios_base::end:
@@ -351,9 +337,7 @@ namespace seal
         class ArrayPutBuffer final : public std::streambuf
         {
         public:
-            ArrayPutBuffer(char_type *buf, std::streamsize size) :
-                buf_(buf),
-                size_(size)
+            ArrayPutBuffer(char_type *buf, std::streamsize size) : buf_(buf), size_(size)
             {
                 if (!buf)
                 {
@@ -372,7 +356,7 @@ namespace seal
 
             ArrayPutBuffer(const ArrayPutBuffer &copy) = delete;
 
-            ArrayPutBuffer &operator =(const ArrayPutBuffer &assign) = delete;
+            ArrayPutBuffer &operator=(const ArrayPutBuffer &assign) = delete;
 
         private:
             int_type overflow(int_type ch = traits_type::eof()) override
@@ -387,17 +371,14 @@ namespace seal
 
             std::streamsize xsputn(const char_type *s, std::streamsize count) override
             {
-                std::streamsize avail =
-                    std::max(std::streamsize(0), std::min(
-                        count, safe_cast<std::streamsize>(std::distance(head_, end_))));
+                std::streamsize avail = std::max(
+                    std::streamsize(0), std::min(count, safe_cast<std::streamsize>(std::distance(head_, end_))));
                 std::copy_n(s, avail, head_);
                 std::advance(head_, avail);
                 return avail;
             }
 
-            pos_type seekpos(
-                pos_type pos,
-                std::ios_base::openmode which = std::ios_base::out) override
+            pos_type seekpos(pos_type pos, std::ios_base::openmode which = std::ios_base::out) override
             {
                 if (which != std::ios_base::out)
                 {
@@ -413,9 +394,7 @@ namespace seal
             }
 
             pos_type seekoff(
-                off_type off,
-                std::ios_base::seekdir dir,
-                std::ios_base::openmode which = std::ios_base::out) override
+                off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which = std::ios_base::out) override
             {
                 off_type newoff = off;
                 switch (dir)
@@ -424,8 +403,7 @@ namespace seal
                     break;
 
                 case std::ios_base::cur:
-                    newoff = add_safe(newoff,
-                        safe_cast<off_type>(std::distance(begin_, head_)));
+                    newoff = add_safe(newoff, safe_cast<off_type>(std::distance(begin_, head_)));
                     break;
 
                 case std::ios_base::end:
@@ -452,5 +430,5 @@ namespace seal
 
             iterator_type head_;
         };
-    }
-}
+    } // namespace util
+} // namespace seal

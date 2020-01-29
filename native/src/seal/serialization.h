@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <iostream>
+#include "seal/util/defines.h"
 #include <cstdint>
 #include <functional>
-#include "seal/util/defines.h"
+#include <iostream>
 
 namespace seal
 {
@@ -77,15 +77,14 @@ namespace seal
 
         @param[in] compr_mode The compression mode to validate
         */
-        SEAL_NODISCARD static bool IsSupportedComprMode(
-            std::uint8_t compr_mode) noexcept
+        SEAL_NODISCARD static bool IsSupportedComprMode(std::uint8_t compr_mode) noexcept
         {
             switch (compr_mode)
             {
-            case static_cast<std::uint8_t>(compr_mode_type::none) :
+            case static_cast<std::uint8_t>(compr_mode_type::none):
                 /* fall through */
 #ifdef SEAL_USE_ZLIB
-            case static_cast<std::uint8_t>(compr_mode_type::deflate) :
+            case static_cast<std::uint8_t>(compr_mode_type::deflate):
 #endif
                 return true;
             }
@@ -97,8 +96,7 @@ namespace seal
 
         @param[in] compr_mode The compression mode to validate
         */
-        SEAL_NODISCARD static inline bool IsSupportedComprMode(
-            compr_mode_type compr_mode) noexcept
+        SEAL_NODISCARD static inline bool IsSupportedComprMode(compr_mode_type compr_mode) noexcept
         {
             return IsSupportedComprMode(static_cast<uint8_t>(compr_mode));
         }
@@ -112,16 +110,14 @@ namespace seal
         @param[in] in_size The compression mode
         @throws std::invalid_argument if the compression mode is not supported
         */
-        SEAL_NODISCARD static std::size_t ComprSizeEstimate(
-            std::size_t in_size, compr_mode_type compr_mode);
+        SEAL_NODISCARD static std::size_t ComprSizeEstimate(std::size_t in_size, compr_mode_type compr_mode);
 
         /**
         Returns true if the given SEALHeader is valid.
 
         @param[in] header The SEALHeader
         */
-        SEAL_NODISCARD static bool IsValidHeader(
-            const SEALHeader &header) noexcept
+        SEAL_NODISCARD static bool IsValidHeader(const SEALHeader &header) noexcept
         {
             if (header.magic != seal_magic)
             {
@@ -182,9 +178,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members,
-            std::streamoff raw_size,
-            std::ostream &stream,
+            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, std::ostream &stream,
             compr_mode_type compr_mode);
 
         /**
@@ -202,9 +196,7 @@ namespace seal
         failed
         @throws std::runtime_error if I/O operations failed
         */
-        static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members,
-            std::istream &stream);
+        static std::streamoff Load(std::function<void(std::istream &stream)> load_members, std::istream &stream);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -231,11 +223,8 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members,
-            std::streamoff raw_size,
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode);
+            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, SEAL_BYTE *out,
+            std::size_t size, compr_mode_type compr_mode);
 
         /**
         Deserializes data from a memory location that was serialized by Save.
@@ -255,11 +244,9 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members,
-            const SEAL_BYTE *in,
-            std::size_t size);
+            std::function<void(std::istream &stream)> load_members, const SEAL_BYTE *in, std::size_t size);
 
     private:
         Serialization() = delete;
     };
-}
+} // namespace seal

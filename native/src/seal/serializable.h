@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <ios>
-#include <iostream>
-#include <cstdint>
-#include <functional>
 #include "seal/serialization.h"
 #include "seal/util/defines.h"
 #include "seal/util/streambuf.h"
+#include <cstdint>
+#include <functional>
+#include <ios>
+#include <iostream>
 
 namespace seal
 {
@@ -58,7 +58,7 @@ namespace seal
                   | GaloisKeys |         Size 2 MB (example)
                   +------------+
     */
-    template<class T>
+    template <class T>
     class Serializable
     {
         friend class KeyGenerator;
@@ -84,14 +84,14 @@ namespace seal
 
         @param[in] assign The serializable object to move from
         */
-        Serializable &operator =(Serializable<T> &&assign) = default;
+        Serializable &operator=(Serializable<T> &&assign) = default;
 
         /**
         Copies a given serializable object to the current one.
 
         @param[in] copy The serializable object to copy from
         */
-        Serializable &operator =(const Serializable<T> &copy) = default;
+        Serializable &operator=(const Serializable<T> &copy) = default;
 
         /**
         Returns an upper bound on the size of the serializable object, as if it
@@ -120,8 +120,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return obj_.save(stream, compr_mode);
         }
@@ -140,18 +139,15 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return obj_.save(out, size, compr_mode);
         }
 
     private:
         Serializable(T &&obj) : obj_(obj)
-        {
-        }
+        {}
 
         T obj_;
     };
-}
+} // namespace seal

@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <functional>
-#include <memory>
 #include "seal/encryptionparams.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
-#include "seal/util/smallntt.h"
 #include "seal/util/baseconverter.h"
 #include "seal/util/pointer.h"
+#include "seal/util/smallntt.h"
+#include <functional>
+#include <memory>
+#include <unordered_map>
 
 namespace seal
 {
@@ -94,16 +94,10 @@ namespace seal
         sec_level_type sec_level;
 
     private:
-        EncryptionParameterQualifiers() :
-            parameters_set(false),
-            using_fft(false),
-            using_ntt(false),
-            using_batching(false),
-            using_fast_plain_lift(false),
-            using_descending_modulus_chain(false),
-            sec_level(sec_level_type::none)
-        {
-        }
+        EncryptionParameterQualifiers()
+            : parameters_set(false), using_fft(false), using_ntt(false), using_batching(false),
+              using_fast_plain_lift(false), using_descending_modulus_chain(false), sec_level(sec_level_type::none)
+        {}
 
         friend class SEALContext;
     };
@@ -164,7 +158,7 @@ namespace seal
 
             ContextData(ContextData &&move) = default;
 
-            ContextData &operator =(ContextData &&move) = default;
+            ContextData &operator=(ContextData &&move) = default;
 
             /**
             Returns a const reference to the underlying encryption parameters.
@@ -198,8 +192,7 @@ namespace seal
             modulus. The security of the encryption parameters largely depends on the
             bit-length of this product, and on the degree of the polynomial modulus.
             */
-            SEAL_NODISCARD inline auto total_coeff_modulus() const noexcept
-                -> const std::uint64_t*
+            SEAL_NODISCARD inline auto total_coeff_modulus() const noexcept -> const std::uint64_t *
             {
                 return total_coeff_modulus_.get();
             }
@@ -240,8 +233,7 @@ namespace seal
             Return a pointer to BFV "Delta", i.e. coefficient modulus divided by
             plaintext modulus.
             */
-            SEAL_NODISCARD inline auto coeff_div_plain_modulus() const noexcept
-                -> const std::uint64_t*
+            SEAL_NODISCARD inline auto coeff_div_plain_modulus() const noexcept -> const std::uint64_t *
             {
                 return coeff_div_plain_modulus_.get();
             }
@@ -250,8 +242,7 @@ namespace seal
             Return the threshold for the upper half of integers modulo plain_modulus.
             This is simply (plain_modulus + 1) / 2.
             */
-            SEAL_NODISCARD inline auto plain_upper_half_threshold() const noexcept
-                -> std::uint64_t
+            SEAL_NODISCARD inline auto plain_upper_half_threshold() const noexcept -> std::uint64_t
             {
                 return plain_upper_half_threshold_;
             }
@@ -262,8 +253,7 @@ namespace seal
             for the full product coeff_modulus if using_fast_plain_lift is false and is
             otherwise represented modulo each of the coeff_modulus primes in order.
             */
-            SEAL_NODISCARD inline auto plain_upper_half_increment() const noexcept
-                -> const std::uint64_t*
+            SEAL_NODISCARD inline auto plain_upper_half_increment() const noexcept -> const std::uint64_t *
             {
                 return plain_upper_half_increment_.get();
             }
@@ -272,8 +262,7 @@ namespace seal
             Return a pointer to the upper half threshold with respect to the total
             coefficient modulus. This is needed in CKKS decryption.
             */
-            SEAL_NODISCARD inline auto upper_half_threshold() const noexcept
-                -> const std::uint64_t*
+            SEAL_NODISCARD inline auto upper_half_threshold() const noexcept -> const std::uint64_t *
             {
                 return upper_half_threshold_.get();
             }
@@ -289,8 +278,7 @@ namespace seal
             this operation is only done for negative message coefficients, i.e. those
             that exceed plain_upper_half_threshold.
             */
-            SEAL_NODISCARD inline auto upper_half_increment() const noexcept
-                -> const std::uint64_t*
+            SEAL_NODISCARD inline auto upper_half_increment() const noexcept -> const std::uint64_t *
             {
                 return upper_half_increment_.get();
             }
@@ -298,8 +286,7 @@ namespace seal
             /**
             Return the non-RNS form of upppoer_half_increment which is q mod t.
             */
-            SEAL_NODISCARD inline auto coeff_mod_plain_modulus() const noexcept
-                -> std::uint64_t
+            SEAL_NODISCARD inline auto coeff_mod_plain_modulus() const noexcept -> std::uint64_t
             {
                 return coeff_mod_plain_modulus_;
             }
@@ -334,8 +321,7 @@ namespace seal
             }
 
         private:
-            ContextData(EncryptionParameters parms, MemoryPoolHandle pool) :
-                pool_(std::move(pool)), parms_(parms)
+            ContextData(EncryptionParameters parms, MemoryPoolHandle pool) : pool_(std::move(pool)), parms_(parms)
             {
                 if (!pool_)
                 {
@@ -391,17 +377,11 @@ namespace seal
         enforced according to HomomorphicEncryption.org security standard
         */
         SEAL_NODISCARD static auto Create(
-            const EncryptionParameters &parms,
-            bool expand_mod_chain = true,
+            const EncryptionParameters &parms, bool expand_mod_chain = true,
             sec_level_type sec_level = sec_level_type::tc128)
         {
             return std::shared_ptr<SEALContext>(
-                new SEALContext(
-                    parms,
-                    expand_mod_chain,
-                    sec_level,
-                    MemoryManager::GetPool())
-                );
+                new SEALContext(parms, expand_mod_chain, sec_level, MemoryManager::GetPool()));
         }
 
         /**
@@ -411,12 +391,10 @@ namespace seal
 
         @param[in] parms_id The parms_id of the encryption parameters
         */
-        SEAL_NODISCARD inline auto get_context_data(
-            parms_id_type parms_id) const
+        SEAL_NODISCARD inline auto get_context_data(parms_id_type parms_id) const
         {
             auto data = context_data_map_.find(parms_id);
-            return (data != context_data_map_.end()) ?
-                data->second : std::shared_ptr<ContextData>{ nullptr };
+            return (data != context_data_map_.end()) ? data->second : std::shared_ptr<ContextData>{ nullptr };
         }
 
         /**
@@ -426,8 +404,7 @@ namespace seal
         SEAL_NODISCARD inline auto key_context_data() const
         {
             auto data = context_data_map_.find(key_parms_id_);
-            return (data != context_data_map_.end()) ?
-                data->second : std::shared_ptr<ContextData>{ nullptr };
+            return (data != context_data_map_.end()) ? data->second : std::shared_ptr<ContextData>{ nullptr };
         }
 
         /**
@@ -437,8 +414,7 @@ namespace seal
         SEAL_NODISCARD inline auto first_context_data() const
         {
             auto data = context_data_map_.find(first_parms_id_);
-            return (data != context_data_map_.end()) ?
-                data->second : std::shared_ptr<ContextData>{ nullptr };
+            return (data != context_data_map_.end()) ? data->second : std::shared_ptr<ContextData>{ nullptr };
         }
 
         /**
@@ -448,8 +424,7 @@ namespace seal
         SEAL_NODISCARD inline auto last_context_data() const
         {
             auto data = context_data_map_.find(last_parms_id_);
-            return (data != context_data_map_.end()) ?
-                data->second : std::shared_ptr<ContextData>{ nullptr };
+            return (data != context_data_map_.end()) ? data->second : std::shared_ptr<ContextData>{ nullptr };
         }
 
         /**
@@ -457,8 +432,7 @@ namespace seal
         */
         SEAL_NODISCARD inline auto parameters_set() const
         {
-            return first_context_data() ?
-                first_context_data()->qualifiers_.parameters_set : false;
+            return first_context_data() ? first_context_data()->qualifiers_.parameters_set : false;
         }
 
         /**
@@ -505,9 +479,9 @@ namespace seal
 
         SEALContext(SEALContext &&source) = delete;
 
-        SEALContext &operator =(const SEALContext &assign) = delete;
+        SEALContext &operator=(const SEALContext &assign) = delete;
 
-        SEALContext &operator =(SEALContext &&assign) = delete;
+        SEALContext &operator=(SEALContext &&assign) = delete;
 
         /**
         Creates an instance of SEALContext, and performs several pre-computations
@@ -521,8 +495,7 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        SEALContext(EncryptionParameters parms, bool expand_mod_chain,
-            sec_level_type sec_level, MemoryPoolHandle pool);
+        SEALContext(EncryptionParameters parms, bool expand_mod_chain, sec_level_type sec_level, MemoryPoolHandle pool);
 
         ContextData validate(EncryptionParameters parms);
 
@@ -542,8 +515,7 @@ namespace seal
 
         parms_id_type last_parms_id_;
 
-        std::unordered_map<
-            parms_id_type, std::shared_ptr<const ContextData>> context_data_map_{};
+        std::unordered_map<parms_id_type, std::shared_ptr<const ContextData>> context_data_map_{};
 
         /**
         Is HomomorphicEncryption.org security standard enforced?
@@ -555,4 +527,4 @@ namespace seal
         */
         bool using_keyswitching_;
     };
-}
+} // namespace seal

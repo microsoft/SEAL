@@ -3,36 +3,37 @@
 
 #pragma once
 
+#include "seal/context.h"
+#include "seal/plaintext.h"
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
+#include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
+#include <cmath>
 #include <complex>
+#include <limits>
 #include <memory>
 #include <type_traits>
-#include <cmath>
 #include <vector>
-#include <limits>
-#include "seal/plaintext.h"
-#include "seal/context.h"
-#include "seal/util/defines.h"
-#include "seal/util/common.h"
-#include "seal/util/uintcore.h"
-#include "seal/util/uintarithsmallmod.h"
 #ifdef SEAL_USE_MSGSL_SPAN
 #include <gsl/span>
 #endif
 
 namespace seal
 {
-    template<typename T_out, typename = std::enable_if_t<
-        std::is_same<std::remove_cv_t<T_out>, double>::value ||
-        std::is_same<std::remove_cv_t<T_out>, std::complex<double>>::value>>
+    template <
+        typename T_out, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T_out>, double>::value ||
+                            std::is_same<std::remove_cv_t<T_out>, std::complex<double>>::value>>
     SEAL_NODISCARD inline T_out from_complex(std::complex<double> in);
 
-    template<>
+    template <>
     SEAL_NODISCARD inline double from_complex(std::complex<double> in)
     {
         return in.real();
     }
 
-    template<>
+    template <>
     SEAL_NODISCARD inline std::complex<double> from_complex(std::complex<double> in)
     {
         return in;
@@ -96,15 +97,15 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T, typename = std::enable_if_t<
-            std::is_same<std::remove_cv_t<T>, double>::value ||
-            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        inline void encode(const std::vector<T> &values,
-            parms_id_type parms_id, double scale, Plaintext &destination,
+        template <
+            typename T, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T>, double>::value ||
+                            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void encode(
+            const std::vector<T> &values, parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode_internal(values.data(), values.size(), parms_id, scale,
-                destination, std::move(pool));
+            encode_internal(values.data(), values.size(), parms_id, scale, destination, std::move(pool));
         }
 
         /**
@@ -127,15 +128,15 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T, typename = std::enable_if_t<
-            std::is_same<std::remove_cv_t<T>, double>::value ||
-            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        inline void encode(const std::vector<T> &values,
-            double scale, Plaintext &destination,
+        template <
+            typename T, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T>, double>::value ||
+                            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void encode(
+            const std::vector<T> &values, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(values, context_->first_parms_id(), scale,
-                destination, std::move(pool));
+            encode(values, context_->first_parms_id(), scale, destination, std::move(pool));
         }
 #ifdef SEAL_USE_MSGSL_SPAN
         /**
@@ -161,17 +162,16 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T, typename = std::enable_if_t<
-            std::is_same<std::remove_cv_t<T>, double>::value ||
-            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        inline void encode(gsl::span<const T> values,
-            parms_id_type parms_id, double scale, Plaintext &destination,
+        template <
+            typename T, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T>, double>::value ||
+                            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void encode(
+            gsl::span<const T> values, parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
             encode_internal(
-                values.data(),
-                static_cast<std::size_t>(values.size()),
-                parms_id, scale, destination, std::move(pool));
+                values.data(), static_cast<std::size_t>(values.size()), parms_id, scale, destination, std::move(pool));
         }
 
         /**
@@ -194,14 +194,15 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T, typename = std::enable_if_t<
-            std::is_same<std::remove_cv_t<T>, double>::value ||
-            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        inline void encode(gsl::span<const T> values, double scale,
-            Plaintext &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
+        template <
+            typename T, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T>, double>::value ||
+                            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void encode(
+            gsl::span<const T> values, double scale, Plaintext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(values, context_->first_parms_id(), scale,
-                destination, std::move(pool));
+            encode(values, context_->first_parms_id(), scale, destination, std::move(pool));
         }
 #endif
         /**
@@ -224,8 +225,8 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encode(double value, parms_id_type parms_id,
-            double scale, Plaintext &destination,
+        inline void encode(
+            double value, parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
             encode_internal(value, parms_id, scale, destination, std::move(pool));
@@ -248,12 +249,10 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encode(double value,
-            double scale, Plaintext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+        inline void encode(
+            double value, double scale, Plaintext &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->first_parms_id(), scale,
-                destination, std::move(pool));
+            encode(value, context_->first_parms_id(), scale, destination, std::move(pool));
         }
 
         /**
@@ -275,8 +274,8 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encode(std::complex<double> value,
-            parms_id_type parms_id, double scale, Plaintext &destination,
+        inline void encode(
+            std::complex<double> value, parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
             encode_internal(value, parms_id, scale, destination, std::move(pool));
@@ -299,12 +298,11 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encode(std::complex<double> value,
-            double scale, Plaintext &destination,
+        inline void encode(
+            std::complex<double> value, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->first_parms_id(), scale,
-                destination, std::move(pool));
+            encode(value, context_->first_parms_id(), scale, destination, std::move(pool));
         }
 
         /**
@@ -318,8 +316,7 @@ namespace seal
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         */
-        inline void encode(std::int64_t value,
-            parms_id_type parms_id, Plaintext &destination)
+        inline void encode(std::int64_t value, parms_id_type parms_id, Plaintext &destination)
         {
             encode_internal(value, parms_id, destination);
         }
@@ -352,11 +349,12 @@ namespace seal
         for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T, typename = std::enable_if_t<
-            std::is_same<std::remove_cv_t<T>, double>::value ||
-            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        inline void decode(const Plaintext &plain, std::vector<T> &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+        template <
+            typename T, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T>, double>::value ||
+                            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void decode(
+            const Plaintext &plain, std::vector<T> &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
             destination.resize(slots_);
             decode_internal(plain, destination.data(), std::move(pool));
@@ -376,11 +374,12 @@ namespace seal
         for the encryption parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        template<typename T, typename = std::enable_if_t<
-            std::is_same<std::remove_cv_t<T>, double>::value ||
-            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        inline void decode(const Plaintext &plain, gsl::span<T> destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+        template <
+            typename T, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T>, double>::value ||
+                            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        inline void decode(
+            const Plaintext &plain, gsl::span<T> destination, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
             if (destination.size() != slots_)
             {
@@ -400,8 +399,7 @@ namespace seal
     private:
         // This is the same function as in evaluator.h
         inline void decompose_single_coeff(
-            const SEALContext::ContextData &context_data,
-            const std::uint64_t *value, std::uint64_t *destination,
+            const SEALContext::ContextData &context_data, const std::uint64_t *value, std::uint64_t *destination,
             util::MemoryPool &pool)
         {
             auto &parms = context_data.parms();
@@ -430,7 +428,7 @@ namespace seal
             auto value_copy(util::allocate_uint(coeff_mod_count, pool));
             for (std::size_t j = 0; j < coeff_mod_count; j++)
             {
-                //destination[j] = util::modulo_uint(
+                // destination[j] = util::modulo_uint(
                 //    value, coeff_mod_count, coeff_modulus_[j], pool);
 
                 // Manually inlined for efficiency
@@ -438,20 +436,20 @@ namespace seal
                 util::set_uint_uint(value, coeff_mod_count, value_copy.get());
 
                 // Starting from the top, reduce always 128-bit blocks
-                for (std::size_t k = coeff_mod_count - 1; k--; )
+                for (std::size_t k = coeff_mod_count - 1; k--;)
                 {
-                    value_copy[k] = util::barrett_reduce_128(
-                        value_copy.get() + k, coeff_modulus[j]);
+                    value_copy[k] = util::barrett_reduce_128(value_copy.get() + k, coeff_modulus[j]);
                 }
                 destination[j] = value_copy[0];
             }
         }
 
-        template<typename T, typename = std::enable_if_t<
-            std::is_same<std::remove_cv_t<T>, double>::value ||
-            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        void encode_internal(const T *values, std::size_t values_size,
-            parms_id_type parms_id, double scale, Plaintext &destination,
+        template <
+            typename T, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T>, double>::value ||
+                            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        void encode_internal(
+            const T *values, std::size_t values_size, parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool)
         {
             // Verify parameters.
@@ -486,8 +484,7 @@ namespace seal
             }
 
             // Check that scale is positive and not too large
-            if (scale <= 0 || (static_cast<int>(log2(scale)) + 1 >=
-                context_data.total_coeff_modulus_bit_count()))
+            if (scale <= 0 || (static_cast<int>(log2(scale)) + 1 >= context_data.total_coeff_modulus_bit_count()))
             {
                 throw std::invalid_argument("scale out of bounds");
             }
@@ -543,8 +540,8 @@ namespace seal
 
                 // Verify that the values are not too large to fit in coeff_modulus
                 // Note that we have an extra + 1 for the sign bit
-                max_coeff_bit_count = std::max(max_coeff_bit_count,
-                    static_cast<int>(std::log2(std::fabs(conj_values[i].real()))) + 2);
+                max_coeff_bit_count =
+                    std::max(max_coeff_bit_count, static_cast<int>(std::log2(std::fabs(conj_values[i].real()))) + 2);
             }
             if (max_coeff_bit_count >= context_data.total_coeff_modulus_bit_count())
             {
@@ -567,23 +564,21 @@ namespace seal
                     double coeffd = std::round(conj_values[i].real());
                     bool is_negative = std::signbit(coeffd);
 
-                    std::uint64_t coeffu =
-                        static_cast<std::uint64_t>(std::fabs(coeffd));
+                    std::uint64_t coeffu = static_cast<std::uint64_t>(std::fabs(coeffd));
 
                     if (is_negative)
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] = util::negate_uint_mod(
-                                coeffu % coeff_modulus[j].value(), coeff_modulus[j]);
+                            destination[i + (j * coeff_count)] =
+                                util::negate_uint_mod(coeffu % coeff_modulus[j].value(), coeff_modulus[j]);
                         }
                     }
                     else
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] =
-                                coeffu % coeff_modulus[j].value();
+                            destination[i + (j * coeff_count)] = coeffu % coeff_modulus[j].value();
                         }
                     }
                 }
@@ -596,25 +591,22 @@ namespace seal
                     bool is_negative = std::signbit(coeffd);
                     coeffd = std::fabs(coeffd);
 
-                    std::uint64_t coeffu[2]{
-                        static_cast<std::uint64_t>(std::fmod(coeffd, two_pow_64)),
-                        static_cast<std::uint64_t>(coeffd / two_pow_64) };
+                    std::uint64_t coeffu[2]{ static_cast<std::uint64_t>(std::fmod(coeffd, two_pow_64)),
+                                             static_cast<std::uint64_t>(coeffd / two_pow_64) };
 
                     if (is_negative)
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] =
-                                util::negate_uint_mod(util::barrett_reduce_128(
-                                    coeffu, coeff_modulus[j]), coeff_modulus[j]);
+                            destination[i + (j * coeff_count)] = util::negate_uint_mod(
+                                util::barrett_reduce_128(coeffu, coeff_modulus[j]), coeff_modulus[j]);
                         }
                     }
                     else
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] =
-                                util::barrett_reduce_128(coeffu, coeff_modulus[j]);
+                            destination[i + (j * coeff_count)] = util::barrett_reduce_128(coeffu, coeff_modulus[j]);
                         }
                     }
                 }
@@ -635,14 +627,12 @@ namespace seal
                     auto coeffu_ptr = coeffu.get();
                     while (coeffd >= 1)
                     {
-                        *coeffu_ptr++ = static_cast<std::uint64_t>(
-                            std::fmod(coeffd, two_pow_64));
+                        *coeffu_ptr++ = static_cast<std::uint64_t>(std::fmod(coeffd, two_pow_64));
                         coeffd /= two_pow_64;
                     }
 
                     // Next decompose this coefficient
-                    decompose_single_coeff(context_data, coeffu.get(),
-                        decomp_coeffu.get(), pool);
+                    decompose_single_coeff(context_data, coeffu.get(), decomp_coeffu.get(), pool);
 
                     // Finally replace the sign if necessary
                     if (is_negative)
@@ -666,19 +656,18 @@ namespace seal
             // Transform to NTT domain
             for (std::size_t i = 0; i < coeff_mod_count; i++)
             {
-                util::ntt_negacyclic_harvey(
-                    destination.data(i * coeff_count), small_ntt_tables[i]);
+                util::ntt_negacyclic_harvey(destination.data(i * coeff_count), small_ntt_tables[i]);
             }
 
             destination.parms_id() = parms_id;
             destination.scale() = scale;
         }
 
-        template<typename T, typename = std::enable_if_t<
-            std::is_same<std::remove_cv_t<T>, double>::value ||
-            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        void decode_internal(const Plaintext &plain, T *destination,
-            MemoryPoolHandle pool)
+        template <
+            typename T, typename = std::enable_if_t<
+                            std::is_same<std::remove_cv_t<T>, double>::value ||
+                            std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
+        void decode_internal(const Plaintext &plain, T *destination, MemoryPoolHandle pool)
         {
             // Verify parameters.
             if (!is_valid_for(plain, context_))
@@ -703,14 +692,13 @@ namespace seal
             auto &coeff_modulus = parms.coeff_modulus();
             std::size_t coeff_mod_count = coeff_modulus.size();
             std::size_t coeff_count = parms.poly_modulus_degree();
-            std::size_t rns_poly_uint64_count =
-                util::mul_safe(coeff_count, coeff_mod_count);
+            std::size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_mod_count);
 
             auto &small_ntt_tables = context_data_ptr->small_ntt_tables();
 
             // Check that scale is positive and not too large
-            if (plain.scale() <= 0 || (static_cast<int>(log2(plain.scale())) >=
-                context_data_ptr->total_coeff_modulus_bit_count()))
+            if (plain.scale() <= 0 ||
+                (static_cast<int>(log2(plain.scale())) >= context_data_ptr->total_coeff_modulus_bit_count()))
             {
                 throw std::invalid_argument("scale out of bounds");
             }
@@ -720,14 +708,12 @@ namespace seal
 
             auto &inv_coeff_products_mod_coeff_array =
                 context_data_ptr->base_converter()->get_inv_coeff_mod_coeff_array();
-            auto coeff_products_array =
-                context_data_ptr->base_converter()->get_coeff_products_array();
+            auto coeff_products_array = context_data_ptr->base_converter()->get_coeff_products_array();
 
             int logn = util::get_power_of_two(coeff_count);
 
             // Quick sanity check
-            if ((logn < 0) || (coeff_count < SEAL_POLY_MOD_DEGREE_MIN) ||
-                (coeff_count > SEAL_POLY_MOD_DEGREE_MAX))
+            if ((logn < 0) || (coeff_count < SEAL_POLY_MOD_DEGREE_MIN) || (coeff_count > SEAL_POLY_MOD_DEGREE_MAX))
             {
                 throw std::logic_error("invalid parameters");
             }
@@ -747,8 +733,7 @@ namespace seal
             // Transform each polynomial from NTT domain
             for (std::size_t i = 0; i < coeff_mod_count; i++)
             {
-                util::inverse_ntt_negacyclic_harvey(
-                    plain_copy.get() + (i * coeff_count), small_ntt_tables[i]);
+                util::inverse_ntt_negacyclic_harvey(plain_copy.get() + (i * coeff_count), small_ntt_tables[i]);
             }
 
             auto res = util::allocate<std::complex<double>>(coeff_count, pool);
@@ -763,46 +748,39 @@ namespace seal
                         inv_coeff_products_mod_coeff_array[j], // (qi/q * plain[i]) mod qi
                         coeff_modulus[j]);
                     util::multiply_uint_uint64(
-                        coeff_products_array + (j * coeff_mod_count),
-                        coeff_mod_count, tmp, coeff_mod_count, temp.get());
-                    util::add_uint_uint_mod(temp.get(),
-                        wide_tmp_dest.get() + (i * coeff_mod_count),
-                        decryption_modulus, coeff_mod_count,
+                        coeff_products_array + (j * coeff_mod_count), coeff_mod_count, tmp, coeff_mod_count,
+                        temp.get());
+                    util::add_uint_uint_mod(
+                        temp.get(), wide_tmp_dest.get() + (i * coeff_mod_count), decryption_modulus, coeff_mod_count,
                         wide_tmp_dest.get() + (i * coeff_mod_count));
                 }
 
                 res[i] = 0.0;
                 if (util::is_greater_than_or_equal_uint_uint(
-                    wide_tmp_dest.get() + (i * coeff_mod_count),
-                    upper_half_threshold, coeff_mod_count))
+                        wide_tmp_dest.get() + (i * coeff_mod_count), upper_half_threshold, coeff_mod_count))
                 {
                     double scaled_two_pow_64 = inv_scale;
-                    for (std::size_t j = 0; j < coeff_mod_count;
-                        j++, scaled_two_pow_64 *= two_pow_64)
+                    for (std::size_t j = 0; j < coeff_mod_count; j++, scaled_two_pow_64 *= two_pow_64)
                     {
                         if (wide_tmp_dest[i * coeff_mod_count + j] > decryption_modulus[j])
                         {
                             auto diff = wide_tmp_dest[i * coeff_mod_count + j] - decryption_modulus[j];
-                            res[i] += diff ?
-                                static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
+                            res[i] += diff ? static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                         else
                         {
                             auto diff = decryption_modulus[j] - wide_tmp_dest[i * coeff_mod_count + j];
-                            res[i] -= diff ?
-                                static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
+                            res[i] -= diff ? static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                     }
                 }
                 else
                 {
                     double scaled_two_pow_64 = inv_scale;
-                    for (std::size_t j = 0; j < coeff_mod_count;
-                        j++, scaled_two_pow_64 *= two_pow_64)
+                    for (std::size_t j = 0; j < coeff_mod_count; j++, scaled_two_pow_64 *= two_pow_64)
                     {
                         auto curr_coeff = wide_tmp_dest[i * coeff_mod_count + j];
-                        res[i] += curr_coeff ?
-                            static_cast<double>(curr_coeff) * scaled_two_pow_64 : 0.0;
+                        res[i] += curr_coeff ? static_cast<double>(curr_coeff) * scaled_two_pow_64 : 0.0;
                     }
                 }
 
@@ -836,26 +814,22 @@ namespace seal
 
             for (std::size_t i = 0; i < slots_; i++)
             {
-                destination[i] = from_complex<T>(
-                    res[static_cast<std::size_t>(matrix_reps_index_map_[i])]);
+                destination[i] = from_complex<T>(res[static_cast<std::size_t>(matrix_reps_index_map_[i])]);
             }
         }
 
-        void encode_internal(double value, parms_id_type parms_id,
-            double scale, Plaintext &destination, MemoryPoolHandle pool);
+        void encode_internal(
+            double value, parms_id_type parms_id, double scale, Plaintext &destination, MemoryPoolHandle pool);
 
-        inline void encode_internal(std::complex<double> value,
-            parms_id_type parms_id, double scale, Plaintext &destination,
+        inline void encode_internal(
+            std::complex<double> value, parms_id_type parms_id, double scale, Plaintext &destination,
             MemoryPoolHandle pool)
         {
-            auto input = util::allocate<std::complex<double>>(
-                slots_, pool_, value);
-            encode_internal(input.get(), slots_, parms_id, scale,
-                destination, std::move(pool));
+            auto input = util::allocate<std::complex<double>>(slots_, pool_, value);
+            encode_internal(input.get(), slots_, parms_id, scale, destination, std::move(pool));
         }
 
-        void encode_internal(std::int64_t value,
-            parms_id_type parms_id, Plaintext &destination);
+        void encode_internal(std::int64_t value, parms_id_type parms_id, Plaintext &destination);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
@@ -869,4 +843,4 @@ namespace seal
 
         util::Pointer<std::size_t> matrix_reps_index_map_;
     };
-}
+} // namespace seal

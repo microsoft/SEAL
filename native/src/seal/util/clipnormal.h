@@ -4,8 +4,8 @@
 #pragma once
 
 #include "seal/util/defines.h"
-#include <random>
 #include <cmath>
+#include <random>
 
 namespace seal
 {
@@ -18,13 +18,10 @@ namespace seal
 
             using param_type = ClippedNormalDistribution;
 
-            ClippedNormalDistribution(
-                result_type mean, result_type standard_deviation,
-                result_type max_deviation);
+            ClippedNormalDistribution(result_type mean, result_type standard_deviation, result_type max_deviation);
 
             template <typename RNG>
-            SEAL_NODISCARD inline result_type operator()(
-                RNG &engine, const param_type &parm) noexcept
+            SEAL_NODISCARD inline result_type operator()(RNG &engine, const param_type &parm) noexcept
             {
                 param(parm);
                 return operator()(engine);
@@ -90,5 +87,5 @@ namespace seal
 
             result_type max_deviation_;
         };
-    }
-}
+    } // namespace util
+} // namespace seal

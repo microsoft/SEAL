@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <limits>
-#include "seal/util/defines.h"
 #include "seal/ciphertext.h"
-#include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
 #include "seal/kswitchkeys.h"
+#include "seal/memorymanager.h"
+#include "seal/util/defines.h"
+#include <iostream>
+#include <limits>
+#include <vector>
 
 namespace seal
 {
@@ -58,8 +58,7 @@ namespace seal
         @param[in] key_power The power of the secret key
         @throws std::invalid_argument if key_power is less than 2
         */
-        SEAL_NODISCARD inline static std::size_t get_index(
-            std::size_t key_power)
+        SEAL_NODISCARD inline static std::size_t get_index(std::size_t key_power)
         {
             if (key_power < 2)
             {
@@ -93,4 +92,4 @@ namespace seal
             return KSwitchKeys::data(get_index(key_power));
         }
     };
-}
+} // namespace seal

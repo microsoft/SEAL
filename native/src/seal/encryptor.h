@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include <vector>
-#include <memory>
-#include "seal/util/defines.h"
-#include "seal/encryptionparams.h"
-#include "seal/plaintext.h"
 #include "seal/ciphertext.h"
-#include "seal/serializable.h"
-#include "seal/memorymanager.h"
 #include "seal/context.h"
+#include "seal/encryptionparams.h"
+#include "seal/memorymanager.h"
+#include "seal/plaintext.h"
 #include "seal/publickey.h"
 #include "seal/secretkey.h"
+#include "seal/serializable.h"
+#include "seal/util/defines.h"
 #include "seal/util/smallntt.h"
+#include <memory>
+#include <vector>
 
 namespace seal
 {
@@ -83,8 +83,7 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if public_key or secret_key is not valid
         */
-        Encryptor(std::shared_ptr<SEALContext> context, const PublicKey &public_key,
-            const SecretKey &secret_key);
+        Encryptor(std::shared_ptr<SEALContext> context, const PublicKey &public_key, const SecretKey &secret_key);
 
         /**
         Give a new instance of public key.
@@ -136,8 +135,8 @@ namespace seal
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt(const Plaintext &plain, Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void encrypt(
+            const Plaintext &plain, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_internal(plain, true, false, destination, pool);
         }
@@ -157,8 +156,7 @@ namespace seal
         @throws std::logic_error if a public key is not set
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt_zero(Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void encrypt_zero(Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_zero(context_->first_parms_id(), destination, pool);
         }
@@ -180,8 +178,8 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt_zero(parms_id_type parms_id, Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void encrypt_zero(
+            parms_id_type parms_id, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_zero_internal(parms_id, true, false, destination, pool);
         }
@@ -206,9 +204,8 @@ namespace seal
         @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt_symmetric(const Plaintext &plain,
-            Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void encrypt_symmetric(
+            const Plaintext &plain, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_internal(plain, false, false, destination, pool);
         }
@@ -228,12 +225,10 @@ namespace seal
         @throws std::logic_error if a secret key is not set
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt_zero_symmetric(Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void encrypt_zero_symmetric(
+            Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_zero_symmetric(
-                context_->first_parms_id(),
-                destination, pool);
+            encrypt_zero_symmetric(context_->first_parms_id(), destination, pool);
         }
 
         /**
@@ -253,9 +248,8 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt_zero_symmetric(parms_id_type parms_id,
-            Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void encrypt_zero_symmetric(
+            parms_id_type parms_id, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encrypt_zero_internal(parms_id, false, false, destination, pool);
         }
@@ -284,8 +278,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         SEAL_NODISCARD inline Serializable<Ciphertext> encrypt_symmetric(
-            const Plaintext &plain,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+            const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
             encrypt_internal(plain, false, true, destination, pool);
@@ -313,8 +306,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         SEAL_NODISCARD inline Serializable<Ciphertext> encrypt_zero_symmetric(
-            parms_id_type parms_id,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+            parms_id_type parms_id, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             Ciphertext destination;
             encrypt_zero_internal(parms_id, false, true, destination, pool);
@@ -355,22 +347,18 @@ namespace seal
 
         Encryptor(Encryptor &&source) = delete;
 
-        Encryptor &operator =(const Encryptor &assign) = delete;
+        Encryptor &operator=(const Encryptor &assign) = delete;
 
-        Encryptor &operator =(Encryptor &&assign) = delete;
+        Encryptor &operator=(Encryptor &&assign) = delete;
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
         void encrypt_zero_internal(
-            parms_id_type parms_id,
-            bool is_asymmetric, bool save_seed,
-            Ciphertext &destination,
+            parms_id_type parms_id, bool is_asymmetric, bool save_seed, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         void encrypt_internal(
-            const Plaintext &plain,
-            bool is_asymmetric, bool save_seed,
-            Ciphertext &destination,
+            const Plaintext &plain, bool is_asymmetric, bool save_seed, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         std::shared_ptr<SEALContext> context_{ nullptr };
@@ -379,4 +367,4 @@ namespace seal
 
         SecretKey secret_key_;
     };
-}
+} // namespace seal

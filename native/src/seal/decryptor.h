@@ -3,19 +3,19 @@
 
 #pragma once
 
-#include <memory>
-#include "seal/util/defines.h"
-#include "seal/randomgen.h"
-#include "seal/encryptionparams.h"
-#include "seal/context.h"
-#include "seal/memorymanager.h"
 #include "seal/ciphertext.h"
+#include "seal/context.h"
+#include "seal/encryptionparams.h"
+#include "seal/memorymanager.h"
 #include "seal/plaintext.h"
+#include "seal/randomgen.h"
 #include "seal/secretkey.h"
 #include "seal/smallmodulus.h"
-#include "seal/util/smallntt.h"
 #include "seal/util/baseconverter.h"
+#include "seal/util/defines.h"
 #include "seal/util/locks.h"
+#include "seal/util/smallntt.h"
+#include <memory>
 
 namespace seal
 {
@@ -101,32 +101,26 @@ namespace seal
         SEAL_NODISCARD int invariant_noise_budget(const Ciphertext &encrypted);
 
     private:
-        void bfv_decrypt(const Ciphertext &encrypted, Plaintext &destination,
-            MemoryPoolHandle pool);
+        void bfv_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool);
 
-        void ckks_decrypt(const Ciphertext &encrypted, Plaintext &destination,
-            MemoryPoolHandle pool);
+        void ckks_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool);
 
         Decryptor(const Decryptor &copy) = delete;
 
         Decryptor(Decryptor &&source) = delete;
 
-        Decryptor &operator =(const Decryptor &assign) = delete;
+        Decryptor &operator=(const Decryptor &assign) = delete;
 
-        Decryptor &operator =(Decryptor &&assign) = delete;
+        Decryptor &operator=(Decryptor &&assign) = delete;
 
         void compute_secret_key_array(std::size_t max_power);
 
         // Compute c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q.
         // Store result in destination in RNS form.
         // destination has the size of an RNS polynomial.
-        void dot_product_ct_sk_array(
-            const Ciphertext &encrypted,
-            std::uint64_t *destination,
-            MemoryPoolHandle pool);
+        void dot_product_ct_sk_array(const Ciphertext &encrypted, std::uint64_t *destination, MemoryPoolHandle pool);
 
-        void compose(const SEALContext::ContextData &context_data,
-            std::uint64_t *value);
+        void compose(const SEALContext::ContextData &context_data, std::uint64_t *value);
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
@@ -139,4 +133,4 @@ namespace seal
 
         mutable util::ReaderWriterLocker secret_key_array_locker_;
     };
-}
+} // namespace seal
