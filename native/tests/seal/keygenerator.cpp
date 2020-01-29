@@ -344,29 +344,12 @@ namespace SEALTest
         decryptor.decrypt(ct, ptres);
         ASSERT_EQ("1x^4 + 4x^2 + 4", ptres.to_string());
 
-        KeyGenerator keygen3(context, sk2, pk2);
-        auto sk3 = keygen3.secret_key();
-        auto pk3 = keygen3.public_key();
-        ASSERT_EQ(sk3.data(), sk2.data());
+        auto pk3 = keygen2.public_key();
+
+        // There is a small random chance for this to fail
         for (size_t i = 0; i < pk3.data().int_array().size(); i++)
         {
-            ASSERT_EQ(pk3.data().data()[i], pk2.data().data()[i]);
+            ASSERT_NE(pk3.data().data()[i], pk2.data().data()[i]);
         }
-
-        RelinKeys rlk3 = keygen3.relin_keys_local();
-        GaloisKeys galk3 = keygen3.galois_keys_local();
-
-        ASSERT_TRUE(is_valid_for(rlk3, context));
-        ASSERT_TRUE(is_valid_for(galk3, context));
-
-        Encryptor encryptor3(context, pk3);
-        Decryptor decryptor3(context, sk3);
-        pt = "1x^2 + 2";
-        ptres.set_zero();
-        encryptor.encrypt(pt, ct);
-        evaluator.square_inplace(ct);
-        evaluator.relinearize_inplace(ct, rlk3);
-        decryptor.decrypt(ct, ptres);
-        ASSERT_EQ("1x^4 + 4x^2 + 4", ptres.to_string());
     }
 } // namespace SEALTest

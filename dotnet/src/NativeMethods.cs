@@ -824,9 +824,6 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealnetnative, EntryPoint = "KeyGenerator_Create2", PreserveSig = false)]
         internal static extern void KeyGenerator_Create(IntPtr sealContext, IntPtr secretKey, out IntPtr keyGenerator);
 
-        [DllImport(sealnetnative, EntryPoint = "KeyGenerator_Create3", PreserveSig = false)]
-        internal static extern void KeyGenerator_Create(IntPtr sealContext, IntPtr secretKey, IntPtr publicKey, out IntPtr keyGenerator);
-
         [DllImport(sealnetnative, PreserveSig = false)]
         internal static extern void KeyGenerator_Destroy(IntPtr thisptr);
 

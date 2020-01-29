@@ -17,8 +17,6 @@ SEALMETHOD KeyGenerator_Create1(void *sealContext, void **key_generator);
 
 SEALMETHOD KeyGenerator_Create2(void *sealContext, void *secret_key, void **key_generator);
 
-SEALMETHOD KeyGenerator_Create3(void *sealContext, void *secret_key, void *public_key, void **key_generator);
-
 SEALMETHOD KeyGenerator_Destroy(void *thisptr);
 
 SEALMETHOD KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys);

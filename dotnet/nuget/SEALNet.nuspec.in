@@ -25,7 +25,7 @@
     <file src="@SEAL_MACOS_SEALNETNATIVE_PATH@" target="runtimes/osx-x64/native" />
     <file src="$LINUX_SEALNETNATIVE$" target="runtimes/linux-x64/native" />
     <file src="$MACOS_SEALNETNATIVE$" target="runtimes/osx-x64/native" />
-    <file src="../lib/$Configuration$/netstandard2.0/SEALNet.dll" target="lib/netstandard2.0/" />
+    <file src="../lib/$Configuration$/netstandard2.1/SEALNet.dll" target="lib/netstandard2.1/" />
     <file src="../../LICENSE" target="LICENSE" />
   </files>
 </package>

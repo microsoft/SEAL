@@ -76,6 +76,7 @@
     <ClCompile Include="seal\serialization.cpp" />
     <ClCompile Include="seal\smallmodulus.cpp" />
     <ClCompile Include="seal\testrunner.cpp" />
+    <ClCompile Include="seal\util\baseconverter.cpp" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
     <ClCompile Include="seal\util\common.cpp" />
     <ClCompile Include="seal\util\hash.cpp" />

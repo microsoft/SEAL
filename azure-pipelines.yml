@@ -16,7 +16,7 @@ stages:
             steps:
                 - template: templates/windows-build.yml
                   parameters:
-                      nuget_version: 4.9.2
+                      nuget_version: '5.4.0'
 
           - job: Linux
             displayName: Linux
@@ -62,4 +62,4 @@ stages:
             steps:
                 - template: templates/pack.yml
                   parameters:
-                      nuget_version: 4.9.2
+                      nuget_version: '5.4.0'
