@@ -13,7 +13,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetIndex(uint64_t galois_elt, uint64_t *index)
+SEALMETHOD GaloisKeys_GetIndex(uint64_t galois_elt, uint64_t *index)
 {
     IfNullRet(index, E_POINTER);
 

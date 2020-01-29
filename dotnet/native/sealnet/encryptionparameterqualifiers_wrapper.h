@@ -13,20 +13,20 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_Create(void *copy, void **epq);
+SEALMETHOD EPQ_Create(void *copy, void **epq);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_Destroy(void *thisptr);
+SEALMETHOD EPQ_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_ParametersSet(void *thisptr, bool *parameters_set);
+SEALMETHOD EPQ_ParametersSet(void *thisptr, bool *parameters_set);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFFT(void *thisptr, bool *using_fft);
+SEALMETHOD EPQ_UsingFFT(void *thisptr, bool *using_fft);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingNTT(void *thisptr, bool *using_ntt);
+SEALMETHOD EPQ_UsingNTT(void *thisptr, bool *using_ntt);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingBatching(void *thisptr, bool *using_batching);
+SEALMETHOD EPQ_UsingBatching(void *thisptr, bool *using_batching);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_plain_lift);
+SEALMETHOD EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_plain_lift);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingDescendingModulusChain(void *thisptr, bool *using_descending_modulus_chain);
+SEALMETHOD EPQ_UsingDescendingModulusChain(void *thisptr, bool *using_descending_modulus_chain);
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_SecLevel(void *thisptr, int *sec_level);
+SEALMETHOD EPQ_SecLevel(void *thisptr, int *sec_level);

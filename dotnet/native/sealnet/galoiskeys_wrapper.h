@@ -13,4 +13,4 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL GaloisKeys_GetIndex(uint64_t galois_elt, uint64_t *index);
+SEALMETHOD GaloisKeys_GetIndex(uint64_t galois_elt, uint64_t *index);

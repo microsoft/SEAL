@@ -16,7 +16,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Create1(uint64_t value, void **small_modulus)
+SEALMETHOD SmallModulus_Create1(uint64_t value, void **small_modulus)
 {
     IfNullRet(small_modulus, E_POINTER);
 
@@ -32,7 +32,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Create1(uint64_t value, void **small
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Create2(void *copy, void **small_modulus)
+SEALMETHOD SmallModulus_Create2(void *copy, void **small_modulus)
 {
     SmallModulus *copypt = FromVoid<SmallModulus>(copy);
     IfNullRet(copypt, E_POINTER);
@@ -42,7 +42,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Create2(void *copy, void **small_mod
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Destroy(void *thisptr)
+SEALMETHOD SmallModulus_Destroy(void *thisptr)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -51,7 +51,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_IsZero(void *thisptr, bool *is_zero)
+SEALMETHOD SmallModulus_IsZero(void *thisptr, bool *is_zero)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -61,7 +61,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_IsZero(void *thisptr, bool *is_zero)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_IsPrime(void *thisptr, bool *is_prime)
+SEALMETHOD SmallModulus_IsPrime(void *thisptr, bool *is_prime)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -71,7 +71,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_IsPrime(void *thisptr, bool *is_prim
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Value(void *thisptr, uint64_t *value)
+SEALMETHOD SmallModulus_Value(void *thisptr, uint64_t *value)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -81,7 +81,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Value(void *thisptr, uint64_t *value
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_BitCount(void *thisptr, int *bit_count)
+SEALMETHOD SmallModulus_BitCount(void *thisptr, int *bit_count)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -91,7 +91,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_BitCount(void *thisptr, int *bit_cou
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_UInt64Count(void *thisptr, uint64_t *uint64_count)
+SEALMETHOD SmallModulus_UInt64Count(void *thisptr, uint64_t *uint64_count)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -101,7 +101,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_UInt64Count(void *thisptr, uint64_t 
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Set1(void *thisptr, void *assign)
+SEALMETHOD SmallModulus_Set1(void *thisptr, void *assign)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -112,7 +112,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Set1(void *thisptr, void *assign)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Set2(void *thisptr, uint64_t value)
+SEALMETHOD SmallModulus_Set2(void *thisptr, uint64_t value)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -129,7 +129,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Set2(void *thisptr, uint64_t value)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, uint64_t length, uint64_t ratio[])
+SEALMETHOD SmallModulus_ConstRatio(void *thisptr, uint64_t length, uint64_t ratio[])
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -145,7 +145,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_ConstRatio(void *thisptr, uint64_t l
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals1(void *thisptr, void *other, bool *result)
+SEALMETHOD SmallModulus_Equals1(void *thisptr, void *other, bool *result)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -157,7 +157,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals1(void *thisptr, void *other, 
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals2(void *thisptr, uint64_t other, bool *result)
+SEALMETHOD SmallModulus_Equals2(void *thisptr, uint64_t other, bool *result)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -167,7 +167,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Equals2(void *thisptr, uint64_t othe
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
+SEALMETHOD SmallModulus_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -189,7 +189,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_SaveSize(void *thisptr, uint8_t comp
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
+SEALMETHOD SmallModulus_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);
@@ -218,7 +218,7 @@ SEALNETNATIVE HRESULT SEALCALL SmallModulus_Save(void *thisptr, uint8_t *outptr,
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL SmallModulus_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALMETHOD SmallModulus_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     SmallModulus *sm = FromVoid<SmallModulus>(thisptr);
     IfNullRet(sm, E_POINTER);

@@ -13,4 +13,4 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_GetIndex(uint64_t key_power, uint64_t *index);
+SEALMETHOD RelinKeys_GetIndex(uint64_t key_power, uint64_t *index);

@@ -38,7 +38,7 @@ namespace seal
     };
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
+SEALMETHOD Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
@@ -56,7 +56,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create1(void *memoryPoolHandle, void **
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
+SEALMETHOD Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
@@ -74,7 +74,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create2(uint64_t coeffCount, void *memo
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
+SEALMETHOD Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
@@ -92,7 +92,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create3(uint64_t capacity, uint64_t coe
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Create4(char *hexPoly, void *memoryPoolHandle, void **plaintext)
+SEALMETHOD Plaintext_Create4(char *hexPoly, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
     IfNullRet(hexPoly, E_POINTER);
@@ -111,7 +111,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create4(char *hexPoly, void *memoryPool
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Create5(void *copy, void **plaintext)
+SEALMETHOD Plaintext_Create5(void *copy, void **plaintext)
 {
     Plaintext *copyptr = FromVoid<Plaintext>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -122,7 +122,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Create5(void *copy, void **plaintext)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Set1(void *thisptr, void *assign)
+SEALMETHOD Plaintext_Set1(void *thisptr, void *assign)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -133,7 +133,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Set1(void *thisptr, void *assign)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Set2(void *thisptr, char *hex_poly)
+SEALMETHOD Plaintext_Set2(void *thisptr, char *hex_poly)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -151,7 +151,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Set2(void *thisptr, char *hex_poly)
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Set3(void *thisptr, uint64_t const_coeff)
+SEALMETHOD Plaintext_Set3(void *thisptr, uint64_t const_coeff)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -167,7 +167,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Set3(void *thisptr, uint64_t const_coef
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Destroy(void *thisptr)
+SEALMETHOD Plaintext_Destroy(void *thisptr)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -176,7 +176,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_CoeffCount(void *thisptr, uint64_t *coeff_count)
+SEALMETHOD Plaintext_CoeffCount(void *thisptr, uint64_t *coeff_count)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -186,7 +186,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_CoeffCount(void *thisptr, uint64_t *coe
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_CoeffAt(void *thisptr, uint64_t index, uint64_t *coeff)
+SEALMETHOD Plaintext_CoeffAt(void *thisptr, uint64_t index, uint64_t *coeff)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -207,7 +207,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_CoeffAt(void *thisptr, uint64_t index, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value)
+SEALMETHOD Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -223,7 +223,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetCoeffAt(void *thisptr, uint64_t inde
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_ToString(void *thispt, uint64_t *length, char *outstr)
+SEALMETHOD Plaintext_ToString(void *thispt, uint64_t *length, char *outstr)
 {
     Plaintext *plain = FromVoid<Plaintext>(thispt);
     IfNullRet(plain, E_POINTER);
@@ -240,7 +240,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_ToString(void *thispt, uint64_t *length
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form)
+SEALMETHOD Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -250,7 +250,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_f
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_IsZero(void *thisptr, bool *is_zero)
+SEALMETHOD Plaintext_IsZero(void *thisptr, bool *is_zero)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -260,7 +260,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_IsZero(void *thisptr, bool *is_zero)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_GetParmsId(void *thisptr, uint64_t *parms_id)
+SEALMETHOD Plaintext_GetParmsId(void *thisptr, uint64_t *parms_id)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -273,7 +273,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_GetParmsId(void *thisptr, uint64_t *par
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetParmsId(void *thisptr, uint64_t *parms_id)
+SEALMETHOD Plaintext_SetParmsId(void *thisptr, uint64_t *parms_id)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -283,7 +283,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetParmsId(void *thisptr, uint64_t *par
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero1(void *thisptr)
+SEALMETHOD Plaintext_SetZero1(void *thisptr)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -292,7 +292,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero1(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, uint64_t start_coeff)
+SEALMETHOD Plaintext_SetZero2(void *thisptr, uint64_t start_coeff)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -308,7 +308,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero2(void *thisptr, uint64_t start_
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, uint64_t start_coeff, uint64_t length)
+SEALMETHOD Plaintext_SetZero3(void *thisptr, uint64_t start_coeff, uint64_t length)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -324,7 +324,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetZero3(void *thisptr, uint64_t start_
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Reserve(void *thisptr, uint64_t capacity)
+SEALMETHOD Plaintext_Reserve(void *thisptr, uint64_t capacity)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -344,7 +344,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Reserve(void *thisptr, uint64_t capacit
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Resize(void *thisptr, uint64_t coeff_count)
+SEALMETHOD Plaintext_Resize(void *thisptr, uint64_t coeff_count)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -364,7 +364,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Resize(void *thisptr, uint64_t coeff_co
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_ShrinkToFit(void *thisptr)
+SEALMETHOD Plaintext_ShrinkToFit(void *thisptr)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -373,7 +373,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_ShrinkToFit(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Release(void *thisptr)
+SEALMETHOD Plaintext_Release(void *thisptr)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -382,7 +382,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Release(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Capacity(void *thisptr, uint64_t *capacity)
+SEALMETHOD Plaintext_Capacity(void *thisptr, uint64_t *capacity)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -392,7 +392,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Capacity(void *thisptr, uint64_t *capac
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SignificantCoeffCount(void *thisptr, uint64_t *significant_coeff_count)
+SEALMETHOD Plaintext_SignificantCoeffCount(void *thisptr, uint64_t *significant_coeff_count)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -402,7 +402,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SignificantCoeffCount(void *thisptr, ui
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_NonZeroCoeffCount(void *thisptr, uint64_t *nonzero_coeff_count)
+SEALMETHOD Plaintext_NonZeroCoeffCount(void *thisptr, uint64_t *nonzero_coeff_count)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -412,7 +412,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_NonZeroCoeffCount(void *thisptr, uint64
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Scale(void *thisptr, double *scale)
+SEALMETHOD Plaintext_Scale(void *thisptr, double *scale)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -422,7 +422,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Scale(void *thisptr, double *scale)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SetScale(void *thisptr, double scale)
+SEALMETHOD Plaintext_SetScale(void *thisptr, double scale)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -431,7 +431,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SetScale(void *thisptr, double scale)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Equals(void *thisptr, void *other, bool *result)
+SEALMETHOD Plaintext_Equals(void *thisptr, void *other, bool *result)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -443,7 +443,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Equals(void *thisptr, void *other, bool
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data)
+SEALMETHOD Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -457,7 +457,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SwapData(void *thisptr, uint64_t count,
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Pool(void *thisptr, void **pool)
+SEALMETHOD Plaintext_Pool(void *thisptr, void **pool)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -468,7 +468,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Pool(void *thisptr, void **pool)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
+SEALMETHOD Plaintext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -490,7 +490,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_SaveSize(void *thisptr, uint8_t compr_m
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
+SEALMETHOD Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -519,7 +519,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_Save(void *thisptr, uint8_t *outptr, ui
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALMETHOD Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
@@ -550,7 +550,7 @@ SEALNETNATIVE HRESULT SEALCALL Plaintext_UnsafeLoad(void *thisptr, void *context
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALMETHOD Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);

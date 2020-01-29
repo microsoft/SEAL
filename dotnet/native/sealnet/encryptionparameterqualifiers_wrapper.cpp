@@ -12,7 +12,7 @@
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_Create(void *copy, void **epq)
+SEALMETHOD EPQ_Create(void *copy, void **epq)
 {
     EncryptionParameterQualifiers *copyptr = FromVoid<EncryptionParameterQualifiers>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -23,7 +23,7 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_Create(void *copy, void **epq)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_Destroy(void *thisptr)
+SEALMETHOD EPQ_Destroy(void *thisptr)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -32,7 +32,7 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_ParametersSet(void *thisptr, bool *parameters_set)
+SEALMETHOD EPQ_ParametersSet(void *thisptr, bool *parameters_set)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -42,7 +42,7 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_ParametersSet(void *thisptr, bool *parameters
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFFT(void *thisptr, bool *using_fft)
+SEALMETHOD EPQ_UsingFFT(void *thisptr, bool *using_fft)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -52,7 +52,7 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFFT(void *thisptr, bool *using_fft)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingNTT(void *thisptr, bool *using_ntt)
+SEALMETHOD EPQ_UsingNTT(void *thisptr, bool *using_ntt)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -62,7 +62,7 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_UsingNTT(void *thisptr, bool *using_ntt)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingBatching(void *thisptr, bool *using_batching)
+SEALMETHOD EPQ_UsingBatching(void *thisptr, bool *using_batching)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -72,7 +72,7 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_UsingBatching(void *thisptr, bool *using_batc
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_plain_lift)
+SEALMETHOD EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_plain_lift)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -82,7 +82,7 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_UsingFastPlainLift(void *thisptr, bool *using
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_UsingDescendingModulusChain(void *thisptr, bool *using_descending_modulus_chain)
+SEALMETHOD EPQ_UsingDescendingModulusChain(void *thisptr, bool *using_descending_modulus_chain)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);
@@ -92,7 +92,7 @@ SEALNETNATIVE HRESULT SEALCALL EPQ_UsingDescendingModulusChain(void *thisptr, bo
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL EPQ_SecLevel(void *thisptr, int *sec_level)
+SEALMETHOD EPQ_SecLevel(void *thisptr, int *sec_level)
 {
     EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
     IfNullRet(epq, E_POINTER);

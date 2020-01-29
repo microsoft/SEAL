@@ -13,60 +13,60 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Create(void *sealContext, void **evaluator);
+SEALMETHOD Evaluator_Create(void *sealContext, void **evaluator);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Destroy(void *thisptr);
+SEALMETHOD Evaluator_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Negate(void *thisptr, void *encrypted, void *destination);
+SEALMETHOD Evaluator_Negate(void *thisptr, void *encrypted, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Add(void *thisptr, void *encrypted1, void *encrypted2, void *destination);
+SEALMETHOD Evaluator_Add(void *thisptr, void *encrypted1, void *encrypted2, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, void *destination);
+SEALMETHOD Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void *destination);
+SEALMETHOD Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, void *destination);
+SEALMETHOD Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void *destination);
+SEALMETHOD Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2, void *destination, void *pool);
+SEALMETHOD Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool);
+SEALMETHOD Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Square(void *thisptr, void *encrypted, void *destination, void *pool);
+SEALMETHOD Evaluator_Square(void *thisptr, void *encrypted, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Relinearize(void *thisptr, void *encrypted, void *relinKeys, void *destination, void *pool);
+SEALMETHOD Evaluator_Relinearize(void *thisptr, void *encrypted, void *relinKeys, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *destination, void *pool);
+SEALMETHOD Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination);
+SEALMETHOD Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool);
+SEALMETHOD Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo2(void *thisptr, void *plain, uint64_t *parms_id, void *destination);
+SEALMETHOD Evaluator_ModSwitchTo2(void *thisptr, void *plain, uint64_t *parms_id, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destination, void *pool);
+SEALMETHOD Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool);
+SEALMETHOD Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parms_id, void *destination_ntt, void *pool);
+SEALMETHOD Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parms_id, void *destination_ntt, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *destination_ntt);
+SEALMETHOD Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *destination_ntt);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *destination);
+SEALMETHOD Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ApplyGalois(void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_ApplyGalois(void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool);
+SEALMETHOD Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
+SEALMETHOD Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching);
+SEALMETHOD Evaluator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching);

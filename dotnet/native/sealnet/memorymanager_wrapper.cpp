@@ -57,7 +57,7 @@ namespace
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void **pool_handle)
+SEALMETHOD MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void **pool_handle)
 {
     IfNullRet(pool_handle, E_POINTER);
 
@@ -79,7 +79,7 @@ SEALNETNATIVE HRESULT SEALCALL MemoryManager_GetPool1(int prof_opt, bool clear_o
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL MemoryManager_GetPool2(void **pool_handle)
+SEALMETHOD MemoryManager_GetPool2(void **pool_handle)
 {
     IfNullRet(pool_handle, E_POINTER);
 
@@ -89,7 +89,7 @@ SEALNETNATIVE HRESULT SEALCALL MemoryManager_GetPool2(void **pool_handle)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL MemoryManager_SwitchProfile(void *new_profile)
+SEALMETHOD MemoryManager_SwitchProfile(void *new_profile)
 {
     MMProf *profile = FromVoid<MMProf>(new_profile);
     IfNullRet(profile, E_POINTER);
@@ -104,7 +104,7 @@ SEALNETNATIVE HRESULT SEALCALL MemoryManager_SwitchProfile(void *new_profile)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL MMProf_CreateGlobal(void **profile)
+SEALMETHOD MMProf_CreateGlobal(void **profile)
 {
     IfNullRet(profile, E_POINTER);
 
@@ -113,7 +113,7 @@ SEALNETNATIVE HRESULT SEALCALL MMProf_CreateGlobal(void **profile)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL MMProf_CreateFixed(void *pool, void **profile)
+SEALMETHOD MMProf_CreateFixed(void *pool, void **profile)
 {
     MemoryPoolHandle *poolptr = FromVoid<MemoryPoolHandle>(pool);
     IfNullRet(poolptr, E_POINTER);
@@ -126,7 +126,7 @@ SEALNETNATIVE HRESULT SEALCALL MMProf_CreateFixed(void *pool, void **profile)
 
 }
 
-SEALNETNATIVE HRESULT SEALCALL MMProf_CreateNew(void **profile)
+SEALMETHOD MMProf_CreateNew(void **profile)
 {
     IfNullRet(profile, E_POINTER);
 
@@ -135,7 +135,7 @@ SEALNETNATIVE HRESULT SEALCALL MMProf_CreateNew(void **profile)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL MMProf_CreateThreadLocal(void **profile)
+SEALMETHOD MMProf_CreateThreadLocal(void **profile)
 {
     IfNullRet(profile, E_POINTER);
 
@@ -144,7 +144,7 @@ SEALNETNATIVE HRESULT SEALCALL MMProf_CreateThreadLocal(void **profile)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL MMProf_GetPool(void *thisptr, void **pool_handle)
+SEALMETHOD MMProf_GetPool(void *thisptr, void **pool_handle)
 {
     MMProf *profile = FromVoid<MMProf>(thisptr);
     IfNullRet(profile, E_POINTER);
@@ -156,7 +156,7 @@ SEALNETNATIVE HRESULT SEALCALL MMProf_GetPool(void *thisptr, void **pool_handle)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL MMProf_Destroy(void *thisptr)
+SEALMETHOD MMProf_Destroy(void *thisptr)
 {
     MMProf *profile = FromVoid<MMProf>(thisptr);
     IfNullRet(profile, E_POINTER);

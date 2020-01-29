@@ -13,34 +13,34 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Create1(void **kswitch_keys);
+SEALMETHOD KSwitchKeys_Create1(void **kswitch_keys);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Create2(void *copy, void **kswitch_keys);
+SEALMETHOD KSwitchKeys_Create2(void *copy, void **kswitch_keys);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Destroy(void *thisptr);
+SEALMETHOD KSwitchKeys_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Set(void *thisptr, void *assign);
+SEALMETHOD KSwitchKeys_Set(void *thisptr, void *assign);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Size(void *thisptr, uint64_t *size);
+SEALMETHOD KSwitchKeys_Size(void *thisptr, uint64_t *size);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_RawSize(void *thisptr, uint64_t *key_count);
+SEALMETHOD KSwitchKeys_RawSize(void *thisptr, uint64_t *key_count);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **key_list);
+SEALMETHOD KSwitchKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **key_list);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_ClearDataAndReserve(void *thisptr, uint64_t size);
+SEALMETHOD KSwitchKeys_ClearDataAndReserve(void *thisptr, uint64_t size);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_AddKeyList(void *thisptr, uint64_t count, void **key_list);
+SEALMETHOD KSwitchKeys_AddKeyList(void *thisptr, uint64_t count, void **key_list);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_GetParmsId(void *thisptr, uint64_t *parms_id);
+SEALMETHOD KSwitchKeys_GetParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_SetParmsId(void *thisptr, uint64_t *parms_id);
+SEALMETHOD KSwitchKeys_SetParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Pool(void *thisptr, void **pool);
+SEALMETHOD KSwitchKeys_Pool(void *thisptr, void **pool);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
+SEALMETHOD KSwitchKeys_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
+SEALMETHOD KSwitchKeys_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
+SEALMETHOD KSwitchKeys_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
 
-SEALNETNATIVE HRESULT SEALCALL KSwitchKeys_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
+SEALMETHOD KSwitchKeys_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);

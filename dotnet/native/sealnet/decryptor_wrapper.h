@@ -13,10 +13,10 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL Decryptor_Create(void *context, void *secret_key, void **decryptor);
+SEALMETHOD Decryptor_Create(void *context, void *secret_key, void **decryptor);
 
-SEALNETNATIVE HRESULT SEALCALL Decryptor_Destroy(void *thisptr);
+SEALMETHOD Decryptor_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination);
+SEALMETHOD Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination);
 
-SEALNETNATIVE HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget);
+SEALMETHOD Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget);

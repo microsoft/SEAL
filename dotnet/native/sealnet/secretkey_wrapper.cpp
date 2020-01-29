@@ -13,7 +13,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Create1(void **secret_key)
+SEALMETHOD SecretKey_Create1(void **secret_key)
 {
     IfNullRet(secret_key, E_POINTER);
 
@@ -22,7 +22,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Create1(void **secret_key)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Create2(void *copy, void **secret_key)
+SEALMETHOD SecretKey_Create2(void *copy, void **secret_key)
 {
     SecretKey *copyptr = FromVoid<SecretKey>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -33,7 +33,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Create2(void *copy, void **secret_key)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Set(void *thisptr, void *assign)
+SEALMETHOD SecretKey_Set(void *thisptr, void *assign)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -44,7 +44,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Set(void *thisptr, void *assign)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Data(void *thisptr, void **data)
+SEALMETHOD SecretKey_Data(void *thisptr, void **data)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -57,7 +57,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Data(void *thisptr, void **data)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Destroy(void *thisptr)
+SEALMETHOD SecretKey_Destroy(void *thisptr)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -66,7 +66,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_ParmsId(void *thisptr, uint64_t *parms_id)
+SEALMETHOD SecretKey_ParmsId(void *thisptr, uint64_t *parms_id)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -76,7 +76,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_ParmsId(void *thisptr, uint64_t *parms_
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Pool(void *thisptr, void **pool)
+SEALMETHOD SecretKey_Pool(void *thisptr, void **pool)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -87,7 +87,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Pool(void *thisptr, void **pool)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
+SEALMETHOD SecretKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     SecretKey* skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -109,7 +109,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_SaveSize(void *thisptr, uint8_t compr_m
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
+SEALMETHOD SecretKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -138,7 +138,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_Save(void *thisptr, uint8_t *outptr, ui
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALMETHOD SecretKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
@@ -169,7 +169,7 @@ SEALNETNATIVE HRESULT SEALCALL SecretKey_UnsafeLoad(void *thisptr, void *context
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL SecretKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALMETHOD SecretKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);

@@ -28,7 +28,7 @@ struct seal::Evaluator::EvaluatorPrivateHelper
     }
 };
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Create(void *sealContext, void **evaluator)
+SEALMETHOD Evaluator_Create(void *sealContext, void **evaluator)
 {
     SEALContext *context = FromVoid<SEALContext>(sealContext);
     IfNullRet(context, E_POINTER);
@@ -48,7 +48,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Create(void *sealContext, void **evalua
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Destroy(void *thisptr)
+SEALMETHOD Evaluator_Destroy(void *thisptr)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -57,7 +57,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Negate(void *thisptr, void *encrypted, void *destination)
+SEALMETHOD Evaluator_Negate(void *thisptr, void *encrypted, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -81,7 +81,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Negate(void *thisptr, void *encrypted, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Add(void *thisptr, void *encrypted1, void *encrypted2, void *destination)
+SEALMETHOD Evaluator_Add(void *thisptr, void *encrypted1, void *encrypted2, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -107,7 +107,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Add(void *thisptr, void *encrypted1, vo
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, void *destination)
+SEALMETHOD Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -139,7 +139,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_AddMany(void *thisptr, uint64_t count, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void *destination)
+SEALMETHOD Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -165,7 +165,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_AddPlain(void *thisptr, void *encrypted
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, void *destination)
+SEALMETHOD Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -191,7 +191,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Sub(void *thisptr, void *encrypted1, vo
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void *destination)
+SEALMETHOD Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -217,7 +217,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_SubPlain(void *thisptr, void *encrypted
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2, void *destination, void *pool)
+SEALMETHOD Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -244,7 +244,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Multiply(void *thisptr, void *encrypted
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -279,7 +279,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyMany(void *thisptr, uint64_t co
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool)
+SEALMETHOD Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -306,7 +306,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_MultiplyPlain(void *thisptr, void *encr
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Square(void *thisptr, void *encrypted, void *destination, void *pool)
+SEALMETHOD Evaluator_Square(void *thisptr, void *encrypted, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -331,7 +331,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Square(void *thisptr, void *encrypted, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Relinearize(void *thisptr, void *encrypted, void *relin_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_Relinearize(void *thisptr, void *encrypted, void *relin_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -358,7 +358,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Relinearize(void *thisptr, void *encryp
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *destination, void *pool)
+SEALMETHOD Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -383,7 +383,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchToNext1(void *thisptr, void *e
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination)
+SEALMETHOD Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -403,7 +403,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchToNext2(void *thisptr, void *p
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
+SEALMETHOD Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -432,7 +432,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo1(void *thisptr, void *encry
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo2(void *thisptr, void *plain, uint64_t *parms_id, void *destination)
+SEALMETHOD Evaluator_ModSwitchTo2(void *thisptr, void *plain, uint64_t *parms_id, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -456,7 +456,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ModSwitchTo2(void *thisptr, void *plain
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destination, void *pool)
+SEALMETHOD Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -481,7 +481,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleToNext(void *thisptr, void *encr
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
+SEALMETHOD Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -510,7 +510,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RescaleTo(void *thisptr, void *encrypte
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -537,7 +537,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_Exponentiate(void *thisptr, void *encry
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parms_id, void *destination_ntt, void *pool)
+SEALMETHOD Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parms_id, void *destination_ntt, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -562,7 +562,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformToNTT1(void *thisptr, void *pl
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *destination_ntt)
+SEALMETHOD Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *destination_ntt)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -586,7 +586,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformToNTT2(void *thisptr, void *en
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *destination)
+SEALMETHOD Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -610,7 +610,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_TransformFromNTT(void *thisptr, void *e
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ApplyGalois(void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_ApplyGalois(void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -637,7 +637,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ApplyGalois(void *thisptr, void *encryp
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool)
+SEALMETHOD Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -664,7 +664,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateRows(void *thisptr, void *encrypt
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -691,7 +691,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateColumns(void *thisptr, void *encr
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -718,7 +718,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_RotateVector(void *thisptr, void *encry
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -745,7 +745,7 @@ SEALNETNATIVE HRESULT SEALCALL Evaluator_ComplexConjugate(void *thisptr, void *e
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Evaluator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching)
+SEALMETHOD Evaluator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);

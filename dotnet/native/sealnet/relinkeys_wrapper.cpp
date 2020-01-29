@@ -13,7 +13,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL RelinKeys_GetIndex(uint64_t key_power, uint64_t *index)
+SEALMETHOD RelinKeys_GetIndex(uint64_t key_power, uint64_t *index)
 {
     IfNullRet(index, E_POINTER);
 

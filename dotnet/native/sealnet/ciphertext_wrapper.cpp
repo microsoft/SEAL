@@ -33,7 +33,7 @@ namespace seal
     };
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
+SEALMETHOD Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
 {
     IfNullRet(ciphertext, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
@@ -50,7 +50,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create1(void *memoryPoolHandle, void *
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create2(void *copy, void **ciphertext)
+SEALMETHOD Ciphertext_Create2(void *copy, void **ciphertext)
 {
     Ciphertext *copyptr = FromVoid<Ciphertext>(copy);
     IfNullRet(copyptr, E_POINTER);
@@ -61,7 +61,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create2(void *copy, void **ciphertext)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create3(void *context, void *pool, void **ciphertext)
+SEALMETHOD Ciphertext_Create3(void *context, void *pool, void **ciphertext)
 {
     const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -80,7 +80,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create3(void *context, void *pool, voi
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, void **ciphertext)
+SEALMETHOD Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, void **ciphertext)
 {
     const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -103,7 +103,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create4(void *context, uint64_t *parms
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capacity, void *pool, void **ciphertext)
+SEALMETHOD Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capacity, void *pool, void **ciphertext)
 {
     const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -126,7 +126,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Create5(void *context, uint64_t *parms
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Reserve1(void *thisptr, void *context, uint64_t *parms_id, uint64_t size_capacity)
+SEALMETHOD Ciphertext_Reserve1(void *thisptr, void *context, uint64_t *parms_id, uint64_t size_capacity)
 {
     const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -148,7 +148,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Reserve1(void *thisptr, void *context,
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Reserve2(void *thisptr, void *context, uint64_t size_capacity)
+SEALMETHOD Ciphertext_Reserve2(void *thisptr, void *context, uint64_t size_capacity)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -166,7 +166,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Reserve2(void *thisptr, void *context,
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Reserve3(void *thisptr, uint64_t size_capacity)
+SEALMETHOD Ciphertext_Reserve3(void *thisptr, uint64_t size_capacity)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -182,7 +182,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Reserve3(void *thisptr, uint64_t size_
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Set(void *thisptr, void *assign)
+SEALMETHOD Ciphertext_Set(void *thisptr, void *assign)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -193,7 +193,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Set(void *thisptr, void *assign)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Destroy(void *thisptr)
+SEALMETHOD Ciphertext_Destroy(void *thisptr)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -202,7 +202,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Size(void *thisptr, uint64_t *size)
+SEALMETHOD Ciphertext_Size(void *thisptr, uint64_t *size)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -212,7 +212,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Size(void *thisptr, uint64_t *size)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_SizeCapacity(void *thisptr, uint64_t *size_capacity)
+SEALMETHOD Ciphertext_SizeCapacity(void *thisptr, uint64_t *size_capacity)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -222,7 +222,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SizeCapacity(void *thisptr, uint64_t *
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_PolyModulusDegree(void *thisptr, uint64_t *poly_modulus_degree)
+SEALMETHOD Ciphertext_PolyModulusDegree(void *thisptr, uint64_t *poly_modulus_degree)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -232,7 +232,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_PolyModulusDegree(void *thisptr, uint6
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_CoeffModCount(void *thisptr, uint64_t *coeff_mod_count)
+SEALMETHOD Ciphertext_CoeffModCount(void *thisptr, uint64_t *coeff_mod_count)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -242,7 +242,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_CoeffModCount(void *thisptr, uint64_t 
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_ParmsId(void *thisptr, uint64_t *parms_id)
+SEALMETHOD Ciphertext_ParmsId(void *thisptr, uint64_t *parms_id)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -252,7 +252,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_ParmsId(void *thisptr, uint64_t *parms
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetParmsId(void *thisptr, uint64_t *parms_id)
+SEALMETHOD Ciphertext_SetParmsId(void *thisptr, uint64_t *parms_id)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -262,7 +262,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetParmsId(void *thisptr, uint64_t *pa
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize1(void *thisptr, void *context, uint64_t *parms_id, uint64_t size)
+SEALMETHOD Ciphertext_Resize1(void *thisptr, void *context, uint64_t *parms_id, uint64_t size)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -284,7 +284,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize1(void *thisptr, void *context, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize2(void *thisptr, void *context, uint64_t size)
+SEALMETHOD Ciphertext_Resize2(void *thisptr, void *context, uint64_t size)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -303,7 +303,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize2(void *thisptr, void *context, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize3(void *thisptr, uint64_t size)
+SEALMETHOD Ciphertext_Resize3(void *thisptr, uint64_t size)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -319,7 +319,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize3(void *thisptr, uint64_t size)
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize4(void *thisptr, uint64_t size, uint64_t polyModulusDegree, uint64_t coeffModCount)
+SEALMETHOD Ciphertext_Resize4(void *thisptr, uint64_t size, uint64_t polyModulusDegree, uint64_t coeffModCount)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -335,7 +335,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Resize4(void *thisptr, uint64_t size, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_GetDataAt1(void *thisptr, uint64_t index, uint64_t *data)
+SEALMETHOD Ciphertext_GetDataAt1(void *thisptr, uint64_t index, uint64_t *data)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -352,7 +352,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_GetDataAt1(void *thisptr, uint64_t ind
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_GetDataAt2(void *thisptr, uint64_t poly_index, uint64_t coeff_index, uint64_t *data)
+SEALMETHOD Ciphertext_GetDataAt2(void *thisptr, uint64_t poly_index, uint64_t coeff_index, uint64_t *data)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -376,7 +376,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_GetDataAt2(void *thisptr, uint64_t pol
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetDataAt(void *thisptr, uint64_t index, uint64_t value)
+SEALMETHOD Ciphertext_SetDataAt(void *thisptr, uint64_t index, uint64_t value)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -392,7 +392,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetDataAt(void *thisptr, uint64_t inde
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsNTTForm(void *thisptr, bool *is_ntt_form)
+SEALMETHOD Ciphertext_IsNTTForm(void *thisptr, bool *is_ntt_form)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -402,7 +402,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsNTTForm(void *thisptr, bool *is_ntt_
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetIsNTTForm(void *thisptr, bool is_ntt_form)
+SEALMETHOD Ciphertext_SetIsNTTForm(void *thisptr, bool is_ntt_form)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -411,7 +411,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetIsNTTForm(void *thisptr, bool is_nt
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Scale(void *thisptr, double *scale)
+SEALMETHOD Ciphertext_Scale(void *thisptr, double *scale)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -421,7 +421,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Scale(void *thisptr, double *scale)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetScale(void *thisptr, double scale)
+SEALMETHOD Ciphertext_SetScale(void *thisptr, double scale)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -430,7 +430,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SetScale(void *thisptr, double scale)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Release(void *thisptr)
+SEALMETHOD Ciphertext_Release(void *thisptr)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -439,7 +439,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Release(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsTransparent(void *thisptr, bool *result)
+SEALMETHOD Ciphertext_IsTransparent(void *thisptr, bool *result)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -449,7 +449,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_IsTransparent(void *thisptr, bool *res
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Pool(void *thisptr, void **pool)
+SEALMETHOD Ciphertext_Pool(void *thisptr, void **pool)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -460,7 +460,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Pool(void *thisptr, void **pool)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
+SEALMETHOD Ciphertext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -482,7 +482,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_SaveSize(void *thisptr, uint8_t compr_
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
+SEALMETHOD Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -511,7 +511,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_Save(void *thisptr, uint8_t *outptr, u
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALMETHOD Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
@@ -542,7 +542,7 @@ SEALNETNATIVE HRESULT SEALCALL Ciphertext_UnsafeLoad(void *thisptr, void *contex
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
+SEALMETHOD Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);

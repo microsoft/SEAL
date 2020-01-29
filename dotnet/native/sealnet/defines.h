@@ -54,3 +54,5 @@ static_assert(false, "Require architecture == x64");
 #define FAILED(hr) (((HRESULT)(hr)) < 0)
 
 #endif // _MSC_VER
+
+#define SEALMETHOD SEALNETNATIVE HRESULT SEALCALL

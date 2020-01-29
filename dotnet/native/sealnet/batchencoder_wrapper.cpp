@@ -16,7 +16,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Create(void *context, void **batch_encoder)
+SEALMETHOD BatchEncoder_Create(void *context, void **batch_encoder)
 {
     const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx, E_POINTER);
@@ -34,7 +34,7 @@ SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Create(void *context, void **batch_e
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Destroy(void *thisptr)
+SEALMETHOD BatchEncoder_Destroy(void *thisptr)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -43,7 +43,7 @@ SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Encode1(void *thisptr, uint64_t count, uint64_t *values, void *destination)
+SEALMETHOD BatchEncoder_Encode1(void *thisptr, uint64_t count, uint64_t *values, void *destination)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -68,7 +68,7 @@ SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Encode1(void *thisptr, uint64_t coun
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Encode2(void *thisptr, uint64_t count, int64_t *values, void *destination)
+SEALMETHOD BatchEncoder_Encode2(void *thisptr, uint64_t count, int64_t *values, void *destination)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -93,7 +93,7 @@ SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Encode2(void *thisptr, uint64_t coun
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Encode3(void *thisptr, void *plain, void *pool)
+SEALMETHOD BatchEncoder_Encode3(void *thisptr, void *plain, void *pool)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -112,7 +112,7 @@ SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Encode3(void *thisptr, void *plain, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, uint64_t *destination, void *pool)
+SEALMETHOD BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, uint64_t *destination, void *pool)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -147,7 +147,7 @@ SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Decode1(void *thisptr, void *plain, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, int64_t *destination, void *pool)
+SEALMETHOD BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, int64_t *destination, void *pool)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -182,7 +182,7 @@ SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Decode2(void *thisptr, void *plain, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Decode3(void *thisptr, void *plain, void *pool)
+SEALMETHOD BatchEncoder_Decode3(void *thisptr, void *plain, void *pool)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -201,7 +201,7 @@ SEALNETNATIVE HRESULT SEALCALL BatchEncoder_Decode3(void *thisptr, void *plain, 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL BatchEncoder_GetSlotCount(void *thisptr, uint64_t *slot_count)
+SEALMETHOD BatchEncoder_GetSlotCount(void *thisptr, uint64_t *slot_count)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);

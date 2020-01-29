@@ -17,7 +17,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL CoeffModulus_MaxBitCount(uint64_t poly_modulus_degree, int sec_level, int *bit_count)
+SEALMETHOD CoeffModulus_MaxBitCount(uint64_t poly_modulus_degree, int sec_level, int *bit_count)
 {
     IfNullRet(bit_count, E_POINTER);
 
@@ -26,7 +26,7 @@ SEALNETNATIVE HRESULT SEALCALL CoeffModulus_MaxBitCount(uint64_t poly_modulus_de
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level, uint64_t *length, void **coeffs)
+SEALMETHOD CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level, uint64_t *length, void **coeffs)
 {
     IfNullRet(length, E_POINTER);
 
@@ -46,7 +46,7 @@ SEALNETNATIVE HRESULT SEALCALL CoeffModulus_BFVDefault(uint64_t poly_modulus_deg
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL CoeffModulus_Create(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs)
+SEALMETHOD CoeffModulus_Create(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs)
 {
     IfNullRet(bit_sizes, E_POINTER);
     IfNullRet(coeffs, E_POINTER);

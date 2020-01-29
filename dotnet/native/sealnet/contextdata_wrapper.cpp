@@ -13,7 +13,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_Destroy(void *thisptr)
+SEALMETHOD ContextData_Destroy(void *thisptr)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -22,7 +22,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_TotalCoeffModulus(void *thisptr, uint64_t *count, uint64_t *total_coeff_modulus)
+SEALMETHOD ContextData_TotalCoeffModulus(void *thisptr, uint64_t *count, uint64_t *total_coeff_modulus)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -44,7 +44,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_TotalCoeffModulus(void *thisptr, uint
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_TotalCoeffModulusBitCount(void *thisptr, int *bit_count)
+SEALMETHOD ContextData_TotalCoeffModulusBitCount(void *thisptr, int *bit_count)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -54,7 +54,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_TotalCoeffModulusBitCount(void *thisp
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_Parms(void *thisptr, void **parms)
+SEALMETHOD ContextData_Parms(void *thisptr, void **parms)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -64,7 +64,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_Parms(void *thisptr, void **parms)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_Qualifiers(void *thisptr, void **epq)
+SEALMETHOD ContextData_Qualifiers(void *thisptr, void **epq)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -75,7 +75,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_Qualifiers(void *thisptr, void **epq)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_CoeffDivPlainModulus(void *thisptr, uint64_t *count, uint64_t *coeff_div)
+SEALMETHOD ContextData_CoeffDivPlainModulus(void *thisptr, uint64_t *count, uint64_t *coeff_div)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -97,7 +97,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_CoeffDivPlainModulus(void *thisptr, u
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_PlainUpperHalfThreshold(void *thisptr, uint64_t *puht)
+SEALMETHOD ContextData_PlainUpperHalfThreshold(void *thisptr, uint64_t *puht)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -107,7 +107,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_PlainUpperHalfThreshold(void *thisptr
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *puhi)
+SEALMETHOD ContextData_PlainUpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *puhi)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -129,7 +129,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_PlainUpperHalfIncrement(void *thisptr
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_UpperHalfThreshold(void *thisptr, uint64_t *count, uint64_t *uht)
+SEALMETHOD ContextData_UpperHalfThreshold(void *thisptr, uint64_t *count, uint64_t *uht)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -158,7 +158,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_UpperHalfThreshold(void *thisptr, uin
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_UpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *uhi)
+SEALMETHOD ContextData_UpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *uhi)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -186,7 +186,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_UpperHalfIncrement(void *thisptr, uin
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_PrevContextData(void *thisptr, void **prev_data)
+SEALMETHOD ContextData_PrevContextData(void *thisptr, void **prev_data)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -197,7 +197,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_PrevContextData(void *thisptr, void *
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_NextContextData(void *thisptr, void **next_data)
+SEALMETHOD ContextData_NextContextData(void *thisptr, void **next_data)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
@@ -208,7 +208,7 @@ SEALNETNATIVE HRESULT SEALCALL ContextData_NextContextData(void *thisptr, void *
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL ContextData_ChainIndex(void *thisptr, uint64_t *index)
+SEALMETHOD ContextData_ChainIndex(void *thisptr, uint64_t *index)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);

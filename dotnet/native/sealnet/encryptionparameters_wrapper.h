@@ -13,36 +13,36 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Create1(uint8_t scheme, void **enc_params);
+SEALMETHOD EncParams_Create1(uint8_t scheme, void **enc_params);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Create2(void *copy, void **enc_params);
+SEALMETHOD EncParams_Create2(void *copy, void **enc_params);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Destroy(void *thisptr);
+SEALMETHOD EncParams_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Set(void *thisptr, void *assign);
+SEALMETHOD EncParams_Set(void *thisptr, void *assign);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_GetPolyModulusDegree(void *thisptr, uint64_t *degree);
+SEALMETHOD EncParams_GetPolyModulusDegree(void *thisptr, uint64_t *degree);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_SetPolyModulusDegree(void *thisptr, uint64_t degree);
+SEALMETHOD EncParams_SetPolyModulusDegree(void *thisptr, uint64_t degree);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_GetCoeffModulus(void *thisptr, uint64_t *length, void **coeffs);
+SEALMETHOD EncParams_GetCoeffModulus(void *thisptr, uint64_t *length, void **coeffs);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coeffs);
+SEALMETHOD EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coeffs);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_GetScheme(void *thisptr, uint8_t *scheme);
+SEALMETHOD EncParams_GetScheme(void *thisptr, uint8_t *scheme);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_GetParmsId(void *thisptr, uint64_t *parms_id);
+SEALMETHOD EncParams_GetParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_GetPlainModulus(void *thisptr, void **plain_modulus);
+SEALMETHOD EncParams_GetPlainModulus(void *thisptr, void **plain_modulus);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus1(void *thisptr, void *modulus);
+SEALMETHOD EncParams_SetPlainModulus1(void *thisptr, void *modulus);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_SetPlainModulus2(void *thisptr, uint64_t plain_modulus);
+SEALMETHOD EncParams_SetPlainModulus2(void *thisptr, uint64_t plain_modulus);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Equals(void *thisptr, void *otherptr, bool *result);
+SEALMETHOD EncParams_Equals(void *thisptr, void *otherptr, bool *result);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
+SEALMETHOD EncParams_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
+SEALMETHOD EncParams_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
 
-SEALNETNATIVE HRESULT SEALCALL EncParams_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
+SEALMETHOD EncParams_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes);

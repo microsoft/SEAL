@@ -13,7 +13,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL Serialization_SEALMagic(uint16_t *result)
+SEALMETHOD Serialization_SEALMagic(uint16_t *result)
 {
     IfNullRet(result, E_POINTER);
 
@@ -21,7 +21,7 @@ SEALNETNATIVE HRESULT SEALCALL Serialization_SEALMagic(uint16_t *result)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Serialization_IsSupportedComprMode(uint8_t compr_mode, bool *result)
+SEALMETHOD Serialization_IsSupportedComprMode(uint8_t compr_mode, bool *result)
 {
     IfNullRet(result, E_POINTER);
 
@@ -29,7 +29,7 @@ SEALNETNATIVE HRESULT SEALCALL Serialization_IsSupportedComprMode(uint8_t compr_
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Serialization_ComprModeDefault(uint8_t *result)
+SEALMETHOD Serialization_ComprModeDefault(uint8_t *result)
 {
     IfNullRet(result, E_POINTER);
 
@@ -37,7 +37,7 @@ SEALNETNATIVE HRESULT SEALCALL Serialization_ComprModeDefault(uint8_t *result)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Serialization_IsValidHeader(uint8_t *headerptr, uint64_t size, bool *result)
+SEALMETHOD Serialization_IsValidHeader(uint8_t *headerptr, uint64_t size, bool *result)
 {
     IfNullRet(headerptr, E_POINTER);
     IfNullRet(result, E_POINTER);

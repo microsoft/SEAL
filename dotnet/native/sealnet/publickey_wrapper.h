@@ -13,24 +13,24 @@
 #include "sealnet/defines.h"
 #include <stdint.h>
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_Create1(void **public_key);
+SEALMETHOD PublicKey_Create1(void **public_key);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_Create2(void *copy, void **public_key);
+SEALMETHOD PublicKey_Create2(void *copy, void **public_key);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_Set(void *thisptr, void *assign);
+SEALMETHOD PublicKey_Set(void *thisptr, void *assign);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_Data(void *thisptr, void **data);
+SEALMETHOD PublicKey_Data(void *thisptr, void **data);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_ParmsId(void *thisptr, uint64_t *parms_id);
+SEALMETHOD PublicKey_ParmsId(void *thisptr, uint64_t *parms_id);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_Pool(void *thisptr, void **pool);
+SEALMETHOD PublicKey_Pool(void *thisptr, void **pool);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_Destroy(void *thisptr);
+SEALMETHOD PublicKey_Destroy(void *thisptr);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
+SEALMETHOD PublicKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
+SEALMETHOD PublicKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
+SEALMETHOD PublicKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
 
-SEALNETNATIVE HRESULT SEALCALL PublicKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);
+SEALMETHOD PublicKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes);

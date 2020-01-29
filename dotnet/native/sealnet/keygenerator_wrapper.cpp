@@ -47,7 +47,7 @@ struct seal::KeyGenerator::KeyGeneratorPrivateHelper
     }
 };
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create1(void *sealContext, void **key_generator)
+SEALMETHOD KeyGenerator_Create1(void *sealContext, void **key_generator)
 {
     const auto &sharedctx = SharedContextFromVoid(sealContext);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -65,7 +65,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create1(void *sealContext, void **ke
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create2(void *sealContext, void *secret_key, void **key_generator)
+SEALMETHOD KeyGenerator_Create2(void *sealContext, void *secret_key, void **key_generator)
 {
     const auto &sharedctx = SharedContextFromVoid(sealContext);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -85,7 +85,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create2(void *sealContext, void *sec
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create3(void *sealContext, void *secret_key, void *public_key, void **key_generator)
+SEALMETHOD KeyGenerator_Create3(void *sealContext, void *secret_key, void *public_key, void **key_generator)
 {
     const auto &sharedctx = SharedContextFromVoid(sealContext);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -107,7 +107,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create3(void *sealContext, void *sec
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr)
+SEALMETHOD KeyGenerator_Destroy(void *thisptr)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -116,7 +116,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys)
+SEALMETHOD KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -138,7 +138,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_RelinKeys(void *thisptr, bool save_s
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromElts(void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys)
+SEALMETHOD KeyGenerator_GaloisKeysFromElts(void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -164,7 +164,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromElts(void *thisptr, ui
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromSteps(void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys)
+SEALMETHOD KeyGenerator_GaloisKeysFromSteps(void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -192,7 +192,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysFromSteps(void *thisptr, u
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysAll(void *thisptr, bool save_seed, void **galois_keys)
+SEALMETHOD KeyGenerator_GaloisKeysAll(void *thisptr, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -216,7 +216,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_GaloisKeysAll(void *thisptr, bool sa
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_PublicKey(void *thisptr, void **public_key)
+SEALMETHOD KeyGenerator_PublicKey(void *thisptr, void **public_key)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -227,7 +227,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_PublicKey(void *thisptr, void **publ
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_SecretKey(void *thisptr, void **secret_key)
+SEALMETHOD KeyGenerator_SecretKey(void *thisptr, void **secret_key)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -238,7 +238,7 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_SecretKey(void *thisptr, void **secr
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching)
+SEALMETHOD KeyGenerator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);

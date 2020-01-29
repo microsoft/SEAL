@@ -12,7 +12,7 @@
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Create(void *context, void **encoder)
+SEALMETHOD IntegerEncoder_Create(void *context, void **encoder)
 {
     const auto& sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
@@ -30,7 +30,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Create(void *context, void **encod
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Destroy(void *thisptr)
+SEALMETHOD IntegerEncoder_Destroy(void *thisptr)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -39,7 +39,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode1(void *thisptr, int32_t value, void *plain)
+SEALMETHOD IntegerEncoder_Encode1(void *thisptr, int32_t value, void *plain)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -50,7 +50,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode1(void *thisptr, int32_t val
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode2(void *thisptr, uint32_t value, void *plain)
+SEALMETHOD IntegerEncoder_Encode2(void *thisptr, uint32_t value, void *plain)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -61,7 +61,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode2(void *thisptr, uint32_t va
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode3(void *thisptr, uint64_t value, void *plain)
+SEALMETHOD IntegerEncoder_Encode3(void *thisptr, uint64_t value, void *plain)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -72,7 +72,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode3(void *thisptr, uint64_t va
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode4(void *thisptr, int64_t value, void *plain)
+SEALMETHOD IntegerEncoder_Encode4(void *thisptr, int64_t value, void *plain)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -83,7 +83,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode4(void *thisptr, int64_t val
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode5(void *thisptr, void *biguint, void *plain)
+SEALMETHOD IntegerEncoder_Encode5(void *thisptr, void *biguint, void *plain)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -96,7 +96,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_Encode5(void *thisptr, void *bigui
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeUInt32(void *thisptr, void *plainptr, uint32_t *result)
+SEALMETHOD IntegerEncoder_DecodeUInt32(void *thisptr, void *plainptr, uint32_t *result)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -115,7 +115,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeUInt32(void *thisptr, void *
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeUInt64(void *thisptr, void *plainptr, uint64_t *result)
+SEALMETHOD IntegerEncoder_DecodeUInt64(void *thisptr, void *plainptr, uint64_t *result)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -134,7 +134,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeUInt64(void *thisptr, void *
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeInt32(void *thisptr, void *plainptr, int32_t *result)
+SEALMETHOD IntegerEncoder_DecodeInt32(void *thisptr, void *plainptr, int32_t *result)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -153,7 +153,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeInt32(void *thisptr, void *p
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeInt64(void *thisptr, void *plainptr, int64_t *result)
+SEALMETHOD IntegerEncoder_DecodeInt64(void *thisptr, void *plainptr, int64_t *result)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -172,7 +172,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeInt64(void *thisptr, void *p
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void *thisptr, void *plainptr, void **biguint)
+SEALMETHOD IntegerEncoder_DecodeBigUInt(void *thisptr, void *plainptr, void **biguint)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);
@@ -193,7 +193,7 @@ SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_DecodeBigUInt(void *thisptr, void 
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL IntegerEncoder_PlainModulus(void *thisptr, void **smallModPtr)
+SEALMETHOD IntegerEncoder_PlainModulus(void *thisptr, void **smallModPtr)
 {
     IntegerEncoder *intenc = FromVoid<IntegerEncoder>(thisptr);
     IfNullRet(intenc, E_POINTER);

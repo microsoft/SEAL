@@ -13,7 +13,7 @@ using namespace std;
 using namespace seal;
 using namespace sealnet;
 
-SEALNETNATIVE HRESULT SEALCALL Decryptor_Create(void *context, void *secret_key, void **decryptor)
+SEALMETHOD Decryptor_Create(void *context, void *secret_key, void **decryptor)
 {
     SecretKey *secretKey = FromVoid<SecretKey>(secret_key);
     IfNullRet(secretKey, E_POINTER);
@@ -33,7 +33,7 @@ SEALNETNATIVE HRESULT SEALCALL Decryptor_Create(void *context, void *secret_key,
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Decryptor_Destroy(void *thisptr)
+SEALMETHOD Decryptor_Destroy(void *thisptr)
 {
     Decryptor *decryptor = FromVoid<Decryptor>(thisptr);
     IfNullRet(decryptor, E_POINTER);
@@ -42,7 +42,7 @@ SEALNETNATIVE HRESULT SEALCALL Decryptor_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEALNETNATIVE HRESULT SEALCALL Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination)
+SEALMETHOD Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination)
 {
     Decryptor *decryptor = FromVoid<Decryptor>(thisptr);
     IfNullRet(decryptor, E_POINTER);
@@ -62,7 +62,7 @@ SEALNETNATIVE HRESULT SEALCALL Decryptor_Decrypt(void *thisptr, void *encrypted,
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget)
+SEALMETHOD Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget)
 {
     Decryptor *decryptor = FromVoid<Decryptor>(thisptr);
     IfNullRet(decryptor, E_POINTER);
