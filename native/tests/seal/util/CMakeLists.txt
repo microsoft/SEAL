@@ -3,6 +3,7 @@
 
 target_sources(sealtest
     PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
         ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
         ${CMAKE_CURRENT_LIST_DIR}/common.cpp
         ${CMAKE_CURRENT_LIST_DIR}/hash.cpp

@@ -3,7 +3,6 @@
 
 target_sources(sealtest
     PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
         ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
         ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
