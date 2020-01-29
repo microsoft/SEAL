@@ -61,25 +61,6 @@ namespace SEALNetTest
 
             Assert.AreNotSame(plain, plain3);
             Assert.AreEqual(plain, plain3);
-
-            KeyGenerator keygen3 = new KeyGenerator(context, keygen1.SecretKey, keygen1.PublicKey);
-            Encryptor encryptor3 = new Encryptor(context, keygen3.PublicKey);
-            Decryptor decryptor3 = new Decryptor(context, keygen3.SecretKey);
-
-            Plaintext plain4 = new Plaintext();
-            decryptor3.Decrypt(cipher, plain4);
-
-            Assert.AreNotSame(plain, plain4);
-            Assert.AreEqual(plain, plain4);
-
-            Ciphertext cipher2 = new Ciphertext();
-            plain2.Release();
-
-            encryptor3.Encrypt(plain, cipher2);
-            decryptor2.Decrypt(cipher2, plain2);
-
-            Assert.AreNotSame(plain, plain2);
-            Assert.AreEqual(plain, plain2);
         }
 
         [TestMethod]
@@ -117,11 +98,6 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(context, null));
             Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey));
             Utilities.AssertThrows<ArgumentException>(() => keygen = new KeyGenerator(context, secret));
-
-            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(context, keygen.SecretKey, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(context, null, keygen.PublicKey));
-            Utilities.AssertThrows<ArgumentNullException>(() => keygen = new KeyGenerator(null, keygen.SecretKey, keygen.PublicKey));
-            Utilities.AssertThrows<ArgumentException>(() => keygen = new KeyGenerator(context, secret, keygen.PublicKey));
 
             Utilities.AssertThrows<ArgumentNullException>(() => keygen.GaloisKeys(elts_null));
             Utilities.AssertThrows<ArgumentException>(() => keygen.GaloisKeys(elts));

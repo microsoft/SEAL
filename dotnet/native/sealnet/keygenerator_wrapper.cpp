@@ -85,28 +85,6 @@ SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create2(void *sealContext, void *sec
     }
 }
 
-SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Create3(void *sealContext, void *secret_key, void *public_key, void **key_generator)
-{
-    const auto &sharedctx = SharedContextFromVoid(sealContext);
-    IfNullRet(sharedctx.get(), E_POINTER);
-    SecretKey *secret_key_ptr = FromVoid<SecretKey>(secret_key);
-    IfNullRet(secret_key_ptr, E_POINTER);
-    PublicKey *public_key_ptr = FromVoid<PublicKey>(public_key);
-    IfNullRet(public_key_ptr, E_POINTER);
-    IfNullRet(key_generator, E_POINTER);
-
-    try
-    {
-        KeyGenerator *keygen = new KeyGenerator(sharedctx, *secret_key_ptr, *public_key_ptr);
-        *key_generator = keygen;
-        return S_OK;
-    }
-    catch (const invalid_argument&)
-    {
-        return E_INVALIDARG;
-    }
-}
-
 SEALNETNATIVE HRESULT SEALCALL KeyGenerator_Destroy(void *thisptr)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);

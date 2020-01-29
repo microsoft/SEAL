@@ -32,13 +32,11 @@ namespace seal
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        // Secret key and public key have not been generated
+        // Secret key has not been generated
         sk_generated_ = false;
-        pk_generated_ = false;
 
         // Generate the secret and public key
         generate_sk();
-        generate_pk();
     }
 
     KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context,
@@ -63,40 +61,6 @@ namespace seal
         sk_generated_ = true;
 
         // Generate the public key
-        generate_sk(sk_generated_);
-        generate_pk();
-    }
-
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context,
-        const SecretKey &secret_key, const PublicKey &public_key) :
-        context_(move(context))
-    {
-        // Verify parameters
-        if (!context_)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context_->parameters_set())
-        {
-            throw invalid_argument("encryption parameters are not set correctly");
-        }
-        if (!is_valid_for(secret_key, context_))
-        {
-            throw invalid_argument("secret key is not valid for encryption parameters");
-        }
-        if (!is_valid_for(public_key, context_))
-        {
-            throw invalid_argument("public key is not valid for encryption parameters");
-        }
-
-        // Set the secret and public keys
-        secret_key_ = secret_key;
-        public_key_ = public_key;
-
-        // Secret key and public key are generated
-        sk_generated_ = true;
-        pk_generated_ = true;
-
         generate_sk(sk_generated_);
     }
 
@@ -143,7 +107,7 @@ namespace seal
         sk_generated_ = true;
     }
 
-    void KeyGenerator::generate_pk()
+    PublicKey KeyGenerator::generate_pk() const
     {
         if (!sk_generated_)
         {
@@ -165,18 +129,17 @@ namespace seal
 
         // Initialize public key.
         // PublicKey data allocated from pool given by MemoryManager::GetPool.
-        public_key_ = PublicKey();
-        pk_generated_ = false;
+        PublicKey public_key;
 
         shared_ptr<UniformRandomGenerator> random(
             parms.random_generator()->create());
-        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, false, public_key_.data());
+        encrypt_zero_symmetric(
+            secret_key_, context_, context_data.parms_id(), true, false, public_key.data());
 
         // Set the parms_id for public key
-        public_key_.parms_id() = context_data.parms_id();
+        public_key.parms_id() = context_data.parms_id();
 
-        // Public key has been generated
-        pk_generated_ = true;
+        return public_key;
     }
 
     RelinKeys KeyGenerator::relin_keys(size_t count, bool save_seed)
@@ -352,15 +315,6 @@ namespace seal
             throw logic_error("secret key has not been generated");
         }
         return secret_key_;
-    }
-
-    const PublicKey &KeyGenerator::public_key() const
-    {
-        if (!pk_generated_)
-        {
-            throw logic_error("public key has not been generated");
-        }
-        return public_key_;
     }
 
     void KeyGenerator::compute_secret_key_array(

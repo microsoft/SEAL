@@ -76,47 +76,8 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates an KeyGenerator instance initialized with the specified
-        /// SEALContext and specified previously secret and public keys.
-        /// </summary>
-        /// <remarks>
-        /// Creates an KeyGenerator instance initialized with the specified
-        /// SEALContext and specified previously secret and public keys. This can
-        /// e.g. be used to increase the number of relinearization keys from what
-        /// had earlier been generated, or to generate Galois keys in case they
-        /// had not been generated earlier.
-        /// </remarks>
-        /// <param name="context">The SEALContext</param>
-        /// <param name="secretKey">A previously generated secret key</param>
-        /// <param name="publicKey">A previously generated public key</param>
-        /// <exception cref="ArgumentNullException">if either context, secretKey
-        /// or publicKey are null</exception>
-        /// <exception cref="ArgumentException">if encryption parameters are not
-        /// valid</exception>
-        /// <exception cref="ArgumentException">if secretKey or publicKey is not
-        /// valid for encryption parameters</exception>
-        public KeyGenerator(SEALContext context, SecretKey secretKey, PublicKey publicKey)
-        {
-            if (null == context)
-                throw new ArgumentNullException(nameof(context));
-            if (null == secretKey)
-                throw new ArgumentNullException(nameof(secretKey));
-            if (null == publicKey)
-                throw new ArgumentNullException(nameof(publicKey));
-            if (!context.ParametersSet)
-                throw new ArgumentException("Encryption parameters are not set correctly");
-            if (!ValCheck.IsValidFor(secretKey, context))
-                throw new ArgumentException("Secret key is not valid for encryption parameters");
-            if (!ValCheck.IsValidFor(publicKey, context))
-                throw new ArgumentException("Public key is not valid for encryption parameters");
-
-            NativeMethods.KeyGenerator_Create(context.NativePtr, secretKey.NativePtr,
-                publicKey.NativePtr, out IntPtr ptr);
-            NativePtr = ptr;
-        }
-
-        /// <summary>
-        /// Returns a copy of the public key.
+        /// Generates and returns a public key. Every time this function is called,
+        /// a new public key will be generated.
         /// </summary>
         public PublicKey PublicKey
         {

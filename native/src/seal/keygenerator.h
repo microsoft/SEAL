@@ -58,31 +58,18 @@ namespace seal
             const SecretKey &secret_key);
 
         /**
-        Creates an KeyGenerator instance initialized with the specified SEALContext
-        and specified previously secret and public keys. This can e.g. be used
-        to increase the number of relinearization keys from what had earlier been
-        generated, or to generate Galois keys in case they had not been generated
-        earlier.
-
-        @param[in] context The SEALContext
-        @param[in] secret_key A previously generated secret key
-        @param[in] public_key A previously generated public key
-        @throws std::invalid_argument if encryption parameters are not valid
-        @throws std::invalid_argument if secret_key or public_key is not valid
-        for encryption parameters
-        */
-        KeyGenerator(std::shared_ptr<SEALContext> context,
-            const SecretKey &secret_key, const PublicKey &public_key);
-
-        /**
         Returns a const reference to the secret key.
         */
         SEAL_NODISCARD const SecretKey &secret_key() const;
 
         /**
-        Returns a const reference to the public key.
+        Generates and returns a public key. Every time this function is called,
+        a new public key will be generated.
         */
-        SEAL_NODISCARD const PublicKey &public_key() const;
+        SEAL_NODISCARD inline PublicKey public_key() const
+        {
+            return generate_pk();
+        }
 
         /**
         Generates and returns relinearization keys. This function returns
@@ -294,7 +281,7 @@ namespace seal
         /**
         Generates new public key matching to existing secret key.
         */
-        void generate_pk();
+        PublicKey generate_pk() const;
 
         /**
         Generates new key switching keys for an array of new keys.
@@ -356,8 +343,6 @@ namespace seal
 
         std::shared_ptr<SEALContext> context_{ nullptr };
 
-        PublicKey public_key_;
-
         SecretKey secret_key_;
 
         std::size_t secret_key_array_size_ = 0;
@@ -367,7 +352,5 @@ namespace seal
         mutable util::ReaderWriterLocker secret_key_array_locker_;
 
         bool sk_generated_ = false;
-
-        bool pk_generated_ = false;
     };
 }
