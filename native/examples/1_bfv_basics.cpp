@@ -199,8 +199,7 @@ void example_bfv_basics()
     print_line(__LINE__);
     int x = 6;
     Plaintext x_plain(to_string(x));
-    cout << "Express x = " + to_string(x) +
-        " as a plaintext polynomial 0x" + x_plain.to_string() + "." << endl;
+    cout << "Express x = " + to_string(x) + " as a plaintext polynomial 0x" + x_plain.to_string() + "." << endl;
 
     /*
     We then encrypt the plaintext, producing a ciphertext.
@@ -222,8 +221,8 @@ void example_bfv_basics()
     /*
     There is plenty of noise budget left in this freshly encrypted ciphertext.
     */
-    cout << "    + noise budget in freshly encrypted x: "
-        << decryptor.invariant_noise_budget(x_encrypted) << " bits" << endl;
+    cout << "    + noise budget in freshly encrypted x: " << decryptor.invariant_noise_budget(x_encrypted) << " bits"
+         << endl;
 
     /*
     We decrypt the ciphertext and print the resulting plaintext in order to
@@ -267,8 +266,8 @@ void example_bfv_basics()
     consumption.
     */
     cout << "    + size of x_sq_plus_one: " << x_sq_plus_one.size() << endl;
-    cout << "    + noise budget in x_sq_plus_one: "
-        << decryptor.invariant_noise_budget(x_sq_plus_one) << " bits" << endl;
+    cout << "    + noise budget in x_sq_plus_one: " << decryptor.invariant_noise_budget(x_sq_plus_one) << " bits"
+         << endl;
 
     /*
     Even though the size has grown, decryption works as usual as long as noise
@@ -288,9 +287,8 @@ void example_bfv_basics()
     evaluator.add_plain(x_encrypted, plain_one, x_plus_one_sq);
     evaluator.square_inplace(x_plus_one_sq);
     cout << "    + size of x_plus_one_sq: " << x_plus_one_sq.size() << endl;
-    cout << "    + noise budget in x_plus_one_sq: "
-        << decryptor.invariant_noise_budget(x_plus_one_sq)
-        << " bits" << endl;
+    cout << "    + noise budget in x_plus_one_sq: " << decryptor.invariant_noise_budget(x_plus_one_sq) << " bits"
+         << endl;
     cout << "    + decryption of x_plus_one_sq: ";
     decryptor.decrypt(x_plus_one_sq, decrypted_result);
     cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
@@ -305,8 +303,8 @@ void example_bfv_basics()
     evaluator.multiply_plain_inplace(x_sq_plus_one, plain_four);
     evaluator.multiply(x_sq_plus_one, x_plus_one_sq, encrypted_result);
     cout << "    + size of encrypted_result: " << encrypted_result.size() << endl;
-    cout << "    + noise budget in encrypted_result: "
-        << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
+    cout << "    + noise budget in encrypted_result: " << decryptor.invariant_noise_budget(encrypted_result) << " bits"
+         << endl;
     cout << "NOTE: Decryption can be incorrect if noise budget is zero." << endl;
 
     cout << endl;
@@ -354,11 +352,10 @@ void example_bfv_basics()
     evaluator.square(x_encrypted, x_squared);
     cout << "    + size of x_squared: " << x_squared.size() << endl;
     evaluator.relinearize_inplace(x_squared, relin_keys);
-    cout << "    + size of x_squared (after relinearization): "
-        << x_squared.size() << endl;
+    cout << "    + size of x_squared (after relinearization): " << x_squared.size() << endl;
     evaluator.add_plain(x_squared, plain_one, x_sq_plus_one);
-    cout << "    + noise budget in x_sq_plus_one: "
-        << decryptor.invariant_noise_budget(x_sq_plus_one) << " bits" << endl;
+    cout << "    + noise budget in x_sq_plus_one: " << decryptor.invariant_noise_budget(x_sq_plus_one) << " bits"
+         << endl;
     cout << "    + decryption of x_sq_plus_one: ";
     decryptor.decrypt(x_sq_plus_one, decrypted_result);
     cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
@@ -366,14 +363,13 @@ void example_bfv_basics()
     print_line(__LINE__);
     Ciphertext x_plus_one;
     cout << "Compute x_plus_one (x+1)," << endl;
-    cout << string(13, ' ')
-        << "then compute and relinearize x_plus_one_sq ((x+1)^2)." << endl;
+    cout << string(13, ' ') << "then compute and relinearize x_plus_one_sq ((x+1)^2)." << endl;
     evaluator.add_plain(x_encrypted, plain_one, x_plus_one);
     evaluator.square(x_plus_one, x_plus_one_sq);
     cout << "    + size of x_plus_one_sq: " << x_plus_one_sq.size() << endl;
     evaluator.relinearize_inplace(x_plus_one_sq, relin_keys);
-    cout << "    + noise budget in x_plus_one_sq: "
-        << decryptor.invariant_noise_budget(x_plus_one_sq) << " bits" << endl;
+    cout << "    + noise budget in x_plus_one_sq: " << decryptor.invariant_noise_budget(x_plus_one_sq) << " bits"
+         << endl;
     cout << "    + decryption of x_plus_one_sq: ";
     decryptor.decrypt(x_plus_one_sq, decrypted_result);
     cout << "0x" << decrypted_result.to_string() << " ...... Correct." << endl;
@@ -384,10 +380,9 @@ void example_bfv_basics()
     evaluator.multiply(x_sq_plus_one, x_plus_one_sq, encrypted_result);
     cout << "    + size of encrypted_result: " << encrypted_result.size() << endl;
     evaluator.relinearize_inplace(encrypted_result, relin_keys);
-    cout << "    + size of encrypted_result (after relinearization): "
-        << encrypted_result.size() << endl;
-    cout << "    + noise budget in encrypted_result: "
-        << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
+    cout << "    + size of encrypted_result (after relinearization): " << encrypted_result.size() << endl;
+    cout << "    + noise budget in encrypted_result: " << decryptor.invariant_noise_budget(encrypted_result) << " bits"
+         << endl;
 
     cout << endl;
     cout << "NOTE: Notice the increase in remaining noise budget." << endl;
@@ -399,8 +394,7 @@ void example_bfv_basics()
     print_line(__LINE__);
     cout << "Decrypt encrypted_result (4(x^2+1)(x+1)^2)." << endl;
     decryptor.decrypt(encrypted_result, decrypted_result);
-    cout << "    + decryption of 4(x^2+1)(x+1)^2 = 0x"
-        << decrypted_result.to_string() << " ...... Correct." << endl;
+    cout << "    + decryption of 4(x^2+1)(x+1)^2 = 0x" << decrypted_result.to_string() << " ...... Correct." << endl;
     cout << endl;
 
     /*

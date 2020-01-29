@@ -59,8 +59,7 @@ void example_serialization()
         size_t poly_modulus_degree = 8192;
         EncryptionParameters parms(scheme_type::CKKS);
         parms.set_poly_modulus_degree(poly_modulus_degree);
-        parms.set_coeff_modulus(CoeffModulus::Create(
-            poly_modulus_degree, { 50, 20, 50 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 50, 20, 50 }));
 
         /*
         Serialization of the encryption parameters to our shared stream is very
@@ -114,19 +113,17 @@ void example_serialization()
         */
         print_line(__LINE__);
         cout << "EncryptionParameters: data size upper bound (compr_mode_type::none): "
-            << parms.save_size(compr_mode_type::none) << endl;
+             << parms.save_size(compr_mode_type::none) << endl;
         cout << "             "
-            << "EncryptionParameters: data size upper bound (compr_mode_type::deflate): "
-            << parms.save_size(compr_mode_type::deflate) << endl;
+             << "EncryptionParameters: data size upper bound (compr_mode_type::deflate): "
+             << parms.save_size(compr_mode_type::deflate) << endl;
 
         /*
         As an example, we now serialize the encryption parameters to a fixed size
         buffer.
         */
         vector<SEAL_BYTE> byte_buffer(parms.save_size());
-        parms.save(
-            reinterpret_cast<SEAL_BYTE*>(byte_buffer.data()),
-            byte_buffer.size());
+        parms.save(reinterpret_cast<SEAL_BYTE *>(byte_buffer.data()), byte_buffer.size());
 
         /*
         To illustrate deserialization, we load back the encryption parameters
@@ -137,16 +134,13 @@ void example_serialization()
         of the buffer is only used for a sanity check.
         */
         EncryptionParameters parms2;
-        parms2.load(
-            reinterpret_cast<const SEAL_BYTE*>(byte_buffer.data()),
-            byte_buffer.size());
+        parms2.load(reinterpret_cast<const SEAL_BYTE *>(byte_buffer.data()), byte_buffer.size());
 
         /*
         We can check that the saved and loaded encryption parameters indeed match.
         */
         print_line(__LINE__);
-        cout << "EncryptionParameters: parms == parms2: "
-            << boolalpha << (parms == parms2) << endl;
+        cout << "EncryptionParameters: parms == parms2: " << boolalpha << (parms == parms2) << endl;
 
         /*
         The functions presented and used here exist for all Microsoft SEAL objects
@@ -212,7 +206,7 @@ void example_serialization()
         print_line(__LINE__);
         cout << "Serializable<RelinKeys>: wrote " << size_rlk << " bytes" << endl;
         cout << "             "
-            << "RelinKeys (local): wrote " << size_rlk_local << " bytes" << endl;
+             << "RelinKeys (local): wrote " << size_rlk_local << " bytes" << endl;
 
         /*
         Seek back in data_stream to where rlk data ended, i.e., size_rlk_local
@@ -266,10 +260,9 @@ void example_serialization()
         Now compare the serialized sizes of encrypted1 and sym_encrypted1.
         */
         print_line(__LINE__);
-        cout << "Serializable<Ciphertext> (symmetric-key): wrote "
-            << size_sym_encrypted1 << " bytes" << endl;
+        cout << "Serializable<Ciphertext> (symmetric-key): wrote " << size_sym_encrypted1 << " bytes" << endl;
         cout << "             "
-            << "Ciphertext (public-key): wrote " << size_encrypted1 << " bytes" << endl;
+             << "Ciphertext (public-key): wrote " << size_encrypted1 << " bytes" << endl;
 
         /*
         Seek back in data_stream to where sym_encrypted1 data ended, i.e.,
@@ -344,8 +337,7 @@ void example_serialization()
         auto size_encrypted_prod = encrypted_prod.save(data_stream);
 
         print_line(__LINE__);
-        cout << "Ciphertext (symmetric-key): wrote "
-            << size_encrypted_prod << " bytes" << endl;
+        cout << "Ciphertext (symmetric-key): wrote " << size_encrypted_prod << " bytes" << endl;
     }
 
     /*

@@ -81,8 +81,7 @@ void example_levels()
                                                |
                     coeff_modulus: { 50 }  +---+  Level 0 (lowest level)
     */
-    parms.set_coeff_modulus(CoeffModulus::Create(
-        poly_modulus_degree, { 50, 30, 30, 50, 50 }));
+    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 50, 30, 30, 50, 50 }));
 
     /*
     In this example the plain_modulus does not play much of a role; we choose
@@ -116,7 +115,7 @@ void example_levels()
     cout << "      parms_id: " << context_data->parms_id() << endl;
     cout << "      coeff_modulus primes: ";
     cout << hex;
-    for(const auto &prime : context_data->parms().coeff_modulus())
+    for (const auto &prime : context_data->parms().coeff_modulus())
     {
         cout << prime.value() << " ";
     }
@@ -146,7 +145,7 @@ void example_levels()
         cout << "      parms_id: " << context_data->parms_id() << endl;
         cout << "      coeff_modulus primes: ";
         cout << hex;
-        for(const auto &prime : context_data->parms().coeff_modulus())
+        for (const auto &prime : context_data->parms().coeff_modulus())
         {
             cout << prime.value() << " ";
         }
@@ -209,12 +208,11 @@ void example_levels()
     cout << "Perform modulus switching on encrypted and print." << endl;
     context_data = context->first_context_data();
     cout << "---->";
-    while(context_data->next_context_data())
+    while (context_data->next_context_data())
     {
         cout << " Level (chain index): " << context_data->chain_index() << endl;
         cout << "      parms_id of encrypted: " << encrypted.parms_id() << endl;
-        cout << "      Noise budget at this level: "
-            << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+        cout << "      Noise budget at this level: " << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
         cout << "\\" << endl;
         cout << " \\-->";
         evaluator.mod_switch_to_next_inplace(encrypted);
@@ -222,8 +220,7 @@ void example_levels()
     }
     cout << " Level (chain index): " << context_data->chain_index() << endl;
     cout << "      parms_id of encrypted: " << encrypted.parms_id() << endl;
-    cout << "      Noise budget at this level: "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+    cout << "      Noise budget at this level: " << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
     cout << "\\" << endl;
     cout << " \\-->";
     cout << " End of chain reached" << endl << endl;
@@ -256,24 +253,24 @@ void example_levels()
     print_line(__LINE__);
     cout << "Compute the 8th power." << endl;
     encryptor.encrypt(plain, encrypted);
-    cout << "    + Noise budget fresh:                   "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+    cout << "    + Noise budget fresh:                   " << decryptor.invariant_noise_budget(encrypted) << " bits"
+         << endl;
     evaluator.square_inplace(encrypted);
     evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "    + Noise budget of the 2nd power:         "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+    cout << "    + Noise budget of the 2nd power:         " << decryptor.invariant_noise_budget(encrypted) << " bits"
+         << endl;
     evaluator.square_inplace(encrypted);
     evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "    + Noise budget of the 4th power:         "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+    cout << "    + Noise budget of the 4th power:         " << decryptor.invariant_noise_budget(encrypted) << " bits"
+         << endl;
 
     /*
     Surprisingly, in this case modulus switching has no effect at all on the
     noise budget.
     */
     evaluator.mod_switch_to_next_inplace(encrypted);
-    cout << "    + Noise budget after modulus switching:  "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+    cout << "    + Noise budget after modulus switching:  " << decryptor.invariant_noise_budget(encrypted) << " bits"
+         << endl;
     /*
     This means that there is no harm at all in dropping some of the coefficient
     modulus after doing enough computations. In some cases one might want to
@@ -284,11 +281,11 @@ void example_levels()
     */
     evaluator.square_inplace(encrypted);
     evaluator.relinearize_inplace(encrypted, relin_keys);
-    cout << "    + Noise budget of the 8th power:         "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+    cout << "    + Noise budget of the 8th power:         " << decryptor.invariant_noise_budget(encrypted) << " bits"
+         << endl;
     evaluator.mod_switch_to_next_inplace(encrypted);
-    cout << "    + Noise budget after modulus switching:  "
-        << decryptor.invariant_noise_budget(encrypted) << " bits" << endl;
+    cout << "    + Noise budget after modulus switching:  " << decryptor.invariant_noise_budget(encrypted) << " bits"
+         << endl;
 
     /*
     At this point the ciphertext still decrypts correctly, has very small size,
@@ -316,8 +313,7 @@ void example_levels()
     print_line(__LINE__);
     cout << "Print the modulus switching chain." << endl;
     cout << "---->";
-    for (context_data = context->key_context_data(); context_data;
-        context_data = context_data->next_context_data())
+    for (context_data = context->key_context_data(); context_data; context_data = context_data->next_context_data())
     {
         cout << " Level (chain index): " << context_data->chain_index() << endl;
         cout << "      parms_id: " << context_data->parms_id() << endl;

@@ -111,8 +111,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         batch_encoder.encode(pod_vector, plain);
         time_end = chrono::high_resolution_clock::now();
-        time_batch_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_batch_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Unbatching]
@@ -122,8 +121,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         batch_encoder.decode(plain, pod_vector2);
         time_end = chrono::high_resolution_clock::now();
-        time_unbatch_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_unbatch_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         if (pod_vector2 != pod_vector)
         {
             throw runtime_error("Batch/unbatch failed. Something is wrong.");
@@ -139,8 +137,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         encryptor.encrypt(plain, encrypted);
         time_end = chrono::high_resolution_clock::now();
-        time_encrypt_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_encrypt_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Decryption]
@@ -150,8 +147,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         decryptor.decrypt(encrypted, plain2);
         time_end = chrono::high_resolution_clock::now();
-        time_decrypt_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_decrypt_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         if (plain2 != plain)
         {
             throw runtime_error("Encrypt/decrypt failed. Something is wrong.");
@@ -170,8 +166,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         evaluator.add_inplace(encrypted2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
         time_end = chrono::high_resolution_clock::now();
-        time_add_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_add_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Multiply]
@@ -183,8 +178,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         evaluator.multiply_inplace(encrypted1, encrypted2);
         time_end = chrono::high_resolution_clock::now();
-        time_multiply_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_multiply_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Multiply Plain]
@@ -195,8 +189,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         evaluator.multiply_plain_inplace(encrypted2, plain);
         time_end = chrono::high_resolution_clock::now();
-        time_multiply_plain_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_multiply_plain_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Square]
@@ -206,8 +199,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         evaluator.square_inplace(encrypted2);
         time_end = chrono::high_resolution_clock::now();
-        time_square_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_square_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         if (context->using_keyswitching())
         {
@@ -221,8 +213,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
             time_start = chrono::high_resolution_clock::now();
             evaluator.relinearize_inplace(encrypted1, relin_keys);
             time_end = chrono::high_resolution_clock::now();
-            time_relinearize_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);
+            time_relinearize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
             /*
             [Rotate Rows One Step]
@@ -232,8 +223,8 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
             evaluator.rotate_rows_inplace(encrypted, 1, gal_keys);
             evaluator.rotate_rows_inplace(encrypted, -1, gal_keys);
             time_end = chrono::high_resolution_clock::now();
-            time_rotate_rows_one_step_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);;
+            time_rotate_rows_one_step_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+            ;
 
             /*
             [Rotate Rows Random]
@@ -245,8 +236,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
             time_start = chrono::high_resolution_clock::now();
             evaluator.rotate_rows_inplace(encrypted, random_rotation, gal_keys);
             time_end = chrono::high_resolution_clock::now();
-            time_rotate_rows_random_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);
+            time_rotate_rows_random_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
             /*
             [Rotate Columns]
@@ -255,8 +245,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
             time_start = chrono::high_resolution_clock::now();
             evaluator.rotate_columns_inplace(encrypted, gal_keys);
             time_end = chrono::high_resolution_clock::now();
-            time_rotate_columns_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);
+            time_rotate_columns_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         }
 
         /*
@@ -293,12 +282,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     if (context->using_keyswitching())
     {
         cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
-        cout << "Average rotate rows one step: " << avg_rotate_rows_one_step <<
-            " microseconds" << endl;
-        cout << "Average rotate rows random: " << avg_rotate_rows_random <<
-            " microseconds" << endl;
-        cout << "Average rotate columns: " << avg_rotate_columns <<
-            " microseconds" << endl;
+        cout << "Average rotate rows one step: " << avg_rotate_rows_one_step << " microseconds" << endl;
+        cout << "Average rotate rows random: " << avg_rotate_rows_random << " microseconds" << endl;
+        cout << "Average rotate columns: " << avg_rotate_columns << " microseconds" << endl;
     }
     cout.flush();
 }
@@ -388,18 +374,15 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         For scale we use the square root of the last coeff_modulus prime
         from parms.
         */
-        Plaintext plain(parms.poly_modulus_degree() *
-            parms.coeff_modulus().size(), 0);
+        Plaintext plain(parms.poly_modulus_degree() * parms.coeff_modulus().size(), 0);
         /*
 
         */
-        double scale = sqrt(static_cast<double>(
-            parms.coeff_modulus().back().value()));
+        double scale = sqrt(static_cast<double>(parms.coeff_modulus().back().value()));
         time_start = chrono::high_resolution_clock::now();
         ckks_encoder.encode(pod_vector, scale, plain);
         time_end = chrono::high_resolution_clock::now();
-        time_encode_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_encode_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Decoding]
@@ -408,8 +391,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         ckks_encoder.decode(plain, pod_vector2);
         time_end = chrono::high_resolution_clock::now();
-        time_decode_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_decode_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Encryption]
@@ -418,8 +400,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         encryptor.encrypt(plain, encrypted);
         time_end = chrono::high_resolution_clock::now();
-        time_encrypt_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_encrypt_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Decryption]
@@ -428,8 +409,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         decryptor.decrypt(encrypted, plain2);
         time_end = chrono::high_resolution_clock::now();
-        time_decrypt_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_decrypt_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Add]
@@ -445,8 +425,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         evaluator.add_inplace(encrypted2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
         time_end = chrono::high_resolution_clock::now();
-        time_add_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_add_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Multiply]
@@ -455,8 +434,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         evaluator.multiply_inplace(encrypted1, encrypted2);
         time_end = chrono::high_resolution_clock::now();
-        time_multiply_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_multiply_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Multiply Plain]
@@ -464,8 +442,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         evaluator.multiply_plain_inplace(encrypted2, plain);
         time_end = chrono::high_resolution_clock::now();
-        time_multiply_plain_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_multiply_plain_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         /*
         [Square]
@@ -473,8 +450,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_start = chrono::high_resolution_clock::now();
         evaluator.square_inplace(encrypted2);
         time_end = chrono::high_resolution_clock::now();
-        time_square_sum += chrono::duration_cast<
-            chrono::microseconds>(time_end - time_start);
+        time_square_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
         if (context->using_keyswitching())
         {
@@ -484,8 +460,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
             time_start = chrono::high_resolution_clock::now();
             evaluator.relinearize_inplace(encrypted1, relin_keys);
             time_end = chrono::high_resolution_clock::now();
-            time_relinearize_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);
+            time_relinearize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
             /*
             [Rescale]
@@ -493,8 +468,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
             time_start = chrono::high_resolution_clock::now();
             evaluator.rescale_to_next_inplace(encrypted1);
             time_end = chrono::high_resolution_clock::now();
-            time_rescale_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);
+            time_rescale_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
             /*
             [Rotate Vector]
@@ -503,8 +477,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
             evaluator.rotate_vector_inplace(encrypted, 1, gal_keys);
             evaluator.rotate_vector_inplace(encrypted, -1, gal_keys);
             time_end = chrono::high_resolution_clock::now();
-            time_rotate_one_step_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);
+            time_rotate_one_step_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
             /*
             [Rotate Vector Random]
@@ -513,8 +486,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
             time_start = chrono::high_resolution_clock::now();
             evaluator.rotate_vector_inplace(encrypted, random_rotation, gal_keys);
             time_end = chrono::high_resolution_clock::now();
-            time_rotate_random_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);
+            time_rotate_random_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
             /*
             [Complex Conjugate]
@@ -522,8 +494,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
             time_start = chrono::high_resolution_clock::now();
             evaluator.complex_conjugate_inplace(encrypted, gal_keys);
             time_end = chrono::high_resolution_clock::now();
-            time_conjugate_sum += chrono::duration_cast<
-                chrono::microseconds>(time_end - time_start);
+            time_conjugate_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         }
 
         /*
@@ -562,8 +533,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     {
         cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
         cout << "Average rescale: " << avg_rescale << " microseconds" << endl;
-        cout << "Average rotate vector one step: " << avg_rotate_one_step <<
-            " microseconds" << endl;
+        cout << "Average rotate vector one step: " << avg_rotate_one_step << " microseconds" << endl;
         cout << "Average rotate vector random: " << avg_rotate_random << " microseconds" << endl;
         cout << "Average complex conjugate: " << avg_conjugate << " microseconds" << endl;
     }
