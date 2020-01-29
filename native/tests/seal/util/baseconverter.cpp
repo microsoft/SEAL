@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/util/baseconverter.h"
 #include "seal/memorymanager.h"
+#include "seal/util/baseconverter.h"
 #include "seal/util/numth.h"
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace seal;
@@ -21,15 +21,13 @@ namespace SEALTest
             int prime_bit_count = 20;
 
             SmallModulus plain_t = 65537;
-            vector<SmallModulus> coeff_base = get_primes(
-                poly_modulus_degree, prime_bit_count, coeff_base_count);
+            vector<SmallModulus> coeff_base = get_primes(poly_modulus_degree, prime_bit_count, coeff_base_count);
 
-            BaseConverter base_converter(
-                coeff_base, poly_modulus_degree , plain_t, MemoryManager::GetPool());
+            BaseConverter base_converter(coeff_base, poly_modulus_degree, plain_t, MemoryManager::GetPool());
             ASSERT_TRUE(base_converter.is_generated());
         }
 
-        //TEST(BaseConverter, FastBConv)
+        // TEST(BaseConverter, FastBConv)
         //{
         //    {
         //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
@@ -53,7 +51,6 @@ namespace SEALTest
 
         //        input[0] = 4395513236581707780;
         //        input[1] = 4395513390924464132;
-
 
         //        output[0] = 0xFFFFFFFFFFFFFFFF;
         //        output[1] = 0xFFFFFFFFFFFFFFFF;
@@ -119,7 +116,7 @@ namespace SEALTest
         //    }
         //}
 
-        //TEST(BaseConverter, FastBConvSK)
+        // TEST(BaseConverter, FastBConvSK)
         //{
         //    {
         //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
@@ -209,7 +206,7 @@ namespace SEALTest
 
         //}
 
-        //TEST(BaseConverter, MontRq)
+        // TEST(BaseConverter, MontRq)
         //{
         //    {
         //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
@@ -304,7 +301,7 @@ namespace SEALTest
         //    }
         //}
 
-        //TEST(BaseConverter, FastFloor)
+        // TEST(BaseConverter, FastFloor)
         //{
         //    {
         //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
@@ -432,7 +429,7 @@ namespace SEALTest
 
         //}
 
-        //TEST(BaseConverter, FastBConver_mtilde)
+        // TEST(BaseConverter, FastBConver_mtilde)
         //{
         //    MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
         //    vector<SmallModulus> coeff_base;
@@ -486,7 +483,7 @@ namespace SEALTest
         //    Assert::AreEqual(static_cast<uint64_t>(849325434816160659), output[11]);
         //}
 
-        //TEST(BaseConverter, FastBConvert_plain_gamma)
+        // TEST(BaseConverter, FastBConvert_plain_gamma)
         //{
         //    MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
         //    vector<SmallModulus> coeff_base;
@@ -529,5 +526,5 @@ namespace SEALTest
         //    Assert::AreEqual(static_cast<uint64_t>(3744510248429639755), output[4]);
         //    Assert::AreEqual(static_cast<uint64_t>(3744510248429639755), output[5]);
         //}
-    }
-}
+    } // namespace util
+} // namespace SEALTest

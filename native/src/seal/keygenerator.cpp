@@ -128,10 +128,8 @@ namespace seal
         // PublicKey data allocated from pool given by MemoryManager::GetPool.
         PublicKey public_key;
 
-        shared_ptr<UniformRandomGenerator> random(
-            parms.random_generator()->create());
-        encrypt_zero_symmetric(
-            secret_key_, context_, context_data.parms_id(), true, false, public_key.data());
+        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
+        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, false, public_key.data());
 
         // Set the parms_id for public key
         public_key.parms_id() = context_data.parms_id();
@@ -304,8 +302,7 @@ namespace seal
         return secret_key_;
     }
 
-    void KeyGenerator::compute_secret_key_array(
-        const SEALContext::ContextData &context_data, size_t max_power)
+    void KeyGenerator::compute_secret_key_array(const SEALContext::ContextData &context_data, size_t max_power)
     {
 #ifdef SEAL_DEBUG
         if (max_power < 1)
