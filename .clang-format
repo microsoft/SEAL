@@ -9,9 +9,9 @@ AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Left
 AlignOperands:   true
 AlignTrailingComments: true
-AllowAllArgumentsOnNextLine: false # \todo rethink
-AllowAllConstructorInitializersOnNextLine: false # \todo rethink
-AllowAllParametersOfDeclarationOnNextLine: false # \todo rethink
+AllowAllArgumentsOnNextLine: true # \todo rethink
+AllowAllConstructorInitializersOnNextLine: true # \todo rethink
+AllowAllParametersOfDeclarationOnNextLine: true # \todo rethink
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
