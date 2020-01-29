@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/randomgen.h"
 #include "seal/randomtostd.h"
 #include "seal/util/clipnormal.h"
-#include <memory>
 #include <cmath>
+#include <memory>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace seal;
@@ -18,8 +18,7 @@ namespace SEALTest
     {
         TEST(ClipNormal, ClipNormalGenerate)
         {
-            shared_ptr<UniformRandomGenerator> generator(
-                UniformRandomGeneratorFactory::DefaultFactory()->create());
+            shared_ptr<UniformRandomGenerator> generator(UniformRandomGeneratorFactory::DefaultFactory()->create());
             RandomToStandardAdapter rand(generator);
             ClippedNormalDistribution dist(50.0, 10.0, 20.0);
 
@@ -43,5 +42,5 @@ namespace SEALTest
             ASSERT_TRUE(average >= 40.0 && average <= 60.0);
             ASSERT_TRUE(stddev >= 5.0 && stddev <= 15.0);
         }
-    }
-}
+    } // namespace util
+} // namespace SEALTest

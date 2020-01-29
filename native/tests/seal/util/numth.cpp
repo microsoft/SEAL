@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/numth.h"
 #include <cstdint>
 #include <numeric>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
@@ -147,5 +147,5 @@ namespace SEALTest
             naf_vec = naf(-123);
             ASSERT_EQ(-123, accumulate(naf_vec.begin(), naf_vec.end(), 0));
         }
-    }
-}
+    } // namespace util
+} // namespace SEALTest

@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/polycore.h"
 #include "seal/util/uintarith.h"
 #include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(PolyCore, AllocatePoly)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
@@ -292,5 +292,5 @@ namespace SEALTest
             max[0] = 10;
             ASSERT_TRUE(are_poly_coefficients_less_than(poly.get(), 3, 2, max.get(), 1));
         }
-   }
-}
+    } // namespace util
+} // namespace SEALTest

@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/ckks.h"
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
-#include <vector>
 #include <ctime>
+#include <vector>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -169,10 +169,8 @@ namespace SEALTest
             // Many primes
             uint32_t slots = 32;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus(CoeffModulus::Create(128, {
-                30, 30, 30, 30, 30, 30,
-                30, 30, 30, 30, 30, 30,
-                30, 30, 30, 30, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(
+                128, { 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
             std::vector<std::complex<double>> values(slots);
@@ -343,4 +341,4 @@ namespace SEALTest
             }
         }
     }
-}
+} // namespace SEALTest

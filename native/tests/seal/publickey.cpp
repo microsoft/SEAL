@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/publickey.h"
 #include "seal/context.h"
-#include "seal/modulus.h"
 #include "seal/keygenerator.h"
+#include "seal/modulus.h"
+#include "seal/publickey.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
@@ -62,4 +62,4 @@ namespace SEALTest
             ASSERT_TRUE(pk.parms_id() == pk2.parms_id());
         }
     }
-}
+} // namespace SEALTest

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/util/uintcore.h"
-#include "seal/util/polycore.h"
 #include "seal/util/polyarithsmallmod.h"
-#include <cstdint>
+#include "seal/util/polycore.h"
+#include "seal/util/uintcore.h"
 #include <cstddef>
+#include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -14,8 +14,8 @@ using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(PolyArithSmallMod, SmallModuloPolyCoeffs)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
@@ -409,5 +409,5 @@ namespace SEALTest
             ASSERT_EQ(6ULL, result[2]);
             ASSERT_EQ(3ULL, result[3]);
         }
-   }
-}
+    } // namespace util
+} // namespace SEALTest

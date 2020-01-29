@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/common.h"
 #include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -92,9 +92,10 @@ namespace SEALTest
             ASSERT_EQ(6, add_safe(0, -pos_i, pos_i, 1, pos_i));
             ASSERT_EQ(0, mul_safe(pos_i, pos_i, pos_i, 0, pos_i));
             ASSERT_EQ(625, mul_safe(pos_i, pos_i, pos_i, pos_i));
-            ASSERT_THROW(res_l = mul_safe(
-                pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i,
-                pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i), logic_error);
+            ASSERT_THROW(
+                res_l = mul_safe(
+                    pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i, pos_i),
+                logic_error);
         }
 
         TEST(Common, FitsIn)
@@ -156,7 +157,7 @@ namespace SEALTest
             ASSERT_TRUE(SEAL_BYTE(0x23) == *get_uint64_byte(number, 15));
         }
 
-        template<typename T>
+        template <typename T>
         void ReverseBits32Helper()
         {
             ASSERT_EQ(static_cast<T>(0), reverse_bits(static_cast<T>(0)));
@@ -210,21 +211,21 @@ namespace SEALTest
 
             // Other types
 #ifdef SEAL_USE_IF_CONSTEXPR
-            SEAL_IF_CONSTEXPR (sizeof(unsigned) == 4)
-                ReverseBits32Helper<unsigned>();
+            SEAL_IF_CONSTEXPR(sizeof(unsigned) == 4)
+            ReverseBits32Helper<unsigned>();
 
-            SEAL_IF_CONSTEXPR (sizeof(unsigned long) == 4)
-                ReverseBits32Helper<unsigned long>();
+            SEAL_IF_CONSTEXPR(sizeof(unsigned long) == 4)
+            ReverseBits32Helper<unsigned long>();
 
-            SEAL_IF_CONSTEXPR (sizeof(unsigned long long) == 4)
-                ReverseBits32Helper<unsigned long long>();
+            SEAL_IF_CONSTEXPR(sizeof(unsigned long long) == 4)
+            ReverseBits32Helper<unsigned long long>();
 
-            SEAL_IF_CONSTEXPR (sizeof(size_t) == 4)
-                ReverseBits32Helper<size_t>();
+            SEAL_IF_CONSTEXPR(sizeof(size_t) == 4)
+            ReverseBits32Helper<size_t>();
 #endif
         }
 
-        template<typename T>
+        template <typename T>
         void ReverseBits64Helper()
         {
             ASSERT_EQ(0ULL, reverse_bits<T>(0ULL));
@@ -271,17 +272,17 @@ namespace SEALTest
 
             // Other types
 #ifdef SEAL_USE_IF_CONSTEXPR
-            SEAL_IF_CONSTEXPR (sizeof(unsigned) == 8)
-                ReverseBits64Helper<unsigned>();
+            SEAL_IF_CONSTEXPR(sizeof(unsigned) == 8)
+            ReverseBits64Helper<unsigned>();
 
-            SEAL_IF_CONSTEXPR (sizeof(unsigned long) == 8)
-                ReverseBits64Helper<unsigned long>();
+            SEAL_IF_CONSTEXPR(sizeof(unsigned long) == 8)
+            ReverseBits64Helper<unsigned long>();
 
-            SEAL_IF_CONSTEXPR (sizeof(unsigned long long) == 8)
-                ReverseBits64Helper<unsigned long long>();
+            SEAL_IF_CONSTEXPR(sizeof(unsigned long long) == 8)
+            ReverseBits64Helper<unsigned long long>();
 
-            SEAL_IF_CONSTEXPR (sizeof(size_t) == 8)
-                ReverseBits64Helper<size_t>();
+            SEAL_IF_CONSTEXPR(sizeof(size_t) == 8)
+            ReverseBits64Helper<size_t>();
 #endif
         }
 
@@ -322,5 +323,5 @@ namespace SEALTest
             get_msb_index_generic(&result, 0xFFFFFFFFFFFFFFFF);
             ASSERT_EQ(static_cast<unsigned long>(63), result);
         }
-    }
-}
+    } // namespace util
+} // namespace SEALTest

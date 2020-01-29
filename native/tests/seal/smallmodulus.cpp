@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/smallmodulus.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
@@ -30,7 +30,6 @@ namespace SEALTest
         ASSERT_EQ(6148914691236517205ULL, mod.const_ratio()[1]);
         ASSERT_EQ(1ULL, mod.const_ratio()[2]);
         ASSERT_TRUE(mod.is_prime());
-
 
         SmallModulus mod2(2);
         SmallModulus mod3(3);
@@ -147,4 +146,4 @@ namespace SEALTest
         ASSERT_EQ(mod2.const_ratio()[2], mod.const_ratio()[2]);
         ASSERT_EQ(mod2.is_prime(), mod.is_prime());
     }
-}
+} // namespace SEALTest

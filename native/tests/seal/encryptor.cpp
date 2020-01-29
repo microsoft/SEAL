@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/context.h"
-#include "seal/encryptor.h"
-#include "seal/decryptor.h"
-#include "seal/keygenerator.h"
 #include "seal/batchencoder.h"
 #include "seal/ckks.h"
+#include "seal/context.h"
+#include "seal/decryptor.h"
+#include "seal/encryptor.h"
 #include "seal/intencoder.h"
+#include "seal/keygenerator.h"
 #include "seal/modulus.h"
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <ctime>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
@@ -395,7 +395,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //input consists of ones
+            // input consists of ones
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 40, 40, 40, 40 }));
@@ -418,7 +418,7 @@ namespace SEALTest
             encoder.encode(input, context->first_parms_id(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
-            //check correctness of encryption
+            // check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -431,7 +431,7 @@ namespace SEALTest
             }
         }
         {
-            //input consists of zeros
+            // input consists of zeros
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 40, 40, 40, 40 }));
@@ -454,7 +454,7 @@ namespace SEALTest
             encoder.encode(input, context->first_parms_id(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
-            //check correctness of encryption
+            // check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -500,7 +500,7 @@ namespace SEALTest
                 encoder.encode(input, context->first_parms_id(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -547,7 +547,7 @@ namespace SEALTest
                 encoder.encode(input, context->first_parms_id(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -656,4 +656,4 @@ namespace SEALTest
             }
         }
     }
-}
+} // namespace SEALTest

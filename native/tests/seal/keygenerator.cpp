@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/context.h"
-#include "seal/keygenerator.h"
-#include "seal/util/polycore.h"
-#include "seal/encryptor.h"
 #include "seal/decryptor.h"
+#include "seal/encryptor.h"
 #include "seal/evaluator.h"
+#include "seal/keygenerator.h"
 #include "seal/valcheck.h"
+#include "seal/util/polycore.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -49,9 +49,9 @@ namespace SEALTest
             ASSERT_TRUE(is_valid_for(evk, context));
 
             GaloisKeys galks = keygen.galois_keys_local();
-            for (auto& a : galks.data())
+            for (auto &a : galks.data())
             {
-                for (auto& b : a)
+                for (auto &b : a)
                 {
                     ASSERT_FALSE(b.data().is_transparent());
                 }
@@ -103,9 +103,9 @@ namespace SEALTest
             ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
             ASSERT_EQ(2ULL, evk.key(2).size());
 
-            for (auto& a : evk.data())
+            for (auto &a : evk.data())
             {
-                for (auto& b : a)
+                for (auto &b : a)
                 {
                     ASSERT_FALSE(b.data().is_transparent());
                 }
@@ -113,9 +113,9 @@ namespace SEALTest
             ASSERT_TRUE(is_valid_for(evk, context));
 
             GaloisKeys galks = keygen.galois_keys_local();
-            for (auto& a : galks.data())
+            for (auto &a : galks.data())
             {
-                for (auto& b : a)
+                for (auto &b : a)
                 {
                     ASSERT_FALSE(b.data().is_transparent());
                 }
@@ -179,9 +179,9 @@ namespace SEALTest
             RelinKeys evk = keygen.relin_keys_local();
             ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
             ASSERT_EQ(1ULL, evk.key(2).size());
-            for (auto& a : evk.data())
+            for (auto &a : evk.data())
             {
-                for (auto& b : a)
+                for (auto &b : a)
                 {
                     ASSERT_FALSE(b.data().is_transparent());
                 }
@@ -189,9 +189,9 @@ namespace SEALTest
             ASSERT_TRUE(is_valid_for(evk, context));
 
             GaloisKeys galks = keygen.galois_keys_local();
-            for (auto& a : galks.data())
+            for (auto &a : galks.data())
             {
-                for (auto& b : a)
+                for (auto &b : a)
                 {
                     ASSERT_FALSE(b.data().is_transparent());
                 }
@@ -241,9 +241,9 @@ namespace SEALTest
             RelinKeys evk = keygen.relin_keys_local();
             ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
             ASSERT_EQ(2ULL, evk.key(2).size());
-            for (auto& a : evk.data())
+            for (auto &a : evk.data())
             {
-                for (auto& b : a)
+                for (auto &b : a)
                 {
                     ASSERT_FALSE(b.data().is_transparent());
                 }
@@ -251,9 +251,9 @@ namespace SEALTest
             ASSERT_TRUE(is_valid_for(evk, context));
 
             GaloisKeys galks = keygen.galois_keys_local();
-            for (auto& a : galks.data())
+            for (auto &a : galks.data())
             {
-                for (auto& b : a)
+                for (auto &b : a)
                 {
                     ASSERT_FALSE(b.data().is_transparent());
                 }
@@ -369,4 +369,4 @@ namespace SEALTest
         decryptor.decrypt(ct, ptres);
         ASSERT_EQ("1x^4 + 4x^2 + 4", ptres.to_string());
     }
-}
+} // namespace SEALTest

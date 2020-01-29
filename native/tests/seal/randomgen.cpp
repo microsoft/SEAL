@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/randomgen.h"
 #include "seal/keygenerator.h"
-#include <cstdint>
+#include "seal/randomgen.h"
 #include <algorithm>
-#include <thread>
+#include <cstdint>
 #include <memory>
 #include <numeric>
 #include <set>
+#include <thread>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
@@ -22,18 +22,14 @@ namespace SEALTest
         {
         public:
             SequentialRandomGenerator() : UniformRandomGenerator({})
-            {
-            }
+            {}
 
             ~SequentialRandomGenerator() override = default;
 
         protected:
             void refill_buffer() override
             {
-                iota(
-                    reinterpret_cast<uint8_t*>(buffer_begin_),
-                    reinterpret_cast<uint8_t*>(buffer_end_),
-                    value);
+                iota(reinterpret_cast<uint8_t *>(buffer_begin_), reinterpret_cast<uint8_t *>(buffer_end_), value);
 
                 value = static_cast<uint8_t>(static_cast<size_t>(value) + buffer_size_);
             }
@@ -45,19 +41,17 @@ namespace SEALTest
         class SequentialRandomGeneratorFactory : public UniformRandomGeneratorFactory
         {
         private:
-            SEAL_NODISCARD auto create_impl(
-                SEAL_MAYBE_UNUSED random_seed_type seed)
+            SEAL_NODISCARD auto create_impl(SEAL_MAYBE_UNUSED random_seed_type seed)
                 -> shared_ptr<UniformRandomGenerator> override
             {
                 return make_shared<SequentialRandomGenerator>();
             }
         };
-    }
+    } // namespace
 
     TEST(RandomGenerator, UniformRandomCreateDefault)
     {
-        shared_ptr<UniformRandomGenerator> generator(
-            UniformRandomGeneratorFactory::DefaultFactory()->create());
+        shared_ptr<UniformRandomGenerator> generator(UniformRandomGeneratorFactory::DefaultFactory()->create());
         bool lower_half = false;
         bool upper_half = false;
         bool even = false;
@@ -90,13 +84,12 @@ namespace SEALTest
 
     TEST(RandomGenerator, SequentialRandomGenerator)
     {
-        unique_ptr<UniformRandomGenerator> sgen =
-            make_unique<SequentialRandomGenerator>();
+        unique_ptr<UniformRandomGenerator> sgen = make_unique<SequentialRandomGenerator>();
         array<uint8_t, 4096> value_list;
         iota(value_list.begin(), value_list.end(), 0);
 
         array<uint8_t, 4096> compare_list;
-        sgen->generate(4096, reinterpret_cast<SEAL_BYTE*>(compare_list.data()));
+        sgen->generate(4096, reinterpret_cast<SEAL_BYTE *>(compare_list.data()));
 
         ASSERT_TRUE(equal(value_list.cbegin(), value_list.cend(), compare_list.cbegin()));
     }
@@ -114,23 +107,17 @@ namespace SEALTest
 
     TEST(RandomGenerator, SeededRNG)
     {
-        auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create(
-            { }));
+        auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create({}));
         array<uint32_t, 20> values1;
-        generator1->generate(sizeof(values1),
-            reinterpret_cast<SEAL_BYTE*>(values1.data()));
+        generator1->generate(sizeof(values1), reinterpret_cast<SEAL_BYTE *>(values1.data()));
 
-        auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create(
-            { 1 }));
+        auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create({ 1 }));
         array<uint32_t, 20> values2;
-        generator2->generate(sizeof(values2),
-            reinterpret_cast<SEAL_BYTE*>(values2.data()));
+        generator2->generate(sizeof(values2), reinterpret_cast<SEAL_BYTE *>(values2.data()));
 
-        auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create(
-            { 1 }));
+        auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create({ 1 }));
         array<uint32_t, 20> values3;
-        generator3->generate(sizeof(values3),
-            reinterpret_cast<SEAL_BYTE*>(values3.data()));
+        generator3->generate(sizeof(values3), reinterpret_cast<SEAL_BYTE *>(values3.data()));
 
         for (size_t i = 0; i < values1.size(); i++)
         {
@@ -150,19 +137,16 @@ namespace SEALTest
     {
         auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create());
         array<uint32_t, 20> values1;
-        generator1->generate(sizeof(values1),
-            reinterpret_cast<SEAL_BYTE*>(values1.data()));
+        generator1->generate(sizeof(values1), reinterpret_cast<SEAL_BYTE *>(values1.data()));
 
         auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create());
         array<uint32_t, 20> values2;
-        generator2->generate(sizeof(values2),
-            reinterpret_cast<SEAL_BYTE*>(values2.data()));
+        generator2->generate(sizeof(values2), reinterpret_cast<SEAL_BYTE *>(values2.data()));
 
         auto seed3 = generator2->seed();
         auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create(seed3));
         array<uint32_t, 20> values3;
-        generator3->generate(sizeof(values3),
-            reinterpret_cast<SEAL_BYTE*>(values3.data()));
+        generator3->generate(sizeof(values3), reinterpret_cast<SEAL_BYTE *>(values3.data()));
 
         for (size_t i = 0; i < values1.size(); i++)
         {
@@ -190,8 +174,9 @@ namespace SEALTest
         for (size_t i = 0; i < thread_count; i++)
         {
             auto th_func = [&, generator, i]() {
-                generator->generate(sizeof(uint64_t) * numbers_per_thread,
-                    reinterpret_cast<SEAL_BYTE*>(results.data() + numbers_per_thread * i));
+                generator->generate(
+                    sizeof(uint64_t) * numbers_per_thread,
+                    reinterpret_cast<SEAL_BYTE *>(results.data() + numbers_per_thread * i));
             };
             th_vec.emplace_back(th_func);
         }
@@ -206,9 +191,8 @@ namespace SEALTest
         for (size_t i = 0; i < thread_count * numbers_per_thread; i++)
         {
             uint64_t value = 0;
-            generator2->generate(sizeof(value),
-                reinterpret_cast<SEAL_BYTE*>(&value));
+            generator2->generate(sizeof(value), reinterpret_cast<SEAL_BYTE *>(&value));
             ASSERT_TRUE(find(results.begin(), results.end(), value) != results.end());
         }
     }
-}
+} // namespace SEALTest

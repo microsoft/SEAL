@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/mempool.h"
-#include "seal/util/uintcore.h"
+#include "seal/util/numth.h"
 #include "seal/util/polycore.h"
 #include "seal/util/smallntt.h"
-#include "seal/util/numth.h"
-#include <random>
+#include "seal/util/uintcore.h"
 #include <cstddef>
 #include <cstdint>
+#include <random>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -17,8 +17,8 @@ using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(SmallNTTTablesTest, SmallNTTBasics)
         {
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
@@ -44,8 +44,8 @@ namespace SEALTest
 
         TEST(SmallNTTTablesTest, SmallNTTPrimitiveRootsTest)
         {
-        MemoryPoolHandle pool = MemoryPoolHandle::Global();
-        SmallNTTTables tables;
+            MemoryPoolHandle pool = MemoryPoolHandle::Global();
+            SmallNTTTables tables;
 
             int coeff_count_power = 1;
             SmallModulus modulus(0xffffffffffc0001ULL);
@@ -123,5 +123,5 @@ namespace SEALTest
                 ASSERT_EQ(temp[i], poly[i]);
             }
         }
-    }
-}
+    } // namespace util
+} // namespace SEALTest

@@ -1,24 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/locks.h"
-#include <thread>
 #include <atomic>
+#include <thread>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         class Reader
         {
         public:
             Reader(ReaderWriterLocker &locker) : locker_(locker), locked_(false), trying_(false)
-            {
-            }
+            {}
 
             bool is_locked() const
             {
@@ -46,12 +45,14 @@ namespace SEALTest
 
             void wait_until_trying()
             {
-                while (!trying_);
+                while (!trying_)
+                    ;
             }
 
             void wait_until_locked()
             {
-                while (!locked_);
+                while (!locked_)
+                    ;
             }
 
         private:
@@ -68,8 +69,7 @@ namespace SEALTest
         {
         public:
             Writer(ReaderWriterLocker &locker) : locker_(locker), locked_(false), trying_(false)
-            {
-            }
+            {}
 
             bool is_locked() const
             {
@@ -97,17 +97,20 @@ namespace SEALTest
 
             void wait_until_trying()
             {
-                while (!trying_);
+                while (!trying_)
+                    ;
             }
 
             void wait_until_locked()
             {
-                while (!locked_);
+                while (!locked_)
+                    ;
             }
 
             void wait_until_unlocked()
             {
-                while(locked_);
+                while (locked_)
+                    ;
             }
 
         private:
@@ -234,12 +237,13 @@ namespace SEALTest
             reader1->release();
             ASSERT_FALSE(reader1->is_locked());
 
-            while (writer1->is_trying_to_lock() && writer2->is_trying_to_lock());
+            while (writer1->is_trying_to_lock() && writer2->is_trying_to_lock())
+                ;
 
             Writer *winner;
             Writer *waiting;
-            atomic<bool>* should_unlock_winner;
-            atomic<bool>* should_unlock_waiting;
+            atomic<bool> *should_unlock_winner;
+            atomic<bool> *should_unlock_waiting;
 
             if (writer1->is_locked())
             {
@@ -305,5 +309,5 @@ namespace SEALTest
             delete writer1;
             delete writer2;
         }
-   }
-}
+    } // namespace util
+} // namespace SEALTest

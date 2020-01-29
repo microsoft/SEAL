@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/randomgen.h"
 #include "seal/randomtostd.h"
 #include <cstdint>
 #include <memory>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
@@ -48,4 +48,4 @@ namespace SEALTest
         ASSERT_TRUE(even);
         ASSERT_TRUE(odd);
     }
-}
+} // namespace SEALTest

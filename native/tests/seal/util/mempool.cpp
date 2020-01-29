@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
+#include "seal/util/common.h"
 #include "seal/util/mempool.h"
 #include "seal/util/pointer.h"
-#include "seal/util/common.h"
 #include <memory>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -13,8 +13,8 @@ using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(MemoryPoolTests, TestMemoryPoolMT)
         {
             {
@@ -670,5 +670,5 @@ namespace SEALTest
                 p1.release();
             }
         }
-   }
-}
+    } // namespace util
+} // namespace SEALTest

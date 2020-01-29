@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/batchencoder.h"
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
-#include <vector>
 #include <ctime>
+#include <vector>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -174,4 +174,4 @@ namespace SEALTest
             ASSERT_TRUE(short_plain[i] == 0);
         }
     }
-}
+} // namespace SEALTest

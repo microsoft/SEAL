@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <stdexcept>
-#include "gtest/gtest.h"
 #include "seal/modulus.h"
 #include "seal/util/uintcore.h"
+#include <stdexcept>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -36,7 +36,7 @@ namespace SEALTest
 
     TEST(CoeffModTest, CustomTest)
     {
-        auto cm = CoeffModulus::Create(2, { });
+        auto cm = CoeffModulus::Create(2, {});
         ASSERT_EQ(0, cm.size());
 
         cm = CoeffModulus::Create(2, { 3 });
@@ -68,4 +68,4 @@ namespace SEALTest
         ASSERT_EQ(1ULL, cm[3].value() % 64);
         ASSERT_EQ(1ULL, cm[4].value() % 64);
     }
-}
+} // namespace SEALTest

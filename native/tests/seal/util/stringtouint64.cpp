@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/common.h"
 #include "seal/util/uintcore.h"
 #include <cstdint>
 #include <cstring>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(StringToUInt64, IsHexCharTest)
         {
             ASSERT_TRUE(is_hex_char('0'));
@@ -267,5 +267,5 @@ namespace SEALTest
             hex_string_to_uint("100", 0, 3, parsed);
             ASSERT_EQ(0, memcmp(correct, parsed, 3 * sizeof(uint64_t)));
         }
-   }
-}
+    } // namespace util
+} // namespace SEALTest

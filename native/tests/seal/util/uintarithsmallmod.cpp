@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/util/uintcore.h"
-#include "seal/util/uintarithsmallmod.h"
-#include "seal/smallmodulus.h"
 #include "seal/memorymanager.h"
+#include "seal/smallmodulus.h"
+#include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace seal;
@@ -13,8 +13,8 @@ using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(UIntArithSmallMod, IncrementUIntSmallMod)
         {
             SmallModulus mod(2);
@@ -205,9 +205,12 @@ namespace SEALTest
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(0, 1, mod));
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(1, 0, mod));
             ASSERT_EQ(1ULL, multiply_uint_uint_mod(1, 1, mod));
-            ASSERT_EQ(1152921504606822400ULL, multiply_uint_uint_mod(2305843009213644800ULL, 2305843009213644801ULL, mod));
-            ASSERT_EQ(1152921504606822400ULL, multiply_uint_uint_mod(2305843009213644801ULL, 2305843009213644800ULL, mod));
-            ASSERT_EQ(3458764513820467201ULL, multiply_uint_uint_mod(2305843009213644801ULL, 2305843009213644801ULL, mod));
+            ASSERT_EQ(
+                1152921504606822400ULL, multiply_uint_uint_mod(2305843009213644800ULL, 2305843009213644801ULL, mod));
+            ASSERT_EQ(
+                1152921504606822400ULL, multiply_uint_uint_mod(2305843009213644801ULL, 2305843009213644800ULL, mod));
+            ASSERT_EQ(
+                3458764513820467201ULL, multiply_uint_uint_mod(2305843009213644801ULL, 2305843009213644801ULL, mod));
             ASSERT_EQ(1ULL, multiply_uint_uint_mod(4611686018427289600ULL, 4611686018427289600ULL, mod));
         }
 
@@ -341,7 +344,6 @@ namespace SEALTest
             ASSERT_FALSE(is_primitive_root(12, 2, mod));
             ASSERT_FALSE(is_primitive_root(12, 8, mod));
 
-
             mod = 1234565441ULL;
             ASSERT_TRUE(is_primitive_root(1234565440ULL, 2, mod));
             ASSERT_TRUE(is_primitive_root(960907033ULL, 8, mod));
@@ -386,5 +388,5 @@ namespace SEALTest
             mod = 131313131313;
             ASSERT_EQ(39418477653ULL, exponentiate_uint_mod(2424242424, 16, mod));
         }
-   }
-}
+    } // namespace util
+} // namespace SEALTest

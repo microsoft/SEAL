@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/ciphertext.h"
 #include "seal/context.h"
-#include "seal/keygenerator.h"
 #include "seal/encryptor.h"
+#include "seal/keygenerator.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -120,8 +120,8 @@ namespace SEALTest
         ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ASSERT_FALSE(ctxt2.is_ntt_form());
-        ASSERT_TRUE(is_equal_uint_uint(ctxt.data(), ctxt2.data(),
-            parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
+        ASSERT_TRUE(is_equal_uint_uint(
+            ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
         ASSERT_TRUE(ctxt.data() != ctxt2.data());
     }
-}
+} // namespace SEALTest

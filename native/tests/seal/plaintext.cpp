@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <vector>
-#include "gtest/gtest.h"
-#include "seal/plaintext.h"
-#include "seal/evaluator.h"
+#include "seal/ckks.h"
 #include "seal/context.h"
+#include "seal/evaluator.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
-#include "seal/ckks.h"
+#include "seal/plaintext.h"
+#include <vector>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -161,4 +161,4 @@ namespace SEALTest
             ASSERT_TRUE(plain2.is_ntt_form());
         }
     }
-}
+} // namespace SEALTest

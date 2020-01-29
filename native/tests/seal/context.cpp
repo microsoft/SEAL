@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/context.h"
 #include "seal/modulus.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
@@ -318,14 +318,12 @@ namespace SEALTest
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(1), context_data->chain_index());
             ASSERT_EQ(1084081ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
-                      prev_context_data->parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(), prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(0), context_data->chain_index());
             ASSERT_EQ(5617ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
-                      prev_context_data->parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(), prev_context_data->parms_id());
             ASSERT_FALSE(!!context_data->next_context_data());
             ASSERT_EQ(context_data->parms_id(), context->last_parms_id());
 
@@ -351,20 +349,17 @@ namespace SEALTest
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(2), context_data->chain_index());
             ASSERT_EQ(1084081ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
-                      prev_context_data->parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(), prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(1), context_data->chain_index());
             ASSERT_EQ(5617ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
-                      prev_context_data->parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(), prev_context_data->parms_id());
             prev_context_data = context_data;
             context_data = context_data->next_context_data();
             ASSERT_EQ(size_t(0), context_data->chain_index());
             ASSERT_EQ(41ULL, *context_data->total_coeff_modulus());
-            ASSERT_EQ(context_data->prev_context_data()->parms_id(),
-                      prev_context_data->parms_id());
+            ASSERT_EQ(context_data->prev_context_data()->parms_id(), prev_context_data->parms_id());
             ASSERT_FALSE(!!context_data->next_context_data());
             ASSERT_EQ(context_data->parms_id(), context->last_parms_id());
 
@@ -377,4 +372,4 @@ namespace SEALTest
             ASSERT_TRUE(!!context->first_context_data()->prev_context_data());
         }
     }
-}
+} // namespace SEALTest

@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/uintarith.h"
 #include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 
 namespace SEALTest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(UIntArith, AddUInt64Generic)
         {
             unsigned long long result;
@@ -42,10 +42,10 @@ namespace SEALTest
         }
 
 #if SEAL_COMPILER == SEAL_COMPILER_MSVC
-#pragma optimize ("", off)
+#pragma optimize("", off)
 #elif SEAL_COMPILER == SEAL_COMPILER_GCC
 #pragma GCC push_options
-#pragma GCC optimize ("O0")
+#pragma GCC optimize("O0")
 #elif SEAL_COMPILER == SEAL_COMPILER_CLANG
 #pragma clang optimize off
 #endif
@@ -80,7 +80,7 @@ namespace SEALTest
         }
 
 #if SEAL_COMPILER == SEAL_COMPILER_MSVC
-#pragma optimize ("", on)
+#pragma optimize("", on)
 #elif SEAL_COMPILER == SEAL_COMPILER_GCC
 #pragma GCC pop_options
 #elif SEAL_COMPILER == SEAL_COMPILER_CLANG
@@ -1650,5 +1650,5 @@ namespace SEALTest
             ASSERT_EQ(0ULL, exponentiate_uint64(0x10ULL, 16ULL));
             ASSERT_EQ(12389286314587456613ULL, exponentiate_uint64(123456789ULL, 13ULL));
         }
-   }
-}
+    } // namespace util
+} // namespace SEALTest
