@@ -92,7 +92,7 @@ steps:
       displayName: 'ESRP Add Strong Name'
       inputs:
         ConnectedServiceName: 'ESRP CodeSigning'
-        FolderPath: dotnet/lib/Release/netstandard2.0
+        FolderPath: dotnet/lib/Release/netstandard2.1
         Pattern: '*.dll'
         signConfigType: inlineSignParams
         inlineOperation: |
@@ -114,10 +114,10 @@ steps:
             ]
 
     - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-      displayName: 'ESRP CodeSigning .NET Standard 2.0'
+      displayName: 'ESRP CodeSigning .NET Standard 2.1'
       inputs:
         ConnectedServiceName: 'ESRP CodeSigning'
-        FolderPath: dotnet/lib/Release/netstandard2.0
+        FolderPath: dotnet/lib/Release/netstandard2.1
         Pattern: '*.dll'
         signConfigType: inlineSignParams
         inlineOperation: |
