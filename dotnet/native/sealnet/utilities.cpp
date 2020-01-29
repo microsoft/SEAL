@@ -2,17 +2,17 @@
 // Licensed under the MIT license.
 
 // STD
-#include <iterator>
 #include <algorithm>
+#include <iterator>
 
 // SEALNet
 #include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
-#include "seal/smallmodulus.h"
-#include "seal/encryptionparams.h"
 #include "seal/context.h"
+#include "seal/encryptionparams.h"
+#include "seal/smallmodulus.h"
 #include "seal/util/common.h"
 #include "seal/util/locks.h"
 
@@ -23,13 +23,13 @@ using namespace seal::util;
 
 namespace sealnet
 {
-    extern unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
+    extern unordered_map<SEALContext *, shared_ptr<SEALContext>> pointer_store_;
 
     extern ReaderWriterLocker pointer_store_locker_;
 
     // This is here only so we have a null shared pointer to return.
     shared_ptr<SEALContext> null_context_;
-}
+} // namespace sealnet
 
 unique_ptr<MemoryPoolHandle> sealnet::MemHandleFromVoid(void *voidptr)
 {
@@ -38,7 +38,7 @@ unique_ptr<MemoryPoolHandle> sealnet::MemHandleFromVoid(void *voidptr)
         return make_unique<MemoryPoolHandle>(MemoryManager::GetPool());
     }
 
-    MemoryPoolHandle *handle = reinterpret_cast<MemoryPoolHandle*>(voidptr);
+    MemoryPoolHandle *handle = reinterpret_cast<MemoryPoolHandle *>(voidptr);
     return make_unique<MemoryPoolHandle>(*handle);
 }
 
@@ -51,10 +51,8 @@ void sealnet::BuildSmallModulusPointers(const vector<SmallModulus> &in_mods, uin
         return;
     }
 
-    SmallModulus* *mod_ptr_array = reinterpret_cast<SmallModulus**>(out_mods);
-    transform(in_mods.begin(), in_mods.end(), mod_ptr_array,
-        [](const auto &mod) { return new SmallModulus(mod); }
-    );
+    SmallModulus **mod_ptr_array = reinterpret_cast<SmallModulus **>(out_mods);
+    transform(in_mods.begin(), in_mods.end(), mod_ptr_array, [](const auto &mod) { return new SmallModulus(mod); });
 }
 
 const shared_ptr<SEALContext> &sealnet::SharedContextFromVoid(void *context)
@@ -99,4 +97,3 @@ HRESULT sealnet::ToStringHelper(const string &str, char *outstr, uint64_t *lengt
 
     return S_OK;
 }
-

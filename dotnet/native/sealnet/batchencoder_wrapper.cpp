@@ -5,8 +5,8 @@
 #include <vector>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/batchencoder_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -28,7 +28,7 @@ SEALMETHOD BatchEncoder_Create(void *context, void **batch_encoder)
         *batch_encoder = encoder;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -62,7 +62,7 @@ SEALMETHOD BatchEncoder_Encode1(void *thisptr, uint64_t count, uint64_t *values,
         encoder->encode(valvec, *plain);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -87,7 +87,7 @@ SEALMETHOD BatchEncoder_Encode2(void *thisptr, uint64_t count, int64_t *values, 
         encoder->encode(valvec, *plain);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -106,7 +106,7 @@ SEALMETHOD BatchEncoder_Encode3(void *thisptr, void *plain, void *pool)
         encoder->encode(*plainptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -141,7 +141,7 @@ SEALMETHOD BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, uin
 
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -176,7 +176,7 @@ SEALMETHOD BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, int
 
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -195,7 +195,7 @@ SEALMETHOD BatchEncoder_Decode3(void *thisptr, void *plain, void *pool)
         encoder->decode(*plainptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }

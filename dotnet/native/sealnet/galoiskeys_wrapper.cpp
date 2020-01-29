@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/galoiskeys_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -22,7 +22,7 @@ SEALMETHOD GaloisKeys_GetIndex(uint64_t galois_elt, uint64_t *index)
         *index = GaloisKeys::get_index(galois_elt);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }

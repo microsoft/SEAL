@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/contextdata_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -193,7 +193,7 @@ SEALMETHOD ContextData_PrevContextData(void *thisptr, void **prev_data)
     IfNullRet(prev_data, E_POINTER);
 
     // The caller should not try to delete the returned pointer
-    *prev_data = const_cast<SEALContext::ContextData*>(cont_data->prev_context_data().get());
+    *prev_data = const_cast<SEALContext::ContextData *>(cont_data->prev_context_data().get());
     return S_OK;
 }
 
@@ -204,7 +204,7 @@ SEALMETHOD ContextData_NextContextData(void *thisptr, void **next_data)
     IfNullRet(next_data, E_POINTER);
 
     // The caller should not try to delete the returned pointer
-    *next_data = const_cast<SEALContext::ContextData*>(cont_data->next_context_data().get());
+    *next_data = const_cast<SEALContext::ContextData *>(cont_data->next_context_data().get());
     return S_OK;
 }
 

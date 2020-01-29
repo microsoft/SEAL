@@ -5,8 +5,8 @@
 #include <unordered_map>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/sealcontext_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -24,13 +24,12 @@ namespace sealnet
     The purpose of this map is to keep SEALContext shared pointers alive
     while they are being used as regular pointers in the managed world.
     */
-    unordered_map<SEALContext*, shared_ptr<SEALContext>> pointer_store_;
+    unordered_map<SEALContext *, shared_ptr<SEALContext>> pointer_store_;
 
     ReaderWriterLocker pointer_store_locker_;
-}
+} // namespace sealnet
 
-SEALMETHOD SEALContext_Create(void *encryptionParams,
-    bool expand_mod_chain, int sec_level, void **context)
+SEALMETHOD SEALContext_Create(void *encryptionParams, bool expand_mod_chain, int sec_level, void **context)
 {
     EncryptionParameters *encParams = FromVoid<EncryptionParameters>(encryptionParams);
     IfNullRet(encParams, E_POINTER);
@@ -104,7 +103,7 @@ SEALMETHOD SEALContext_KeyContextData(void *thisptr, void **context_data)
 
     // The pointer that is returned should not be deleted.
     auto data = context->key_context_data();
-    *context_data = const_cast<SEALContext::ContextData*>(data.get());
+    *context_data = const_cast<SEALContext::ContextData *>(data.get());
     return S_OK;
 }
 
@@ -116,7 +115,7 @@ SEALMETHOD SEALContext_FirstContextData(void *thisptr, void **context_data)
 
     // The pointer that is returned should not be deleted.
     auto data = context->first_context_data();
-    *context_data = const_cast<SEALContext::ContextData*>(data.get());
+    *context_data = const_cast<SEALContext::ContextData *>(data.get());
     return S_OK;
 }
 
@@ -128,7 +127,7 @@ SEALMETHOD SEALContext_LastContextData(void *thisptr, void **context_data)
 
     // The pointer that is returned should not be deleted.
     auto data = context->last_context_data();
-    *context_data = const_cast<SEALContext::ContextData*>(data.get());
+    *context_data = const_cast<SEALContext::ContextData *>(data.get());
     return S_OK;
 }
 
@@ -143,7 +142,7 @@ SEALMETHOD SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void **
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
     auto data = context->get_context_data(parms);
-    *context_data = const_cast<SEALContext::ContextData*>(data.get());
+    *context_data = const_cast<SEALContext::ContextData *>(data.get());
     return S_OK;
 }
 

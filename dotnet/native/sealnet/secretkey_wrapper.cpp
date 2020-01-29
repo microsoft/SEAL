@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/secretkey_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -53,7 +53,7 @@ SEALMETHOD SecretKey_Data(void *thisptr, void **data)
     // This returns a pointer to an existing object, not a new object.
     // Make sure the managed side does not try to delete it.
     const Plaintext *plaintext = &skey->data();
-    *data = const_cast<Plaintext*>(plaintext);
+    *data = const_cast<Plaintext *>(plaintext);
     return S_OK;
 }
 
@@ -89,14 +89,13 @@ SEALMETHOD SecretKey_Pool(void *thisptr, void **pool)
 
 SEALMETHOD SecretKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
-    SecretKey* skey = FromVoid<SecretKey>(thisptr);
+    SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
     IfNullRet(result, E_POINTER);
 
     try
     {
-        *result = static_cast<int64_t>(
-            skey->save_size(static_cast<compr_mode_type>(compr_mode)));
+        *result = static_cast<int64_t>(skey->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -119,8 +118,7 @@ SEALMETHOD SecretKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t
     try
     {
         *out_bytes = util::safe_cast<int64_t>(skey->save(
-            reinterpret_cast<SEAL_BYTE*>(outptr),
-            util::safe_cast<size_t>(size),
+            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -149,10 +147,8 @@ SEALMETHOD SecretKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, ui
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(skey->unsafe_load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE*>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            skey->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -180,10 +176,8 @@ SEALMETHOD SecretKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(skey->load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE*>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            skey->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

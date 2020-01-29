@@ -5,8 +5,8 @@
 #include <string>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/biguint_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -35,7 +35,7 @@ SEALMETHOD BigUInt_Create2(int bitCount, void **bui)
         *bui = biguint;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -55,7 +55,7 @@ SEALMETHOD BigUInt_Create3(int bitCount, char *hex_string, void **bui)
         *bui = biguint;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -71,7 +71,7 @@ SEALMETHOD BigUInt_Create4(int bitCount, uint64_t value, void **bui)
         *bui = biguint;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -91,7 +91,7 @@ SEALMETHOD BigUInt_Create5(char *hex_string, void **bui)
         *bui = biguint;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -173,7 +173,7 @@ SEALMETHOD BigUInt_Get(void *thisptr, uint64_t index, uint8_t *value)
     IfNullRet(biguint, E_POINTER);
     IfNullRet(value, E_POINTER)
 
-    if (index >= biguint->byte_count())
+        if (index >= biguint->byte_count())
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -243,7 +243,7 @@ SEALMETHOD BigUInt_Set3(void *thisptr, uint64_t value)
         *biguint = value;
         return S_OK;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -262,11 +262,11 @@ SEALMETHOD BigUInt_Set4(void *thisptr, char *assign)
         *biguint = assign_str;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -408,11 +408,11 @@ SEALMETHOD BigUInt_ModuloInvert1(void *thisptr, void *modulus, void **result)
         *result = resultbui;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -430,11 +430,11 @@ SEALMETHOD BigUInt_ModuloInvert2(void *thisptr, uint64_t modulus, void **result)
         *result = resultbui;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -455,7 +455,7 @@ SEALMETHOD BigUInt_TryModuloInvert1(void *thisptr, void *modulus, void *inverse,
         *result = biguint->trymodinv(*modulusui, *inverseui);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -474,7 +474,7 @@ SEALMETHOD BigUInt_TryModuloInvert2(void *thisptr, uint64_t modulus, void *inver
         *result = biguint->trymodinv(modulus, *inverseui);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -563,7 +563,7 @@ SEALMETHOD BigUInt_OperatorMult1(void *thisptr, void *operand, void **result)
     return S_OK;
 }
 
-SEALMETHOD BigUInt_OperatorMult2(void *thisptr, uint64_t operand, void * *result)
+SEALMETHOD BigUInt_OperatorMult2(void *thisptr, uint64_t operand, void **result)
 {
     BigUInt *biguint = FromVoid<BigUInt>(thisptr);
     IfNullRet(biguint, E_POINTER);
@@ -704,14 +704,13 @@ SEALMETHOD BigUInt_ToDouble(void *thisptr, double *result)
 
 SEALMETHOD BigUInt_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
 {
-    BigUInt* biguint = FromVoid<BigUInt>(thisptr);
+    BigUInt *biguint = FromVoid<BigUInt>(thisptr);
     IfNullRet(biguint, E_POINTER);
     IfNullRet(result, E_POINTER);
 
     try
     {
-        *result = static_cast<int64_t>(
-            biguint->save_size(static_cast<compr_mode_type>(compr_mode)));
+        *result = static_cast<int64_t>(biguint->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -734,8 +733,7 @@ SEALMETHOD BigUInt_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t c
     try
     {
         *out_bytes = util::safe_cast<int64_t>(biguint->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr),
-            util::safe_cast<size_t>(size),
+            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -762,9 +760,8 @@ SEALMETHOD BigUInt_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *i
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(biguint->load(
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            biguint->load(reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

@@ -2,12 +2,12 @@
 // Licensed under the MIT license.
 
 // STD
-#include <string>
 #include <algorithm>
+#include <string>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/plaintext_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -36,7 +36,7 @@ namespace seal
             swap(plain->data_, new_data);
         }
     };
-}
+} // namespace seal
 
 SEALMETHOD Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
 {
@@ -50,7 +50,7 @@ SEALMETHOD Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
         *plaintext = plain;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -68,7 +68,7 @@ SEALMETHOD Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void *
         *plaintext = plain;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -86,7 +86,7 @@ SEALMETHOD Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memor
         *plaintext = plain;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -105,7 +105,7 @@ SEALMETHOD Plaintext_Create4(char *hexPoly, void *memoryPoolHandle, void **plain
         *plaintext = plain;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -145,7 +145,7 @@ SEALMETHOD Plaintext_Set2(void *thisptr, char *hex_poly)
         *plain = hex_poly_str;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -161,7 +161,7 @@ SEALMETHOD Plaintext_Set3(void *thisptr, uint64_t const_coeff)
         *plain = const_coeff;
         return S_OK;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return E_INVALIDARG;
     }
@@ -197,11 +197,11 @@ SEALMETHOD Plaintext_CoeffAt(void *thisptr, uint64_t index, uint64_t *coeff)
         *coeff = (*plain)[index];
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const out_of_range&)
+    catch (const out_of_range &)
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -217,7 +217,7 @@ SEALMETHOD Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value)
         (*plain)[index] = value;
         return S_OK;
     }
-    catch (const out_of_range&)
+    catch (const out_of_range &)
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -234,7 +234,7 @@ SEALMETHOD Plaintext_ToString(void *thispt, uint64_t *length, char *outstr)
         string str = plain->to_string();
         return ToStringHelper(str, outstr, length);
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -302,7 +302,7 @@ SEALMETHOD Plaintext_SetZero2(void *thisptr, uint64_t start_coeff)
         plain->set_zero(safe_cast<size_t>(start_coeff));
         return S_OK;
     }
-    catch (const out_of_range&)
+    catch (const out_of_range &)
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -318,7 +318,7 @@ SEALMETHOD Plaintext_SetZero3(void *thisptr, uint64_t start_coeff, uint64_t leng
         plain->set_zero(safe_cast<size_t>(start_coeff), safe_cast<size_t>(length));
         return S_OK;
     }
-    catch (const out_of_range&)
+    catch (const out_of_range &)
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -334,11 +334,11 @@ SEALMETHOD Plaintext_Reserve(void *thisptr, uint64_t capacity)
         plain->reserve(capacity);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -354,11 +354,11 @@ SEALMETHOD Plaintext_Resize(void *thisptr, uint64_t coeff_count)
         plain->resize(coeff_count);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -476,8 +476,7 @@ SEALMETHOD Plaintext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result
 
     try
     {
-        *result = static_cast<int64_t>(
-            plain->save_size(static_cast<compr_mode_type>(compr_mode)));
+        *result = static_cast<int64_t>(plain->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -500,8 +499,7 @@ SEALMETHOD Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t
     try
     {
         *out_bytes = util::safe_cast<int64_t>(plain->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr),
-            util::safe_cast<size_t>(size),
+            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -530,10 +528,8 @@ SEALMETHOD Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, ui
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(plain->unsafe_load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            plain->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -561,10 +557,8 @@ SEALMETHOD Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(plain->load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            plain->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

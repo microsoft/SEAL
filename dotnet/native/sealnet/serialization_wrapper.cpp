@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/serialization_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -48,8 +48,7 @@ SEALMETHOD Serialization_IsValidHeader(uint8_t *headerptr, uint64_t size, bool *
 
     Serialization::SEALHeader header;
     memcpy(
-        reinterpret_cast<SEAL_BYTE*>(&header),
-        reinterpret_cast<SEAL_BYTE*>(headerptr),
+        reinterpret_cast<SEAL_BYTE *>(&header), reinterpret_cast<SEAL_BYTE *>(headerptr),
         sizeof(Serialization::SEALHeader));
     *result = Serialization::IsValidHeader(header);
     return S_OK;

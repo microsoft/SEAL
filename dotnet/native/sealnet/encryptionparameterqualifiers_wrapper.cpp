@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/encryptionparameterqualifiers_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL

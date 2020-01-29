@@ -5,8 +5,8 @@
 #include <vector>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/ckksencoder_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -28,7 +28,7 @@ SEALMETHOD CKKSEncoder_Create(void *context, void **ckks_encoder)
         *ckks_encoder = encoder;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -44,7 +44,9 @@ SEALMETHOD CKKSEncoder_Destroy(void *thisptr)
 }
 
 // Array of doubles
-SEALMETHOD CKKSEncoder_Encode1(void *thisptr, uint64_t value_count, double *values, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALMETHOD CKKSEncoder_Encode1(
+    void *thisptr, uint64_t value_count, double *values, uint64_t *parms_id, double scale, void *destination,
+    void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -67,14 +69,16 @@ SEALMETHOD CKKSEncoder_Encode1(void *thisptr, uint64_t value_count, double *valu
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
 }
 
 // Array of complex numbers (two doubles per value)
-SEALMETHOD CKKSEncoder_Encode2(void *thisptr, uint64_t value_count, double *complex_values, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALMETHOD CKKSEncoder_Encode2(
+    void *thisptr, uint64_t value_count, double *complex_values, uint64_t *parms_id, double scale, void *destination,
+    void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -89,8 +93,7 @@ SEALMETHOD CKKSEncoder_Encode2(void *thisptr, uint64_t value_count, double *comp
     vector<complex<double>> input(value_count);
     for (uint64_t i = 0; i < value_count; i++)
     {
-        input[i] = complex<double>(complex_values[i*2],
-                                   complex_values[i*2 + 1]);
+        input[i] = complex<double>(complex_values[i * 2], complex_values[i * 2 + 1]);
     }
 
     try
@@ -98,14 +101,15 @@ SEALMETHOD CKKSEncoder_Encode2(void *thisptr, uint64_t value_count, double *comp
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
 }
 
 // Single double value
-SEALMETHOD CKKSEncoder_Encode3(void *thisptr, double value, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALMETHOD CKKSEncoder_Encode3(
+    void *thisptr, double value, uint64_t *parms_id, double scale, void *destination, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -122,14 +126,15 @@ SEALMETHOD CKKSEncoder_Encode3(void *thisptr, double value, uint64_t *parms_id, 
         encoder->encode(value, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
 }
 
 // Single complex value
-SEALMETHOD CKKSEncoder_Encode4(void *thisptr, double value_re, double value_im, uint64_t *parms_id, double scale, void *destination, void *pool)
+SEALMETHOD CKKSEncoder_Encode4(
+    void *thisptr, double value_re, double value_im, uint64_t *parms_id, double scale, void *destination, void *pool)
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
@@ -148,7 +153,7 @@ SEALMETHOD CKKSEncoder_Encode4(void *thisptr, double value_re, double value_im, 
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -171,7 +176,7 @@ SEALMETHOD CKKSEncoder_Encode5(void *thisptr, int64_t value, uint64_t *parms_id,
         encoder->encode(value, parms, *destinationptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -193,7 +198,7 @@ SEALMETHOD CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_count
     {
         encoder->decode(*plainptr, destination, *handle);
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -231,7 +236,7 @@ SEALMETHOD CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_count
     {
         encoder->decode(*plainptr, destination, *handle);
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -247,8 +252,8 @@ SEALMETHOD CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_count
     // Copy to actual destination
     for (uint64_t i = 0; i < destination.size(); i++)
     {
-        values[i*2]     = destination[i].real();
-        values[i*2 + 1] = destination[i].imag();
+        values[i * 2] = destination[i].real();
+        values[i * 2 + 1] = destination[i].imag();
     }
 
     return S_OK;

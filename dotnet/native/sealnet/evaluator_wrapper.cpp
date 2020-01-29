@@ -6,14 +6,14 @@
 #include <iterator>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/evaluator_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
-#include "seal/util/common.h"
-#include "seal/evaluator.h"
 #include "seal/context.h"
+#include "seal/evaluator.h"
+#include "seal/util/common.h"
 
 using namespace std;
 using namespace seal;
@@ -42,7 +42,7 @@ SEALMETHOD Evaluator_Create(void *sealContext, void **evaluator)
         *evaluator = eval;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -71,11 +71,11 @@ SEALMETHOD Evaluator_Negate(void *thisptr, void *encrypted, void *destination)
         eval->negate(*encrypted_ptr, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -97,11 +97,11 @@ SEALMETHOD Evaluator_Add(void *thisptr, void *encrypted1, void *encrypted2, void
         eval->add(*encrypted1_ptr, *encrypted2_ptr, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -115,7 +115,7 @@ SEALMETHOD Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, v
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
 
-    Ciphertext* *encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
+    Ciphertext **encrypteds_pp = reinterpret_cast<Ciphertext **>(encrypteds);
     vector<Ciphertext> encrypteds_vec;
 
     encrypteds_vec.reserve(count);
@@ -129,11 +129,11 @@ SEALMETHOD Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, v
         eval->add_many(encrypteds_vec, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -155,11 +155,11 @@ SEALMETHOD Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void 
         eval->add_plain(*encrypted_ptr, *plain_ptr, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -181,11 +181,11 @@ SEALMETHOD Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, void
         eval->sub(*encrypted1_ptr, *encrypted2_ptr, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -207,11 +207,11 @@ SEALMETHOD Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void 
         eval->sub_plain(*encrypted_ptr, *plain_ptr, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -234,17 +234,18 @@ SEALMETHOD Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2,
         eval->multiply(*encrypted1_ptr, *encrypted2_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
 }
 
-SEALMETHOD Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_MultiplyMany(
+    void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -255,7 +256,7 @@ SEALMETHOD Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypte
     IfNullRet(destination_ptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
-    Ciphertext* *encrypteds_pp = reinterpret_cast<Ciphertext**>(encrypteds);
+    Ciphertext **encrypteds_pp = reinterpret_cast<Ciphertext **>(encrypteds);
     vector<Ciphertext> encrypteds_vec;
 
     encrypteds_vec.reserve(count);
@@ -269,11 +270,11 @@ SEALMETHOD Evaluator_MultiplyMany(void *thisptr, uint64_t count, void **encrypte
         eval->multiply_many(encrypteds_vec, *relin_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -296,11 +297,11 @@ SEALMETHOD Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, 
         eval->multiply_plain(*encrypted_ptr, *plain_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -321,11 +322,11 @@ SEALMETHOD Evaluator_Square(void *thisptr, void *encrypted, void *destination, v
         eval->square(*encrypted_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -348,11 +349,11 @@ SEALMETHOD Evaluator_Relinearize(void *thisptr, void *encrypted, void *relin_key
         eval->relinearize(*encrypted_ptr, *relin_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -373,11 +374,11 @@ SEALMETHOD Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *dest
         eval->mod_switch_to_next(*encrypted_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -397,7 +398,7 @@ SEALMETHOD Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destinat
         eval->mod_switch_to_next(*plain_ptr, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -422,11 +423,11 @@ SEALMETHOD Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parm
         eval->mod_switch_to(*encrypted_ptr, parms, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -450,7 +451,7 @@ SEALMETHOD Evaluator_ModSwitchTo2(void *thisptr, void *plain, uint64_t *parms_id
         eval->mod_switch_to(*plain_ptr, parms, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -471,11 +472,11 @@ SEALMETHOD Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destina
         eval->rescale_to_next(*encrypted_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -500,17 +501,18 @@ SEALMETHOD Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_i
         eval->rescale_to(*encrypted_ptr, parms, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
 }
 
-SEALMETHOD Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_Exponentiate(
+    void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -527,11 +529,11 @@ SEALMETHOD Evaluator_Exponentiate(void *thisptr, void *encrypted, uint64_t expon
         eval->exponentiate(*encrypted_ptr, exponent, *relin_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -556,7 +558,7 @@ SEALMETHOD Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parms
         eval->transform_to_ntt(*plain_ptr, parms, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -576,11 +578,11 @@ SEALMETHOD Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *desti
         eval->transform_to_ntt(*encrypted_ptr, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -600,17 +602,18 @@ SEALMETHOD Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *
         eval->transform_from_ntt(*encrypted_ptr, *destination_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
 }
 
-SEALMETHOD Evaluator_ApplyGalois(void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_ApplyGalois(
+    void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -627,17 +630,18 @@ SEALMETHOD Evaluator_ApplyGalois(void *thisptr, void *encrypted, uint64_t galois
         eval->apply_galois(*encrypted_ptr, galois_elt, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
 }
 
-SEALMETHOD Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool)
+SEALMETHOD Evaluator_RotateRows(
+    void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -654,11 +658,11 @@ SEALMETHOD Evaluator_RotateRows(void *thisptr, void *encrypted, int steps, void 
         eval->rotate_rows(*encrypted_ptr, steps, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -681,17 +685,18 @@ SEALMETHOD Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_
         eval->rotate_columns(*encrypted_ptr, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
 }
 
-SEALMETHOD Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool)
+SEALMETHOD Evaluator_RotateVector(
+    void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -708,11 +713,11 @@ SEALMETHOD Evaluator_RotateVector(void *thisptr, void *encrypted, int steps, voi
         eval->rotate_vector(*encrypted_ptr, steps, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -735,11 +740,11 @@ SEALMETHOD Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galo
         eval->complex_conjugate(*encrypted_ptr, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }

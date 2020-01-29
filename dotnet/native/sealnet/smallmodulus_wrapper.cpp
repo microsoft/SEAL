@@ -5,8 +5,8 @@
 #include <algorithm>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/smallmodulus_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -26,7 +26,7 @@ SEALMETHOD SmallModulus_Create1(uint64_t value, void **small_modulus)
         *small_modulus = sm;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -121,7 +121,7 @@ SEALMETHOD SmallModulus_Set2(void *thisptr, uint64_t value)
     {
         *sm = value;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -175,8 +175,7 @@ SEALMETHOD SmallModulus_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *res
 
     try
     {
-        *result = static_cast<int64_t>(
-            sm->save_size(static_cast<compr_mode_type>(compr_mode)));
+        *result = static_cast<int64_t>(sm->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -199,8 +198,7 @@ SEALMETHOD SmallModulus_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint
     try
     {
         *out_bytes = util::safe_cast<int64_t>(sm->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr),
-            util::safe_cast<size_t>(size),
+            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -227,9 +225,8 @@ SEALMETHOD SmallModulus_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(sm->load(
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes =
+            util::safe_cast<int64_t>(sm->load(reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

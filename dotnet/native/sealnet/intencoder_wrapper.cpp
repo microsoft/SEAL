@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/intencoder_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -14,7 +14,7 @@ using namespace sealnet;
 
 SEALMETHOD IntegerEncoder_Create(void *context, void **encoder)
 {
-    const auto& sharedctx = SharedContextFromVoid(context);
+    const auto &sharedctx = SharedContextFromVoid(context);
     IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(encoder, E_POINTER);
 
@@ -24,7 +24,7 @@ SEALMETHOD IntegerEncoder_Create(void *context, void **encoder)
         *encoder = intEncoder;
         return S_OK;
     }
-    catch (const std::invalid_argument&)
+    catch (const std::invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -109,7 +109,7 @@ SEALMETHOD IntegerEncoder_DecodeUInt32(void *thisptr, void *plainptr, uint32_t *
         *result = intenc->decode_uint32(*plain);
         return S_OK;
     }
-    catch (const std::invalid_argument&)
+    catch (const std::invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -128,7 +128,7 @@ SEALMETHOD IntegerEncoder_DecodeUInt64(void *thisptr, void *plainptr, uint64_t *
         *result = intenc->decode_uint64(*plain);
         return S_OK;
     }
-    catch (const std::invalid_argument&)
+    catch (const std::invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -147,7 +147,7 @@ SEALMETHOD IntegerEncoder_DecodeInt32(void *thisptr, void *plainptr, int32_t *re
         *result = intenc->decode_int32(*plain);
         return S_OK;
     }
-    catch (const std::invalid_argument&)
+    catch (const std::invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -166,7 +166,7 @@ SEALMETHOD IntegerEncoder_DecodeInt64(void *thisptr, void *plainptr, int64_t *re
         *result = intenc->decode_int64(*plain);
         return S_OK;
     }
-    catch (std::invalid_argument&)
+    catch (std::invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -187,7 +187,7 @@ SEALMETHOD IntegerEncoder_DecodeBigUInt(void *thisptr, void *plainptr, void **bi
         *biguint = resultPtr;
         return S_OK;
     }
-    catch (const std::invalid_argument&)
+    catch (const std::invalid_argument &)
     {
         return E_INVALIDARG;
     }

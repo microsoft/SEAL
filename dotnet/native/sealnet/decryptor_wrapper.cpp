@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/decryptor_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -27,7 +27,7 @@ SEALMETHOD Decryptor_Create(void *context, void *secret_key, void **decryptor)
         *decryptor = decr;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -56,7 +56,7 @@ SEALMETHOD Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination)
         decryptor->decrypt(*encryptedptr, *destinationptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -75,7 +75,7 @@ SEALMETHOD Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *i
         *invariant_noise_budget = decryptor->invariant_noise_budget(*encryptedptr);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }

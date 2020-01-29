@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/memorymanager_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -15,38 +15,38 @@ using namespace sealnet;
 
 namespace
 {
-    template<class T>
-    HRESULT GenericCreateProfileCopy(T *original, MMProf* *copyptr)
+    template <class T>
+    HRESULT GenericCreateProfileCopy(T *original, MMProf **copyptr)
     {
         T *copy = new T(*original);
         *copyptr = copy;
         return S_OK;
     }
 
-    HRESULT CreateProfileCopy(MMProf *profile, MMProf* *copyptr)
+    HRESULT CreateProfileCopy(MMProf *profile, MMProf **copyptr)
     {
         IfNullRet(profile, E_POINTER);
         IfNullRet(copyptr, E_POINTER);
 
-        MMProfGlobal *global = dynamic_cast<MMProfGlobal*>(profile);
+        MMProfGlobal *global = dynamic_cast<MMProfGlobal *>(profile);
         if (nullptr != global)
         {
             return GenericCreateProfileCopy(global, copyptr);
         }
 
-        MMProfFixed *fixed = dynamic_cast<MMProfFixed*>(profile);
+        MMProfFixed *fixed = dynamic_cast<MMProfFixed *>(profile);
         if (nullptr != fixed)
         {
             return GenericCreateProfileCopy(fixed, copyptr);
         }
 
-        MMProfNew *newprof = dynamic_cast<MMProfNew*>(profile);
+        MMProfNew *newprof = dynamic_cast<MMProfNew *>(profile);
         if (nullptr != newprof)
         {
             return GenericCreateProfileCopy(newprof, copyptr);
         }
 
-        MMProfThreadLocal *threadlocal = dynamic_cast<MMProfThreadLocal*>(profile);
+        MMProfThreadLocal *threadlocal = dynamic_cast<MMProfThreadLocal *>(profile);
         if (nullptr != threadlocal)
         {
             return GenericCreateProfileCopy(threadlocal, copyptr);
@@ -55,7 +55,7 @@ namespace
         // No matching profile.
         return E_UNEXPECTED;
     }
-}
+} // namespace
 
 SEALMETHOD MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void **pool_handle)
 {
@@ -100,7 +100,7 @@ SEALMETHOD MemoryManager_SwitchProfile(void *new_profile)
     MMProf *new_mm_profile = nullptr;
     IfFailRet(CreateProfileCopy(profile, &new_mm_profile));
 
-    MemoryManager::SwitchProfile(static_cast<MMProf*>(new_mm_profile));
+    MemoryManager::SwitchProfile(static_cast<MMProf *>(new_mm_profile));
     return S_OK;
 }
 
@@ -123,7 +123,6 @@ SEALMETHOD MMProf_CreateFixed(void *pool, void **profile)
     MMProfFixed *fixed = new MMProfFixed(myhandle);
     *profile = fixed;
     return S_OK;
-
 }
 
 SEALMETHOD MMProf_CreateNew(void **profile)

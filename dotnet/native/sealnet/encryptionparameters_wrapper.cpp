@@ -2,15 +2,15 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/encryptionparameters_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
 #include "seal/encryptionparams.h"
 #include "seal/smallmodulus.h"
-#include "seal/util/hash.h"
 #include "seal/util/common.h"
+#include "seal/util/hash.h"
 
 using namespace std;
 using namespace seal;
@@ -28,7 +28,7 @@ namespace seal
             return parms.parms_id();
         }
     };
-}
+} // namespace seal
 
 SEALMETHOD EncParams_Create1(uint8_t scheme, void **enc_params)
 {
@@ -40,7 +40,7 @@ SEALMETHOD EncParams_Create1(uint8_t scheme, void **enc_params)
         *enc_params = params;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -97,7 +97,7 @@ SEALMETHOD EncParams_SetPolyModulusDegree(void *thisptr, uint64_t degree)
         params->set_poly_modulus_degree(degree);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -119,7 +119,7 @@ SEALMETHOD EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coef
     IfNullRet(params, E_POINTER);
     IfNullRet(coeffs, E_POINTER);
 
-    SmallModulus* *coeff_array = reinterpret_cast<SmallModulus**>(coeffs);
+    SmallModulus **coeff_array = reinterpret_cast<SmallModulus **>(coeffs);
     vector<SmallModulus> coefficients(length);
 
     for (uint64_t i = 0; i < length; i++)
@@ -132,7 +132,7 @@ SEALMETHOD EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coef
         params->set_coeff_modulus(coefficients);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -171,7 +171,7 @@ SEALMETHOD EncParams_GetPlainModulus(void *thisptr, void **plain_modulus)
     IfNullRet(plain_modulus, E_POINTER);
 
     const auto plainmodulus = &params->plain_modulus();
-    *plain_modulus = const_cast<SmallModulus*>(plainmodulus);
+    *plain_modulus = const_cast<SmallModulus *>(plainmodulus);
     return S_OK;
 }
 
@@ -187,7 +187,7 @@ SEALMETHOD EncParams_SetPlainModulus1(void *thisptr, void *modulus)
         params->set_plain_modulus(*smallmodulus);
         return S_OK;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -203,7 +203,7 @@ SEALMETHOD EncParams_SetPlainModulus2(void *thisptr, uint64_t plain_modulus)
         params->set_plain_modulus(plain_modulus);
         return S_OK;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -229,8 +229,7 @@ SEALMETHOD EncParams_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result
 
     try
     {
-        *result = static_cast<int64_t>(
-            params->save_size(static_cast<compr_mode_type>(compr_mode)));
+        *result = static_cast<int64_t>(params->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -253,8 +252,7 @@ SEALMETHOD EncParams_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t
     try
     {
         *out_bytes = util::safe_cast<int64_t>(params->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr),
-            util::safe_cast<size_t>(size),
+            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -281,9 +279,8 @@ SEALMETHOD EncParams_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t 
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(params->load(
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes =
+            util::safe_cast<int64_t>(params->load(reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/ciphertext_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -20,8 +20,7 @@ namespace seal
     */
     struct Ciphertext::CiphertextPrivateHelper
     {
-        static void resize(Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree,
-            size_t coeff_mod_count)
+        static void resize(Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree, size_t coeff_mod_count)
         {
             ciphertext->resize_internal(size, poly_modulus_degree, coeff_mod_count);
         }
@@ -31,7 +30,7 @@ namespace seal
             ciphertext->is_ntt_form_ = is_ntt_form;
         }
     };
-}
+} // namespace seal
 
 SEALMETHOD Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
 {
@@ -44,7 +43,7 @@ SEALMETHOD Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
         *ciphertext = cipher;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -74,7 +73,7 @@ SEALMETHOD Ciphertext_Create3(void *context, void *pool, void **ciphertext)
         *ciphertext = cipher;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -97,7 +96,7 @@ SEALMETHOD Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, voi
         *ciphertext = cipher;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -120,7 +119,7 @@ SEALMETHOD Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capaci
         *ciphertext = cipher;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -142,7 +141,7 @@ SEALMETHOD Ciphertext_Reserve1(void *thisptr, void *context, uint64_t *parms_id,
         cipher->reserve(sharedctx, parms, size_capacity);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -160,7 +159,7 @@ SEALMETHOD Ciphertext_Reserve2(void *thisptr, void *context, uint64_t size_capac
         cipher->reserve(sharedctx, size_capacity);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -176,7 +175,7 @@ SEALMETHOD Ciphertext_Reserve3(void *thisptr, uint64_t size_capacity)
         cipher->reserve(size_capacity);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -278,7 +277,7 @@ SEALMETHOD Ciphertext_Resize1(void *thisptr, void *context, uint64_t *parms_id, 
         cipher->resize(sharedctx, parms, size);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -297,7 +296,7 @@ SEALMETHOD Ciphertext_Resize2(void *thisptr, void *context, uint64_t size)
         cipher->resize(sharedctx, size);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -313,7 +312,7 @@ SEALMETHOD Ciphertext_Resize3(void *thisptr, uint64_t size)
         cipher->resize(size);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -329,7 +328,7 @@ SEALMETHOD Ciphertext_Resize4(void *thisptr, uint64_t size, uint64_t polyModulus
         Ciphertext::CiphertextPrivateHelper::resize(cipher, size, polyModulusDegree, coeffModCount);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -346,7 +345,7 @@ SEALMETHOD Ciphertext_GetDataAt1(void *thisptr, uint64_t index, uint64_t *data)
         *data = (*cipher)[index];
         return S_OK;
     }
-    catch (const out_of_range&)
+    catch (const out_of_range &)
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -358,8 +357,7 @@ SEALMETHOD Ciphertext_GetDataAt2(void *thisptr, uint64_t poly_index, uint64_t co
     IfNullRet(cipher, E_POINTER);
     IfNullRet(data, E_POINTER);
 
-    auto poly_uint64_count = util::mul_safe(
-        cipher->poly_modulus_degree(), cipher->coeff_mod_count());
+    auto poly_uint64_count = util::mul_safe(cipher->poly_modulus_degree(), cipher->coeff_mod_count());
 
     // poly_index is verified by the data method, we need to verify coeff_index ourselves.
     if (coeff_index >= poly_uint64_count)
@@ -370,7 +368,7 @@ SEALMETHOD Ciphertext_GetDataAt2(void *thisptr, uint64_t poly_index, uint64_t co
         *data = cipher->data(poly_index)[coeff_index];
         return S_OK;
     }
-    catch (const out_of_range&)
+    catch (const out_of_range &)
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -386,7 +384,7 @@ SEALMETHOD Ciphertext_SetDataAt(void *thisptr, uint64_t index, uint64_t value)
         (*cipher)[index] = value;
         return S_OK;
     }
-    catch (const out_of_range&)
+    catch (const out_of_range &)
     {
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
     }
@@ -468,8 +466,7 @@ SEALMETHOD Ciphertext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *resul
 
     try
     {
-        *result = static_cast<int64_t>(
-            cipher->save_size(static_cast<compr_mode_type>(compr_mode)));
+        *result = static_cast<int64_t>(cipher->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -492,8 +489,7 @@ SEALMETHOD Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
     try
     {
         *out_bytes = util::safe_cast<int64_t>(cipher->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr),
-            util::safe_cast<size_t>(size),
+            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -522,10 +518,8 @@ SEALMETHOD Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, u
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(cipher->unsafe_load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            cipher->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -553,10 +547,8 @@ SEALMETHOD Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(cipher->load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            cipher->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

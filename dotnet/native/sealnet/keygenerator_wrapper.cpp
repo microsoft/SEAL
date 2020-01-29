@@ -6,8 +6,8 @@
 #include <iterator>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/keygenerator_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -59,7 +59,7 @@ SEALMETHOD KeyGenerator_Create1(void *sealContext, void **key_generator)
         *key_generator = keygen;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -79,7 +79,7 @@ SEALMETHOD KeyGenerator_Create2(void *sealContext, void *secret_key, void **key_
         *key_generator = keygen;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -101,7 +101,7 @@ SEALMETHOD KeyGenerator_Create3(void *sealContext, void *secret_key, void *publi
         *key_generator = keygen;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -128,7 +128,7 @@ SEALMETHOD KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_ke
         *relin_keys = relinKeys;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -138,7 +138,8 @@ SEALMETHOD KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_ke
     }
 }
 
-SEALMETHOD KeyGenerator_GaloisKeysFromElts(void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys)
+SEALMETHOD KeyGenerator_GaloisKeysFromElts(
+    void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -150,21 +151,23 @@ SEALMETHOD KeyGenerator_GaloisKeysFromElts(void *thisptr, uint64_t count, uint64
 
     try
     {
-        GaloisKeys *keys = new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
+        GaloisKeys *keys =
+            new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
 }
 
-SEALMETHOD KeyGenerator_GaloisKeysFromSteps(void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys)
+SEALMETHOD KeyGenerator_GaloisKeysFromSteps(
+    void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -178,15 +181,16 @@ SEALMETHOD KeyGenerator_GaloisKeysFromSteps(void *thisptr, uint64_t count, int *
     try
     {
         galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_elts_from_steps(keygen, steps_vec);
-        GaloisKeys *keys = new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
+        GaloisKeys *keys =
+            new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }
@@ -202,15 +206,16 @@ SEALMETHOD KeyGenerator_GaloisKeysAll(void *thisptr, bool save_seed, void **galo
 
     try
     {
-        GaloisKeys *keys = new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
+        GaloisKeys *keys =
+            new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }

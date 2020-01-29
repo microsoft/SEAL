@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/encryptor_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -15,20 +15,20 @@ using namespace sealnet;
 
 struct seal::Encryptor::EncryptorPrivateHelper
 {
-    static void encrypt_symmetric_internal(Encryptor *encryptor, const Plaintext &plain,
-        bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
+    static void encrypt_symmetric_internal(
+        Encryptor *encryptor, const Plaintext &plain, bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
     {
         encryptor->encrypt_internal(plain, false, save_seed, destination, pool);
     }
 
-    static void encrypt_zero_symmetric_internal(Encryptor *encryptor, parms_id_type parms_id,
-        bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
+    static void encrypt_zero_symmetric_internal(
+        Encryptor *encryptor, parms_id_type parms_id, bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
     {
         encryptor->encrypt_zero_internal(parms_id, false, save_seed, destination, pool);
     }
 
-    static void encrypt_zero_symmetric_internal(Encryptor *encryptor, bool save_seed,
-        Ciphertext &destination, MemoryPoolHandle pool)
+    static void encrypt_zero_symmetric_internal(
+        Encryptor *encryptor, bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
     {
         encryptor->encrypt_zero_internal(encryptor->context_->first_parms_id(), false, save_seed, destination, pool);
     }
@@ -64,7 +64,7 @@ SEALMETHOD Encryptor_Create(void *context, void *public_key, void *secret_key, v
         *encryptor = enc;
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -82,7 +82,7 @@ SEALMETHOD Encryptor_SetPublicKey(void *thisptr, void *public_key)
         encryptor->set_public_key(*pkey);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -100,7 +100,7 @@ SEALMETHOD Encryptor_SetSecretKey(void *thisptr, void *secret_key)
         encryptor->set_secret_key(*skey);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -121,7 +121,7 @@ SEALMETHOD Encryptor_Encrypt(void *thisptr, void *plaintext, void *destination, 
         encryptor->encrypt(*plain, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -148,7 +148,7 @@ SEALMETHOD Encryptor_EncryptZero1(void *thisptr, uint64_t *parms_id, void *desti
         encryptor->encrypt_zero(parms, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -171,7 +171,7 @@ SEALMETHOD Encryptor_EncryptZero2(void *thisptr, void *destination, void *pool_h
         encryptor->encrypt_zero(*cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -181,7 +181,8 @@ SEALMETHOD Encryptor_EncryptZero2(void *thisptr, void *destination, void *pool_h
     }
 }
 
-SEALMETHOD Encryptor_EncryptSymmetric(void *thisptr, void *plaintext, bool save_seed, void *destination, void *pool_handle)
+SEALMETHOD Encryptor_EncryptSymmetric(
+    void *thisptr, void *plaintext, bool save_seed, void *destination, void *pool_handle)
 {
     Encryptor *encryptor = FromVoid<Encryptor>(thisptr);
     IfNullRet(encryptor, E_POINTER);
@@ -196,7 +197,7 @@ SEALMETHOD Encryptor_EncryptSymmetric(void *thisptr, void *plaintext, bool save_
         Encryptor::EncryptorPrivateHelper::encrypt_symmetric_internal(encryptor, *plain, save_seed, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -206,7 +207,8 @@ SEALMETHOD Encryptor_EncryptSymmetric(void *thisptr, void *plaintext, bool save_
     }
 }
 
-SEALMETHOD Encryptor_EncryptZeroSymmetric1(void *thisptr, uint64_t *parms_id, bool save_seed, void *destination, void *pool_handle)
+SEALMETHOD Encryptor_EncryptZeroSymmetric1(
+    void *thisptr, uint64_t *parms_id, bool save_seed, void *destination, void *pool_handle)
 {
     Encryptor *encryptor = FromVoid<Encryptor>(thisptr);
     IfNullRet(encryptor, E_POINTER);
@@ -223,7 +225,7 @@ SEALMETHOD Encryptor_EncryptZeroSymmetric1(void *thisptr, uint64_t *parms_id, bo
         Encryptor::EncryptorPrivateHelper::encrypt_zero_symmetric_internal(encryptor, parms, save_seed, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -246,7 +248,7 @@ SEALMETHOD Encryptor_EncryptZeroSymmetric2(void *thisptr, bool save_seed, void *
         Encryptor::EncryptorPrivateHelper::encrypt_zero_symmetric_internal(encryptor, save_seed, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }

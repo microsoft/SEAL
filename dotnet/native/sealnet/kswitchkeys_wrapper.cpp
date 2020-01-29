@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/kswitchkeys_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -25,7 +25,7 @@ namespace
             return S_OK;
         }
 
-        auto pkeys = reinterpret_cast<PublicKey**>(key_list);
+        auto pkeys = reinterpret_cast<PublicKey **>(key_list);
         for (size_t i = 0; i < key.size(); i++)
         {
             pkeys[i] = new PublicKey(key[i]);
@@ -33,7 +33,7 @@ namespace
 
         return S_OK;
     }
-}
+} // namespace
 
 namespace seal
 {
@@ -44,7 +44,7 @@ namespace seal
             return PublicKey(pool);
         }
     };
-}
+} // namespace seal
 
 SEALMETHOD KSwitchKeys_Create1(void **kswitch_keys)
 {
@@ -131,7 +131,7 @@ SEALMETHOD KSwitchKeys_AddKeyList(void *thisptr, uint64_t count, void **key_list
     IfNullRet(keys, E_POINTER);
     IfNullRet(key_list, E_POINTER);
 
-    PublicKey **key = reinterpret_cast<PublicKey**>(key_list);
+    PublicKey **key = reinterpret_cast<PublicKey **>(key_list);
 
     // Don't resize, only reserve
     keys->data().emplace_back();
@@ -192,8 +192,7 @@ SEALMETHOD KSwitchKeys_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *resu
 
     try
     {
-        *result = static_cast<int64_t>(
-            keys->save_size(static_cast<compr_mode_type>(compr_mode)));
+        *result = static_cast<int64_t>(keys->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -216,8 +215,7 @@ SEALMETHOD KSwitchKeys_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8
     try
     {
         *out_bytes = util::safe_cast<int64_t>(keys->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr),
-            util::safe_cast<size_t>(size),
+            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -246,10 +244,8 @@ SEALMETHOD KSwitchKeys_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, 
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(keys->unsafe_load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            keys->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -277,10 +273,8 @@ SEALMETHOD KSwitchKeys_Load(void *thisptr, void *context, uint8_t *inptr, uint64
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(keys->load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            keys->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

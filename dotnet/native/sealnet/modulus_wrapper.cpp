@@ -6,8 +6,8 @@
 #include <iterator>
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/modulus_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -37,7 +37,7 @@ SEALMETHOD CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level, 
     {
         result = CoeffModulus::BFVDefault(poly_modulus_degree, security_level);
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -59,11 +59,11 @@ SEALMETHOD CoeffModulus_Create(uint64_t poly_modulus_degree, uint64_t length, in
     {
         result = CoeffModulus::Create(poly_modulus_degree, bit_sizes_vec);
     }
-    catch (const invalid_argument&)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
-    catch (const logic_error&)
+    catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
     }

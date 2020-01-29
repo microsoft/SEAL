@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "sealnet/stdafx.h"
 #include "sealnet/publickey_wrapper.h"
+#include "sealnet/stdafx.h"
 #include "sealnet/utilities.h"
 
 // SEAL
@@ -95,8 +95,7 @@ SEALMETHOD PublicKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result
 
     try
     {
-        *result = static_cast<int64_t>(
-            pkey->save_size(static_cast<compr_mode_type>(compr_mode)));
+        *result = static_cast<int64_t>(pkey->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -119,8 +118,7 @@ SEALMETHOD PublicKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t
     try
     {
         *out_bytes = util::safe_cast<int64_t>(pkey->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr),
-            util::safe_cast<size_t>(size),
+            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -149,10 +147,8 @@ SEALMETHOD PublicKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, ui
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(pkey->unsafe_load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            pkey->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -180,10 +176,8 @@ SEALMETHOD PublicKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t
 
     try
     {
-        *in_bytes = util::safe_cast<int64_t>(pkey->load(
-            sharedctx,
-            reinterpret_cast<SEAL_BYTE *>(inptr),
-            util::safe_cast<size_t>(size)));
+        *in_bytes = util::safe_cast<int64_t>(
+            pkey->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
