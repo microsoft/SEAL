@@ -50,6 +50,12 @@ steps:
           if (Test-Path env:SEALNetSigningCertificate) {
               Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
           }
+          
+    - task: UseDotNet@2
+      displayName: 'Get .NET Core 3.1 SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '3.1.x'
 
     - task: VSBuild@1
       displayName: 'Build solution SEAL'
