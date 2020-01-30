@@ -170,7 +170,7 @@ namespace seal
             unsigned long long coeff = plain[bit_index];
 
             // Left shift result.
-            int64_t next_result = result << 1;
+            int64_t next_result = result * 2;
             if ((next_result < 0) != (result < 0))
             {
                 // Check for overflow.

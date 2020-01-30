@@ -122,7 +122,7 @@ void example_serialization()
         As an example, we now serialize the encryption parameters to a fixed size
         buffer.
         */
-        vector<SEAL_BYTE> byte_buffer(parms.save_size());
+        vector<SEAL_BYTE> byte_buffer(static_cast<size_t>(parms.save_size()));
         parms.save(reinterpret_cast<SEAL_BYTE *>(byte_buffer.data()), byte_buffer.size());
 
         /*

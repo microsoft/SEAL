@@ -135,7 +135,6 @@ namespace SEALTest
             ASSERT_EQ(correct, poly_to_hex_string(number, 4, 1));
             ASSERT_EQ(correct, poly_to_hex_string(number, 2, 2));
             ASSERT_EQ(correct, poly_to_hex_string(number, 1, 4));
-            ASSERT_EQ(correct, poly_to_hex_string(nullptr, 0, 0));
 
             number[0] = 1;
             correct = "1";

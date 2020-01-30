@@ -21,11 +21,17 @@ namespace seal
             const std::uint64_t *value, std::size_t coeff_count, std::size_t coeff_uint64_count)
         {
 #ifdef SEAL_DEBUG
-            if (coeff_uint64_count && coeff_count && !value)
+            if (!value)
             {
                 throw std::invalid_argument("value");
             }
 #endif
+            // First check if there is anything to print
+            if (!coeff_count || !coeff_uint64_count)
+            {
+                return "0";
+            }
+
             std::ostringstream result;
             bool empty = true;
             value += util::mul_safe(coeff_count - 1, coeff_uint64_count);
@@ -59,11 +65,17 @@ namespace seal
             const std::uint64_t *value, std::size_t coeff_count, std::size_t coeff_uint64_count, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
-            if (coeff_uint64_count && coeff_count && !value)
+            if (!value)
             {
                 throw std::invalid_argument("value");
             }
 #endif
+            // First check if there is anything to print
+            if (!coeff_count || !coeff_uint64_count)
+            {
+                return "0";
+            }
+
             std::ostringstream result;
             bool empty = true;
             value += coeff_count - 1;

@@ -540,8 +540,9 @@ namespace seal
 
                 // Verify that the values are not too large to fit in coeff_modulus
                 // Note that we have an extra + 1 for the sign bit
-                max_coeff_bit_count =
-                    std::max(max_coeff_bit_count, static_cast<int>(std::log2(std::fabs(conj_values[i].real()))) + 2);
+                // Don't compute logarithmis of numbers less than 1
+                double d = std::max(std::fabs(conj_values[i].real()), 1.0);
+                max_coeff_bit_count = std::max(max_coeff_bit_count, static_cast<int>(std::log2(d)) + 2);
             }
             if (max_coeff_bit_count >= context_data.total_coeff_modulus_bit_count())
             {

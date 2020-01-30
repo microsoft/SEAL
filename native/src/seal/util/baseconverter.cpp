@@ -30,7 +30,7 @@ namespace seal
             : pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
-            if (!pool)
+            if (!pool_)
             {
                 throw std::invalid_argument("pool is uninitialized");
             }
