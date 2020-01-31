@@ -5,15 +5,15 @@
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="$(MSBuildThisFileDirectory)../runtimes/win10-x64/native/sealnetnative.dll" />
-    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Linux'))" Include="$(MSBuildThisFileDirectory)../runtimes/linux-x64/native/libsealnetnative.so*" />
-    <SEALNetNativeBinaryFiles Condition="$([MSBuild]::IsOsPlatform('OSX'))" Include="$(MSBuildThisFileDirectory)../runtimes/osx-x64/native/libsealnetnative*.dylib" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="$(MSBuildThisFileDirectory)../runtimes/win10-x64/native/sealc.dll" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Linux'))" Include="$(MSBuildThisFileDirectory)../runtimes/linux-x64/native/libsealc.so*" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('OSX'))" Include="$(MSBuildThisFileDirectory)../runtimes/osx-x64/native/libsealc*.dylib" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="@(SEALNetNativeBinaryFiles)">
-      <Link Condition="$([MSBuild]::IsOsPlatform('Windows'))">sealnetnative.dll</Link>
-      <Link Condition="$([MSBuild]::IsOsPlatform('Linux'))">libsealnetnative.so</Link>
-      <Link Condition="$([MSBuild]::IsOsPlatform('OSX'))">libsealnetnative.dylib</Link>
+    <None Include="@(SEALCBinaryFiles)">
+      <Link Condition="$([MSBuild]::IsOsPlatform('Windows'))">sealc.dll</Link>
+      <Link Condition="$([MSBuild]::IsOsPlatform('Linux'))">libsealc.so</Link>
+      <Link Condition="$([MSBuild]::IsOsPlatform('OSX'))">libsealc.dylib</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

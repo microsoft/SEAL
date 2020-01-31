@@ -315,20 +315,20 @@ if(SEAL_USE_ZLIB)
     endif()
 endif()
 
-# Set the sealnetnative dynamic library file names to be included in creating
+# Set the sealc dynamic library file names to be included in creating
 # the NuGet package. When building a multi-platform package, all three paths
 # should be included.
 if(SEAL_MULTIPLATFORM_NUGET_BUILD)
-    set(SEAL_WINDOWS_SEALNETNATIVE_PATH ../lib/x64/$Configuration$/sealnetnative.dll)
-    set(SEAL_LINUX_SEALNETNATIVE_PATH ../lib/libsealnetnative.so.${SEAL_VERSION})
-    set(SEAL_MACOS_SEALNETNATIVE_PATH ../lib/libsealnetnative.${SEAL_VERSION}.dylib)
+    set(SEAL_WINDOWS_SEAL_C_PATH ../../native/lib/x64/$Configuration$/sealc.dll)
+    set(SEAL_LINUX_SEAL_C_PATH ../../native/lib/libsealc.so.${SEAL_VERSION})
+    set(SEAL_MACOS_SEAL_C_PATH ../../native/lib/libsealc.${SEAL_VERSION}.dylib)
 else()
     if(MSVC)
-        set(SEAL_WINDOWS_SEALNETNATIVE_PATH ../lib/x64/$Configuration$/sealnetnative.dll)
+        set(SEAL_WINDOWS_SEAL_C_PATH ../../native/lib/x64/$Configuration$/sealc.dll)
     elseif(APPLE)
-        set(SEAL_MACOS_SEALNETNATIVE_PATH ../lib/libsealnetnative.${SEAL_VERSION}.dylib)
+        set(SEAL_MACOS_SEAL_C_PATH ../../native/lib/libsealc.${SEAL_VERSION}.dylib)
     elseif(UNIX)
-        set(SEAL_LINUX_SEALNETNATIVE_PATH ../lib/libsealnetnative.so.${SEAL_VERSION})
+        set(SEAL_LINUX_SEAL_C_PATH ../../native/lib/libsealc.so.${SEAL_VERSION})
     endif()
 endif()
 
