@@ -77,7 +77,6 @@ rem Call CMake.
 	-A %PROJECTPLATFORM%                                            ^
 	-DALLOW_COMMAND_LINE_BUILD=1                                    ^
 	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%"                     ^
-	-DSEAL_LIB_BUILD_TYPE="Static_PIC"                              ^
 	-DSEAL_USE_MSGSL=%USE_MSGSL%                                    ^
 	-DMSGSL_ROOT="%MSGSL_ROOT%"                                     ^
 	-DSEAL_USE_ZLIB=%USE_ZLIB%                                      ^

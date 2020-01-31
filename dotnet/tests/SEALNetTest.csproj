@@ -27,7 +27,7 @@
   <ItemGroup>
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="$(ProjectDir)..\..\native\lib\x64\$(Configuration)\sealc.dll" />
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="$(ProjectDir)../../native/lib/libsealc.so.*" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="$(ProjectDir)../../native/lib/libsealc.*.dylib" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="$(ProjectDir)../../native/lib/libsealc*.dylib" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

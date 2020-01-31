@@ -1,32 +1,31 @@
 parameters:
-    dir: ''
     artifactName: 'nix-drop'
     ext: ''
 
 steps:
-
     - task: CMake@1
       displayName: 'CMake ZLIB'
       inputs:
           workingDirectory: native/src/thirdparty/zlib
-          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release'
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON'
 
-    - script: |
-          cd $BUILD_SOURCESDIRECTORY
-          cd native/src/thirdparty/zlib
-          make
+    - task: CMake@1
+      displayName: 'Build ZLIB'
+      inputs:
+          workingDirectory: native/src/thirdparty/zlib
+          cmakeArgs: '--build'
 
     - task: CMake@1
       displayName: 'CMake SEAL'
       inputs:
           workingDirectory: native/src
-          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_LIB_BUILD_TYPE=Static_PIC -DZLIB_LIBRARY=./thirdparty/zlib/zlib-src/libz.${{parameters.ext}} -DZLIB_INCLUDE_DIR=./thirdparty/zlib/zlib-src/ ${{ parameters.dir }}'
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_BUILD_SEAL_C=ON -DZLIB_LIBRARY=./thirdparty/zlib/zlib-src/libz.${{parameters.ext}} -DZLIB_INCLUDE_DIR=./thirdparty/zlib/zlib-src/}'
 
-    - script: |
-          cd $BUILD_SOURCESDIRECTORY
-          cd native/src
-          make
+    - task: CMake@1
       displayName: 'Build SEAL'
+      inputs:
+          workingDirectory: native/src
+          cmakeArgs: '--build'
 
     - script: |
           cd native/tests/thirdparty
@@ -37,31 +36,19 @@ steps:
       displayName: 'CMake SEALTest'
       inputs:
           workingDirectory: native/tests
-          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_DIR=../src/cmake ${{ parameters.dir }}'
-
-    - script: |
-          cd $BUILD_SOURCESDIRECTORY
-          cd native/tests
-          make
+          cmakeArgs: '-DSEAL_DIR=../src/cmake}'
+          
+    - task: CMake@1
       displayName: 'Build SEALTest'
+      inputs:
+          workingDirectory: native/tests
+          cmakeArgs: '--build}'
 
     - script: |
           cd $BUILD_SOURCESDIRECTORY
           cd native/bin
           ./sealtest
       displayName: 'Run unit tests'
-
-    - task: CMake@1
-      displayName: 'CMake SEALNetNative'
-      inputs:
-          workingDirectory: dotnet/native
-          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_DIR=../../native/src/cmake ${{ parameters.dir }}'
-
-    - script: |
-          cd $BUILD_SOURCESDIRECTORY
-          cd dotnet/native
-          make
-      displayName: 'Build SEALNetNative'
 
     - task: UseDotNet@2
       displayName: 'Get .NET Core 3.1 SDK'
@@ -79,9 +66,9 @@ steps:
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
       inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/dotnet/lib'
-          Contents: 'libsealnetnative.*'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)/dotnet/lib'
+          SourceFolder: '$(Build.SourcesDirectory)/native/lib'
+          Contents: 'libsealc.*'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/native/lib'
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'

@@ -2,6 +2,9 @@ name: $(TeamProject)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)
 pr:
     - contrib
 
+trigger:
+    - master
+    
 stages:
     - stage: build
       displayName: Build
@@ -50,9 +53,8 @@ stages:
             steps:
                 - template: templates/nix-build.yml
                   parameters:
-                      dir: .
                       artifactName: macos-drop
-                      ext: so
+                      ext: a
 
           - job: Nuget
             displayName: Pack into Nuget
