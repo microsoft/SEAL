@@ -15,7 +15,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
 #include <gsl/span>
 #endif
 
@@ -149,7 +149,7 @@ namespace seal
         and bit_count is positive
         */
         BigUInt(int bit_count, std::uint64_t *value);
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Creates an aliased BigUInt with given backing array and bit width set to
         the size of the backing array. An aliased BigUInt does not internally
@@ -238,7 +238,7 @@ namespace seal
         {
             return value_.get();
         }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Returns the backing array storing the BigUInt value.
 
@@ -419,7 +419,7 @@ namespace seal
             value_ = util::Pointer<std::uint64_t>::Aliasing(value);
             bit_count_ = bit_count;
         }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Makes the BigUInt an aliased BigUInt with the given backing array
         and bit width set equal to the size of the backing array. An aliased

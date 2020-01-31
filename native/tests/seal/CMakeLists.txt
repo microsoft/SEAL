@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-target_sources(sealtest
+target_sources(sealtests
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
         ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp
@@ -25,6 +25,7 @@ target_sources(sealtest
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.cpp
         ${CMAKE_CURRENT_LIST_DIR}/serialization.cpp
         ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/testrunner.cpp
 )
 
 add_subdirectory(util)

@@ -42,6 +42,46 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{33C15AAC
 		dotnet\nuget\SEALNet.targets.in = dotnet\nuget\SEALNet.targets.in
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C73A600E-7F50-467C-9228-58AC2C1A7DDA}"
+	ProjectSection(SolutionItems) = preProject
+		.clang-format = .clang-format
+		.gitignore = .gitignore
+		azure-pipelines.yml = azure-pipelines.yml
+		Changes.md = Changes.md
+		CMakeLists.txt = CMakeLists.txt
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
+		CONTRIBUTING.md = CONTRIBUTING.md
+		ISSUES.md = ISSUES.md
+		LICENSE = LICENSE
+		NOTICE = NOTICE
+		README.md = README.md
+		SECURITY.md = SECURITY.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{0518DDC0-82BC-4E7C-A24D-98B8EA9C47B3}"
+	ProjectSection(SolutionItems) = preProject
+		templates\nix-build.yml = templates\nix-build.yml
+		templates\pack.yml = templates\pack.yml
+		templates\windows-build.yml = templates\windows-build.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "thirdparty", "thirdparty", "{6B00D0DE-8A17-44B8-BF47-F372E9189434}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zlib", "zlib", "{5E524D23-AD60-45AF-B279-0322941E9F31}"
+	ProjectSection(SolutionItems) = preProject
+		thirdparty\zlib\CMakeLists.txt = thirdparty\zlib\CMakeLists.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msgsl", "msgsl", "{B4EF7358-C76B-4142-9746-B082114B1DDD}"
+	ProjectSection(SolutionItems) = preProject
+		thirdparty\msgsl\CMakeLists.txt = thirdparty\msgsl\CMakeLists.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "googletest", "googletest", "{0DD76E94-59E1-49D4-9ED7-8C696B89F26E}"
+	ProjectSection(SolutionItems) = preProject
+		thirdparty\googletest\CMakeLists.txt = thirdparty\googletest\CMakeLists.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -114,11 +154,16 @@ Global
 		{7EA96C25-FC0D-485A-BB71-32B6DA55652A} = {A5BADDF0-1F03-48FE-AAC0-3355614C9A8D}
 		{0345DC4D-EFE3-460E-AB7E-AA6E05BB8DFF} = {A5BADDF0-1F03-48FE-AAC0-3355614C9A8D}
 		{2B57D847-26DC-45FF-B9AF-EE33910B5093} = {A5BADDF0-1F03-48FE-AAC0-3355614C9A8D}
-		{70BBB2AA-FA77-40C1-890F-7AA7DBB3AD3D} = {0786F255-C3A7-4912-A669-12273E7AE013}
+		{70BBB2AA-FA77-40C1-890F-7AA7DBB3AD3D} = {A5BADDF0-1F03-48FE-AAC0-3355614C9A8D}
 		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E} = {0786F255-C3A7-4912-A669-12273E7AE013}
 		{D0FCCA29-F0F8-49A3-9615-24FF899F1909} = {0786F255-C3A7-4912-A669-12273E7AE013}
 		{18DA9F90-3131-461A-A3E8-40AC0B1D7632} = {0786F255-C3A7-4912-A669-12273E7AE013}
 		{33C15AAC-6E56-477E-A118-3451FD21AC49} = {0786F255-C3A7-4912-A669-12273E7AE013}
+		{0518DDC0-82BC-4E7C-A24D-98B8EA9C47B3} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
+		{6B00D0DE-8A17-44B8-BF47-F372E9189434} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
+		{5E524D23-AD60-45AF-B279-0322941E9F31} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
+		{B4EF7358-C76B-4142-9746-B082114B1DDD} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
+		{0DD76E94-59E1-49D4-9ED7-8C696B89F26E} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15A17F22-F747-4B82-BF5F-E0224AF4B3ED}

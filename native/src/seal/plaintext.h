@@ -18,7 +18,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
 #include <gsl/span>
 #endif
 
@@ -346,7 +346,7 @@ namespace seal
         {
             return data_.cbegin();
         }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Returns a span pointing to the beginning of the text polynomial.
         */

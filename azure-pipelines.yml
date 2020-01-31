@@ -14,8 +14,6 @@ stages:
             displayName: Windows
             pool:
                 vmImage: 'windows-latest'
-            variables:
-                ZLIB_ROOT: '$(Build.SourcesDirectory)\native\src\thirdparty\zlib\zlib-src'
             steps:
                 - template: templates/windows-build.yml
                   parameters:
@@ -35,15 +33,14 @@ stages:
                       g++-7 --version
                       which gcc-7
                       which g++-7
-                      
+
                       sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-7 50
                       sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-7 50
-                      
+
                   displayName: 'Install GCC 7'
                 - template: templates/nix-build.yml
                   parameters:
                       artifactName: linux-drop
-                      ext: a
 
           - job: macOs
             displayName: Mac OS X
@@ -54,7 +51,6 @@ stages:
                 - template: templates/nix-build.yml
                   parameters:
                       artifactName: macos-drop
-                      ext: a
 
           - job: Nuget
             displayName: Pack into Nuget

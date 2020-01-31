@@ -196,7 +196,7 @@ namespace seal
         // Note: We already performed bit-reversal when reading in the matrix
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
     void BatchEncoder::encode(gsl::span<const uint64_t> values_matrix, Plaintext &destination)
     {
         auto &context_data = *context_->first_context_data();
@@ -418,7 +418,7 @@ namespace seal
                                  : static_cast<int64_t>(curr_value);
         }
     }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
     void BatchEncoder::decode(const Plaintext &plain, gsl::span<uint64_t> destination, MemoryPoolHandle pool)
     {
         if (!is_valid_for(plain, context_))

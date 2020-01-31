@@ -23,5 +23,4 @@
 #cmakedefine SEAL_USE__ADDCARRY_U64
 #cmakedefine SEAL_USE__SUBBORROW_U64
 #cmakedefine SEAL_USE_MSGSL
-#cmakedefine SEAL_USE_MSGSL_SPAN
 #cmakedefine SEAL_USE_ZLIB

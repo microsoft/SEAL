@@ -282,7 +282,7 @@ namespace seal
         {
             Ciphertext destination;
             encrypt_internal(plain, false, true, destination, pool);
-            return std::move(destination);
+            return destination;
         }
 
         /**
@@ -310,7 +310,7 @@ namespace seal
         {
             Ciphertext destination;
             encrypt_zero_internal(parms_id, false, true, destination, pool);
-            return std::move(destination);
+            return destination;
         }
 
         /**

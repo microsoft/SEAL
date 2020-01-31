@@ -212,7 +212,7 @@ inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
         std::cout << std::setw(3) << matrix[i] << ((i != 2 * row_size - 1) ? "," : " ]\n");
     }
     std::cout << std::endl;
-};
+}
 
 /*
 Helper function: Print line number.

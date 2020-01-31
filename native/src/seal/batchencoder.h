@@ -11,7 +11,7 @@
 #include "seal/util/uintcore.h"
 #include <limits>
 #include <vector>
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
 #include <gsl/span>
 #endif
 
@@ -101,7 +101,7 @@ namespace seal
         @throws std::invalid_argument if values is too large
         */
         void encode(const std::vector<std::int64_t> &values, Plaintext &destination);
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
         of integers modulo the plaintext modulus into a plaintext element, and stores
@@ -194,7 +194,7 @@ namespace seal
         void decode(
             const Plaintext &plain, std::vector<std::int64_t> &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Inverse of encode. This function "unbatches" a given plaintext into a matrix
         of integers modulo the plaintext modulus, and stores the result in the destination

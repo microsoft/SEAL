@@ -121,8 +121,8 @@ Studio 2017 version 15.3 or newer is required to build Microsoft SEAL.
 
 The Visual Studio solution `SEAL.sln` is configured to build Microsoft SEAL both
 for `Win32` and `x64` platforms. Please choose the right platform before building
-Microsoft SEAL. The `SEALNetNative` project or the .NET wrapper library `SEALNet`
-can only be built for `x64`.
+Microsoft SEAL. The `SEAL_C` project and the .NET wrapper library `SEALNet` can only
+be built for `x64`.
 
 #### Debug and Release builds
 
@@ -134,7 +134,7 @@ as the performance will be orders of magnitude worse than in `Release` mode.
 #### Building Microsoft SEAL
 
 Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`. This results in
-the static library `seal.lib` to be created in `native\lib\$(Platform)\$(Configuration)`.
+the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
 When linking with applications, you need to add `native\src\` (full path) as an
 include directory for Microsoft SEAL header files.
 
@@ -142,7 +142,7 @@ include directory for Microsoft SEAL header files.
 
 Build the SEALExamples project `native\examples\SEALExamples.vcxproj` from `SEAL.sln`.
 This results in an executable `sealexamples.exe` to be created in
-`native\bin\$(Platform)\$(Configuration)`.
+`bin\$(Platform)\$(Configuration)`.
 
 #### Building Unit Tests
 
@@ -240,7 +240,7 @@ cd ../..
 It is very easy to link your own applications and libraries with Microsoft SEAL if
 you use CMake. Simply add the following to your `CMakeLists.txt`:
 ````
-find_package(SEAL 3.4 REQUIRED)
+find_package(SEAL 3.5 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ````
 If Microsoft SEAL was installed globally, the above `find_package` command will likely
@@ -266,14 +266,10 @@ enabled if it is compiled with support for specific third-party libraries.
 ## Microsoft GSL
 
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements
-two convenient (templated) data types: `gsl::span` and `gsl::multi_span`. These
-are *view types* that provide safe (bounds-checked) array access to memory. For
-example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder`
+`gsl::span`: a *view type* that provide safe (bounds-checked) array access to memory.
+For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder`
 and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`,
-which can have significant benefit in performance. Additionally, `BatchEncoder` allows
-access to the slot data alternatively through a two-dimensional `gsl::multi_span`,
-reflecting the batching slot structure. Also the `Ciphertext` class allows the
-ciphertext data to be accessed hierarchically through a `gsl::multi_span`.
+which can in some cases have a significant performance benefit.
 
 #### Microsoft GSL in Windows
 
@@ -546,7 +542,7 @@ It is recommeded to read the comments and the code snippets along with command l
 from running an example. For easier navigation, command line printout provides the line number
 in the associated source file where the associated code snippets start.
 
-**WARNING: It is impossible to use Microsoft SEAL correctly without reading all examples 
+**WARNING: It is impossible to use Microsoft SEAL correctly without reading all examples
 or by simply re-using the code from examples. Any developer attempting to do so
 will inevitably produce code that is *vulnerable*, *malfunctioning*, or *extremely slow*.**
 

@@ -1,53 +1,24 @@
 parameters:
     artifactName: 'nix-drop'
-    ext: ''
 
 steps:
     - task: CMake@1
-      displayName: 'CMake ZLIB'
-      inputs:
-          workingDirectory: native/src/thirdparty/zlib
-          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON'
-
-    - task: CMake@1
-      displayName: 'Build ZLIB'
-      inputs:
-          workingDirectory: native/src/thirdparty/zlib
-          cmakeArgs: '--build'
-
-    - task: CMake@1
       displayName: 'CMake SEAL'
       inputs:
-          workingDirectory: native/src
-          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_BUILD_SEAL_C=ON -DZLIB_LIBRARY=./thirdparty/zlib/zlib-src/libz.${{parameters.ext}} -DZLIB_INCLUDE_DIR=./thirdparty/zlib/zlib-src/}'
+          workingDirectory: '$(Build.SourcesDirectory)'
+          cmakeArgs: '-DCMAKE_BUILD_TYPE=Release -DSEAL_BUILD_TESTS=ON -DSEAL_BUILD_SEAL_C=ON .'
 
-    - task: CMake@1
+    - script: |
+          cd $BUILD_SOURCESDIRECTORY
+          make
       displayName: 'Build SEAL'
       inputs:
           workingDirectory: native/src
           cmakeArgs: '--build'
 
     - script: |
-          cd native/tests/thirdparty
-          git submodule update --init
-      displayName: 'Install Google Test'
-
-    - task: CMake@1
-      displayName: 'CMake SEALTest'
-      inputs:
-          workingDirectory: native/tests
-          cmakeArgs: '-DSEAL_DIR=../src/cmake}'
-          
-    - task: CMake@1
-      displayName: 'Build SEALTest'
-      inputs:
-          workingDirectory: native/tests
-          cmakeArgs: '--build}'
-
-    - script: |
           cd $BUILD_SOURCESDIRECTORY
-          cd native/bin
-          ./sealtest
+          ./bin/sealtests
       displayName: 'Run unit tests'
 
     - task: UseDotNet@2
@@ -66,9 +37,9 @@ steps:
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
       inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/native/lib'
+          SourceFolder: '$(Build.SourcesDirectory)/lib'
           Contents: 'libsealc.*'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)/native/lib'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/lib'
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'

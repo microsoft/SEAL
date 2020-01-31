@@ -3,7 +3,6 @@ parameters:
     configuration: 'release'
 
 steps:
-
     - task: NuGetToolInstaller@1
       displayName: 'Use NuGet'
       inputs:
@@ -28,18 +27,6 @@ steps:
           outputFormat: sarif
           debugMode: false
 
-    - task: CMake@1
-      displayName: 'CMake ZLIB'
-      inputs:
-          workingDirectory: native/src/thirdparty/zlib
-          cmakeArgs: '-DCMAKE_POSITION_INDEPENDENT_CODE=ON .'
-
-    - task: CMake@1
-      displayName: 'Build ZLIB'
-      inputs:
-          workingDirectory: native/src/thirdparty/zlib
-          cmakeArgs: '--build . --config Release'
-
     - task: PowerShell@2
       displayName: 'Download Strong Name certificate'
       inputs:
@@ -50,7 +37,7 @@ steps:
           if (Test-Path env:SEALNetSigningCertificate) {
               Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
           }
-          
+
     - task: UseDotNet@2
       displayName: 'Get .NET Core 3.1 SDK'
       inputs:

@@ -44,7 +44,7 @@ namespace seal
             throw invalid_argument("value must be non-null for non-zero bit count");
         }
     }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
     BigUInt::BigUInt(gsl::span<uint64_t> value)
     {
         if (unsigned_gt(value.size(), numeric_limits<int>::max() / bits_per_uint64))

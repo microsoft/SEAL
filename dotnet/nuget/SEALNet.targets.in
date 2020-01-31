@@ -5,9 +5,9 @@
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="$(MSBuildThisFileDirectory)../runtimes/win10-x64/native/sealc.dll" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Linux'))" Include="$(MSBuildThisFileDirectory)../runtimes/linux-x64/native/libsealc.so*" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('OSX'))" Include="$(MSBuildThisFileDirectory)../runtimes/osx-x64/native/libsealc*.dylib" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="$(MSBuildThisFileDirectory)../runtimes/win10-x64/sealc.dll" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('Linux'))" Include="$(MSBuildThisFileDirectory)../runtimes/linux-x64/libsealc.so*" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform('OSX'))" Include="$(MSBuildThisFileDirectory)../runtimes/macos-x64/libsealc*.dylib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="@(SEALCBinaryFiles)">

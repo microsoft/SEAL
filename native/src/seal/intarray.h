@@ -13,7 +13,7 @@
 #include <iostream>
 #include <limits>
 #include <type_traits>
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
 #include <gsl/span>
 #endif
 
@@ -239,7 +239,7 @@ namespace seal
         {
             return size_ ? cbegin() + size_ : cbegin();
         }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Returns a span pointing to the beginning of the IntArray.
         */

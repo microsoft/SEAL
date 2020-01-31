@@ -15,7 +15,7 @@
 #include <memory>
 #include <type_traits>
 #include <vector>
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
 #include <gsl/span>
 #endif
 
@@ -138,7 +138,7 @@ namespace seal
         {
             encode(values, context_->first_parms_id(), scale, destination, std::move(pool));
         }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Encodes a vector of double-precision floating-point real or complex numbers
         into a plaintext polynomial. Append zeros if vector size is less than N/2.
@@ -359,7 +359,7 @@ namespace seal
             destination.resize(slots_);
             decode_internal(plain, destination.data(), std::move(pool));
         }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Decodes a plaintext polynomial into double-precision floating-point
         real or complex numbers. Dynamic memory allocations in the process are

@@ -37,16 +37,16 @@ steps:
     - task: CopyFiles@2
       displayName: 'Copy Linux Files to: $(Build.ArtifactStagingDirectory)'
       inputs:
-          SourceFolder: '$(Build.ArtifactStagingDirectory)\linux-drop\dotnet\lib\'
+          SourceFolder: '$(Build.ArtifactStagingDirectory)\linux-drop\lib\'
           Contents: '*'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\lib\'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
 
     - task: CopyFiles@2
       displayName: 'Copy Mac OS X Files to: $(Build.ArtifactStagingDirectory)'
       inputs:
-          SourceFolder: '$(Build.ArtifactStagingDirectory)\macos-drop\dotnet\lib\'
+          SourceFolder: '$(Build.ArtifactStagingDirectory)\macos-drop\lib\'
           Contents: '*'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\lib\'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
 
     - task: NuGetToolInstaller@1
       displayName: 'Use NuGet'
@@ -59,7 +59,7 @@ steps:
           command: 'pack'
           packagesToPack: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\*.nuspec'
           packDestination: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\Release'
-          buildProperties: 'Configuration=Release;LINUX_SEALNETNATIVE=$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\lib\libsealnetnative.so;MACOS_SEALNETNATIVE=$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\lib\libsealnetnative.dylib'
+          buildProperties: 'Configuration=Release;LINUX_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.so*;MACOS_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc*.dylib'
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'

@@ -52,19 +52,9 @@ set(SEAL_ENFORCE_HE_STD_SECURITY @SEAL_ENFORCE_HE_STD_SECURITY@)
 # Add the current directory to the module search path
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-set(SEAL_USE_MSGSL @SEAL_USE_MSGSL@)
-if(SEAL_USE_MSGSL)
-    find_seal_dependency(MSGSL)
-endif()
-
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_seal_dependency(Threads)
-
-set(SEAL_USE_ZLIB @SEAL_USE_ZLIB@)
-if(SEAL_USE_ZLIB)
-    find_seal_dependency(ZLIB)
-endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/SEALTargets.cmake)
 

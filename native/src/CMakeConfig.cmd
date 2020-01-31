@@ -51,7 +51,33 @@ if "%VSVERSION%"=="15.0" (
 	exit 1
 )
 
-set CONFIGDIR=".config\%VSVERSION%\%PROJECTPLATFORM%"
+rem Download Microsoft GSL
+set MSGSLCONFIGDIR="..\..\thirdparty\msgsl\.config\%VSVERSION%\%PROJECTPLATFORM%"
+cd %~dp0
+if not exist %MSGSLCONFIGDIR% (
+	mkdir %MSGSLCONFIGDIR%
+)
+cd %MSGSLCONFIGDIR%
+"%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM%
+"%CMAKEPATH%" --build . --config "%PROJECTCONFIGURATION%"
+
+rem Copy Microsoft GSL header files into the local source directory
+robocopy ..\..\..\GSL-src\include %~dp0 /s
+
+rem Download and build ZLIB
+set ZLIBCONFIGDIR="..\..\thirdparty\zlib\.config\%VSVERSION%\%PROJECTPLATFORM%"
+cd %~dp0
+if not exist %ZLIBCONFIGDIR% (
+	mkdir %ZLIBCONFIGDIR%
+)
+cd %ZLIBCONFIGDIR%
+"%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM%           ^
+	-DZLIB_PLATFORM="%PROJECTPLATFORM%"
+
+"%CMAKEPATH%" --build . --config "%PROJECTCONFIGURATION%"
+
+rem Configure Microsoft SEAL
+set CONFIGDIR="..\..\.config\%VSVERSION%\%PROJECTPLATFORM%"
 cd %~dp0
 if not exist %CONFIGDIR% (
 	mkdir %CONFIGDIR%
@@ -59,27 +85,13 @@ if not exist %CONFIGDIR% (
 cd %CONFIGDIR%
 echo Running CMake configuration in %cd%
 
-rem Determine if ZLIB should be enabled
-set USE_ZLIB=0
-if defined ZLIB_ROOT (
-	set USE_ZLIB=1
-)
-
-rem Determine if MSGSL should be enabled
-set USE_MSGSL=0
-if defined MSGSL_ROOT (
-	set USE_MSGSL=1
-)
-
-rem Call CMake.
-"%CMAKEPATH%" ..\..\..                                              ^
-	-G %CMAKEGEN%                                                   ^
-	-A %PROJECTPLATFORM%                                            ^
+"%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM%           ^
 	-DALLOW_COMMAND_LINE_BUILD=1                                    ^
 	-DCMAKE_BUILD_TYPE="%PROJECTCONFIGURATION%"                     ^
-	-DSEAL_USE_MSGSL=%USE_MSGSL%                                    ^
-	-DMSGSL_ROOT="%MSGSL_ROOT%"                                     ^
-	-DSEAL_USE_ZLIB=%USE_ZLIB%                                      ^
-	-DZLIB_ROOT="%ZLIB_ROOT%"                                       ^
-	-DCMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX="Release"                ^
+	-DBUILD_SHARED_LIBS=OFF                                         ^
+	-DSEAL_USE_MSGSL=ON                                             ^
+	-DSEAL_USE_ZLIB=ON                                              ^
+	-DSEAL_BUILD_TESTS=OFF                                          ^
+	-DSEAL_BUILD_EXAMPLES=OFF                                       ^
+	-DSEAL_BUILD_SEAL_C=OFF                                         ^
 	--no-warn-unused-cli
