@@ -1,32 +1,33 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-target_sources(seal
-    PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
-        ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
-        ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/croots.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/globals.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/numth.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/polyarith.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/rlwe.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/scalingvariant.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/smallntt.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/uintarith.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/uintcore.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ztools.cpp
+# Source files in this directory
+target_sources(seal_obj PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
+    ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
+    ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/croots.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/globals.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/numth.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/polyarith.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rlwe.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/scalingvariant.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/smallntt.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/uintarith.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/uintcore.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ztools.cpp
 )
 
 # Create the config file
 configure_file(${CMAKE_CURRENT_LIST_DIR}/config.h.in ${CMAKE_CURRENT_LIST_DIR}/config.h)
 
+# Add header files for installation
 install(
     FILES
         ${CMAKE_CURRENT_LIST_DIR}/baseconverter.h

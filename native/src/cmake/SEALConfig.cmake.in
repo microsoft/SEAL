@@ -41,10 +41,11 @@ macro(find_seal_dependency dep)
 endmacro()
 
 set(SEAL_FOUND FALSE)
+set(SEAL_SHARED_FOUND FALSE)
+set(SEAL_C_FOUND FALSE)
 
 set(SEAL_BUILD_TYPE @CMAKE_BUILD_TYPE@)
 set(SEAL_DEBUG @SEAL_DEBUG@)
-set(SEAL_LIB_BUILD_TYPE @SEAL_LIB_BUILD_TYPE@)
 set(SEAL_USE_CXX17 @SEAL_USE_CXX17@)
 set(SEAL_ENFORCE_HE_STD_SECURITY @SEAL_ENFORCE_HE_STD_SECURITY@)
 
@@ -68,14 +69,32 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/SEALTargets.cmake)
 
 if(TARGET SEAL::seal)
+    set(SEAL_FOUND TRUE)
+endif()
+
+if(TARGET SEAL::seal_shared)
+    set(SEAL_SHARED_FOUND TRUE)
+endif()
+
+if(TARGET SEAL::sealc)
+    set(SEAL_C_FOUND TRUE)
+endif()
+        
+if(SEAL_FOUND)
     status_when_not_quiet("Microsoft SEAL -> Version ${SEAL_VERSION} detected")
     if(SEAL_DEBUG)
         status_when_not_quiet("Performance warning: Microsoft SEAL compiled in debug mode")
     endif()
-    status_when_not_quiet("Microsoft SEAL -> Library build type: ${SEAL_LIB_BUILD_TYPE}")
-    set(SEAL_FOUND TRUE)
+
+    set(SEAL_TARGETS_AVAILABLE "Microsoft SEAL -> Targets available: SEAL::seal")
+    if(SEAL_SHARED_FOUND)
+        string(APPEND SEAL_TARGETS_AVAILABLE ", SEAL::seal_shared")
+    endif()
+    if(SEAL_C_FOUND)
+        string(APPEND SEAL_TARGETS_AVAILABLE ", SEAL::sealc")
+    endif()
+
+    status_when_not_quiet(${SEAL_TARGETS_AVAILABLE})
 else()
     warning_when_not_quiet("Microsoft SEAL -> NOT FOUND")
-    set(SEAL_FOUND FALSE)
 endif()
-

@@ -77,6 +77,14 @@ endfunction()
 set(SEAL_DEBUG ${SEAL_DEBUG_DEFAULT})
 message(STATUS "Microsoft SEAL debug mode: ${SEAL_DEBUG}")
 
+# Should we build also the shared library?
+set(BUILD_SHARED_LIBS_STR "Build shared library")
+option(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_STR} OFF)
+if(MSVC AND BUILD_SHARED_LIBS)
+    message(WARNING "This build system only supports a static build; disabling `BUILD_SHARED_LIBS`")
+    set(BUILD_SHARED_LIBS OFF CACHE)
+endif()
+
 # Should we use C++14 or C++17?
 set(SEAL_USE_CXX17_OPTION_STR "Use C++17")
 option(SEAL_USE_CXX17 ${SEAL_USE_CXX17_OPTION_STR} ON)
@@ -97,22 +105,8 @@ if(SEAL_USE_CXX17)
     set(SEAL_LANG_FLAG "-std=c++17")
 endif()
 
-# Should we build a shared library?
-set(SEAL_DEFAULT_LIB_BUILD_TYPE "Static_PIC")
-if(NOT SEAL_LIB_BUILD_TYPE)
-    set(SEAL_LIB_BUILD_TYPE ${SEAL_DEFAULT_LIB_BUILD_TYPE} CACHE
-        STRING "Library build type" FORCE)
-    set_property(CACHE SEAL_LIB_BUILD_TYPE PROPERTY
-        STRINGS "Static" "Static_PIC" "Shared")
-endif()
-message(STATUS "Library build type (SEAL_LIB_BUILD_TYPE): ${SEAL_LIB_BUILD_TYPE}")
-
-# Optionally enable CMAKE_POSITION_INDEPENDENT_CODE
-if(SEAL_LIB_BUILD_TYPE STREQUAL "Static")
-  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
-else()
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
+# Always build position-independent-code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Throw on multiply_plain by a zero plaintext
 set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member of Evaluator outputs a transparent ciphertext")
@@ -148,23 +142,23 @@ endif()
 # Specific intrinsics depending on SEAL_USE_INTRIN
 if(MSVC)
     set(SEAL_USE__UMUL128_OPTION_STR "Use _umul128")
-    cmake_dependent_option(SEAL_USE__UMUL128 SEAL_USE__UMUL128_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
+    cmake_dependent_option(SEAL_USE__UMUL128 ${SEAL_USE__UMUL128_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 
     set(SEAL_USE__BITSCANREVERSE64_OPTION_STR "Use _BitScanReverse64")
-    cmake_dependent_option(SEAL_USE__BITSCANREVERSE64 SEAL_USE__BITSCANREVERSE64_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
+    cmake_dependent_option(SEAL_USE__BITSCANREVERSE64 ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 else()
     set(SEAL_USE___INT128_OPTION_STR "Use __int128")
-    cmake_dependent_option(SEAL_USE___INT128 SEAL_USE___INT128_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
+    cmake_dependent_option(SEAL_USE___INT128 ${SEAL_USE___INT128_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 
     set(SEAL_USE___BUILTIN_CLZLL_OPTION_STR "Use __builtin_clzll")
-    cmake_dependent_option(SEAL_USE___BUILTIN_CLZLL SEAL_USE___BUILTIN_CLZLL_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
+    cmake_dependent_option(SEAL_USE___BUILTIN_CLZLL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 endif()
 
 set(SEAL_USE__ADDCARRY_U64_OPTION_STR "Use _addcarry_u64")
-cmake_dependent_option(SEAL_USE__ADDCARRY_U64 SEAL_USE__ADDCARRY_U64_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
+cmake_dependent_option(SEAL_USE__ADDCARRY_U64 ${SEAL_USE__ADDCARRY_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 
 set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
-cmake_dependent_option(SEAL_USE__SUBBORROW_U64 SEAL_USE__SUBBORROW_U64_OPTION_STR ON "SEAL_USE_INTRIN" OFF)
+cmake_dependent_option(SEAL_USE__SUBBORROW_U64 ${SEAL_USE__SUBBORROW_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 
 if(SEAL_USE_INTRIN)
     cmake_push_check_state(RESET)
@@ -344,61 +338,128 @@ configure_file(
     ${SEAL_SOURCE_DIR}/../../dotnet/nuget/SEALNet.targets
     @ONLY)
 
-# Create library but add no source files yet
-if(SEAL_LIB_BUILD_TYPE STREQUAL "Shared")
-    add_library(seal SHARED "")
+# Set the C++ language version
+macro(set_language target)
+    if(SEAL_USE_CXX17)
+        target_compile_features(${target} PUBLIC cxx_std_17)
+    else()
+        target_compile_features(${target} PUBLIC cxx_std_14)
+    endif()
+endmacro()
 
-    # Set SOVERSION for shared library
+# Set the VERSION property
+macro(set_version target)
+    set_target_properties(${target} PROPERTIES VERSION ${SEAL_VERSION})
+endmacro()
+
+# Set the library filename to reflect version
+macro(set_version_filename target)
     set_target_properties(seal PROPERTIES
+        OUTPUT_NAME seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+endmacro()
+
+# Set the SOVERSION property
+macro(set_soversion target)
+    set_target_properties(${target} PROPERTIES
         SOVERSION ${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
-else()
-    add_library(seal STATIC "")
+endmacro()
 
-    # For a static library indicate version in the filename
-    set_target_properties(seal PROPERTIES OUTPUT_NAME seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
-endif()
+# Set include directories for build and install interfaces
+macro(set_include_directories target)
+    target_include_directories(${target} PUBLIC
+        $<BUILD_INTERFACE:${SEAL_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${SEAL_INCLUDES_INSTALL_DIR}>)
+endmacro()
 
-# Set VERSION for all library build types
-set_target_properties(seal PROPERTIES VERSION ${SEAL_VERSION})
+# Link all dependencies
+macro(link_dependencies target)
+    # Require thread library
+    if(NOT TARGET Threads::Threads)
+        set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+        set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+        find_package(Threads REQUIRED)
+    endif()
+
+    # Link Threads
+    target_link_libraries(${target} PUBLIC Threads::Threads)
+
+    if(SEAL_USE_MSGSL)
+        # Link MSGSL
+        target_link_libraries(${target} PUBLIC MSGSL::MSGSL)
+    endif()
+
+    if(SEAL_USE_ZLIB)
+        # Link ZLIB
+        target_link_libraries(${target} PUBLIC ZLIB::ZLIB)
+    endif()
+endmacro()
+
+# Create an object library to compile sources only once
+add_library(seal_obj OBJECT)
 
 # Add source files to library and header files to install
 add_subdirectory(seal)
 
-# Add local include directories for build
-target_include_directories(seal PUBLIC
-    $<BUILD_INTERFACE:${SEAL_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:${SEAL_INCLUDES_INSTALL_DIR}>)
+# Set C++ language version and include directories for the object library
+set_language(seal_obj)
+set_include_directories(seal_obj)
 
-# We require at least C++14
-if(SEAL_USE_CXX17)
-    target_compile_features(seal PUBLIC cxx_std_17)
-else()
-    target_compile_features(seal PUBLIC cxx_std_14)
+# Always build the static library
+add_library(seal STATIC $<TARGET_OBJECTS:seal_obj>)
+
+set_version(seal)
+set_version_filename(seal)
+set_language(seal)
+set_include_directories(seal)
+link_dependencies(seal)
+
+# Conditionally build the shared library
+if(BUILD_SHARED_LIBS)
+    add_library(seal_shared SHARED $<TARGET_OBJECTS:seal_obj>)
+
+    set_version(seal_shared)
+    set_soversion(seal_shared)
+    set_language(seal_shared)
+    set_include_directories(seal_shared)
+    link_dependencies(seal_shared)
 endif()
 
-# Require thread library
-set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-find_package(Threads REQUIRED)
+# For SEAL_C check that size_t is 8 bytes
+include(CheckTypeSize)
+check_type_size("size_t" SIZET LANGUAGE C)
 
-# Link Threads with seal
-target_link_libraries(seal PUBLIC Threads::Threads)
+set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
+cmake_dependent_option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR}
+    OFF "${SIZET} EQUAL 8" OFF)
 
-if(SEAL_USE_MSGSL)
-    # Link MSGSL with seal
-    target_link_libraries(seal PUBLIC MSGSL::MSGSL)
+# Create shared SEAL_C library but add no source files yet
+if(SEAL_BUILD_SEAL_C)
+    add_library(sealc SHARED)
+
+    # Add source files to library and header files to install
+    add_subdirectory(seal/c)
+
+    set_version(sealc)
+    set_soversion(sealc)
+    set_language(sealc)
+    set_include_directories(sealc)
+    link_dependencies(sealc)
+    target_link_libraries(sealc PUBLIC seal)
 endif()
 
-if(SEAL_USE_ZLIB)
-    # Link ZLIB::ZLIB with seal
-    target_link_libraries(seal PRIVATE ZLIB::ZLIB)
-endif()
+macro(install_target_if_exists target export)
+    if(TARGET ${target})
+        install(TARGETS ${target} EXPORT ${export}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    endif()
+endmacro()
 
-# Associate seal to export SEALTargets
-install(TARGETS seal EXPORT SEALTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+# Associate seal and seal_shared to export SEALTargets
+install_target_if_exists(seal SEALTargets)
+install_target_if_exists(seal_shared SEALTargets)
+install_target_if_exists(sealc SEALTargets)
 
 # Create the CMake config file
 include(CMakePackageConfigHelpers)

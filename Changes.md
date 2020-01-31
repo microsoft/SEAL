@@ -20,6 +20,8 @@
 - Microsoft SEAL now compiles also in FreeBSD ([PR 113](https://github.com/microsoft/SEAL/pull/113)).
 - In serialization, unsupported compression mode now throws `std::invalid_argument` (native) or `ArgumentException` (.NET).
 - Examples for serialization have been added.
+- Moved `dotnet/native/` to be under `native/src/c/`. The C export library in this directory can be used to build wrappers for other languages also -- not just .NET.
+- Changed the CMake file structure. Targets available are now: `SEAL::seal` (static library), `SEAL::seal_shared` (shared library), `SEAL::sealc` (C export library).
 
 ## Version 3.4.5
 
