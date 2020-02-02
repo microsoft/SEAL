@@ -83,7 +83,7 @@ namespace SEALNetExamples
                 }
 
                 /*
-                Force a garbage collection after each example to accurately show memory pool use.
+                We may want to force a garbage collection after each example to accurately show memory pool use.
                 */
                 GC.Collect();
             }

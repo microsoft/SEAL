@@ -42,7 +42,7 @@ namespace SEALNetExamples
             be large enough to support the desired computation; otherwise the result is
             impossible to make sense of even with the secret key.
             */
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
 
             /*
             The first parameter we set is the degree of the `polynomial modulus'. This
@@ -124,8 +124,21 @@ namespace SEALNetExamples
             Now that all parameters are set, we are ready to construct a SEALContext
             object. This is a heavy class that checks the validity and properties of the
             parameters we just set.
+
+            C# 8.0 introduced the `using` declaration for local variables. This is a very
+            convenient addition to the language: it causes the Dispose method for the
+            object to be called at the end of the enclosing scope (in this case the end
+            of this function), hence automatically releasing the native resources held by
+            the object. This is helpful, because releasing the native resources returns
+            the allocated memory to the memory pool, speeding up further allocations.
+            Another way would be to call GC::Collect() at a convenient point in the code,
+            but this may be less optimal as it may still cause unnecessary allocations
+            of memory if native resources were not released early enough. In this program 
+            we call GC::Collect() after every example (see Examples.cs) to make sure
+            everything is returned to the memory pool at latest before running the next
+            example.
             */
-            SEALContext context = new SEALContext(parms);
+            using SEALContext context = new SEALContext(parms);
 
             /*
             Print the parameters that we have chosen.
@@ -150,29 +163,29 @@ namespace SEALNetExamples
             automatically generates the public and secret key, which can immediately be
             read to local variables.
             */
-            KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey publicKey = keygen.PublicKey;
-            SecretKey secretKey = keygen.SecretKey;
+            using KeyGenerator keygen = new KeyGenerator(context);
+            using PublicKey publicKey = keygen.PublicKey;
+            using SecretKey secretKey = keygen.SecretKey;
 
             /*
             To be able to encrypt we need to construct an instance of Encryptor. Note
             that the Encryptor only requires the public key, as expected.
             */
-            Encryptor encryptor = new Encryptor(context, publicKey);
+            using Encryptor encryptor = new Encryptor(context, publicKey);
 
             /*
             Computations on the ciphertexts are performed with the Evaluator class. In
             a real use-case the Evaluator would not be constructed by the same party
             that holds the secret key.
             */
-            Evaluator evaluator = new Evaluator(context);
+            using Evaluator evaluator = new Evaluator(context);
 
             /*
             We will of course want to decrypt our results to verify that everything worked,
             so we need to also construct an instance of Decryptor. Note that the Decryptor
             requires the secret key.
             */
-            Decryptor decryptor = new Decryptor(context, secretKey);
+            using Decryptor decryptor = new Decryptor(context, secretKey);
 
             /*
             As an example, we evaluate the degree 4 polynomial
@@ -199,14 +212,14 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             int x = 6;
-            Plaintext xPlain = new Plaintext(x.ToString());
+            using Plaintext xPlain = new Plaintext(x.ToString());
             Console.WriteLine($"Express x = {x} as a plaintext polynomial 0x{xPlain}.");
 
             /*
             We then encrypt the plaintext, producing a ciphertext.
             */
             Utilities.PrintLine();
-            Ciphertext xEncrypted = new Ciphertext();
+            using Ciphertext xEncrypted = new Ciphertext();
             Console.WriteLine("Encrypt xPlain to xEncrypted.");
             encryptor.Encrypt(xPlain, xEncrypted);
 
@@ -229,7 +242,7 @@ namespace SEALNetExamples
             We decrypt the ciphertext and print the resulting plaintext in order to
             demonstrate correctness of the encryption.
             */
-            Plaintext xDecrypted = new Plaintext();
+            using Plaintext xDecrypted = new Plaintext();
             Console.Write("    + decryption of encrypted_x: ");
             decryptor.Decrypt(xEncrypted, xDecrypted);
             Console.WriteLine($"0x{xDecrypted} ...... Correct.");
@@ -254,9 +267,9 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("Compute xSqPlusOne (x^2+1).");
-            Ciphertext xSqPlusOne = new Ciphertext();
+            using Ciphertext xSqPlusOne = new Ciphertext();
             evaluator.Square(xEncrypted, xSqPlusOne);
-            Plaintext plainOne = new Plaintext("1");
+            using Plaintext plainOne = new Plaintext("1");
             evaluator.AddPlainInplace(xSqPlusOne, plainOne);
 
             /*
@@ -274,7 +287,7 @@ namespace SEALNetExamples
             Even though the size has grown, decryption works as usual as long as noise
             budget has not reached 0.
             */
-            Plaintext decryptedResult = new Plaintext();
+            using Plaintext decryptedResult = new Plaintext();
             Console.Write("    + decryption of xSqPlusOne: ");
             decryptor.Decrypt(xSqPlusOne, decryptedResult);
             Console.WriteLine($"0x{decryptedResult} ...... Correct.");
@@ -284,7 +297,7 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("Compute xPlusOneSq ((x+1)^2).");
-            Ciphertext xPlusOneSq = new Ciphertext();
+            using Ciphertext xPlusOneSq = new Ciphertext();
             evaluator.AddPlain(xEncrypted, plainOne, xPlusOneSq);
             evaluator.SquareInplace(xPlusOneSq);
             Console.WriteLine($"    + size of xPlusOneSq: {xPlusOneSq.Size}");
@@ -299,8 +312,8 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("Compute encryptedResult (4(x^2+1)(x+1)^2).");
-            Ciphertext encryptedResult = new Ciphertext();
-            Plaintext plainFour = new Plaintext("4");
+            using Ciphertext encryptedResult = new Ciphertext();
+            using Plaintext plainFour = new Plaintext("4");
             evaluator.MultiplyPlainInplace(xSqPlusOne, plainFour);
             evaluator.Multiply(xSqPlusOne, xPlusOneSq, encryptedResult);
             Console.WriteLine($"    + size of encrypted_result: {encryptedResult.Size}");
@@ -341,7 +354,7 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("Generate locally usable relinearization keys.");
-            RelinKeys relinKeys = keygen.RelinKeysLocal();
+            using RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             /*
             We now repeat the computation relinearizing after each multiplication.
@@ -349,7 +362,7 @@ namespace SEALNetExamples
             Utilities.PrintLine();
             Console.WriteLine("Compute and relinearize xSquared (x^2),");
             Console.WriteLine(new string(' ', 13) + "then compute xSqPlusOne (x^2+1)");
-            Ciphertext xSquared = new Ciphertext();
+            using Ciphertext xSquared = new Ciphertext();
             evaluator.Square(xEncrypted, xSquared);
             Console.WriteLine($"    + size of xSquared: {xSquared.Size}");
             evaluator.RelinearizeInplace(xSquared, relinKeys);
@@ -363,7 +376,7 @@ namespace SEALNetExamples
             Console.WriteLine($"0x{decryptedResult} ...... Correct.");
 
             Utilities.PrintLine();
-            Ciphertext xPlusOne = new Ciphertext();
+            using Ciphertext xPlusOne = new Ciphertext();
             Console.WriteLine("Compute xPlusOne (x+1),");
             Console.WriteLine(new string(' ', 13) +
                 "then compute and relinearize xPlusOneSq ((x+1)^2).");

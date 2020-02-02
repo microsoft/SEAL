@@ -17,55 +17,73 @@ namespace SEALNetExamples
             Utilities.PrintParameters(context);
             Console.WriteLine();
 
-            EncryptionParameters parms = context.FirstContextData.Parms;
-            SmallModulus plainModulus = parms.PlainModulus;
+            using EncryptionParameters parms = context.FirstContextData.Parms;
+            using SmallModulus plainModulus = parms.PlainModulus;
             ulong polyModulusDegree = parms.PolyModulusDegree;
 
             Console.Write("Generating secret/public keys: ");
-            KeyGenerator keygen = new KeyGenerator(context);
+            using KeyGenerator keygen = new KeyGenerator(context);
             Console.WriteLine("Done");
 
-            SecretKey secretKey = keygen.SecretKey;
-            PublicKey publicKey = keygen.PublicKey;
+            using SecretKey secretKey = keygen.SecretKey;
+            using PublicKey publicKey = keygen.PublicKey;
 
-            RelinKeys relinKeys = null;
-            GaloisKeys galKeys = null;
-            if (context.UsingKeyswitching)
-            {
-                /*
-                Generate relinearization keys.
-                */
-                Console.Write("Generating relinearization keys: ");
-                timer = Stopwatch.StartNew();
-                relinKeys = keygen.RelinKeysLocal();
-                int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
-                Console.WriteLine($"Done [{micros} microseconds]");
-
-                if (!context.KeyContextData.Qualifiers.UsingBatching)
+            Func<RelinKeys> GetRelinKeys = () => {
+                if (context.UsingKeyswitching)
                 {
-                    Console.WriteLine("Given encryption parameters do not support batching.");
-                    return;
+                    /*
+                    Generate relinearization keys.
+                    */
+                    Console.Write("Generating relinearization keys: ");
+                    timer = Stopwatch.StartNew();
+                    RelinKeys result = keygen.RelinKeysLocal();
+                    int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
+                    Console.WriteLine($"Done [{micros} microseconds]");
+                    return result;
                 }
+                else
+                {
+                    return null;
+                }
+            };
 
-                /*
-                Generate Galois keys. In larger examples the Galois keys can use a lot of
-                memory, which can be a problem in constrained systems. The user should
-                try some of the larger runs of the test and observe their effect on the
-                memory pool allocation size. The key generation can also take a long time,
-                as can be observed from the print-out.
-                */
-                Console.Write($"Generating Galois keys: ");
-                timer = Stopwatch.StartNew();
-                galKeys = keygen.GaloisKeysLocal();
-                micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
-                Console.WriteLine($"Done [{micros} microseconds]");
-            }
+            Func<GaloisKeys> GetGaloisKeys = () => {
+                if (context.UsingKeyswitching)
+                {
+                    if (!context.KeyContextData.Qualifiers.UsingBatching)
+                    {
+                        Console.WriteLine("Given encryption parameters do not support batching.");
+                        return null;
+                    }
 
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Decryptor decryptor = new Decryptor(context, secretKey);
-            Evaluator evaluator = new Evaluator(context);
-            BatchEncoder batchEncoder = new BatchEncoder(context);
-            IntegerEncoder encoder = new IntegerEncoder(context);
+                    /*
+                    Generate Galois keys. In larger examples the Galois keys can use a lot of
+                    memory, which can be a problem in constrained systems. The user should
+                    try some of the larger runs of the test and observe their effect on the
+                    memory pool allocation size. The key generation can also take a long time,
+                    as can be observed from the print-out.
+                    */
+                    Console.Write($"Generating Galois keys: ");
+                    timer = Stopwatch.StartNew();
+                    GaloisKeys result = keygen.GaloisKeysLocal();
+                    int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
+                    Console.WriteLine($"Done [{micros} microseconds]");
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
+            };
+
+            using RelinKeys relinKeys = GetRelinKeys();
+            using GaloisKeys galKeys = GetGaloisKeys();
+
+            using Encryptor encryptor = new Encryptor(context, publicKey);
+            using Decryptor decryptor = new Decryptor(context, secretKey);
+            using Evaluator evaluator = new Evaluator(context);
+            using BatchEncoder batchEncoder = new BatchEncoder(context);
+            using IntegerEncoder encoder = new IntegerEncoder(context);
 
             /*
             These will hold the total times used by each operation.
@@ -108,7 +126,7 @@ namespace SEALNetExamples
                 into the polynomial. Note how the plaintext we create is of the exactly
                 right size so unnecessary reallocations are avoided.
                 */
-                Plaintext plain = new Plaintext(parms.PolyModulusDegree, 0);
+                using Plaintext plain = new Plaintext(parms.PolyModulusDegree, 0);
                 timeBatchSum.Start();
                 batchEncoder.Encode(podValues, plain);
                 timeBatchSum.Stop();
@@ -132,7 +150,7 @@ namespace SEALNetExamples
                 to hold the encryption with these encryption parameters. We encrypt
                 our random batched matrix here.
                 */
-                Ciphertext encrypted = new Ciphertext(context);
+                using Ciphertext encrypted = new Ciphertext(context);
                 timeEncryptSum.Start();
                 encryptor.Encrypt(plain, encrypted);
                 timeEncryptSum.Stop();
@@ -141,7 +159,7 @@ namespace SEALNetExamples
                 [Decryption]
                 We decrypt what we just encrypted.
                 */
-                Plaintext plain2 = new Plaintext(polyModulusDegree, 0);
+                using Plaintext plain2 = new Plaintext(polyModulusDegree, 0);
                 timeDecryptSum.Start();
                 decryptor.Decrypt(encrypted, plain2);
                 timeDecryptSum.Stop();
@@ -154,9 +172,9 @@ namespace SEALNetExamples
                 [Add]
                 We create two ciphertexts and perform a few additions with them.
                 */
-                Ciphertext encrypted1 = new Ciphertext(context);
+                using Ciphertext encrypted1 = new Ciphertext(context);
                 encryptor.Encrypt(encoder.Encode(i), encrypted1);
-                Ciphertext encrypted2 = new Ciphertext(context);
+                using Ciphertext encrypted2 = new Ciphertext(context);
                 encryptor.Encrypt(encoder.Encode(i + 1), encrypted2);
 
                 timeAddSum.Start();
@@ -286,53 +304,71 @@ namespace SEALNetExamples
             Utilities.PrintParameters(context);
             Console.WriteLine();
 
-            EncryptionParameters parms = context.FirstContextData.Parms;
+            using EncryptionParameters parms = context.FirstContextData.Parms;
             ulong polyModulusDegree = parms.PolyModulusDegree;
 
             Console.Write("Generating secret/public keys: ");
-            KeyGenerator keygen = new KeyGenerator(context);
+            using KeyGenerator keygen = new KeyGenerator(context);
             Console.WriteLine("Done");
 
-            SecretKey secretKey = keygen.SecretKey;
-            PublicKey publicKey = keygen.PublicKey;
+            using SecretKey secretKey = keygen.SecretKey;
+            using PublicKey publicKey = keygen.PublicKey;
 
-            RelinKeys relinKeys = null;
-            GaloisKeys galKeys = null;
-            if (context.UsingKeyswitching)
-            {
-                /*
-                Generate relinearization keys.
-                */
-                Console.Write("Generating relinearization keys: ");
-                timer = Stopwatch.StartNew();
-                relinKeys = keygen.RelinKeysLocal();
-                int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
-                Console.WriteLine($"Done [{micros} microseconds]");
-
-                if (!context.KeyContextData.Qualifiers.UsingBatching)
+            Func<RelinKeys> GetRelinKeys = () => {
+                if (context.UsingKeyswitching)
                 {
-                    Console.WriteLine("Given encryption parameters do not support batching.");
-                    return;
+                    /*
+                    Generate relinearization keys.
+                    */
+                    Console.Write("Generating relinearization keys: ");
+                    timer = Stopwatch.StartNew();
+                    RelinKeys result = keygen.RelinKeysLocal();
+                    int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
+                    Console.WriteLine($"Done [{micros} microseconds]");
+                    return result;
                 }
+                else
+                {
+                    return null;
+                }
+            };
 
-                /*
-                Generate Galois keys. In larger examples the Galois keys can use a lot of
-                memory, which can be a problem in constrained systems. The user should
-                try some of the larger runs of the test and observe their effect on the
-                memory pool allocation size. The key generation can also take a long time,
-                as can be observed from the print-out.
-                */
-                Console.Write($"Generating Galois keys: ");
-                timer = Stopwatch.StartNew();
-                galKeys = keygen.GaloisKeysLocal();
-                micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
-                Console.WriteLine($"Done [{micros} microseconds]");
-            }
+            Func<GaloisKeys> GetGaloisKeys = () => {
+                if (context.UsingKeyswitching)
+                {
+                    if (!context.KeyContextData.Qualifiers.UsingBatching)
+                    {
+                        Console.WriteLine("Given encryption parameters do not support batching.");
+                        return null;
+                    }
 
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Decryptor decryptor = new Decryptor(context, secretKey);
-            Evaluator evaluator = new Evaluator(context);
-            CKKSEncoder ckksEncoder = new CKKSEncoder(context);
+                    /*
+                    Generate Galois keys. In larger examples the Galois keys can use a lot of
+                    memory, which can be a problem in constrained systems. The user should
+                    try some of the larger runs of the test and observe their effect on the
+                    memory pool allocation size. The key generation can also take a long time,
+                    as can be observed from the print-out.
+                    */
+                    Console.Write($"Generating Galois keys: ");
+                    timer = Stopwatch.StartNew();
+                    GaloisKeys result = keygen.GaloisKeysLocal();
+                    int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
+                    Console.WriteLine($"Done [{micros} microseconds]");
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
+            };
+
+            using RelinKeys relinKeys = GetRelinKeys();
+            using GaloisKeys galKeys = GetGaloisKeys();
+
+            using Encryptor encryptor = new Encryptor(context, publicKey);
+            using Decryptor decryptor = new Decryptor(context, secretKey);
+            using Evaluator evaluator = new Evaluator(context);
+            using CKKSEncoder ckksEncoder = new CKKSEncoder(context);
 
             Stopwatch timeEncodeSum = new Stopwatch();
             Stopwatch timeDecodeSum = new Stopwatch();
@@ -374,7 +410,7 @@ namespace SEALNetExamples
                 from parms.
                 */
                 double scale = Math.Sqrt(parms.CoeffModulus.Last().Value);
-                Plaintext plain = new Plaintext(parms.PolyModulusDegree *
+                using Plaintext plain = new Plaintext(parms.PolyModulusDegree *
                     (ulong)parms.CoeffModulus.Count(), 0);
                 timeEncodeSum.Start();
                 ckksEncoder.Encode(podValues, scale, plain);
@@ -391,7 +427,7 @@ namespace SEALNetExamples
                 /*
                 [Encryption]
                 */
-                Ciphertext encrypted = new Ciphertext(context);
+                using Ciphertext encrypted = new Ciphertext(context);
                 timeEncryptSum.Start();
                 encryptor.Encrypt(plain, encrypted);
                 timeEncryptSum.Stop();
@@ -399,7 +435,7 @@ namespace SEALNetExamples
                 /*
                 [Decryption]
                 */
-                Plaintext plain2 = new Plaintext(polyModulusDegree, 0);
+                using Plaintext plain2 = new Plaintext(polyModulusDegree, 0);
                 timeDecryptSum.Start();
                 decryptor.Decrypt(encrypted, plain2);
                 timeDecryptSum.Stop();
@@ -407,10 +443,10 @@ namespace SEALNetExamples
                 /*
                 [Add]
                 */
-                Ciphertext encrypted1 = new Ciphertext(context);
+                using Ciphertext encrypted1 = new Ciphertext(context);
                 ckksEncoder.Encode(i + 1, plain);
                 encryptor.Encrypt(plain, encrypted1);
-                Ciphertext encrypted2 = new Ciphertext(context);
+                using Ciphertext encrypted2 = new Ciphertext(context);
                 ckksEncoder.Encode(i + 1, plain2);
                 encryptor.Encrypt(plain2, encrypted2);
                 timeAddSum.Start();
@@ -529,26 +565,35 @@ namespace SEALNetExamples
         {
             Utilities.PrintExampleBanner("BFV Performance Test with Degrees: 4096, 8192, and 16384");
 
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             ulong polyModulusDegree = 4096;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
             parms.PlainModulus = new SmallModulus(786433);
-            BFVPerformanceTest(new SEALContext(parms));
+            using (SEALContext context = new SEALContext(parms))
+            {
+                BFVPerformanceTest(context);
+            }
 
             Console.WriteLine();
             polyModulusDegree = 8192;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
             parms.PlainModulus = new SmallModulus(786433);
-            BFVPerformanceTest(new SEALContext(parms));
+            using (SEALContext context = new SEALContext(parms))
+            {
+                BFVPerformanceTest(context);
+            }
 
             Console.WriteLine();
             polyModulusDegree = 16384;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
             parms.PlainModulus = new SmallModulus(786433);
-            BFVPerformanceTest(new SEALContext(parms));
+            using (SEALContext context = new SEALContext(parms))
+            {
+                BFVPerformanceTest(context);
+            }
 
             /*
             Comment out the following to run the biggest example.
@@ -558,7 +603,10 @@ namespace SEALNetExamples
             //parms.PolyModulusDegree = polyModulusDegree;
             //parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
             //parms.PlainModulus = new SmallModulus(786433);
-            //BFVPerformanceTest(new SEALContext(parms));
+            //using (SEALContext context = new SEALContext(parms))
+            //{
+            //    BFVPerformanceTest(context);
+            //}
         }
 
         private static void ExampleBFVPerformanceCustom()
@@ -580,7 +628,7 @@ namespace SEALNetExamples
             string banner = $"BFV Performance Test with Degree: {polyModulusDegree}";
             Utilities.PrintExampleBanner(banner);
 
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = polyModulusDegree,
                 CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree)
@@ -593,7 +641,11 @@ namespace SEALNetExamples
             {
                 parms.PlainModulus = new SmallModulus(786433);
             }
-            BFVPerformanceTest(new SEALContext(parms));
+
+            using (SEALContext context = new SEALContext(parms))
+            {
+                BFVPerformanceTest(context);
+            }
         }
 
         private static void ExampleCKKSPerformanceDefault()
@@ -602,23 +654,32 @@ namespace SEALNetExamples
 
             // It is not recommended to use BFVDefault primes in CKKS. However, for performance
             // test, BFVDefault primes are good enough.
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
             ulong polyModulusDegree = 4096;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-            CKKSPerformanceTest(new SEALContext(parms));
+            using (SEALContext context = new SEALContext(parms))
+            {
+                CKKSPerformanceTest(context);
+            }
 
             Console.WriteLine();
             polyModulusDegree = 8192;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-            CKKSPerformanceTest(new SEALContext(parms));
+            using (SEALContext context = new SEALContext(parms))
+            {
+                CKKSPerformanceTest(context);
+            }
 
             Console.WriteLine();
             polyModulusDegree = 16384;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-            CKKSPerformanceTest(new SEALContext(parms));
+            using (SEALContext context = new SEALContext(parms))
+            {
+                CKKSPerformanceTest(context);
+            }
 
             /*
             Comment out the following to run the biggest example.
@@ -627,7 +688,10 @@ namespace SEALNetExamples
             //polyModulusDegree = 32768;
             //parms.PolyModulusDegree = polyModulusDegree;
             //parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-            //CKKSPerformanceTest(new SEALContext(parms));
+            //using (SEALContext context = new SEALContext(parms))
+            //{
+            //    CKKSPerformanceTest(context);
+            //}
         }
 
         private static void ExampleCKKSPerformanceCustom()
@@ -649,12 +713,16 @@ namespace SEALNetExamples
             string banner = $"CKKS Performance Test with Degree: {polyModulusDegree}";
             Utilities.PrintExampleBanner(banner);
 
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
             {
                 PolyModulusDegree = polyModulusDegree,
                 CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree)
             };
-            CKKSPerformanceTest(new SEALContext(parms));
+
+            using (SEALContext context = new SEALContext(parms))
+            {
+                CKKSPerformanceTest(context);
+            }
         }
 
         private static void ExamplePerformanceTest()

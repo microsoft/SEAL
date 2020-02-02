@@ -44,7 +44,7 @@ namespace SEALNetExamples
             node can be identified by the ParmsId of its specific encryption parameters
             (PolyModulusDegree remains the same but CoeffModulus varies).
             */
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             ulong polyModulusDegree = 8192;
             parms.PolyModulusDegree = polyModulusDegree;
 
@@ -91,7 +91,7 @@ namespace SEALNetExamples
             */
             parms.PlainModulus = PlainModulus.Batching(polyModulusDegree, 20);
 
-            SEALContext context = new SEALContext(parms);
+            using SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
 
             /*
@@ -164,10 +164,10 @@ namespace SEALNetExamples
             /*
             We create some keys and check that indeed they appear at the highest level.
             */
-            KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey publicKey = keygen.PublicKey;
-            SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeysLocal();
+            using KeyGenerator keygen = new KeyGenerator(context);
+            using PublicKey publicKey = keygen.PublicKey;
+            using SecretKey secretKey = keygen.SecretKey;
+            using RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             /*
             In this example we create a local version of the GaloisKeys object using
@@ -176,7 +176,7 @@ namespace SEALNetExamples
             use KeyGenerator.GaloisKeys(), which outputs a Serializable<GaloisKeys>
             object for compressed serialization.
             */
-            GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
+            using GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
             Utilities.PrintLine();
             Console.WriteLine("Print the parameter IDs of generated elements.");
             Console.WriteLine($"    + publicKey:  {publicKey.ParmsId}");
@@ -184,16 +184,16 @@ namespace SEALNetExamples
             Console.WriteLine($"    + relinKeys:  {relinKeys.ParmsId}");
             Console.WriteLine($"    + galoisKeys: {galoisKeys.ParmsId}");
 
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Evaluator evaluator = new Evaluator(context);
-            Decryptor decryptor = new Decryptor(context, secretKey);
+            using Encryptor encryptor = new Encryptor(context, publicKey);
+            using Evaluator evaluator = new Evaluator(context);
+            using Decryptor decryptor = new Decryptor(context, secretKey);
 
             /*
             In the BFV scheme plaintexts do not carry a ParmsId, but ciphertexts do. Note
             how the freshly encrypted ciphertext is at the highest data level.
             */
-            Plaintext plain = new Plaintext("1x^3 + 2x^2 + 3x^1 + 4");
-            Ciphertext encrypted = new Ciphertext();
+            using Plaintext plain = new Plaintext("1x^3 + 2x^2 + 3x^1 + 4");
+            using Ciphertext encrypted = new Ciphertext();
             encryptor.Encrypt(plain, encrypted);
             Console.WriteLine($"    + plain:      {plain.ParmsId} (not set in BFV)");
             Console.WriteLine($"    + encrypted:  {encrypted.ParmsId}");
@@ -309,7 +309,7 @@ namespace SEALNetExamples
             not want to create the modulus switching chain, except for the highest two
             levels. This can be done by passing a bool `false' to SEALContext constructor.
             */
-            context = new SEALContext(parms, expandModChain: false);
+            using SEALContext context2 = new SEALContext(parms, expandModChain: false);
 
             /*
             We can check that indeed the modulus switching chain has been created only
@@ -320,7 +320,7 @@ namespace SEALNetExamples
             Utilities.PrintLine();
             Console.WriteLine("Print the modulus switching chain.");
             Console.Write("----> ");
-            for (contextData = context.KeyContextData; null != contextData;
+            for (contextData = context2.KeyContextData; null != contextData;
                 contextData = contextData.NextContextData)
             {
                 Console.WriteLine($"Level (chain index): {contextData.ChainIndex}");

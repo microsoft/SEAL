@@ -24,7 +24,7 @@ namespace SEALNetExamples
 
             We start by setting up the CKKS scheme.
             */
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
 
             /*
             We saw in `2_Encoders.cs' that multiplication in CKKS causes scales in
@@ -86,19 +86,19 @@ namespace SEALNetExamples
             */
             double scale = Math.Pow(2.0, 40);
 
-            SEALContext context = new SEALContext(parms);
+            using SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
             Console.WriteLine();
 
-            KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey publicKey = keygen.PublicKey;
-            SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeysLocal();
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Evaluator evaluator = new Evaluator(context);
-            Decryptor decryptor = new Decryptor(context, secretKey);
+            using KeyGenerator keygen = new KeyGenerator(context);
+            using PublicKey publicKey = keygen.PublicKey;
+            using SecretKey secretKey = keygen.SecretKey;
+            using RelinKeys relinKeys = keygen.RelinKeysLocal();
+            using Encryptor encryptor = new Encryptor(context, publicKey);
+            using Evaluator evaluator = new Evaluator(context);
+            using Decryptor decryptor = new Decryptor(context, secretKey);
 
-            CKKSEncoder encoder = new CKKSEncoder(context);
+            using CKKSEncoder encoder = new CKKSEncoder(context);
             ulong slotCount = encoder.SlotCount;
             Console.WriteLine($"Number of slots: {slotCount}");
 
@@ -117,25 +117,25 @@ namespace SEALNetExamples
             We create plaintexts for PI, 0.4, and 1 using an overload of CKKSEncoder.Encode
             that encodes the given floating-point value to every slot in the vector.
             */
-            Plaintext plainCoeff3 = new Plaintext(),
-                      plainCoeff1 = new Plaintext(),
-                      plainCoeff0 = new Plaintext();
+            using Plaintext plainCoeff3 = new Plaintext(),
+                            plainCoeff1 = new Plaintext(),
+                            plainCoeff0 = new Plaintext();
             encoder.Encode(3.14159265, scale, plainCoeff3);
             encoder.Encode(0.4, scale, plainCoeff1);
             encoder.Encode(1.0, scale, plainCoeff0);
 
-            Plaintext xPlain = new Plaintext();
+            using Plaintext xPlain = new Plaintext();
             Utilities.PrintLine();
             Console.WriteLine("Encode input vectors.");
             encoder.Encode(input, scale, xPlain);
-            Ciphertext x1Encrypted = new Ciphertext();
+            using Ciphertext x1Encrypted = new Ciphertext();
             encryptor.Encrypt(xPlain, x1Encrypted);
 
             /*
             To compute x^3 we first compute x^2 and relinearize. However, the scale has
             now grown to 2^80.
             */
-            Ciphertext x3Encrypted = new Ciphertext();
+            using Ciphertext x3Encrypted = new Ciphertext();
             Utilities.PrintLine();
             Console.WriteLine("Compute x^2 and relinearize:");
             evaluator.Square(x1Encrypted, x3Encrypted);
@@ -165,7 +165,7 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("Compute and rescale PI*x.");
-            Ciphertext x1EncryptedCoeff3 = new Ciphertext();
+            using Ciphertext x1EncryptedCoeff3 = new Ciphertext();
             evaluator.MultiplyPlain(x1Encrypted, plainCoeff3, x1EncryptedCoeff3);
             Console.WriteLine("    + Scale of PI*x before rescale: {0} bits",
                 Math.Log(x1EncryptedCoeff3.Scale, newBase: 2));
@@ -284,14 +284,14 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("Compute PI*x^3 + 0.4*x + 1.");
-            Ciphertext encryptedResult = new Ciphertext();
+            using Ciphertext encryptedResult = new Ciphertext();
             evaluator.Add(x3Encrypted, x1Encrypted, encryptedResult);
             evaluator.AddPlainInplace(encryptedResult, plainCoeff0);
 
             /*
             First print the true result.
             */
-            Plaintext plainResult = new Plaintext();
+            using Plaintext plainResult = new Plaintext();
             Utilities.PrintLine();
             Console.WriteLine("Decrypt and decode PI * x ^ 3 + 0.4x + 1.");
             Console.WriteLine("    + Expected result:");

@@ -28,6 +28,7 @@ namespace SEALNetExamples
             if (!Serialization.IsSupportedComprMode(ComprModeType.Deflate))
             {
                 Console.WriteLine("ZLIB support is not enabled; this example is not available.");
+                Console.WriteLine();
                 return;
             }
 
@@ -53,7 +54,7 @@ namespace SEALNetExamples
             */
             {
                 ulong polyModulusDegree = 8192;
-                EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
+                using EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
                 parms.PolyModulusDegree = polyModulusDegree;
                 parms.CoeffModulus = CoeffModulus.Create(
                     polyModulusDegree, new int[]{ 50, 20, 50 });
@@ -134,7 +135,7 @@ namespace SEALNetExamples
                 we need to seek our stream back to the beginning.
                 */
                 buffer.Seek(0, SeekOrigin.Begin);
-                EncryptionParameters parms2 = new EncryptionParameters();
+                using EncryptionParameters parms2 = new EncryptionParameters();
                 parms2.Load(buffer);
 
                 /*
@@ -149,7 +150,7 @@ namespace SEALNetExamples
             and creates the required keys.
             */
             {
-                EncryptionParameters parms = new EncryptionParameters();
+                using EncryptionParameters parms = new EncryptionParameters();
                 parms.Load(parmsStream);
 
                 /*
@@ -158,11 +159,11 @@ namespace SEALNetExamples
                 */
                 parmsStream.Seek(0, SeekOrigin.Begin);
 
-                SEALContext context = new SEALContext(parms);
+                using SEALContext context = new SEALContext(parms);
 
-                KeyGenerator keygen = new KeyGenerator(context);
-                SecretKey sk = keygen.SecretKey;
-                PublicKey pk = keygen.PublicKey;
+                using KeyGenerator keygen = new KeyGenerator(context);
+                using SecretKey sk = keygen.SecretKey;
+                using PublicKey pk = keygen.PublicKey;
 
                 /*
                 We need to save the secret key so we can decrypt later.
@@ -184,7 +185,7 @@ namespace SEALNetExamples
                 must be expanded before being used in computations; this is automatically
                 done by deserialization.
                 */
-                Serializable<RelinKeys> rlk = keygen.RelinKeys();
+                using Serializable<RelinKeys> rlk = keygen.RelinKeys();
 
                 /*
                 Before continuing, we demonstrate the significant space saving from this
@@ -192,7 +193,7 @@ namespace SEALNetExamples
                 */
                 long sizeRlk = rlk.Save(dataStream);
 
-                RelinKeys rlkLocal = keygen.RelinKeysLocal();
+                using RelinKeys rlkLocal = keygen.RelinKeysLocal();
                 long sizeRlkLocal = rlkLocal.Save(dataStream);
 
                 /*
@@ -214,14 +215,14 @@ namespace SEALNetExamples
                 */
                 double scale = Math.Pow(2.0, 20);
                 CKKSEncoder encoder = new CKKSEncoder(context);
-                Plaintext plain1 = new Plaintext(),
-                          plain2 = new Plaintext();
+                using Plaintext plain1 = new Plaintext(),
+                                plain2 = new Plaintext();
                 encoder.Encode(2.3, scale, plain1);
                 encoder.Encode(4.5, scale, plain2);
 
-                Encryptor encryptor = new Encryptor(context, pk);
-                Ciphertext encrypted1 = new Ciphertext(),
-                           encrypted2 = new Ciphertext();
+                using Encryptor encryptor = new Encryptor(context, pk);
+                using Ciphertext encrypted1 = new Ciphertext(),
+                                encrypted2 = new Ciphertext();
                 encryptor.Encrypt(plain1, encrypted1);
                 encryptor.Encrypt(plain2, encrypted2);
 
@@ -242,9 +243,9 @@ namespace SEALNetExamples
                 To use symmetric-key encryption, we need to set up the Encryptor with the
                 secret key instead.
                 */
-                Encryptor symEncryptor = new Encryptor(context, sk);
-                Serializable<Ciphertext> symEncrypted1 = symEncryptor.EncryptSymmetric(plain1);
-                Serializable<Ciphertext> symEncrypted2 = symEncryptor.EncryptSymmetric(plain2);
+                using Encryptor symEncryptor = new Encryptor(context, sk);
+                using Serializable<Ciphertext> symEncrypted1 = symEncryptor.EncryptSymmetric(plain1);
+                using Serializable<Ciphertext> symEncrypted2 = symEncryptor.EncryptSymmetric(plain2);
 
                 /*
                 Before continuing, we demonstrate the significant space saving from this
@@ -294,20 +295,20 @@ namespace SEALNetExamples
             SEALContext and set up an Evaluator here.
             */
             {
-                EncryptionParameters parms = new EncryptionParameters();
+                using EncryptionParameters parms = new EncryptionParameters();
                 parms.Load(parmsStream);
                 parmsStream.Seek(0, SeekOrigin.Begin);
-                SEALContext context = new SEALContext(parms);
+                using SEALContext context = new SEALContext(parms);
 
-                Evaluator evaluator = new Evaluator(context);
+                using Evaluator evaluator = new Evaluator(context);
 
                 /*
                 Next we need to load relinearization keys and the ciphertexts from our
                 dataStream.
                 */
-                RelinKeys rlk  = new RelinKeys();
-                Ciphertext encrypted1 = new Ciphertext(),
-                           encrypted2 = new Ciphertext();
+                using RelinKeys rlk  = new RelinKeys();
+                using Ciphertext encrypted1 = new Ciphertext(),
+                                 encrypted2 = new Ciphertext();
 
                 /*
                 Deserialization is as easy as serialization.
@@ -319,7 +320,7 @@ namespace SEALNetExamples
                 /*
                 Compute the product, rescale, and relinearize.
                 */
-                Ciphertext encryptedProd = new Ciphertext();
+                using Ciphertext encryptedProd = new Ciphertext();
                 evaluator.Multiply(encrypted1, encrypted2, encryptedProd);
                 evaluator.RelinearizeInplace(encryptedProd, rlk);
                 evaluator.RescaleToNextInplace(encryptedProd);
@@ -345,23 +346,23 @@ namespace SEALNetExamples
             In the final step the client decrypts the result.
             */
             {
-                EncryptionParameters parms = new EncryptionParameters();
+                using EncryptionParameters parms = new EncryptionParameters();
                 parms.Load(parmsStream);
                 parmsStream.Seek(0, SeekOrigin.Begin);
-                SEALContext context = new SEALContext(parms);
+                using SEALContext context = new SEALContext(parms);
 
                 /*
                 Load back the secret key from skStream.
                 */
-                SecretKey sk = new SecretKey();
+                using SecretKey sk = new SecretKey();
                 sk.Load(context, skStream);
-                Decryptor decryptor = new Decryptor(context, sk);
-                CKKSEncoder encoder = new CKKSEncoder(context);
+                using Decryptor decryptor = new Decryptor(context, sk);
+                using CKKSEncoder encoder = new CKKSEncoder(context);
 
-                Ciphertext encryptedResult = new Ciphertext();
+                using Ciphertext encryptedResult = new Ciphertext();
                 encryptedResult.Load(context, dataStream);
 
-                Plaintext plainResult = new Plaintext();
+                using Plaintext plainResult = new Plaintext();
                 decryptor.Decrypt(encryptedResult, plainResult);
                 List<double> result = new List<double>();
                 encoder.Decode(plainResult, result);
