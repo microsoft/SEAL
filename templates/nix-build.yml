@@ -12,9 +12,6 @@ steps:
           cd $BUILD_SOURCESDIRECTORY
           make
       displayName: 'Build SEAL'
-      inputs:
-          workingDirectory: native/src
-          cmakeArgs: '--build'
 
     - script: |
           cd $BUILD_SOURCESDIRECTORY
