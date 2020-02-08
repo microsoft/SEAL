@@ -441,16 +441,12 @@ EMSCRIPTEN_BINDINGS(bindings) {
         .constructor<std::shared_ptr<SEALContext>> ()
         .function("negate", &Evaluator::negate)
         .function("add", &Evaluator::add)
+        .function("addPlain", &Evaluator::add_plain)
         .function("sub", &Evaluator::sub)
+        .function("subPlain", &Evaluator::sub_plain)
         .function("multiply", &Evaluator::multiply)
+        .function("multiplyPlain", &Evaluator::multiply_plain)
         .function("square", &Evaluator::square)
-        .function("relinearize", &Evaluator::relinearize)
-        .function("cipherModSwitchToNext", select_overload<void(const Ciphertext &, Ciphertext &, MemoryPoolHandle)>(&Evaluator::mod_switch_to_next))
-        .function("cipherModSwitchTo", select_overload<void(const Ciphertext &, parms_id_type, Ciphertext &, MemoryPoolHandle)>(&Evaluator::mod_switch_to))
-        .function("plainModSwitchToNext", select_overload<void(const Plaintext &, Plaintext &)>(&Evaluator::mod_switch_to_next))
-        .function("plainModSwitchTo", select_overload<void(const Plaintext &, parms_id_type, Plaintext &)>(&Evaluator::mod_switch_to))
-        .function("rescaleToNext", &Evaluator::rescale_to_next)
-        .function("rescaleTo", &Evaluator::rescale_to)
         .function("exponentiate", optional_override([](Evaluator &self,
             const Ciphertext &encrypted, std::uint32_t exponent,
             const RelinKeys &relin_keys, Ciphertext &destination,
@@ -458,9 +454,13 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::uint64_t exponent_uint64 = (uint64_t) exponent;
             return self.Evaluator::exponentiate(encrypted, exponent_uint64, relin_keys, destination, pool);
         }))
-        .function("addPlain", &Evaluator::add_plain)
-        .function("subPlain", &Evaluator::sub_plain)
-        .function("multiplyPlain", &Evaluator::multiply_plain)
+        .function("relinearize", &Evaluator::relinearize)
+        .function("cipherModSwitchToNext", select_overload<void(const Ciphertext &, Ciphertext &, MemoryPoolHandle)>(&Evaluator::mod_switch_to_next))
+        .function("cipherModSwitchTo", select_overload<void(const Ciphertext &, parms_id_type, Ciphertext &, MemoryPoolHandle)>(&Evaluator::mod_switch_to))
+        .function("plainModSwitchToNext", select_overload<void(const Plaintext &, Plaintext &)>(&Evaluator::mod_switch_to_next))
+        .function("plainModSwitchTo", select_overload<void(const Plaintext &, parms_id_type, Plaintext &)>(&Evaluator::mod_switch_to))
+        .function("rescaleToNext", &Evaluator::rescale_to_next)
+        .function("rescaleTo", &Evaluator::rescale_to)
         .function("plainTransformToNtt", select_overload<void(const Plaintext &, parms_id_type, Plaintext &, MemoryPoolHandle)>(&Evaluator::transform_to_ntt))
         .function("cipherTransformToNtt", select_overload<void(const Ciphertext &, Ciphertext &)>(&Evaluator::transform_to_ntt))
         .function("cipherTransformFromNtt", select_overload<void(const Ciphertext &, Ciphertext &)>(&Evaluator::transform_from_ntt))
