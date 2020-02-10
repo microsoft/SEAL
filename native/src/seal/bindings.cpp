@@ -18,15 +18,10 @@ using namespace seal;
 template<typename T>
     std::vector<T> vecFromJSArray(const val &v) {
         std::vector<T> rv;
-        const auto l = v["length"].as<unsigned>();
-        rv.reserve(l);
+        const size_t l = v["length"].as<unsigned>();
         rv.resize(l);
-
-        emscripten::val memoryView {
-            emscripten::typed_memory_view(l, rv.data())
-        };
+        val memoryView { typed_memory_view(l, rv.data()) };
         memoryView.call<void>("set", v);
-
         return rv;
     };
 
@@ -35,17 +30,17 @@ template<typename T>
 */
 template<typename T>
     emscripten::val jsArrayFromVec(const std::vector<T>  &vec) {
-        const auto length = vec.size();
-        return val(typed_memory_view(length, vec.data()));
+        const size_t l = vec.size();
+        return val(typed_memory_view(l, vec.data()));
     };
 
 /*
-  Converts a Vector of type T1 to type T2
+  Copies a Vector of type T1 to type T2
 */
 template<typename T1, typename T2>
-    void convert_vector(const std::vector<T1> &vector_input, std::vector<T2> &vector_output) {
-        std::copy(vector_input.begin(), vector_input.end(), std::back_inserter(vector_output));
-    }
+    void copy_vector(const std::vector<T1> &vector_input, std::vector<T2> &vector_output) {
+        vector_output.assign(vector_input.begin(), vector_input.end());
+    };
 
 /*
 Helper function: Prints a vector of floating-point values.
@@ -622,41 +617,67 @@ EMSCRIPTEN_BINDINGS(bindings) {
         .function("encodeVectorInt32", optional_override([](BatchEncoder &self,
             const std::vector<std::int32_t> &values, Plaintext &destination) {
             std::vector<std::int64_t>values_int64;
-            convert_vector(values, values_int64);
+            copy_vector(values, values_int64);
             return self.BatchEncoder::encode(values_int64, destination);
         }))
         .function("encodeVectorUInt32", optional_override([](BatchEncoder &self,
             const std::vector<std::uint32_t> &values, Plaintext &destination) {
             std::vector<std::uint64_t>values_uint64;
-            convert_vector(values, values_uint64);
+            copy_vector(values, values_uint64);
             return self.BatchEncoder::encode(values_uint64, destination);
         }))
         .function("encode", optional_override([](BatchEncoder &self,
             const val &v, Plaintext &destination,
                 const bool &sign) {
             if (sign) {
-                std::vector<std::int32_t>temp;
-                const auto l = v["length"].as<unsigned>();
-                temp.resize(l);
-                val memoryView {
-                    typed_memory_view(l, temp.data())
-                };
+                // Get the size of the TypedArray input
+                const size_t length = v["length"].as<unsigned>();
+
+                // Reserve the known max BatchEncoder slot count
+                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+
+                // Create a temporary vector to store the TypedArray values
+                std::vector<std::int32_t> temp;
+                temp.reserve(MAX_SLOT_COUNT);
+
+                // Resize to the number of elements in the TypedArray
+                temp.resize(length);
+
+                // Construct a memory view on the temp vector
+                const val memoryView { typed_memory_view(length, temp.data()) };
+                // Set the data in the vector from the JS side.
                 memoryView.call<void>("set", v);
 
-                std::vector<std::int64_t>values;
-                convert_vector(temp, values);
+                // Create a new vector that the encode method supports
+                std::vector<std::int64_t> values;
+                copy_vector(temp, values);
+
+                // Encode the vector to the plainText
                 self.BatchEncoder::encode(values, destination);
             } else {
-                std::vector<std::uint32_t>temp;
-                const auto l = v["length"].as<unsigned>();
-                temp.resize(l);
-                val memoryView {
-                    typed_memory_view(l, temp.data())
-                };
+                // Get the size of the TypedArray input
+                const size_t length = v["length"].as<unsigned>();
+
+                // Reserve the known max BatchEncoder slot count
+                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+
+                // Create a temporary vector to store the TypedArray values
+                std::vector<std::uint32_t> temp;
+                temp.reserve(MAX_SLOT_COUNT);
+
+                // Resize to the number of elements in the TypedArray
+                temp.resize(length);
+
+                // Construct a memory view on the temp vector
+                const val memoryView { typed_memory_view(length, temp.data()) };
+                // Set the data in the vector from the JS side.
                 memoryView.call<void>("set", v);
 
-                std::vector<std::uint64_t>values;
-                convert_vector(temp, values);
+                // Create a new vector that the encode method supports
+                std::vector<std::uint64_t> values;
+                copy_vector(temp, values);
+
+                // Encode the vector to the plainText
                 self.BatchEncoder::encode(values, destination);
             }
         }))
@@ -664,41 +685,60 @@ EMSCRIPTEN_BINDINGS(bindings) {
             const Plaintext &plain, std::vector<std::int32_t> &destination,
                 MemoryPoolHandle pool = MemoryManager::GetPool()) {
             std::vector<std::int64_t>destination_int64;
-            convert_vector(destination, destination_int64);
+            copy_vector(destination, destination_int64);
             self.BatchEncoder::decode(plain, destination_int64, pool);
-            convert_vector(destination_int64, destination);
+            copy_vector(destination_int64, destination);
         }))
         .function("decodeVectorUInt32", optional_override([](BatchEncoder &self,
             const Plaintext &plain, std::vector<std::uint32_t> &destination,
                 MemoryPoolHandle pool = MemoryManager::GetPool()) {
             std::vector<std::uint64_t>destination_uint64;
-            convert_vector(destination, destination_uint64);
+            copy_vector(destination, destination_uint64);
             self.BatchEncoder::decode(plain, destination_uint64, pool);
-            convert_vector(destination_uint64, destination);
+            copy_vector(destination_uint64, destination);
         }))
-        .function("decode", optional_override([](BatchEncoder &self,
-            const Plaintext &plain,
-                const bool &sign, MemoryPoolHandle pool = MemoryManager::GetPool()) {
-            if (sign) {
-                std::vector<std::int64_t>destination;
+        .function("decodeInt32", optional_override([](BatchEncoder &self,
+            const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                // Create a new vector to store the decoded result
+                std::vector<std::int64_t> destination;
+
+                // Reserve the known max CKKS encoder slot count
+                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+                destination.reserve(MAX_SLOT_COUNT);
+
+                // Decode the plainText
                 self.BatchEncoder::decode(plain, destination, pool);
 
-                std::vector<std::int32_t>values;
-                convert_vector(destination, values);
+                // Create a new vector with the type JS can accept
+                std::vector<std::int32_t> result;
+                copy_vector(destination, result);
 
-                const auto l = values.size();
-                return val(typed_memory_view(l, values.data()));
-            } else {
-                std::vector<std::uint64_t>destination;
+                // We must return a vector type instead of a "typed_memory_view"
+                // because once this function returns, the c++ vector is
+                // garbage collected and the memory view becomes corrupted.
+                return result;
+            }))
+        .function("decodeUInt32", optional_override([](BatchEncoder &self,
+            const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                // Create a new vector to store the decoded result
+                std::vector<std::uint64_t> destination;
+
+                // Reserve the known max CKKS encoder slot count
+                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+                destination.reserve(MAX_SLOT_COUNT);
+
+                // Decode the plainText
                 self.BatchEncoder::decode(plain, destination, pool);
 
-                std::vector<std::uint32_t>values;
-                convert_vector(destination, values);
+                // Create a new vector with the type JS can accept
+                std::vector<std::uint32_t> result;
+                copy_vector(destination, result);
 
-                const auto l = values.size();
-                return val(typed_memory_view(l, values.data()));
-            }
-        }))
+                // We must return a vector type instead of a "typed_memory_view"
+                // because once this function returns, the c++ vector is
+                // garbage collected and the memory view becomes corrupted.
+                return result;
+            }))
         .function("slotCount", optional_override([](BatchEncoder &self) {
             return self.slot_count();
         }));
@@ -719,30 +759,43 @@ EMSCRIPTEN_BINDINGS(bindings) {
         .function("encode", optional_override([](CKKSEncoder &self,
             const val &v, double scale, Plaintext &destination,
                 MemoryPoolHandle pool = MemoryManager::GetPool()) {
-            std::vector<double>values;
-            const auto l = v["length"].as<unsigned>();
-            values.reserve(l);
-            values.resize(l);
-            val memoryView {
-                typed_memory_view(l, values.data())
-            };
+            // Get the size of the TypedArray input
+            const size_t length = v["length"].as<unsigned>();
+
+            // Reserve the known max CKKS encoder slot count
+            const size_t MAX_SLOT_COUNT = self.CKKSEncoder::slot_count();
+
+            // Create a vector to store the TypedArray values
+            std::vector<double> values;
+            values.reserve(MAX_SLOT_COUNT);
+
+            // Resize to the number of elements in the TypedArray
+            values.resize(length);
+
+            // Construct a memory view on the vector
+            const val memoryView { typed_memory_view(length, values.data()) };
+            // Set the data in the vector from the JS side.
             memoryView.call<void>("set", v);
+
+            // Encode the vector to the plainText
             self.CKKSEncoder::encode(values, scale, destination, pool);
         }))
-        .function("decode", optional_override([](CKKSEncoder &self,
+        .function("decodeDouble", optional_override([](CKKSEncoder &self,
             const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) {
-            std::vector<double>destination;
+            // Create a new vector to store the decoded result
+            std::vector<double> destination;
+
+            // Reserve the known max CKKS encoder slot count
+            const size_t MAX_SLOT_COUNT = self.CKKSEncoder::slot_count();
+            destination.reserve(MAX_SLOT_COUNT);
+
+            // Decode the plainText
             self.CKKSEncoder::decode(plain, destination, pool);
 
-            // For some unknown reason, this extra copy is needed or else
-            // the result has three (3) zero's at the beginning of the array
-            // while the remaining slots are correct. Even when we print
-            // the original vector's values (which are correct)...
-            std::vector<double>values;
-            convert_vector(destination, values);
-
-            const auto l = values.size();
-            return val(typed_memory_view(l, values.data()));
+            // We must return a vector type instead of a "typed_memory_view"
+            // because once this function returns, the c++ vector is
+            // garbage collected and the memory view becomes corrupted.
+            return destination;
         }))
         .function("slotCount", optional_override([](CKKSEncoder &self) {
             return self.slot_count();
