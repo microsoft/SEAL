@@ -26,6 +26,7 @@
 - Releases are now listed on GitHub.
 - Moved `dotnet/native/` to be under `native/src/c/`. The C export library in this directory can be used to build wrappers for other languages also -- not just .NET.
 - Changed the CMake file structure. Targets available are now: `SEAL::seal` (static library), `SEAL::seal_shared` (shared library), `SEAL::sealc` (C export library).
+- There is now a `.clang-format` for automated formatting of C++ (`.cpp` and `.h`) files. A command line tool is added to `tools/scripts/clang-format-all.sh` for easy formatting. This is compatible with clang-format-9 and above. Support for C# is not yet ideal.
 
 ## Version 3.4.5
 
