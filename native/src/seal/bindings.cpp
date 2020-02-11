@@ -550,7 +550,15 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::istringstream is(decoded);
             self.load(context, is);
         }))
+        .function("reserve", &Plaintext::reserve)
         .function("shrinkToFit", &Plaintext::shrink_to_fit)
+        .function("release", optional_override([](Plaintext &self) {
+            return self.release();
+        }))
+        .function("resize", &Plaintext::resize)
+        .function("setZero", optional_override([](Plaintext &self) {
+            return self.set_zero();
+        }))
         .function("isZero", &Plaintext::is_zero)
         .function("capacity", optional_override([](Plaintext &self) {
             return self.capacity();
@@ -585,6 +593,17 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::istringstream is(decoded);
             self.load(context, is);
         }))
+        .function("reserve", optional_override([](Ciphertext &self,
+            std::size_t capacity) {
+            return self.reserve(capacity);
+        }))
+        .function("resize", optional_override([](Ciphertext &self,
+            std::size_t size) {
+            return self.resize(size);
+        }))
+        .function("release", optional_override([](Ciphertext &self) {
+             return self.release();
+         }))
         .function("coeffModCount", optional_override([](Ciphertext &self) {
             return self.coeff_mod_count();
         }))
