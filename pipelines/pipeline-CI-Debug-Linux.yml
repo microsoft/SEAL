@@ -1,0 +1,16 @@
+# This defines a pipeline to build on Linux in Debug mode.
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+
+stages:
+  - stage: build
+    displayName: Build
+    jobs:
+    - template: jobs.yml
+      parameters:
+        debug: true
+        name: Linux

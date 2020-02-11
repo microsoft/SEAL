@@ -1,7 +1,9 @@
-parameters:
-    nuget_version: ''
-
 steps:
+    - task: NuGetToolInstaller@1
+      displayName: 'Use NuGet'
+      inputs:
+          versionSpec: ${{ parameters.nuget_version }}
+
     - task: DownloadBuildArtifacts@0
       inputs:
           downloadType: 'single'
@@ -42,16 +44,11 @@ steps:
           TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
 
     - task: CopyFiles@2
-      displayName: 'Copy Mac OS X Files to: $(Build.ArtifactStagingDirectory)'
+      displayName: 'Copy macOS Files to: $(Build.ArtifactStagingDirectory)'
       inputs:
           SourceFolder: '$(Build.ArtifactStagingDirectory)\macos-drop\lib\'
           Contents: '*'
           TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
-
-    - task: NuGetToolInstaller@1
-      displayName: 'Use NuGet'
-      inputs:
-          versionSpec: ${{ parameters.nuget_version }}
 
     - task: NuGetCommand@2
       displayName: 'Build Nuget Package'

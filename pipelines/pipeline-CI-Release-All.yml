@@ -1,0 +1,20 @@
+# This defines a pipeline to build on Windows, Linux, and macOS in Release mode.
+
+trigger: none
+
+stages:
+  - stage: build
+    displayName: Build
+    jobs:
+    - template: jobs.yml
+      parameters:
+        debug: false
+        name: Windows
+    - template: jobs.yml
+      parameters:
+        debug: false
+        name: Linux
+    - template: jobs.yml
+      parameters:
+        debug: false
+        name: macOS
