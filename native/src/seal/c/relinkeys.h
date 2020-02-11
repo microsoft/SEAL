@@ -10,7 +10,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include <stdint.h>
 #include "seal/c/defines.h"
+#include <stdint.h>
 
 SEAL_C_FUNC RelinKeys_GetIndex(uint64_t key_power, uint64_t *index);

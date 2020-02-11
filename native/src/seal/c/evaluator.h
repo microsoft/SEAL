@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include <stdint.h>
 #include "seal/c/defines.h"
+#include <stdint.h>
 
 SEAL_C_FUNC Evaluator_Create(void *sealContext, void **evaluator);
 
@@ -55,7 +55,8 @@ SEAL_C_FUNC Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_
 SEAL_C_FUNC Evaluator_Exponentiate(
     void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool);
 
-SEAL_C_FUNC Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parms_id, void *destination_ntt, void *pool);
+SEAL_C_FUNC Evaluator_TransformToNTT1(
+    void *thisptr, void *plain, uint64_t *parms_id, void *destination_ntt, void *pool);
 
 SEAL_C_FUNC Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *destination_ntt);
 
@@ -72,6 +73,7 @@ SEAL_C_FUNC Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois
 SEAL_C_FUNC Evaluator_RotateVector(
     void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool);
 
-SEAL_C_FUNC Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
+SEAL_C_FUNC Evaluator_ComplexConjugate(
+    void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
 
 SEAL_C_FUNC Evaluator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching);

@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include <stdint.h>
 #include "seal/c/defines.h"
+#include <stdint.h>
 
 SEAL_C_FUNC Plaintext_Create1(void *memoryPoolHandle, void **plaintext);
 

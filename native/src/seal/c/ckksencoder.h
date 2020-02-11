@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include <stdint.h>
 #include "seal/c/defines.h"
+#include <stdint.h>
 
 SEAL_C_FUNC CKKSEncoder_Create(void *context, void **ckks_encoder);
 

@@ -10,8 +10,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include <stdint.h>
 #include "seal/c/defines.h"
+#include <stdint.h>
 
 SEAL_C_FUNC PublicKey_Create1(void **public_key);
 

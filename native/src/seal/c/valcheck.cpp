@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "seal/c/valcheck.h"
 #include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
+#include "seal/c/valcheck.h"
 
 // SEAL
 #include "seal/valcheck.h"
