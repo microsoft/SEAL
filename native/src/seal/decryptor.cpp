@@ -287,58 +287,6 @@ namespace seal
         }
     }
 
-    void Decryptor::compose(const SEALContext::ContextData &context_data, uint64_t *value)
-    {
-#ifdef SEAL_DEBUG
-        if (value == nullptr)
-        {
-            throw invalid_argument("input cannot be null");
-        }
-#endif
-        auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
-        size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_mod_count);
-
-        auto &base_converter = context_data.base_converter();
-        auto coeff_products_array = base_converter->get_coeff_products_array();
-        auto &inv_coeff_mod_coeff_array = base_converter->get_inv_coeff_mod_coeff_array();
-
-        // Set temporary coefficients_ptr pointer to point to either an existing
-        // allocation given as parameter, or else to a new allocation from the memory pool.
-        auto coefficients(allocate_uint(rns_poly_uint64_count, pool_));
-        uint64_t *coefficients_ptr = coefficients.get();
-
-        // Re-merge the coefficients first
-        for (size_t i = 0; i < coeff_count; i++)
-        {
-            for (size_t j = 0; j < coeff_mod_count; j++)
-            {
-                coefficients_ptr[j + (i * coeff_mod_count)] = value[(j * coeff_count) + i];
-            }
-        }
-
-        auto temp(allocate_uint(coeff_mod_count, pool_));
-        set_zero_uint(rns_poly_uint64_count, value);
-
-        for (size_t i = 0; i < coeff_count; i++)
-        {
-            for (size_t j = 0; j < coeff_mod_count; j++)
-            {
-                uint64_t tmp =
-                    multiply_uint_uint_mod(coefficients_ptr[j], inv_coeff_mod_coeff_array[j], coeff_modulus[j]);
-                multiply_uint_uint64(
-                    coeff_products_array + (j * coeff_mod_count), coeff_mod_count, tmp, coeff_mod_count, temp.get());
-                add_uint_uint_mod(
-                    temp.get(), value + (i * coeff_mod_count), context_data.total_coeff_modulus(), coeff_mod_count,
-                    value + (i * coeff_mod_count));
-            }
-            set_zero_uint(coeff_mod_count, temp.get());
-            coefficients_ptr += coeff_mod_count;
-        }
-    }
-
     int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
     {
         // Verify that encrypted is valid.

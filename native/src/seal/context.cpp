@@ -7,6 +7,7 @@
 #include "seal/util/polycore.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
+#include <algorithm>
 #include <stdexcept>
 #include <utility>
 
@@ -62,15 +63,13 @@ namespace seal
 
         // Compute the product of all coeff moduli
         context_data.total_coeff_modulus_ = allocate_uint(coeff_mod_count, pool_);
-        auto temp(allocate_uint(coeff_mod_count, pool_));
-        set_uint(1, coeff_mod_count, context_data.total_coeff_modulus_.get());
+        auto coeff_modulus_values(allocate_uint(coeff_mod_count, pool_));
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            multiply_uint_uint64(
-                context_data.total_coeff_modulus_.get(), coeff_mod_count, coeff_modulus[i].value(), coeff_mod_count,
-                temp.get());
-            set_uint_uint(temp.get(), coeff_mod_count, context_data.total_coeff_modulus_.get());
+            coeff_modulus_values[i] = coeff_modulus[i].value();
         }
+        multiply_many_uint64(
+            coeff_modulus_values.get(), coeff_mod_count, context_data.total_coeff_modulus_.get(), pool_);
         context_data.total_coeff_modulus_bit_count_ =
             get_significant_bit_count_uint(context_data.total_coeff_modulus_.get(), coeff_mod_count);
 
@@ -110,6 +109,15 @@ namespace seal
                 context_data.qualifiers_.parameters_set = false;
                 return context_data;
             }
+        }
+
+        // Set up the CRTTool
+        context_data.crt_tool_ = allocate<CRTTool>(pool_, pool_);
+        if (!context_data.crt_tool_->initialize(coeff_modulus))
+        {
+            // Parameters are not valid
+            context_data.qualifiers_.parameters_set = false;
+            return context_data;
         }
 
         // Can we use NTT with coeff_modulus?
@@ -184,6 +192,7 @@ namespace seal
             // store the non-RNS form of upper_half_increment for BFV encryption
             context_data.coeff_mod_plain_modulus_ = context_data.upper_half_increment_[0];
             // Decompose coeff_div_plain_modulus into RNS factors
+            auto temp(allocate_uint(coeff_mod_count, pool_));
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 temp[i] =

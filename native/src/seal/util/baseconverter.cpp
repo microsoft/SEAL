@@ -200,7 +200,7 @@ namespace seal
             }
 
             // Compute inverse coeff base mod coeff base array (qi^(-1)) mod qi and
-            // mtilde inv coeff products mod auxiliary moduli  (m_tilda*qi^(-1)) mod qi
+            // mtilde inv coeff products mod auxiliary moduli  (m_tilde*qi^(-1)) mod qi
             inv_coeff_base_products_mod_coeff_array_ = allocate_uint(coeff_base_mod_count_, pool_);
             mtilde_inv_coeff_base_products_mod_coeff_array_ = allocate_uint(coeff_base_mod_count_, pool_);
             for (size_t i = 0; i < coeff_base_mod_count_; i++)
@@ -209,8 +209,8 @@ namespace seal
                     coeff_products_array_.get() + (i * coeff_products_uint64_count), coeff_products_uint64_count,
                     coeff_base_array_[i], pool_);
                 if (!try_invert_uint_mod(
-                        inv_coeff_base_products_mod_coeff_array_[i], coeff_base_array_[i],
-                        inv_coeff_base_products_mod_coeff_array_[i]))
+                    inv_coeff_base_products_mod_coeff_array_[i], coeff_base_array_[i],
+                    inv_coeff_base_products_mod_coeff_array_[i]))
                 {
                     reset();
                     return;
@@ -227,8 +227,8 @@ namespace seal
                     aux_products_array.get() + (i * aux_products_uint64_count), aux_products_uint64_count,
                     aux_base_array_[i], pool_);
                 if (!try_invert_uint_mod(
-                        inv_aux_base_products_mod_aux_array_[i], aux_base_array_[i],
-                        inv_aux_base_products_mod_aux_array_[i]))
+                    inv_aux_base_products_mod_aux_array_[i], aux_base_array_[i],
+                    inv_aux_base_products_mod_aux_array_[i]))
                 {
                     reset();
                     return;

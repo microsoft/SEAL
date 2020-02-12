@@ -120,7 +120,18 @@ namespace seal
         // destination has the size of an RNS polynomial.
         void dot_product_ct_sk_array(const Ciphertext &encrypted, std::uint64_t *destination, MemoryPoolHandle pool);
 
-        void compose(const SEALContext::ContextData &context_data, std::uint64_t *value);
+        void compose(const SEALContext::ContextData &context_data, std::uint64_t *value)
+        {
+#ifdef SEAL_DEBUG
+            if (value == nullptr)
+            {
+                throw std::invalid_argument("input cannot be null");
+            }
+#endif
+            auto &parms = context_data.parms();
+            size_t coeff_count = parms.poly_modulus_degree();
+            context_data.crt_tool()->compose_array(value, coeff_count);
+        }
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);

@@ -7,8 +7,10 @@
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintcore.h"
+#include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <set>
 #include <stdexcept>
 #include <type_traits>
 
@@ -809,6 +811,82 @@ namespace seal
         inline void multiply_uint64_hw64(T operand1, S operand2, unsigned long long *hw64)
         {
             SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64);
+        }
+
+        template <typename T, typename = std::enable_if<is_uint64_v<T>>>
+        inline void multiply_many_uint64(T *operands, std::size_t count, T *result, MemoryPool &pool)
+        {
+#ifdef SEAL_DEBUG
+            if (operands == result)
+            {
+                throw std::invalid_argument("operands cannot point to same value as result");
+            }
+            if (!operands && count)
+            {
+                throw std::invalid_argument("operands");
+            }
+            if (!result && count)
+            {
+                throw std::invalid_argument("operands");
+            }
+#endif
+            // Nothing to do
+            if (!count)
+            {
+                return;
+            }
+
+            // Set result to operands[0]
+            set_uint(static_cast<std::uint64_t>(operands[0]), count, result);
+
+            // Compute product
+            auto temp_mpi(allocate_uint(count, pool));
+            for (std::size_t i = 1; i < count; i++)
+            {
+                multiply_uint_uint64(result, i, operands[i], i + 1, temp_mpi.get());
+                set_uint_uint(temp_mpi.get(), i + 1, result);
+            }
+        }
+
+        template <typename T, typename = std::enable_if<is_uint64_v<T>>>
+        inline void multiply_many_uint64_except(
+            T *operands, std::size_t count, std::size_t except, T *result, MemoryPool &pool)
+        {
+#ifdef SEAL_DEBUG
+            if (operands == result)
+            {
+                throw std::invalid_argument("operands cannot point to same value as result");
+            }
+            if (!operands)
+            {
+                throw std::invalid_argument("operands");
+            }
+            if (count < 2)
+            {
+                throw std::invalid_argument("count");
+            }
+            if (except >= count)
+            {
+                throw std::invalid_argument("except");
+            }
+            if (!result)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            // Set result to operands[0] unless except is 0
+            set_uint(except == 0 ? std::uint64_t(1) : static_cast<std::uint64_t>(operands[0]), count, result);
+
+            // Compute punctured product
+            auto temp_mpi(allocate_uint(count, pool));
+            for (std::size_t i = 1; i < count; i++)
+            {
+                if (i != except)
+                {
+                    multiply_uint_uint64(result, i, operands[i], i + 1, temp_mpi.get());
+                    set_uint_uint(temp_mpi.get(), i + 1, result);
+                }
+            }
         }
 
         void multiply_uint_uint(

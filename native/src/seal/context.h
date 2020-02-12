@@ -9,6 +9,7 @@
 #include "seal/util/baseconverter.h"
 #include "seal/util/pointer.h"
 #include "seal/util/smallntt.h"
+#include "seal/util/numth.h"
 #include <functional>
 #include <memory>
 #include <unordered_map>
@@ -206,6 +207,14 @@ namespace seal
             }
 
             /**
+            Returns a const reference to the CRT tool.
+            */
+            SEAL_NODISCARD inline auto &crt_tool() const noexcept
+            {
+                return crt_tool_;
+            }
+
+            /**
             Returns a const reference to the base converter.
             */
             SEAL_NODISCARD inline auto &base_converter() const noexcept
@@ -334,6 +343,8 @@ namespace seal
             EncryptionParameters parms_;
 
             EncryptionParameterQualifiers qualifiers_;
+
+            util::Pointer<util::CRTTool> crt_tool_;
 
             util::Pointer<util::BaseConverter> base_converter_;
 

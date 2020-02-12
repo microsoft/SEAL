@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/intarray.h"
 #include "seal/util/numth.h"
+#include "seal/util/uintarith.h"
+#include "seal/util/uintarithsmallmod.h"
 #include <cstdint>
 #include <numeric>
 #include "gtest/gtest.h"
 
+using namespace seal;
 using namespace seal::util;
 using namespace std;
 
@@ -146,6 +150,90 @@ namespace SEALTest
             ASSERT_EQ(123, accumulate(naf_vec.begin(), naf_vec.end(), 0));
             naf_vec = naf(-123);
             ASSERT_EQ(-123, accumulate(naf_vec.begin(), naf_vec.end(), 0));
+        }
+
+        TEST(NumberTheoryTest, CRTInitialize)
+        {
+            seal::util::CRTTool crt;
+
+            // Invalid configurations
+            crt.initialize({});
+            ASSERT_FALSE(crt.is_initialized());
+            crt.initialize({ 2 });
+            ASSERT_FALSE(crt.is_initialized());
+            crt.initialize({ 2, 2 });
+            ASSERT_FALSE(crt.is_initialized());
+            crt.initialize({ 3, 12 });
+            ASSERT_FALSE(crt.is_initialized());
+            crt.initialize({ 3, 4 });
+            ASSERT_FALSE(crt.is_initialized());
+            crt.initialize({ 3, 5, 7, 5 });
+            ASSERT_FALSE(crt.is_initialized());
+
+            // Valid configurations
+            crt.initialize({ 2, 3 });
+            ASSERT_TRUE(crt.is_initialized());
+            crt.initialize({ 3, 5 });
+            ASSERT_TRUE(crt.is_initialized());
+            crt.initialize({ 2, 3, 5, 7 });
+            ASSERT_TRUE(crt.is_initialized());
+            crt.initialize({ SmallModulus(13), SmallModulus(65537), get_prime(12, 20), get_prime(12, 30) });
+            ASSERT_TRUE(crt.is_initialized());
+        }
+
+        TEST(NumberTheoryTest, CRTComposeDecompose)
+        {
+            seal::util::CRTTool crt;
+
+            auto crt_test = [&crt](vector<uint64_t> in, vector<uint64_t> out) {
+                auto in_copy = in;
+                crt.decompose(in_copy.data());
+                ASSERT_TRUE(in_copy == out);
+                crt.compose(in_copy.data());
+                ASSERT_TRUE(in_copy == in);
+            };
+
+            ASSERT_TRUE(crt.initialize({ 3, 5 }));
+            crt_test({ 0, 0 }, { 0, 0 });
+            crt_test({ 1, 0 }, { 1, 1 });
+            crt_test({ 2, 0 }, { 2, 2 });
+            crt_test({ 3, 0 }, { 0, 3 });
+            crt_test({ 4, 0 }, { 1, 4 });
+            crt_test({ 5, 0 }, { 2, 0 });
+            crt_test({ 8, 0 }, { 2, 3 });
+            crt_test({ 12, 0 }, { 0, 2 });
+            crt_test({ 14, 0 }, { 2, 4 });
+
+            ASSERT_TRUE(crt.initialize({ 2, 3, 5 }));
+            crt_test({ 0, 0, 0 }, { 0, 0, 0 });
+            crt_test({ 1, 0, 0 }, { 1, 1, 1 });
+            crt_test({ 2, 0, 0 }, { 0, 2, 2 });
+            crt_test({ 3, 0, 0 }, { 1, 0, 3 });
+            crt_test({ 4, 0, 0 }, { 0, 1, 4 });
+            crt_test({ 5, 0, 0 }, { 1, 2, 0 });
+            crt_test({ 10, 0, 0 }, { 0, 1, 0 });
+            crt_test({ 11, 0, 0 }, { 1, 2, 1 });
+            crt_test({ 16, 0, 0 }, { 0, 1, 1 });
+            crt_test({ 27, 0, 0 }, { 1, 0, 2 });
+            crt_test({ 29, 0, 0 }, { 1, 2, 4 });
+
+            ASSERT_TRUE(crt.initialize({ 13, 37, 53, 97 }));
+            crt_test({ 0, 0, 0, 0 }, { 0, 0, 0, 0 });
+            crt_test({ 1, 0, 0, 0 }, { 1, 1, 1, 1 });
+            crt_test({ 2, 0, 0, 0 }, { 2, 2, 2, 2 });
+            crt_test({ 12, 0, 0, 0 }, { 12, 12, 12, 12 });
+            crt_test({ 321, 0, 0, 0 }, { 9, 25, 3, 30 });
+
+            // Large example
+            auto pool = MemoryManager::GetPool();
+            auto primes = get_primes(10, 60, 4);
+            vector<uint64_t> in_values{ 0xAAAAAAAAAAA, 0xBBBBBBBBBB, 0xCCCCCCCCCC, 0xDDDDDDDDDD };
+            ASSERT_TRUE(crt.initialize(primes));
+            crt_test(
+                in_values, { modulo_uint(in_values.data(), in_values.size(), primes[0], pool),
+                             modulo_uint(in_values.data(), in_values.size(), primes[1], pool),
+                             modulo_uint(in_values.data(), in_values.size(), primes[2], pool),
+                             modulo_uint(in_values.data(), in_values.size(), primes[3], pool) });
         }
     } // namespace util
 } // namespace SEALTest

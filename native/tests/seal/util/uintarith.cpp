@@ -1180,6 +1180,104 @@ namespace SEALTest
             ASSERT_EQ(334670460471ULL, result);
         }
 
+        TEST(UIntArith, MultiplyManyUInt64)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+
+            vector<uint64_t> in = { 0 };
+            vector<uint64_t> out = { 0 };
+            vector<uint64_t> expected = { 0 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 1 };
+            out = { 0 };
+            expected = { 1 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 0, 0, 0 };
+            out = { 0, 0, 0 };
+            expected = { 0, 0, 0 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64(in.data(), 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64(in.data(), 3, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 1, 1, 1 };
+            out = { 0, 0, 0 };
+            expected = { 1, 0, 0 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64(in.data(), 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64(in.data(), 3, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 10, 20, 40 };
+            out = { 0, 0, 0 };
+            expected = { 10, 0, 0 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 200, 0, 0 };
+            multiply_many_uint64(in.data(), 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 8000, 0, 0 };
+            multiply_many_uint64(in.data(), 3, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 0xF0F0F0F0F0F0F0, 0xBABABABABABABA, 0xCECECECECECECE };
+            out = { 0, 0, 0 };
+            expected = { 0xade881380d001140, 0xd4d54d49088bd2dd, 0x8df9832af0 };
+            multiply_many_uint64(in.data(), 3, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+        }
+
+        TEST(UIntArith, MultiplyManyUInt64Except)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+
+            vector<uint64_t> in = { 0, 0, 0 };
+            vector<uint64_t> out = { 0, 0, 0 };
+            vector<uint64_t> expected = { 0, 0, 0 };
+            multiply_many_uint64_except(in.data(), 2, 0, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64_except(in.data(), 2, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64_except(in.data(), 3, 0, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64_except(in.data(), 3, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64_except(in.data(), 3, 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 2, 3, 5 };
+            out = { 0, 0, 0 };
+            expected = { 3, 0, 0 };
+            multiply_many_uint64_except(in.data(), 2, 0, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 2, 0, 0 };
+            multiply_many_uint64_except(in.data(), 2, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 15, 0, 0 };
+            multiply_many_uint64_except(in.data(), 3, 0, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 10, 0, 0 };
+            multiply_many_uint64_except(in.data(), 3, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 6, 0, 0 };
+            multiply_many_uint64_except(in.data(), 3, 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 0xF0F0F0F0F0F0F0, 0xBABABABABABABA, 0xCECECECECECECE };
+            out = { 0, 0, 0 };
+            expected = { 0x0c6a88a6c4e30120, 0xc2a486684a2c, 0x0 };
+            multiply_many_uint64_except(in.data(), 3, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+        }
+
         TEST(UIntArith, MultiplyUIntUInt)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;

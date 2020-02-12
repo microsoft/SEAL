@@ -2,8 +2,10 @@
 // Licensed under the MIT license.
 
 #include "seal/util/numth.h"
+#include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
+#include <algorithm>
 #include <random>
 
 using namespace std;
@@ -12,6 +14,191 @@ namespace seal
 {
     namespace util
     {
+        bool CRTTool::initialize(const vector<SmallModulus> &prime_array)
+        {
+            prime_count_ = prime_array.size();
+
+            // Verify that the prime array has at least two primes
+            if (prime_count_ < 2)
+            {
+                reset();
+                return is_initialized_;
+            }
+
+            // Verify that the size is not too large
+            if (!product_fits_in(prime_count_, prime_count_))
+            {
+                reset();
+                return is_initialized_;
+            }
+
+            // Verify that inputs are primes
+            for (const auto &prime : prime_array)
+            {
+                if (!prime.is_prime())
+                {
+                    reset();
+                    return is_initialized_;
+                }
+            }
+
+            // Copy over the primes to local variables
+            prime_array_ = allocate<SmallModulus>(prime_count_, pool_);
+            copy(prime_array.cbegin(), prime_array.cend(), prime_array_.get());
+
+            auto prime_array_values = allocate<uint64_t>(prime_count_, pool_);
+            transform(prime_array.cbegin(), prime_array.cend(), prime_array_values.get(), [](const auto &prime) {
+                return prime.value();
+            });
+
+            // Create punctured products
+            punctured_product_array_ = allocate_zero_uint(prime_count_ * prime_count_, pool_);
+            for (size_t i = 0; i < prime_count_; i++)
+            {
+                multiply_many_uint64_except(
+                    prime_array_values.get(), prime_count_, i, punctured_product_array_.get() + (i * prime_count_),
+                    pool_);
+            }
+
+            // Compute the full product
+            auto temp_mpi(allocate_uint(prime_count_, pool_));
+            prime_product_ = allocate_uint(prime_count_, pool_);
+            multiply_uint_uint64(
+                punctured_product_array_.get(), prime_count_, prime_array_[0].value(), prime_count_, temp_mpi.get());
+            set_uint_uint(temp_mpi.get(), prime_count_, prime_product_.get());
+
+            // Compute inverses of punctured products mod primes
+            inv_punctured_product_mod_prime_array_ = allocate_uint(prime_count_, pool_);
+            for (size_t i = 0; i < prime_count_; i++)
+            {
+                inv_punctured_product_mod_prime_array_[i] = modulo_uint(
+                    punctured_product_array_.get() + (i * prime_count_), prime_count_, prime_array_[i], pool_);
+                if (!try_invert_uint_mod(
+                        inv_punctured_product_mod_prime_array_[i], prime_array_[i],
+                        inv_punctured_product_mod_prime_array_[i]))
+                {
+                    reset();
+                    return is_initialized_;
+                }
+            }
+
+            // Everything went well
+            is_initialized_ = true;
+            return is_initialized_;
+        }
+
+        void CRTTool::decompose(uint64_t *value) const
+        {
+            if (!is_initialized_)
+            {
+                throw invalid_argument("CRTTool is uninitialized");
+            }
+
+            // Decompose a single multi-precision integer into CRT factors
+            auto temp(allocate_uint(prime_count_, pool_));
+            set_uint_uint(value, prime_count_, temp.get());
+            for (size_t i = 0; i < prime_count_; i++)
+            {
+                value[i] = modulo_uint(temp.get(), prime_count_, prime_array_[i], pool_);
+            }
+        }
+
+        void CRTTool::decompose_array(uint64_t *value, size_t count) const
+        {
+            if (!is_initialized_)
+            {
+                throw invalid_argument("CRTTool is uninitialized");
+            }
+            if (!product_fits_in(count, prime_count_))
+            {
+                throw invalid_argument("count is too large");
+            }
+
+            // Decompose an array of multi-precision integers into an array of arrays,
+            // one per each CRT factor
+            auto temp(allocate_uint(count * prime_count_, pool_));
+            for (size_t i = 0; i < count; i++, value += prime_count_)
+            {
+                set_uint_uint(value, prime_count_, temp.get());
+                for (size_t j = 0; j < prime_count_; j++)
+                {
+                    value[i * prime_count_ + j] = modulo_uint(temp.get(), prime_count_, prime_array_[j], pool_);
+                }
+            }
+        }
+
+        void CRTTool::compose(uint64_t *value) const
+        {
+            if (!is_initialized_)
+            {
+                throw invalid_argument("CRTTool is uninitialized");
+            }
+
+            // Copy the value
+            auto temp_value(allocate_uint(prime_count_, pool_));
+            copy_n(value, prime_count_, temp_value.get());
+
+            // Clear the result
+            set_zero_uint(prime_count_, value);
+
+            // Compose an array of integers (one per CRT factor) into a single multi-precision integer
+            auto temp_mpi(allocate_uint(prime_count_, pool_));
+            for (size_t i = 0; i < prime_count_; i++)
+            {
+                uint64_t temp_prod =
+                    multiply_uint_uint_mod(temp_value[i], inv_punctured_product_mod_prime_array_[i], prime_array_[i]);
+                multiply_uint_uint64(
+                    punctured_product_array_.get() + (i * prime_count_), prime_count_, temp_prod, prime_count_,
+                    temp_mpi.get());
+                add_uint_uint_mod(temp_mpi.get(), value, prime_product_.get(), prime_count_, value);
+            }
+        }
+
+        void CRTTool::compose_array(uint64_t *value, size_t count) const
+        {
+            if (!is_initialized_)
+            {
+                throw invalid_argument("CRTTool is uninitialized");
+            }
+            if (!product_fits_in(count, prime_count_))
+            {
+                throw invalid_argument("count is too large");
+            }
+
+            // Compose an array of arrays of integers (one array per CRT factor) into
+            // a single array of multi-precision integers
+            auto temp_array(allocate_uint(count * prime_count_, pool_));
+
+            // Merge the coefficients first
+            for (size_t i = 0; i < count; i++)
+            {
+                for (size_t j = 0; j < prime_count_; j++)
+                {
+                    temp_array[j + (i * prime_count_)] = value[(j * count) + i];
+                }
+            }
+
+            // Clear the result
+            set_zero_uint(count * prime_count_, value);
+
+            auto temp_mpi(allocate_uint(prime_count_, pool_));
+            for (size_t i = 0; i < count; i++)
+            {
+                // Do CRT compose for each coefficient
+                for (size_t j = 0; j < prime_count_; j++)
+                {
+                    uint64_t temp_prod = multiply_uint_uint_mod(
+                        temp_array[(i * prime_count_) + j], inv_punctured_product_mod_prime_array_[j], prime_array_[j]);
+                    multiply_uint_uint64(
+                        punctured_product_array_.get() + (j * prime_count_), prime_count_, temp_prod, prime_count_,
+                        temp_mpi.get());
+                    add_uint_uint_mod(
+                        temp_mpi.get(), value + (i * prime_count_), prime_product_.get(), prime_count_,
+                        value + (i * prime_count_));
+                }
+            }
+        }
+
         vector<uint64_t> conjugate_classes(uint64_t modulus, uint64_t subgroup_generator)
         {
             if (!product_fits_in(modulus, subgroup_generator) || !fits_in<size_t>(modulus))

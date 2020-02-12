@@ -3,11 +3,13 @@
 
 #pragma once
 
+#include "seal/memorymanager.h"
 #include "seal/smallmodulus.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
-#include <algorithm>
+#include "seal/util/pointer.h"
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <stdexcept>
 #include <tuple>
@@ -17,6 +19,73 @@ namespace seal
 {
     namespace util
     {
+        class CRTTool
+        {
+        public:
+            CRTTool(MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
+            {
+                if (!pool_)
+                {
+                    throw std::invalid_argument("pool is uninitialized");
+                }
+            }
+
+            CRTTool(const std::vector<SmallModulus> &prime_array, MemoryPoolHandle pool = MemoryManager::GetPool())
+                : CRTTool(std::move(pool))
+            {
+                initialize(prime_array);
+            }
+
+            CRTTool(const CRTTool &copy) = delete;
+
+            CRTTool &operator=(const CRTTool &assign) = delete;
+
+            void reset()
+            {
+                prime_count_ = 0;
+                prime_array_.release();
+                prime_product_.release();
+                punctured_product_array_.release();
+                inv_punctured_product_mod_prime_array_.release();
+                is_initialized_ = false;
+            }
+
+            SEAL_NODISCARD inline bool is_initialized() noexcept
+            {
+                return is_initialized_;
+            }
+
+            SEAL_NODISCARD inline operator bool() noexcept
+            {
+                return is_initialized();
+            }
+
+            bool initialize(const std::vector<SmallModulus> &prime_array);
+
+            void decompose(std::uint64_t *value) const;
+
+            void decompose_array(std::uint64_t *value, std::size_t count) const;
+
+            void compose(std::uint64_t *value) const;
+
+            void compose_array(std::uint64_t *value, std::size_t count) const;
+
+        private:
+            MemoryPoolHandle pool_;
+
+            bool is_initialized_ = false;
+
+            std::size_t prime_count_ = 0;
+
+            Pointer<SmallModulus> prime_array_;
+
+            Pointer<std::uint64_t> prime_product_;
+
+            Pointer<std::uint64_t> punctured_product_array_;
+
+            Pointer<std::uint64_t> inv_punctured_product_mod_prime_array_;
+        };
+
         SEAL_NODISCARD inline std::vector<int> naf(int value)
         {
             std::vector<int> res;
