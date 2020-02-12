@@ -159,8 +159,6 @@ namespace SEALTest
             // Invalid configurations
             crt.initialize({});
             ASSERT_FALSE(crt.is_initialized());
-            crt.initialize({ 2 });
-            ASSERT_FALSE(crt.is_initialized());
             crt.initialize({ 2, 2 });
             ASSERT_FALSE(crt.is_initialized());
             crt.initialize({ 3, 12 });
@@ -171,6 +169,8 @@ namespace SEALTest
             ASSERT_FALSE(crt.is_initialized());
 
             // Valid configurations
+            crt.initialize({ 2 });
+            ASSERT_TRUE(crt.is_initialized());
             crt.initialize({ 2, 3 });
             ASSERT_TRUE(crt.is_initialized());
             crt.initialize({ 3, 5 });
@@ -192,6 +192,17 @@ namespace SEALTest
                 crt.compose(in_copy.data());
                 ASSERT_TRUE(in_copy == in);
             };
+
+            ASSERT_TRUE(crt.initialize({ 2 }));
+            crt_test({ 0 }, { 0 });
+            crt_test({ 1 }, { 1 });
+
+            ASSERT_TRUE(crt.initialize({ 5 }));
+            crt_test({ 0 }, { 0 });
+            crt_test({ 1 }, { 1 });
+            crt_test({ 2 }, { 2 });
+            crt_test({ 3 }, { 3 });
+            crt_test({ 4 }, { 4 });
 
             ASSERT_TRUE(crt.initialize({ 3, 5 }));
             crt_test({ 0, 0 }, { 0, 0 });

@@ -397,53 +397,6 @@ namespace seal
         }
 
     private:
-        // This is the same function as in evaluator.h
-        inline void decompose_single_coeff(
-            const SEALContext::ContextData &context_data, const std::uint64_t *value, std::uint64_t *destination,
-            util::MemoryPool &pool)
-        {
-            auto &parms = context_data.parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            std::size_t coeff_mod_count = coeff_modulus.size();
-#ifdef SEAL_DEBUG
-            if (value == nullptr)
-            {
-                throw std::invalid_argument("value cannot be null");
-            }
-            if (destination == nullptr)
-            {
-                throw std::invalid_argument("destination cannot be null");
-            }
-            if (destination == value)
-            {
-                throw std::invalid_argument("value cannot be the same as destination");
-            }
-#endif
-            if (coeff_mod_count == 1)
-            {
-                util::set_uint_uint(value, coeff_mod_count, destination);
-                return;
-            }
-
-            auto value_copy(util::allocate_uint(coeff_mod_count, pool));
-            for (std::size_t j = 0; j < coeff_mod_count; j++)
-            {
-                // destination[j] = util::modulo_uint(
-                //    value, coeff_mod_count, coeff_modulus_[j], pool);
-
-                // Manually inlined for efficiency
-                // Make a fresh copy of value
-                util::set_uint_uint(value, coeff_mod_count, value_copy.get());
-
-                // Starting from the top, reduce always 128-bit blocks
-                for (std::size_t k = coeff_mod_count - 1; k--;)
-                {
-                    value_copy[k] = util::barrett_reduce_128(value_copy.get() + k, coeff_modulus[j]);
-                }
-                destination[j] = value_copy[0];
-            }
-        }
-
         template <
             typename T, typename = std::enable_if_t<
                             std::is_same<std::remove_cv_t<T>, double>::value ||
@@ -616,7 +569,6 @@ namespace seal
             {
                 // Slow case
                 auto coeffu(util::allocate_uint(coeff_mod_count, pool));
-                auto decomp_coeffu(util::allocate_uint(coeff_mod_count, pool));
                 for (std::size_t i = 0; i < n; i++)
                 {
                     double coeffd = std::round(conj_values[i].real());
@@ -633,7 +585,7 @@ namespace seal
                     }
 
                     // Next decompose this coefficient
-                    decompose_single_coeff(context_data, coeffu.get(), decomp_coeffu.get(), pool);
+                    context_data.crt_tool()->decompose(coeffu.get());
 
                     // Finally replace the sign if necessary
                     if (is_negative)
@@ -641,14 +593,14 @@ namespace seal
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
                             destination[i + (j * coeff_count)] =
-                                util::negate_uint_mod(decomp_coeffu[j], coeff_modulus[j]);
+                                util::negate_uint_mod(coeffu[j], coeff_modulus[j]);
                         }
                     }
                     else
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] = decomp_coeffu[j];
+                            destination[i + (j * coeff_count)] = coeffu[j];
                         }
                     }
                 }

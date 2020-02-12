@@ -267,16 +267,16 @@ namespace seal
                 return *value % modulus.value();
             }
 
-            auto value_copy(allocate_uint(value_uint64_count, pool));
-            set_uint_uint(value, value_uint64_count, value_copy.get());
-
-            // Starting from the top, reduce always 128-bit blocks
-            for (std::size_t i = value_uint64_count - 1; i--;)
+            // Temporary space for 128-bit reductions
+            uint64_t temp[2]{ 0, value[value_uint64_count - 1] };
+            for (size_t k = value_uint64_count - 1; k--;)
             {
-                value_copy[i] = barrett_reduce_128(value_copy.get() + i, modulus);
+                temp[0] = value[k];
+                temp[1] = barrett_reduce_128(temp, modulus);
             }
 
-            return value_copy[0];
+            // Save the result modulo i-th prime
+            return temp[1];
         }
 
         inline bool try_invert_uint_mod(std::uint64_t operand, const SmallModulus &modulus, std::uint64_t &result)
