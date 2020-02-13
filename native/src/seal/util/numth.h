@@ -62,13 +62,13 @@ namespace seal
 
             bool initialize(const std::vector<SmallModulus> &prime_array);
 
-            void decompose(std::uint64_t *value) const;
+            void decompose(std::uint64_t *value, MemoryPoolHandle pool) const;
 
-            void decompose_array(std::uint64_t *value, std::size_t count) const;
+            void decompose_array(std::uint64_t *value, std::size_t count, MemoryPoolHandle pool) const;
 
-            void compose(std::uint64_t *value) const;
+            void compose(std::uint64_t *value, MemoryPoolHandle pool) const;
 
-            void compose_array(std::uint64_t *value, std::size_t count) const;
+            void compose_array(std::uint64_t *value, std::size_t count, MemoryPoolHandle pool) const;
 
         private:
             MemoryPoolHandle pool_;

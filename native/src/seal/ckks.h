@@ -585,15 +585,14 @@ namespace seal
                     }
 
                     // Next decompose this coefficient
-                    context_data.crt_tool()->decompose(coeffu.get());
+                    context_data.crt_tool()->decompose(coeffu.get(), pool);
 
                     // Finally replace the sign if necessary
                     if (is_negative)
                     {
                         for (std::size_t j = 0; j < coeff_mod_count; j++)
                         {
-                            destination[i + (j * coeff_count)] =
-                                util::negate_uint_mod(coeffu[j], coeff_modulus[j]);
+                            destination[i + (j * coeff_count)] = util::negate_uint_mod(coeffu[j], coeff_modulus[j]);
                         }
                     }
                     else
@@ -640,29 +639,23 @@ namespace seal
                 throw std::invalid_argument("pool is uninitialized");
             }
 
-            auto context_data_ptr = context_->get_context_data(plain.parms_id());
-            auto &parms = context_data_ptr->parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            std::size_t coeff_mod_count = coeff_modulus.size();
+            auto &context_data = *context_->get_context_data(plain.parms_id());
+            auto &parms = context_data.parms();
+            std::size_t coeff_mod_count = parms.coeff_modulus().size();
             std::size_t coeff_count = parms.poly_modulus_degree();
             std::size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_mod_count);
 
-            auto &small_ntt_tables = context_data_ptr->small_ntt_tables();
+            auto &small_ntt_tables = context_data.small_ntt_tables();
 
             // Check that scale is positive and not too large
             if (plain.scale() <= 0 ||
-                (static_cast<int>(log2(plain.scale())) >= context_data_ptr->total_coeff_modulus_bit_count()))
+                (static_cast<int>(log2(plain.scale())) >= context_data.total_coeff_modulus_bit_count()))
             {
                 throw std::invalid_argument("scale out of bounds");
             }
 
-            auto decryption_modulus = context_data_ptr->total_coeff_modulus();
-            auto upper_half_threshold = context_data_ptr->upper_half_threshold();
-
-            auto &inv_coeff_products_mod_coeff_array =
-                context_data_ptr->base_converter()->get_inv_coeff_mod_coeff_array();
-            auto coeff_products_array = context_data_ptr->base_converter()->get_coeff_products_array();
-
+            auto decryption_modulus = context_data.total_coeff_modulus();
+            auto upper_half_threshold = context_data.upper_half_threshold();
             int logn = util::get_power_of_two(coeff_count);
 
             // Quick sanity check
@@ -674,14 +667,8 @@ namespace seal
             double inv_scale = double(1.0) / plain.scale();
 
             // Create mutable copy of input
-            auto plain_copy = util::allocate_uint(rns_poly_uint64_count, pool);
+            auto plain_copy(util::allocate_uint(rns_poly_uint64_count, pool));
             util::set_uint_uint(plain.data(), rns_poly_uint64_count, plain_copy.get());
-
-            // Array to keep number bigger than std::uint64_t
-            auto temp(util::allocate_uint(coeff_mod_count, pool));
-
-            // destination mod q
-            auto wide_tmp_dest(util::allocate_zero_uint(rns_poly_uint64_count, pool));
 
             // Transform each polynomial from NTT domain
             for (std::size_t i = 0; i < coeff_mod_count; i++)
@@ -689,40 +676,29 @@ namespace seal
                 util::inverse_ntt_negacyclic_harvey(plain_copy.get() + (i * coeff_count), small_ntt_tables[i]);
             }
 
-            auto res = util::allocate<std::complex<double>>(coeff_count, pool);
+            // CRT-compose the polynomial
+            context_data.crt_tool()->compose_array(plain_copy.get(), coeff_count, pool);
 
+            // Create floating-point representations of the multi-precision integer coefficients
             double two_pow_64 = std::pow(2.0, 64);
+            auto res(util::allocate<std::complex<double>>(coeff_count, pool));
             for (std::size_t i = 0; i < coeff_count; i++)
             {
-                for (std::size_t j = 0; j < coeff_mod_count; j++)
-                {
-                    std::uint64_t tmp = util::multiply_uint_uint_mod(
-                        plain_copy[(j * coeff_count) + i],
-                        inv_coeff_products_mod_coeff_array[j], // (qi/q * plain[i]) mod qi
-                        coeff_modulus[j]);
-                    util::multiply_uint_uint64(
-                        coeff_products_array + (j * coeff_mod_count), coeff_mod_count, tmp, coeff_mod_count,
-                        temp.get());
-                    util::add_uint_uint_mod(
-                        temp.get(), wide_tmp_dest.get() + (i * coeff_mod_count), decryption_modulus, coeff_mod_count,
-                        wide_tmp_dest.get() + (i * coeff_mod_count));
-                }
-
                 res[i] = 0.0;
                 if (util::is_greater_than_or_equal_uint_uint(
-                        wide_tmp_dest.get() + (i * coeff_mod_count), upper_half_threshold, coeff_mod_count))
+                        plain_copy.get() + (i * coeff_mod_count), upper_half_threshold, coeff_mod_count))
                 {
                     double scaled_two_pow_64 = inv_scale;
                     for (std::size_t j = 0; j < coeff_mod_count; j++, scaled_two_pow_64 *= two_pow_64)
                     {
-                        if (wide_tmp_dest[i * coeff_mod_count + j] > decryption_modulus[j])
+                        if (plain_copy[i * coeff_mod_count + j] > decryption_modulus[j])
                         {
-                            auto diff = wide_tmp_dest[i * coeff_mod_count + j] - decryption_modulus[j];
+                            auto diff = plain_copy[i * coeff_mod_count + j] - decryption_modulus[j];
                             res[i] += diff ? static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                         else
                         {
-                            auto diff = decryption_modulus[j] - wide_tmp_dest[i * coeff_mod_count + j];
+                            auto diff = decryption_modulus[j] - plain_copy[i * coeff_mod_count + j];
                             res[i] -= diff ? static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                     }
@@ -732,7 +708,7 @@ namespace seal
                     double scaled_two_pow_64 = inv_scale;
                     for (std::size_t j = 0; j < coeff_mod_count; j++, scaled_two_pow_64 *= two_pow_64)
                     {
-                        auto curr_coeff = wide_tmp_dest[i * coeff_mod_count + j];
+                        auto curr_coeff = plain_copy[i * coeff_mod_count + j];
                         res[i] += curr_coeff ? static_cast<double>(curr_coeff) * scaled_two_pow_64 : 0.0;
                     }
                 }
@@ -743,6 +719,7 @@ namespace seal
                 // res[i] = res_accum * inv_scale;
             }
 
+            // Butterfly to obtain final result
             std::size_t tt = coeff_count;
             for (int i = 0; i < logn; i++)
             {

@@ -91,7 +91,7 @@ namespace seal
             return is_initialized_;
         }
 
-        void CRTTool::decompose(uint64_t *value) const
+        void CRTTool::decompose(uint64_t *value, MemoryPoolHandle pool) const
         {
             if (!is_initialized_)
             {
@@ -106,11 +106,15 @@ namespace seal
             {
                 throw invalid_argument("value is too large");
             }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
+            }
 #endif
             if (prime_count_ > 1)
             {
                 // Copy the value
-                auto value_copy(allocate_uint(prime_count_, pool_));
+                auto value_copy(allocate_uint(prime_count_, pool));
                 set_uint_uint(value, prime_count_, value_copy.get());
 
                 // Temporary space for 128-bit reductions
@@ -130,7 +134,7 @@ namespace seal
             }
         }
 
-        void CRTTool::decompose_array(uint64_t *value, size_t count) const
+        void CRTTool::decompose_array(uint64_t *value, size_t count, MemoryPoolHandle pool) const
         {
             if (!is_initialized_)
             {
@@ -140,6 +144,10 @@ namespace seal
             if (!value)
             {
                 throw invalid_argument("value cannot be null");
+            }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
             }
 #endif
             if (prime_count_ > 1)
@@ -151,7 +159,7 @@ namespace seal
 
                 // Decompose an array of multi-precision integers into an array of arrays,
                 // one per each CRT factor
-                auto value_copy(allocate_uint(count * prime_count_, pool_));
+                auto value_copy(allocate_uint(count * prime_count_, pool));
                 for (size_t i = 0; i < count; i++, value += prime_count_)
                 {
                     set_uint_uint(value, prime_count_, value_copy.get());
@@ -174,7 +182,7 @@ namespace seal
             }
         }
 
-        void CRTTool::compose(uint64_t *value) const
+        void CRTTool::compose(uint64_t *value, MemoryPoolHandle pool) const
         {
             if (!is_initialized_)
             {
@@ -189,18 +197,22 @@ namespace seal
             {
                 throw invalid_argument("value is too large");
             }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
+            }
 #endif
             if (prime_count_ > 1)
             {
                 // Copy the value
-                auto temp_value(allocate_uint(prime_count_, pool_));
+                auto temp_value(allocate_uint(prime_count_, pool));
                 copy_n(value, prime_count_, temp_value.get());
 
                 // Clear the result
                 set_zero_uint(prime_count_, value);
 
                 // Compose an array of integers (one per CRT factor) into a single multi-precision integer
-                auto temp_mpi(allocate_uint(prime_count_, pool_));
+                auto temp_mpi(allocate_uint(prime_count_, pool));
                 for (size_t i = 0; i < prime_count_; i++)
                 {
                     uint64_t temp_prod = multiply_uint_uint_mod(
@@ -213,7 +225,7 @@ namespace seal
             }
         }
 
-        void CRTTool::compose_array(uint64_t *value, size_t count) const
+        void CRTTool::compose_array(uint64_t *value, size_t count, MemoryPoolHandle pool) const
         {
             if (!is_initialized_)
             {
@@ -223,6 +235,10 @@ namespace seal
             if (!value)
             {
                 throw invalid_argument("value cannot be null");
+            }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
             }
 #endif
             if (prime_count_ > 1)
@@ -234,7 +250,7 @@ namespace seal
 
                 // Compose an array of arrays of integers (one array per CRT factor) into
                 // a single array of multi-precision integers
-                auto temp_array(allocate_uint(count * prime_count_, pool_));
+                auto temp_array(allocate_uint(count * prime_count_, pool));
 
                 // Merge the coefficients first
                 for (size_t i = 0; i < count; i++)
@@ -248,7 +264,7 @@ namespace seal
                 // Clear the result
                 set_zero_uint(count * prime_count_, value);
 
-                auto temp_mpi(allocate_uint(prime_count_, pool_));
+                auto temp_mpi(allocate_uint(prime_count_, pool));
                 for (size_t i = 0; i < count; i++)
                 {
                     // Do CRT compose for each coefficient

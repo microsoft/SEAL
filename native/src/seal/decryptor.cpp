@@ -335,8 +335,8 @@ namespace seal
                 noise_poly.get() + i * coeff_count);
         }
 
-        // Compose the noise
-        compose(context_data, noise_poly.get());
+        // CRT-compose the noise
+        context_data.crt_tool()->compose_array(noise_poly.get(), coeff_count, pool_);
 
         // Next we compute the infinity norm mod parms.coeff_modulus()
         poly_infty_norm_coeffmod(

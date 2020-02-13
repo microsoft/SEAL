@@ -168,7 +168,6 @@ namespace seal
         {
             // Slow case
             auto coeffu(allocate_uint(coeff_mod_count, pool));
-            auto decomp_coeffu(allocate_uint(coeff_mod_count, pool));
 
             // We are at this point guaranteed to fit in the allocated space
             set_zero_uint(coeff_mod_count, coeffu.get());
@@ -180,7 +179,7 @@ namespace seal
             }
 
             // Next decompose this coefficient
-            decompose_single_coeff(context_data, coeffu.get(), decomp_coeffu.get(), pool);
+            context_data.crt_tool()->decompose(coeffu.get(), pool);
 
             // Finally replace the sign if necessary
             if (is_negative)
@@ -189,14 +188,14 @@ namespace seal
                 {
                     fill_n(
                         destination.data() + (j * coeff_count), coeff_count,
-                        negate_uint_mod(decomp_coeffu[j], coeff_modulus[j]));
+                        negate_uint_mod(coeffu[j], coeff_modulus[j]));
                 }
             }
             else
             {
                 for (size_t j = 0; j < coeff_mod_count; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count, decomp_coeffu[j]);
+                    fill_n(destination.data() + (j * coeff_count), coeff_count, coeffu[j]);
                 }
             }
         }

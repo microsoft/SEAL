@@ -184,12 +184,13 @@ namespace SEALTest
         TEST(NumberTheoryTest, CRTComposeDecompose)
         {
             seal::util::CRTTool crt;
+            MemoryPoolHandle pool = MemoryManager::GetPool();
 
-            auto crt_test = [&crt](vector<uint64_t> in, vector<uint64_t> out) {
+            auto crt_test = [&crt, &pool](vector<uint64_t> in, vector<uint64_t> out) {
                 auto in_copy = in;
-                crt.decompose(in_copy.data());
+                crt.decompose(in_copy.data(), pool);
                 ASSERT_TRUE(in_copy == out);
-                crt.compose(in_copy.data());
+                crt.compose(in_copy.data(), pool);
                 ASSERT_TRUE(in_copy == in);
             };
 
@@ -236,7 +237,6 @@ namespace SEALTest
             crt_test({ 321, 0, 0, 0 }, { 9, 25, 3, 30 });
 
             // Large example
-            auto pool = MemoryManager::GetPool();
             auto primes = get_primes(10, 60, 4);
             vector<uint64_t> in_values{ 0xAAAAAAAAAAA, 0xBBBBBBBBBB, 0xCCCCCCCCCC, 0xDDDDDDDDDD };
             ASSERT_TRUE(crt.initialize(primes));
