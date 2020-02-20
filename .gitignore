@@ -17,7 +17,7 @@ native/src/gsl
 .local_vimrc
 **/*.code-workspace
 **/.vscode
-*/build
+**/build
 **/*.build
 **/compile_commands.json
 **/.DS_Store
