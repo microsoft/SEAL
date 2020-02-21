@@ -6,11 +6,13 @@
 
 - New generic class `Serializable` wraps `Ciphertext`, `RelinKeys`, and `GaloisKeys` objects to provide a more flexible approach to the functionality provided in release 3.4 by `KeyGenerator::[relin|galois]_keys_save` and `Encryptor::encrypt_[zero_]symmetric_save` functions. Specifically, these functions have been removed and replaced with overloads of `KeyGenerator::[relin|galois]_keys` and `Encryptor::encrypt_[zero_]symmetric` that return `Serializable` objects. The `Serializable` objects cannot be used directly by Microsoft SEAL, and are instead intended to be serialized, which activates the compression functionalities introduced earlier in release 3.4.
 - Added examples for serialization.
+- `SEAL_POLY_MOD_DEGREE_MAX` is now 131072.
 
 ### New files
 
 - [native/src/seal/serializable.h](native/src/seal/serializable.h)
 - [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
+- [native/src/seal/util/crootsquad.h](native/src/seal/util/crootsquad.h)
 - [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
 - [dotnet/src/Serializable.cs](dotnet/src/Serializable.cs)
 - [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
@@ -27,6 +29,7 @@
 - Moved `dotnet/native/` to be under `native/src/c/`. The C export library in this directory can be used to build wrappers for other languages also -- not just .NET.
 - Changed the CMake file structure. Targets available are now: `SEAL::seal` (static library), `SEAL::seal_shared` (shared library), `SEAL::sealc` (C export library).
 - There is now a `.clang-format` for automated formatting of C++ (`.cpp` and `.h`) files. A command line tool is added to `tools/scripts/clang-format-all.sh` for easy formatting. This is compatible with clang-format-9 and above. Support for C# is not yet ideal.
+- Precomputed high-precision 131072-th complex roots are kept in `native/src/seal/util/crootsquad.h` as a backup.
 
 ## Version 3.4.5
 
