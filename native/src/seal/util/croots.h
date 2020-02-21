@@ -24,7 +24,6 @@ namespace seal
             SEAL_NODISCARD std::complex<double> get_root(std::size_t index) const;
 
         private:
-
             static constexpr double PI_ = 3.1415926535897932384626433832795028842;
 
             // Contains 0~(n/8-1)-th powers of the n-th primitive root.

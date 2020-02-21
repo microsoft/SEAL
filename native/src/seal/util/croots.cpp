@@ -10,7 +10,8 @@ namespace seal
 {
     namespace util
     {
-        ComplexRoots::ComplexRoots(size_t degree_of_roots, MemoryPoolHandle pool) : pool_(std::move(pool)), degree_of_roots_(degree_of_roots)
+        ComplexRoots::ComplexRoots(size_t degree_of_roots, MemoryPoolHandle pool)
+            : pool_(std::move(pool)), degree_of_roots_(degree_of_roots)
         {
 #ifdef SEAL_DEBUG
             int power = util::get_power_of_two(degree_of_roots_);
@@ -36,7 +37,9 @@ namespace seal
         SEAL_NODISCARD complex<double> ComplexRoots::get_root(size_t index) const
         {
             index &= degree_of_roots_ - 1;
-            auto mirror = [](complex<double> a) { return complex<double>{a.imag(), a.real()}; };
+            auto mirror = [](complex<double> a) {
+                return complex<double>{ a.imag(), a.real() };
+            };
 
             // This express the 8-fold symmetry of all n-th roots.
             if (index <= degree_of_roots_ / 8)
@@ -49,10 +52,15 @@ namespace seal
             }
             else if (index <= degree_of_roots_ / 2)
             {
-                return mirror(conj(get_root(index - degree_of_roots_ / 4)));
+                return -conj(get_root(degree_of_roots_ / 2 - index));
             }
-            else {
+            else if (index <= 3 * degree_of_roots_ / 4)
+            {
                 return -get_root(index - degree_of_roots_ / 2);
+            }
+            else
+            {
+                return conj(get_root(degree_of_roots_ - index));
             }
         }
     } // namespace util

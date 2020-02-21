@@ -70,8 +70,8 @@ namespace seal
         }
         else if (m == 4)
         {
-            roots_[0] = {0, 1};
-            roots_[1] = {0, -1};
+            roots_[0] = { 0, 1 };
+            roots_[1] = { 0, -1 };
             inv_roots_[0] = conj(roots_[0]);
             inv_roots_[1] = conj(roots_[1]);
         }
