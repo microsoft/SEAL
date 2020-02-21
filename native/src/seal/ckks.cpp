@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 #include "seal/ckks.h"
-#include "seal/util/croots.h"
 #include <cinttypes>
 #include <limits>
 #include <random>
@@ -56,12 +55,25 @@ namespace seal
             pos &= (m - 1);
         }
 
+        // we need 0~(n-1)-th powers of the primitive 2n-th root, m = 2n
         roots_ = allocate<complex<double>>(coeff_count, pool_);
         inv_roots_ = allocate<complex<double>>(coeff_count, pool_);
-        for (size_t i = 0; i < coeff_count; i++)
+        // 0~(n-1)-th powers of the primitive 2n-th root have 4-fold symmetry
+        if (m >= 8)
         {
-            roots_[i] = ComplexRoots::get_root(reverse_bits(i, logn), static_cast<size_t>(m));
-            inv_roots_[i] = conj(roots_[i]);
+            complex_roots_ = make_shared<util::ComplexRoots>(util::ComplexRoots(static_cast<size_t>(m), pool_));
+            for (size_t i = 0; i < coeff_count; i++)
+            {
+                roots_[i] = complex_roots_->get_root(static_cast<size_t>(reverse_bits(i, logn)));
+                inv_roots_[i] = conj(roots_[i]);
+            }
+        }
+        else if (m == 4)
+        {
+            roots_[0] = {0, 1};
+            roots_[1] = {0, -1};
+            inv_roots_[0] = conj(roots_[0]);
+            inv_roots_[1] = conj(roots_[1]);
         }
     }
 

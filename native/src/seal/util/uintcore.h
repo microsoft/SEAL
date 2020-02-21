@@ -328,6 +328,9 @@ namespace seal
             }
         }
 
+        /**
+        If the value is a power of two, return the power; otherwise, return -1.
+        */
         SEAL_NODISCARD inline int get_power_of_two(std::uint64_t value)
         {
             if (value == 0 || (value & (value - 1)) != 0)

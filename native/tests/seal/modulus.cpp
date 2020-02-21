@@ -18,7 +18,7 @@ namespace SEALTest
         ASSERT_THROW(auto modulus = CoeffModulus::Create(1, { 2 }), invalid_argument);
 
         // Too large poly_modulus_degree
-        ASSERT_THROW(auto modulus = CoeffModulus::Create(65536, { 30 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(262144, { 30 }), invalid_argument);
 
         // Invalid poly_modulus_degree
         ASSERT_THROW(auto modulus = CoeffModulus::Create(1023, { 20 }), invalid_argument);

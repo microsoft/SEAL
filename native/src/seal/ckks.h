@@ -6,6 +6,7 @@
 #include "seal/context.h"
 #include "seal/plaintext.h"
 #include "seal/util/common.h"
+#include "seal/util/croots.h"
 #include "seal/util/defines.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
@@ -837,6 +838,8 @@ namespace seal
         std::shared_ptr<SEALContext> context_{ nullptr };
 
         std::size_t slots_;
+
+        std::shared_ptr<util::ComplexRoots> complex_roots_;
 
         util::Pointer<std::complex<double>> roots_;
 
