@@ -104,7 +104,7 @@ steps:
     InputType: Basic
     AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\native\bin\x64\${{ parameters.path }}\*.exe'
     AnalyzeSymPath: '**\bin\**\*.pdb'
-  enabled: false
+  enabled: true
 
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
   displayName: 'Component Detection'
@@ -113,8 +113,8 @@ steps:
   displayName: 'Upload Scan Results for Analysis'
   inputs:
     uploadUrl: 'https://airbuildscan.azurewebsites.net/api/Upload'
-    areaPathParent: SEAL
-  enabled: false
+    areaPathParent: 'SEAL'
+  enabled: true
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
   displayName: 'Publish Security Analysis Logs'
