@@ -3,7 +3,7 @@ steps:
   displayName: 'CMake SEAL'
   inputs:
     workingDirectory: '$(Build.SourcesDirectory)'
-    cmakeArgs: '-DCMAKE_BUILD_TYPE=${{ parameters.configuration }} -DSEAL_BUILD_TESTS=ON -DSEAL_BUILD_SEAL_C=ON .'
+    cmakeArgs: '-DCMAKE_BUILD_TYPE=${{ parameters.configuration }} -DSEAL_BUILD_TESTS=ON -DSEAL_BUILD_SEAL_C=ON -DSEAL_BUILD_EXAMPLES=ON .'
 
 - script: |
       cd $BUILD_SOURCESDIRECTORY
