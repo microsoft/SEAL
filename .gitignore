@@ -21,6 +21,7 @@ native/src/seal/util/config.h
 **/compile_commands.json
 **/.DS_Store
 **/GSL
+**/*.args.json
 thirdparty/zlib/*
 !thirdparty/zlib/CMakeLists.txt
 thirdparty/msgsl/*

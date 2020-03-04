@@ -524,7 +524,6 @@ install(
     FILES
         ${SEAL_CONFIG_FILENAME}
         ${SEAL_CONFIG_VERSION_FILENAME}
-        ${MSGSL_FIND_MODULE_PATH}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
 # We export SEALTargets from the build tree so it can be used by other projects
@@ -555,9 +554,9 @@ set(SEAL_BUILD_TESTS_OPTION_STR "Build C++ tests for Microsoft SEAL")
 option(SEAL_BUILD_TESTS ${SEAL_BUILD_TESTS_OPTION_STR} OFF)
 
 if(SEAL_BUILD_TESTS)
-    add_executable(sealtests)
-    add_subdirectory(native/tests)
-    target_link_libraries(sealtests PRIVATE seal gtest)
+    add_executable(sealtest)
+    add_subdirectory(native/tests/seal)
+    target_link_libraries(sealtest PRIVATE seal gtest)
 endif()
 
 #######################################

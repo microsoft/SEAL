@@ -5,7 +5,7 @@
     <Authors>Microsoft Research</Authors>
     <Company>Microsoft Corporation</Company>
     <Description>.NET wrapper library for Microsoft SEAL</Description>
-    <Copyright>Microsoft Corporation 2019</Copyright>
+    <Copyright>Microsoft Corporation 2020</Copyright>
     <SignAssembly Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</SignAssembly>
     <AssemblyOriginatorKeyFile Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">SEALNetCert.snk</AssemblyOriginatorKeyFile>
     <DelaySign Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</DelaySign>

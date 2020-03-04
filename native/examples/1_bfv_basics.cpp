@@ -124,12 +124,7 @@ void example_bfv_basics()
     object. This is a heavy class that checks the validity and properties of the
     parameters we just set.
     */
-
-    // Guaranteed secure parameters
     auto context = SEALContext::Create(parms);
-
-    // Insecure parameters
-    auto context = SEALContext::Create(parms, true sec_level_type::none);
 
     /*
     Print the parameters that we have chosen.

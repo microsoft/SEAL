@@ -14,9 +14,9 @@ namespace seal
 {
     namespace util
     {
-        bool CRTTool::initialize(const vector<SmallModulus> &prime_array)
+        bool CRTTool::initialize(const SmallModulus *prime_array, size_t prime_count)
         {
-            prime_count_ = prime_array.size();
+            prime_count_ = prime_count;
 
             // Verify that the prime array has at least one prime
             if (!prime_count_)
@@ -25,13 +25,22 @@ namespace seal
                 return is_initialized_;
             }
 
-            // Verify that inputs are primes
-            for (const auto &prime : prime_array)
+            // Verify that inputs are primes and coprime
+            for (size_t i = 0; i < prime_count_; i++)
             {
-                if (!prime.is_prime())
+                if (!prime_array[i].is_prime())
                 {
                     reset();
                     return is_initialized_;
+                }
+
+                for (size_t j = 0; j < i; j++)
+                {
+                    if (!are_coprime(prime_array[i].value(), prime_array[j].value()))
+                    {
+                        reset();
+                        return is_initialized_;
+                    }
                 }
             }
 
@@ -44,41 +53,41 @@ namespace seal
 
             // Copy over the primes to local variables
             prime_array_ = allocate<SmallModulus>(prime_count_, pool_);
-            copy(prime_array.cbegin(), prime_array.cend(), prime_array_.get());
+            copy_n(prime_array, prime_count_, prime_array_.get());
 
             if (prime_count_ > 1)
             {
                 auto prime_array_values = allocate<uint64_t>(prime_count_, pool_);
-                transform(prime_array.cbegin(), prime_array.cend(), prime_array_values.get(), [](const auto &prime) {
-                    return prime.value();
-                });
+                for (size_t i = 0; i < prime_count_; i++)
+                {
+                    prime_array_values[i] = prime_array[i].value();
+                }
 
                 // Create punctured products
-                punctured_product_array_ = allocate_zero_uint(prime_count_ * prime_count_, pool_);
+                punctured_prod_array_ = allocate_zero_uint(prime_count_ * prime_count_, pool_);
                 for (size_t i = 0; i < prime_count_; i++)
                 {
                     multiply_many_uint64_except(
-                        prime_array_values.get(), prime_count_, i, punctured_product_array_.get() + (i * prime_count_),
+                        prime_array_values.get(), prime_count_, i, punctured_prod_array_.get() + (i * prime_count_),
                         pool_);
                 }
 
                 // Compute the full product
                 auto temp_mpi(allocate_uint(prime_count_, pool_));
-                prime_product_ = allocate_uint(prime_count_, pool_);
+                prime_prod_ = allocate_uint(prime_count_, pool_);
                 multiply_uint_uint64(
-                    punctured_product_array_.get(), prime_count_, prime_array_[0].value(), prime_count_,
-                    temp_mpi.get());
-                set_uint_uint(temp_mpi.get(), prime_count_, prime_product_.get());
+                    punctured_prod_array_.get(), prime_count_, prime_array_[0].value(), prime_count_, temp_mpi.get());
+                set_uint_uint(temp_mpi.get(), prime_count_, prime_prod_.get());
 
                 // Compute inverses of punctured products mod primes
-                inv_punctured_product_mod_prime_array_ = allocate_uint(prime_count_, pool_);
+                inv_punctured_prod_mod_prime_array_ = allocate_uint(prime_count_, pool_);
                 for (size_t i = 0; i < prime_count_; i++)
                 {
-                    inv_punctured_product_mod_prime_array_[i] = modulo_uint(
-                        punctured_product_array_.get() + (i * prime_count_), prime_count_, prime_array_[i], pool_);
+                    inv_punctured_prod_mod_prime_array_[i] = modulo_uint(
+                        punctured_prod_array_.get() + (i * prime_count_), prime_count_, prime_array_[i], pool_);
                     if (!try_invert_uint_mod(
-                            inv_punctured_product_mod_prime_array_[i], prime_array_[i],
-                            inv_punctured_product_mod_prime_array_[i]))
+                            inv_punctured_prod_mod_prime_array_[i], prime_array_[i],
+                            inv_punctured_prod_mod_prime_array_[i]))
                     {
                         reset();
                         return is_initialized_;
@@ -215,12 +224,12 @@ namespace seal
                 auto temp_mpi(allocate_uint(prime_count_, pool));
                 for (size_t i = 0; i < prime_count_; i++)
                 {
-                    uint64_t temp_prod = multiply_uint_uint_mod(
-                        temp_value[i], inv_punctured_product_mod_prime_array_[i], prime_array_[i]);
+                    uint64_t temp_prod =
+                        multiply_uint_uint_mod(temp_value[i], inv_punctured_prod_mod_prime_array_[i], prime_array_[i]);
                     multiply_uint_uint64(
-                        punctured_product_array_.get() + (i * prime_count_), prime_count_, temp_prod, prime_count_,
+                        punctured_prod_array_.get() + (i * prime_count_), prime_count_, temp_prod, prime_count_,
                         temp_mpi.get());
-                    add_uint_uint_mod(temp_mpi.get(), value, prime_product_.get(), prime_count_, value);
+                    add_uint_uint_mod(temp_mpi.get(), value, prime_prod_.get(), prime_count_, value);
                 }
             }
         }
@@ -271,26 +280,170 @@ namespace seal
                     for (size_t j = 0; j < prime_count_; j++)
                     {
                         uint64_t temp_prod = multiply_uint_uint_mod(
-                            temp_array[(i * prime_count_) + j], inv_punctured_product_mod_prime_array_[j],
+                            temp_array[(i * prime_count_) + j], inv_punctured_prod_mod_prime_array_[j],
                             prime_array_[j]);
                         multiply_uint_uint64(
-                            punctured_product_array_.get() + (j * prime_count_), prime_count_, temp_prod, prime_count_,
+                            punctured_prod_array_.get() + (j * prime_count_), prime_count_, temp_prod, prime_count_,
                             temp_mpi.get());
                         add_uint_uint_mod(
-                            temp_mpi.get(), value + (i * prime_count_), prime_product_.get(), prime_count_,
+                            temp_mpi.get(), value + (i * prime_count_), prime_prod_.get(), prime_count_,
                             value + (i * prime_count_));
                     }
                 }
             }
         }
 
+        void BaseConvTool::fast_convert(const uint64_t *in, uint64_t *out, MemoryPoolHandle pool) const
+        {
+            auto temp(allocate_uint(ibase_size_, pool));
+            for (size_t i = 0; i < ibase_size_; i++)
+            {
+                temp[i] = multiply_uint_uint_mod(in[i], inv_ibase_punctured_prod_mod_ibase_[i], ibase_[i]);
+            }
+
+            for (size_t j = 0; j < obase_size_; j++)
+            {
+                out[j] = dot_product_mod(temp.get(), ibase_size_, base_change_matrix_[j].get(), obase_[j]);
+            }
+        }
+
+        void BaseConvTool::fast_convert_array(
+            const uint64_t *in, size_t count, uint64_t *out, MemoryPoolHandle pool) const
+        {
+            auto temp(allocate_uint(count * ibase_size_, pool));
+            for (size_t i = 0; i < ibase_size_; i++)
+            {
+                uint64_t inv_ibase_punctured_prod_mod_ibase_elt = inv_ibase_punctured_prod_mod_ibase_[i];
+                SmallModulus ibase_elt = ibase_[i];
+                for (size_t k = 0; k < count; k++, in++)
+                {
+                    temp[i + (k * ibase_size_)] =
+                        multiply_uint_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
+                }
+            }
+
+            for (size_t j = 0; j < obase_size_; j++)
+            {
+                uint64_t *temp_ptr = temp.get();
+                SmallModulus obase_elt = obase_[j];
+                for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_size_)
+                {
+                    *out = dot_product_mod(temp_ptr, ibase_size_, base_change_matrix_[j].get(), obase_elt);
+                }
+            }
+        }
+
+        bool BaseConvTool::initialize(
+            const SmallModulus *ibase, size_t ibase_size, const SmallModulus *obase, size_t obase_size)
+
+        {
+            ibase_size_ = ibase_size;
+            obase_size_ = obase_size;
+
+            // Verify that the prime array has at least one prime
+            if (!ibase_size_ || !obase_size_)
+            {
+                reset();
+                return is_initialized_;
+            }
+
+            // Validate the bases (only coprimality required)
+            for (size_t i = 0; i < ibase_size; i++)
+            {
+                for (size_t j = 0; j < i; j++)
+                {
+                    if (!are_coprime(ibase[i].value(), ibase[j].value()))
+                    {
+                        reset();
+                        return is_initialized_;
+                    }
+                }
+            }
+            for (size_t i = 0; i < obase_size; i++)
+            {
+                for (size_t j = 0; j < i; j++)
+                {
+                    if (!are_coprime(obase[i].value(), obase[j].value()))
+                    {
+                        reset();
+                        return is_initialized_;
+                    }
+                }
+            }
+
+            // Verify that the size is not too large
+            if (!product_fits_in(ibase_size_, obase_size_))
+            {
+                reset();
+                return is_initialized_;
+            }
+
+            // Copy over the bases to local variables
+            ibase_ = allocate<SmallModulus>(ibase_size_, pool_);
+            obase_ = allocate<SmallModulus>(obase_size_, pool_);
+            copy_n(ibase, ibase_size_, ibase_.get());
+            copy_n(obase, obase_size_, obase_.get());
+
+            auto ibase_values = allocate<uint64_t>(ibase_size_, pool_);
+            for (size_t i = 0; i < ibase_size_; i++)
+            {
+                ibase_values[i] = ibase[i].value();
+            }
+
+            // Create punctured products
+            ibase_punctured_prod_array_ = allocate_zero_uint(ibase_size_ * ibase_size_, pool_);
+            for (size_t i = 0; i < ibase_size_; i++)
+            {
+                multiply_many_uint64_except(
+                    ibase_values.get(), ibase_size_, i, ibase_punctured_prod_array_.get() + (i * ibase_size_), pool_);
+            }
+
+            // Compute the full product
+            auto temp_mpi(allocate_uint(ibase_size_, pool_));
+            ibase_prod_ = allocate_uint(ibase_size_, pool_);
+            multiply_uint_uint64(
+                ibase_punctured_prod_array_.get(), ibase_size_, ibase_[0].value(), ibase_size_, temp_mpi.get());
+            set_uint_uint(temp_mpi.get(), ibase_size_, ibase_prod_.get());
+
+            // Compute inverses of punctured products mod ibase
+            inv_ibase_punctured_prod_mod_ibase_ = allocate_uint(ibase_size_, pool_);
+            for (size_t i = 0; i < ibase_size_; i++)
+            {
+                inv_ibase_punctured_prod_mod_ibase_[i] =
+                    modulo_uint(ibase_punctured_prod_array_.get() + (i * ibase_size_), ibase_size_, ibase_[i], pool_);
+                if (!try_invert_uint_mod(
+                        inv_ibase_punctured_prod_mod_ibase_[i], ibase_[i], inv_ibase_punctured_prod_mod_ibase_[i]))
+                {
+                    reset();
+                    return is_initialized_;
+                }
+            }
+
+            // Compute the base-change matrix
+            base_change_matrix_ = allocate<Pointer<uint64_t>>(obase_size_, pool_);
+            for (size_t i = 0; i < obase_size_; i++)
+            {
+                base_change_matrix_[i] = allocate_uint(ibase_size_, pool_);
+                for (size_t j = 0; j < ibase_size_; j++)
+                {
+                    base_change_matrix_[i][j] = modulo_uint(
+                        ibase_punctured_prod_array_.get() + (j * ibase_size_), ibase_size_, obase_[i], pool_);
+                }
+            }
+
+            // Everything went well
+            is_initialized_ = true;
+            return is_initialized_;
+        }
+
         vector<uint64_t> conjugate_classes(uint64_t modulus, uint64_t subgroup_generator)
         {
+#ifdef SEAL_DEBUG
             if (!product_fits_in(modulus, subgroup_generator) || !fits_in<size_t>(modulus))
             {
                 throw invalid_argument("inputs too large");
             }
-
+#endif
             vector<uint64_t> classes{};
             for (uint64_t i = 0; i < modulus; i++)
             {
@@ -329,13 +482,43 @@ namespace seal
             return classes;
         }
 
+        bool try_invert_uint_mod(uint64_t value, uint64_t modulus, uint64_t &result)
+        {
+#ifdef SEAL_DEBUG
+            if (modulus <= 1)
+            {
+                throw invalid_argument("modulus must be at least 2");
+            }
+#endif
+            if (value == 0)
+            {
+                return false;
+            }
+            auto gcd_tuple = xgcd(value, modulus);
+            if (get<0>(gcd_tuple) != 1)
+            {
+                return false;
+            }
+            else if (get<1>(gcd_tuple) < 0)
+            {
+                result = static_cast<uint64_t>(get<1>(gcd_tuple)) + modulus;
+                return true;
+            }
+            else
+            {
+                result = static_cast<uint64_t>(get<1>(gcd_tuple));
+                return true;
+            }
+        }
+
         vector<uint64_t> multiplicative_orders(vector<uint64_t> conjugate_classes, uint64_t modulus)
         {
+#ifdef SEAL_DEBUG
             if (!product_fits_in(modulus, modulus) || !fits_in<size_t>(modulus))
             {
                 throw invalid_argument("inputs too large");
             }
-
+#endif
             vector<uint64_t> orders{};
             orders.push_back(0);
             orders.push_back(1);
@@ -517,19 +700,20 @@ namespace seal
 
         vector<SmallModulus> get_primes(size_t ntt_size, int bit_size, size_t count)
         {
+#ifdef SEAL_DEBUG
             if (!count)
             {
                 throw invalid_argument("count must be positive");
             }
-            if (!ntt_size)
+            if (get_power_of_two(ntt_size) < 0)
             {
-                throw invalid_argument("ntt_size must be positive");
+                throw invalid_argument("ntt_size must be a power of two");
             }
             if (bit_size >= 63 || bit_size <= 1)
             {
                 throw invalid_argument("bit_size is invalid");
             }
-
+#endif
             vector<SmallModulus> destination;
             uint64_t factor = mul_safe(uint64_t(2), safe_cast<uint64_t>(ntt_size));
 
@@ -539,7 +723,7 @@ namespace seal
             {
                 value = sub_safe(value, factor) + 1;
             }
-            catch (const out_of_range &)
+            catch (const logic_error &)
             {
                 throw logic_error("failed to find enough qualifying primes");
             }
@@ -560,6 +744,108 @@ namespace seal
                 throw logic_error("failed to find enough qualifying primes");
             }
             return destination;
+        }
+
+        bool is_primitive_root(uint64_t root, uint64_t degree, const SmallModulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (modulus.bit_count() < 2)
+            {
+                throw invalid_argument("modulus");
+            }
+            if (root >= modulus.value())
+            {
+                throw out_of_range("operand");
+            }
+            if (get_power_of_two(degree) < 1)
+            {
+                throw invalid_argument("degree must be a power of two and at least two");
+            }
+#endif
+            if (root == 0)
+            {
+                return false;
+            }
+
+            // We check if root is a degree-th root of unity in integers modulo
+            // modulus, where degree is a power of two.
+            // It suffices to check that root^(degree/2) is -1 modulo modulus.
+            return exponentiate_uint_mod(root, degree >> 1, modulus) == (modulus.value() - 1);
+        }
+
+        bool try_primitive_root(uint64_t degree, const SmallModulus &modulus, uint64_t &destination)
+        {
+#ifdef SEAL_DEBUG
+            if (modulus.bit_count() < 2)
+            {
+                throw invalid_argument("modulus");
+            }
+            if (get_power_of_two(degree) < 1)
+            {
+                throw invalid_argument("degree must be a power of two and at least two");
+            }
+#endif
+            // We need to divide modulus-1 by degree to get the size of the
+            // quotient group
+            uint64_t size_entire_group = modulus.value() - 1;
+
+            // Compute size of quotient group
+            uint64_t size_quotient_group = size_entire_group / degree;
+
+            // size_entire_group must be divisible by degree, or otherwise the
+            // primitive root does not exist in integers modulo modulus
+            if (size_entire_group - size_quotient_group * degree != 0)
+            {
+                return false;
+            }
+
+            // For randomness
+            random_device rd;
+
+            int attempt_counter = 0;
+            int attempt_counter_max = 100;
+            do
+            {
+                attempt_counter++;
+
+                // Set destination to be a random number modulo modulus
+                destination = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
+                destination %= modulus.value();
+
+                // Raise the random number to power the size of the quotient
+                // to get rid of irrelevant part
+                destination = exponentiate_uint_mod(destination, size_quotient_group, modulus);
+            } while (!is_primitive_root(destination, degree, modulus) && (attempt_counter < attempt_counter_max));
+
+            return is_primitive_root(destination, degree, modulus);
+        }
+
+        bool try_minimal_primitive_root(uint64_t degree, const SmallModulus &modulus, uint64_t &destination)
+        {
+            uint64_t root;
+            if (!try_primitive_root(degree, modulus, root))
+            {
+                return false;
+            }
+            uint64_t generator_sq = multiply_uint_uint_mod(root, root, modulus);
+            uint64_t current_generator = root;
+
+            // destination is going to always contain the smallest generator found
+            for (size_t i = 0; i < degree; i++)
+            {
+                // If our current generator is strictly smaller than destination,
+                // update
+                if (current_generator < root)
+                {
+                    root = current_generator;
+                }
+
+                // Then move on to the next generator
+                current_generator = multiply_uint_uint_mod(current_generator, generator_sq, modulus);
+            }
+
+            destination = root;
+            return true;
         }
     } // namespace util
 } // namespace seal

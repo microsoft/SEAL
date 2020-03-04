@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "seal/biguint.h"
 #include "seal/memorymanager.h"
 #include "seal/smallmodulus.h"
+#include "seal/util/numth.h"
 #include "seal/util/pointer.h"
 #include "seal/util/smallntt.h"
 #include <memory>
@@ -19,156 +19,155 @@ namespace seal
         class BaseConverter
         {
         public:
-            BaseConverter(MemoryPoolHandle pool) : pool_(std::move(pool))
+            BaseConverter(MemoryPoolHandle pool)
+                : pool_(std::move(pool)), base_q_crt_(pool_), base_B_crt_(pool_), base_q_to_Bsk_conv_(pool_),
+                  base_q_to_m_tilde_conv_(pool_), base_B_to_q_conv_(pool_), base_B_to_m_sk_conv_(pool_),
+                  base_q_to_t_gamma_conv_(pool_)
             {
+#ifdef SEAL_DEBUG
                 if (!pool_)
                 {
                     throw std::invalid_argument("pool is uninitialized");
                 }
+#endif
             }
 
             BaseConverter(
-                const std::vector<SmallModulus> &coeff_base, std::size_t coeff_count,
-                const SmallModulus &small_plain_mod, MemoryPoolHandle pool);
+                std::size_t poly_modulus_degree, const std::vector<SmallModulus> &coeff_modulus,
+                const SmallModulus &plain_modulus, MemoryPoolHandle pool);
 
             /**
             Generates the pre-computations for the given parameters.
             */
-            void generate(
-                const std::vector<SmallModulus> &coeff_base, std::size_t coeff_count,
-                const SmallModulus &small_plain_mod);
+            bool initialize(
+                std::size_t poly_modulus_degree, const std::vector<SmallModulus> &coeff_modulus,
+                const SmallModulus &plain_modulus);
 
-            void floor_last_coeff_modulus_inplace(std::uint64_t *rns_poly, MemoryPoolHandle pool) const;
+            void divide_and_floor_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
 
-            void floor_last_coeff_modulus_ntt_inplace(
-                std::uint64_t *rns_poly, const Pointer<SmallNTTTables> &rns_ntt_tables, MemoryPoolHandle pool) const;
+            void divide_and_floor_q_last_ntt_inplace(
+                std::uint64_t *input, const Pointer<SmallNTTTables> &rns_ntt_tables, MemoryPoolHandle pool) const;
 
-            void round_last_coeff_modulus_inplace(std::uint64_t *rns_poly, MemoryPoolHandle pool) const;
+            void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
 
-            void round_last_coeff_modulus_ntt_inplace(
-                std::uint64_t *rns_poly, const Pointer<SmallNTTTables> &rns_ntt_tables, MemoryPoolHandle pool) const;
-
-            /**
-            Fast base converter from q to Bsk
-            */
-            void fastbconv(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void divide_and_round_q_last_ntt_inplace(
+                std::uint64_t *input, const Pointer<SmallNTTTables> &rns_ntt_tables, MemoryPoolHandle pool) const;
 
             /**
-            Fast base converter from Bsk to q
+            Shenoy-Kumaresan conversion from Bsk to q
             */
             void fastbconv_sk(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             /**
-            Reduction from Bsk U {m_tilde} to Bsk
+            Montgomery reduction from Bsk U {m_tilde} to Bsk
             */
-            void mont_rq(const std::uint64_t *input, std::uint64_t *destination) const;
+            void montgomery_reduction(const std::uint64_t *input, std::uint64_t *destination) const;
 
             /**
-            Fast base converter from q U Bsk to Bsk
+            Divide by q and fast floor from q U Bsk to Bsk
             */
             void fast_floor(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             /**
-            Fast base converter from q to Bsk U {m_tilde}
+            Fast base conversion from q to Bsk U {m_tilde}
             */
-            void fastbconv_mtilde(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv_m_tilde(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             /**
-            Fast base converter from q to plain_modulus U {gamma}
+            Compute round(t/q * |input|_q) mod t exactly
             */
-            void fastbconv_plain_gamma(
-                const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void exact_scale_and_round(const uint64_t *phase, uint64_t *destination, MemoryPoolHandle pool) const;
 
             void reset() noexcept;
 
-            SEAL_NODISCARD inline auto is_generated() const noexcept
+            SEAL_NODISCARD inline bool is_initialized() const noexcept
             {
-                return generated_;
+                return is_initialized_;
             }
 
-            SEAL_NODISCARD inline auto coeff_base_mod_count() const noexcept
+            SEAL_NODISCARD inline operator bool() const noexcept
             {
-                return coeff_base_mod_count_;
+                return is_initialized();
             }
 
-            SEAL_NODISCARD inline auto aux_base_mod_count() const noexcept
+            SEAL_NODISCARD inline auto &inv_q_last_mod_q() const noexcept
             {
-                return aux_base_mod_count_;
+                return inv_q_last_mod_q_;
             }
 
-            SEAL_NODISCARD inline auto &get_plain_gamma_product() const noexcept
+            SEAL_NODISCARD inline auto &base_Bsk_small_ntt_tables() const noexcept
             {
-                return plain_gamma_product_mod_coeff_array_;
+                return base_Bsk_small_ntt_tables_;
             }
 
-            SEAL_NODISCARD inline auto &get_neg_inv_coeff() const noexcept
+            SEAL_NODISCARD inline auto base_q_size() const noexcept
             {
-                return neg_inv_coeff_products_all_mod_plain_gamma_array_;
+                return base_q_size_;
             }
 
-            SEAL_NODISCARD inline auto &get_plain_gamma_array() const noexcept
+            SEAL_NODISCARD inline auto &base_q() const noexcept
             {
-                return plain_gamma_array_;
+                return base_q_;
             }
 
-            SEAL_NODISCARD inline auto get_coeff_products_array() const noexcept -> const std::uint64_t *
+            SEAL_NODISCARD inline auto base_B_size() const noexcept
             {
-                return coeff_products_array_.get();
+                return base_q_size_;
             }
 
-            SEAL_NODISCARD inline std::uint64_t get_inv_gamma() const noexcept
+            SEAL_NODISCARD inline auto &base_B() const noexcept
             {
-                return inv_gamma_mod_plain_;
+                return base_B_;
             }
 
-            SEAL_NODISCARD inline auto &get_bsk_small_ntt_tables() const noexcept
+            SEAL_NODISCARD inline auto base_Bsk_size() const noexcept
             {
-                return bsk_small_ntt_tables_;
+                return base_Bsk_size_;
             }
 
-            SEAL_NODISCARD inline auto bsk_base_mod_count() const noexcept
+            SEAL_NODISCARD inline auto &base_Bsk() const noexcept
             {
-                return bsk_base_mod_count_;
+                return base_Bsk_;
             }
 
-            SEAL_NODISCARD inline auto &get_bsk_mod_array() const noexcept
+            SEAL_NODISCARD inline auto base_Bsk_m_tilde_size() const noexcept
             {
-                return bsk_base_array_;
+                return base_Bsk_m_tilde_size_;
             }
 
-            SEAL_NODISCARD inline auto &get_msk() const noexcept
+            SEAL_NODISCARD inline auto &base_Bsk_m_tilde() const noexcept
             {
-                return m_sk_;
+                return base_Bsk_m_tilde_;
             }
 
-            SEAL_NODISCARD inline auto &get_m_tilde() const noexcept
+            SEAL_NODISCARD inline auto base_t_gamma_size() const noexcept
+            {
+                return base_t_gamma_size_;
+            }
+
+            SEAL_NODISCARD inline auto &base_t_gamma() const noexcept
+            {
+                return base_t_gamma_;
+            }
+
+            SEAL_NODISCARD inline auto &m_tilde() const noexcept
             {
                 return m_tilde_;
             }
 
-            SEAL_NODISCARD inline auto &get_mtilde_inv_coeff_products_mod_coeff() const noexcept
+            SEAL_NODISCARD inline auto &m_sk() const noexcept
             {
-                return mtilde_inv_coeff_base_products_mod_coeff_array_;
+                return m_sk_;
             }
 
-            SEAL_NODISCARD inline auto &get_inv_coeff_mod_mtilde() const noexcept
+            SEAL_NODISCARD inline auto &t() const noexcept
             {
-                return inv_coeff_products_mod_mtilde_;
+                return t_;
             }
 
-            SEAL_NODISCARD inline auto &get_inv_coeff_mod_coeff_array() const noexcept
+            SEAL_NODISCARD inline auto &gamma() const noexcept
             {
-                return inv_coeff_base_products_mod_coeff_array_;
-            }
-
-            SEAL_NODISCARD inline auto &get_inv_last_coeff_mod_array() const noexcept
-            {
-                return inv_last_coeff_mod_array_;
-            }
-
-            SEAL_NODISCARD inline auto &get_coeff_base_products_mod_msk() const noexcept
-            {
-                return coeff_base_products_mod_aux_bsk_array_[bsk_base_mod_count_ - 1];
+                return gamma_;
             }
 
         private:
@@ -182,95 +181,89 @@ namespace seal
 
             MemoryPoolHandle pool_;
 
-            bool generated_ = false;
+            bool is_initialized_ = false;
 
             std::size_t coeff_count_ = 0;
 
-            std::size_t coeff_base_mod_count_ = 0;
+            std::size_t base_q_size_ = 0;
 
-            std::size_t aux_base_mod_count_ = 0;
+            Pointer<SmallModulus> base_q_;
 
-            std::size_t bsk_base_mod_count_ = 0;
+            std::size_t base_B_size_ = 0;
 
-            std::size_t plain_gamma_count_ = 0;
+            Pointer<SmallModulus> base_B_;
 
-            // Array of coefficient small moduli
-            Pointer<SmallModulus> coeff_base_array_;
+            std::size_t base_Bsk_size_ = 0;
 
-            // Array of auxiliary moduli
-            Pointer<SmallModulus> aux_base_array_;
+            Pointer<SmallModulus> base_Bsk_;
 
-            // Array of auxiliary U {m_sk_} moduli
-            Pointer<SmallModulus> bsk_base_array_;
+            std::size_t base_Bsk_m_tilde_size_ = 0;
 
-            // Array of plain modulus U gamma
-            Pointer<SmallModulus> plain_gamma_array_;
+            Pointer<SmallModulus> base_Bsk_m_tilde_;
 
-            // Punctured products of the coeff moduli
-            Pointer<std::uint64_t> coeff_products_array_;
+            std::size_t base_t_gamma_size_ = 0;
 
-            // Matrix which contains the products of coeff moduli mod aux
-            Pointer<Pointer<std::uint64_t>> coeff_base_products_mod_aux_bsk_array_;
+            Pointer<SmallModulus> base_t_gamma_;
 
-            // Array of inverse coeff modulus products mod each small coeff mods
-            Pointer<std::uint64_t> inv_coeff_base_products_mod_coeff_array_;
+            // CRT tool for the initial coeff_modulus base q
+            CRTTool base_q_crt_;
 
-            // Array of coeff moduli products mod m_tilde
-            Pointer<std::uint64_t> coeff_base_products_mod_mtilde_array_;
+            // CRT tool for the extended (auxiliary) base B
+            CRTTool base_B_crt_;
 
-            // Array of coeff modulus products times m_tilda mod each coeff modulus
-            Pointer<std::uint64_t> mtilde_inv_coeff_base_products_mod_coeff_array_;
+            // Base converter: q --> B_sk
+            BaseConvTool base_q_to_Bsk_conv_;
 
-            // Matrix of the inversion of coeff modulus products mod each auxiliary mods
-            Pointer<std::uint64_t> inv_coeff_products_all_mod_aux_bsk_array_;
+            // Base converter: q --> {m_tilde}
+            BaseConvTool base_q_to_m_tilde_conv_;
 
-            // Matrix of auxiliary mods products mod each coeff modulus
-            Pointer<Pointer<std::uint64_t>> aux_base_products_mod_coeff_array_;
+            // Base converter: B --> q
+            BaseConvTool base_B_to_q_conv_;
 
-            // Array of inverse auxiliary mod products mod each auxiliary mods
-            Pointer<std::uint64_t> inv_aux_base_products_mod_aux_array_;
+            // Base converter: B --> {m_sk}
+            BaseConvTool base_B_to_m_sk_conv_;
 
-            // Array of auxiliary bases products mod m_sk_
-            Pointer<std::uint64_t> aux_base_products_mod_msk_array_;
+            // Base converter: q --> {t, gamma}
+            BaseConvTool base_q_to_t_gamma_conv_;
 
-            // Coeff moduli products inverse mod m_tilde
-            std::uint64_t inv_coeff_products_mod_mtilde_ = 0;
+            // prod(q)^(-1) mod Bsk
+            Pointer<std::uint64_t> inv_prod_q_mod_Bsk_;
 
-            // Auxiliary base products mod m_sk_ (m1*m2*...*ml)-1 mod m_sk
-            std::uint64_t inv_aux_products_mod_msk_ = 0;
+            // prod(q)^(-1) mod m_tilde
+            std::uint64_t inv_prod_q_mod_m_tilde_ = 0;
 
-            // Gamma inverse mod plain modulus
-            std::uint64_t inv_gamma_mod_plain_ = 0;
+            // prod(B)^(-1) mod m_sk
+            std::uint64_t inv_prod_B_mod_m_sk_ = 0;
 
-            // Auxiliary base products mod coeff moduli (m1*m2*...*ml) mod qi
-            Pointer<std::uint64_t> aux_products_all_mod_coeff_array_;
+            // gamma^(-1) mod t
+            std::uint64_t inv_gamma_mod_t_ = 0;
 
-            // Array of m_tilde inverse mod Bsk = m U {msk}
-            Pointer<std::uint64_t> inv_mtilde_mod_bsk_array_;
+            // prod(B) mod q
+            Pointer<std::uint64_t> prod_B_mod_q_;
 
-            // Array of all coeff base products mod Bsk
-            Pointer<std::uint64_t> coeff_products_all_mod_bsk_array_;
+            // m_tilde^(-1) mod Bsk
+            Pointer<std::uint64_t> inv_m_tilde_mod_Bsk_;
 
-            // Matrix of coeff base product mod plain modulus and gamma
-            Pointer<Pointer<std::uint64_t>> coeff_products_mod_plain_gamma_array_;
+            // prod(q) mod Bsk
+            Pointer<std::uint64_t> prod_q_mod_Bsk_;
 
-            // Array of negative inverse all coeff base product mod plain modulus and gamma
-            Pointer<std::uint64_t> neg_inv_coeff_products_all_mod_plain_gamma_array_;
+            // -prod(q)^(-1) mod {t, gamma}
+            Pointer<std::uint64_t> neg_inv_q_mod_t_gamma_;
 
-            // Array of plain_gamma_product mod coeff base moduli
-            Pointer<std::uint64_t> plain_gamma_product_mod_coeff_array_;
+            // prod({t, gamma}) mod q
+            Pointer<std::uint64_t> prod_t_gamma_mod_q_;
 
-            // Array of small NTT tables for moduli in Bsk
-            Pointer<SmallNTTTables> bsk_small_ntt_tables_;
+            // q[last]^(-1) mod q[i] for i = 0..last-1
+            Pointer<std::uint64_t> inv_q_last_mod_q_;
 
-            // For modulus switching: inverses of the last coeff base modulus
-            Pointer<std::uint64_t> inv_last_coeff_mod_array_;
+            // SmallNTTTables for Bsk
+            Pointer<SmallNTTTables> base_Bsk_small_ntt_tables_;
 
             SmallModulus m_tilde_;
 
             SmallModulus m_sk_;
 
-            SmallModulus small_plain_mod_;
+            SmallModulus t_;
 
             SmallModulus gamma_;
         };

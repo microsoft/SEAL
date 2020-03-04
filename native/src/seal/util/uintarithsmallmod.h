@@ -279,21 +279,21 @@ namespace seal
             return temp[1];
         }
 
-        inline bool try_invert_uint_mod(std::uint64_t operand, const SmallModulus &modulus, std::uint64_t &result)
+        // Computes (operand1 * operand2) + operand3 mod modulus
+        inline std::uint64_t multiply_add_uint_mod(
+            std::uint64_t operand1, std::uint64_t operand2, std::uint64_t operand3, const SmallModulus &modulus)
         {
-            return try_mod_inverse(operand, modulus.value(), result);
+            // Lazy reduction
+            unsigned long long temp[2];
+            multiply_uint64(operand1, operand2, temp);
+            temp[1] += add_uint64(temp[0], operand3, temp);
+            return barrett_reduce_128(temp, modulus);
         }
 
-        bool is_primitive_root(std::uint64_t root, std::uint64_t degree, const SmallModulus &prime_modulus);
-
-        // Try to find a primitive degree-th root of unity modulo small prime
-        // modulus, where degree must be a power of two.
-        bool try_primitive_root(std::uint64_t degree, const SmallModulus &prime_modulus, std::uint64_t &destination);
-
-        // Try to find the smallest (as integer) primitive degree-th root of
-        // unity modulo small prime modulus, where degree must be a power of two.
-        bool try_minimal_primitive_root(
-            std::uint64_t degree, const SmallModulus &prime_modulus, std::uint64_t &destination);
+        inline bool try_invert_uint_mod(std::uint64_t operand, const SmallModulus &modulus, std::uint64_t &result)
+        {
+            return try_invert_uint_mod(operand, modulus.value(), result);
+        }
 
         SEAL_NODISCARD std::uint64_t exponentiate_uint_mod(
             std::uint64_t operand, std::uint64_t exponent, const SmallModulus &modulus);
@@ -303,5 +303,10 @@ namespace seal
             MemoryPool &pool);
 
         SEAL_NODISCARD std::uint64_t galois_elt_from_step(int steps, std::size_t coeff_count);
+
+        // Computes a dot product of two uint64_t arrays
+        std::uint64_t dot_product_mod(
+            const std::uint64_t *operand1, std::size_t coeff_count, const std::uint64_t *operand2,
+            const SmallModulus &modulus);
     } // namespace util
 } // namespace seal

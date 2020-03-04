@@ -82,6 +82,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "googletest", "googletest", 
 		thirdparty\googletest\CMakeLists.txt = thirdparty\googletest\CMakeLists.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmake", "cmake", "{256C7291-7A4D-466A-BF88-535B541D2CAC}"
+	ProjectSection(SolutionItems) = preProject
+		cmake\SEALConfig.cmake.in = cmake\SEALConfig.cmake.in
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -164,6 +169,7 @@ Global
 		{5E524D23-AD60-45AF-B279-0322941E9F31} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
 		{B4EF7358-C76B-4142-9746-B082114B1DDD} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
 		{0DD76E94-59E1-49D4-9ED7-8C696B89F26E} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
+		{256C7291-7A4D-466A-BF88-535B541D2CAC} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15A17F22-F747-4B82-BF5F-E0224AF4B3ED}

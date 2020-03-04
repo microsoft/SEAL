@@ -53,7 +53,7 @@ namespace seal
             // Check that all coeff moduli are pairwise relatively prime
             for (size_t j = 0; j < i; j++)
             {
-                if (gcd(coeff_modulus[i].value(), coeff_modulus[j].value()) > 1)
+                if (!are_coprime(coeff_modulus[i].value(), coeff_modulus[j].value()))
                 {
                     context_data.qualifiers_.parameters_set = false;
                     return context_data;
@@ -125,7 +125,7 @@ namespace seal
         context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_mod_count, pool_, pool_);
         for (size_t i = 0; i < coeff_mod_count; i++)
         {
-            if (!context_data.small_ntt_tables_[i].generate(coeff_count_power, coeff_modulus[i]))
+            if (!context_data.small_ntt_tables_[i].initialize(coeff_count_power, coeff_modulus[i]))
             {
                 // Parameters are not valid
                 context_data.qualifiers_.using_ntt = false;
@@ -146,7 +146,7 @@ namespace seal
             // Check that all coeff moduli are relatively prime to plain_modulus
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
-                if (gcd(coeff_modulus[i].value(), plain_modulus.value()) > 1)
+                if (!are_coprime(coeff_modulus[i].value(), plain_modulus.value()))
                 {
                     context_data.qualifiers_.parameters_set = false;
                     return context_data;
@@ -166,22 +166,21 @@ namespace seal
             // Can we use batching? (NTT with plain_modulus)
             context_data.qualifiers_.using_batching = false;
             context_data.plain_ntt_tables_ = allocate<SmallNTTTables>(pool_);
-            if (context_data.plain_ntt_tables_->generate(coeff_count_power, plain_modulus))
+            if (context_data.plain_ntt_tables_->initialize(coeff_count_power, plain_modulus))
             {
                 context_data.qualifiers_.using_batching = true;
             }
 
             // Check for plain_lift
-            // If all the small coefficient moduli are larger than plain modulus,
-            // we can quickly lift plain coefficients to RNS form
+            // If all the small coefficient moduli are larger than plain modulus, we can quickly
+            // lift plain coefficients to RNS form
             context_data.qualifiers_.using_fast_plain_lift = true;
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 context_data.qualifiers_.using_fast_plain_lift &= (coeff_modulus[i].value() > plain_modulus.value());
             }
 
-            // Calculate coeff_div_plain_modulus (BFV-"Delta") and the remainder
-            // upper_half_increment
+            // Calculate coeff_div_plain_modulus (BFV-"Delta") and the remainder upper_half_increment
             context_data.coeff_div_plain_modulus_ = allocate_uint(coeff_mod_count, pool_);
             context_data.upper_half_increment_ = allocate_uint(coeff_mod_count, pool_);
             auto wide_plain_modulus(duplicate_uint_if_needed(
@@ -189,24 +188,15 @@ namespace seal
             divide_uint_uint(
                 context_data.total_coeff_modulus_.get(), wide_plain_modulus.get(), coeff_mod_count,
                 context_data.coeff_div_plain_modulus_.get(), context_data.upper_half_increment_.get(), pool_);
-            // store the non-RNS form of upper_half_increment for BFV encryption
+
+            // Store the non-RNS form of upper_half_increment for BFV encryption
             context_data.coeff_mod_plain_modulus_ = context_data.upper_half_increment_[0];
+
             // Decompose coeff_div_plain_modulus into RNS factors
-            auto temp(allocate_uint(coeff_mod_count, pool_));
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                temp[i] =
-                    modulo_uint(context_data.coeff_div_plain_modulus_.get(), coeff_mod_count, coeff_modulus[i], pool_);
-            }
-            set_uint_uint(temp.get(), coeff_mod_count, context_data.coeff_div_plain_modulus_.get());
+            context_data.crt_tool_->decompose(context_data.coeff_div_plain_modulus_.get(), pool_);
 
             // Decompose upper_half_increment into RNS factors
-            for (size_t i = 0; i < coeff_mod_count; i++)
-            {
-                temp[i] =
-                    modulo_uint(context_data.upper_half_increment_.get(), coeff_mod_count, coeff_modulus[i], pool_);
-            }
-            set_uint_uint(temp.get(), coeff_mod_count, context_data.upper_half_increment_.get());
+            context_data.crt_tool_->decompose(context_data.upper_half_increment_.get(), pool_);
 
             // Calculate (plain_modulus + 1) / 2.
             context_data.plain_upper_half_threshold_ = (plain_modulus.value() + 1) >> 1;
@@ -272,16 +262,14 @@ namespace seal
 
         // Create BaseConverter
         context_data.base_converter_ = allocate<BaseConverter>(pool_, pool_);
-        context_data.base_converter_->generate(coeff_modulus, poly_modulus_degree, plain_modulus);
-        if (!context_data.base_converter_->is_generated())
+        if (!context_data.base_converter_->initialize(poly_modulus_degree, coeff_modulus, plain_modulus))
         {
             // Parameters are not valid
             context_data.qualifiers_.parameters_set = false;
             return context_data;
         }
 
-        // Check whether the coefficient modulus consists of a set of primes that
-        // are in decreasing order
+        // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
         context_data.qualifiers_.using_descending_modulus_chain = true;
         for (size_t i = 0; i < coeff_mod_count - 1; i++)
         {

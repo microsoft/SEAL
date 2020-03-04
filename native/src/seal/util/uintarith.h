@@ -47,6 +47,27 @@ namespace seal
             return static_cast<unsigned char>(*result < operand1);
         }
 
+        inline unsigned char add_uint128(
+            const std::uint64_t *operand1, const std::uint64_t *operand2, std::uint64_t *result)
+        {
+#ifdef SEAL_DEBUG
+            if (!operand1)
+            {
+                throw std::invalid_argument("operand1");
+            }
+            if (!operand2)
+            {
+                throw std::invalid_argument("operand2");
+            }
+            if (!result)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            unsigned char carry = add_uint64(operand1[0], operand2[0], result);
+            return add_uint64(operand1[1], operand2[1], carry, result + 1);
+        }
+
         inline unsigned char add_uint_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count, unsigned char carry, std::size_t result_uint64_count,
@@ -861,7 +882,7 @@ namespace seal
             {
                 throw std::invalid_argument("operands");
             }
-            if (count < 2)
+            if (count < 1)
             {
                 throw std::invalid_argument("count");
             }
@@ -874,6 +895,13 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
+            // An empty product; return 1
+            if (count == 1 && except == 0)
+            {
+                set_uint(1, count, result);
+                return;
+            }
+
             // Set result to operands[0] unless except is 0
             set_uint(except == 0 ? std::uint64_t(1) : static_cast<std::uint64_t>(operands[0]), count, result);
 

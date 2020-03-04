@@ -24,7 +24,7 @@ namespace seal
                 throw invalid_argument("pool is uninitialized");
             }
 #endif
-            if (!generate(coeff_count_power, modulus))
+            if (!initialize(coeff_count_power, modulus))
             {
                 // Generation failed; probably modulus wasn't prime.
                 // It is necessary to check generated() after creating
@@ -34,7 +34,7 @@ namespace seal
 
         void SmallNTTTables::reset()
         {
-            generated_ = false;
+            is_initialized_ = false;
             modulus_ = SmallModulus();
             root_ = 0;
             root_powers_.release();
@@ -48,16 +48,16 @@ namespace seal
             coeff_count_ = 0;
         }
 
-        bool SmallNTTTables::generate(int coeff_count_power, const SmallModulus &modulus)
+        bool SmallNTTTables::initialize(int coeff_count_power, const SmallModulus &modulus)
         {
             reset();
-
+#ifdef SEAL_DEBUG
             if ((coeff_count_power < get_power_of_two(SEAL_POLY_MOD_DEGREE_MIN)) ||
                 coeff_count_power > get_power_of_two(SEAL_POLY_MOD_DEGREE_MAX))
             {
                 throw invalid_argument("coeff_count_power out of range");
             }
-
+#endif
             coeff_count_power_ = coeff_count_power;
             coeff_count_ = size_t(1) << coeff_count_power_;
 
@@ -104,9 +104,9 @@ namespace seal
 
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
-            generated_ = try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_);
+            is_initialized_ = try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_);
 
-            if (!generated_)
+            if (!is_initialized_)
             {
                 reset();
                 return false;
@@ -126,8 +126,7 @@ namespace seal
             }
         }
 
-        // compute floor ( input * beta /q ), where beta is a 64k power of 2
-        // and  0 < q < beta.
+        // Compute floor (input * beta /q), where beta is a 64k power of 2 and  0 < q < beta.
         void SmallNTTTables::ntt_scale_powers_of_primitive_root(const uint64_t *input, uint64_t *destination) const
         {
             for (size_t i = 0; i < coeff_count_; i++, input++, destination++)
@@ -151,6 +150,12 @@ namespace seal
         */
         void ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
         {
+#ifdef SEAL_DEBUG
+            if (!tables)
+            {
+                throw std::logic_error("SmallNTTTables is uninitialized");
+            }
+#endif
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus * 2;
 
@@ -237,6 +242,12 @@ namespace seal
         // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig).
         void inverse_ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
         {
+#ifdef SEAL_DEBUG
+            if (!tables)
+            {
+                throw std::logic_error("SmallNTTTables is uninitialized");
+            }
+#endif
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus * 2;
 

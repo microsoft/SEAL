@@ -15,7 +15,7 @@ namespace SEALTest
 {
     namespace util
     {
-        TEST(UIntArithSmallMod, IncrementUIntSmallMod)
+        TEST(UIntArithSmallMod, IncrementUIntMod)
         {
             SmallModulus mod(2);
             ASSERT_EQ(1ULL, increment_uint_mod(0, mod));
@@ -32,7 +32,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, increment_uint_mod(0, mod));
         }
 
-        TEST(UIntArithSmallMod, DecrementUIntSmallMod)
+        TEST(UIntArithSmallMod, DecrementUIntMod)
         {
             SmallModulus mod(2);
             ASSERT_EQ(0ULL, decrement_uint_mod(1, mod));
@@ -49,7 +49,7 @@ namespace SEALTest
             ASSERT_EQ(0ULL, decrement_uint_mod(1, mod));
         }
 
-        TEST(UIntArithSmallMod, NegateUIntSmallMod)
+        TEST(UIntArithSmallMod, NegateUIntMod)
         {
             SmallModulus mod(2);
             ASSERT_EQ(0ULL, negate_uint_mod(0, mod));
@@ -70,7 +70,7 @@ namespace SEALTest
             ASSERT_EQ(4611686018427289600ULL, negate_uint_mod(1, mod));
         }
 
-        TEST(UIntArithSmallMod, Div2UIntSmallMod)
+        TEST(UIntArithSmallMod, Div2UIntMod)
         {
             SmallModulus mod(3);
             ASSERT_EQ(0ULL, div2_uint_mod(0ULL, mod));
@@ -85,7 +85,7 @@ namespace SEALTest
             ASSERT_EQ(0x800000000000001ULL, div2_uint_mod(3ULL, mod));
         }
 
-        TEST(UIntArithSmallMod, AddUIntSmallMod)
+        TEST(UIntArithSmallMod, AddUIntMod)
         {
             SmallModulus mod(2);
             ASSERT_EQ(0ULL, add_uint_uint_mod(0, 0, mod));
@@ -111,7 +111,7 @@ namespace SEALTest
             ASSERT_EQ(4611686018427289599ULL, add_uint_uint_mod(4611686018427289600ULL, 4611686018427289600ULL, mod));
         }
 
-        TEST(UIntArithSmallMod, SubUIntSmallMod)
+        TEST(UIntArithSmallMod, SubUIntMod)
         {
             SmallModulus mod(2);
             ASSERT_EQ(0ULL, sub_uint_uint_mod(0, 0, mod));
@@ -183,7 +183,7 @@ namespace SEALTest
             ASSERT_EQ(1010101010101ULL, barrett_reduce_128(input, mod));
         }
 
-        TEST(UIntArithSmallMod, MultiplyUIntUIntSmallMod)
+        TEST(UIntArithSmallMod, MultiplyUIntUIntMod)
         {
             SmallModulus mod(2);
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(0, 0, mod));
@@ -214,7 +214,24 @@ namespace SEALTest
             ASSERT_EQ(1ULL, multiply_uint_uint_mod(4611686018427289600ULL, 4611686018427289600ULL, mod));
         }
 
-        TEST(UIntArithSmallMod, ModuloUIntSmallMod)
+        TEST(UIntArithSmallMod, MultiplyAddMod)
+        {
+            SmallModulus mod(7);
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(0, 0, 0, mod));
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(1, 0, 0, mod));
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(0, 1, 0, mod));
+            ASSERT_EQ(1ULL, multiply_add_uint_mod(0, 0, 1, mod));
+            ASSERT_EQ(3ULL, multiply_add_uint_mod(3, 4, 5, mod));
+
+            mod = 0x3FFFFFFFFFFFFFFFULL;
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(0, 0, 0, mod));
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(1, 0, 0, mod));
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(0, 1, 0, mod));
+            ASSERT_EQ(1ULL, multiply_add_uint_mod(0, 0, 1, mod));
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(mod.value() - 1, mod.value() - 1, mod.value() - 1, mod));
+        }
+
+        TEST(UIntArithSmallMod, ModuloUIntMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto value(allocate_uint(4, pool));
@@ -282,7 +299,7 @@ namespace SEALTest
             ASSERT_EQ(0ULL, value[3]);
         }
 
-        TEST(UIntArithSmallMod, TryInvertUIntSmallMod)
+        TEST(UIntArithSmallMod, TryInvertUIntMod)
         {
             uint64_t result;
             SmallModulus mod(5);
@@ -307,74 +324,7 @@ namespace SEALTest
             ASSERT_EQ(1052541512ULL, result);
         }
 
-        TEST(UIntArithSmallMod, TryPrimitiveRootSmallMod)
-        {
-            uint64_t result;
-            SmallModulus mod(11);
-
-            ASSERT_TRUE(try_primitive_root(2, mod, result));
-            ASSERT_EQ(10ULL, result);
-
-            mod = 29;
-            ASSERT_TRUE(try_primitive_root(2, mod, result));
-            ASSERT_EQ(28ULL, result);
-
-            vector<uint64_t> corrects{ 12, 17 };
-            ASSERT_TRUE(try_primitive_root(4, mod, result));
-            ASSERT_TRUE(std::find(corrects.begin(), corrects.end(), result) != corrects.end());
-
-            mod = 1234565441;
-            ASSERT_TRUE(try_primitive_root(2, mod, result));
-            ASSERT_EQ(1234565440ULL, result);
-            corrects = { 984839708, 273658408, 249725733, 960907033 };
-            ASSERT_TRUE(try_primitive_root(8, mod, result));
-            ASSERT_TRUE(std::find(corrects.begin(), corrects.end(), result) != corrects.end());
-        }
-
-        TEST(UIntArithSmallMod, IsPrimitiveRootSmallMod)
-        {
-            SmallModulus mod(11);
-            ASSERT_TRUE(is_primitive_root(10, 2, mod));
-            ASSERT_FALSE(is_primitive_root(9, 2, mod));
-            ASSERT_FALSE(is_primitive_root(10, 4, mod));
-
-            mod = 29;
-            ASSERT_TRUE(is_primitive_root(28, 2, mod));
-            ASSERT_TRUE(is_primitive_root(12, 4, mod));
-            ASSERT_FALSE(is_primitive_root(12, 2, mod));
-            ASSERT_FALSE(is_primitive_root(12, 8, mod));
-
-            mod = 1234565441ULL;
-            ASSERT_TRUE(is_primitive_root(1234565440ULL, 2, mod));
-            ASSERT_TRUE(is_primitive_root(960907033ULL, 8, mod));
-            ASSERT_TRUE(is_primitive_root(1180581915ULL, 16, mod));
-            ASSERT_FALSE(is_primitive_root(1180581915ULL, 32, mod));
-            ASSERT_FALSE(is_primitive_root(1180581915ULL, 8, mod));
-            ASSERT_FALSE(is_primitive_root(1180581915ULL, 2, mod));
-        }
-
-        TEST(UIntArithSmallMod, TryMinimalPrimitiveRootSmallMod)
-        {
-            SmallModulus mod(11);
-
-            uint64_t result;
-            ASSERT_TRUE(try_minimal_primitive_root(2, mod, result));
-            ASSERT_EQ(10ULL, result);
-
-            mod = 29;
-            ASSERT_TRUE(try_minimal_primitive_root(2, mod, result));
-            ASSERT_EQ(28ULL, result);
-            ASSERT_TRUE(try_minimal_primitive_root(4, mod, result));
-            ASSERT_EQ(12ULL, result);
-
-            mod = 1234565441;
-            ASSERT_TRUE(try_minimal_primitive_root(2, mod, result));
-            ASSERT_EQ(1234565440ULL, result);
-            ASSERT_TRUE(try_minimal_primitive_root(8, mod, result));
-            ASSERT_EQ(249725733ULL, result);
-        }
-
-        TEST(UIntArithSmallMod, ExponentiateUIntSmallMod)
+        TEST(UIntArithSmallMod, ExponentiateUIntMod)
         {
             SmallModulus mod(5);
             ASSERT_EQ(1ULL, exponentiate_uint_mod(1, 0, mod));
@@ -387,6 +337,42 @@ namespace SEALTest
 
             mod = 131313131313;
             ASSERT_EQ(39418477653ULL, exponentiate_uint_mod(2424242424, 16, mod));
+        }
+
+        TEST(UIntArithSmallMod, DotProductMod)
+        {
+            SmallModulus mod(5);
+            uint64_t arr1[64], arr2[64];
+            for (size_t i = 0; i < 64; i++)
+            {
+                arr1[i] = 2;
+                arr2[i] = 3;
+            }
+
+            ASSERT_EQ(0, dot_product_mod(arr1, 0, arr2, mod));
+            ASSERT_EQ(1, dot_product_mod(arr1, 1, arr2, mod));
+            ASSERT_EQ(2, dot_product_mod(arr1, 2, arr2, mod));
+            ASSERT_EQ(15 % mod.value(), dot_product_mod(arr1, 15, arr2, mod));
+            ASSERT_EQ(16 % mod.value(), dot_product_mod(arr1, 16, arr2, mod));
+            ASSERT_EQ(17 % mod.value(), dot_product_mod(arr1, 17, arr2, mod));
+            ASSERT_EQ(32 % mod.value(), dot_product_mod(arr1, 32, arr2, mod));
+            ASSERT_EQ(64 % mod.value(), dot_product_mod(arr1, 64, arr2, mod));
+
+            mod = get_prime(1024, 62);
+            for (size_t i = 0; i < 64; i++)
+            {
+                arr1[i] = mod.value() - 1;
+                arr2[i] = mod.value() - 1;
+            }
+
+            ASSERT_EQ(0, dot_product_mod(arr1, 0, arr2, mod));
+            ASSERT_EQ(1, dot_product_mod(arr1, 1, arr2, mod));
+            ASSERT_EQ(2, dot_product_mod(arr1, 2, arr2, mod));
+            ASSERT_EQ(15, dot_product_mod(arr1, 15, arr2, mod));
+            ASSERT_EQ(16, dot_product_mod(arr1, 16, arr2, mod));
+            ASSERT_EQ(17, dot_product_mod(arr1, 17, arr2, mod));
+            ASSERT_EQ(32, dot_product_mod(arr1, 32, arr2, mod));
+            ASSERT_EQ(64, dot_product_mod(arr1, 64, arr2, mod));
         }
     } // namespace util
 } // namespace SEALTest

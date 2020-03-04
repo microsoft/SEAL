@@ -213,11 +213,11 @@ namespace seal
         }
 
         void apply_galois(
-            const std::uint64_t *input, int coeff_count_power, std::uint64_t galois_elt, const SmallModulus &modulus,
+            const std::uint64_t *operand, int coeff_count_power, std::uint64_t galois_elt, const SmallModulus &modulus,
             std::uint64_t *result);
 
         void apply_galois_ntt(
-            const std::uint64_t *input, int coeff_count_power, std::uint64_t galois_elt, std::uint64_t *result);
+            const std::uint64_t *operand, int coeff_count_power, std::uint64_t galois_elt, std::uint64_t *result);
 
         void dyadic_product_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,

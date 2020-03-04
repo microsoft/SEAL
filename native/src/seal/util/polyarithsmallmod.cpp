@@ -295,21 +295,21 @@ namespace seal
         }
 
         void apply_galois(
-            const uint64_t *input, int coeff_count_power, uint64_t galois_elt, const SmallModulus &modulus,
+            const uint64_t *operand, int coeff_count_power, uint64_t galois_elt, const SmallModulus &modulus,
             uint64_t *result)
         {
 #ifdef SEAL_DEBUG
-            if (input == nullptr)
+            if (operand == nullptr)
             {
-                throw invalid_argument("input");
+                throw invalid_argument("operand");
             }
             if (result == nullptr)
             {
                 throw invalid_argument("result");
             }
-            if (input == result)
+            if (operand == result)
             {
-                throw invalid_argument("result cannot point to the same value as input");
+                throw invalid_argument("result cannot point to the same value as operand");
             }
             if (coeff_count_power < get_power_of_two(SEAL_POLY_MOD_DEGREE_MIN) ||
                 coeff_count_power > get_power_of_two(SEAL_POLY_MOD_DEGREE_MAX))
@@ -332,7 +332,7 @@ namespace seal
             {
                 uint64_t index_raw = i * galois_elt;
                 uint64_t index = index_raw & coeff_count_minus_one;
-                uint64_t result_value = *input++;
+                uint64_t result_value = *operand++;
                 if ((index_raw >> coeff_count_power) & 1)
                 {
                     // Explicit inline
@@ -344,20 +344,20 @@ namespace seal
             }
         }
 
-        void apply_galois_ntt(const uint64_t *input, int coeff_count_power, uint64_t galois_elt, uint64_t *result)
+        void apply_galois_ntt(const uint64_t *operand, int coeff_count_power, uint64_t galois_elt, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
-            if (input == nullptr)
+            if (operand == nullptr)
             {
-                throw invalid_argument("input");
+                throw invalid_argument("operand");
             }
             if (result == nullptr)
             {
                 throw invalid_argument("result");
             }
-            if (input == result)
+            if (operand == result)
             {
-                throw invalid_argument("result cannot point to the same value as input");
+                throw invalid_argument("result cannot point to the same value as operand");
             }
             if (coeff_count_power <= 0)
             {
@@ -377,7 +377,7 @@ namespace seal
                 uint64_t index_raw = galois_elt * (2 * reversed + 1);
                 index_raw &= m_minus_one;
                 uint64_t index = reverse_bits((index_raw - 1) >> 1, coeff_count_power);
-                result[i] = input[index];
+                result[i] = operand[index];
             }
         }
 

@@ -6,6 +6,7 @@
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
 #include <random>
+#include <tuple>
 
 using namespace std;
 
@@ -13,108 +14,6 @@ namespace seal
 {
     namespace util
     {
-        bool is_primitive_root(uint64_t root, uint64_t degree, const SmallModulus &modulus)
-        {
-#ifdef SEAL_DEBUG
-            if (modulus.bit_count() < 2)
-            {
-                throw invalid_argument("modulus");
-            }
-            if (root >= modulus.value())
-            {
-                throw out_of_range("operand");
-            }
-            if (get_power_of_two(degree) < 1)
-            {
-                throw invalid_argument("degree must be a power of two and at least two");
-            }
-#endif
-            if (root == 0)
-            {
-                return false;
-            }
-
-            // We check if root is a degree-th root of unity in integers modulo
-            // modulus, where degree is a power of two.
-            // It suffices to check that root^(degree/2) is -1 modulo modulus.
-            return exponentiate_uint_mod(root, degree >> 1, modulus) == (modulus.value() - 1);
-        }
-
-        bool try_primitive_root(uint64_t degree, const SmallModulus &modulus, uint64_t &destination)
-        {
-#ifdef SEAL_DEBUG
-            if (modulus.bit_count() < 2)
-            {
-                throw invalid_argument("modulus");
-            }
-            if (get_power_of_two(degree) < 1)
-            {
-                throw invalid_argument("degree must be a power of two and at least two");
-            }
-#endif
-            // We need to divide modulus-1 by degree to get the size of the
-            // quotient group
-            uint64_t size_entire_group = modulus.value() - 1;
-
-            // Compute size of quotient group
-            uint64_t size_quotient_group = size_entire_group / degree;
-
-            // size_entire_group must be divisible by degree, or otherwise the
-            // primitive root does not exist in integers modulo modulus
-            if (size_entire_group - size_quotient_group * degree != 0)
-            {
-                return false;
-            }
-
-            // For randomness
-            random_device rd;
-
-            int attempt_counter = 0;
-            int attempt_counter_max = 100;
-            do
-            {
-                attempt_counter++;
-
-                // Set destination to be a random number modulo modulus
-                destination = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
-                destination %= modulus.value();
-
-                // Raise the random number to power the size of the quotient
-                // to get rid of irrelevant part
-                destination = exponentiate_uint_mod(destination, size_quotient_group, modulus);
-            } while (!is_primitive_root(destination, degree, modulus) && (attempt_counter < attempt_counter_max));
-
-            return is_primitive_root(destination, degree, modulus);
-        }
-
-        bool try_minimal_primitive_root(uint64_t degree, const SmallModulus &modulus, uint64_t &destination)
-        {
-            uint64_t root;
-            if (!try_primitive_root(degree, modulus, root))
-            {
-                return false;
-            }
-            uint64_t generator_sq = multiply_uint_uint_mod(root, root, modulus);
-            uint64_t current_generator = root;
-
-            // destination is going to always contain the smallest generator found
-            for (size_t i = 0; i < degree; i++)
-            {
-                // If our current generator is strictly smaller than destination,
-                // update
-                if (current_generator < root)
-                {
-                    root = current_generator;
-                }
-
-                // Then move on to the next generator
-                current_generator = multiply_uint_uint_mod(current_generator, generator_sq, modulus);
-            }
-
-            destination = root;
-            return true;
-        }
-
         uint64_t exponentiate_uint_mod(uint64_t operand, uint64_t exponent, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -249,6 +148,52 @@ namespace seal
                 }
                 return galois_elt;
             }
+        }
+
+        uint64_t dot_product_mod(
+            const uint64_t *operand1, size_t count, const uint64_t *operand2, const SmallModulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (!operand1 && count)
+            {
+                throw invalid_argument("operand1");
+            }
+            if (!operand2 && count)
+            {
+                throw invalid_argument("operand2");
+            }
+            if (modulus.is_zero())
+            {
+                throw invalid_argument("modulus");
+            }
+#endif
+            // Product of two numbers is up to 62 bit + 62 bit = 124 bit, so can sum up to 16 of them
+            // with no reduction.
+            size_t lazy_reduction_summand_bound = 16;
+
+            uint64_t result = 0;
+
+            // We may have to perform multiple lazy reductions depending on count
+            size_t r = lazy_reduction_summand_bound;
+            unsigned long long accumulator[2]{ 0, 0 };
+            for (size_t i = 0; i < count; i++, operand1++, operand2++)
+            {
+                // Compute current product
+                unsigned long long qword[2];
+                multiply_uint64(*operand1, *operand2, qword);
+
+                // 128-bit addition to accumulator; ignore carry bit since it can never be set
+                add_uint128(qword, accumulator, accumulator);
+
+                // Lazy reduction
+                if (!--r)
+                {
+                    r = lazy_reduction_summand_bound;
+                    accumulator[0] = barrett_reduce_128(accumulator, modulus);
+                    accumulator[1] = 0;
+                }
+            }
+            return barrett_reduce_128(accumulator, modulus);
         }
     } // namespace util
 } // namespace seal

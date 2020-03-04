@@ -4,6 +4,8 @@
 #include "seal/memorymanager.h"
 #include "seal/util/baseconverter.h"
 #include "seal/util/numth.h"
+#include <cstdint>
+#include <vector>
 #include "gtest/gtest.h"
 
 using namespace seal::util;
@@ -14,7 +16,7 @@ namespace SEALTest
 {
     namespace util
     {
-        TEST(BaseConverter, BaseConverterConstructor)
+        TEST(BaseConverter, Initialize)
         {
             int poly_modulus_degree = 32;
             int coeff_base_count = 4;
@@ -23,8 +25,87 @@ namespace SEALTest
             SmallModulus plain_t = 65537;
             vector<SmallModulus> coeff_base = get_primes(poly_modulus_degree, prime_bit_count, coeff_base_count);
 
-            BaseConverter base_converter(coeff_base, poly_modulus_degree, plain_t, MemoryManager::GetPool());
-            ASSERT_TRUE(base_converter.is_generated());
+            BaseConverter base_converter(poly_modulus_degree, coeff_base, plain_t, MemoryManager::GetPool());
+            ASSERT_TRUE(base_converter.is_initialized());
+
+            // Succeeds with 0 plain_modulus (case of CKKS)
+            ASSERT_TRUE(base_converter.initialize(poly_modulus_degree, coeff_base, 0));
+
+            // Fails when poly_modulus_degree is too small
+            ASSERT_FALSE(base_converter.initialize(1, coeff_base, plain_t));
+
+            // Fails when coeff_modulus is not relatively prime
+            coeff_base.push_back(coeff_base.back());
+            ASSERT_FALSE(base_converter.initialize(poly_modulus_degree, coeff_base, plain_t));
+            coeff_base.pop_back();
+        }
+
+        TEST(BaseConverter, FastBConvMTilde)
+        {
+            // This function multiplies an input array with m_tilde (modulo q-base) and subsequently
+            // performs base conversion to Bsk U {m_tilde}.
+
+            SmallModulus plain_t = 0;
+            auto pool = MemoryManager::GetPool();
+
+            {
+                size_t poly_modulus_degree = 2;
+                size_t coeff_mod_count = 1;
+                BaseConverter base_converter(poly_modulus_degree, { 3 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(poly_modulus_degree * coeff_mod_count);
+                vector<uint64_t> out(poly_modulus_degree * base_converter.base_Bsk_m_tilde_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.fastbconv_m_tilde(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                in[0] = 1;
+                in[1] = 2;
+                base_converter.fastbconv_m_tilde(in.data(), out.data(), pool);
+                uint64_t temp = base_converter.m_tilde().value() % 3;
+                uint64_t temp2 = (2 * base_converter.m_tilde().value()) % 3;
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[0].value(), out[0]);
+                ASSERT_EQ(temp2 % base_converter.base_Bsk_m_tilde()[0].value(), out[1]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[1].value(), out[2]);
+                ASSERT_EQ(temp2 % base_converter.base_Bsk_m_tilde()[1].value(), out[3]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[2].value(), out[4]);
+                ASSERT_EQ(temp2 % base_converter.base_Bsk_m_tilde()[2].value(), out[5]);
+            }
+            {
+                size_t poly_modulus_degree = 2;
+                size_t coeff_mod_count = 2;
+                BaseConverter base_converter(poly_modulus_degree, { 3, 5 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(poly_modulus_degree * coeff_mod_count);
+                vector<uint64_t> out(poly_modulus_degree * base_converter.base_Bsk_m_tilde_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.fastbconv_m_tilde(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                in[0] = 1;
+                in[1] = 0;
+                in[2] = 2;
+                in[3] = 0;
+                base_converter.fastbconv_m_tilde(in.data(), out.data(), pool);
+                uint64_t m_tilde = base_converter.m_tilde().value();
+                uint64_t temp = ((2 * m_tilde) % 3) * 5 + ((4 * m_tilde) % 5) * 3;
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[0].value(), out[0]);
+                ASSERT_EQ(0, out[1]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[1].value(), out[2]);
+                ASSERT_EQ(0, out[3]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[2].value(), out[4]);
+                ASSERT_EQ(0, out[5]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[3].value(), out[6]);
+                ASSERT_EQ(0, out[7]);
+            }
         }
 
         // TEST(BaseConverter, FastBConv)

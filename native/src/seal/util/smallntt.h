@@ -28,36 +28,39 @@ namespace seal
             SmallNTTTables(
                 int coeff_count_power, const SmallModulus &modulus, MemoryPoolHandle pool = MemoryManager::GetPool());
 
-            SEAL_NODISCARD inline bool is_generated() const
+            SEAL_NODISCARD inline bool is_initialized() const noexcept
             {
-                return generated_;
+                return is_initialized_;
             }
 
-            bool generate(int coeff_count_power, const SmallModulus &modulus);
+            SEAL_NODISCARD inline operator bool() const noexcept
+            {
+                return is_initialized();
+            }
+
+            bool initialize(int coeff_count_power, const SmallModulus &modulus);
 
             void reset();
 
             SEAL_NODISCARD inline std::uint64_t get_root() const
             {
-#ifdef SEAL_DEBUG
-                if (!generated_)
+                if (!is_initialized_)
                 {
-                    throw std::logic_error("tables are not generated");
+                    throw std::logic_error("SmallNTTTables is uninitialized");
                 }
-#endif
                 return root_;
             }
 
             SEAL_NODISCARD inline auto get_from_root_powers(std::size_t index) const -> std::uint64_t
             {
+                if (!is_initialized_)
+                {
+                    throw std::logic_error("SmallNTTTables is uninitialized");
+                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
                     throw std::out_of_range("index");
-                }
-                if (!generated_)
-                {
-                    throw std::logic_error("tables are not generated");
                 }
 #endif
                 return root_powers_[index];
@@ -65,14 +68,14 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_from_scaled_root_powers(std::size_t index) const -> std::uint64_t
             {
+                if (!is_initialized_)
+                {
+                    throw std::logic_error("SmallNTTTables is uninitialized");
+                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
                     throw std::out_of_range("index");
-                }
-                if (!generated_)
-                {
-                    throw std::logic_error("tables are not generated");
                 }
 #endif
                 return scaled_root_powers_[index];
@@ -80,14 +83,14 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_from_inv_root_powers(std::size_t index) const -> std::uint64_t
             {
+                if (!is_initialized_)
+                {
+                    throw std::logic_error("SmallNTTTables is uninitialized");
+                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
                     throw std::out_of_range("index");
-                }
-                if (!generated_)
-                {
-                    throw std::logic_error("tables are not generated");
                 }
 #endif
                 return inv_root_powers_[index];
@@ -95,14 +98,14 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers(std::size_t index) const -> std::uint64_t
             {
+                if (!is_initialized_)
+                {
+                    throw std::logic_error("SmallNTTTables is uninitialized");
+                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
                     throw std::out_of_range("index");
-                }
-                if (!generated_)
-                {
-                    throw std::logic_error("tables are not generated");
                 }
 #endif
                 return scaled_inv_root_powers_[index];
@@ -110,14 +113,14 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_from_inv_root_powers_div_two(std::size_t index) const -> std::uint64_t
             {
+                if (!is_initialized_)
+                {
+                    throw std::logic_error("SmallNTTTables is uninitialized");
+                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
                     throw std::out_of_range("index");
-                }
-                if (!generated_)
-                {
-                    throw std::logic_error("tables are not generated");
                 }
 #endif
                 return inv_root_powers_div_two_[index];
@@ -125,14 +128,14 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers_div_two(std::size_t index) const -> std::uint64_t
             {
+                if (!is_initialized_)
+                {
+                    throw std::logic_error("SmallNTTTables is uninitialized");
+                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
                     throw std::out_of_range("index");
-                }
-                if (!generated_)
-                {
-                    throw std::logic_error("tables are not generated");
                 }
 #endif
                 return scaled_inv_root_powers_div_two_[index];
@@ -140,12 +143,10 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_inv_degree_modulo() const -> const std::uint64_t *
             {
-#ifdef SEAL_DEBUG
-                if (!generated_)
+                if (!is_initialized_)
                 {
-                    throw std::logic_error("tables are not generated");
+                    throw std::logic_error("SmallNTTTables is uninitialized");
                 }
-#endif
                 return &inv_degree_modulo_;
             }
 
@@ -183,21 +184,21 @@ namespace seal
 
             MemoryPoolHandle pool_;
 
-            bool generated_ = false;
+            bool is_initialized_ = false;
 
             std::uint64_t root_ = 0;
 
             // Size coeff_count_
-            Pointer<decltype(root_)> root_powers_;
+            Pointer<std::uint64_t> root_powers_;
 
             // Size coeff_count_
-            Pointer<decltype(root_)> scaled_root_powers_;
+            Pointer<std::uint64_t> scaled_root_powers_;
 
             // Size coeff_count_
-            Pointer<decltype(root_)> inv_root_powers_div_two_;
+            Pointer<std::uint64_t> inv_root_powers_div_two_;
 
             // Size coeff_count_
-            Pointer<decltype(root_)> scaled_inv_root_powers_div_two_;
+            Pointer<std::uint64_t> scaled_inv_root_powers_div_two_;
 
             int coeff_count_power_ = 0;
 
@@ -206,10 +207,10 @@ namespace seal
             SmallModulus modulus_;
 
             // Size coeff_count_
-            Pointer<decltype(root_)> inv_root_powers_;
+            Pointer<std::uint64_t> inv_root_powers_;
 
             // Size coeff_count_
-            Pointer<decltype(root_)> scaled_inv_root_powers_;
+            Pointer<std::uint64_t> scaled_inv_root_powers_;
 
             std::uint64_t inv_degree_modulo_ = 0;
         };

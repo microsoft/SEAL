@@ -278,7 +278,7 @@ namespace seal
         // for negative power of 3 mod m (X -> X^{-3^k})
         uint64_t two_power_of_three = 3;
         uint64_t neg_two_power_of_three = 0;
-        try_mod_inverse(3, m, neg_two_power_of_three);
+        try_invert_uint_mod(3, m, neg_two_power_of_three);
         for (int i = 0; i < logn - 1; i++)
         {
             galois_elts.push_back(two_power_of_three);
