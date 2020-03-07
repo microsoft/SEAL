@@ -65,7 +65,7 @@ namespace seal
             }
 #endif
             unsigned char carry = add_uint64(operand1[0], operand2[0], result);
-            return add_uint64(operand1[1], operand2[1], carry, result + 1);
+            return add_uint64(operand1[1], operand2[1], carry, reinterpret_cast<unsigned long long *>(result + 1));
         }
 
         inline unsigned char add_uint_uint(
