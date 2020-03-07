@@ -47,8 +47,8 @@ namespace seal
             return static_cast<unsigned char>(*result < operand1);
         }
 
-        inline unsigned char add_uint128(
-            const std::uint64_t *operand1, const std::uint64_t *operand2, std::uint64_t *result)
+        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        inline unsigned char add_uint128(const T *operand1, const S *operand2, unsigned long long *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1)
@@ -65,7 +65,7 @@ namespace seal
             }
 #endif
             unsigned char carry = add_uint64(operand1[0], operand2[0], result);
-            return add_uint64(operand1[1], operand2[1], carry, reinterpret_cast<unsigned long long *>(result + 1));
+            return add_uint64(operand1[1], operand2[1], carry, result + 1);
         }
 
         inline unsigned char add_uint_uint(

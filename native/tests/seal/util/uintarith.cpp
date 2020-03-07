@@ -151,15 +151,16 @@ namespace SEALTest
                 destination[0] = val0;
                 destination[1] = val1;
             };
-            
-            auto assert_uint128_eq = [](uint64_t *test, uint64_t expect0, uint64_t expect1) {
+
+            auto assert_uint128_eq = [](unsigned long long *test, unsigned long long expect0,
+                                        unsigned long long expect1) {
                 ASSERT_EQ(expect0, test[0]);
                 ASSERT_EQ(expect1, test[1]);
             };
 
             uint64_t operand1[2]{ 0, 0 };
             uint64_t operand2[2]{ 0, 0 };
-            uint64_t result[2]{ 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL };
+            unsigned long long result[2]{ 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL };
             ASSERT_FALSE(add_uint128(operand1, operand2, result));
             ASSERT_EQ(0, result[0] | result[1]);
 
@@ -173,7 +174,6 @@ namespace SEALTest
             ASSERT_FALSE(add_uint128(operand1, operand2, result));
             assert_uint128_eq(result, 0, 1);
 
-            
             set_uint128(operand1, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL);
             set_uint128(operand2, 1, 0);
             ASSERT_TRUE(add_uint128(operand1, operand2, result));
