@@ -834,6 +834,28 @@ namespace seal
             SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64);
         }
 
+        void multiply_uint_uint(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
+            std::size_t operand2_uint64_count, std::size_t result_uint64_count, std::uint64_t *result);
+
+        inline void multiply_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count,
+            std::uint64_t *result)
+        {
+            multiply_uint_uint(operand1, uint64_count, operand2, uint64_count, uint64_count * 2, result);
+        }
+
+        void multiply_uint_uint64(
+            const std::uint64_t *operand1, std::size_t operand1_uint64_count, std::uint64_t operand2,
+            std::size_t result_uint64_count, std::uint64_t *result);
+
+        inline void multiply_truncate_uint_uint(
+            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count,
+            std::uint64_t *result)
+        {
+            multiply_uint_uint(operand1, uint64_count, operand2, uint64_count, uint64_count, result);
+        }
+
         template <typename T, typename = std::enable_if<is_uint64_v<T>>>
         inline void multiply_many_uint64(T *operands, std::size_t count, T *result, MemoryPool &pool)
         {
@@ -915,28 +937,6 @@ namespace seal
                     set_uint_uint(temp_mpi.get(), i + 1, result);
                 }
             }
-        }
-
-        void multiply_uint_uint(
-            const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count, std::size_t result_uint64_count, std::uint64_t *result);
-
-        inline void multiply_uint_uint(
-            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count,
-            std::uint64_t *result)
-        {
-            multiply_uint_uint(operand1, uint64_count, operand2, uint64_count, uint64_count * 2, result);
-        }
-
-        void multiply_uint_uint64(
-            const std::uint64_t *operand1, std::size_t operand1_uint64_count, std::uint64_t operand2,
-            std::size_t result_uint64_count, std::uint64_t *result);
-
-        inline void multiply_truncate_uint_uint(
-            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count,
-            std::uint64_t *result)
-        {
-            multiply_uint_uint(operand1, uint64_count, operand2, uint64_count, uint64_count, result);
         }
 
         void divide_uint_uint_inplace(
