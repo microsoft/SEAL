@@ -4,6 +4,7 @@
 #include "seal/memorymanager.h"
 #include "seal/util/baseconverter.h"
 #include "seal/util/numth.h"
+#include <cmath>
 #include <cstdint>
 #include <vector>
 #include "gtest/gtest.h"
@@ -16,7 +17,7 @@ namespace SEALTest
 {
     namespace util
     {
-        TEST(BaseConverter, Initialize)
+        TEST(BaseConverterTest, Initialize)
         {
             int poly_modulus_degree = 32;
             int coeff_base_count = 4;
@@ -40,7 +41,7 @@ namespace SEALTest
             coeff_base.pop_back();
         }
 
-        TEST(BaseConverter, FastBConvMTilde)
+        TEST(BaseConverterTest, FastBConvMTilde)
         {
             // This function multiplies an input array with m_tilde (modulo q-base) and subsequently
             // performs base conversion to Bsk U {m_tilde}.
@@ -50,11 +51,10 @@ namespace SEALTest
 
             {
                 size_t poly_modulus_degree = 2;
-                size_t coeff_mod_count = 1;
                 BaseConverter base_converter(poly_modulus_degree, { 3 }, plain_t, pool);
                 ASSERT_TRUE(base_converter.is_initialized());
 
-                vector<uint64_t> in(poly_modulus_degree * coeff_mod_count);
+                vector<uint64_t> in(poly_modulus_degree * base_converter.base_q_size());
                 vector<uint64_t> out(poly_modulus_degree * base_converter.base_Bsk_m_tilde_size());
                 set_zero_uint(in.size(), in.data());
                 base_converter.fastbconv_m_tilde(in.data(), out.data(), pool);
@@ -66,8 +66,12 @@ namespace SEALTest
                 in[0] = 1;
                 in[1] = 2;
                 base_converter.fastbconv_m_tilde(in.data(), out.data(), pool);
+
+                // These are results for fase base conversion for a length-2 array ((m_tilde), (2*m_tilde))
+                // before reduction to target base.
                 uint64_t temp = base_converter.m_tilde().value() % 3;
                 uint64_t temp2 = (2 * base_converter.m_tilde().value()) % 3;
+
                 ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[0].value(), out[0]);
                 ASSERT_EQ(temp2 % base_converter.base_Bsk_m_tilde()[0].value(), out[1]);
                 ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[1].value(), out[2]);
@@ -91,521 +95,543 @@ namespace SEALTest
                 }
 
                 in[0] = 1;
-                in[1] = 0;
+                in[1] = 1;
                 in[2] = 2;
-                in[3] = 0;
+                in[3] = 2;
                 base_converter.fastbconv_m_tilde(in.data(), out.data(), pool);
                 uint64_t m_tilde = base_converter.m_tilde().value();
+
+                // This is the result of fast base conversion for a length-2 array
+                // ((m_tilde, 2*m_tilde), (m_tilde, 2*m_tilde)) before reduction to target base.
                 uint64_t temp = ((2 * m_tilde) % 3) * 5 + ((4 * m_tilde) % 5) * 3;
+
                 ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[0].value(), out[0]);
-                ASSERT_EQ(0, out[1]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[0].value(), out[1]);
                 ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[1].value(), out[2]);
-                ASSERT_EQ(0, out[3]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[1].value(), out[3]);
                 ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[2].value(), out[4]);
-                ASSERT_EQ(0, out[5]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[2].value(), out[5]);
                 ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[3].value(), out[6]);
-                ASSERT_EQ(0, out[7]);
+                ASSERT_EQ(temp % base_converter.base_Bsk_m_tilde()[3].value(), out[7]);
             }
         }
 
-        // TEST(BaseConverter, FastBConv)
-        //{
-        //    {
-        //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //        vector<SmallModulus> coeff_base;
-        //        vector<SmallModulus> aux_base;
-        //        SmallModulus plain_t = small_mods[9];
-        //        int coeff_base_count = 2;
-        //        int aux_base_count = 2;
-
-        //        for (int i = 0; i < coeff_base_count; ++i)
-        //        {
-        //            coeff_base.push_back(small_mods[i]);
-        //            aux_base.push_back(small_mods[i + coeff_base_count + 2]);
-        //        }
-
-        //        BaseConverter base_converter(coeff_base, 1, plain_t);
-        //        Pointer input(allocate_uint(2, pool));
-        //        Pointer output(allocate_uint(3, pool));
-
-        //        // the composed input is 0xffffffffffffff00ffffffffffffff
-
-        //        input[0] = 4395513236581707780;
-        //        input[1] = 4395513390924464132;
-
-        //        output[0] = 0xFFFFFFFFFFFFFFFF;
-        //        output[1] = 0xFFFFFFFFFFFFFFFF;
-        //        output[2] = 0;
-
-        //        Assert::IsTrue(base_converter.fastbconv(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(3116074317392112723), output[0]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1254200639185090240), output[1]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3528328721557038672), output[2]);
-        //    }
-
-        //    {
-        //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //        vector<SmallModulus> coeff_base;
-        //        vector<SmallModulus> aux_base;
-        //        SmallModulus mtilde = small_mods[10];
-        //        SmallModulus msk = small_mods[11];
-        //        SmallModulus plain_t = small_mods[9];
-        //        int coeff_base_count = 2;
-        //        int aux_base_count = 2;
-
-        //        for (int i = 0; i < coeff_base_count; ++i)
-        //        {
-        //            coeff_base.push_back(small_mods[i]);
-        //            aux_base.push_back(small_mods[i + coeff_base_count + 2]);
-        //        }
-        //        BaseConverter base_converter(coeff_base, 4, plain_t);
-        //        Pointer input(allocate_uint(8, pool));
-        //        Pointer output(allocate_uint(12, pool));
-
-        //        // the composed input is 0xffffffffffffff00ffffffffffffff for all coeffs
-        //        // mod q1
-        //        input[0] = 4395513236581707780; // cons
-        //        input[1] = 4395513236581707780; // x
-        //        input[2] = 4395513236581707780; // x^2
-        //        input[3] = 4395513236581707780; // x^3
-
-        //        //mod q2
-        //        input[4] = 4395513390924464132;
-        //        input[5] = 4395513390924464132;
-        //        input[6] = 4395513390924464132;
-        //        input[7] = 4395513390924464132;
-
-        //        output[0] = 0xFFFFFFFFFFFFFFFF;
-        //        output[1] = 0xFFFFFFFFFFFFFFFF;
-        //        output[2] = 0;
-
-        //        Assert::IsTrue(base_converter.fastbconv(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(3116074317392112723), output[0]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3116074317392112723), output[1]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3116074317392112723), output[2]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3116074317392112723), output[3]);
-
-        //        Assert::AreEqual(static_cast<uint64_t>(1254200639185090240), output[4]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1254200639185090240), output[5]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1254200639185090240), output[6]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1254200639185090240), output[7]);
-
-        //        Assert::AreEqual(static_cast<uint64_t>(3528328721557038672), output[8]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3528328721557038672), output[9]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3528328721557038672), output[10]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3528328721557038672), output[11]);
-        //    }
-        //}
-
-        // TEST(BaseConverter, FastBConvSK)
-        //{
-        //    {
-        //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //        vector<SmallModulus> coeff_base;
-        //        vector<SmallModulus> aux_base;
-        //        SmallModulus mtilde = small_mods[10];
-        //        SmallModulus msk = small_mods[4];
-        //        SmallModulus plain_t = small_mods[9];
-
-        //        int coeff_base_count = 2;
-        //        int aux_base_count = 2;
-        //        for (int i = 0; i < coeff_base_count; ++i)
-        //        {
-        //            coeff_base.push_back(small_mods[i]);
-        //            aux_base.push_back(small_mods[i + coeff_base_count]);
-        //        }
-
-        //        BaseConverter base_converter(coeff_base, 1, plain_t);
-        //        Pointer input(allocate_uint(3, pool));
-        //        Pointer output(allocate_uint(2, pool));
-
-        //        // The composed input is 0xffffffffffffff00ffffffffffffff
-
-        //        input[0] = 4395583330278772740;
-        //        input[1] = 4396634741790752772;
-        //        input[2] = 4396375252835237892;    // mod msk
-
-        //        output[0] = 0xFFFFFFFFFFFFFFF;
-        //        output[1] = 0xFFFFFFFFFFFFFFF;
-
-        //        Assert::IsTrue(base_converter.fastbconv_sk(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(2494482839790051254), output[0]);
-        //        Assert::AreEqual(static_cast<uint64_t>(218180408843610743), output[1]);
-        //    }
-
-        //    {
-        //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //        vector<SmallModulus> coeff_base;
-        //        vector<SmallModulus> aux_base;
-        //        SmallModulus mtilde = small_mods[10];
-        //        SmallModulus msk = small_mods[4];
-        //        SmallModulus plain_t = small_mods[9];
-
-        //        int coeff_base_count = 2;
-        //        int aux_base_count = 2;
-        //        for (int i = 0; i < coeff_base_count; ++i)
-        //        {
-        //            coeff_base.push_back(small_mods[i]);
-        //            aux_base.push_back(small_mods[i + coeff_base_count]);
-        //        }
-
-        //        BaseConverter base_converter(coeff_base, 4, plain_t);
-        //        Pointer input(allocate_uint(12, pool));
-        //        Pointer output(allocate_uint(8, pool));
-
-        //        // The composed input is 0xffffffffffffff00ffffffffffffff
-
-        //        input[0] = 4395583330278772740;    // cons
-        //        input[1] = 4395583330278772740; // x
-        //        input[2] = 4395583330278772740; // x^2
-        //        input[3] = 4395583330278772740; // x^3
-
-        //        input[4] = 4396634741790752772;
-        //        input[5] = 4396634741790752772;
-        //        input[6] = 4396634741790752772;
-        //        input[7] = 4396634741790752772;
-
-        //        input[8] = 4396375252835237892;    // mod msk
-        //        input[9] = 4396375252835237892;
-        //        input[10] = 4396375252835237892;
-        //        input[11] = 4396375252835237892;
-
-        //        output[0] = 0xFFFFFFFFFFFFFFF;
-        //        output[1] = 0xFFFFFFFFFFFFFFF;
-
-        //        Assert::IsTrue(base_converter.fastbconv_sk(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(2494482839790051254), output[0]); //mod q1
-        //        Assert::AreEqual(static_cast<uint64_t>(2494482839790051254), output[1]);
-        //        Assert::AreEqual(static_cast<uint64_t>(2494482839790051254), output[2]);
-        //        Assert::AreEqual(static_cast<uint64_t>(2494482839790051254), output[3]);
-
-        //        Assert::AreEqual(static_cast<uint64_t>(218180408843610743), output[4]); //mod q2
-        //        Assert::AreEqual(static_cast<uint64_t>(218180408843610743), output[5]);
-        //        Assert::AreEqual(static_cast<uint64_t>(218180408843610743), output[6]);
-        //        Assert::AreEqual(static_cast<uint64_t>(218180408843610743), output[7]);
-        //    }
-
-        //}
-
-        // TEST(BaseConverter, MontRq)
-        //{
-        //    {
-        //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //        vector<SmallModulus> coeff_base;
-        //        vector<SmallModulus> aux_base;
-        //        SmallModulus mtilde = small_mods[5];
-        //        SmallModulus msk = small_mods[4];
-        //        SmallModulus plain_t = small_mods[9];
-
-        //        int coeff_base_count = 2;
-        //        int aux_base_count = 2;
-        //        for (int i = 0; i < coeff_base_count; ++i)
-        //        {
-        //            coeff_base.push_back(small_mods[i]);
-        //            aux_base.push_back(small_mods[i + coeff_base_count]);
-        //        }
-
-        //        BaseConverter base_converter(coeff_base, 1, plain_t);
-        //        Pointer input(allocate_uint(4, pool));
-        //        Pointer output(allocate_uint(3, pool));
-
-        //        // The composed input is 0xffffffffffffff00ffffffffffffff
-
-        //        input[0] = 4395583330278772740;  // mod m1
-        //        input[1] = 4396634741790752772;  // mod m2
-        //        input[2] = 4396375252835237892;     // mod msk
-        //        input[3] = 4396146554501595140;  // mod m_tilde
-
-        //        output[0] = 0xfffffffff;
-        //        output[1] = 0x00fffffff;
-        //        output[2] = 0;
-
-        //        Assert::IsTrue(base_converter.mont_rq(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(1412154008057360306), output[0]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3215947095329058299), output[1]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1636465626706639696), output[2]);
-        //    }
-        //    {
-        //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //        vector<SmallModulus> coeff_base;
-        //        vector<SmallModulus> aux_base;
-        //        SmallModulus mtilde = small_mods[5];
-        //        SmallModulus msk = small_mods[4];
-        //        SmallModulus plain_t = small_mods[9];
-
-        //        int coeff_base_count = 2;
-        //        int aux_base_count = 2;
-        //        for (int i = 0; i < coeff_base_count; ++i)
-        //        {
-        //            coeff_base.push_back(small_mods[i]);
-        //            aux_base.push_back(small_mods[i + coeff_base_count]);
-        //        }
-
-        //        BaseConverter base_converter(coeff_base, 3, plain_t);
-        //        Pointer input(allocate_uint(12, pool));
-        //        Pointer output(allocate_uint(9, pool));
-
-        //        // The composed input is 0xffffffffffffff00ffffffffffffff for all coeffs
-
-        //        input[0] = 4395583330278772740;  // cons mod m1
-        //        input[1] = 4395583330278772740;  // x mod m1
-        //        input[2] = 4395583330278772740;  // x^2 mod m1
-
-        //        input[3] = 4396634741790752772;  // cons mod m2
-        //        input[4] = 4396634741790752772;  // x mod m2
-        //        input[5] = 4396634741790752772;  // x^2 mod m2
-
-        //        input[6] = 4396375252835237892;     // cons mod msk
-        //        input[7] = 4396375252835237892;     // x mod msk
-        //        input[8] = 4396375252835237892;     // x^2 mod msk
-
-        //        input[9] = 4396146554501595140;  // cons mod m_tilde
-        //        input[10] = 4396146554501595140;  // x mod m_tilde
-        //        input[11] = 4396146554501595140;  // x^2 mod m_tilde
-
-        //        output[0] = 0xfffffffff;
-        //        output[1] = 0x00fffffff;
-        //        output[2] = 0;
-
-        //        Assert::IsTrue(base_converter.mont_rq(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(1412154008057360306), output[0]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1412154008057360306), output[1]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1412154008057360306), output[2]);
-
-        //        Assert::AreEqual(static_cast<uint64_t>(3215947095329058299), output[3]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3215947095329058299), output[4]);
-        //        Assert::AreEqual(static_cast<uint64_t>(3215947095329058299), output[5]);
-
-        //        Assert::AreEqual(static_cast<uint64_t>(1636465626706639696), output[6]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1636465626706639696), output[7]);
-        //        Assert::AreEqual(static_cast<uint64_t>(1636465626706639696), output[8]);
-        //    }
-        //}
-
-        // TEST(BaseConverter, FastFloor)
-        //{
-        //    {
-        //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //        vector<SmallModulus> coeff_base;
-        //        vector<SmallModulus> aux_base;
-        //        SmallModulus mtilde = small_mods[5];
-        //        SmallModulus msk = small_mods[4];
-        //        SmallModulus plain_t = small_mods[9];
-
-        //        int coeff_base_count = 2;
-        //        int aux_base_count = 2;
-        //        for (int i = 0; i < coeff_base_count; ++i)
-        //        {
-        //            coeff_base.push_back(small_mods[i]);
-        //            aux_base.push_back(small_mods[i + coeff_base_count]);
-        //        }
-
-        //        BaseConverter base_converter(coeff_base, 1, plain_t);
-        //        Pointer input(allocate_uint(5, pool));
-        //        Pointer output(allocate_uint(3, pool));
-
-        //        // The composed input is 0xffffffffffffff00ffffffffffffff
-
-        //        input[0] = 4395513236581707780;        // mod q1
-        //        input[1] = 4395513390924464132;        // mod q2
-        //        input[2] = 4395583330278772740;        // mod m1
-        //        input[3] = 4396634741790752772;        // mod m2
-        //        input[4] = 4396375252835237892;        // mod msk
-
-        //        output[0] = 0xfffffffff;
-        //        output[1] = 0x00fffffff;
-        //        output[2] = 0;
-
-        //        Assert::IsTrue(base_converter.fast_floor(input.get(), output.get()));
-
-        //        // The result for all moduli is equal to -1 since the composed input is small
-        //        // Assert::AreEqual(static_cast<uint64_t>(4611686018393899008), output[0]);
-        //        // Assert::AreEqual(static_cast<uint64_t>(4611686018293432320), output[1]);
-        //        // Assert::AreEqual(static_cast<uint64_t>(4611686018309947392), output[2]);
-
-        //        // The composed input is 0xffffffffffffff00ffffffffffffff00ff
-
-        //        input[0] = 17574536613119;        // mod q1
-        //        input[1] = 10132675570633983;        // mod q2
-        //        input[2] = 3113399115422302529;        // mod m1
-        //        input[3] = 1298513899176416785;        // mod m2
-        //        input[4] = 3518991311999157564;        // mod msk
-
-        //        output[0] = 0xfffffffff;
-        //        output[1] = 0x00fffffff;
-        //        output[2] = 0;
-
-        //        // Since input > q1*q2, the result should be floor(x/(q1*q2)) - alpha (alpha = {0 or 1})
-        //        Assert::IsTrue(base_converter.fast_floor(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfff), output[0]);
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfff), output[1]);
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfff), output[2]);
-
-        //        // The composed input is 0xffffffffffffff00ffffffffffffff00ffff
-
-        //        input[0] = 4499081372958719;        // mod q1
-        //        input[1] = 2593964946082299903;        // mod q2
-        //        input[2] = 4013821342825660755;        // mod m1
-        //        input[3] = 457963018288239031;        // mod m2
-        //        input[4] = 1691919900291185724;        // mod msk
-
-        //        output[0] = 0xfffffffff;
-        //        output[1] = 0x00fffffff;
-        //        output[2] = 0;
-
-        //        // Since input > q1*q2, the result should be floor(x/(q1*q2)) - alpha (alpha = {0 or 1})
-        //        Assert::IsTrue(base_converter.fast_floor(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[0]);
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[1]);
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[2]);
-        //    }
-
-        //    {
-        //        MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //        vector<SmallModulus> coeff_base;
-        //        vector<SmallModulus> aux_base;
-        //        SmallModulus plain_t = small_mods[9];
-
-        //        int coeff_base_count = 2;
-        //        int aux_base_count = 2;
-        //        for (int i = 0; i < coeff_base_count; ++i)
-        //        {
-        //            coeff_base.push_back(small_mods[i]);
-        //        }
-
-        //        BaseConverter base_converter(coeff_base, 2, plain_t);
-        //        Pointer input(allocate_uint(10, pool));
-        //        Pointer output(allocate_uint(6, pool));
-
-        //        input[0] = 4499081372958719;    // mod q1
-        //        input[1] = 4499081372958719;    // mod q1
-
-        //        input[2] = 2593964946082299903; // mod q2
-        //        input[3] = 2593964946082299903; // mod q2
-
-        //        input[4] = 4013821342825660755; // mod m1
-        //        input[5] = 4013821342825660755; // mod m1
-
-        //        input[6] = 457963018288239031;  // mod m2
-        //        input[7] = 457963018288239031;  // mod m2
-
-        //        input[8] = 1691919900291185724; // mod msk
-        //        input[9] = 1691919900291185724; // mod msk
-
-        //        output[0] = 0xfffffffff;
-        //        output[1] = 0x00fffffff;
-        //        output[2] = 0;
-
-        //        // Since input > q1*q2, the result should be floor(x/(q1*q2)) - alpha (alpha = {0 or 1})
-        //        Assert::IsTrue(base_converter.fast_floor(input.get(), output.get()));
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[0]);
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[1]);
-
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[2]);
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[3]);
-
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[4]);
-        //        Assert::AreEqual(static_cast<uint64_t>(0xfffff), output[5]);
-        //    }
-
-        //}
-
-        // TEST(BaseConverter, FastBConver_mtilde)
-        //{
-        //    MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //    vector<SmallModulus> coeff_base;
-        //    vector<SmallModulus> aux_base;
-        //    SmallModulus mtilde = small_mods[5];
-        //    SmallModulus msk = small_mods[4];
-        //    SmallModulus plain_t = small_mods[9];
-
-        //    int coeff_base_count = 2;
-        //    int aux_base_count = 2;
-        //    for (int i = 0; i < coeff_base_count; ++i)
-        //    {
-        //        coeff_base.push_back(small_mods[i]);
-        //        aux_base.push_back(small_mods[i + coeff_base_count]);
-        //    }
-
-        //    BaseConverter base_converter(coeff_base, 3, plain_t);
-        //    Pointer input(allocate_uint(6, pool));
-        //    Pointer output(allocate_uint(12, pool));
-
-        //    // The composed input is 0xffffffffffffff00ffffffffffffff for all coeffs
-
-        //    input[0] = 4395513236581707780; // cons mod q1
-        //    input[1] = 4395513236581707780; // x mod q1
-        //    input[2] = 4395513236581707780; // x^2 mod q1
-
-        //    input[3] = 4395513390924464132; // cons mod q2
-        //    input[4] = 4395513390924464132; // x mod q2
-        //    input[5] = 4395513390924464132; // x^2 mod q2
-
-        //    output[0] = 0xffffffff;
-        //    output[1] = 0;
-        //    output[2] = 0xffffff;
-        //    output[3] = 0xffffff;
-
-        //    Assert::IsTrue(base_converter.fastbconv_mtilde(input.get(), output.get()));
-        //    Assert::AreEqual(static_cast<uint64_t>(3116074317392112723), output[0]); //mod m1
-        //    Assert::AreEqual(static_cast<uint64_t>(3116074317392112723), output[1]);
-        //    Assert::AreEqual(static_cast<uint64_t>(3116074317392112723), output[2]);
-
-        //    Assert::AreEqual(static_cast<uint64_t>(1254200639185090240), output[3]); //mod m2
-        //    Assert::AreEqual(static_cast<uint64_t>(1254200639185090240), output[4]);
-        //    Assert::AreEqual(static_cast<uint64_t>(1254200639185090240), output[5]);
-
-        //    Assert::AreEqual(static_cast<uint64_t>(3528328721557038672), output[6]); //mod msk
-        //    Assert::AreEqual(static_cast<uint64_t>(3528328721557038672), output[7]);
-        //    Assert::AreEqual(static_cast<uint64_t>(3528328721557038672), output[8]);
-
-        //    Assert::AreEqual(static_cast<uint64_t>(849325434816160659), output[9]); //mod m_tilde
-        //    Assert::AreEqual(static_cast<uint64_t>(849325434816160659), output[10]);
-        //    Assert::AreEqual(static_cast<uint64_t>(849325434816160659), output[11]);
-        //}
-
-        // TEST(BaseConverter, FastBConvert_plain_gamma)
-        //{
-        //    MemoryPoolMT& pool = *MemoryPoolMT::default_pool();
-        //    vector<SmallModulus> coeff_base;
-        //    vector<SmallModulus> aux_base;
-        //    SmallModulus plain_t = small_mods[9];
-
-        //    int coeff_base_count = 2;
-        //    int aux_base_count = 2;
-        //    for (int i = 0; i < coeff_base_count; ++i)
-        //    {
-        //        coeff_base.push_back(small_mods[i]);
-        //        aux_base.push_back(small_mods[i + coeff_base_count]);
-        //    }
-
-        //    BaseConverter base_converter(coeff_base, 3, plain_t);
-        //    Pointer input(allocate_uint(6, pool));
-        //    Pointer output(allocate_uint(6, pool));
-
-        //    // The composed input is 0xffffffffffffff00ffffffffffffff for all coeffs
-
-        //    input[0] = 4395513236581707780;        // cons mod q1
-        //    input[1] = 4395513236581707780;        // x mod q1
-        //    input[2] = 4395513236581707780;        // x^2 mod q1
-
-        //    input[3] = 4395513390924464132;        // cons mod q2
-        //    input[4] = 4395513390924464132;        // x mod q2
-        //    input[5] = 4395513390924464132;        // x^2 mod q2
-
-        //    output[0] = 0xffffffff;
-        //    output[1] = 0;
-        //    output[2] = 0xffffff;
-        //    output[3] = 0xffffff;
-
-        //    Assert::IsTrue(base_converter.fastbconv_plain_gamma(input.get(), output.get()));
-        //    Assert::AreEqual(static_cast<uint64_t>(1950841694949736435), output[0]); //mod plain modulus
-        //    Assert::AreEqual(static_cast<uint64_t>(1950841694949736435), output[1]);
-        //    Assert::AreEqual(static_cast<uint64_t>(1950841694949736435), output[2]);
-
-        //    Assert::AreEqual(static_cast<uint64_t>(3744510248429639755), output[3]); //mod gamma
-        //    Assert::AreEqual(static_cast<uint64_t>(3744510248429639755), output[4]);
-        //    Assert::AreEqual(static_cast<uint64_t>(3744510248429639755), output[5]);
-        //}
+        TEST(BaseConverterTest, MontgomeryReduction)
+        {
+            // This function assumes the input is in base Bsk U {m_tilde}. If the input is
+            // |[c*m_tilde]_q + qu|_m for m in Bsk U {m_tilde}, then the output is c' in Bsk
+            // such that c' = c mod q. In other words, this function cancels the extra multiples
+            // of q in the Bsk U {m_tilde} representation. The functions works correctly for
+            // sufficiently small values of u.
+
+            SmallModulus plain_t = 0;
+            auto pool = MemoryManager::GetPool();
+
+            {
+                size_t poly_modulus_degree = 2;
+                BaseConverter base_converter(poly_modulus_degree, { 3 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(poly_modulus_degree * base_converter.base_Bsk_m_tilde_size());
+                vector<uint64_t> out(poly_modulus_degree * base_converter.base_Bsk_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.montgomery_reduction(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                // Input base is Bsk U {m_tilde}, in this case consisting of 3 primes.
+                // Note that m_tilde is always smaller than the primes in Bsk (61 bits).
+                // Set the length-2 array to have values 1*m_tilde and 2*m_tilde.
+                in[0] = base_converter.m_tilde().value();
+                in[1] = 2 * base_converter.m_tilde().value();
+                in[2] = base_converter.m_tilde().value();
+                in[3] = 2 * base_converter.m_tilde().value();
+
+                // Modulo m_tilde
+                in[4] = 0;
+                in[5] = 0;
+
+                // This should simply get rid of the m_tilde factor
+                base_converter.montgomery_reduction(in.data(), out.data(), pool);
+
+                ASSERT_EQ(1, out[0]);
+                ASSERT_EQ(2, out[1]);
+                ASSERT_EQ(1, out[2]);
+                ASSERT_EQ(2, out[3]);
+
+                // Next add a multiple of q to the input and see if it is reduced properly
+                in[0] = base_converter.base_q()[0].value();
+                in[1] = base_converter.base_q()[0].value();
+                in[2] = base_converter.base_q()[0].value();
+                in[3] = base_converter.base_q()[0].value();
+                in[4] = base_converter.base_q()[0].value();
+                in[5] = base_converter.base_q()[0].value();
+
+                base_converter.montgomery_reduction(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+            }
+            {
+                size_t poly_modulus_degree = 2;
+                BaseConverter base_converter(poly_modulus_degree, { 3, 5 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(poly_modulus_degree * base_converter.base_Bsk_m_tilde_size());
+                vector<uint64_t> out(poly_modulus_degree * base_converter.base_Bsk_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.montgomery_reduction(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                // Input base is Bsk U {m_tilde}, in this case consisting of 6 primes.
+                // Note that m_tilde is always smaller than the primes in Bsk (61 bits).
+                // Set the length-2 array to have values 1*m_tilde and 2*m_tilde.
+                in[0] = base_converter.m_tilde().value();
+                in[1] = 2 * base_converter.m_tilde().value();
+                in[2] = base_converter.m_tilde().value();
+                in[3] = 2 * base_converter.m_tilde().value();
+                in[4] = base_converter.m_tilde().value();
+                in[5] = 2 * base_converter.m_tilde().value();
+
+                // Modulo m_tilde
+                in[6] = 0;
+                in[7] = 0;
+
+                // This should simply get rid of the m_tilde factor
+                base_converter.montgomery_reduction(in.data(), out.data(), pool);
+
+                ASSERT_EQ(1, out[0]);
+                ASSERT_EQ(2, out[1]);
+                ASSERT_EQ(1, out[2]);
+                ASSERT_EQ(2, out[3]);
+                ASSERT_EQ(1, out[4]);
+                ASSERT_EQ(2, out[5]);
+
+                // Next add a multiple of q to the input and see if it is reduced properly
+                in[0] = 15;
+                in[1] = 30;
+                in[2] = 15;
+                in[3] = 30;
+                in[4] = 15;
+                in[5] = 30;
+                in[6] = 15;
+                in[7] = 30;
+
+                base_converter.montgomery_reduction(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                // Now with a multiple of m_tilde + multiple of q
+                in[0] = 2 * base_converter.m_tilde().value() + 15;
+                in[1] = 2 * base_converter.m_tilde().value() + 30;
+                in[2] = 2 * base_converter.m_tilde().value() + 15;
+                in[3] = 2 * base_converter.m_tilde().value() + 30;
+                in[4] = 2 * base_converter.m_tilde().value() + 15;
+                in[5] = 2 * base_converter.m_tilde().value() + 30;
+                in[6] = 2 * base_converter.m_tilde().value() + 15;
+                in[7] = 2 * base_converter.m_tilde().value() + 30;
+
+                base_converter.montgomery_reduction(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(2, val);
+                }
+            }
+        }
+
+        TEST(BaseConverterTest, FastFloor)
+        {
+            // This function assumes the input is in base q U Bsk. It outputs an approximation of
+            // the value divided by q floored in base Bsk. The approximation has absolute value up
+            // to k-1, where k is the number of primes in the base q.
+
+            SmallModulus plain_t = 0;
+            auto pool = MemoryManager::GetPool();
+
+            {
+                size_t poly_modulus_degree = 2;
+                BaseConverter base_converter(poly_modulus_degree, { 3 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(
+                    poly_modulus_degree * (base_converter.base_Bsk_size() + base_converter.base_q_size()));
+                vector<uint64_t> out(poly_modulus_degree * base_converter.base_Bsk_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.fast_floor(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                // The size of q U Bsk is 3. We set the input to have values 15 and 5, and divide by 3 (i.e., q).
+                in[0] = 15;
+                in[1] = 3;
+                in[2] = 15;
+                in[3] = 3;
+                in[4] = 15;
+                in[5] = 3;
+
+                // We get an exact result in this case since input base only has size 1
+                base_converter.fast_floor(in.data(), out.data(), pool);
+                ASSERT_EQ(5ULL, out[0]);
+                ASSERT_EQ(1ULL, out[1]);
+                ASSERT_EQ(5ULL, out[2]);
+                ASSERT_EQ(1ULL, out[3]);
+
+                // Now a case where the floor really shows up
+                in[0] = 17;
+                in[1] = 4;
+                in[2] = 17;
+                in[3] = 4;
+                in[4] = 17;
+                in[5] = 4;
+
+                // We get an exact result in this case since input base only has size 1
+                base_converter.fast_floor(in.data(), out.data(), pool);
+                ASSERT_EQ(5ULL, out[0]);
+                ASSERT_EQ(1ULL, out[1]);
+                ASSERT_EQ(5ULL, out[2]);
+                ASSERT_EQ(1ULL, out[3]);
+            }
+            {
+                size_t poly_modulus_degree = 2;
+                BaseConverter base_converter(poly_modulus_degree, { 3, 5 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(
+                    poly_modulus_degree * (base_converter.base_Bsk_size() + base_converter.base_q_size()));
+                vector<uint64_t> out(poly_modulus_degree * base_converter.base_Bsk_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.fast_floor(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                // The size of q U Bsk is now 5. We set the input to multiples of 15 an divide by 15 (i.e., q).
+                in[0] = 15;
+                in[1] = 30;
+                in[2] = 15;
+                in[3] = 30;
+                in[4] = 15;
+                in[5] = 30;
+                in[6] = 15;
+                in[7] = 30;
+                in[8] = 15;
+                in[9] = 30;
+
+                // We get an exact result in this case
+                base_converter.fast_floor(in.data(), out.data(), pool);
+                ASSERT_EQ(1ULL, out[0]);
+                ASSERT_EQ(2ULL, out[1]);
+                ASSERT_EQ(1ULL, out[2]);
+                ASSERT_EQ(2ULL, out[3]);
+                ASSERT_EQ(1ULL, out[4]);
+                ASSERT_EQ(2ULL, out[5]);
+
+                // Now a case where the floor really shows up
+                in[0] = 21;
+                in[1] = 32;
+                in[2] = 21;
+                in[3] = 32;
+                in[4] = 21;
+                in[5] = 32;
+                in[6] = 21;
+                in[7] = 32;
+                in[8] = 21;
+                in[9] = 32;
+
+                // The result is not exact but differs at most by 1
+                base_converter.fast_floor(in.data(), out.data(), pool);
+                ASSERT_TRUE(fabs(1ULL - out[0]) <= 1);
+                ASSERT_TRUE(fabs(2ULL - out[1]) <= 1);
+                ASSERT_TRUE(fabs(1ULL - out[2]) <= 1);
+                ASSERT_TRUE(fabs(2ULL - out[3]) <= 1);
+                ASSERT_TRUE(fabs(1ULL - out[4]) <= 1);
+                ASSERT_TRUE(fabs(2ULL - out[5]) <= 1);
+            }
+        }
+
+        TEST(BaseConverterTest, FastBConvSK)
+        {
+            // This function assumes the input is in base Bsk and outputs a fast base conversion
+            // with Shenoy-Kumaresan correction to base q. The conversion is exact.
+
+            SmallModulus plain_t = 0;
+            auto pool = MemoryManager::GetPool();
+
+            {
+                size_t poly_modulus_degree = 2;
+                BaseConverter base_converter(poly_modulus_degree, { 3 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(poly_modulus_degree * base_converter.base_Bsk_size());
+                vector<uint64_t> out(poly_modulus_degree * base_converter.base_q_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.fastbconv_sk(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                // The size of Bsk is 2
+                in[0] = 1;
+                in[1] = 2;
+                in[2] = 1;
+                in[3] = 2;
+
+                base_converter.fastbconv_sk(in.data(), out.data(), pool);
+                ASSERT_EQ(1ULL, out[0]);
+                ASSERT_EQ(2ULL, out[1]);
+            }
+            {
+                size_t poly_modulus_degree = 2;
+                BaseConverter base_converter(poly_modulus_degree, { 3, 5 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(poly_modulus_degree * base_converter.base_Bsk_size());
+                vector<uint64_t> out(poly_modulus_degree * base_converter.base_q_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.fastbconv_sk(in.data(), out.data(), pool);
+                for (auto val : out)
+                {
+                    ASSERT_EQ(0, val);
+                }
+
+                // The size of Bsk is 3
+                in[0] = 1;
+                in[1] = 2;
+                in[2] = 1;
+                in[3] = 2;
+                in[4] = 1;
+                in[5] = 2;
+
+                base_converter.fastbconv_sk(in.data(), out.data(), pool);
+                ASSERT_EQ(1ULL, out[0]);
+                ASSERT_EQ(2ULL, out[1]);
+                ASSERT_EQ(1ULL, out[2]);
+                ASSERT_EQ(2ULL, out[3]);
+            }
+        }
+
+        TEST(BaseConverterTest, ExactScaleAndRound)
+        {
+            // This function computes [round(t/q * |input|_q)]_t exactly using the gamma-correction technique.
+
+            auto pool = MemoryManager::GetPool();
+
+            size_t poly_modulus_degree = 2;
+            SmallModulus plain_t = 3;
+            BaseConverter base_converter(poly_modulus_degree, { 5, 7 }, plain_t, pool);
+            ASSERT_TRUE(base_converter.is_initialized());
+
+            vector<uint64_t> in(poly_modulus_degree * base_converter.base_Bsk_size());
+            vector<uint64_t> out(poly_modulus_degree * base_converter.base_q_size());
+            set_zero_uint(in.size(), in.data());
+            base_converter.exact_scale_and_round(in.data(), out.data(), pool);
+            for (auto val : out)
+            {
+                ASSERT_EQ(0, val);
+            }
+
+            // The size of Bsk is 2. Both values here are multiples of 35 (i.e., q).
+            in[0] = 35;
+            in[1] = 70;
+            in[2] = 35;
+            in[3] = 70;
+
+            // We expect to get a zero output in this case
+            base_converter.exact_scale_and_round(in.data(), out.data(), pool);
+            ASSERT_EQ(0ULL, out[0]);
+            ASSERT_EQ(0ULL, out[1]);
+
+            // Now try a non-trivial case
+            in[0] = 29;
+            in[1] = 30 + 35;
+            in[2] = 29;
+            in[3] = 30 + 35;
+
+            // Here 29 will scale and round to 2 and 30 will scale and round to 0.
+            // The added 35 should not make a difference.
+            base_converter.exact_scale_and_round(in.data(), out.data(), pool);
+            ASSERT_EQ(2ULL, out[0]);
+            ASSERT_EQ(0ULL, out[1]);
+        }
+
+        TEST(BaseConverterTest, DivideAndRoundQLastInplace)
+        {
+            // This function approximately divides the input values by the last prime in the base q.
+            // Input is in base q; the last RNS component becomes invalid.
+
+            auto pool = MemoryManager::GetPool();
+
+            {
+                size_t poly_modulus_degree = 2;
+                SmallModulus plain_t = 0;
+                BaseConverter base_converter(poly_modulus_degree, { 13, 7 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(poly_modulus_degree * base_converter.base_q_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.divide_and_round_q_last_inplace(in.data(), pool);
+                ASSERT_EQ(0ULL, in[0]);
+                ASSERT_EQ(0ULL, in[1]);
+
+                // The size of q is 2. We set some values here and divide by the last modulus (i.e., 7).
+                in[0] = 1;
+                in[1] = 2;
+                in[2] = 1;
+                in[3] = 2;
+
+                // We expect to get a zero output also in this case
+                base_converter.divide_and_round_q_last_inplace(in.data(), pool);
+                ASSERT_EQ(0ULL, in[0]);
+                ASSERT_EQ(0ULL, in[1]);
+
+                // Next a case with non-trivial rounding
+                in[0] = 4;
+                in[1] = 12;
+                in[2] = 4;
+                in[3] = 12;
+
+                base_converter.divide_and_round_q_last_inplace(in.data(), pool);
+                ASSERT_EQ(1ULL, in[0]);
+                ASSERT_EQ(2ULL, in[1]);
+
+                // Input array (19, 15)
+                in[0] = 6;
+                in[1] = 2;
+                in[2] = 5;
+                in[3] = 1;
+
+                base_converter.divide_and_round_q_last_inplace(in.data(), pool);
+                ASSERT_EQ(3ULL, in[0]);
+                ASSERT_EQ(2ULL, in[1]);
+            }
+            {
+                size_t poly_modulus_degree = 2;
+                SmallModulus plain_t = 0;
+                BaseConverter base_converter(poly_modulus_degree, { 3, 5, 7, 11 }, plain_t, pool);
+                ASSERT_TRUE(base_converter.is_initialized());
+
+                vector<uint64_t> in(poly_modulus_degree * base_converter.base_q_size());
+                set_zero_uint(in.size(), in.data());
+                base_converter.divide_and_round_q_last_inplace(in.data(), pool);
+                ASSERT_EQ(0ULL, in[0]);
+                ASSERT_EQ(0ULL, in[1]);
+                ASSERT_EQ(0ULL, in[2]);
+                ASSERT_EQ(0ULL, in[3]);
+                ASSERT_EQ(0ULL, in[4]);
+                ASSERT_EQ(0ULL, in[5]);
+
+                // The size of q is 4. We set some values here and divide by the last modulus (i.e., 11).
+                in[0] = 1;
+                in[1] = 2;
+                in[2] = 1;
+                in[3] = 2;
+                in[4] = 1;
+                in[5] = 2;
+                in[6] = 1;
+                in[7] = 2;
+
+                // We expect to get a zero output also in this case
+                base_converter.divide_and_round_q_last_inplace(in.data(), pool);
+                ASSERT_EQ(0ULL, in[0]);
+                ASSERT_EQ(0ULL, in[1]);
+                ASSERT_EQ(0ULL, in[2]);
+                ASSERT_EQ(0ULL, in[3]);
+                ASSERT_EQ(0ULL, in[4]);
+                ASSERT_EQ(0ULL, in[5]);
+
+                // Next a case with non-trivial rounding; array is (60, 70)
+                in[0] = 0;
+                in[1] = 1;
+                in[2] = 0;
+                in[3] = 0;
+                in[4] = 4;
+                in[5] = 0;
+                in[6] = 5;
+                in[7] = 4;
+
+                // We get only approximate result in this case
+                base_converter.divide_and_round_q_last_inplace(in.data(), pool);
+                ASSERT_TRUE((3ULL + 2ULL - in[0]) % 3ULL <= 1);
+                ASSERT_TRUE((3ULL + 0ULL - in[1]) % 3ULL <= 1);
+                ASSERT_TRUE((5ULL + 0ULL - in[2]) % 5ULL <= 1);
+                ASSERT_TRUE((5ULL + 1ULL - in[3]) % 5ULL <= 1);
+                ASSERT_TRUE((7ULL + 5ULL - in[4]) % 7ULL <= 1);
+                ASSERT_TRUE((7ULL + 6ULL - in[5]) % 7ULL <= 1);
+            }
+        }
+
+        TEST(BaseConverterTest, DivideAndRoundQLastNTTInplace)
+        {
+            // This function approximately divides the input values by the last prime in the base q.
+            // The input and output are both in NTT form. Input is in base q; the last RNS component
+            // becomes invalid.
+
+            auto pool = MemoryManager::GetPool();
+
+            size_t poly_modulus_degree = 2;
+            SmallNTTTables ntt[]{ { 1, SmallModulus(53) }, { 1, SmallModulus(13) } };
+            auto ntt_ptr = Pointer<SmallNTTTables>::Aliasing(ntt);
+            SmallModulus plain_t = 0;
+            BaseConverter base_converter(poly_modulus_degree, { 53, 13 }, plain_t, pool);
+            ASSERT_TRUE(base_converter.is_initialized());
+
+            vector<uint64_t> in(poly_modulus_degree * base_converter.base_q_size());
+            set_zero_uint(in.size(), in.data());
+            base_converter.divide_and_round_q_last_inplace(in.data(), pool);
+            ASSERT_EQ(0ULL, in[0]);
+            ASSERT_EQ(0ULL, in[1]);
+
+            // The size of q is 2. We set some values here and divide by the last modulus (i.e., 13).
+            in[0] = 1;
+            in[1] = 2;
+            in[2] = 1;
+            in[3] = 2;
+            ntt_negacyclic_harvey(in.data(), ntt[0]);
+            ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
+
+            // We expect to get a zero output also in this case
+            base_converter.divide_and_round_q_last_ntt_inplace(in.data(), ntt_ptr, pool);
+            inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
+            ASSERT_EQ(0ULL, in[0]);
+            ASSERT_EQ(0ULL, in[1]);
+
+            // Next a case with non-trivial rounding
+            in[0] = 4;
+            in[1] = 12;
+            in[2] = 4;
+            in[3] = 12;
+            ntt_negacyclic_harvey(in.data(), ntt[0]);
+            ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
+
+            base_converter.divide_and_round_q_last_ntt_inplace(in.data(), ntt_ptr, pool);
+            inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
+            ASSERT_TRUE((53ULL + 1ULL - in[0]) % 53ULL <= 1);
+            ASSERT_TRUE((53ULL + 2ULL - in[1]) % 53ULL <= 1);
+
+            // Input array (25, 35)
+            in[0] = 25;
+            in[1] = 35;
+            in[2] = 12;
+            in[3] = 9;
+            ntt_negacyclic_harvey(in.data(), ntt[0]);
+            ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
+
+            base_converter.divide_and_round_q_last_ntt_inplace(in.data(), ntt_ptr, pool);
+            inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
+            ASSERT_TRUE((53ULL + 2ULL - in[0]) % 53ULL <= 1);
+            ASSERT_TRUE((53ULL + 3ULL - in[1]) % 53ULL <= 1);
+        }
     } // namespace util
 } // namespace SEALTest

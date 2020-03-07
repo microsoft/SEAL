@@ -103,8 +103,8 @@ namespace seal
         // Allocate a full size destination to write to
         destination.resize(coeff_count);
 
-        // Divide scaling variant using Bajard FullRNS techniques.
-        divide_phase_by_scaling_variant(tmp_dest_modq.get(), context_data, destination.data(), pool);
+        // Divide scaling variant using Bajard FullRNS techniques
+        context_data.base_converter()->exact_scale_and_round(tmp_dest_modq.get(), destination.data(), pool);
 
         // How many non-zero coefficients do we really have in the result?
         size_t plain_coeff_count = get_significant_uint64_count_uint(destination.data(), coeff_count);

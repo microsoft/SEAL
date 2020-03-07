@@ -362,7 +362,7 @@ namespace seal
                 encrypted1.data(i), tmp_encrypted1_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment), pool);
             base_converter->montgomery_reduction(
                 tmp_encrypted1_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment),
-                tmp_encrypted1_Bsk.get() + (i * enc_Bsk_ptr_increment));
+                tmp_encrypted1_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
         }
 
         // Iterate over all the ciphertexts inside encrypted2
@@ -372,7 +372,7 @@ namespace seal
                 encrypted2.data(i), tmp_encrypted2_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment), pool);
             base_converter->montgomery_reduction(
                 tmp_encrypted2_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment),
-                tmp_encrypted2_Bsk.get() + (i * enc_Bsk_ptr_increment));
+                tmp_encrypted2_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
         }
 
         // Step 2: compute product and multiply plain modulus to the result
@@ -762,7 +762,7 @@ namespace seal
                 encrypted.data(i), tmp_encrypted_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment), pool);
             base_converter->montgomery_reduction(
                 tmp_encrypted_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment),
-                tmp_encrypted_Bsk.get() + (i * enc_Bsk_ptr_increment));
+                tmp_encrypted_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
         }
 
         // Step 2: compute product and multiply plain modulus to the result.
@@ -1167,6 +1167,7 @@ namespace seal
             // Set temp1 to ct mod qk
             set_uint_uint(
                 encrypted_copy.data(poly_index) + next_coeff_mod_count * coeff_count, coeff_count, temp1.get());
+
             // Add (p-1)/2 to change from flooring to rounding.
             auto last_modulus = context_data.parms().coeff_modulus().back();
             uint64_t half = last_modulus.value() >> 1;
@@ -1183,10 +1184,12 @@ namespace seal
                 {
                     temp2_ptr[j] = sub_uint_uint_mod(temp2_ptr[j], half_mod, next_coeff_modulus[mod_index]);
                 }
+
                 // ((ct mod qi) - (ct mod qk)) mod qi
                 sub_poly_poly_coeffmod(
                     encrypted_copy.data(poly_index) + mod_index * coeff_count, temp2_ptr, coeff_count,
                     next_coeff_modulus[mod_index], temp2_ptr);
+
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                 multiply_poly_scalar_coeffmod(
                     temp2_ptr, coeff_count, inv_last_coeff_mod_array[mod_index], next_coeff_modulus[mod_index],
@@ -2321,6 +2324,7 @@ namespace seal
         {
             throw logic_error("scheme not implemented");
         }
+
         // wipe encrypted.data(1)
         set_zero_poly(coeff_count, coeff_mod_count, encrypted.data(1));
         // END: Apply Galois for each ciphertext

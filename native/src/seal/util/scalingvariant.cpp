@@ -30,13 +30,14 @@ namespace seal
             // floor((q * m + floor((t+1) / 2)) / t).
             for (size_t i = 0; i < plain_coeff_count; i++, destination++)
             {
-                // compute numerator = (q mod t) * m[i] + (t+1)/2
+                // Compute numerator = (q mod t) * m[i] + (t+1)/2
                 unsigned long long prod[2]{ 0, 0 };
                 uint64_t numerator[2]{ 0, 0 };
                 multiply_uint64(plain.data()[i], q_mod_t, prod);
                 unsigned char carry = add_uint64(*prod, plain_upper_half_threshold, numerator);
                 numerator[1] = static_cast<uint64_t>(prod[1]) + static_cast<uint64_t>(carry);
-                // compute fix[0] = floor( numerator / t )
+
+                // Compute fix[0] = floor(numerator / t)
                 uint64_t fix[2] = { 0, 0 };
                 divide_uint128_uint64_inplace(numerator, plain_modulus.value(), fix);
 
@@ -68,13 +69,14 @@ namespace seal
             // floor((q * m + floor((t+1) / 2)) / t).
             for (size_t i = 0; i < plain_coeff_count; i++, destination++)
             {
-                // compute numerator = (q mod t) * m[i] + (t+1)/2
+                // Compute numerator = (q mod t) * m[i] + (t+1)/2
                 unsigned long long prod[2]{ 0, 0 };
                 uint64_t numerator[2]{ 0, 0 };
                 multiply_uint64(plain[i], q_mod_t, prod);
                 unsigned char carry = add_uint64(*prod, plain_upper_half_threshold, numerator);
                 numerator[1] = static_cast<uint64_t>(prod[1]) + static_cast<uint64_t>(carry);
-                // compute fix[0] = floor( numerator / t )
+
+                // Compute fix[0] = floor(numerator / t)
                 uint64_t fix[2] = { 0, 0 };
                 divide_uint128_uint64_inplace(numerator, plain_modulus.value(), fix);
 
@@ -82,17 +84,11 @@ namespace seal
                 for (size_t j = 0; j < coeff_mod_count; j++)
                 {
                     destination[j * coeff_count] = sub_uint_uint_mod(
+                        destination[j * coeff_count],
                         multiply_add_uint_mod(coeff_div_plain_modulus[j], plain.data()[i], fix[0], coeff_modulus[j]),
-                        destination[j * coeff_count], coeff_modulus[j]);
+                        coeff_modulus[j]);
                 }
             }
-        }
-
-        void divide_phase_by_scaling_variant(
-            const uint64_t *phase, const SEALContext::ContextData &context_data, uint64_t *destination,
-            MemoryPoolHandle pool)
-        {
-            context_data.base_converter()->exact_scale_and_round(phase, destination, pool);
         }
     } // namespace util
 } // namespace seal

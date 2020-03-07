@@ -357,83 +357,6 @@ namespace seal
             coeff_count_ = 0;
         }
 
-        void BaseConverter::divide_and_floor_q_last_inplace(uint64_t *input, MemoryPoolHandle pool) const
-        {
-            if (!is_initialized_)
-            {
-                throw logic_error("BaseConverter is uninitialized");
-            }
-#ifdef SEAL_DEBUG
-            if (!input)
-            {
-                throw invalid_argument("input cannot be null");
-            }
-            if (!pool)
-            {
-                throw invalid_argument("pool is uninitialized");
-            }
-#endif
-            auto temp(allocate_uint(coeff_count_, pool));
-            for (size_t i = 0; i < base_q_size_ - 1; i++)
-            {
-                // (ct mod qk) mod qi
-                modulo_poly_coeffs_63(input + (base_q_size_ - 1) * coeff_count_, coeff_count_, base_q_[i], temp.get());
-
-                // ((ct mod qi) - (ct mod qk)) mod qi
-                sub_poly_poly_coeffmod(
-                    input + (i * coeff_count_), temp.get(), coeff_count_, base_q_[i], input + (i * coeff_count_));
-
-                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(
-                    input + i * coeff_count_, coeff_count_, inv_q_last_mod_q_[i], base_q_[i],
-                    input + (i * coeff_count_));
-            }
-        }
-
-        void BaseConverter::divide_and_floor_q_last_ntt_inplace(
-            uint64_t *input, const Pointer<SmallNTTTables> &rns_ntt_tables, MemoryPoolHandle pool) const
-        {
-            if (!is_initialized_)
-            {
-                throw logic_error("BaseConverter is uninitialized");
-            }
-#ifdef SEAL_DEBUG
-            if (!input)
-            {
-                throw invalid_argument("input cannot be null");
-            }
-            if (!rns_ntt_tables)
-            {
-                throw invalid_argument("rns_ntt_tables cannot be null");
-            }
-            if (!pool)
-            {
-                throw invalid_argument("pool is uninitialized");
-            }
-#endif
-            // Convert to non-NTT form
-            inverse_ntt_negacyclic_harvey(input + (base_q_size_ - 1) * coeff_count_, rns_ntt_tables[base_q_size_ - 1]);
-
-            auto temp(allocate_uint(coeff_count_, pool));
-            for (size_t i = 0; i < base_q_size_ - 1; i++)
-            {
-                // (ct mod qk) mod qi
-                modulo_poly_coeffs_63(input + (base_q_size_ - 1) * coeff_count_, coeff_count_, base_q_[i], temp.get());
-
-                // Convert to NTT form
-                ntt_negacyclic_harvey(temp.get(), rns_ntt_tables[i]);
-
-                // ((ct mod qi) - (ct mod qk)) mod qi
-                sub_poly_poly_coeffmod(
-                    input + (i * coeff_count_), temp.get(), coeff_count_, base_q_[i], input + (i * coeff_count_));
-
-                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(
-                    input + (i * coeff_count_), coeff_count_, inv_q_last_mod_q_[i], base_q_[i],
-                    input + (i * coeff_count_));
-            }
-        }
-
         void BaseConverter::divide_and_round_q_last_inplace(uint64_t *input, MemoryPoolHandle pool) const
         {
             if (!is_initialized_)
@@ -452,7 +375,7 @@ namespace seal
 #endif
             uint64_t *last_ptr = input + (base_q_size_ - 1) * coeff_count_;
 
-            // Add (qi-1)/2 to change from flooring to rounding.
+            // Add (qi-1)/2 to change from flooring to rounding
             SmallModulus last_modulus = base_q_[base_q_size_ - 1];
             uint64_t half = last_modulus.value() >> 1;
             for (size_t j = 0; j < coeff_count_; j++)
@@ -509,7 +432,7 @@ namespace seal
             // Convert to non-NTT form
             inverse_ntt_negacyclic_harvey(last_ptr, rns_ntt_tables[base_q_size_ - 1]);
 
-            // Add (qi-1)/2 to change from flooring to rounding.
+            // Add (qi-1)/2 to change from flooring to rounding
             SmallModulus last_modulus = base_q_[base_q_size_ - 1];
             uint64_t half = last_modulus.value() >> 1;
             for (size_t j = 0; j < coeff_count_; j++)
@@ -615,7 +538,8 @@ namespace seal
             }
         }
 
-        void BaseConverter::montgomery_reduction(const uint64_t *input, uint64_t *destination) const
+        void BaseConverter::montgomery_reduction(
+            const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
         {
             if (!is_initialized_)
             {
@@ -630,32 +554,47 @@ namespace seal
             {
                 throw invalid_argument("destination cannot be null");
             }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
+            }
 #endif
             /*
             Require: Input in base Bsk U {m_tilde}
             Ensure: Output in base Bsk
             */
 
+            // The last component of the input is mod m_tilde
+            const uint64_t *input_m_tilde_ptr = input + (coeff_count_ * base_Bsk_size_);
+            const uint64_t m_tilde_div_2 = m_tilde_.value() >> 1;
+
+            // Compute r_m_tilde
+            auto r_m_tilde(allocate_uint(coeff_count_, pool));
+            for (size_t i = 0; i < coeff_count_; i++)
+            {
+                uint64_t temp = multiply_uint_uint_mod(input_m_tilde_ptr[i], inv_prod_q_mod_m_tilde_, m_tilde_);
+                r_m_tilde[i] = negate_uint_mod(temp, m_tilde_);
+            }
+
             for (size_t k = 0; k < base_Bsk_size_; k++)
             {
-                // The last component of the input is mod m_tilde
-                const uint64_t *input_m_tilde_ptr = input + (coeff_count_ * base_Bsk_size_);
-
                 SmallModulus base_Bsk_elt = base_Bsk_[k];
                 uint64_t inv_m_tilde_mod_Bsk_elt = inv_m_tilde_mod_Bsk_[k];
                 uint64_t prod_q_mod_Bsk_elt = prod_q_mod_Bsk_[k];
                 for (size_t i = 0; i < coeff_count_; i++, destination++, input++)
                 {
-                    // Compute r_m_tilde
-                    // Duplicate work: This needs to be computed only once per coefficient, not per Bsk modulus
-                    uint64_t r_m_tilde =
-                        multiply_uint_uint_mod(input_m_tilde_ptr[i], inv_prod_q_mod_m_tilde_, m_tilde_);
-                    r_m_tilde = negate_uint_mod(r_m_tilde, m_tilde_);
+                    // We need centered reduction of r_m_tilde modulo Bsk. Note that m_tilde is chosen
+                    // to be a power of two so we have '>=' below.
+                    uint64_t temp = r_m_tilde[i];
+                    if (temp >= m_tilde_div_2)
+                    {
+                        temp += base_Bsk_elt.value() - m_tilde_.value();
+                    }
 
                     // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk
                     *destination = multiply_uint_uint_mod(
-                        multiply_add_uint_mod(prod_q_mod_Bsk_elt, r_m_tilde, *input, base_Bsk_elt),
-                        inv_m_tilde_mod_Bsk_elt, base_Bsk_elt);
+                        multiply_add_uint_mod(prod_q_mod_Bsk_elt, temp, *input, base_Bsk_elt), inv_m_tilde_mod_Bsk_elt,
+                        base_Bsk_elt);
                 }
             }
         }
@@ -752,7 +691,7 @@ namespace seal
         void BaseConverter::exact_scale_and_round(
             const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
         {
-            // Compute |gamma * plain|qi * ct(s)
+            // Compute |gamma * t|_qi * ct(s)
             auto temp(allocate_poly(coeff_count_, base_q_size_, pool));
             for (size_t i = 0; i < base_q_size_; i++)
             {
@@ -780,7 +719,7 @@ namespace seal
             uint64_t gamma_div_2 = base_t_gamma_[1].value() >> 1;
 
             // Now compute the subtraction to remove error and perform final multiplication by
-            // gamma inverse mod plain_modulus
+            // gamma inverse mod t
             for (size_t i = 0; i < coeff_count_; i++)
             {
                 // Need correction because of centered mod
@@ -796,9 +735,11 @@ namespace seal
                     destination[i] =
                         sub_uint_uint_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
                 }
+
+                // If this coefficient was non-zero, multiply by t^(-1)
                 if (0 != destination[i])
                 {
-                    // Perform final multiplication by gamma inverse mod plain_modulus
+                    // Perform final multiplication by gamma inverse mod t
                     destination[i] = multiply_uint_uint_mod(destination[i], inv_gamma_mod_t_, t_);
                 }
             }

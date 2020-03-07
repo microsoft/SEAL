@@ -43,11 +43,6 @@ namespace seal
                 std::size_t poly_modulus_degree, const std::vector<SmallModulus> &coeff_modulus,
                 const SmallModulus &plain_modulus);
 
-            void divide_and_floor_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
-
-            void divide_and_floor_q_last_ntt_inplace(
-                std::uint64_t *input, const Pointer<SmallNTTTables> &rns_ntt_tables, MemoryPoolHandle pool) const;
-
             void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
 
             void divide_and_round_q_last_ntt_inplace(
@@ -61,7 +56,8 @@ namespace seal
             /**
             Montgomery reduction from Bsk U {m_tilde} to Bsk
             */
-            void montgomery_reduction(const std::uint64_t *input, std::uint64_t *destination) const;
+            void montgomery_reduction(
+                const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
 
             /**
             Divide by q and fast floor from q U Bsk to Bsk

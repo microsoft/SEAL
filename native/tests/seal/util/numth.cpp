@@ -17,7 +17,7 @@ namespace SEALTest
 {
     namespace util
     {
-        TEST(NumberTheoryTest, GCD)
+        TEST(NumberTheory, GCD)
         {
             ASSERT_EQ(1ULL, gcd(1, 1));
             ASSERT_EQ(1ULL, gcd(2, 1));
@@ -31,7 +31,7 @@ namespace SEALTest
             ASSERT_EQ(3ULL, gcd(11112, 44445));
         }
 
-        TEST(NumberTheoryTest, ExtendedGCD)
+        TEST(NumberTheory, ExtendedGCD)
         {
             tuple<uint64_t, int64_t, int64_t> result;
 
@@ -62,7 +62,7 @@ namespace SEALTest
             ASSERT_TRUE(result == make_tuple<>(7, 1, -1));
         }
 
-        TEST(NumberTheoryTest, TryInvertUIntMod)
+        TEST(NumberTheory, TryInvertUIntMod)
         {
             uint64_t input, modulus, result;
 
@@ -96,7 +96,7 @@ namespace SEALTest
             ASSERT_EQ(result, 5ULL);
         }
 
-        TEST(NumberTheoryTest, IsPrime)
+        TEST(NumberTheory, IsPrime)
         {
             ASSERT_FALSE(is_prime(0));
             ASSERT_TRUE(is_prime(2));
@@ -113,7 +113,7 @@ namespace SEALTest
             ASSERT_FALSE(is_prime(36893488147419107ULL));
         }
 
-        TEST(NumberTheoryTest, NAF)
+        TEST(NumberTheory, NAF)
         {
             auto naf_vec = naf(0);
             ASSERT_EQ(0, naf_vec.size());
@@ -152,7 +152,7 @@ namespace SEALTest
             ASSERT_EQ(-123, accumulate(naf_vec.begin(), naf_vec.end(), 0));
         }
 
-        TEST(NumberTheoryTest, CRTInitialize)
+        TEST(NumberTheory, CRTInitialize)
         {
             seal::util::CRTTool crt;
 
@@ -172,7 +172,7 @@ namespace SEALTest
                 crt.initialize({ SmallModulus(13), SmallModulus(65537), get_prime(2048, 20), get_prime(2048, 30) }));
         }
 
-        TEST(NumberTheoryTest, CRTComposeDecompose)
+        TEST(NumberTheory, CRTComposeDecompose)
         {
             seal::util::CRTTool crt;
             MemoryPoolHandle pool = MemoryManager::GetPool();
@@ -228,7 +228,7 @@ namespace SEALTest
             crt_test({ 321, 0, 0, 0 }, { 9, 25, 3, 30 });
 
             // Large example
-            auto primes = get_primes(10, 60, 4);
+            auto primes = get_primes(1024, 60, 4);
             vector<uint64_t> in_values{ 0xAAAAAAAAAAA, 0xBBBBBBBBBB, 0xCCCCCCCCCC, 0xDDDDDDDDDD };
             ASSERT_TRUE(crt.initialize(primes));
             crt_test(
@@ -238,7 +238,7 @@ namespace SEALTest
                              modulo_uint(in_values.data(), in_values.size(), primes[3], pool) });
         }
 
-        TEST(NumberTheoryTest, BaseConvInitialize)
+        TEST(NumberTheory, BaseConvInitialize)
         {
             BaseConvTool bct;
 
@@ -260,7 +260,7 @@ namespace SEALTest
             ASSERT_FALSE(bct.initialize({ 3 }, { 2, 6 }));
         }
 
-        TEST(NumberTheoryTest, BaseConv)
+        TEST(NumberTheory, BaseConv)
         {
             auto pool = MemoryManager::GetPool();
             BaseConvTool bct;
@@ -310,7 +310,7 @@ namespace SEALTest
             bct_test({ 1, 1, 1 }, { 1, 1 });
         }
 
-        TEST(NumberTheoryTest, BaseConvArray)
+        TEST(NumberTheory, BaseConvArray)
         {
             auto pool = MemoryManager::GetPool();
             BaseConvTool bct;
@@ -342,7 +342,7 @@ namespace SEALTest
             bct_test({ 0, 1, 1, 0, 1, 2 }, { 0, 1, 2, 0, 3, 1, 0, 2, 0 });
         }
 
-        TEST(NumberTheoryTest, TryPrimitiveRootMod)
+        TEST(NumberTheory, TryPrimitiveRootMod)
         {
             uint64_t result;
             SmallModulus mod(11);
@@ -366,7 +366,7 @@ namespace SEALTest
             ASSERT_TRUE(std::find(corrects.begin(), corrects.end(), result) != corrects.end());
         }
 
-        TEST(NumberTheoryTest, IsPrimitiveRootMod)
+        TEST(NumberTheory, IsPrimitiveRootMod)
         {
             SmallModulus mod(11);
             ASSERT_TRUE(is_primitive_root(10, 2, mod));
@@ -388,7 +388,7 @@ namespace SEALTest
             ASSERT_FALSE(is_primitive_root(1180581915ULL, 2, mod));
         }
 
-        TEST(NumberTheoryTest, TryMinimalPrimitiveRootMod)
+        TEST(NumberTheory, TryMinimalPrimitiveRootMod)
         {
             SmallModulus mod(11);
 

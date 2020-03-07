@@ -15,7 +15,7 @@ namespace SEALTest
 {
     namespace util
     {
-        TEST(MemoryPoolTests, TestMemoryPoolMT)
+        TEST(MemoryPoolTest, TestMemoryPoolMT)
         {
             {
                 MemoryPoolMT pool;
