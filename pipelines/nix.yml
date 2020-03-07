@@ -12,7 +12,7 @@ steps:
 
 - script: |
       cd $BUILD_SOURCESDIRECTORY
-      ./bin/sealtests
+      ./bin/sealtest
   displayName: 'Run unit tests'
 
 - task: UseDotNet@2
