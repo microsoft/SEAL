@@ -84,7 +84,7 @@ namespace seal
                 for (size_t i = 0; i < prime_count_; i++)
                 {
                     inv_punctured_prod_mod_prime_array_[i] = modulo_uint(
-                        punctured_prod_array_.get() + (i * prime_count_), prime_count_, prime_array_[i], pool_);
+                        punctured_prod_array_.get() + (i * prime_count_), prime_count_, prime_array_[i]);
                     if (!try_invert_uint_mod(
                             inv_punctured_prod_mod_prime_array_[i], prime_array_[i],
                             inv_punctured_prod_mod_prime_array_[i]))
@@ -410,7 +410,7 @@ namespace seal
             for (size_t i = 0; i < ibase_size_; i++)
             {
                 inv_ibase_punctured_prod_mod_ibase_[i] =
-                    modulo_uint(ibase_punctured_prod_array_.get() + (i * ibase_size_), ibase_size_, ibase_[i], pool_);
+                    modulo_uint(ibase_punctured_prod_array_.get() + (i * ibase_size_), ibase_size_, ibase_[i]);
                 if (!try_invert_uint_mod(
                         inv_ibase_punctured_prod_mod_ibase_[i], ibase_[i], inv_ibase_punctured_prod_mod_ibase_[i]))
                 {
@@ -427,7 +427,7 @@ namespace seal
                 for (size_t j = 0; j < ibase_size_; j++)
                 {
                     base_change_matrix_[i][j] = modulo_uint(
-                        ibase_punctured_prod_array_.get() + (j * ibase_size_), ibase_size_, obase_[i], pool_);
+                        ibase_punctured_prod_array_.get() + (j * ibase_size_), ibase_size_, obase_[i]);
                 }
             }
 

@@ -232,10 +232,10 @@ namespace SEALTest
             vector<uint64_t> in_values{ 0xAAAAAAAAAAA, 0xBBBBBBBBBB, 0xCCCCCCCCCC, 0xDDDDDDDDDD };
             ASSERT_TRUE(crt.initialize(primes));
             crt_test(
-                in_values, { modulo_uint(in_values.data(), in_values.size(), primes[0], pool),
-                             modulo_uint(in_values.data(), in_values.size(), primes[1], pool),
-                             modulo_uint(in_values.data(), in_values.size(), primes[2], pool),
-                             modulo_uint(in_values.data(), in_values.size(), primes[3], pool) });
+                in_values, { modulo_uint(in_values.data(), in_values.size(), primes[0]),
+                             modulo_uint(in_values.data(), in_values.size(), primes[1]),
+                             modulo_uint(in_values.data(), in_values.size(), primes[2]),
+                             modulo_uint(in_values.data(), in_values.size(), primes[3]) });
         }
 
         TEST(NumberTheory, BaseConvInitialize)

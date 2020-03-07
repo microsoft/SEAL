@@ -213,14 +213,14 @@ namespace seal
             prod_B_mod_q_ = allocate_uint(base_q_size_, pool_);
             for (size_t i = 0; i < base_q_size_; i++)
             {
-                prod_B_mod_q_[i] = modulo_uint(base_B_product.get(), base_B_size_, base_q_[i], pool_);
+                prod_B_mod_q_[i] = modulo_uint(base_B_product.get(), base_B_size_, base_q_[i]);
             }
 
             // Compute prod(q)^(-1) mod Bsk
             inv_prod_q_mod_Bsk_ = allocate_uint(base_Bsk_size_, pool_);
             for (size_t i = 0; i < base_Bsk_size_; i++)
             {
-                inv_prod_q_mod_Bsk_[i] = modulo_uint(prod_q.get(), base_q_size_, base_Bsk_[i], pool_);
+                inv_prod_q_mod_Bsk_[i] = modulo_uint(prod_q.get(), base_q_size_, base_Bsk_[i]);
                 if (!try_invert_uint_mod(inv_prod_q_mod_Bsk_[i], base_Bsk_[i], inv_prod_q_mod_Bsk_[i]))
                 {
                     reset();
@@ -229,7 +229,7 @@ namespace seal
             }
 
             // Compute prod(B)^(-1) mod m_sk
-            inv_prod_B_mod_m_sk_ = modulo_uint(base_B_product.get(), base_B_size_, m_sk_, pool_);
+            inv_prod_B_mod_m_sk_ = modulo_uint(base_B_product.get(), base_B_size_, m_sk_);
             if (!try_invert_uint_mod(inv_prod_B_mod_m_sk_, m_sk_, inv_prod_B_mod_m_sk_))
             {
                 reset();
@@ -249,7 +249,7 @@ namespace seal
             }
 
             // Compute prod(q)^(-1) mod m_tilde
-            inv_prod_q_mod_m_tilde_ = modulo_uint(prod_q.get(), base_q_size_, m_tilde_, pool_);
+            inv_prod_q_mod_m_tilde_ = modulo_uint(prod_q.get(), base_q_size_, m_tilde_);
             if (!try_invert_uint_mod(inv_prod_q_mod_m_tilde_, m_tilde_, inv_prod_q_mod_m_tilde_))
             {
                 reset();
@@ -260,7 +260,7 @@ namespace seal
             prod_q_mod_Bsk_ = allocate_uint(base_Bsk_size_, pool_);
             for (size_t i = 0; i < base_Bsk_size_; i++)
             {
-                prod_q_mod_Bsk_[i] = modulo_uint(prod_q.get(), base_q_size_, base_Bsk_[i], pool_);
+                prod_q_mod_Bsk_[i] = modulo_uint(prod_q.get(), base_q_size_, base_Bsk_[i]);
             }
 
             if (base_t_gamma_)
@@ -284,7 +284,7 @@ namespace seal
                 neg_inv_q_mod_t_gamma_ = allocate_uint(base_t_gamma_size_, pool_);
                 for (size_t i = 0; i < base_t_gamma_size_; i++)
                 {
-                    neg_inv_q_mod_t_gamma_[i] = modulo_uint(prod_q.get(), base_q_size_, base_t_gamma_[i], pool_);
+                    neg_inv_q_mod_t_gamma_[i] = modulo_uint(prod_q.get(), base_q_size_, base_t_gamma_[i]);
                     if (!try_invert_uint_mod(neg_inv_q_mod_t_gamma_[i], base_t_gamma_[i], neg_inv_q_mod_t_gamma_[i]))
                     {
                         reset();
