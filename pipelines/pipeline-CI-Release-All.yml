@@ -18,3 +18,7 @@ stages:
       parameters:
         debug: false
         name: macOS
+    - template: jobs.yml
+      parameters:
+        debug: false
+        name: Nuget

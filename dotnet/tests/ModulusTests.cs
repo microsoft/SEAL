@@ -54,7 +54,7 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(1, new int[] { 2 }));
 
             // Too large polyModulusDegree
-            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(65536, new int[] { 30 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(262144, new int[] { 30 }));
 
             // Invalid polyModulusDegree
             Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(1023, new int[] { 20 }));

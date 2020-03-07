@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "seal/memorymanager.h"
 #include "seal/util/defines.h"
 #include "seal/util/uintcore.h"
 #include <complex>
@@ -11,36 +12,26 @@
 
 namespace seal
 {
-    class ComplexRoots
+    namespace util
     {
-    public:
-        ComplexRoots() = delete;
-
-        SEAL_NODISCARD static inline std::complex<double> get_root(std::size_t index, std::size_t of_roots)
+        class ComplexRoots
         {
-#ifdef SEAL_DEBUG
-            if (util::get_power_of_two(of_roots) < 0)
-            {
-                throw std::invalid_argument("of_roots must be a power of two");
-            }
-            if (of_roots > root_fidelity_)
-            {
-                throw std::invalid_argument("of_roots is too large");
-            }
-#endif
-            index &= of_roots - 1;
-            return get_root(util::mul_safe(index, root_fidelity_ / of_roots));
-        }
+        public:
+            ComplexRoots() = delete;
 
-    private:
-        SEAL_NODISCARD static std::complex<double> get_root(std::size_t index);
+            ComplexRoots(std::size_t degree_of_roots, MemoryPoolHandle pool);
 
-        static constexpr std::size_t root_fidelity_ = 131072;
+            SEAL_NODISCARD std::complex<double> get_root(std::size_t index) const;
 
-        static constexpr double PI_ = 3.1415926535897932384626433832795028842;
+        private:
+            static constexpr double PI_ = 3.1415926535897932384626433832795028842;
 
-        // static const double complex_roots_re_[root_fidelity_ / 8 + 1];
+            // Contains 0~(n/8-1)-th powers of the n-th primitive root.
+            util::Pointer<std::complex<double>> roots_;
 
-        // static const double complex_roots_im_[root_fidelity_ / 8 + 1];
-    };
+            std::size_t degree_of_roots_;
+
+            MemoryPoolHandle pool_;
+        };
+    } // namespace util
 } // namespace seal

@@ -3,6 +3,7 @@ cmake/SEALConfig.cmake
 cmake/SEALConfigVersion.cmake
 cmake/SEALTargets.cmake
 native/src/seal/util/config.h
+native/src/gsl
 **/CMakeCache.txt
 **/CMakeFiles
 **/Makefile
@@ -16,7 +17,7 @@ native/src/seal/util/config.h
 .local_vimrc
 **/*.code-workspace
 **/.vscode
-*/build
+**/build
 **/*.build
 **/compile_commands.json
 **/.DS_Store

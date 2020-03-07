@@ -34,7 +34,7 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #define SEAL_COEFF_MOD_COUNT_MIN 1
 
 // Bounds for polynomial modulus degree
-#define SEAL_POLY_MOD_DEGREE_MAX 32768
+#define SEAL_POLY_MOD_DEGREE_MAX 131072
 #define SEAL_POLY_MOD_DEGREE_MIN 2
 
 // Bounds for the plaintext modulus
