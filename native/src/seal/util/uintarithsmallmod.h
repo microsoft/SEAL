@@ -249,7 +249,7 @@ namespace seal
         }
 
         SEAL_NODISCARD inline std::uint64_t modulo_uint(
-            const std::uint64_t *value, std::size_t value_uint64_count, const SmallModulus &modulus, MemoryPool &pool)
+            const std::uint64_t *value, std::size_t value_uint64_count, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if (!value && value_uint64_count)
