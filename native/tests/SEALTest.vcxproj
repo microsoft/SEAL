@@ -100,7 +100,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt" />
     <Text Include="seal\CMakeLists.txt" />
     <Text Include="seal\util\CMakeLists.txt" />
   </ItemGroup>

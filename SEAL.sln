@@ -46,7 +46,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.clang-format = .clang-format
 		.gitignore = .gitignore
-		azure-pipelines.yml = azure-pipelines.yml
 		Changes.md = Changes.md
 		CMakeLists.txt = CMakeLists.txt
 		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
@@ -56,13 +55,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NOTICE = NOTICE
 		README.md = README.md
 		SECURITY.md = SECURITY.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{0518DDC0-82BC-4E7C-A24D-98B8EA9C47B3}"
-	ProjectSection(SolutionItems) = preProject
-		templates\nix-build.yml = templates\nix-build.yml
-		templates\pack.yml = templates\pack.yml
-		templates\windows-build.yml = templates\windows-build.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "thirdparty", "thirdparty", "{6B00D0DE-8A17-44B8-BF47-F372E9189434}"
@@ -85,6 +77,20 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmake", "cmake", "{256C7291-7A4D-466A-BF88-535B541D2CAC}"
 	ProjectSection(SolutionItems) = preProject
 		cmake\SEALConfig.cmake.in = cmake\SEALConfig.cmake.in
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{03B08661-29E2-4806-9F10-F1B7013D717D}"
+	ProjectSection(SolutionItems) = preProject
+		pipelines\jobs.yml = pipelines\jobs.yml
+		pipelines\nix.yml = pipelines\nix.yml
+		pipelines\nuget.yml = pipelines\nuget.yml
+		pipelines\pipeline-CI-Debug-Linux.yml = pipelines\pipeline-CI-Debug-Linux.yml
+		pipelines\pipeline-CI-Debug-macOS.yml = pipelines\pipeline-CI-Debug-macOS.yml
+		pipelines\pipeline-CI-Debug-Windows.yml = pipelines\pipeline-CI-Debug-Windows.yml
+		pipelines\pipeline-CI-Release-All.yml = pipelines\pipeline-CI-Release-All.yml
+		pipelines\pipeline-Nuget.yml = pipelines\pipeline-Nuget.yml
+		pipelines\pipeline-PR-Debug-All.yml = pipelines\pipeline-PR-Debug-All.yml
+		pipelines\windows.yml = pipelines\windows.yml
 	EndProjectSection
 EndProject
 Global
@@ -164,12 +170,12 @@ Global
 		{D0FCCA29-F0F8-49A3-9615-24FF899F1909} = {0786F255-C3A7-4912-A669-12273E7AE013}
 		{18DA9F90-3131-461A-A3E8-40AC0B1D7632} = {0786F255-C3A7-4912-A669-12273E7AE013}
 		{33C15AAC-6E56-477E-A118-3451FD21AC49} = {0786F255-C3A7-4912-A669-12273E7AE013}
-		{0518DDC0-82BC-4E7C-A24D-98B8EA9C47B3} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
 		{6B00D0DE-8A17-44B8-BF47-F372E9189434} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
 		{5E524D23-AD60-45AF-B279-0322941E9F31} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
 		{B4EF7358-C76B-4142-9746-B082114B1DDD} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
 		{0DD76E94-59E1-49D4-9ED7-8C696B89F26E} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
 		{256C7291-7A4D-466A-BF88-535B541D2CAC} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
+		{03B08661-29E2-4806-9F10-F1B7013D717D} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15A17F22-F747-4B82-BF5F-E0224AF4B3ED}

@@ -145,9 +145,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt">
-      <Filter>Other</Filter>
-    </Text>
     <Text Include="seal\CMakeLists.txt">
       <Filter>Other\seal</Filter>
     </Text>
