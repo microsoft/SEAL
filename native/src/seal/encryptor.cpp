@@ -145,7 +145,7 @@ namespace seal
                 // Requires modulus switching
                 auto &prev_context_data = *prev_context_data_ptr;
                 auto &prev_parms_id = prev_context_data.parms_id();
-                auto &base_converter = prev_context_data.base_converter();
+                auto rns_tool = prev_context_data.rns_tool();
 
                 // Zero encryption without modulus switching
                 Ciphertext temp(pool);
@@ -156,12 +156,12 @@ namespace seal
                 {
                     if (is_ntt_form)
                     {
-                        base_converter->divide_and_round_q_last_ntt_inplace(
+                        rns_tool->divide_and_round_q_last_ntt_inplace(
                             temp.data(j), prev_context_data.small_ntt_tables(), pool);
                     }
                     else
                     {
-                        base_converter->divide_and_round_q_last_inplace(temp.data(j), pool);
+                        rns_tool->divide_and_round_q_last_inplace(temp.data(j), pool);
                     }
                     util::set_poly_poly(temp.data(j), coeff_count, coeff_mod_count, destination.data(j));
                 }

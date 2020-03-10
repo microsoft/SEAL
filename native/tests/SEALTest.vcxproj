@@ -77,7 +77,6 @@
     <ClCompile Include="seal\serialization.cpp" />
     <ClCompile Include="seal\smallmodulus.cpp" />
     <ClCompile Include="seal\testrunner.cpp" />
-    <ClCompile Include="seal\util\baseconverter.cpp" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
     <ClCompile Include="seal\util\common.cpp" />
     <ClCompile Include="seal\util\hash.cpp" />
@@ -88,6 +87,7 @@
     <ClCompile Include="seal\util\polyarithmod.cpp" />
     <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
     <ClCompile Include="seal\util\polycore.cpp" />
+    <ClCompile Include="seal\util\rns.cpp" />
     <ClCompile Include="seal\util\smallntt.cpp" />
     <ClCompile Include="seal\util\stringtouint64.cpp" />
     <ClCompile Include="seal\util\uint64tostring.cpp" />

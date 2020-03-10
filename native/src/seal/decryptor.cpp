@@ -104,7 +104,7 @@ namespace seal
         destination.resize(coeff_count);
 
         // Divide scaling variant using Bajard FullRNS techniques
-        context_data.base_converter()->exact_scale_and_round(tmp_dest_modq.get(), destination.data(), pool);
+        context_data.rns_tool()->decrypt_scale_and_round(tmp_dest_modq.get(), destination.data(), pool);
 
         // How many non-zero coefficients do we really have in the result?
         size_t plain_coeff_count = get_significant_uint64_count_uint(destination.data(), coeff_count);
@@ -243,7 +243,7 @@ namespace seal
         size_t encrypted_size = encrypted.size();
         auto is_ntt_form = encrypted.is_ntt_form();
 
-        auto &small_ntt_tables = context_data.small_ntt_tables();
+        auto small_ntt_tables = context_data.small_ntt_tables();
 
         // Make sure we have enough secret key powers computed
         compute_secret_key_array(encrypted_size - 1);
@@ -336,7 +336,7 @@ namespace seal
         }
 
         // CRT-compose the noise
-        context_data.crt_tool()->compose_array(noise_poly.get(), coeff_count, pool_);
+        context_data.rns_tool()->base_q()->compose_array(noise_poly.get(), coeff_count, pool_);
 
         // Next we compute the infinity norm mod parms.coeff_modulus()
         poly_infty_norm_coeffmod(

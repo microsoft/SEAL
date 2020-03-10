@@ -101,9 +101,6 @@
     <ClInclude Include="seal\valcheck.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\util\baseconverter.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="seal\util\blake2.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -200,6 +197,9 @@
     <ClInclude Include="seal\util\ztools.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="seal\util\rns.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\batchencoder.cpp">
@@ -259,9 +259,6 @@
     <ClCompile Include="seal\valcheck.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\util\baseconverter.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
     <ClCompile Include="seal\util\clipnormal.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -314,6 +311,9 @@
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\blake2b.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\rns.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>

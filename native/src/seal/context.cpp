@@ -111,9 +111,13 @@ namespace seal
             }
         }
 
-        // Set up the CRTTool
-        context_data.crt_tool_ = allocate<CRTTool>(pool_, pool_);
-        if (!context_data.crt_tool_->initialize(coeff_modulus))
+        // Set up RNSBase for coeff_modulus
+        Pointer<RNSBase> coeff_modulus_base;
+        try
+        {
+            coeff_modulus_base = allocate<RNSBase>(pool_, coeff_modulus, pool_);
+        }
+        catch (const invalid_argument &)
         {
             // Parameters are not valid
             context_data.qualifiers_.parameters_set = false;
@@ -193,10 +197,10 @@ namespace seal
             context_data.coeff_mod_plain_modulus_ = context_data.upper_half_increment_[0];
 
             // Decompose coeff_div_plain_modulus into RNS factors
-            context_data.crt_tool_->decompose(context_data.coeff_div_plain_modulus_.get(), pool_);
+            coeff_modulus_base->decompose(context_data.coeff_div_plain_modulus_.get(), pool_);
 
             // Decompose upper_half_increment into RNS factors
-            context_data.crt_tool_->decompose(context_data.upper_half_increment_.get(), pool_);
+            coeff_modulus_base->decompose(context_data.upper_half_increment_.get(), pool_);
 
             // Calculate (plain_modulus + 1) / 2.
             context_data.plain_upper_half_threshold_ = (plain_modulus.value() + 1) >> 1;
@@ -260,9 +264,9 @@ namespace seal
             return context_data;
         }
 
-        // Create BaseConverter
-        context_data.base_converter_ = allocate<BaseConverter>(pool_, pool_);
-        if (!context_data.base_converter_->initialize(poly_modulus_degree, coeff_modulus, plain_modulus))
+        // Create RNSTool
+        context_data.rns_tool_ = allocate<RNSTool>(pool_, pool_);
+        if (!context_data.rns_tool_->initialize(poly_modulus_degree, *coeff_modulus_base, plain_modulus))
         {
             // Parameters are not valid
             context_data.qualifiers_.parameters_set = false;

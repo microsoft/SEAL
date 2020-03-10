@@ -191,7 +191,7 @@ namespace seal
             }
 
             // Next decompose this coefficient
-            context_data.crt_tool()->decompose(coeffu.get(), pool);
+            context_data.rns_tool()->base_q()->decompose(coeffu.get(), pool);
 
             // Finally replace the sign if necessary
             if (is_negative)

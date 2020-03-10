@@ -45,7 +45,6 @@
     <ClInclude Include="seal\serializable.h" />
     <ClInclude Include="seal\serialization.h" />
     <ClInclude Include="seal\smallmodulus.h" />
-    <ClInclude Include="seal\util\baseconverter.h" />
     <ClInclude Include="seal\util\blake2.h" />
     <ClInclude Include="seal\util\blake2-impl.h" />
     <ClInclude Include="seal\util\clang.h" />
@@ -67,6 +66,7 @@
     <ClInclude Include="seal\util\polyarithsmallmod.h" />
     <ClInclude Include="seal\util\polycore.h" />
     <ClInclude Include="seal\util\rlwe.h" />
+    <ClInclude Include="seal\util\rns.h" />
     <ClInclude Include="seal\util\scalingvariant.h" />
     <ClInclude Include="seal\util\smallntt.h" />
     <ClInclude Include="seal\util\streambuf.h" />
@@ -96,9 +96,9 @@
     <ClCompile Include="seal\randomgen.cpp" />
     <ClCompile Include="seal\serialization.cpp" />
     <ClCompile Include="seal\smallmodulus.cpp" />
+    <ClCompile Include="seal\util\rns.cpp" />
     <ClCompile Include="seal\util\ztools.cpp" />
     <ClCompile Include="seal\valcheck.cpp" />
-    <ClCompile Include="seal\util\baseconverter.cpp" />
     <ClCompile Include="seal\util\blake2b.c" />
     <ClCompile Include="seal\util\blake2xb.c" />
     <ClCompile Include="seal\util\clipnormal.cpp" />

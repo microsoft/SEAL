@@ -3,7 +3,6 @@
 
 # Source files in this directory
 target_sources(seal_obj PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/baseconverter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
     ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
     ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
@@ -15,6 +14,7 @@ target_sources(seal_obj PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.cpp
     ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rlwe.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rns.cpp
     ${CMAKE_CURRENT_LIST_DIR}/scalingvariant.cpp
     ${CMAKE_CURRENT_LIST_DIR}/smallntt.cpp
     ${CMAKE_CURRENT_LIST_DIR}/uintarith.cpp
@@ -30,7 +30,6 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/config.h.in ${CMAKE_CURRENT_LIST_DIR}/c
 # Add header files for installation
 install(
     FILES
-        ${CMAKE_CURRENT_LIST_DIR}/baseconverter.h
         ${CMAKE_CURRENT_LIST_DIR}/blake2.h
         ${CMAKE_CURRENT_LIST_DIR}/blake2-impl.h
         ${CMAKE_CURRENT_LIST_DIR}/clang.h
@@ -53,6 +52,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.h
         ${CMAKE_CURRENT_LIST_DIR}/polycore.h
         ${CMAKE_CURRENT_LIST_DIR}/rlwe.h
+        ${CMAKE_CURRENT_LIST_DIR}/rns.h
         ${CMAKE_CURRENT_LIST_DIR}/scalingvariant.h
         ${CMAKE_CURRENT_LIST_DIR}/smallntt.h
         ${CMAKE_CURRENT_LIST_DIR}/streambuf.h

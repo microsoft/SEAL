@@ -443,7 +443,7 @@ namespace seal
                 throw std::invalid_argument("scale out of bounds");
             }
 
-            auto &small_ntt_tables = context_data.small_ntt_tables();
+            auto small_ntt_tables = context_data.small_ntt_tables();
 
             // values_size is guaranteed to be no bigger than slots_
             std::size_t n = util::mul_safe(slots_, std::size_t(2));
@@ -586,7 +586,7 @@ namespace seal
                     }
 
                     // Next decompose this coefficient
-                    context_data.crt_tool()->decompose(coeffu.get(), pool);
+                    context_data.rns_tool()->base_q()->decompose(coeffu.get(), pool);
 
                     // Finally replace the sign if necessary
                     if (is_negative)
@@ -646,7 +646,7 @@ namespace seal
             std::size_t coeff_count = parms.poly_modulus_degree();
             std::size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_mod_count);
 
-            auto &small_ntt_tables = context_data.small_ntt_tables();
+            auto small_ntt_tables = context_data.small_ntt_tables();
 
             // Check that scale is positive and not too large
             if (plain.scale() <= 0 ||
@@ -678,7 +678,7 @@ namespace seal
             }
 
             // CRT-compose the polynomial
-            context_data.crt_tool()->compose_array(plain_copy.get(), coeff_count, pool);
+            context_data.rns_tool()->base_q()->compose_array(plain_copy.get(), coeff_count, pool);
 
             // Create floating-point representations of the multi-precision integer coefficients
             double two_pow_64 = std::pow(2.0, 64);

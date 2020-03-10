@@ -6,7 +6,7 @@
 #include "seal/encryptionparams.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
-#include "seal/util/baseconverter.h"
+#include "seal/util/rns.h"
 #include "seal/util/pointer.h"
 #include "seal/util/smallntt.h"
 #include "seal/util/numth.h"
@@ -193,7 +193,7 @@ namespace seal
             modulus. The security of the encryption parameters largely depends on the
             bit-length of this product, and on the degree of the polynomial modulus.
             */
-            SEAL_NODISCARD inline auto total_coeff_modulus() const noexcept -> const std::uint64_t *
+            SEAL_NODISCARD inline auto total_coeff_modulus() const noexcept
             {
                 return total_coeff_modulus_.get();
             }
@@ -207,42 +207,34 @@ namespace seal
             }
 
             /**
-            Returns a const reference to the CRT tool.
+            Returns a constant pointer to the RNSTool.
             */
-            SEAL_NODISCARD inline auto &crt_tool() const noexcept
+            SEAL_NODISCARD inline auto rns_tool() const noexcept
             {
-                return crt_tool_;
+                return rns_tool_.get();
             }
 
             /**
-            Returns a const reference to the base converter.
+            Returns a constant pointer to the NTT tables.
             */
-            SEAL_NODISCARD inline auto &base_converter() const noexcept
+            SEAL_NODISCARD inline auto small_ntt_tables() const noexcept
             {
-                return base_converter_;
+                return small_ntt_tables_.get();
             }
 
             /**
-            Returns a const reference to the NTT tables.
+            Returns a constant pointer to the NTT tables.
             */
-            SEAL_NODISCARD inline auto &small_ntt_tables() const noexcept
+            SEAL_NODISCARD inline auto plain_ntt_tables() const noexcept
             {
-                return small_ntt_tables_;
-            }
-
-            /**
-            Returns a const reference to the NTT tables.
-            */
-            SEAL_NODISCARD inline auto &plain_ntt_tables() const noexcept
-            {
-                return plain_ntt_tables_;
+                return plain_ntt_tables_.get();
             }
 
             /**
             Return a pointer to BFV "Delta", i.e. coefficient modulus divided by
             plaintext modulus.
             */
-            SEAL_NODISCARD inline auto coeff_div_plain_modulus() const noexcept -> const std::uint64_t *
+            SEAL_NODISCARD inline auto coeff_div_plain_modulus() const noexcept
             {
                 return coeff_div_plain_modulus_.get();
             }
@@ -251,7 +243,7 @@ namespace seal
             Return the threshold for the upper half of integers modulo plain_modulus.
             This is simply (plain_modulus + 1) / 2.
             */
-            SEAL_NODISCARD inline auto plain_upper_half_threshold() const noexcept -> std::uint64_t
+            SEAL_NODISCARD inline auto plain_upper_half_threshold() const noexcept
             {
                 return plain_upper_half_threshold_;
             }
@@ -262,7 +254,7 @@ namespace seal
             for the full product coeff_modulus if using_fast_plain_lift is false and is
             otherwise represented modulo each of the coeff_modulus primes in order.
             */
-            SEAL_NODISCARD inline auto plain_upper_half_increment() const noexcept -> const std::uint64_t *
+            SEAL_NODISCARD inline auto plain_upper_half_increment() const noexcept
             {
                 return plain_upper_half_increment_.get();
             }
@@ -271,7 +263,7 @@ namespace seal
             Return a pointer to the upper half threshold with respect to the total
             coefficient modulus. This is needed in CKKS decryption.
             */
-            SEAL_NODISCARD inline auto upper_half_threshold() const noexcept -> const std::uint64_t *
+            SEAL_NODISCARD inline auto upper_half_threshold() const noexcept
             {
                 return upper_half_threshold_.get();
             }
@@ -287,7 +279,7 @@ namespace seal
             this operation is only done for negative message coefficients, i.e. those
             that exceed plain_upper_half_threshold.
             */
-            SEAL_NODISCARD inline auto upper_half_increment() const noexcept -> const std::uint64_t *
+            SEAL_NODISCARD inline auto upper_half_increment() const noexcept
             {
                 return upper_half_increment_.get();
             }
@@ -344,9 +336,7 @@ namespace seal
 
             EncryptionParameterQualifiers qualifiers_;
 
-            util::Pointer<util::CRTTool> crt_tool_;
-
-            util::Pointer<util::BaseConverter> base_converter_;
+            util::Pointer<util::RNSTool> rns_tool_;
 
             util::Pointer<util::SmallNTTTables> small_ntt_tables_;
 

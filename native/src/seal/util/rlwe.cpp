@@ -145,7 +145,7 @@ namespace seal
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
-            auto &small_ntt_tables = context_data.small_ntt_tables();
+            auto small_ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = public_key.data().size();
 
             // Make destination have right size and parms_id
@@ -218,7 +218,7 @@ namespace seal
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_mod_count = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
-            auto &small_ntt_tables = context_data.small_ntt_tables();
+            auto small_ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = 2;
 
             // If a polynomial is too small to store a seed, disable save_seed.

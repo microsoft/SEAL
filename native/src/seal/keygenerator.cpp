@@ -84,7 +84,7 @@ namespace seal
             uint64_t *secret_key = secret_key_.data().data();
             sample_poly_ternary(random, parms, secret_key);
 
-            auto &small_ntt_tables = context_data.small_ntt_tables();
+            auto small_ntt_tables = context_data.small_ntt_tables();
             for (size_t i = 0; i < coeff_mod_count; i++)
             {
                 // Transform the secret s into NTT representation.
