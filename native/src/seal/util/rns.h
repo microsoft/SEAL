@@ -53,7 +53,7 @@ namespace seal
                 return subbase.is_subbase_of(*this);
             }
 
-            SEAL_NODISCARD inline bool is_proper_subbase_of(const RNSBase& superbase) const noexcept
+            SEAL_NODISCARD inline bool is_proper_subbase_of(const RNSBase &superbase) const noexcept
             {
                 return (size_ < superbase.size_) && is_subbase_of(superbase);
             }

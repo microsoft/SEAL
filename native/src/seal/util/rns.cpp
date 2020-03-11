@@ -3,10 +3,10 @@
 
 #include "seal/util/common.h"
 #include "seal/util/numth.h"
+#include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rns.h"
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"
-#include "seal/util/polyarithsmallmod.h"
 #include <algorithm>
 
 using namespace std;
@@ -349,14 +349,14 @@ namespace seal
                     set_uint_uint(value, size_, value_copy.get());
 
                     // Temporary space for 128-bit reductions
-                    for (size_t i = 0; i < size_; i++)
+                    for (size_t j = 0; j < size_; j++)
                     {
                         // Reduce in blocks
                         uint64_t temp[2]{ 0, value_copy[size_ - 1] };
                         for (size_t k = size_ - 1; k--;)
                         {
                             temp[0] = value_copy[k];
-                            temp[1] = barrett_reduce_128(temp, base_[i]);
+                            temp[1] = barrett_reduce_128(temp, base_[j]);
                         }
 
                         // Save the result modulo i-th base element
@@ -517,8 +517,8 @@ namespace seal
             }
         }
 
-        RNSTool::RNSTool(
-            size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t, MemoryPoolHandle pool) : pool_(move(pool))
+        RNSTool::RNSTool(size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t, MemoryPoolHandle pool)
+            : pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
             if (!pool_)

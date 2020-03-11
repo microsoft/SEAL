@@ -25,29 +25,31 @@
 #endif
 
 #ifdef SEAL_USE___INT128
-#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64)                                                 \
-    {                                                                                                       \
-        *hw64 = static_cast<unsigned long long>(                                                            \
-            ((static_cast<unsigned __int128>(operand1) * static_cast<unsigned __int128>(operand2)) >> 64)); \
+__extension__ typedef __int128 int128_t;
+__extension__ typedef unsigned __int128 uint128_t;
+#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64)                                 \
+    {                                                                                       \
+        *hw64 = static_cast<unsigned long long>(                                            \
+            ((static_cast<uint128_t>(operand1) * static_cast<uint128_t>(operand2)) >> 64)); \
     }
 
-#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)                              \
-    {                                                                                    \
-        unsigned __int128 product = static_cast<unsigned __int128>(operand1) * operand2; \
-        result128[0] = static_cast<unsigned long long>(product);                         \
-        result128[1] = static_cast<unsigned long long>(product >> 64);                   \
+#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)              \
+    {                                                                    \
+        uint128_t product = static_cast<uint128_t>(operand1) * operand2; \
+        result128[0] = static_cast<unsigned long long>(product);         \
+        result128[1] = static_cast<unsigned long long>(product >> 64);   \
     }
 
-#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result)                                                 \
-    {                                                                                                              \
-        unsigned __int128 n, q;                                                                                    \
-        n = (static_cast<unsigned __int128>(numerator[1]) << 64) | (static_cast<unsigned __int128>(numerator[0])); \
-        q = n / denominator;                                                                                       \
-        n -= q * denominator;                                                                                      \
-        numerator[0] = static_cast<std::uint64_t>(n);                                                              \
-        numerator[1] = static_cast<std::uint64_t>(n >> 64);                                                        \
-        quotient[0] = static_cast<std::uint64_t>(q);                                                               \
-        quotient[1] = static_cast<std::uint64_t>(q >> 64);                                                         \
+#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result)                                 \
+    {                                                                                              \
+        uint128_t n, q;                                                                            \
+        n = (static_cast<uint128_t>(numerator[1]) << 64) | (static_cast<uint128_t>(numerator[0])); \
+        q = n / denominator;                                                                       \
+        n -= q * denominator;                                                                      \
+        numerator[0] = static_cast<std::uint64_t>(n);                                              \
+        numerator[1] = static_cast<std::uint64_t>(n >> 64);                                        \
+        quotient[0] = static_cast<std::uint64_t>(q);                                               \
+        quotient[1] = static_cast<std::uint64_t>(q >> 64);                                         \
     }
 #endif
 

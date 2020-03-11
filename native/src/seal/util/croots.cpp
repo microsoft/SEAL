@@ -11,7 +11,7 @@ namespace seal
     namespace util
     {
         ComplexRoots::ComplexRoots(size_t degree_of_roots, MemoryPoolHandle pool)
-            : pool_(std::move(pool)), degree_of_roots_(degree_of_roots)
+            : degree_of_roots_(degree_of_roots), pool_(std::move(pool))
         {
 #ifdef SEAL_DEBUG
             int power = util::get_power_of_two(degree_of_roots_);
@@ -30,7 +30,8 @@ namespace seal
             // Alternatively, choose from precomputed high-precision roots in files.
             for (size_t i = 0; i <= degree_of_roots_ / 8; i++)
             {
-                roots_[i] = std::polar<double>(1.0, 2 * PI_ * static_cast<double>(i) / degree_of_roots_);
+                roots_[i] =
+                    std::polar<double>(1.0, 2 * PI_ * static_cast<double>(i) / static_cast<double>(degree_of_roots_));
             }
         }
 

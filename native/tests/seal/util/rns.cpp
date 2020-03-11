@@ -39,7 +39,7 @@ namespace SEALTest
                 RNSBase base({ 2 }, pool);
                 ASSERT_EQ(size_t(1), base.size());
                 ASSERT_EQ(SmallModulus(2), base[0]);
-                ASSERT_THROW(auto a = base[1], out_of_range);
+                ASSERT_THROW(base[1], out_of_range);
             }
             {
                 RNSBase base({ 2, 3, 5 }, pool);
@@ -47,7 +47,7 @@ namespace SEALTest
                 ASSERT_EQ(SmallModulus(2), base[0]);
                 ASSERT_EQ(SmallModulus(3), base[1]);
                 ASSERT_EQ(SmallModulus(5), base[2]);
-                ASSERT_THROW(auto a = base[3], out_of_range);
+                ASSERT_THROW(base[3], out_of_range);
             }
         }
 
@@ -613,8 +613,7 @@ namespace SEALTest
                 RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool);
                 ASSERT_TRUE(rns_tool.is_initialized());
 
-                vector<uint64_t> in(
-                    poly_modulus_degree * (rns_tool.base_Bsk()->size() + rns_tool.base_q()->size()));
+                vector<uint64_t> in(poly_modulus_degree * (rns_tool.base_Bsk()->size() + rns_tool.base_q()->size()));
                 vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
                 rns_tool.fast_floor(in.data(), out.data(), pool);
@@ -658,8 +657,7 @@ namespace SEALTest
                 RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool);
                 ASSERT_TRUE(rns_tool.is_initialized());
 
-                vector<uint64_t> in(
-                    poly_modulus_degree * (rns_tool.base_Bsk()->size() + rns_tool.base_q()->size()));
+                vector<uint64_t> in(poly_modulus_degree * (rns_tool.base_Bsk()->size() + rns_tool.base_q()->size()));
                 vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
                 rns_tool.fast_floor(in.data(), out.data(), pool);

@@ -11,9 +11,9 @@
 #include "seal/randomgen.h"
 #include "seal/secretkey.h"
 #include "seal/smallmodulus.h"
-#include "seal/util/rns.h"
 #include "seal/util/defines.h"
 #include "seal/util/locks.h"
+#include "seal/util/rns.h"
 #include "seal/util/smallntt.h"
 #include <memory>
 

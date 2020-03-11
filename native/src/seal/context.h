@@ -6,10 +6,10 @@
 #include "seal/encryptionparams.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
-#include "seal/util/rns.h"
-#include "seal/util/pointer.h"
-#include "seal/util/smallntt.h"
 #include "seal/util/numth.h"
+#include "seal/util/pointer.h"
+#include "seal/util/rns.h"
+#include "seal/util/smallntt.h"
 #include <functional>
 #include <memory>
 #include <unordered_map>
