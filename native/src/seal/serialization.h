@@ -53,23 +53,23 @@ namespace seal
         Struct to contain header information for serialization. The size of the
         header is 16 bytes and it consists of the following fields:
 
-        1. a magic number identifying this is a SEALHeader struct (2 bytes)
-        2. 0x00 (1 byte)
-        3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
-        4. the size in bytes of the entire serialized object, including the header (8 bytes)
-        5. reserved for future use (4 bytes)
+        1. 0x00 (1 byte)
+        2. a compr_mode_type indicating whether data after the header is compressed (1 byte)
+        3. a magic number identifying this is a SEALHeader struct (2 bytes)
+        4. reserved for future use (4 bytes)
+        5. the size in bytes of the entire serialized object, including the header (8 bytes)
         */
         struct SEALHeader
         {
-            std::uint16_t magic = seal_magic;
-
             std::uint8_t zero_byte = 0x00;
 
             compr_mode_type compr_mode = compr_mode_type::none;
 
-            std::uint64_t size = 0;
+            std::uint16_t magic = seal_magic;
 
             std::uint32_t reserved = 0;
+
+            std::uint64_t size = 0;
         };
 
         /**

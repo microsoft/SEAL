@@ -54,15 +54,11 @@ namespace Microsoft.Research.SEAL
         /// 1. a magic number identifying this is a SEALHeader struct (2 bytes)
         /// 2. 0x00 (1 byte)
         /// 3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
-        /// 4. the size in bytes of the entire serialized object, including the header (4 bytes)
-        /// 5. reserved for future use (8 bytes)
+        /// 4. the size in bytes of the entire serialized object, including the header (8 bytes)
+        /// 5. reserved for future use (4 bytes)
         /// </remarks>
         public class SEALHeader
         {
-            /// <summary>A magic number identifying this as a SEALHeader struct
-            /// (2 bytes)</summary>
-            public ushort Magic = SEALMagic;
-
             /// <summary>0x00 (1 byte)</summary>
             public byte ZeroByte = 0x00;
 
@@ -70,12 +66,17 @@ namespace Microsoft.Research.SEAL
             /// compressed (1 byte)</summary>
             public ComprModeType ComprMode = ComprModeDefault;
 
-            /// <summary>The size in bytes of the entire serialized object, including the
-            /// header (4 bytes)</summary>
-            public uint Size = 0;
+            /// <summary>A magic number identifying this as a SEALHeader struct
+            /// (2 bytes)</summary>
+            public ushort Magic = SEALMagic;
 
-            /// <summary>Reserved for future use (8 bytes)</summary>
+            /// <summary>Reserved for future use (4 bytes)</summary>
             public uint Reserved = 0;
+
+            /// <summary>The size in bytes of the entire serialized object, including the
+            /// header (8 bytes)</summary>
+            public ulong Size = 0;
+
         };
 
         private static bool IsSupportedComprMode(byte comprMode)
@@ -129,9 +130,9 @@ namespace Microsoft.Research.SEAL
 
             using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
             {
-                writer.Write(header.Magic);
                 writer.Write(header.ZeroByte);
                 writer.Write((byte)header.ComprMode);
+                writer.Write(header.Magic);
                 writer.Write(header.Reserved);
             }
         }
@@ -157,10 +158,11 @@ namespace Microsoft.Research.SEAL
 
             using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, true))
             {
-                header.Magic = reader.ReadUInt16();
                 header.ZeroByte = reader.ReadByte();
                 header.ComprMode = (ComprModeType)reader.ReadByte();
-                header.Size = reader.ReadUInt32();
+                header.Magic = reader.ReadUInt16();
+                header.Reserved = reader.ReadUInt32();
+                header.Size = reader.ReadUInt64();
             }
         }
 
@@ -192,8 +194,7 @@ namespace Microsoft.Research.SEAL
         /// support writing, or if size is negative or too large</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         /// <exception cref="InvalidOperationException">if the data to be saved is
-        /// invalid, if compression mode is not supported, or if compression
-        /// failed</exception>
+        /// invalid, if compression mode is not supported, or if compression failed</exception>
         internal static long Save(SaveDelegate SaveData, long size,
             ComprModeType comprMode, Stream stream)
         {
@@ -208,8 +209,9 @@ namespace Microsoft.Research.SEAL
 
             try
             {
-                byte[] buffer = new byte[size];
-                SaveData(buffer, checked((ulong)size), (byte)comprMode, out long outBytes);
+                int sizeInt = checked((int)size);
+                byte[] buffer = new byte[sizeInt];
+                SaveData(buffer, checked((ulong)sizeInt), (byte)comprMode, out long outBytes);
                 int intOutBytes = checked((int)outBytes);
                 using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
                 {
@@ -248,8 +250,9 @@ namespace Microsoft.Research.SEAL
         /// support reading</exception>
         /// <exception cref="EndOfStreamException">if the stream ended unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid
-        /// or if the loaded compression mode is not supported</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is invalid,
+        /// if the loaded compression mode is not supported, or if size of the object
+        /// is more than 2 GB</exception>
         internal static long Load(LoadDelegate LoadData, Stream stream)
         {
             if (null == stream)
@@ -270,6 +273,8 @@ namespace Microsoft.Research.SEAL
                     throw new InvalidOperationException("Unsupported compression mode");
                 if (!IsValidHeader(header))
                     throw new InvalidOperationException("Loaded SEALHeader is invalid");
+                if (header.Size > checked((ulong)int.MaxValue))
+                    throw new InvalidOperationException("Object size is larger than 2 GB");
 
                 int sizeInt = checked((int)header.Size);
                 stream.Seek(pos, SeekOrigin.Begin);
