@@ -56,8 +56,8 @@ namespace seal
         1. a magic number identifying this is a SEALHeader struct (2 bytes)
         2. 0x00 (1 byte)
         3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
-        4. the size in bytes of the entire serialized object, including the header (4 bytes)
-        5. reserved for future use (8 bytes)
+        4. the size in bytes of the entire serialized object, including the header (8 bytes)
+        5. reserved for future use (4 bytes)
         */
         struct SEALHeader
         {
@@ -67,9 +67,9 @@ namespace seal
 
             compr_mode_type compr_mode = compr_mode_type::none;
 
-            std::uint32_t size = 0;
+            std::uint64_t size = 0;
 
-            std::uint64_t reserved = 0;
+            std::uint32_t reserved = 0;
         };
 
         /**

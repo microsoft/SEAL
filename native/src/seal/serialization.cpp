@@ -122,7 +122,7 @@ namespace seal
             case compr_mode_type::none:
                 // We set the compression mode and size here, and save the header
                 header.compr_mode = compr_mode;
-                header.size = safe_cast<uint32_t>(raw_size);
+                header.size = safe_cast<uint64_t>(raw_size);
                 SaveHeader(header, stream);
 
                 // Write rest of the data
@@ -208,7 +208,7 @@ namespace seal
             case compr_mode_type::none:
                 // Read rest of the data
                 load_members(stream);
-                if (header.size != stream.tellg() - stream_start_pos)
+                if (header.size != safe_cast<uint64_t>(stream.tellg() - stream_start_pos))
                 {
                     throw logic_error("invalid data size");
                 }
@@ -216,7 +216,7 @@ namespace seal
 #ifdef SEAL_USE_ZLIB
             case compr_mode_type::deflate:
             {
-                auto compr_size = header.size - (stream.tellg() - stream_start_pos);
+                auto compr_size = header.size - safe_cast<uint64_t>(stream.tellg() - stream_start_pos);
 
                 // We don't know the decompressed size, but use compr_size as
                 // starting point for the buffer.
