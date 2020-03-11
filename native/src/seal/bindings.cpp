@@ -187,22 +187,67 @@ std::string get_exception(intptr_t ptr) {
     std::string error_string = exception->what();
     return error_string;
 }
+/*
+ Fast binary GCD implementation using intrinsics
+*/
+std::uint64_t gcd(std::uint64_t u, std::uint64_t v)
+{
+   auto shift = __builtin_ctzll(u | v);
+    u >>= __builtin_ctzll(u);
+    do {
+        v >>= __builtin_ctzll(v);
+        if(u > v)
+            std::swap(u, v);
+    } while((v -= u));
+    return u << shift;
+}
+
+template <class F>
+struct y_combinator {
+    F f; // the lambda will be stored here
+
+    // a forwarding operator():
+    template <class... Args>
+    decltype(auto) operator()(Args&&... args) const {
+        // we pass ourselves to f, then the arguments.
+        // the lambda should take the first argument as `auto&& recurse` or similar.
+        return f(*this, std::forward<Args>(args)...);
+    }
+};
+// helper function that deduces the type of the lambda:
+template <class F>
+y_combinator<std::decay_t<F>> make_y_combinator(F&& f) {
+    return {std::forward<F>(f)};
+}
 
 EMSCRIPTEN_BINDINGS(bindings) {
-    emscripten:: function ("getException", &get_exception);
-    emscripten:: function ("printContext", &printContext);
-    emscripten:: function ("jsArrayInt32FromVec", select_overload<val(const std::vector<int32_t> &)>(&jsArrayFromVec));
-    emscripten:: function ("jsArrayUint32FromVec", select_overload<val(const std::vector<uint32_t> &)>(&jsArrayFromVec));
-    emscripten:: function ("jsArrayDoubleFromVec", select_overload<val(const std::vector<double> &)>(&jsArrayFromVec));
-    emscripten:: function ("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
-    emscripten:: function ("vecFromArrayUInt32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
-    emscripten:: function ("vecFromArrayDouble", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
-    emscripten:: function ("printVectorInt32", select_overload<void(std::vector<int32_t>, size_t, int)>(&printVector));
-    emscripten:: function ("printVectorUInt32", select_overload<void(std::vector<uint32_t>, size_t, int)>(&printVector));
-    emscripten:: function ("printVectorDouble", select_overload<void(std::vector<double>, size_t, int)>(&printVector));
-    emscripten:: function ("printMatrixInt32", select_overload<void(std::vector<int32_t> &, size_t)>(&printMatrix));
-    emscripten:: function ("printMatrixUInt32", select_overload<void(std::vector<uint32_t> &, size_t)>(&printMatrix));
+    emscripten::function("getException", &get_exception);
+    emscripten::function("printContext", &printContext);
+    emscripten::function("jsArrayInt32FromVec", select_overload<val(const std::vector<int32_t> &)>(&jsArrayFromVec));
+    emscripten::function("jsArrayUint32FromVec", select_overload<val(const std::vector<uint32_t> &)>(&jsArrayFromVec));
+    emscripten::function("jsArrayDoubleFromVec", select_overload<val(const std::vector<double> &)>(&jsArrayFromVec));
+    emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
+    emscripten::function("vecFromArrayUInt32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
+    emscripten::function("vecFromArrayDouble", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
+    emscripten::function("printVectorInt32", select_overload<void(std::vector<int32_t>, size_t, int)>(&printVector));
+    emscripten::function("printVectorUInt32", select_overload<void(std::vector<uint32_t>, size_t, int)>(&printVector));
+    emscripten::function("printVectorDouble", select_overload<void(std::vector<double>, size_t, int)>(&printVector));
+    emscripten::function("printMatrixInt32", select_overload<void(std::vector<int32_t> &, size_t)>(&printMatrix));
+    emscripten::function("printMatrixUInt32", select_overload<void(std::vector<uint32_t> &, size_t)>(&printMatrix));
+    emscripten::function("gcd", optional_override([](std::string a, std::string b) {
+            uint64_t aa;
+            uint64_t bb;
+            std::istringstream issa(a);
+            std::istringstream issb(b);
+            issa >> aa;
+            issb >> bb;
+            uint64_t result = gcd(aa, bb);
+            std::ostringstream str;
+            str << result;
+            return str.str();
+        }));
 
+    register_vector<Plaintext>("std::vector<Plaintext>");
     register_vector<Ciphertext>("std::vector<Ciphertext>");
     register_vector<int32_t>("std::vector<int32_t>");
     register_vector<uint32_t>("std::vector<uint32_t>");
@@ -463,10 +508,106 @@ EMSCRIPTEN_BINDINGS(bindings) {
         .function("rotateRows", &Evaluator::rotate_rows)
         .function("rotateColumns", &Evaluator::rotate_columns)
         .function("rotateVector", &Evaluator::rotate_vector)
-        .function("complexConjugate", &Evaluator::complex_conjugate);
+        .function("complexConjugate", &Evaluator::complex_conjugate)
+        .function("sumElements", optional_override([](Evaluator &self, const Ciphertext &encrypted,
+            const GaloisKeys &gal_keys, scheme_type scheme, Ciphertext &destination, MemoryPoolHandle pool =
+            MemoryManager::GetPool()) {
+                if (scheme == scheme_type::none ) {
+                    throw std::logic_error("unsupported scheme");
+                }
+                // Check if power of 2 via complement and compare method
+                if (!((encrypted.poly_modulus_degree() != 0) &&
+                  ((encrypted.poly_modulus_degree() & (encrypted.poly_modulus_degree() - 1)) == 0))) {
+                    throw std::out_of_range("encrypted poly_modulus_degree must be a power of 2");
+                }
+
+                // create a copy to mutate
+                Ciphertext temp = encrypted;
+                int rotateSteps = temp.poly_modulus_degree() / 4;
+
+                if (scheme == scheme_type::CKKS ) {
+                    // define recursive lambda
+                    auto sum_elements = make_y_combinator([](auto&& sum_elements, Evaluator &self, Ciphertext &a, int steps,
+                    const GaloisKeys &gal_keys, Ciphertext &destination, MemoryPoolHandle pool) {
+                        if (steps < 1) {
+                            destination = std::move(a);
+                            return;
+                        }
+                        self.rotate_vector(a, steps, gal_keys, destination, pool);
+                        self.add(a, destination, a);
+                        return sum_elements(self, a, steps / 2, gal_keys, destination, pool);
+                    });
+
+                    // recursively sum
+                    sum_elements(self, temp, rotateSteps, gal_keys, destination, pool);
+                    return;
+                }
+
+                if (scheme == scheme_type::BFV ) {
+                    // define recursive lambda
+                    auto sum_elements = make_y_combinator([](auto&& sum_elements, Evaluator &self, Ciphertext &a, int steps,
+                    const GaloisKeys &gal_keys, Ciphertext &destination, MemoryPoolHandle pool) {
+                        if (steps < 1) {
+                            destination = std::move(a);
+                            return;
+                        }
+                        self.rotate_rows(a, steps, gal_keys, destination, pool);
+                        self.rotate_columns(destination, gal_keys, destination, pool);
+                        self.add(a, destination, a);
+                        return sum_elements(self, a, steps / 2, gal_keys, destination, pool);
+                    });
+                    // Perform first step to optimize loop
+                    self.rotate_columns(temp, gal_keys, destination, pool);
+                    self.add(temp, destination, temp);
+
+                    // recursively sum
+                    sum_elements(self, temp, rotateSteps, gal_keys, destination, pool);
+                }
+
+            }))
+        .function("linearTransformPlain", optional_override([](Evaluator &self, const Ciphertext &ct, const
+            std::vector<Plaintext> &U_diagonals, const GaloisKeys &gal_keys) {
+                // Get the size of the vector of diagonals
+                const std::size_t diagSize = U_diagonals.size();
+                // Fill ct with duplicate
+                Ciphertext ct_rot;
+
+                // Rotate the input cipher to the left
+                self.Evaluator::rotate_vector(ct, -diagSize, gal_keys, ct_rot);
+
+                // Create a new cipher
+                Ciphertext ct_new;
+
+                // Add the rotated value to the original and store it in the new cipher
+                self.Evaluator::add(ct, ct_rot, ct_new);
+
+                // Create a new result cipher of the same size as the vector of diagonals
+                vector<Ciphertext> ct_result(diagSize);
+
+                // Multiply each new cipher by each of the plaintext diagonals and store it in the result cipher vector
+                self.Evaluator::multiply_plain(ct_new, U_diagonals[0], ct_result[0]);
+
+                // Rotate and multiply each new cipher
+                for (int l = 1; l < diagSize; l++)
+                {
+                    Ciphertext temp_rot;
+                    self.Evaluator::rotate_vector(ct_new, l, gal_keys, temp_rot);
+                    if (U_diagonals[l].is_zero()) {
+                        continue;
+                    }
+                    self.Evaluator::multiply_plain(temp_rot, U_diagonals[l], ct_result[l]);
+                }
+                Ciphertext ct_prime;
+                self.Evaluator::add_many(ct_result, ct_prime);
+
+                return ct_prime;
+            }));
 
     class_<KSwitchKeys>("KSwitchKeys")
         .constructor<>()
+        .function("size", optional_override([](KSwitchKeys &self) {
+                return self.size();
+            }))
         .function("saveToString", optional_override([](KSwitchKeys &self,
             compr_mode_type compr_mode) {
             std::ostringstream buffer;
@@ -484,9 +625,35 @@ EMSCRIPTEN_BINDINGS(bindings) {
         }));
 
     class_<RelinKeys, base<KSwitchKeys>> ("RelinKeys")
-        .constructor<>();
+        .constructor<>()
+        .constructor<const RelinKeys &>() // Copy via constructor overload
+        .function("copy", optional_override([](RelinKeys &self, const RelinKeys &copy) {
+                self = copy; // Copy via assignment overload
+            }))
+        .function("clone", optional_override([](const RelinKeys &self) {
+                RelinKeys clone = self; // Copy via assignment overload
+                return clone;
+            }))
+        .function("move", optional_override([](RelinKeys &self, RelinKeys &&assign) {
+                // If the original assign was const, this will default to a copy assignment
+                self = std::move(assign);
+            }));
+
+
     class_<GaloisKeys, base<KSwitchKeys>> ("GaloisKeys")
-        .constructor<>();
+        .constructor<>()
+        .constructor<const GaloisKeys &>() // Copy via constructor overload
+        .function("copy", optional_override([](GaloisKeys &self, const GaloisKeys &copy) {
+                self = copy; // Copy via assignment overload
+            }))
+        .function("clone", optional_override([](const GaloisKeys &self) {
+                GaloisKeys clone = self; // Copy via assignment overload
+                return clone;
+            }))
+        .function("move", optional_override([](GaloisKeys &self, GaloisKeys &&assign) {
+                // If the original assign was const, this will default to a copy assignment
+                self = std::move(assign);
+            }));
 
     class_<KeyGenerator>("KeyGenerator")
         .constructor<std::shared_ptr<SEALContext>> ()
@@ -499,6 +666,18 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<PublicKey>("PublicKey")
         .constructor<>()
+        .constructor<const PublicKey &>() // Copy via constructor overload
+        .function("copy", optional_override([](PublicKey &self, const PublicKey &copy) {
+                self = copy; // Copy via assignment overload
+            }))
+        .function("clone", optional_override([](const PublicKey &self) {
+                PublicKey clone = self; // Copy via assignment overload
+                return clone;
+            }))
+        .function("move", optional_override([](PublicKey &self, PublicKey &&assign) {
+                // If the original assign was const, this will default to a copy assignment
+                self = std::move(assign);
+            }))
         .function("saveToString", optional_override([](PublicKey &self,
             compr_mode_type compr_mode) {
             std::ostringstream buffer;
@@ -517,6 +696,18 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<SecretKey>("SecretKey")
         .constructor<>()
+        .constructor<const SecretKey &>() // Copy via constructor overload
+        .function("copy", optional_override([](SecretKey &self, const SecretKey &copy) {
+                self = copy; // Copy via assignment overload
+            }))
+        .function("clone", optional_override([](const SecretKey &self) {
+                SecretKey clone = self; // Copy via assignment overload
+                return clone;
+            }))
+        .function("move", optional_override([](SecretKey &self, SecretKey &&assign) {
+                // If the original assign was const, this will default to a copy assignment
+                self = std::move(assign);
+            }))
         .function("saveToString", optional_override([](SecretKey &self,
             compr_mode_type compr_mode) {
             std::ostringstream buffer;
@@ -535,6 +726,18 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<Plaintext>("Plaintext")
         .constructor<>()
+        .constructor<const Plaintext &>() // Copy via constructor overload
+        .function("copy", optional_override([](Plaintext &self, const Plaintext &copy) {
+                self = copy; // Copy via assignment overload
+            }))
+        .function("clone", optional_override([](const Plaintext &self) {
+                Plaintext clone = self; // Copy via assignment overload
+                return clone;
+            }))
+        .function("move", optional_override([](Plaintext &self, Plaintext &&assign) {
+                // If the original assign was const, this will default to a copy assignment
+                self = std::move(assign);
+            }))
         .function("saveToString", optional_override([](Plaintext &self,
             compr_mode_type compr_mode) {
             std::ostringstream buffer;
@@ -578,6 +781,18 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<Ciphertext>("Ciphertext")
         .constructor<>()
+        .constructor<const Ciphertext &>() // Copy via constructor overload
+        .function("copy", optional_override([](Ciphertext &self, const Ciphertext &copy) {
+                self = copy; // Copy via assignment overload
+            }))
+        .function("clone", optional_override([](const Ciphertext &self) {
+                Ciphertext clone = self; // Copy via assignment overload
+                return clone;
+            }))
+        .function("move", optional_override([](Ciphertext &self, Ciphertext &&assign) {
+                // If the original assign was const, this will default to a copy assignment
+                self = std::move(assign);
+            }))
         .function("saveToString", optional_override([](Ciphertext &self,
             compr_mode_type compr_mode) {
             std::ostringstream buffer;
@@ -633,18 +848,6 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<BatchEncoder>("BatchEncoder")
         .constructor<std::shared_ptr<SEALContext>> ()
-        .function("encodeVectorInt32", optional_override([](BatchEncoder &self,
-            const std::vector<std::int32_t> &values, Plaintext &destination) {
-            std::vector<std::int64_t>values_int64;
-            copy_vector(values, values_int64);
-            return self.BatchEncoder::encode(values_int64, destination);
-        }))
-        .function("encodeVectorUInt32", optional_override([](BatchEncoder &self,
-            const std::vector<std::uint32_t> &values, Plaintext &destination) {
-            std::vector<std::uint64_t>values_uint64;
-            copy_vector(values, values_uint64);
-            return self.BatchEncoder::encode(values_uint64, destination);
-        }))
         .function("encode", optional_override([](BatchEncoder &self,
             const val &v, Plaintext &destination,
                 const bool &sign) {
@@ -700,22 +903,6 @@ EMSCRIPTEN_BINDINGS(bindings) {
                 self.BatchEncoder::encode(values, destination);
             }
         }))
-        .function("decodeVectorInt32", optional_override([](BatchEncoder &self,
-            const Plaintext &plain, std::vector<std::int32_t> &destination,
-                MemoryPoolHandle pool = MemoryManager::GetPool()) {
-            std::vector<std::int64_t>destination_int64;
-            copy_vector(destination, destination_int64);
-            self.BatchEncoder::decode(plain, destination_int64, pool);
-            copy_vector(destination_int64, destination);
-        }))
-        .function("decodeVectorUInt32", optional_override([](BatchEncoder &self,
-            const Plaintext &plain, std::vector<std::uint32_t> &destination,
-                MemoryPoolHandle pool = MemoryManager::GetPool()) {
-            std::vector<std::uint64_t>destination_uint64;
-            copy_vector(destination, destination_uint64);
-            self.BatchEncoder::decode(plain, destination_uint64, pool);
-            copy_vector(destination_uint64, destination);
-        }))
         .function("decodeInt32", optional_override([](BatchEncoder &self,
             const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) {
                 // Create a new vector to store the decoded result
@@ -764,17 +951,6 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<CKKSEncoder>("CKKSEncoder")
         .constructor<std::shared_ptr<SEALContext>> ()
-        .function("encodeVectorDouble", optional_override([](CKKSEncoder &self,
-            const std::vector<double> &values,
-                double scale, Plaintext &destination,
-                MemoryPoolHandle pool = MemoryManager::GetPool()) {
-            self.CKKSEncoder::encode(values, scale, destination, pool);
-        }))
-        .function("decodeVectorDouble", optional_override([](CKKSEncoder &self,
-            const Plaintext &plain, std::vector<double> &destination,
-                MemoryPoolHandle pool = MemoryManager::GetPool()) {
-            self.CKKSEncoder::decode(plain, destination, pool);
-        }))
         .function("encode", optional_override([](CKKSEncoder &self,
             const val &v, double scale, Plaintext &destination,
                 MemoryPoolHandle pool = MemoryManager::GetPool()) {
