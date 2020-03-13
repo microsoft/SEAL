@@ -223,6 +223,7 @@
     <ClInclude Include="seal\c\targetver.h" />
     <ClInclude Include="seal\c\utilities.h" />
     <ClInclude Include="seal\c\valcheck.h" />
+    <ClInclude Include="seal\c\version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\c\modulus.cpp" />
@@ -258,6 +259,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="seal\c\valcheck.cpp" />
+    <ClCompile Include="seal\c\version.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="seal\c\CMakeLists.txt" />

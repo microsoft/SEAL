@@ -12,15 +12,16 @@
 
 ### New files
 
-- [native/src/seal/c/version.h](native/src/seal/c/version.h)
-- [native/src/seal/c/version.cpp](native/src/seal/c/version.cpp)
 - [native/src/seal/serializable.h](native/src/seal/serializable.h)
 - [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
 - [native/src/seal/util/crootsquad.h](native/src/seal/util/crootsquad.h)
 - [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
+- [native/src/seal/c/version.h](native/src/seal/c/version.h)
+- [native/src/seal/c/version.cpp](native/src/seal/c/version.cpp)
 - [dotnet/src/Serializable.cs](dotnet/src/Serializable.cs)
 - [dotnet/src/Version.cs](dotnet/src/Version.cs)
 - [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
+- [dotnet/tests/SerializationTests.cs](dotnet/tests/SerializationTests.cs)
 
 ### Other changes
 
