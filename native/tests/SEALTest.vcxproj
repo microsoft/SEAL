@@ -95,6 +95,7 @@
     <ClCompile Include="seal\util\uintarithmod.cpp" />
     <ClCompile Include="seal\util\uintarithsmallmod.cpp" />
     <ClCompile Include="seal\util\uintcore.cpp" />
+    <ClCompile Include="seal\util\serialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
