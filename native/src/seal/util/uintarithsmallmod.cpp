@@ -171,6 +171,8 @@ namespace seal
             // with no reduction.
             size_t lazy_reduction_summand_bound = 16;
 
+            uint64_t result = 0;
+
             // We may have to perform multiple lazy reductions depending on count
             size_t r = lazy_reduction_summand_bound;
             unsigned long long accumulator[2]{ 0, 0 };

@@ -2439,7 +2439,9 @@ namespace seal
         for (size_t j = 0; j < rns_mod_count; j++)
         {
             size_t key_index = (j == decomp_mod_count ? key_mod_count - 1 : j);
-            size_t lazy_reduction_summand_bound = 16;
+            // Product of two numbers is up to 60 + 60 = 120 bits, so we can sum up to 256 of them without reduction.
+            // Remark: This differs from the bound in uintarithsmallmod.cpp-->dot_product_mod.
+            size_t lazy_reduction_summand_bound = 1 << (128 - SEAL_USER_MOD_BIT_COUNT_MAX * 2);
             size_t lazy_reduction_counter = lazy_reduction_summand_bound;
             unsigned long long wide_product[2]{ 0, 0 };
             unsigned long long *accumulator = nullptr;
