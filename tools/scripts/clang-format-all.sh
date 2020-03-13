@@ -8,4 +8,3 @@ SEAL_ROOT_DIR=$BASE_DIR/../../
 shopt -s globstar
 clang-format -i $SEAL_ROOT_DIR/native/**/*.h
 clang-format -i $SEAL_ROOT_DIR/native/**/*.cpp
-clang-format -i $SEAL_ROOT_DIR/dotnet/**/*.cs

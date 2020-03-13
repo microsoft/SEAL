@@ -2407,6 +2407,7 @@ namespace seal
 
         // Prepare input
         auto &key_vector = kswitch_keys.data()[kswitch_keys_index];
+        size_t key_component_count = key_vector[0].data().size();
 
         // Check only the used component in KSwitchKeys.
         for (auto &each_key : key_vector)
@@ -2418,138 +2419,157 @@ namespace seal
         }
 
         // Temporary results
-        Pointer<uint64_t> temp_poly[2]{ allocate_zero_poly(2 * coeff_count, rns_mod_count, pool),
-                                        allocate_zero_poly(2 * coeff_count, rns_mod_count, pool) };
-
-        // RNS decomposition index = key index
-        for (size_t i = 0; i < decomp_mod_count; i++)
+        Pointer<uint64_t> t_target(allocate_poly(coeff_count, decomp_mod_count, pool));
+        set_uint_uint(target, decomp_mod_count * coeff_count, t_target.get());
+        if (scheme == scheme_type::CKKS)
         {
-            // For each RNS decomposition, multiply with key data and sum up.
-            auto local_small_poly_0(allocate_uint(coeff_count, pool));
-            auto local_small_poly_1(allocate_uint(coeff_count, pool));
-            auto local_small_poly_2(allocate_uint(coeff_count, pool));
-
-            const uint64_t *local_encrypted_ptr = nullptr;
-            set_uint_uint(target + i * coeff_count, coeff_count, local_small_poly_0.get());
-            if (scheme == scheme_type::CKKS)
+            uint64_t *ptr = t_target.get();
+            for (size_t i = 0; i < decomp_mod_count; i++, ptr += coeff_count)
             {
-                inverse_ntt_negacyclic_harvey(local_small_poly_0.get(), small_ntt_tables[i]);
+                inverse_ntt_negacyclic_harvey(ptr, small_ntt_tables[i]);
             }
+        }
+        // Ciphertext-side operand of switch key operation is in integer space now.
 
-            // Key RNS representation
-            for (size_t j = 0; j < rns_mod_count; j++)
+        // Temporary results
+        auto t_poly_prod(allocate_zero_poly(coeff_count, rns_mod_count * key_component_count, pool));
+        auto t_poly_lazy(allocate<unsigned long long>(mul_safe(coeff_count * 2, key_component_count), pool));
+        auto t_ntt(allocate_uint(coeff_count, pool));
+
+        for (size_t j = 0; j < rns_mod_count; j++)
+        {
+            size_t key_index = (j == decomp_mod_count ? key_mod_count - 1 : j);
+            size_t lazy_reduction_summand_bound = 16;
+            size_t lazy_reduction_counter = lazy_reduction_summand_bound;
+            unsigned long long wide_product[2]{ 0, 0 };
+            unsigned long long *accumulator = nullptr;
+            uint64_t *t_target_acc = t_target.get();
+            std::fill_n(t_poly_lazy.get(), mul_safe(coeff_count * 2, key_component_count), 0);
+
+            // Multiply with keys and perform lazy reduction on product's coefficients
+            for (size_t i = 0; i < decomp_mod_count; i++, t_target_acc += coeff_count)
             {
-                size_t index = (j == decomp_mod_count ? key_mod_count - 1 : j);
+                const uint64_t *t_operand_ptr = nullptr;
+                // RNS-NTT form exists in input
                 if (scheme == scheme_type::CKKS && i == j)
                 {
-                    local_encrypted_ptr = target + j * coeff_count;
+                    t_operand_ptr = target + i * coeff_count;
                 }
+                // Perform RNS-NTT conversion
                 else
                 {
-                    // Reduce modulus only if needed
-                    if (key_modulus[i].value() <= key_modulus[index].value())
+                    // No need to perform RNS conversion (modular reduction)
+                    if (key_modulus[i].value() <= key_modulus[key_index].value())
                     {
-                        set_uint_uint(local_small_poly_0.get(), coeff_count, local_small_poly_1.get());
+                        set_uint_uint(t_target_acc, coeff_count, t_ntt.get());
+                    }
+                    // Perform RNS conversion (modular reduction)
+                    else
+                    {
+                        modulo_poly_coeffs_63(t_target_acc, coeff_count, key_modulus[key_index], t_ntt.get());
+                    }
+                    // NTT conversion lazy outputs in [0, 4q)
+                    ntt_negacyclic_harvey_lazy(t_ntt.get(), small_ntt_tables[key_index]);
+                    t_operand_ptr = t_ntt.get();
+                }
+                // Multiply with keys and modular accumulate products in a lazy fashion
+                accumulator = t_poly_lazy.get();
+                for (size_t k = 0; k < key_component_count; k++)
+                {
+                    const uint64_t *t_key_acc = key_vector[i].data().data(k) + key_index * coeff_count;
+                    if (!lazy_reduction_counter)
+                    {
+                        for (size_t l = 0; l < coeff_count; l++, t_key_acc++, accumulator += 2)
+                        {
+                            multiply_uint64(t_operand_ptr[l], *t_key_acc, wide_product);
+                            // accumulate to t_poly_lazy
+                            add_uint128(wide_product, accumulator, accumulator);
+                            accumulator[0] = barrett_reduce_128(accumulator, key_modulus[key_index]);
+                            accumulator[1] = 0;
+                        }
                     }
                     else
                     {
-                        modulo_poly_coeffs_63(
-                            local_small_poly_0.get(), coeff_count, key_modulus[index], local_small_poly_1.get());
+                        for (size_t l = 0; l < coeff_count; l++, t_key_acc++, accumulator += 2)
+                        {
+                            multiply_uint64(t_operand_ptr[l], *t_key_acc, wide_product);
+                            // accumulate to t_poly_lazy
+                            add_uint128(wide_product, accumulator, accumulator);
+                        }
                     }
-
-                    // Lazy reduction, output in [0, 4q).
-                    ntt_negacyclic_harvey_lazy(local_small_poly_1.get(), small_ntt_tables[index]);
-                    local_encrypted_ptr = local_small_poly_1.get();
                 }
-                // Two components in key
-                for (size_t k = 0; k < 2; k++)
+                if (!--lazy_reduction_counter)
                 {
-                    // dyadic_product_coeffmod(
-                    //     local_encrypted_ptr,
-                    //     key_vector[i].data(k) + index * coeff_count,
-                    //     coeff_count,
-                    //     key_modulus[index],
-                    //     local_small_poly_2.get());
-                    // add_poly_poly_coeffmod(
-                    //     local_small_poly_2.get(),
-                    //     temp_poly[k].get() + j * coeff_count,
-                    //     coeff_count,
-                    //     key_modulus[index],
-                    //     temp_poly[k].get() + j * coeff_count);
-                    const uint64_t *key_ptr = key_vector[i].data().data(k);
-                    for (size_t l = 0; l < coeff_count; l++)
-                    {
-                        unsigned long long local_wide_product[2];
-                        unsigned long long local_low_word;
-                        unsigned char local_carry;
+                    lazy_reduction_counter = lazy_reduction_summand_bound;
+                }
+            }
 
-                        multiply_uint64(local_encrypted_ptr[l], key_ptr[(index * coeff_count) + l], local_wide_product);
-                        local_carry = add_uint64(
-                            temp_poly[k].get()[(j * coeff_count + l) * 2], local_wide_product[0], &local_low_word);
-                        temp_poly[k].get()[(j * coeff_count + l) * 2] = local_low_word;
-                        temp_poly[k].get()[(j * coeff_count + l) * 2 + 1] += local_wide_product[1] + local_carry;
+            // Final modular reduction (might not be necessary)
+            accumulator = t_poly_lazy.get();
+            for (size_t k = 0; k < key_component_count; k++)
+            {
+                uint64_t *t_poly_prod_acc = t_poly_prod.get() + (k * rns_mod_count + j) * coeff_count;
+                if (lazy_reduction_counter == lazy_reduction_summand_bound)
+                {
+                    for (size_t l = 0; l < coeff_count; l++, accumulator += 2, t_poly_prod_acc++)
+                    {
+                        *t_poly_prod_acc = (uint64_t)*accumulator;
+                    }
+                }
+                else
+                {
+                    for (size_t l = 0; l < coeff_count; l++, accumulator += 2, t_poly_prod_acc++)
+                    {
+                        *t_poly_prod_acc = barrett_reduce_128(accumulator, key_modulus[key_index]);
                     }
                 }
             }
         }
+        // Accumulated products are now stored in t_poly_prod
 
-        // Results are now stored in temp_poly[k]
-        // Modulus switching should be performed
-        auto local_small_poly(allocate_uint(coeff_count, pool));
-        for (size_t k = 0; k < 2; k++)
+        // Perform modulus switching with scaling
+        for (size_t k = 0; k < key_component_count; k++)
         {
-            // Reduce (ct mod 4qk) mod qk
-            uint64_t *temp_poly_ptr = temp_poly[k].get() + decomp_mod_count * coeff_count * 2;
-            for (size_t l = 0; l < coeff_count; l++)
-            {
-                temp_poly_ptr[l] = barrett_reduce_128(temp_poly_ptr + l * 2, key_modulus[key_mod_count - 1]);
-            }
+            uint64_t *encrypted_ptr = encrypted.data(k);
+            uint64_t *t_poly_prod_ptr = t_poly_prod.get() + k * rns_mod_count * coeff_count;
 
             // Lazy reduction, they are then reduced mod qi
-            uint64_t *temp_last_poly_ptr = temp_poly[k].get() + decomp_mod_count * coeff_count * 2;
-            inverse_ntt_negacyclic_harvey_lazy(temp_last_poly_ptr, small_ntt_tables[key_mod_count - 1]);
+            uint64_t *t_last = t_poly_prod_ptr + decomp_mod_count * coeff_count;
+            inverse_ntt_negacyclic_harvey_lazy(t_last, small_ntt_tables[key_mod_count - 1]);
 
             // Add (p-1)/2 to change from flooring to rounding.
             uint64_t half = key_modulus[key_mod_count - 1].value() >> 1;
             for (size_t l = 0; l < coeff_count; l++)
             {
-                temp_last_poly_ptr[l] = barrett_reduce_63(temp_last_poly_ptr[l] + half, key_modulus[key_mod_count - 1]);
+                t_last[l] = barrett_reduce_63(t_last[l] + half, key_modulus[key_mod_count - 1]);
             }
 
-            uint64_t *encrypted_ptr = encrypted.data(k);
             for (size_t j = 0; j < decomp_mod_count; j++)
             {
-                temp_poly_ptr = temp_poly[k].get() + j * coeff_count * 2;
-                // (ct mod 4qi) mod qi
-                for (size_t l = 0; l < coeff_count; l++)
-                {
-                    temp_poly_ptr[l] = barrett_reduce_128(temp_poly_ptr + l * 2, key_modulus[j]);
-                }
+                uint64_t *t_else = t_poly_prod_ptr + j * coeff_count;
                 // (ct mod 4qk) mod qi
-                modulo_poly_coeffs_63(temp_last_poly_ptr, coeff_count, key_modulus[j], local_small_poly.get());
+                modulo_poly_coeffs_63(t_last, coeff_count, key_modulus[j], t_ntt.get());
 
-                uint64_t half_mod = barrett_reduce_63(half, key_modulus[j]);
+                uint64_t fix = barrett_reduce_63(half, key_modulus[j]);
                 for (size_t l = 0; l < coeff_count; l++)
                 {
-                    local_small_poly.get()[l] = sub_uint_uint_mod(local_small_poly.get()[l], half_mod, key_modulus[j]);
+                    t_ntt.get()[l] = sub_uint_uint_mod(t_ntt.get()[l], fix, key_modulus[j]);
                 }
 
                 if (scheme == scheme_type::CKKS)
                 {
-                    ntt_negacyclic_harvey(local_small_poly.get(), small_ntt_tables[j]);
+                    ntt_negacyclic_harvey(t_ntt.get(), small_ntt_tables[j]);
                 }
                 else if (scheme == scheme_type::BFV)
                 {
-                    inverse_ntt_negacyclic_harvey(temp_poly_ptr, small_ntt_tables[j]);
+                    inverse_ntt_negacyclic_harvey(t_else, small_ntt_tables[j]);
                 }
                 // ((ct mod qi) - (ct mod qk)) mod qi
-                sub_poly_poly_coeffmod(
-                    temp_poly_ptr, local_small_poly.get(), coeff_count, key_modulus[j], temp_poly_ptr);
+                sub_poly_poly_coeffmod(t_else, t_ntt.get(), coeff_count, key_modulus[j], t_else);
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(
-                    temp_poly_ptr, coeff_count, modswitch_factors[j], key_modulus[j], temp_poly_ptr);
+                multiply_poly_scalar_coeffmod(t_else, coeff_count, modswitch_factors[j], key_modulus[j], t_else);
                 add_poly_poly_coeffmod(
-                    temp_poly_ptr, encrypted_ptr + j * coeff_count, coeff_count, key_modulus[j],
+                    t_else, encrypted_ptr + j * coeff_count, coeff_count, key_modulus[j],
                     encrypted_ptr + j * coeff_count);
             }
         }
