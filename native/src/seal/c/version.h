@@ -13,12 +13,8 @@
 #include "seal/c/defines.h"
 #include <stdint.h>
 
-SEAL_C_FUNC Serialization_SEALMagic(uint16_t *result);
+SEAL_C_FUNC Version_Major(uint8_t *result);
 
-SEAL_C_FUNC Serialization_IsSupportedComprMode(uint8_t compr_mode, bool *result);
+SEAL_C_FUNC Version_Minor(uint8_t *result);
 
-SEAL_C_FUNC Serialization_ComprModeDefault(uint8_t *result);
-
-SEAL_C_FUNC Serialization_IsValidHeader(uint8_t *headerptr, uint64_t size, bool *result);
-
-SEAL_C_FUNC Serialization_SEALHeaderBytes(uint32_t *result);
+SEAL_C_FUNC Version_Patch(uint8_t *result);

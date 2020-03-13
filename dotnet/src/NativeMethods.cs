@@ -12,6 +12,19 @@ namespace Microsoft.Research.SEAL
     {
         private const string sealc = "sealc";
 
+        #region Version methods
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Version_Major(out byte value);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Version_Minor(out byte value);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Version_Patch(out byte value);
+
+        #endregion
+
         #region BigUInt methods
 
         [DllImport(sealc, EntryPoint = "BigUInt_Create1", PreserveSig = false)]
@@ -1202,6 +1215,9 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Serialization_IsValidHeader(byte[] headerptr, ulong size, out bool result);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Serialization_SEALHeaderBytes(out uint result);
 
         #endregion
 

@@ -53,21 +53,27 @@ namespace seal
         Struct to contain header information for serialization. The size of the
         header is 16 bytes and it consists of the following fields:
 
-        1. 0x00 (1 byte)
-        2. a compr_mode_type indicating whether data after the header is compressed (1 byte)
-        3. a magic number identifying this is a SEALHeader struct (2 bytes)
-        4. reserved for future use (4 bytes)
-        5. the size in bytes of the entire serialized object, including the header (8 bytes)
+        1. a magic number identifying this is a SEALHeader struct (2 bytes)
+        2. Microsoft SEAL's major version number (1 byte)
+        3. Microsoft SEAL's minor version number (2 byte)
+        4. a compr_mode_type indicating whether data after the header is compressed (1 byte)
+        5. an empty byte 0x00 for data alignment (1 byte)
+        6. reserved for future use and data alignment (2 bytes)
+        7. the size in bytes of the entire serialized object, including the header (8 bytes)
         */
         struct SEALHeader
         {
-            std::uint8_t zero_byte = 0x00;
+            std::uint16_t magic = seal_magic;
+
+            std::uint8_t version_major = (std::uint8_t)SEAL_VERSION_MAJOR;
+
+            std::uint8_t version_minor = (std::uint8_t)SEAL_VERSION_MINOR;
 
             compr_mode_type compr_mode = compr_mode_type::none;
 
-            std::uint16_t magic = seal_magic;
+            std::uint8_t zero_byte = 0x00;
 
-            std::uint32_t reserved = 0;
+            std::uint16_t reserved = 0;
 
             std::uint64_t size = 0;
         };
@@ -114,12 +120,18 @@ namespace seal
 
         /**
         Returns true if the given SEALHeader is valid.
+        Even if versions do not match, serialization should work.
 
         @param[in] header The SEALHeader
         */
         SEAL_NODISCARD static bool IsValidHeader(const SEALHeader &header) noexcept
         {
             if (header.magic != seal_magic)
+            {
+                return false;
+            }
+            // SEALHeader::version_major is introduced in 3.5
+            if (header.version_major < 3)
             {
                 return false;
             }

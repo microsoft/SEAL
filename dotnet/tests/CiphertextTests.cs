@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using System.Text;
 
 namespace SEALNetTest
 {
@@ -329,21 +328,6 @@ namespace SEALNetTest
 
             Utilities.AssertThrows<ArgumentNullException>(() => cipher.Load(null, new MemoryStream()));
             Utilities.AssertThrows<ArgumentNullException>(() => cipher.Load(context, null));
-
-            using (MemoryStream mem = new MemoryStream())
-            {
-                KeyGenerator keygen = new KeyGenerator(context);
-                Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
-                Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
-                encryptor.Encrypt(plain, cipher);
-                cipher.Save(mem);
-                mem.Seek(offset: 8, loc: SeekOrigin.Begin);
-                BinaryWriter writer = new BinaryWriter(mem, Encoding.UTF8, true);
-                writer.Write((ulong)0x80000000);
-
-                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
-                Utilities.AssertThrows<InvalidOperationException>(() => cipher.Load(context, mem));
-            }
         }
     }
 }

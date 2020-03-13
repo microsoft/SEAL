@@ -30,6 +30,7 @@ target_sources(sealc PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/valcheck.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/version.cpp
 )
 
 # Add header files for installation
@@ -64,6 +65,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/targetver.h
         ${CMAKE_CURRENT_LIST_DIR}/utilities.h
         ${CMAKE_CURRENT_LIST_DIR}/valcheck.h
+        ${CMAKE_CURRENT_LIST_DIR}/version.h
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal/c
 )

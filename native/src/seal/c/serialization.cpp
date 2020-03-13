@@ -53,3 +53,11 @@ SEAL_C_FUNC Serialization_IsValidHeader(uint8_t *headerptr, uint64_t size, bool 
     *result = Serialization::IsValidHeader(header);
     return S_OK;
 }
+
+SEAL_C_FUNC Serialization_SEALHeaderBytes(uint32_t *result)
+{
+    IfNullRet(result, E_POINTER);
+
+    *result = util::safe_cast<uint32_t>(sizeof(Serialization::SEALHeader));
+    return S_OK;
+}

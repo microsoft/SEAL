@@ -5,8 +5,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Research.SEAL;
 using System;
 using System.IO;
-using System.Text;
-using System.Collections.Generic;
 
 namespace SEALNetTest
 {

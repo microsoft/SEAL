@@ -48,35 +48,46 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Struct to contain header information for serialization.</summary>
         /// <remarks>
-        /// Struct to contain header information for serialization. The size of the
-        /// header is 16 bytes and it consists of the following fields:
+        /// Struct to contain header information for serialization. The size of the header is 16 bytes and it consists
+        /// of the following fields:
         ///
         /// 1. a magic number identifying this is a SEALHeader struct (2 bytes)
-        /// 2. 0x00 (1 byte)
-        /// 3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
-        /// 4. the size in bytes of the entire serialized object, including the header (8 bytes)
-        /// 5. reserved for future use (4 bytes)
+        /// 2. Microsoft SEAL's major version number (1 byte)
+        /// 3. Microsoft SEAL's minor version number (2 byte)
+        /// 4. a compr_mode_type indicating whether data after the header is compressed (1 byte)
+        /// 5. an empty byte 0x00 for data alignment (1 byte)
+        /// 6. reserved for future use and data alignment (2 bytes)
+        /// 7. the size in bytes of the entire serialized object, including the header (8 bytes)
         /// </remarks>
         public class SEALHeader
         {
-            /// <summary>0x00 (1 byte)</summary>
-            public byte ZeroByte = 0x00;
-
-            /// <summary>A ComprModeType indicating whether data after the header is
-            /// compressed (1 byte)</summary>
-            public ComprModeType ComprMode = ComprModeDefault;
-
-            /// <summary>A magic number identifying this as a SEALHeader struct
-            /// (2 bytes)</summary>
+            /// <summary>A magic number identifying this is a SEALHeader struct (2 bytes)</summary>
             public ushort Magic = SEALMagic;
 
-            /// <summary>Reserved for future use (4 bytes)</summary>
-            public uint Reserved = 0;
+            /// <summary>Microsoft SEAL's major version number (1 byte)</summary>
+            public byte VersionMajor = SEALVersion.Major();
 
-            /// <summary>The size in bytes of the entire serialized object, including the
-            /// header (8 bytes)</summary>
+            /// <summary>Microsoft SEAL's minor version number (1 byte)</summary>
+            public byte VersionMinor = SEALVersion.Minor();
+
+            /// <summary>A compr_mode_type indicating whether data after the header is compressed (1 byte)</summary>
+            public ComprModeType ComprMode = ComprModeDefault;
+
+            /// <summary>An empty byte 0x00 for data alignment (1 byte)</summary>
+            public byte ZeroByte = 0x00;
+
+            /// <summary>Reserved for future use and data alignment (2 bytes)</summary>
+            public ushort Reserved = 0;
+
+            /// <summary>The size in bytes of the entire serialized object, including the header (8 bytes)</summary>
             public ulong Size = 0;
 
+            /// <summary>Returns SEALHeader's size in bytes (16 bytes).</summary>
+            public static int Bytes()
+            {
+                NativeMethods.Serialization_SEALHeaderBytes(out uint result);
+                return checked((int)result);
+            }
         };
 
         private static bool IsSupportedComprMode(byte comprMode)
@@ -85,20 +96,16 @@ namespace Microsoft.Research.SEAL
             return result;
         }
 
-        /// <summary>
-        /// Returns true if the given value corresponds to a supported compression mode.
-        /// </summary>
+        /// <summary>Returns true if the given value corresponds to a supported compression mode.</summary>
         /// <param name="comprMode">The compression mode to validate</param>
         public static bool IsSupportedComprMode(ComprModeType comprMode) =>
             IsSupportedComprMode((byte)comprMode);
 
-        /// <summary>
-        /// Returns true if the given SEALHeader is valid.
-        /// </summary>
+        /// <summary>Returns true if the given SEALHeader is valid.</summary>
         /// <param name="header">The SEALHeader</param>
         public static bool IsValidHeader(SEALHeader header)
         {
-            byte[] headerArray = new byte[16];
+            byte[] headerArray = new byte[SEALHeader.Bytes()];
             using (MemoryStream stream = new MemoryStream(headerArray))
             {
                 SaveHeader(header, stream);
@@ -110,14 +117,12 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Saves a SEALHeader to a given binary stream.</summary>
         /// <remarks>
-        /// Saves a SEALHeader to a given stream. The output is in binary format and
-        /// not human-readable.
+        /// Saves a SEALHeader to a given stream. The output is in binary format and not human-readable.
         /// </remarks>
         /// <param name="header">The SEALHeader to save to the stream</param>
         /// <param name="stream">The stream to save the SEALHeader to</param>
         /// <exception cref="ArgumentNullException">if header or stream is null</exception>
-        /// <exception cref="ArgumentException">if the stream is closed or does not support
-        /// writing</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not support writing</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         public static void SaveHeader(SEALHeader header, Stream stream)
         {
@@ -130,10 +135,13 @@ namespace Microsoft.Research.SEAL
 
             using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
             {
-                writer.Write(header.ZeroByte);
-                writer.Write((byte)header.ComprMode);
                 writer.Write(header.Magic);
+                writer.Write(header.VersionMajor);
+                writer.Write(header.VersionMinor);
+                writer.Write((byte)header.ComprMode);
+                writer.Write(header.ZeroByte);
                 writer.Write(header.Reserved);
+                writer.Write(header.Size);
             }
         }
 
@@ -141,10 +149,9 @@ namespace Microsoft.Research.SEAL
         /// <param name="stream">The stream to load the SEALHeader from</param>
         /// <param name="header">The SEALHeader to populate with the loaded data</param>
         /// <exception cref="ArgumentNullException">if header or stream is null</exception>
-        /// <exception cref="ArgumentException">if the stream is closed or does not support
-        /// reading</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is not a valid
-        /// SEALHeader or if the loaded compression mode is not supported</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not support reading</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is not a valid SEALHeader or if the loaded
+        /// compression mode is not supported</exception>
         /// <exception cref="EndOfStreamException">if the stream ended unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         public static void LoadHeader(Stream stream, SEALHeader header)
@@ -158,10 +165,12 @@ namespace Microsoft.Research.SEAL
 
             using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, true))
             {
-                header.ZeroByte = reader.ReadByte();
-                header.ComprMode = (ComprModeType)reader.ReadByte();
                 header.Magic = reader.ReadUInt16();
-                header.Reserved = reader.ReadUInt32();
+                header.VersionMajor = reader.ReadByte();
+                header.VersionMinor = reader.ReadByte();
+                header.ComprMode = (ComprModeType)reader.ReadByte();
+                header.ZeroByte = reader.ReadByte();
+                header.Reserved = reader.ReadUInt16();
                 header.Size = reader.ReadUInt64();
             }
         }
@@ -174,27 +183,22 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Saves data to a given binary stream.</summary>
         /// <remarks>
-        /// First this function allocates a buffer of size <paramref name="size" />.
-        /// The buffer is used by the <paramref name="SaveData"/> delegate that
-        /// writes some number of bytes to the buffer and outputs (in out-parameter)
-        /// the number of bytes written (less than the size of the buffer). The
-        /// contents of the buffer are then written to <paramref name="stream"/> and
-        /// the function returns the output value of <paramref name="SaveData"/>.
-        /// This function is intended only for internal use.
+        /// First this function allocates a buffer of size <paramref name="size" />. The buffer is used by the
+        /// <paramref name="SaveData"/> delegate that writes some number of bytes to the buffer and outputs (in
+        /// out-parameter) the number of bytes written (less than the size of the buffer). The contents of the buffer
+        /// are then written to <paramref name="stream"/> and the function returns the output value of
+        /// <paramref name="SaveData"/>. This function is intended only for internal use.
         /// </remarks>
-        /// <param name="SaveData">The delegate that writes some number of bytes to
-        /// a given buffer</param>
-        /// <param name="size">An upper bound on the number of bytes that
-        /// <paramref name="SaveData" /> requires</param>
+        /// <param name="SaveData">The delegate that writes some number of bytes to a given buffer</param>
+        /// <param name="size">An upper bound on the number of bytes that <paramref name="SaveData" /> requires</param>
         /// <param name="comprMode">The desired compression mode</param>
         /// <param name="stream">The destination stream</param>
-        /// <exception cref="ArgumentNullException">if SaveData or stream is
-        /// null</exception>
-        /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support writing, or if size is negative or too large</exception>
+        /// <exception cref="ArgumentNullException">if SaveData or stream is null</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not support writing, or if size is
+        /// negative or too large</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the data to be saved is
-        /// invalid, if compression mode is not supported, or if compression failed</exception>
+        /// <exception cref="InvalidOperationException">if the data to be saved is invalid, if compression mode is not
+        /// supported, or if compression failed</exception>
         internal static long Save(SaveDelegate SaveData, long size,
             ComprModeType comprMode, Stream stream)
         {
@@ -231,28 +235,22 @@ namespace Microsoft.Research.SEAL
 
         /// <summary>Loads data from a given binary stream.</summary>
         /// <remarks>
-        /// This function calls the <see cref="LoadHeader" /> function to first load
-        /// a <see cref="SEALHeader" /> object from <paramref name="stream"/>. The
-        /// <see cref="SEALHeader.Size"/> is then read from the <see cref="SEALHeader" />
-        /// and a buffer of corresponding size is allocated. Next, the buffer is
-        /// filled with data read from <paramref name="stream"/> and <paramref name="LoadData"/>
-        /// is called with the buffer as input, which outputs (in out-parameter) the
-        /// number bytes read from the buffer. This should match exactly the size of
-        /// the buffer. Finally, the function returns the output value of
-        /// <paramref name="LoadData"/>. This function is intended only for internal
-        /// use.
+        /// This function calls the <see cref="LoadHeader" /> function to first load a <see cref="SEALHeader" /> object
+        /// from <paramref name="stream"/>. The <see cref="SEALHeader.Size"/> is then read from the
+        /// <see cref="SEALHeader" /> and a buffer of corresponding size is allocated. Next, the buffer is filled with
+        /// data read from <paramref name="stream"/> and <paramref name="LoadData"/> is called with the buffer as input,
+        /// which outputs (in out-parameter) the number bytes read from the buffer. This should match exactly the size
+        /// of the buffer. Finally, the function returns the output value of <paramref name="LoadData"/>. This function
+        /// is intended only for internal use.
         /// </remarks>
-        /// <param name="LoadData">The delegate that reads some number of bytes to
-        /// a given buffer</param>
+        /// <param name="LoadData">The delegate that reads some number of bytes to a given buffer</param>
         /// <param name="stream">The input stream</param>
         /// <exception cref="ArgumentNullException">if LoadData or stream is null</exception>
-        /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support reading</exception>
+        /// <exception cref="ArgumentException">if the stream is closed or does not support reading</exception>
         /// <exception cref="EndOfStreamException">if the stream ended unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid,
-        /// if the loaded compression mode is not supported, or if size of the object
-        /// is more than 2 GB</exception>
+        /// <exception cref="InvalidOperationException">if the loaded data is invalid, if the loaded compression mode is
+        /// not supported, or if size of the object is more than 2 GB</exception>
         internal static long Load(LoadDelegate LoadData, Stream stream)
         {
             if (null == stream)
