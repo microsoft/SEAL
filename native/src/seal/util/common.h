@@ -142,7 +142,7 @@ namespace seal
                     throw std::logic_error("signed underflow");
                 }
             }
-            return in1 * in2;
+            return (T)(in1 * in2);
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_integral<T>::value>>
@@ -162,12 +162,10 @@ namespace seal
         {
             SEAL_IF_CONSTEXPR(std::is_unsigned<T>::value)
             {
-                T result = in1 + in2;
-                if (result < in1)
+                if (in2 > std::numeric_limits<T>::max() - in1)
                 {
                     throw std::logic_error("unsigned overflow");
                 }
-                return result;
             }
             else
             {
@@ -179,8 +177,8 @@ namespace seal
                 {
                     throw std::logic_error("signed underflow");
                 }
-                return in1 + in2;
             }
+            return (T)(in1 + in2);
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
@@ -194,12 +192,10 @@ namespace seal
         {
             SEAL_IF_CONSTEXPR(std::is_unsigned<T>::value)
             {
-                T result = in1 - in2;
-                if (result > in1)
+                if (in1 < in2)
                 {
                     throw std::logic_error("unsigned underflow");
                 }
-                return result;
             }
             else
             {
@@ -211,8 +207,8 @@ namespace seal
                 {
                     throw std::logic_error("signed overflow");
                 }
-                return in1 - in2;
             }
+            return (T)(in1 - in2);
         }
 
         template <

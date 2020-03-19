@@ -8,7 +8,11 @@
 - Added examples for serialization.
 - Native library can serialize (save and load) objects larger than 2 GB. In .Net library, objects are limited to 2 GB, and loading an object larger than 2 GB will throw an exception.
 - `Serilization::SEALHeader` also keeps library version numbers (major and minor). Version numbers are retrivable in .Net through `SEALVersion` class.
-- `SEAL_POLY_MOD_DEGREE_MAX` is now 131072.
+- New bounds in [native/src/seal/util/defines.h](native/src/seal/util/defines.h):
+  - `SEAL_MOD_BIT_COUNT_MAX` and `SEAL_MOD_BIT_COUNT_MIN` are added and set to 61 and 2, respectively.
+  - `SEAL_INTERNAL_MOD_BIT_COUNT` is added and set to 61.
+  - `SEAL_COEFF_MOD_COUNT_MAX` is increased to 64.
+  - `SEAL_POLY_MOD_DEGREE_MAX` is increased to 131072.
 
 ### New files
 
@@ -34,7 +38,7 @@
 - Releases are now listed on GitHub.
 - Moved `dotnet/native/` to be under `native/src/c/`. The C export library in this directory can be used to build wrappers for other languages also -- not just .NET.
 - Changed the CMake file structure. Targets available are now: `SEAL::seal` (static library), `SEAL::seal_shared` (shared library), `SEAL::sealc` (C export library).
-- There is now a `.clang-format` for automated formatting of C++ (`.cpp` and `.h`) files. A command line tool is added to `tools/scripts/clang-format-all.sh` for easy formatting. This is compatible with clang-format-9 and above. Support for C# is not yet ideal.
+- There is now a `.clang-format` for automated formatting of C++ (`.cpp` and `.h`) files. A bash script is added. Run `bash tools/scripts/clang-format-all.sh` for easy formatting. This is compatible with clang-format-9 and above. Support for C# is not yet ideal.
 
 ## Version 3.4.5
 

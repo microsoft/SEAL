@@ -26,9 +26,9 @@ namespace SEALTest
             ASSERT_EQ(2ULL, increment_uint_mod(1ULL, mod));
             ASSERT_EQ(0ULL, increment_uint_mod(0xFFFFULL, mod));
 
-            mod = 4611686018427289601ULL;
+            mod = 2305843009211596801ULL;
             ASSERT_EQ(1ULL, increment_uint_mod(0, mod));
-            ASSERT_EQ(0ULL, increment_uint_mod(4611686018427289600ULL, mod));
+            ASSERT_EQ(0ULL, increment_uint_mod(2305843009211596800ULL, mod));
             ASSERT_EQ(1ULL, increment_uint_mod(0, mod));
         }
 
@@ -43,9 +43,9 @@ namespace SEALTest
             ASSERT_EQ(1ULL, decrement_uint_mod(2ULL, mod));
             ASSERT_EQ(0xFFFFULL, decrement_uint_mod(0ULL, mod));
 
-            mod = 4611686018427289601ULL;
+            mod = 2305843009211596801ULL;
             ASSERT_EQ(0ULL, decrement_uint_mod(1, mod));
-            ASSERT_EQ(4611686018427289600ULL, decrement_uint_mod(0ULL, mod));
+            ASSERT_EQ(2305843009211596800ULL, decrement_uint_mod(0ULL, mod));
             ASSERT_EQ(0ULL, decrement_uint_mod(1, mod));
         }
 
@@ -65,9 +65,9 @@ namespace SEALTest
             ASSERT_EQ(0xFFFFULL, negate_uint_mod(1, mod));
             ASSERT_EQ(0x1ULL, negate_uint_mod(0xFFFFULL, mod));
 
-            mod = 4611686018427289601ULL;
+            mod = 2305843009211596801ULL;
             ASSERT_EQ(0ULL, negate_uint_mod(0, mod));
-            ASSERT_EQ(4611686018427289600ULL, negate_uint_mod(1, mod));
+            ASSERT_EQ(2305843009211596800ULL, negate_uint_mod(1, mod));
         }
 
         TEST(UIntArithSmallMod, Div2UIntMod)
@@ -101,14 +101,14 @@ namespace SEALTest
             ASSERT_EQ(4ULL, add_uint_uint_mod(7, 7, mod));
             ASSERT_EQ(3ULL, add_uint_uint_mod(6, 7, mod));
 
-            mod = 4611686018427289601;
+            mod = 2305843009211596801ULL;
             ASSERT_EQ(0ULL, add_uint_uint_mod(0, 0, mod));
             ASSERT_EQ(1ULL, add_uint_uint_mod(0, 1, mod));
             ASSERT_EQ(1ULL, add_uint_uint_mod(1, 0, mod));
             ASSERT_EQ(2ULL, add_uint_uint_mod(1, 1, mod));
-            ASSERT_EQ(0ULL, add_uint_uint_mod(2305843009213644800ULL, 2305843009213644801ULL, mod));
-            ASSERT_EQ(1ULL, add_uint_uint_mod(2305843009213644801ULL, 2305843009213644801ULL, mod));
-            ASSERT_EQ(4611686018427289599ULL, add_uint_uint_mod(4611686018427289600ULL, 4611686018427289600ULL, mod));
+            ASSERT_EQ(0ULL, add_uint_uint_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(1ULL, add_uint_uint_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(2305843009211596799ULL, add_uint_uint_mod(2305843009211596800ULL, 2305843009211596800ULL, mod));
         }
 
         TEST(UIntArithSmallMod, SubUIntMod)
@@ -128,15 +128,15 @@ namespace SEALTest
             ASSERT_EQ(9ULL, sub_uint_uint_mod(6, 7, mod));
             ASSERT_EQ(1ULL, sub_uint_uint_mod(7, 6, mod));
 
-            mod = 4611686018427289601ULL;
+            mod = 2305843009211596801ULL;
             ASSERT_EQ(0ULL, sub_uint_uint_mod(0, 0, mod));
-            ASSERT_EQ(4611686018427289600ULL, sub_uint_uint_mod(0, 1, mod));
+            ASSERT_EQ(2305843009211596800ULL, sub_uint_uint_mod(0, 1, mod));
             ASSERT_EQ(1ULL, sub_uint_uint_mod(1, 0, mod));
             ASSERT_EQ(0ULL, sub_uint_uint_mod(1, 1, mod));
-            ASSERT_EQ(4611686018427289600ULL, sub_uint_uint_mod(2305843009213644800ULL, 2305843009213644801ULL, mod));
-            ASSERT_EQ(1ULL, sub_uint_uint_mod(2305843009213644801ULL, 2305843009213644800ULL, mod));
-            ASSERT_EQ(0ULL, sub_uint_uint_mod(2305843009213644801ULL, 2305843009213644801ULL, mod));
-            ASSERT_EQ(0ULL, sub_uint_uint_mod(4611686018427289600ULL, 4611686018427289600ULL, mod));
+            ASSERT_EQ(2305843009211596800ULL, sub_uint_uint_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(1ULL, sub_uint_uint_mod(1152921504605798401ULL, 1152921504605798400ULL, mod));
+            ASSERT_EQ(0ULL, sub_uint_uint_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(0ULL, sub_uint_uint_mod(2305843009211596800ULL, 2305843009211596800ULL, mod));
         }
 
         TEST(UIntArithSmallMod, BarrettReduce128)
@@ -200,18 +200,18 @@ namespace SEALTest
             ASSERT_EQ(2ULL, multiply_uint_uint_mod(6, 7, mod));
             ASSERT_EQ(2ULL, multiply_uint_uint_mod(7, 6, mod));
 
-            mod = 4611686018427289601ULL;
+            mod = 2305843009211596801ULL;
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(0, 0, mod));
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(0, 1, mod));
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(1, 0, mod));
             ASSERT_EQ(1ULL, multiply_uint_uint_mod(1, 1, mod));
             ASSERT_EQ(
-                1152921504606822400ULL, multiply_uint_uint_mod(2305843009213644800ULL, 2305843009213644801ULL, mod));
+                576460752302899200ULL, multiply_uint_uint_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
             ASSERT_EQ(
-                1152921504606822400ULL, multiply_uint_uint_mod(2305843009213644801ULL, 2305843009213644800ULL, mod));
+                576460752302899200ULL, multiply_uint_uint_mod(1152921504605798401ULL, 1152921504605798400ULL, mod));
             ASSERT_EQ(
-                3458764513820467201ULL, multiply_uint_uint_mod(2305843009213644801ULL, 2305843009213644801ULL, mod));
-            ASSERT_EQ(1ULL, multiply_uint_uint_mod(4611686018427289600ULL, 4611686018427289600ULL, mod));
+                1729382256908697601ULL, multiply_uint_uint_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(1ULL, multiply_uint_uint_mod(2305843009211596800ULL, 2305843009211596800ULL, mod));
         }
 
         TEST(UIntArithSmallMod, MultiplyAddMod)
@@ -223,7 +223,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, multiply_add_uint_mod(0, 0, 1, mod));
             ASSERT_EQ(3ULL, multiply_add_uint_mod(3, 4, 5, mod));
 
-            mod = 0x3FFFFFFFFFFFFFFFULL;
+            mod = 0x1FFFFFFFFFFFFFFFULL;
             ASSERT_EQ(0ULL, multiply_add_uint_mod(0, 0, 0, mod));
             ASSERT_EQ(0ULL, multiply_add_uint_mod(1, 0, 0, mod));
             ASSERT_EQ(0ULL, multiply_add_uint_mod(0, 1, 0, mod));
@@ -358,7 +358,7 @@ namespace SEALTest
             ASSERT_EQ(32 % mod.value(), dot_product_mod(arr1, 32, arr2, mod));
             ASSERT_EQ(64 % mod.value(), dot_product_mod(arr1, 64, arr2, mod));
 
-            mod = get_prime(1024, 62);
+            mod = get_prime(1024, SEAL_MOD_BIT_COUNT_MAX);
             for (size_t i = 0; i < 64; i++)
             {
                 arr1[i] = mod.value() - 1;

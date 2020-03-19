@@ -8,11 +8,11 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
-    /// <summary>Represent an integer modulus of up to 62 bits.</summary>
+    /// <summary>Represent an integer modulus of up to 61 bits.</summary>
     /// <remarks>
     /// <para>
-    /// Represent an integer modulus of up to 62 bits. An instance of the SmallModulus
-    /// class represents a non-negative integer modulus up to 62 bits. In particular,
+    /// Represent an integer modulus of up to 61 bits. An instance of the SmallModulus
+    /// class represents a non-negative integer modulus up to 61 bits. In particular,
     /// the encryption parameter PlainModulus, and the primes in CoeffModulus, are
     /// represented by instances of SmallModulus. The purpose of this class is to
     /// perform and store the pre-computation required by Barrett reduction.
@@ -45,7 +45,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="value">The integer modulus</param>
         /// <exception cref="ArgumentException">if value is 1 or more than
-        /// 62 bits</exception>
+        /// 61 bits</exception>
         public SmallModulus(ulong value)
         {
             NativeMethods.SmallModulus_Create(value, out IntPtr ptr);
@@ -88,7 +88,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>Sets the value of the SmallModulus.</summary>
         /// <param name="value">The new integer modulus</param>
         /// <exception cref="ArgumentException">if value is 1 or more than
-        /// 62 bits</exception>
+        /// 61 bits</exception>
         public void Set(ulong value)
         {
             NativeMethods.SmallModulus_Set(NativePtr, value);
@@ -268,7 +268,7 @@ namespace Microsoft.Research.SEAL
         /// the given value.
         /// </remarks>
         /// <param name="value">The integer modulus</param>
-        /// <exception cref="ArgumentException">if value is 1 or more than 62 bits</exception>
+        /// <exception cref="ArgumentException">if value is 1 or more than 61 bits</exception>
         public static explicit operator SmallModulus(ulong value)
         {
             SmallModulus sm = new SmallModulus(value);

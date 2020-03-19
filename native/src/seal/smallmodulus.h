@@ -15,8 +15,8 @@
 namespace seal
 {
     /**
-    Represent an integer modulus of up to 62 bits. An instance of the SmallModulus
-    class represents a non-negative integer modulus up to 62 bits. In particular,
+    Represent an integer modulus of up to 61 bits. An instance of the SmallModulus
+    class represents a non-negative integer modulus up to 61 bits. In particular,
     the encryption parameter plain_modulus, and the primes in coeff_modulus, are
     represented by instances of SmallModulus. The purpose of this class is to
     perform and store the pre-computation required by Barrett reduction.
@@ -35,7 +35,7 @@ namespace seal
         the given value, or to zero by default.
 
         @param[in] value The integer modulus
-        @throws std::invalid_argument if value is 1 or more than 62 bits
+        @throws std::invalid_argument if value is 1 or more than 61 bits
         */
         SmallModulus(std::uint64_t value = 0)
         {
@@ -74,7 +74,7 @@ namespace seal
         Sets the value of the SmallModulus.
 
         @param[in] value The new integer modulus
-        @throws std::invalid_argument if value is 1 or more than 62 bits
+        @throws std::invalid_argument if value is 1 or more than 61 bits
         */
         inline SmallModulus &operator=(std::uint64_t value)
         {

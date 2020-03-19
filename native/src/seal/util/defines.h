@@ -25,25 +25,37 @@ static_assert(sizeof(int) == 4, "Require sizeof(int) == 4");
 // Check that unsigned long long is 64 bits
 static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long long) == 8");
 
+/**
+ * Some modular arithmetic in SEAL requires moduli to be at most 62-bit.
+ * Here we choose tighter bounds (60 or 61) when defining moduli.
+ */
+
+// Bounds for bit-length of all coefficient moduli
+#define SEAL_MOD_BIT_COUNT_MAX 61
+#define SEAL_MOD_BIT_COUNT_MIN 2
+
+// Bit-length of internally used coefficient moduli, e.g., auxiliary base in BFV
+#define SEAL_INTERNAL_MOD_BIT_COUNT 61
+
 // Bounds for bit-length of user-defined coefficient moduli
 #define SEAL_USER_MOD_BIT_COUNT_MAX 60
 #define SEAL_USER_MOD_BIT_COUNT_MIN 2
 
-// Bounds for number of coefficient moduli
-#define SEAL_COEFF_MOD_COUNT_MAX 62
+// Bounds for bit-length of the plaintext modulus
+#define SEAL_PLAIN_MOD_BIT_COUNT_MAX SEAL_USER_MOD_BIT_COUNT_MAX
+#define SEAL_PLAIN_MOD_BIT_COUNT_MIN SEAL_USER_MOD_BIT_COUNT_MIN
+
+// Bounds for number of coefficient moduli (no hard requirement)
+#define SEAL_COEFF_MOD_COUNT_MAX 64
 #define SEAL_COEFF_MOD_COUNT_MIN 1
 
-// Bounds for polynomial modulus degree
+// Bounds for polynomial modulus degree (no hard requirement)
 #define SEAL_POLY_MOD_DEGREE_MAX 131072
 #define SEAL_POLY_MOD_DEGREE_MIN 2
 
-// Bounds for the plaintext modulus
-#define SEAL_PLAIN_MOD_MIN SEAL_USER_MOD_BIT_COUNT_MIN
-#define SEAL_PLAIN_MOD_MAX SEAL_USER_MOD_BIT_COUNT_MAX
-
-// Upper bound on the size of a ciphertext
-#define SEAL_CIPHERTEXT_SIZE_MIN 2
+// Upper bound on the size of a ciphertext (no hard requirement)
 #define SEAL_CIPHERTEXT_SIZE_MAX 16
+#define SEAL_CIPHERTEXT_SIZE_MIN 2
 
 // Detect system
 #define SEAL_SYSTEM_OTHER 1

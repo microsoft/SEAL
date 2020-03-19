@@ -494,7 +494,7 @@ namespace SEALTest
                 }
 
                 // Input base is Bsk U {m_tilde}, in this case consisting of 3 primes.
-                // Note that m_tilde is always smaller than the primes in Bsk (61 bits).
+                // m_tilde is always smaller than the primes in Bsk (SEAL_INTERNAL_MOD_BIT_COUNT (61) bits).
                 // Set the length-2 array to have values 1*m_tilde and 2*m_tilde.
                 in[0] = rns_tool.m_tilde().value();
                 in[1] = 2 * rns_tool.m_tilde().value();
@@ -542,7 +542,7 @@ namespace SEALTest
                 }
 
                 // Input base is Bsk U {m_tilde}, in this case consisting of 6 primes.
-                // Note that m_tilde is always smaller than the primes in Bsk (61 bits).
+                // m_tilde is always smaller than the primes in Bsk (SEAL_INTERNAL_MOD_BIT_COUNT (61) bits).
                 // Set the length-2 array to have values 1*m_tilde and 2*m_tilde.
                 in[0] = rns_tool.m_tilde().value();
                 in[1] = 2 * rns_tool.m_tilde().value();

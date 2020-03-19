@@ -554,15 +554,16 @@ namespace seal
             // Allocate memory for the bases q, B, Bsk, Bsk U m_tilde, t_gamma
             size_t base_q_size = q.size();
 
-            // In some cases we might need to increase the size of the base B by one, namely
-            // we require K * n * t * q^2 < q * prod(B) * m_sk, where K takes into account
-            // cross terms when larger size ciphertexts are used, and n is the "delta factor"
-            // for the ring. We reserve 32 bits for K * n. Here the coeff modulus primes q_i
-            // are bounded to be 60 bits, and all primes in B and m_sk are 61 bits.
+            // In some cases we might need to increase the size of the base B by one, namely we require
+            // K * n * t * q^2 < q * prod(B) * m_sk, where K takes into account cross terms when larger size ciphertexts
+            // are used, and n is the "delta factor" for the ring. We reserve 32 bits for K * n. Here the coeff modulus
+            // primes q_i are bounded to be SEAL_USER_MOD_BIT_COUNT_MAX (60) bits, and all primes in B and m_sk are
+            // SEAL_INTERNAL_MOD_BIT_COUNT (61) bits.
             int total_coeff_bit_count = get_significant_bit_count_uint(q.base_prod(), q.size());
 
             size_t base_B_size = base_q_size;
-            if (32 + t_.bit_count() + total_coeff_bit_count >= 61 * safe_cast<int>(base_q_size) + 61)
+            if (32 + t_.bit_count() + total_coeff_bit_count >=
+                SEAL_INTERNAL_MOD_BIT_COUNT * safe_cast<int>(base_q_size) + SEAL_INTERNAL_MOD_BIT_COUNT)
             {
                 base_B_size++;
             }

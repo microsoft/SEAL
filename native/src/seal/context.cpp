@@ -31,8 +31,7 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         auto &plain_modulus = parms.plain_modulus();
 
-        // The number of coeff moduli is restricted to 62 for lazy reductions
-        // in baseconverter.cpp to work
+        // The number of coeff moduli is restricted to 64 to prevent unexpected behaviors
         if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX || coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
         {
             context_data.qualifiers_.parameters_set = false;
@@ -141,7 +140,8 @@ namespace seal
         if (parms.scheme() == scheme_type::BFV)
         {
             // Plain modulus must be at least 2 and at most 60 bits
-            if (plain_modulus.value() >> SEAL_PLAIN_MOD_MAX || !(plain_modulus.value() >> (SEAL_PLAIN_MOD_MIN - 1)))
+            if (plain_modulus.value() >> SEAL_PLAIN_MOD_BIT_COUNT_MAX ||
+                !(plain_modulus.value() >> (SEAL_PLAIN_MOD_BIT_COUNT_MIN - 1)))
             {
                 context_data.qualifiers_.parameters_set = false;
                 return context_data;

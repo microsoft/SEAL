@@ -35,15 +35,15 @@ namespace SEALNetTest
             Assert.AreEqual(3, sm.BitCount);
             Assert.IsTrue(sm.IsPrime);
 
-            // Value is exactly 62 bits
-            SmallModulus sm2 = new SmallModulus(0x3FFFFFFFFFFFFFFFul);
+            // Value is exactly 61 bits
+            SmallModulus sm2 = new SmallModulus(0x1FFFFFFFFFFFFFFFul);
 
             Assert.IsNotNull(sm2);
             Assert.IsFalse(sm2.IsZero);
-            Assert.AreEqual(0x3FFFFFFFFFFFFFFFul, sm2.Value);
-            Assert.AreEqual(62, sm2.BitCount);
+            Assert.AreEqual(0x1FFFFFFFFFFFFFFFul, sm2.Value);
+            Assert.AreEqual(61, sm2.BitCount);
             Assert.AreEqual(1ul, sm2.UInt64Count);
-            Assert.IsFalse(sm2.IsPrime);
+            Assert.IsTrue(sm2.IsPrime);
 
             SmallModulus sm3 = new SmallModulus(0xF00000F000079ul);
 
@@ -84,8 +84,8 @@ namespace SEALNetTest
         [TestMethod]
         public void ConstructorFail2Test()
         {
-            // Should fail if value is larger than 62 bits
-            Utilities.AssertThrows<ArgumentException>(() => { SmallModulus sm = new SmallModulus(0x7FFFFFFFFFFFFFFFul); });
+            // Should fail if value is larger than 61 bits
+            Utilities.AssertThrows<ArgumentException>(() => { SmallModulus sm = new SmallModulus(0x2000000000000000ul); });
         }
 
         [TestMethod]
@@ -125,9 +125,9 @@ namespace SEALNetTest
         [TestMethod]
         public void SetFail2Test()
         {
-            // Should fail if set to bigger than 62 bits
+            // Should fail if set to bigger than 61 bits
             SmallModulus sm = new SmallModulus();
-            Utilities.AssertThrows<ArgumentException>(() => sm.Set(0x7FFFFFFFFFFFFFFFul));
+            Utilities.AssertThrows<ArgumentException>(() => sm.Set(0x2000000000000000ul));
         }
 
         [TestMethod]

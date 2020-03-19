@@ -72,9 +72,9 @@ namespace seal
             const_ratio_ = { { 0, 0, 0 } };
             is_prime_ = false;
         }
-        else if ((value >> 62 != 0) || (value == uint64_t(0x4000000000000000)) || (value == 1))
+        else if ((value >> SEAL_MOD_BIT_COUNT_MAX != 0) || (value == 1))
         {
-            throw invalid_argument("value can be at most 62 bits and cannot be 1");
+            throw invalid_argument("value can be at most 61-bit and cannot be 1");
         }
         else
         {

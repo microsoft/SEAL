@@ -167,11 +167,13 @@ namespace seal
                 throw invalid_argument("modulus");
             }
 #endif
-            // Product of two numbers is up to 62 bit + 62 bit = 124 bit, so can sum up to 16 of them
-            // with no reduction.
-            size_t lazy_reduction_summand_bound = 16;
-
-            uint64_t result = 0;
+            // Product of two numbers is up to 61 bit + 61 bit = 122 bit. We can sum up to 64 of them with no reduction.
+            size_t lazy_reduction_summand_bound;
+#if SEAL_MOD_BIT_COUNT_MAX > 32
+            lazy_reduction_summand_bound = safe_cast<size_t>(1 << (128 - (SEAL_MOD_BIT_COUNT_MAX << 1)));
+#else
+            lazy_reduction_summand_bound = std::numeric_limits<size_t>::max();
+#endif
 
             // We may have to perform multiple lazy reductions depending on count
             size_t r = lazy_reduction_summand_bound;
