@@ -321,6 +321,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<SmallModulus>("SmallModulus")
         .constructor<>()
+        .constructor<SmallModulus &&>() // Move via constructor overload
         .function("isZero", optional_override([](SmallModulus &self) {
             return self.is_zero();
         }))
@@ -344,21 +345,18 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::istringstream is(decoded);
             self.load(is);
         }))
-        .function("createFromString", optional_override([](SmallModulus &self,
-            const std::string &encoded) {
-            std::string decoded = b64decode(encoded);
-            std::istringstream is(decoded);
-            SmallModulus sm;
-            sm.load(is);
-            return sm;
+        .function("setValue", optional_override([](SmallModulus &self,
+            const std::string &v) {
+            std::uint64_t value;
+            std::istringstream is(v);
+            is >> value;
+            self = std::move(value);
         }))
         .function("value", optional_override([](SmallModulus &self) {
-            uint64_t value;
-            value = self.value();
+            uint64_t value = self.value();
             std::ostringstream oss;
             oss << value;
-            std::string intAsString;
-            intAsString = oss.str();
+            std::string intAsString = oss.str();
             return intAsString;
         }));
 
@@ -626,7 +624,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<RelinKeys, base<KSwitchKeys>> ("RelinKeys")
         .constructor<>()
-        .constructor<const RelinKeys &>() // Copy via constructor overload
+        .constructor<RelinKeys &&>() // Move via constructor overload
         .function("copy", optional_override([](RelinKeys &self, const RelinKeys &copy) {
                 self = copy; // Copy via assignment overload
             }))
@@ -642,7 +640,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<GaloisKeys, base<KSwitchKeys>> ("GaloisKeys")
         .constructor<>()
-        .constructor<const GaloisKeys &>() // Copy via constructor overload
+        .constructor<GaloisKeys &&>() // Move via constructor overload
         .function("copy", optional_override([](GaloisKeys &self, const GaloisKeys &copy) {
                 self = copy; // Copy via assignment overload
             }))
@@ -666,7 +664,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<PublicKey>("PublicKey")
         .constructor<>()
-        .constructor<const PublicKey &>() // Copy via constructor overload
+        .constructor<PublicKey &&>() // Move via constructor overload
         .function("copy", optional_override([](PublicKey &self, const PublicKey &copy) {
                 self = copy; // Copy via assignment overload
             }))
@@ -696,7 +694,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<SecretKey>("SecretKey")
         .constructor<>()
-        .constructor<const SecretKey &>() // Copy via constructor overload
+        .constructor<SecretKey &&>() // Move via constructor overload
         .function("copy", optional_override([](SecretKey &self, const SecretKey &copy) {
                 self = copy; // Copy via assignment overload
             }))
@@ -726,7 +724,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<Plaintext>("Plaintext")
         .constructor<>()
-        .constructor<const Plaintext &>() // Copy via constructor overload
+        .constructor<Plaintext &&>() // Move via constructor overload
         .function("copy", optional_override([](Plaintext &self, const Plaintext &copy) {
                 self = copy; // Copy via assignment overload
             }))
@@ -781,7 +779,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<Ciphertext>("Ciphertext")
         .constructor<>()
-        .constructor<const Ciphertext &>() // Copy via constructor overload
+        .constructor<Ciphertext &&>() // Move via constructor overload
         .function("copy", optional_override([](Ciphertext &self, const Ciphertext &copy) {
                 self = copy; // Copy via assignment overload
             }))
