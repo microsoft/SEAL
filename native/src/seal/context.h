@@ -16,6 +16,12 @@
 
 namespace seal
 {
+    enum class encryption_parameter_error: int
+    {
+        success = 0,
+
+    };
+
     /**
     Stores a set of attributes (qualifiers) of a set of encryption parameters.
     These parameters are mainly used internally in various parts of the library,
@@ -29,11 +35,93 @@ namespace seal
     class EncryptionParameterQualifiers
     {
     public:
+
         /**
-        If the encryption parameters are set in a way that is considered valid by
-        Microsoft SEAL, the variable parameters_set is set to true.
+        Identifies the reason why encryption parameters are not valid.
         */
-        bool parameters_set;
+        enum class error_type: int
+        {
+            none = -1,
+            success = 0,
+
+            /**
+            scheme must be BFV or CKKS.
+            */
+            invalid_scheme = 1,
+
+            /**
+            coeff_modulus's primes' count is bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX).
+            */
+            invalid_coeff_mod_count = 2,
+
+            /**
+            coeff_modulus's primes' bit counts are bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX).
+            */
+            invalid_coeff_mod_bit_count = 3,
+
+            /**
+            coeff_modulus's primes must be congruent to 1 modulo (2 * poly_mod_degree).
+            */
+            invalid_coeff_mod_no_ntt = 4,
+
+            /**
+            poly_modulus_degree is bounded by SEAL_POLY_MOD_DEGREE_MIN(MAX).
+            */
+            invalid_poly_mod_degree = 5,
+
+            /**
+            poly_modulus_degree must be a power of two.
+            */
+            invalid_poly_mod_degree_non_power_of_two = 6,
+
+            /**
+            Parameters are too large to fit in size_t type.
+            */
+            invalid_parameters_too_large = 7,
+
+            /**
+            Parameters are not secure according to HomomorphicEncryption.org security standard.
+            */
+            invalid_parameters_insecure = 8,
+
+            /**
+            RNSBase cannot be constructed.
+            */
+            failed_creating_rns_base = 9,
+
+            /**
+            plain_modulus's bit count is bounded by SEAL_PLAIN_MOD_BIT_COUNT_MIN(MAX).
+            */
+            invalid_plain_mod_bit_count = 10,
+
+            /**
+            If scheme is BFV, plain_modulus must be coprime to coeff_modulus.
+            */
+            invalid_plain_mod_coprimality = 11,
+
+            /**
+            If scheme is BFV, plain_modulus must be smaller than coeff_modulus.
+            */
+            invalid_plain_mod_too_large = 12,
+
+            /**
+            If scheme is CKKS, plain_modulus must be zero.
+            */
+            invalid_plain_mod_nonzero = 13,
+
+            /**
+            RNSTool cannot be constructed.
+            */
+            failed_creating_rns_tool = 14
+        };
+
+        /**
+        The variable parameter_error is set to:
+        - none, if parameters are not validated;
+        - success, if parameters are considered valid by Microsoft SEAL;
+        - other values, if parameters are validated and invalid.
+        */
+        error_type parameter_error;
 
         /**
         Tells whether FFT can be used for polynomial multiplication. If the
@@ -96,7 +184,7 @@ namespace seal
 
     private:
         EncryptionParameterQualifiers()
-            : parameters_set(false), using_fft(false), using_ntt(false), using_batching(false),
+            : parameter_error(error_type::none), using_fft(false), using_ntt(false), using_batching(false),
               using_fast_plain_lift(false), using_descending_modulus_chain(false), sec_level(sec_level_type::none)
         {}
 

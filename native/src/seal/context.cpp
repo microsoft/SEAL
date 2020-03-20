@@ -16,15 +16,17 @@ using namespace seal::util;
 
 namespace seal
 {
+    using error_type = EncryptionParameterQualifiers::error_type;
+
     SEALContext::ContextData SEALContext::validate(EncryptionParameters parms)
     {
         ContextData context_data(parms, pool_);
-        context_data.qualifiers_.parameters_set = true;
+        context_data.qualifiers_.parameter_error = error_type::success;
 
         // Is a scheme set?
         if (parms.scheme() == scheme_type::none)
         {
-            context_data.qualifiers_.parameters_set = false;
+            context_data.qualifiers_.parameter_error = error_type::invalid_scheme;
             return context_data;
         }
 
@@ -34,7 +36,7 @@ namespace seal
         // The number of coeff moduli is restricted to 64 to prevent unexpected behaviors
         if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX || coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
         {
-            context_data.qualifiers_.parameters_set = false;
+            context_data.qualifiers_.parameter_error = error_type::invalid_coeff_mod_count;
             return context_data;
         }
 
@@ -45,18 +47,8 @@ namespace seal
             if (coeff_modulus[i].value() >> SEAL_USER_MOD_BIT_COUNT_MAX ||
                 !(coeff_modulus[i].value() >> (SEAL_USER_MOD_BIT_COUNT_MIN - 1)))
             {
-                context_data.qualifiers_.parameters_set = false;
+                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_mod_bit_count;
                 return context_data;
-            }
-
-            // Check that all coeff moduli are pairwise relatively prime
-            for (size_t j = 0; j < i; j++)
-            {
-                if (!are_coprime(coeff_modulus[i].value(), coeff_modulus[j].value()))
-                {
-                    context_data.qualifiers_.parameters_set = false;
-                    return context_data;
-                }
             }
         }
 
@@ -74,19 +66,24 @@ namespace seal
 
         // Check polynomial modulus degree and create poly_modulus
         size_t poly_modulus_degree = parms.poly_modulus_degree();
-        int coeff_count_power = get_power_of_two(poly_modulus_degree);
-        if (poly_modulus_degree < SEAL_POLY_MOD_DEGREE_MIN || poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX ||
-            coeff_count_power < 0)
+        if (poly_modulus_degree < SEAL_POLY_MOD_DEGREE_MIN || poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX)
         {
             // Parameters are not valid
-            context_data.qualifiers_.parameters_set = false;
+            context_data.qualifiers_.parameter_error = error_type::invalid_poly_mod_degree;
+            return context_data;
+        }
+        int coeff_count_power = get_power_of_two(poly_modulus_degree);
+        if (coeff_count_power < 0)
+        {
+            // Parameters are not valid
+            context_data.qualifiers_.parameter_error = error_type::invalid_poly_mod_degree_non_power_of_two;
             return context_data;
         }
 
         // Quick sanity check
         if (!product_fits_in(coeff_mod_count, poly_modulus_degree))
         {
-            context_data.qualifiers_.parameters_set = false;
+            context_data.qualifiers_.parameter_error = error_type::invalid_parameters_too_large;
             return context_data;
         }
 
@@ -96,8 +93,7 @@ namespace seal
         // Assume parameters satisfy desired security level
         context_data.qualifiers_.sec_level = sec_level_;
 
-        // Check if the parameters are secure according to HomomorphicEncryption.org
-        // security standard
+        // Check if the parameters are secure according to HomomorphicEncryption.org security standard
         if (context_data.total_coeff_modulus_bit_count_ > CoeffModulus::MaxBitCount(poly_modulus_degree, sec_level_))
         {
             // Not secure according to HomomorphicEncryption.org security standard
@@ -105,12 +101,15 @@ namespace seal
             if (sec_level_ != sec_level_type::none)
             {
                 // Parameters are not valid
-                context_data.qualifiers_.parameters_set = false;
+                context_data.qualifiers_.parameter_error = error_type::invalid_parameters_insecure;
                 return context_data;
             }
         }
 
         // Set up RNSBase for coeff_modulus
+        // RNSBase's constructor may fail due to:
+        //   (1) coeff_mod not coprime
+        //   (2) cannot find inverse of punctured products (because of (1))
         Pointer<RNSBase> coeff_modulus_base;
         try
         {
@@ -119,7 +118,7 @@ namespace seal
         catch (const invalid_argument &)
         {
             // Parameters are not valid
-            context_data.qualifiers_.parameters_set = false;
+            context_data.qualifiers_.parameter_error = error_type::failed_creating_rns_base;
             return context_data;
         }
 
@@ -132,7 +131,7 @@ namespace seal
             {
                 // Parameters are not valid
                 context_data.qualifiers_.using_ntt = false;
-                context_data.qualifiers_.parameters_set = false;
+                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_mod_no_ntt;
                 return context_data;
             }
         }
@@ -143,7 +142,7 @@ namespace seal
             if (plain_modulus.value() >> SEAL_PLAIN_MOD_BIT_COUNT_MAX ||
                 !(plain_modulus.value() >> (SEAL_PLAIN_MOD_BIT_COUNT_MIN - 1)))
             {
-                context_data.qualifiers_.parameters_set = false;
+                context_data.qualifiers_.parameter_error = error_type::invalid_plain_mod_bit_count;
                 return context_data;
             }
 
@@ -152,7 +151,7 @@ namespace seal
             {
                 if (!are_coprime(coeff_modulus[i].value(), plain_modulus.value()))
                 {
-                    context_data.qualifiers_.parameters_set = false;
+                    context_data.qualifiers_.parameter_error = error_type::invalid_plain_mod_coprimality;
                     return context_data;
                 }
             }
@@ -163,7 +162,7 @@ namespace seal
                     coeff_mod_count))
             {
                 // Parameters are not valid
-                context_data.qualifiers_.parameters_set = false;
+                context_data.qualifiers_.parameter_error = error_type::invalid_plain_mod_too_large;
                 return context_data;
             }
 
@@ -228,7 +227,7 @@ namespace seal
             if (!plain_modulus.is_zero())
             {
                 // Parameters are not valid
-                context_data.qualifiers_.parameters_set = false;
+                context_data.qualifiers_.parameter_error = error_type::invalid_plain_mod_nonzero;
                 return context_data;
             }
 
@@ -260,16 +259,19 @@ namespace seal
         }
         else
         {
-            context_data.qualifiers_.parameters_set = false;
+            context_data.qualifiers_.parameter_error = error_type::invalid_scheme;
             return context_data;
         }
 
         // Create RNSTool
+        // RNSTool's constructor may fail due to:
+        //   (1) auxiliary base being too large
+        //   (2) cannot find inverse of punctured products in auxiliary base
         context_data.rns_tool_ = allocate<RNSTool>(pool_, pool_);
         if (!context_data.rns_tool_->initialize(poly_modulus_degree, *coeff_modulus_base, plain_modulus))
         {
             // Parameters are not valid
-            context_data.qualifiers_.parameters_set = false;
+            context_data.qualifiers_.parameter_error = error_type::failed_creating_rns_tool;
             return context_data;
         }
 
