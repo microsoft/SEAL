@@ -142,7 +142,7 @@ namespace seal
                     throw std::logic_error("signed underflow");
                 }
             }
-            return (T)(in1 * in2);
+            return static_cast<T>(in1 * in2);
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_integral<T>::value>>
@@ -178,7 +178,7 @@ namespace seal
                     throw std::logic_error("signed underflow");
                 }
             }
-            return (T)(in1 + in2);
+            return static_cast<T>(in1 + in2);
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
@@ -208,7 +208,7 @@ namespace seal
                     throw std::logic_error("signed overflow");
                 }
             }
-            return (T)(in1 - in2);
+            return static_cast<T>(in1 - in2);
         }
 
         template <
