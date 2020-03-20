@@ -8,9 +8,12 @@
 using namespace seal;
 using namespace std;
 
+using error_type = EncryptionParameterQualifiers::error_type;
+
 namespace SEALTest
 {
-    using ErrorType = EncryptionParameterQualifiers::error_type;
+
+
     TEST(ContextTest, ContextConstructor)
     {
         // Nothing set
@@ -20,7 +23,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, ErrorType::invalid_coeff_mod_count);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_coeff_mod_count);
             ASSERT_FALSE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -39,7 +42,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, ErrorType::failed_creating_rns_base);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::failed_creating_rns_base);
             ASSERT_FALSE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -58,7 +61,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, ErrorType::invalid_plain_mod_coprimality);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_plain_mod_coprimality);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -78,7 +81,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, ErrorType::invalid_plain_mod_too_large);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_plain_mod_too_large);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -98,7 +101,7 @@ namespace SEALTest
             ASSERT_EQ(3ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, ErrorType::invalid_coeff_mod_no_ntt);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_coeff_mod_no_ntt);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -237,7 +240,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, ErrorType::invalid_parameters_insecure);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_parameters_insecure);
             ASSERT_EQ(sec_level_type::none, qualifiers.sec_level);
             ASSERT_FALSE(context->using_keyswitching());
         }
@@ -251,7 +254,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, ErrorType::invalid_parameters_insecure);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_parameters_insecure);
             ASSERT_EQ(sec_level_type::none, qualifiers.sec_level);
             ASSERT_FALSE(context->using_keyswitching());
         }
@@ -379,5 +382,19 @@ namespace SEALTest
             ASSERT_FALSE(!!context->first_context_data()->next_context_data());
             ASSERT_TRUE(!!context->first_context_data()->prev_context_data());
         }
+    }
+
+    TEST(EncryptionParameterQualifiersTest, ParameterError)
+    {
+        auto scheme = scheme_type::BFV;
+        EncryptionParameters parms(scheme);
+        auto context = SEALContext::Create(parms, false, sec_level_type::none);
+        auto qualifiers = context->first_context_data()->qualifiers();
+
+        qualifiers.parameter_error = error_type::none;
+        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "none");
+
+        qualifiers.parameter_error = error_type::invalid_parameters_too_large;
+        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "invalid_parameters_too_large");
     }
 } // namespace SEALTest

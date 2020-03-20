@@ -118,6 +118,16 @@ namespace seal
         error_type parameter_error;
 
         /**
+        Returns the name of parameter_error.
+        */
+        SEAL_NODISCARD const std::string parameter_error_name() const;
+
+        /**
+        Returns a comprehensive message that interprets parameter_error.
+        */
+        SEAL_NODISCARD const std::string parameter_error_message() const;
+
+        /**
         Tells whether parameter_error is error_type::success.
         */
         SEAL_NODISCARD inline bool parameters_set() const noexcept

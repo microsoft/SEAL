@@ -14,9 +14,72 @@
 using namespace std;
 using namespace seal::util;
 
+using error_type = seal::EncryptionParameterQualifiers::error_type;
+
 namespace seal
 {
-    using error_type = EncryptionParameterQualifiers::error_type;
+
+    const string EncryptionParameterQualifiers::parameter_error_name() const
+    {
+        switch (parameter_error)
+        {
+        case error_type::none:
+            return "none";
+
+        case error_type::success:
+            return "success";
+
+        case error_type::invalid_scheme:
+            return "invalid_scheme";
+
+        case error_type::invalid_coeff_mod_count:
+            return "invalid_coeff_mod_count";
+
+        case error_type::invalid_coeff_mod_bit_count:
+            return "invalid_coeff_mod_bit_count";
+
+        case error_type::invalid_coeff_mod_no_ntt:
+            return "invalid_coeff_mod_no_ntt";
+
+        case error_type::invalid_poly_mod_degree:
+            return "invalid_poly_mod_degree";
+
+        case error_type::invalid_poly_mod_degree_non_power_of_two:
+            return "invalid_poly_mod_degree_non_power_of_two";
+
+        case error_type::invalid_parameters_too_large:
+            return "invalid_parameters_too_large";
+
+        case error_type::invalid_parameters_insecure:
+            return "invalid_parameters_insecure";
+
+        case error_type::failed_creating_rns_base:
+            return "failed_creating_rns_base";
+
+        case error_type::invalid_plain_mod_bit_count:
+            return "invalid_plain_mod_bit_count";
+
+        case error_type::invalid_plain_mod_coprimality:
+            return "invalid_plain_mod_coprimality";
+
+        case error_type::invalid_plain_mod_too_large:
+            return "invalid_plain_mod_too_large";
+
+        case error_type::invalid_plain_mod_nonzero:
+            return "invalid_plain_mod_nonzero";
+
+        case error_type::failed_creating_rns_tool:
+            return "failed_creating_rns_tool";
+
+        default:
+            throw invalid_argument("invalid EncryptionParameterQualifier::error_type");
+        }
+    }
+
+    const string EncryptionParameterQualifiers::parameter_error_message() const
+    {
+            return "<unknown>";
+    }
 
     SEALContext::ContextData SEALContext::validate(EncryptionParameters parms)
     {
