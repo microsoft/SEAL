@@ -35,76 +35,83 @@ namespace seal
         */
         enum class error_type: int
         {
+            /**
+            constructed but not yet validated
+            */
             none = -1,
+
+            /**
+            valid
+            */
             success = 0,
 
             /**
-            scheme must be BFV or CKKS.
+            scheme must be BFV or CKKS
             */
             invalid_scheme = 1,
 
             /**
-            coeff_modulus's primes' count is bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX).
+            coeff_modulus's primes' count is not bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX)
             */
             invalid_coeff_mod_count = 2,
 
             /**
-            coeff_modulus's primes' bit counts are bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX).
+            coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)
             */
             invalid_coeff_mod_bit_count = 3,
 
             /**
-            coeff_modulus's primes must be congruent to 1 modulo (2 * poly_mod_degree).
+            coeff_modulus's primes are not congruent to 1 modulo (2 * poly_mod_degree)
             */
             invalid_coeff_mod_no_ntt = 4,
 
             /**
-            poly_modulus_degree is bounded by SEAL_POLY_MOD_DEGREE_MIN(MAX).
+            poly_modulus_degree is not bounded by SEAL_POLY_MOD_DEGREE_MIN(MAX)
             */
             invalid_poly_mod_degree = 5,
 
             /**
-            poly_modulus_degree must be a power of two.
+            poly_modulus_degree is not a power of two
             */
             invalid_poly_mod_degree_non_power_of_two = 6,
 
             /**
-            Parameters are too large to fit in size_t type.
+            parameters are too large to fit in size_t type
             */
             invalid_parameters_too_large = 7,
 
             /**
-            Parameters are not secure according to HomomorphicEncryption.org security standard.
+            parameters are not secure according to HomomorphicEncryption.org security standard
             */
             invalid_parameters_insecure = 8,
 
             /**
-            RNSBase cannot be constructed.
+            RNSBase cannot be constructed
             */
             failed_creating_rns_base = 9,
 
             /**
-            plain_modulus's bit count is bounded by SEAL_PLAIN_MOD_BIT_COUNT_MIN(MAX).
+            plain_modulus's bit count is not bounded by SEAL_PLAIN_MOD_BIT_COUNT_MIN(MAX)
             */
             invalid_plain_mod_bit_count = 10,
 
             /**
-            If scheme is BFV, plain_modulus must be coprime to coeff_modulus.
+            plain_modulus is not coprime to coeff_modulus
             */
             invalid_plain_mod_coprimality = 11,
 
             /**
-            If scheme is BFV, plain_modulus must be smaller than coeff_modulus.
+            plain_modulus is not smaller than coeff_modulus
             */
             invalid_plain_mod_too_large = 12,
 
             /**
-            If scheme is CKKS, plain_modulus must be zero.
+            plain_modulus is not zero
             */
             invalid_plain_mod_nonzero = 13,
 
             /**
-            RNSTool cannot be constructed.
+            RNSTool cannot be constructed
             */
             failed_creating_rns_tool = 14
         };

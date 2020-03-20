@@ -78,7 +78,59 @@ namespace seal
 
     const string EncryptionParameterQualifiers::parameter_error_message() const
     {
-            return "<unknown>";
+        switch (parameter_error)
+        {
+        case error_type::none:
+            return "constructed but not yet validated";
+
+        case error_type::success:
+            return "valid";
+
+        case error_type::invalid_scheme:
+            return "scheme must be BFV or CKKS";
+
+        case error_type::invalid_coeff_mod_count:
+            return "coeff_modulus's primes' count is not bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX)";
+
+        case error_type::invalid_coeff_mod_bit_count:
+            return "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)";
+
+        case error_type::invalid_coeff_mod_no_ntt:
+            return "coeff_modulus's primes are not congruent to 1 modulo (2 * poly_mod_degree)";
+
+        case error_type::invalid_poly_mod_degree:
+            return "poly_modulus_degree is not bounded by SEAL_POLY_MOD_DEGREE_MIN(MAX)";
+
+        case error_type::invalid_poly_mod_degree_non_power_of_two:
+            return "poly_modulus_degree is not a power of two";
+
+        case error_type::invalid_parameters_too_large:
+            return "parameters are too large to fit in size_t type";
+
+        case error_type::invalid_parameters_insecure:
+            return "parameters are not secure according to HomomorphicEncryption.org security standard";
+
+        case error_type::failed_creating_rns_base:
+            return "RNSBase cannot be constructed";
+
+        case error_type::invalid_plain_mod_bit_count:
+            return "plain_modulus's bit count is not bounded by SEAL_PLAIN_MOD_BIT_COUNT_MIN(MAX)";
+
+        case error_type::invalid_plain_mod_coprimality:
+            return "plain_modulus is not coprime to coeff_modulus";
+
+        case error_type::invalid_plain_mod_too_large:
+            return "plain_modulus is not smaller than coeff_modulus";
+
+        case error_type::invalid_plain_mod_nonzero:
+            return "plain_modulus is not zero";
+
+        case error_type::failed_creating_rns_tool:
+            return "RNSTool cannot be constructed";
+
+        default:
+            throw invalid_argument("invalid EncryptionParameterQualifier::error_type");
+        }
     }
 
     SEALContext::ContextData SEALContext::validate(EncryptionParameters parms)

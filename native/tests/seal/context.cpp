@@ -393,8 +393,15 @@ namespace SEALTest
 
         qualifiers.parameter_error = error_type::none;
         ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "none");
+        ASSERT_STREQ(qualifiers.parameter_error_message().c_str(), "constructed but not yet validated");
 
-        qualifiers.parameter_error = error_type::invalid_parameters_too_large;
-        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "invalid_parameters_too_large");
+        qualifiers.parameter_error = error_type::success;
+        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "success");
+        ASSERT_STREQ(qualifiers.parameter_error_message().c_str(), "valid");
+
+        qualifiers.parameter_error = error_type::invalid_coeff_mod_bit_count;
+        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "invalid_coeff_mod_bit_count");
+        ASSERT_STREQ(qualifiers.parameter_error_message().c_str(),
+            "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)");
     }
 } // namespace SEALTest
