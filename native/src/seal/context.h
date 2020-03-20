@@ -16,12 +16,6 @@
 
 namespace seal
 {
-    enum class encryption_parameter_error: int
-    {
-        success = 0,
-
-    };
-
     /**
     Stores a set of attributes (qualifiers) of a set of encryption parameters.
     These parameters are mainly used internally in various parts of the library,
@@ -122,6 +116,14 @@ namespace seal
         - other values, if parameters are validated and invalid.
         */
         error_type parameter_error;
+
+        /**
+        Tells whether parameter_error is error_type::success.
+        */
+        SEAL_NODISCARD inline bool parameters_set() const noexcept
+        {
+            return parameter_error == error_type::success;
+        }
 
         /**
         Tells whether FFT can be used for polynomial multiplication. If the
@@ -521,7 +523,7 @@ namespace seal
         */
         SEAL_NODISCARD inline auto parameters_set() const
         {
-            return first_context_data() ? first_context_data()->qualifiers_.parameters_set : false;
+            return first_context_data() ? first_context_data()->qualifiers_.parameters_set() : false;
         }
 
         /**

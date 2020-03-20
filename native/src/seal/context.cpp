@@ -300,7 +300,7 @@ namespace seal
         auto next_context_data = validate(next_parms);
 
         // If not valid then return zero parms_id
-        if (!next_context_data.qualifiers_.parameters_set)
+        if (!next_context_data.qualifiers_.parameters_set())
         {
             return parms_id_zero;
         }
@@ -345,7 +345,7 @@ namespace seal
         // more than one modulus in coeff_modulus. This is equivalent to expanding
         // the chain by one step. Otherwise, we set first_parms_id_ to equal
         // key_parms_id_.
-        if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set || parms.coeff_modulus().size() == 1)
+        if (!context_data_map_.at(key_parms_id_)->qualifiers_.parameters_set() || parms.coeff_modulus().size() == 1)
         {
             first_parms_id_ = key_parms_id_;
         }
@@ -361,9 +361,9 @@ namespace seal
         // Check if keyswitching is available
         using_keyswitching_ = (first_parms_id_ != key_parms_id_);
 
-        // If modulus switching chain is to be created, compute the remaining
-        // parameter sets as long as they are valid to use (parameters_set == true)
-        if (expand_mod_chain && context_data_map_.at(first_parms_id_)->qualifiers_.parameters_set)
+        // If modulus switching chain is to be created, compute the remaining parameter sets as long as they are valid
+        // to use (i.e., parameters_set() == true).
+        if (expand_mod_chain && context_data_map_.at(first_parms_id_)->qualifiers_.parameters_set())
         {
             auto prev_parms_id = first_parms_id_;
             while (context_data_map_.at(prev_parms_id)->parms().coeff_modulus().size() > 1)

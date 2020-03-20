@@ -18,7 +18,7 @@ namespace SEALTest
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_FALSE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -36,7 +36,7 @@ namespace SEALTest
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_FALSE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -54,7 +54,7 @@ namespace SEALTest
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -73,7 +73,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(2ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -92,7 +92,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(3ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -111,7 +111,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -132,7 +132,7 @@ namespace SEALTest
             ASSERT_EQ(697ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             auto key_qualifiers = context->key_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -151,7 +151,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -170,7 +170,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             ASSERT_EQ(697ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_TRUE(qualifiers.using_batching);
@@ -191,7 +191,7 @@ namespace SEALTest
             ASSERT_EQ(26441ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             auto key_qualifiers = context->key_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_TRUE(qualifiers.using_batching);
@@ -212,7 +212,7 @@ namespace SEALTest
             ASSERT_EQ(26441ULL, *context->key_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             auto key_qualifiers = context->key_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_TRUE(qualifiers.using_batching);
@@ -230,7 +230,7 @@ namespace SEALTest
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_EQ(sec_level_type::none, qualifiers.sec_level);
             ASSERT_FALSE(context->using_keyswitching());
         }
@@ -243,7 +243,7 @@ namespace SEALTest
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_FALSE(qualifiers.parameters_set);
+            ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_EQ(sec_level_type::none, qualifiers.sec_level);
             ASSERT_FALSE(context->using_keyswitching());
         }
@@ -255,7 +255,7 @@ namespace SEALTest
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::tc128);
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -273,7 +273,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
             auto key_qualifiers = context->key_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -290,7 +290,7 @@ namespace SEALTest
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
-            ASSERT_TRUE(qualifiers.parameters_set);
+            ASSERT_TRUE(qualifiers.parameters_set());
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_TRUE(qualifiers.using_batching);
