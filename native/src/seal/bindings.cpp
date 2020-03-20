@@ -503,7 +503,12 @@ EMSCRIPTEN_BINDINGS(bindings) {
         .function("plainTransformToNtt", select_overload<void(const Plaintext &, parms_id_type, Plaintext &, MemoryPoolHandle)>(&Evaluator::transform_to_ntt))
         .function("cipherTransformToNtt", select_overload<void(const Ciphertext &, Ciphertext &)>(&Evaluator::transform_to_ntt))
         .function("cipherTransformFromNtt", select_overload<void(const Ciphertext &, Ciphertext &)>(&Evaluator::transform_from_ntt))
-        .function("applyGalois", &Evaluator::apply_galois)
+        .function("applyGalois", optional_override([](Evaluator &self, const Ciphertext &encrypted,
+             const std::uint32_t g_elt, const GaloisKeys &gal_keys, Ciphertext &destination,
+             MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                 std::uint64_t galois_elt = (uint64_t) g_elt;
+                 self.apply_galois(encrypted, g_elt, gal_keys, destination, pool);
+             }))
         .function("rotateRows", &Evaluator::rotate_rows)
         .function("rotateColumns", &Evaluator::rotate_columns)
         .function("rotateVector", &Evaluator::rotate_vector)
@@ -626,6 +631,15 @@ EMSCRIPTEN_BINDINGS(bindings) {
     class_<RelinKeys, base<KSwitchKeys>> ("RelinKeys")
         .constructor<>()
         .constructor<RelinKeys &&>() // Move via constructor overload
+        .function("getIndex", optional_override([](RelinKeys &self, const std::uint32_t &key_power) {
+                return self.get_index(key_power);
+            }))
+        .function("hasKey", optional_override([](RelinKeys &self, const std::uint32_t &key_power) {
+                return self.has_key(key_power);
+            }))
+//        .function("key", optional_override([](RelinKeys &self, const std::uint32_t &key_power) {
+//                return self.key(key_power);
+//            }))
         .function("copy", optional_override([](RelinKeys &self, const RelinKeys &copy) {
                 self = copy; // Copy via assignment overload
             }))
@@ -642,6 +656,18 @@ EMSCRIPTEN_BINDINGS(bindings) {
     class_<GaloisKeys, base<KSwitchKeys>> ("GaloisKeys")
         .constructor<>()
         .constructor<GaloisKeys &&>() // Move via constructor overload
+        .function("getIndex", optional_override([](GaloisKeys &self, const std::uint32_t &g_elt) {
+                std::uint64_t galois_elt = (uint64_t) g_elt;
+                return self.get_index(galois_elt);
+            }))
+        .function("hasKey", optional_override([](GaloisKeys &self, const std::uint32_t &g_elt) {
+                std::uint64_t galois_elt = (uint64_t) g_elt;
+                return self.has_key(galois_elt);
+            }))
+//        .function("key", optional_override([](GaloisKeys &self, const std::uint32_t &g_elt) {
+//                std::uint64_t galois_elt = (uint64_t) g_elt;
+//                return self.key(galois_elt);
+//            }))
         .function("copy", optional_override([](GaloisKeys &self, const GaloisKeys &copy) {
                 self = copy; // Copy via assignment overload
             }))
