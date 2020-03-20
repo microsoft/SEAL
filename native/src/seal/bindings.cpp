@@ -276,6 +276,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<parms_id_type>("ParmsIdType")
         .constructor<>()
+        .constructor<parms_id_type &&>() // Move via constructor overload
         .function("values", optional_override([](parms_id_type &self) {
             std::ostringstream str;
             std::string separator;
@@ -807,8 +808,9 @@ EMSCRIPTEN_BINDINGS(bindings) {
             self.load(context, is);
         }))
         .function("reserve", optional_override([](Ciphertext &self,
+                    std::shared_ptr<SEALContext>context,
             std::size_t capacity) {
-            return self.reserve(capacity);
+            return self.reserve(context, capacity);
         }))
         .function("resize", optional_override([](Ciphertext &self,
             std::size_t size) {
