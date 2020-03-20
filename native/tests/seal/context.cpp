@@ -43,7 +43,7 @@ namespace SEALTest
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_EQ(qualifiers.parameter_error, error_type::failed_creating_rns_base);
-            ASSERT_FALSE(qualifiers.using_fft);
+            ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
@@ -73,17 +73,17 @@ namespace SEALTest
 
         // Plain modulus not smaller than product of coeff moduli
         parms.set_poly_modulus_degree(4);
-        parms.set_coeff_modulus({ 2 });
-        parms.set_plain_modulus(3);
+        parms.set_coeff_modulus({ 17 });
+        parms.set_plain_modulus(41);
         parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
-            ASSERT_EQ(2ULL, *context->first_context_data()->total_coeff_modulus());
+            ASSERT_EQ(17ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
             ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_plain_mod_too_large);
             ASSERT_TRUE(qualifiers.using_fft);
-            ASSERT_FALSE(qualifiers.using_ntt);
+            ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
             ASSERT_FALSE(qualifiers.using_fast_plain_lift);
             ASSERT_FALSE(qualifiers.using_descending_modulus_chain);

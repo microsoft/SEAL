@@ -13,8 +13,10 @@
   - `SEAL_INTERNAL_MOD_BIT_COUNT` is added and set to 61.
   - `SEAL_COEFF_MOD_COUNT_MAX` is increased to 64.
   - `SEAL_POLY_MOD_DEGREE_MAX` is increased to 131072.
-- `EncryptionParameterQualifiers` now has an error code `parameter_error` that indicates the reason why an `EncryptionParameter` object is invalid.
+- `EncryptionParameterQualifiers` now has an error code `parameter_error` that interprets the reason why an `EncryptionParameter` object is invalid.
   - `bool parameters_set()` is added to replace the previous `bool parameters_set` member.
+  - `string parameter_error_name()` is added to retrieve error code name.
+  - `string parameter_error_message()` is added to retrieve a comprehensive error message.
 
 ### New files
 

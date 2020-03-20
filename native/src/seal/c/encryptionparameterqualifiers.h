@@ -30,3 +30,7 @@ SEAL_C_FUNC EPQ_UsingFastPlainLift(void *thisptr, bool *using_fast_plain_lift);
 SEAL_C_FUNC EPQ_UsingDescendingModulusChain(void *thisptr, bool *using_descending_modulus_chain);
 
 SEAL_C_FUNC EPQ_SecLevel(void *thisptr, int *sec_level);
+
+SEAL_C_FUNC EPQ_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length);
+
+SEAL_C_FUNC EPQ_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length);

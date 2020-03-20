@@ -19,7 +19,7 @@ using error_type = seal::EncryptionParameterQualifiers::error_type;
 namespace seal
 {
 
-    const string EncryptionParameterQualifiers::parameter_error_name() const
+    const string EncryptionParameterQualifiers::parameter_error_name() const noexcept
     {
         switch (parameter_error)
         {
@@ -72,11 +72,11 @@ namespace seal
             return "failed_creating_rns_tool";
 
         default:
-            throw invalid_argument("invalid EncryptionParameterQualifier::error_type");
+            return "invalid parameter_error";
         }
     }
 
-    const string EncryptionParameterQualifiers::parameter_error_message() const
+    const string EncryptionParameterQualifiers::parameter_error_message() const noexcept
     {
         switch (parameter_error)
         {
@@ -129,7 +129,7 @@ namespace seal
             return "RNSTool cannot be constructed";
 
         default:
-            throw invalid_argument("invalid EncryptionParameterQualifier::error_type");
+            return "invalid parameter_error";
         }
     }
 

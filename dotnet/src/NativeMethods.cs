@@ -226,6 +226,12 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void EPQ_SecLevel(IntPtr thisptr, out int secLevel);
 
+        [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
+        internal static extern void EPQ_ParameterErrorName(IntPtr thisptr, StringBuilder outstr, ref ulong length);
+
+        [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
+        internal static extern void EPQ_ParameterErrorMessage(IntPtr thisptr, StringBuilder outstr, ref ulong length);
+
         #endregion
 
         #region SmallModulus methods

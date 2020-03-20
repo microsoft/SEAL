@@ -56,9 +56,7 @@ namespace SEALNetTest
                 PlainModulus = new SmallModulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
             };
-            SEALContext context = new SEALContext(parms,
-                expandModChain: true,
-                secLevel: SecLevelType.None);
+            SEALContext context = new SEALContext(parms, expandModChain: true, secLevel: SecLevelType.None);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);

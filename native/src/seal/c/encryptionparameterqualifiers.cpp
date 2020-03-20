@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+// STD
+#include <string>
+
 // SEALNet
 #include "seal/c/encryptionparameterqualifiers.h"
 #include "seal/c/stdafx.h"
@@ -9,6 +12,7 @@
 // SEAL
 #include "seal/context.h"
 
+using namespace std;
 using namespace seal;
 using namespace seal::c;
 
@@ -38,7 +42,7 @@ SEAL_C_FUNC EPQ_ParametersSet(void *thisptr, bool *parameters_set)
     IfNullRet(epq, E_POINTER);
     IfNullRet(parameters_set, E_POINTER);
 
-    *parameters_set = epq->parameters_set;
+    *parameters_set = epq->parameters_set();
     return S_OK;
 }
 
@@ -100,4 +104,24 @@ SEAL_C_FUNC EPQ_SecLevel(void *thisptr, int *sec_level)
 
     *sec_level = static_cast<int>(epq->sec_level);
     return S_OK;
+}
+
+SEAL_C_FUNC EPQ_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length)
+{
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    IfNullRet(epq, E_POINTER);
+    IfNullRet(length, E_POINTER);
+
+    string str = epq->parameter_error_name();
+    return ToStringHelper(str, outstr, length);
+}
+
+SEAL_C_FUNC EPQ_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length)
+{
+    EncryptionParameterQualifiers *epq = FromVoid<EncryptionParameterQualifiers>(thisptr);
+    IfNullRet(epq, E_POINTER);
+    IfNullRet(length, E_POINTER);
+
+    string str = epq->parameter_error_message();
+    return ToStringHelper(str, outstr, length);
 }
