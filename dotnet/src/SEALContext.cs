@@ -3,6 +3,7 @@
 
 using Microsoft.Research.SEAL.Tools;
 using System;
+using System.Text;
 
 namespace Microsoft.Research.SEAL
 {
@@ -148,6 +149,41 @@ namespace Microsoft.Research.SEAL
                 NativeMethods.SEALContext_ParametersSet(NativePtr, out bool paramsSet);
                 return paramsSet;
             }
+        }
+
+        /// <summary>
+        /// If the encryption parameters are set in a way that is considered valid by SEAL, return "success".
+        /// If the encryption parameters are set but not validated yet, return "none".
+        /// Otherwise, return a brief reason.
+        /// </summary>
+        public string ParametersErrorName()
+        {
+            ulong length = 0;
+
+            // Get string length
+            NativeMethods.SEALContext_ParameterErrorName(NativePtr, null, ref length);
+
+            // Now get the string
+            StringBuilder buffer = new StringBuilder(checked((int)length));
+            NativeMethods.SEALContext_ParameterErrorName(NativePtr, buffer, ref length);
+            return buffer.ToString();
+        }
+
+        /// <summary>
+        /// If the encryption parameters are set in a way that is considered valid by SEAL, return "valid".
+        /// Otherwise, return a comprehensive reason.
+        /// </summary>
+        public string ParametersErrorMessage()
+        {
+            ulong length = 0;
+
+            // Get string length
+            NativeMethods.SEALContext_ParameterErrorMessage(NativePtr, null, ref length);
+
+            // Now get the string
+            StringBuilder buffer = new StringBuilder(checked((int)length));
+            NativeMethods.SEALContext_ParameterErrorMessage(NativePtr, buffer, ref length);
+            return buffer.ToString();
         }
 
         /// <summary>

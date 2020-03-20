@@ -18,7 +18,6 @@ using error_type = seal::EncryptionParameterQualifiers::error_type;
 
 namespace seal
 {
-
     const string EncryptionParameterQualifiers::parameter_error_name() const noexcept
     {
         switch (parameter_error)

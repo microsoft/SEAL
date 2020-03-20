@@ -158,3 +158,23 @@ SEAL_C_FUNC SEALContext_UsingKeyswitching(void *thisptr, bool *using_keyswitchin
     *using_keyswitching = context->using_keyswitching();
     return S_OK;
 }
+
+SEAL_C_FUNC SEALContext_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length)
+{
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
+    IfNullRet(context, E_POINTER);
+    IfNullRet(length, E_POINTER);
+
+    string str = context->parameter_error_name();
+    return ToStringHelper(str, outstr, length);
+}
+
+SEAL_C_FUNC SEALContext_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length)
+{
+    SEALContext *context = FromVoid<SEALContext>(thisptr);
+    IfNullRet(context, E_POINTER);
+    IfNullRet(length, E_POINTER);
+
+    string str = context->parameter_error_message();
+    return ToStringHelper(str, outstr, length);
+}

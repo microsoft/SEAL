@@ -12,8 +12,6 @@ using error_type = EncryptionParameterQualifiers::error_type;
 
 namespace SEALTest
 {
-
-
     TEST(ContextTest, ContextConstructor)
     {
         // Nothing set
@@ -401,7 +399,17 @@ namespace SEALTest
 
         qualifiers.parameter_error = error_type::invalid_coeff_mod_bit_count;
         ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "invalid_coeff_mod_bit_count");
-        ASSERT_STREQ(qualifiers.parameter_error_message().c_str(),
+        ASSERT_STREQ(
+            qualifiers.parameter_error_message().c_str(),
             "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)");
+
+        parms.set_poly_modulus_degree(127);
+        parms.set_coeff_modulus({ 17, 73 });
+        parms.set_plain_modulus(41);
+        parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
+        context = SEALContext::Create(parms, false, sec_level_type::none);
+        ASSERT_FALSE(context->parameters_set());
+        ASSERT_STREQ(context->parameter_error_name().c_str(), "invalid_poly_mod_degree_non_power_of_two");
+        ASSERT_STREQ(context->parameter_error_message().c_str(), "poly_modulus_degree is not a power of two");
     }
 } // namespace SEALTest

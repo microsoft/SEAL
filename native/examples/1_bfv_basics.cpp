@@ -133,6 +133,12 @@ void example_bfv_basics()
     cout << "Set encryption parameters and print" << endl;
     print_parameters(context);
 
+    /*
+    When parameters are used to create SEALContext, Microsoft SEAL will first
+    validate those parameters. The default parameters chosen now are valid.
+    */
+    cout << "Parameter validation (good): " << context->parameter_error_message() << endl;
+
     cout << endl;
     cout << "~~~~~~ A naive way to calculate 4(x^2+1)(x+1)^2. ~~~~~~" << endl;
 
@@ -401,5 +407,20 @@ void example_bfv_basics()
     For x=6, 4(x^2+1)(x+1)^2 = 7252. Since the plaintext modulus is set to 1024,
     this result is computed in integers modulo 1024. Therefore the expected output
     should be 7252 % 1024 == 84, or 0x54 in hexadecimal.
+    */
+
+    /*
+    Sometimes we create customized encryption parameters which turn out to be invalid.
+    Microsoft SEAL can interpret the reason why parameters are considered invalid.
+    Here we simply reduce the polynomial modulus degree to make it insecure.
+    */
+    print_line(__LINE__);
+    cout << "An example of invalid parameters" << endl;
+    parms.set_poly_modulus_degree(2048);
+    context = SEALContext::Create(parms);
+    print_parameters(context);
+    cout << "Parameter validation (bad): " << context->parameter_error_message() << endl;
+    /*
+    This information is helpful to fix invalid encryption parameters.
     */
 }

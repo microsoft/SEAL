@@ -34,3 +34,7 @@ SEAL_C_FUNC SEALContext_LastContextData(void *thisptr, void **context_data);
 SEAL_C_FUNC SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void **context_data);
 
 SEAL_C_FUNC SEALContext_UsingKeyswitching(void *thisptr, bool *using_keyswitching);
+
+SEAL_C_FUNC SEALContext_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length);
+
+SEAL_C_FUNC SEALContext_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length);

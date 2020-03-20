@@ -29,11 +29,10 @@ namespace seal
     class EncryptionParameterQualifiers
     {
     public:
-
         /**
         Identifies the reason why encryption parameters are not valid.
         */
-        enum class error_type: int
+        enum class error_type : int
         {
             /**
             constructed but not yet validated
@@ -536,11 +535,27 @@ namespace seal
         }
 
         /**
-        Returns whether the encryption parameters are valid.
+        Returns whether the first_context_data's encryption parameters are valid.
         */
         SEAL_NODISCARD inline auto parameters_set() const
         {
             return first_context_data() ? first_context_data()->qualifiers_.parameters_set() : false;
+        }
+
+        /**
+        Returns the name of encryption parameters' error.
+        */
+        SEAL_NODISCARD inline std::string parameter_error_name() const
+        {
+            return first_context_data() ? first_context_data()->qualifiers_.parameter_error_name() : "SEALContext is empty";
+        }
+
+        /**
+        Returns a comprehensive message that interprets encryption parameters' error.
+        */
+        SEAL_NODISCARD inline std::string parameter_error_message() const
+        {
+            return first_context_data() ? first_context_data()->qualifiers_.parameter_error_message() : "SEALContext is empty";
         }
 
         /**
