@@ -750,8 +750,9 @@ EMSCRIPTEN_BINDINGS(bindings) {
         }));
 
     class_<Plaintext>("Plaintext")
-        .constructor<>()
-        .constructor<Plaintext &&>() // Move via constructor overload
+        .constructor<MemoryPoolHandle>()
+        .constructor<std::size_t, MemoryPoolHandle>()
+        .constructor<std::size_t, std::size_t, MemoryPoolHandle>()
         .function("copy", optional_override([](Plaintext &self, const Plaintext &copy) {
                 self = copy; // Copy via assignment overload
             }))
@@ -805,8 +806,10 @@ EMSCRIPTEN_BINDINGS(bindings) {
         }));
 
     class_<Ciphertext>("Ciphertext")
-        .constructor<>()
-        .constructor<Ciphertext &&>() // Move via constructor overload
+        .constructor<MemoryPoolHandle>()
+        .constructor<std::shared_ptr<SEALContext>, MemoryPoolHandle>()
+        .constructor<std::shared_ptr<SEALContext>, parms_id_type, MemoryPoolHandle>()
+        .constructor<std::shared_ptr<SEALContext>, parms_id_type, std::size_t, MemoryPoolHandle>()
         .function("copy", optional_override([](Ciphertext &self, const Ciphertext &copy) {
                 self = copy; // Copy via assignment overload
             }))
