@@ -7,6 +7,7 @@
 #include "seal/util/uintcore.h"
 #include <random>
 #include <tuple>
+#include <numeric>
 
 using namespace std;
 
@@ -172,9 +173,8 @@ namespace seal
 #if SEAL_MOD_BIT_COUNT_MAX > 32
             lazy_reduction_summand_bound = safe_cast<size_t>(1 << (128 - (SEAL_MOD_BIT_COUNT_MAX << 1)));
 #else
-            lazy_reduction_summand_bound = std::numeric_limits<size_t>::max();
+            lazy_reduction_summand_bound = numeric_limits<size_t>::max();
 #endif
-
             // We may have to perform multiple lazy reductions depending on count
             size_t r = lazy_reduction_summand_bound;
             unsigned long long accumulator[2]{ 0, 0 };
