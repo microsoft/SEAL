@@ -128,7 +128,7 @@ template<typename T>
 /*
 Helper function: Prints the parameters in a SEALContext.
 */
-void printContext(shared_ptr<SEALContext> context) {
+std::string printContext(shared_ptr<SEALContext> context) {
     // Verify parameters
     if (!context) {
         throw std::invalid_argument("context is not set");
@@ -149,34 +149,38 @@ void printContext(shared_ptr<SEALContext> context) {
     default:
         throw std::invalid_argument("unsupported scheme");
     }
-    std::cout << "/" << std::endl;
-    std::cout << "| Encryption parameters :" << std::endl;
-    std::cout << "|   scheme: " << scheme_name << std::endl;
-    std::cout << "|   poly_modulus_degree: " <<
+
+    std::ostringstream oss;
+
+    oss << "/" << std::endl;
+    oss << "| Encryption parameters :" << std::endl;
+    oss << "|   scheme: " << scheme_name << std::endl;
+    oss << "|   poly_modulus_degree: " <<
         context_data.parms().poly_modulus_degree() << std::endl;
 
     /*
     Print the size of the true (product) coefficient modulus.
     */
-    std::cout << "|   coeff_modulus size: ";
-    std::cout << context_data.total_coeff_modulus_bit_count() << " (";
+    oss << "|   coeff_modulus size: ";
+    oss << context_data.total_coeff_modulus_bit_count() << " (";
     auto coeff_modulus = context_data.parms().coeff_modulus();
     std::size_t coeff_mod_count = coeff_modulus.size();
     for (std::size_t i = 0; i < coeff_mod_count - 1; i++) {
-        std::cout << coeff_modulus[i].bit_count() << " + ";
+        oss << coeff_modulus[i].bit_count() << " + ";
     }
-    std::cout << coeff_modulus.back().bit_count();
-    std::cout << ") bits" << std::endl;
+    oss << coeff_modulus.back().bit_count();
+    oss << ") bits" << std::endl;
 
     /*
     For the BFV scheme print the plain_modulus parameter.
     */
     if (context_data.parms().scheme() == seal::scheme_type::BFV) {
-        std::cout << "|   plain_modulus: " << context_data.
+        oss << "|   plain_modulus: " << context_data.
         parms().plain_modulus().value() << std::endl;
     }
 
-    std::cout << "\\" << std::endl;
+    oss << "\\" << std::endl;
+    return oss.str();
 }
 
 /*
