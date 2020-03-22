@@ -55,7 +55,7 @@ namespace seal
             invalid_coeff_mod_count = 2,
 
             /**
-            coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)
+            coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_MIN(MAX)
             */
             invalid_coeff_mod_bit_count = 3,
 
