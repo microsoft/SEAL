@@ -43,89 +43,6 @@ template<typename T1, typename T2>
     };
 
 /*
-Helper function: Prints a vector of floating-point values.
-*/
-template<typename T>
-    void printVector(std::vector<T> vec, size_t print_size = 4, int prec = 3) {
-        /*
-        Save the formatting information for std::cout.
-        */
-        ios old_fmt(nullptr);
-        old_fmt.copyfmt(cout);
-
-        size_t slot_count = vec.size();
-
-        cout << fixed << setprecision(prec) << endl;
-        if (slot_count<= 2 *print_size) {
-            cout << "    [";
-            for (size_t i = 0; i<slot_count; i++) {
-                cout << " " << vec[i] << ((i != slot_count - 1) ? "," : " ]\n");
-            }
-        } else {
-            vec.resize(max(vec.size(), 2 *print_size));
-            cout << "    [";
-            for (size_t i = 0; i<print_size; i++) {
-                cout << " " << vec[i] << ",";
-            }
-            if (vec.size()>2 *print_size) {
-                cout << " ...,";
-            }
-            for (size_t i = slot_count - print_size; i<slot_count; i++) {
-                cout << " " << vec[i] << ((i != slot_count - 1) ? "," : " ]\n");
-            }
-        }
-        cout << endl;
-
-        /*
-        Restore the old std::cout formatting.
-        */
-        cout.copyfmt(old_fmt);
-    }
-
-/*
-Printing the matrix is a bit of a pain.
-*/
-template<typename T>
-    void printMatrix(std::vector<T>  &matrix, size_t row_size) {
-        /*
-        Save the formatting information for std::cout.
-        */
-        ios old_fmt(nullptr);
-        old_fmt.copyfmt(cout);
-
-        cout << endl;
-
-        /*
-        We're not going to print every column of the matrix (there are 2048). Instead
-        print this many slots from beginning and end of the matrix.
-        */
-        size_t print_size = 5;
-
-        cout << "    [";
-        for (size_t i = 0; i<print_size; i++) {
-            cout << setw(3) << matrix[i] << ",";
-        }
-        cout << setw(3) << " ...,";
-        for (size_t i = row_size - print_size; i<row_size; i++) {
-            cout << setw(3) << matrix[i] << ((i != row_size - 1) ? "," : " ]\n");
-        }
-        cout << "    [";
-        for (size_t i = row_size; i<row_size + print_size; i++) {
-            cout << setw(3) << matrix[i] << ",";
-        }
-        cout << setw(3) << " ...,";
-        for (size_t i = 2 *row_size - print_size; i<2 *row_size; i++) {
-            cout << setw(3) << matrix[i] << ((i != 2 *row_size - 1) ? "," : " ]\n");
-        }
-        cout << endl;
-
-        /*
-        Restore the old std::cout formatting.
-        */
-        cout.copyfmt(old_fmt);
-    }
-
-/*
 Helper function: Prints the parameters in a SEALContext.
 */
 std::string printContext(shared_ptr<SEALContext> context) {
@@ -226,18 +143,12 @@ y_combinator<std::decay_t<F>> make_y_combinator(F&& f) {
 
 EMSCRIPTEN_BINDINGS(bindings) {
     emscripten::function("getException", &get_exception);
-    emscripten::function("printContext", &printContext);
     emscripten::function("jsArrayInt32FromVec", select_overload<val(const std::vector<int32_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayUint32FromVec", select_overload<val(const std::vector<uint32_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayDoubleFromVec", select_overload<val(const std::vector<double> &)>(&jsArrayFromVec));
     emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayUInt32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayDouble", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
-    emscripten::function("printVectorInt32", select_overload<void(std::vector<int32_t>, size_t, int)>(&printVector));
-    emscripten::function("printVectorUInt32", select_overload<void(std::vector<uint32_t>, size_t, int)>(&printVector));
-    emscripten::function("printVectorDouble", select_overload<void(std::vector<double>, size_t, int)>(&printVector));
-    emscripten::function("printMatrixInt32", select_overload<void(std::vector<int32_t> &, size_t)>(&printMatrix));
-    emscripten::function("printMatrixUInt32", select_overload<void(std::vector<uint32_t> &, size_t)>(&printMatrix));
     emscripten::function("gcd", optional_override([](std::string a, std::string b) {
             uint64_t aa;
             uint64_t bb;
@@ -462,6 +373,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<SEALContext>("SEALContext")
         .smart_ptr_constructor("std::shared_ptr<SEALContext>", &SEALContext::Create)
+        .function("toHuman", &printContext)
         .function("getContextData", &SEALContext::get_context_data)
         .function("keyContextData", &SEALContext::key_context_data)
         .function("firstContextData", &SEALContext::first_context_data)
