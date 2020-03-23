@@ -400,8 +400,13 @@ namespace SEALTest
         qualifiers.parameter_error = error_type::invalid_coeff_modulus_bit_count;
         ASSERT_STREQ(qualifiers.parameter_error_name(), "invalid_coeff_modulus_bit_count");
         ASSERT_STREQ(
+<<<<<<< HEAD
             qualifiers.parameter_error_message(),
             "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)");
+=======
+            qualifiers.parameter_error_message().c_str(),
+            "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_MIN(MAX)");
+>>>>>>> f3ea575281657bcf173d0f22ae856d81ef974d6f
 
         parms.set_poly_modulus_degree(127);
         parms.set_coeff_modulus({ 17, 73 });
