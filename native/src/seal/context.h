@@ -126,12 +126,12 @@ namespace seal
         /**
         Returns the name of parameter_error.
         */
-        SEAL_NODISCARD const std::string parameter_error_name() const noexcept;
+        SEAL_NODISCARD const char *parameter_error_name() const noexcept;
 
         /**
         Returns a comprehensive message that interprets parameter_error.
         */
-        SEAL_NODISCARD const std::string parameter_error_message() const noexcept;
+        SEAL_NODISCARD const char *parameter_error_message() const noexcept;
 
         /**
         Tells whether parameter_error is error_type::success.
