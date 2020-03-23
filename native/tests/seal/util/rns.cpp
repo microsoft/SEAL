@@ -39,7 +39,19 @@ namespace SEALTest
                 RNSBase base({ 2 }, pool);
                 ASSERT_EQ(size_t(1), base.size());
                 ASSERT_EQ(SmallModulus(2), base[0]);
+#if SEAL_COMPILER == SEAL_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
+#elif SEAL_COMPILER == SEAL_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
                 ASSERT_THROW(auto b = base[1], out_of_range);
+#if SEAL_COMPILER == SEAL_COMPILER_CLANG
+#pragma clang diagnostic pop 
+#elif SEAL_COMPILER == SEAL_COMPILER_GCC
+#pragma GCC diagnostic pop 
+#endif
             }
             {
                 RNSBase base({ 2, 3, 5 }, pool);
@@ -47,7 +59,19 @@ namespace SEALTest
                 ASSERT_EQ(SmallModulus(2), base[0]);
                 ASSERT_EQ(SmallModulus(3), base[1]);
                 ASSERT_EQ(SmallModulus(5), base[2]);
+#if SEAL_COMPILER == SEAL_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
+#elif SEAL_COMPILER == SEAL_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
                 ASSERT_THROW(auto b = base[3], out_of_range);
+#if SEAL_COMPILER == SEAL_COMPILER_CLANG
+#pragma clang diagnostic pop 
+#elif SEAL_COMPILER == SEAL_COMPILER_GCC
+#pragma GCC diagnostic pop 
+#endif
             }
         }
 
@@ -433,11 +457,11 @@ namespace SEALTest
             }
             {
                 size_t poly_modulus_degree = 2;
-                size_t coeff_mod_count = 2;
+                size_t coeff_modulus_count = 2;
                 RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool);
                 ASSERT_TRUE(rns_tool.is_initialized());
 
-                vector<uint64_t> in(poly_modulus_degree * coeff_mod_count);
+                vector<uint64_t> in(poly_modulus_degree * coeff_modulus_count);
                 vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk_m_tilde()->size());
                 set_zero_uint(in.size(), in.data());
                 rns_tool.fastbconv_m_tilde(in.data(), out.data(), pool);

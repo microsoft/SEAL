@@ -19,11 +19,11 @@ namespace seal
             size_t coeff_count = parms.poly_modulus_degree();
             size_t plain_coeff_count = plain.coeff_count();
             auto &coeff_modulus = parms.coeff_modulus();
-            size_t coeff_mod_count = coeff_modulus.size();
+            size_t coeff_modulus_count = coeff_modulus.size();
             auto plain_modulus = context_data.parms().plain_modulus();
             auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
             uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
-            uint64_t q_mod_t = context_data.coeff_mod_plain_modulus();
+            uint64_t q_mod_t = context_data.coeff_modulus_mod_plain_modulus();
 
             // Coefficients of plain m multiplied by coeff_modulus q, divided by plain_modulus t,
             // and rounded to the nearest integer (rounded up in case of a tie). Equivalent to
@@ -42,7 +42,7 @@ namespace seal
                 divide_uint128_uint64_inplace(numerator, plain_modulus.value(), fix);
 
                 // Add to ciphertext: floor(q / t) * m + increment
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (size_t j = 0; j < coeff_modulus_count; j++)
                 {
                     destination[j * coeff_count] = add_uint_uint_mod(
                         multiply_add_uint_mod(coeff_div_plain_modulus[j], plain.data()[i], fix[0], coeff_modulus[j]),
@@ -58,11 +58,11 @@ namespace seal
             size_t coeff_count = parms.poly_modulus_degree();
             size_t plain_coeff_count = plain.coeff_count();
             auto &coeff_modulus = parms.coeff_modulus();
-            size_t coeff_mod_count = coeff_modulus.size();
+            size_t coeff_modulus_count = coeff_modulus.size();
             auto plain_modulus = context_data.parms().plain_modulus();
             auto coeff_div_plain_modulus = context_data.coeff_div_plain_modulus();
             uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
-            uint64_t q_mod_t = context_data.coeff_mod_plain_modulus();
+            uint64_t q_mod_t = context_data.coeff_modulus_mod_plain_modulus();
 
             // Coefficients of plain m multiplied by coeff_modulus q, divided by plain_modulus t,
             // and rounded to the nearest integer (rounded up in case of a tie). Equivalent to
@@ -81,7 +81,7 @@ namespace seal
                 divide_uint128_uint64_inplace(numerator, plain_modulus.value(), fix);
 
                 // Add to ciphertext: floor(q / t) * m + increment
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (size_t j = 0; j < coeff_modulus_count; j++)
                 {
                     destination[j * coeff_count] = sub_uint_uint_mod(
                         destination[j * coeff_count],

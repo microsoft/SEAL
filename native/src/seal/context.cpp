@@ -31,20 +31,20 @@ namespace seal
         case error_type::invalid_scheme:
             return "invalid_scheme";
 
-        case error_type::invalid_coeff_mod_count:
-            return "invalid_coeff_mod_count";
+        case error_type::invalid_coeff_modulus_count:
+            return "invalid_coeff_modulus_count";
 
-        case error_type::invalid_coeff_mod_bit_count:
-            return "invalid_coeff_mod_bit_count";
+        case error_type::invalid_coeff_modulus_bit_count:
+            return "invalid_coeff_modulus_bit_count";
 
-        case error_type::invalid_coeff_mod_no_ntt:
-            return "invalid_coeff_mod_no_ntt";
+        case error_type::invalid_coeff_modulus_no_ntt:
+            return "invalid_coeff_modulus_no_ntt";
 
-        case error_type::invalid_poly_mod_degree:
-            return "invalid_poly_mod_degree";
+        case error_type::invalid_poly_modulus_degree:
+            return "invalid_poly_modulus_degree";
 
-        case error_type::invalid_poly_mod_degree_non_power_of_two:
-            return "invalid_poly_mod_degree_non_power_of_two";
+        case error_type::invalid_poly_modulus_degree_non_power_of_two:
+            return "invalid_poly_modulus_degree_non_power_of_two";
 
         case error_type::invalid_parameters_too_large:
             return "invalid_parameters_too_large";
@@ -55,17 +55,17 @@ namespace seal
         case error_type::failed_creating_rns_base:
             return "failed_creating_rns_base";
 
-        case error_type::invalid_plain_mod_bit_count:
-            return "invalid_plain_mod_bit_count";
+        case error_type::invalid_plain_modulus_bit_count:
+            return "invalid_plain_modulus_bit_count";
 
-        case error_type::invalid_plain_mod_coprimality:
-            return "invalid_plain_mod_coprimality";
+        case error_type::invalid_plain_modulus_coprimality:
+            return "invalid_plain_modulus_coprimality";
 
-        case error_type::invalid_plain_mod_too_large:
-            return "invalid_plain_mod_too_large";
+        case error_type::invalid_plain_modulus_too_large:
+            return "invalid_plain_modulus_too_large";
 
-        case error_type::invalid_plain_mod_nonzero:
-            return "invalid_plain_mod_nonzero";
+        case error_type::invalid_plain_modulus_nonzero:
+            return "invalid_plain_modulus_nonzero";
 
         case error_type::failed_creating_rns_tool:
             return "failed_creating_rns_tool";
@@ -88,19 +88,19 @@ namespace seal
         case error_type::invalid_scheme:
             return "scheme must be BFV or CKKS";
 
-        case error_type::invalid_coeff_mod_count:
+        case error_type::invalid_coeff_modulus_count:
             return "coeff_modulus's primes' count is not bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX)";
 
-        case error_type::invalid_coeff_mod_bit_count:
+        case error_type::invalid_coeff_modulus_bit_count:
             return "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)";
 
-        case error_type::invalid_coeff_mod_no_ntt:
-            return "coeff_modulus's primes are not congruent to 1 modulo (2 * poly_mod_degree)";
+        case error_type::invalid_coeff_modulus_no_ntt:
+            return "coeff_modulus's primes are not congruent to 1 modulo (2 * poly_modulus_degree)";
 
-        case error_type::invalid_poly_mod_degree:
+        case error_type::invalid_poly_modulus_degree:
             return "poly_modulus_degree is not bounded by SEAL_POLY_MOD_DEGREE_MIN(MAX)";
 
-        case error_type::invalid_poly_mod_degree_non_power_of_two:
+        case error_type::invalid_poly_modulus_degree_non_power_of_two:
             return "poly_modulus_degree is not a power of two";
 
         case error_type::invalid_parameters_too_large:
@@ -112,16 +112,16 @@ namespace seal
         case error_type::failed_creating_rns_base:
             return "RNSBase cannot be constructed";
 
-        case error_type::invalid_plain_mod_bit_count:
+        case error_type::invalid_plain_modulus_bit_count:
             return "plain_modulus's bit count is not bounded by SEAL_PLAIN_MOD_BIT_COUNT_MIN(MAX)";
 
-        case error_type::invalid_plain_mod_coprimality:
+        case error_type::invalid_plain_modulus_coprimality:
             return "plain_modulus is not coprime to coeff_modulus";
 
-        case error_type::invalid_plain_mod_too_large:
+        case error_type::invalid_plain_modulus_too_large:
             return "plain_modulus is not smaller than coeff_modulus";
 
-        case error_type::invalid_plain_mod_nonzero:
+        case error_type::invalid_plain_modulus_nonzero:
             return "plain_modulus is not zero";
 
         case error_type::failed_creating_rns_tool:
@@ -150,52 +150,52 @@ namespace seal
         // The number of coeff moduli is restricted to 64 to prevent unexpected behaviors
         if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX || coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
         {
-            context_data.qualifiers_.parameter_error = error_type::invalid_coeff_mod_count;
+            context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_count;
             return context_data;
         }
 
-        size_t coeff_mod_count = coeff_modulus.size();
-        for (size_t i = 0; i < coeff_mod_count; i++)
+        size_t coeff_modulus_count = coeff_modulus.size();
+        for (size_t i = 0; i < coeff_modulus_count; i++)
         {
             // Check coefficient moduli bounds
             if (coeff_modulus[i].value() >> SEAL_USER_MOD_BIT_COUNT_MAX ||
                 !(coeff_modulus[i].value() >> (SEAL_USER_MOD_BIT_COUNT_MIN - 1)))
             {
-                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_mod_bit_count;
+                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_bit_count;
                 return context_data;
             }
         }
 
         // Compute the product of all coeff moduli
-        context_data.total_coeff_modulus_ = allocate_uint(coeff_mod_count, pool_);
-        auto coeff_modulus_values(allocate_uint(coeff_mod_count, pool_));
-        for (size_t i = 0; i < coeff_mod_count; i++)
+        context_data.total_coeff_modulus_ = allocate_uint(coeff_modulus_count, pool_);
+        auto coeff_modulus_values(allocate_uint(coeff_modulus_count, pool_));
+        for (size_t i = 0; i < coeff_modulus_count; i++)
         {
             coeff_modulus_values[i] = coeff_modulus[i].value();
         }
         multiply_many_uint64(
-            coeff_modulus_values.get(), coeff_mod_count, context_data.total_coeff_modulus_.get(), pool_);
+            coeff_modulus_values.get(), coeff_modulus_count, context_data.total_coeff_modulus_.get(), pool_);
         context_data.total_coeff_modulus_bit_count_ =
-            get_significant_bit_count_uint(context_data.total_coeff_modulus_.get(), coeff_mod_count);
+            get_significant_bit_count_uint(context_data.total_coeff_modulus_.get(), coeff_modulus_count);
 
         // Check polynomial modulus degree and create poly_modulus
         size_t poly_modulus_degree = parms.poly_modulus_degree();
         if (poly_modulus_degree < SEAL_POLY_MOD_DEGREE_MIN || poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX)
         {
             // Parameters are not valid
-            context_data.qualifiers_.parameter_error = error_type::invalid_poly_mod_degree;
+            context_data.qualifiers_.parameter_error = error_type::invalid_poly_modulus_degree;
             return context_data;
         }
         int coeff_count_power = get_power_of_two(poly_modulus_degree);
         if (coeff_count_power < 0)
         {
             // Parameters are not valid
-            context_data.qualifiers_.parameter_error = error_type::invalid_poly_mod_degree_non_power_of_two;
+            context_data.qualifiers_.parameter_error = error_type::invalid_poly_modulus_degree_non_power_of_two;
             return context_data;
         }
 
         // Quick sanity check
-        if (!product_fits_in(coeff_mod_count, poly_modulus_degree))
+        if (!product_fits_in(coeff_modulus_count, poly_modulus_degree))
         {
             context_data.qualifiers_.parameter_error = error_type::invalid_parameters_too_large;
             return context_data;
@@ -238,14 +238,14 @@ namespace seal
 
         // Can we use NTT with coeff_modulus?
         context_data.qualifiers_.using_ntt = true;
-        context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_mod_count, pool_, pool_);
-        for (size_t i = 0; i < coeff_mod_count; i++)
+        context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_modulus_count, pool_, pool_);
+        for (size_t i = 0; i < coeff_modulus_count; i++)
         {
             if (!context_data.small_ntt_tables_[i].initialize(coeff_count_power, coeff_modulus[i]))
             {
                 // Parameters are not valid
                 context_data.qualifiers_.using_ntt = false;
-                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_mod_no_ntt;
+                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_no_ntt;
                 return context_data;
             }
         }
@@ -256,16 +256,16 @@ namespace seal
             if (plain_modulus.value() >> SEAL_PLAIN_MOD_BIT_COUNT_MAX ||
                 !(plain_modulus.value() >> (SEAL_PLAIN_MOD_BIT_COUNT_MIN - 1)))
             {
-                context_data.qualifiers_.parameter_error = error_type::invalid_plain_mod_bit_count;
+                context_data.qualifiers_.parameter_error = error_type::invalid_plain_modulus_bit_count;
                 return context_data;
             }
 
             // Check that all coeff moduli are relatively prime to plain_modulus
-            for (size_t i = 0; i < coeff_mod_count; i++)
+            for (size_t i = 0; i < coeff_modulus_count; i++)
             {
                 if (!are_coprime(coeff_modulus[i].value(), plain_modulus.value()))
                 {
-                    context_data.qualifiers_.parameter_error = error_type::invalid_plain_mod_coprimality;
+                    context_data.qualifiers_.parameter_error = error_type::invalid_plain_modulus_coprimality;
                     return context_data;
                 }
             }
@@ -273,10 +273,10 @@ namespace seal
             // Check that plain_modulus is smaller than total coeff modulus
             if (!is_less_than_uint_uint(
                     plain_modulus.data(), plain_modulus.uint64_count(), context_data.total_coeff_modulus_.get(),
-                    coeff_mod_count))
+                    coeff_modulus_count))
             {
                 // Parameters are not valid
-                context_data.qualifiers_.parameter_error = error_type::invalid_plain_mod_too_large;
+                context_data.qualifiers_.parameter_error = error_type::invalid_plain_modulus_too_large;
                 return context_data;
             }
 
@@ -292,22 +292,22 @@ namespace seal
             // If all the small coefficient moduli are larger than plain modulus, we can quickly
             // lift plain coefficients to RNS form
             context_data.qualifiers_.using_fast_plain_lift = true;
-            for (size_t i = 0; i < coeff_mod_count; i++)
+            for (size_t i = 0; i < coeff_modulus_count; i++)
             {
                 context_data.qualifiers_.using_fast_plain_lift &= (coeff_modulus[i].value() > plain_modulus.value());
             }
 
             // Calculate coeff_div_plain_modulus (BFV-"Delta") and the remainder upper_half_increment
-            context_data.coeff_div_plain_modulus_ = allocate_uint(coeff_mod_count, pool_);
-            context_data.upper_half_increment_ = allocate_uint(coeff_mod_count, pool_);
+            context_data.coeff_div_plain_modulus_ = allocate_uint(coeff_modulus_count, pool_);
+            context_data.upper_half_increment_ = allocate_uint(coeff_modulus_count, pool_);
             auto wide_plain_modulus(duplicate_uint_if_needed(
-                plain_modulus.data(), plain_modulus.uint64_count(), coeff_mod_count, false, pool_));
+                plain_modulus.data(), plain_modulus.uint64_count(), coeff_modulus_count, false, pool_));
             divide_uint_uint(
-                context_data.total_coeff_modulus_.get(), wide_plain_modulus.get(), coeff_mod_count,
+                context_data.total_coeff_modulus_.get(), wide_plain_modulus.get(), coeff_modulus_count,
                 context_data.coeff_div_plain_modulus_.get(), context_data.upper_half_increment_.get(), pool_);
 
             // Store the non-RNS form of upper_half_increment for BFV encryption
-            context_data.coeff_mod_plain_modulus_ = context_data.upper_half_increment_[0];
+            context_data.coeff_modulus_mod_plain_modulus_ = context_data.upper_half_increment_[0];
 
             // Decompose coeff_div_plain_modulus into RNS factors
             coeff_modulus_base->decompose(context_data.coeff_div_plain_modulus_.get(), pool_);
@@ -319,11 +319,11 @@ namespace seal
             context_data.plain_upper_half_threshold_ = (plain_modulus.value() + 1) >> 1;
 
             // Calculate coeff_modulus - plain_modulus.
-            context_data.plain_upper_half_increment_ = allocate_uint(coeff_mod_count, pool_);
+            context_data.plain_upper_half_increment_ = allocate_uint(coeff_modulus_count, pool_);
             if (context_data.qualifiers_.using_fast_plain_lift)
             {
                 // Calculate coeff_modulus[i] - plain_modulus if using_fast_plain_lift
-                for (size_t i = 0; i < coeff_mod_count; i++)
+                for (size_t i = 0; i < coeff_modulus_count; i++)
                 {
                     context_data.plain_upper_half_increment_[i] = coeff_modulus[i].value() - plain_modulus.value();
                 }
@@ -331,7 +331,7 @@ namespace seal
             else
             {
                 sub_uint_uint(
-                    context_data.total_coeff_modulus(), wide_plain_modulus.get(), coeff_mod_count,
+                    context_data.total_coeff_modulus(), wide_plain_modulus.get(), coeff_modulus_count,
                     context_data.plain_upper_half_increment_.get());
             }
         }
@@ -341,7 +341,7 @@ namespace seal
             if (!plain_modulus.is_zero())
             {
                 // Parameters are not valid
-                context_data.qualifiers_.parameter_error = error_type::invalid_plain_mod_nonzero;
+                context_data.qualifiers_.parameter_error = error_type::invalid_plain_modulus_nonzero;
                 return context_data;
             }
 
@@ -356,8 +356,8 @@ namespace seal
             context_data.plain_upper_half_threshold_ = uint64_t(1) << 63;
 
             // Calculate plain_upper_half_increment = 2^64 mod coeff_modulus for CKKS plaintexts
-            context_data.plain_upper_half_increment_ = allocate_uint(coeff_mod_count, pool_);
-            for (size_t i = 0; i < coeff_mod_count; i++)
+            context_data.plain_upper_half_increment_ = allocate_uint(coeff_modulus_count, pool_);
+            for (size_t i = 0; i < coeff_modulus_count; i++)
             {
                 uint64_t tmp = (uint64_t(1) << 63) % coeff_modulus[i].value();
                 context_data.plain_upper_half_increment_[i] =
@@ -365,11 +365,11 @@ namespace seal
             }
 
             // Compute the upper_half_threshold for this modulus.
-            context_data.upper_half_threshold_ = allocate_uint(coeff_mod_count, pool_);
+            context_data.upper_half_threshold_ = allocate_uint(coeff_modulus_count, pool_);
             increment_uint(
-                context_data.total_coeff_modulus(), coeff_mod_count, context_data.upper_half_threshold_.get());
+                context_data.total_coeff_modulus(), coeff_modulus_count, context_data.upper_half_threshold_.get());
             right_shift_uint(
-                context_data.upper_half_threshold_.get(), 1, coeff_mod_count, context_data.upper_half_threshold_.get());
+                context_data.upper_half_threshold_.get(), 1, coeff_modulus_count, context_data.upper_half_threshold_.get());
         }
         else
         {
@@ -391,7 +391,7 @@ namespace seal
 
         // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
         context_data.qualifiers_.using_descending_modulus_chain = true;
-        for (size_t i = 0; i < coeff_mod_count - 1; i++)
+        for (size_t i = 0; i < coeff_modulus_count - 1; i++)
         {
             context_data.qualifiers_.using_descending_modulus_chain &=
                 (coeff_modulus[i].value() > coeff_modulus[i + 1].value());

@@ -52,27 +52,27 @@ namespace seal
             /**
             coeff_modulus's primes' count is not bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX)
             */
-            invalid_coeff_mod_count = 2,
+            invalid_coeff_modulus_count = 2,
 
             /**
             coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_MIN(MAX)
             */
-            invalid_coeff_mod_bit_count = 3,
+            invalid_coeff_modulus_bit_count = 3,
 
             /**
-            coeff_modulus's primes are not congruent to 1 modulo (2 * poly_mod_degree)
+            coeff_modulus's primes are not congruent to 1 modulo (2 * poly_modulus_degree)
             */
-            invalid_coeff_mod_no_ntt = 4,
+            invalid_coeff_modulus_no_ntt = 4,
 
             /**
             poly_modulus_degree is not bounded by SEAL_POLY_MOD_DEGREE_MIN(MAX)
             */
-            invalid_poly_mod_degree = 5,
+            invalid_poly_modulus_degree = 5,
 
             /**
             poly_modulus_degree is not a power of two
             */
-            invalid_poly_mod_degree_non_power_of_two = 6,
+            invalid_poly_modulus_degree_non_power_of_two = 6,
 
             /**
             parameters are too large to fit in size_t type
@@ -92,22 +92,22 @@ namespace seal
             /**
             plain_modulus's bit count is not bounded by SEAL_PLAIN_MOD_BIT_COUNT_MIN(MAX)
             */
-            invalid_plain_mod_bit_count = 10,
+            invalid_plain_modulus_bit_count = 10,
 
             /**
             plain_modulus is not coprime to coeff_modulus
             */
-            invalid_plain_mod_coprimality = 11,
+            invalid_plain_modulus_coprimality = 11,
 
             /**
             plain_modulus is not smaller than coeff_modulus
             */
-            invalid_plain_mod_too_large = 12,
+            invalid_plain_modulus_too_large = 12,
 
             /**
             plain_modulus is not zero
             */
-            invalid_plain_mod_nonzero = 13,
+            invalid_plain_modulus_nonzero = 13,
 
             /**
             RNSTool cannot be constructed
@@ -393,9 +393,9 @@ namespace seal
             /**
             Return the non-RNS form of upppoer_half_increment which is q mod t.
             */
-            SEAL_NODISCARD inline auto coeff_mod_plain_modulus() const noexcept -> std::uint64_t
+            SEAL_NODISCARD inline auto coeff_modulus_mod_plain_modulus() const noexcept -> std::uint64_t
             {
-                return coeff_mod_plain_modulus_;
+                return coeff_modulus_mod_plain_modulus_;
             }
 
             /**
@@ -462,7 +462,7 @@ namespace seal
 
             util::Pointer<std::uint64_t> upper_half_increment_;
 
-            std::uint64_t coeff_mod_plain_modulus_ = 0;
+            std::uint64_t coeff_modulus_mod_plain_modulus_ = 0;
 
             std::weak_ptr<const ContextData> prev_context_data_;
 

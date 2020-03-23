@@ -39,7 +39,7 @@ SEAL_C_FUNC Ciphertext_SizeCapacity(void *thisptr, uint64_t *size_capacity);
 
 SEAL_C_FUNC Ciphertext_PolyModulusDegree(void *thisptr, uint64_t *poly_modulus_degree);
 
-SEAL_C_FUNC Ciphertext_CoeffModCount(void *thisptr, uint64_t *coeff_mod_count);
+SEAL_C_FUNC Ciphertext_CoeffModCount(void *thisptr, uint64_t *coeff_modulus_count);
 
 SEAL_C_FUNC Ciphertext_ParmsId(void *thisptr, uint64_t *parms_id);
 

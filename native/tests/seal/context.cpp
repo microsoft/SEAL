@@ -21,7 +21,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_coeff_mod_count);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_coeff_modulus_count);
             ASSERT_FALSE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -59,7 +59,7 @@ namespace SEALTest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_plain_mod_coprimality);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_plain_modulus_coprimality);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -79,7 +79,7 @@ namespace SEALTest
             ASSERT_EQ(17ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_plain_mod_too_large);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_plain_modulus_too_large);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_TRUE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -99,7 +99,7 @@ namespace SEALTest
             ASSERT_EQ(3ULL, *context->first_context_data()->total_coeff_modulus());
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_coeff_mod_no_ntt);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_coeff_modulus_no_ntt);
             ASSERT_TRUE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);
@@ -397,8 +397,8 @@ namespace SEALTest
         ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "success");
         ASSERT_STREQ(qualifiers.parameter_error_message().c_str(), "valid");
 
-        qualifiers.parameter_error = error_type::invalid_coeff_mod_bit_count;
-        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "invalid_coeff_mod_bit_count");
+        qualifiers.parameter_error = error_type::invalid_coeff_modulus_bit_count;
+        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "invalid_coeff_modulus_bit_count");
         ASSERT_STREQ(
             qualifiers.parameter_error_message().c_str(),
             "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)");
@@ -409,7 +409,7 @@ namespace SEALTest
         parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         context = SEALContext::Create(parms, false, sec_level_type::none);
         ASSERT_FALSE(context->parameters_set());
-        ASSERT_STREQ(context->parameter_error_name().c_str(), "invalid_poly_mod_degree_non_power_of_two");
+        ASSERT_STREQ(context->parameter_error_name().c_str(), "invalid_poly_modulus_degree_non_power_of_two");
         ASSERT_STREQ(context->parameter_error_message().c_str(), "poly_modulus_degree is not a power of two");
     }
 } // namespace SEALTest

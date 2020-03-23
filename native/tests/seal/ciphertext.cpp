@@ -73,7 +73,7 @@ namespace SEALTest
         ASSERT_FALSE(ctxt.is_ntt_form());
 
         Ciphertext ctxt2{ ctxt };
-        ASSERT_EQ(ctxt.coeff_mod_count(), ctxt2.coeff_mod_count());
+        ASSERT_EQ(ctxt.coeff_modulus_count(), ctxt2.coeff_modulus_count());
         ASSERT_EQ(ctxt.is_ntt_form(), ctxt2.is_ntt_form());
         ASSERT_EQ(ctxt.poly_modulus_degree(), ctxt2.poly_modulus_degree());
         ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
@@ -82,7 +82,7 @@ namespace SEALTest
 
         Ciphertext ctxt3;
         ctxt3 = ctxt;
-        ASSERT_EQ(ctxt.coeff_mod_count(), ctxt3.coeff_mod_count());
+        ASSERT_EQ(ctxt.coeff_modulus_count(), ctxt3.coeff_modulus_count());
         ASSERT_EQ(ctxt.poly_modulus_degree(), ctxt3.poly_modulus_degree());
         ASSERT_EQ(ctxt.is_ntt_form(), ctxt3.is_ntt_form());
         ASSERT_TRUE(ctxt.parms_id() == ctxt3.parms_id());

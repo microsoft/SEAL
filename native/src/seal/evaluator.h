@@ -1367,7 +1367,7 @@ namespace seal
         {
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
-            std::size_t coeff_mod_count = coeff_modulus.size();
+            std::size_t coeff_modulus_count = coeff_modulus.size();
 #ifdef SEAL_DEBUG
             if (value == nullptr)
             {
@@ -1382,24 +1382,24 @@ namespace seal
                 throw std::invalid_argument("value cannot be the same as destination");
             }
 #endif
-            if (coeff_mod_count == 1)
+            if (coeff_modulus_count == 1)
             {
-                util::set_uint_uint(value, coeff_mod_count, destination);
+                util::set_uint_uint(value, coeff_modulus_count, destination);
                 return;
             }
 
-            auto value_copy(util::allocate_uint(coeff_mod_count, pool));
-            for (std::size_t j = 0; j < coeff_mod_count; j++)
+            auto value_copy(util::allocate_uint(coeff_modulus_count, pool));
+            for (std::size_t j = 0; j < coeff_modulus_count; j++)
             {
                 // destination[j] = util::modulo_uint(
-                //    value, coeff_mod_count, coeff_modulus_[j], pool);
+                //    value, coeff_modulus_count, coeff_modulus_[j], pool);
 
                 // Manually inlined for efficiency
                 // Make a fresh copy of value
-                util::set_uint_uint(value, coeff_mod_count, value_copy.get());
+                util::set_uint_uint(value, coeff_modulus_count, value_copy.get());
 
                 // Starting from the top, reduce always 128-bit blocks
-                for (std::size_t k = coeff_mod_count - 1; k--;)
+                for (std::size_t k = coeff_modulus_count - 1; k--;)
                 {
                     value_copy[k] = util::barrett_reduce_128(value_copy.get() + k, coeff_modulus[j]);
                 }
@@ -1414,8 +1414,8 @@ namespace seal
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             std::size_t coeff_count = parms.poly_modulus_degree();
-            std::size_t coeff_mod_count = coeff_modulus.size();
-            std::size_t rns_poly_uint64_count = util::mul_safe(coeff_mod_count, coeff_count);
+            std::size_t coeff_modulus_count = coeff_modulus.size();
+            std::size_t rns_poly_uint64_count = util::mul_safe(coeff_modulus_count, coeff_count);
 #ifdef SEAL_DEBUG
             if (value == nullptr)
             {
@@ -1430,27 +1430,27 @@ namespace seal
                 throw std::invalid_argument("value cannot be the same as destination");
             }
 #endif
-            if (coeff_mod_count == 1)
+            if (coeff_modulus_count == 1)
             {
                 util::set_uint_uint(value, rns_poly_uint64_count, destination);
                 return;
             }
 
-            auto value_copy(util::allocate_uint(coeff_mod_count, pool));
+            auto value_copy(util::allocate_uint(coeff_modulus_count, pool));
             for (std::size_t i = 0; i < coeff_count; i++)
             {
-                for (std::size_t j = 0; j < coeff_mod_count; j++)
+                for (std::size_t j = 0; j < coeff_modulus_count; j++)
                 {
                     // destination[i + (j * coeff_count)] =
-                    //    util::modulo_uint(value + (i * coeff_mod_count),
-                    //        coeff_mod_count, coeff_modulus_[j], pool);
+                    //    util::modulo_uint(value + (i * coeff_modulus_count),
+                    //        coeff_modulus_count, coeff_modulus_[j], pool);
 
                     // Manually inlined for efficiency
-                    // Make a fresh copy of value + (i * coeff_mod_count)
-                    util::set_uint_uint(value + (i * coeff_mod_count), coeff_mod_count, value_copy.get());
+                    // Make a fresh copy of value + (i * coeff_modulus_count)
+                    util::set_uint_uint(value + (i * coeff_modulus_count), coeff_modulus_count, value_copy.get());
 
                     // Starting from the top, reduce always 128-bit blocks
-                    for (std::size_t k = coeff_mod_count - 1; k--;)
+                    for (std::size_t k = coeff_modulus_count - 1; k--;)
                     {
                         value_copy[k] = util::barrett_reduce_128(value_copy.get() + k, coeff_modulus[j]);
                     }

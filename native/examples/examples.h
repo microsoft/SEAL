@@ -88,8 +88,8 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     std::cout << "|   coeff_modulus size: ";
     std::cout << context_data.total_coeff_modulus_bit_count() << " (";
     auto coeff_modulus = context_data.parms().coeff_modulus();
-    std::size_t coeff_mod_count = coeff_modulus.size();
-    for (std::size_t i = 0; i < coeff_mod_count - 1; i++)
+    std::size_t coeff_modulus_count = coeff_modulus.size();
+    for (std::size_t i = 0; i < coeff_modulus_count - 1; i++)
     {
         std::cout << coeff_modulus[i].bit_count() << " + ";
     }

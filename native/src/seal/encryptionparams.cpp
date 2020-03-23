@@ -19,12 +19,12 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             uint64_t poly_modulus_degree64 = static_cast<uint64_t>(poly_modulus_degree_);
-            uint64_t coeff_mod_count64 = static_cast<uint64_t>(coeff_modulus_.size());
+            uint64_t coeff_modulus_count64 = static_cast<uint64_t>(coeff_modulus_.size());
             uint8_t scheme = static_cast<uint8_t>(scheme_);
 
             stream.write(reinterpret_cast<const char *>(&scheme), sizeof(uint8_t));
             stream.write(reinterpret_cast<const char *>(&poly_modulus_degree64), sizeof(uint64_t));
-            stream.write(reinterpret_cast<const char *>(&coeff_mod_count64), sizeof(uint64_t));
+            stream.write(reinterpret_cast<const char *>(&coeff_modulus_count64), sizeof(uint64_t));
             for (const auto &mod : coeff_modulus_)
             {
                 mod.save(stream, compr_mode_type::none);
@@ -72,18 +72,18 @@ namespace seal
             }
 
             // Read the coeff_modulus size
-            uint64_t coeff_mod_count64 = 0;
-            stream.read(reinterpret_cast<char *>(&coeff_mod_count64), sizeof(uint64_t));
+            uint64_t coeff_modulus_count64 = 0;
+            stream.read(reinterpret_cast<char *>(&coeff_modulus_count64), sizeof(uint64_t));
 
             // Only check for upper bound; lower bound is zero for scheme_type::none
-            if (coeff_mod_count64 > SEAL_COEFF_MOD_COUNT_MAX)
+            if (coeff_modulus_count64 > SEAL_COEFF_MOD_COUNT_MAX)
             {
                 throw logic_error("coeff_modulus is invalid");
             }
 
             // Read the coeff_modulus
             vector<SmallModulus> coeff_modulus;
-            for (uint64_t i = 0; i < coeff_mod_count64; i++)
+            for (uint64_t i = 0; i < coeff_modulus_count64; i++)
             {
                 coeff_modulus.emplace_back();
                 coeff_modulus.back().load(stream);
@@ -121,12 +121,12 @@ namespace seal
 
     void EncryptionParameters::compute_parms_id()
     {
-        size_t coeff_mod_count = coeff_modulus_.size();
+        size_t coeff_modulus_count = coeff_modulus_.size();
 
         size_t total_uint64_count = add_safe(
             size_t(1), // scheme
             size_t(1), // poly_modulus_degree
-            coeff_mod_count, plain_modulus_.uint64_count());
+            coeff_modulus_count, plain_modulus_.uint64_count());
 
         auto param_data(allocate_uint(total_uint64_count, pool_));
         uint64_t *param_data_ptr = param_data.get();

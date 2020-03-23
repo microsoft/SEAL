@@ -69,14 +69,14 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_count = coeff_modulus.size();
 
         if (!is_initialized)
         {
             // Initialize secret key.
             secret_key_ = SecretKey();
             sk_generated_ = false;
-            secret_key_.data().resize(mul_safe(coeff_count, coeff_mod_count));
+            secret_key_.data().resize(mul_safe(coeff_count, coeff_modulus_count));
 
             shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
@@ -85,7 +85,7 @@ namespace seal
             sample_poly_ternary(random, parms, secret_key);
 
             auto small_ntt_tables = context_data.small_ntt_tables();
-            for (size_t i = 0; i < coeff_mod_count; i++)
+            for (size_t i = 0; i < coeff_modulus_count; i++)
             {
                 // Transform the secret s into NTT representation.
                 ntt_negacyclic_harvey(secret_key + (i * coeff_count), small_ntt_tables[i]);
@@ -96,8 +96,8 @@ namespace seal
         }
 
         // Set the secret_key_array to have size 1 (first power of secret)
-        secret_key_array_ = allocate_poly(coeff_count, coeff_mod_count, pool_);
-        set_poly_poly(secret_key_.data().data(), coeff_count, coeff_mod_count, secret_key_array_.get());
+        secret_key_array_ = allocate_poly(coeff_count, coeff_modulus_count, pool_);
+        set_poly_poly(secret_key_.data().data(), coeff_count, coeff_modulus_count, secret_key_array_.get());
         secret_key_array_size_ = 1;
 
         // Secret key has been generated
@@ -116,10 +116,10 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_count = coeff_modulus.size();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_mod_count))
+        if (!product_fits_in(coeff_count, coeff_modulus_count))
         {
             throw logic_error("invalid parameters");
         }
@@ -153,10 +153,10 @@ namespace seal
         auto &context_data = *context_->key_context_data();
         auto &parms = context_data.parms();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = parms.coeff_modulus().size();
+        size_t coeff_modulus_count = parms.coeff_modulus().size();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_mod_count))
+        if (!product_fits_in(coeff_count, coeff_modulus_count))
         {
             throw logic_error("invalid parameters");
         }
@@ -171,7 +171,7 @@ namespace seal
 
         // Assume the secret key is already transformed into NTT form.
         generate_kswitch_keys(
-            secret_key_array_.get() + coeff_mod_count * coeff_count, count, static_cast<KSwitchKeys &>(relin_keys),
+            secret_key_array_.get() + coeff_modulus_count * coeff_count, count, static_cast<KSwitchKeys &>(relin_keys),
             save_seed);
 
         // Set the parms_id
@@ -198,11 +198,11 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_count = coeff_modulus.size();
         int coeff_count_power = get_power_of_two(coeff_count);
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_mod_count, size_t(2)))
+        if (!product_fits_in(coeff_count, coeff_modulus_count, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -228,8 +228,8 @@ namespace seal
             }
 
             // Rotate secret key for each coeff_modulus
-            auto rotated_secret_key(allocate_poly(coeff_count, coeff_mod_count, pool_));
-            for (size_t i = 0; i < coeff_mod_count; i++)
+            auto rotated_secret_key(allocate_poly(coeff_count, coeff_modulus_count, pool_));
+            for (size_t i = 0; i < coeff_modulus_count; i++)
             {
                 apply_galois_ntt(
                     secret_key_.data().data() + i * coeff_count, coeff_count_power, galois_elt,
@@ -318,10 +318,10 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_count = coeff_modulus.size();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_mod_count, max_power))
+        if (!product_fits_in(coeff_count, coeff_modulus_count, max_power))
         {
             throw logic_error("invalid parameters");
         }
@@ -340,10 +340,10 @@ namespace seal
 
         // Need to extend the array
         // Compute powers of secret key until max_power
-        auto new_secret_key_array(allocate_poly(new_size * coeff_count, coeff_mod_count, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_mod_count, new_secret_key_array.get());
+        auto new_secret_key_array(allocate_poly(new_size * coeff_count, coeff_modulus_count, pool_));
+        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_count, new_secret_key_array.get());
 
-        size_t poly_ptr_increment = coeff_count * coeff_mod_count;
+        size_t poly_ptr_increment = coeff_count * coeff_modulus_count;
         uint64_t *prev_poly_ptr = new_secret_key_array.get() + (old_size - 1) * poly_ptr_increment;
         uint64_t *next_poly_ptr = prev_poly_ptr + poly_ptr_increment;
 
@@ -353,7 +353,7 @@ namespace seal
         // [which is equal to NTT(secret_key_)].
         for (size_t i = old_size; i < new_size; i++)
         {
-            for (size_t j = 0; j < coeff_mod_count; j++)
+            for (size_t j = 0; j < coeff_modulus_count; j++)
             {
                 dyadic_product_coeffmod(
                     prev_poly_ptr + (j * coeff_count), new_secret_key_array.get() + (j * coeff_count), coeff_count,
@@ -424,11 +424,11 @@ namespace seal
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
-        size_t coeff_mod_count = key_parms.coeff_modulus().size();
+        size_t coeff_modulus_count = key_parms.coeff_modulus().size();
         shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_mod_count, num_keys))
+        if (!product_fits_in(coeff_count, coeff_modulus_count, num_keys))
         {
             throw logic_error("invalid parameters");
         }
@@ -437,7 +437,7 @@ namespace seal
         auto temp(allocate_uint(coeff_count, pool_));
         for (size_t l = 0; l < num_keys; l++)
         {
-            const uint64_t *new_key_ptr = new_keys + l * coeff_mod_count * coeff_count;
+            const uint64_t *new_key_ptr = new_keys + l * coeff_modulus_count * coeff_count;
             generate_one_kswitch_key(new_key_ptr, destination.data()[l], save_seed);
         }
     }

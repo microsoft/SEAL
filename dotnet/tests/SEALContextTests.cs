@@ -106,7 +106,7 @@ namespace SEALNetTest
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
             };
             context = new SEALContext(parms, expandModChain: true, secLevel: SecLevelType.None);
-            Assert.AreEqual(context.ParametersErrorName(), "invalid_poly_mod_degree_non_power_of_two");
+            Assert.AreEqual(context.ParametersErrorName(), "invalid_poly_modulus_degree_non_power_of_two");
             Assert.AreEqual(context.ParametersErrorMessage(), "poly_modulus_degree is not a power of two");
         }
 

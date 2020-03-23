@@ -69,7 +69,7 @@ namespace SEALNetTest
             };
             context = new SEALContext(encParam, expandModChain: true, secLevel: SecLevelType.None);
             qualifiers = context.FirstContextData.Qualifiers;
-            Assert.AreEqual(qualifiers.ParametersErrorName(), "invalid_poly_mod_degree_non_power_of_two");
+            Assert.AreEqual(qualifiers.ParametersErrorName(), "invalid_poly_modulus_degree_non_power_of_two");
             Assert.AreEqual(qualifiers.ParametersErrorMessage(), "poly_modulus_degree is not a power of two");
         }
 

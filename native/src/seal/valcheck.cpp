@@ -89,7 +89,7 @@ namespace seal
         // Check that the metadata matches
         auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
         size_t poly_modulus_degree = context_data_ptr->parms().poly_modulus_degree();
-        if ((coeff_modulus.size() != in.coeff_mod_count()) || (poly_modulus_degree != in.poly_modulus_degree()))
+        if ((coeff_modulus.size() != in.coeff_modulus_count()) || (poly_modulus_degree != in.poly_modulus_degree()))
         {
             return false;
         }
@@ -189,7 +189,7 @@ namespace seal
     bool is_buffer_valid(const Ciphertext &in)
     {
         // Check that the buffer size is correct
-        if (in.int_array().size() != mul_safe(in.size(), in.coeff_mod_count(), in.poly_modulus_degree()))
+        if (in.int_array().size() != mul_safe(in.size(), in.coeff_modulus_count(), in.poly_modulus_degree()))
         {
             return false;
         }
@@ -247,10 +247,10 @@ namespace seal
             auto context_data_ptr = context->get_context_data(in.parms_id());
             auto &parms = context_data_ptr->parms();
             auto &coeff_modulus = parms.coeff_modulus();
-            size_t coeff_mod_count = coeff_modulus.size();
+            size_t coeff_modulus_count = coeff_modulus.size();
 
             const Plaintext::pt_coeff_type *ptr = in.data();
-            for (size_t j = 0; j < coeff_mod_count; j++)
+            for (size_t j = 0; j < coeff_modulus_count; j++)
             {
                 uint64_t modulus = coeff_modulus[j].value();
                 size_t poly_modulus_degree = parms.poly_modulus_degree();
@@ -292,14 +292,14 @@ namespace seal
         // Check the data
         auto context_data_ptr = context->get_context_data(in.parms_id());
         const auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_count = coeff_modulus.size();
 
         const Ciphertext::ct_coeff_type *ptr = in.data();
         auto size = in.size();
 
         for (size_t i = 0; i < size; i++)
         {
-            for (size_t j = 0; j < coeff_mod_count; j++)
+            for (size_t j = 0; j < coeff_modulus_count; j++)
             {
                 uint64_t modulus = coeff_modulus[j].value();
                 auto poly_modulus_degree = in.poly_modulus_degree();
@@ -328,10 +328,10 @@ namespace seal
         auto context_data_ptr = context->key_context_data();
         auto &parms = context_data_ptr->parms();
         auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_count = coeff_modulus.size();
 
         const Plaintext::pt_coeff_type *ptr = in.data().data();
-        for (size_t j = 0; j < coeff_mod_count; j++)
+        for (size_t j = 0; j < coeff_modulus_count; j++)
         {
             uint64_t modulus = coeff_modulus[j].value();
             size_t poly_modulus_degree = parms.poly_modulus_degree();
@@ -358,14 +358,14 @@ namespace seal
         // Check the data
         auto context_data_ptr = context->key_context_data();
         const auto &coeff_modulus = context_data_ptr->parms().coeff_modulus();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_count = coeff_modulus.size();
 
         const Ciphertext::ct_coeff_type *ptr = in.data().data();
         auto size = in.data().size();
 
         for (size_t i = 0; i < size; i++)
         {
-            for (size_t j = 0; j < coeff_mod_count; j++)
+            for (size_t j = 0; j < coeff_modulus_count; j++)
             {
                 uint64_t modulus = coeff_modulus[j].value();
                 auto poly_modulus_degree = in.data().poly_modulus_degree();
