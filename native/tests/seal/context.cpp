@@ -390,17 +390,17 @@ namespace SEALTest
         auto qualifiers = context->first_context_data()->qualifiers();
 
         qualifiers.parameter_error = error_type::none;
-        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "none");
-        ASSERT_STREQ(qualifiers.parameter_error_message().c_str(), "constructed but not yet validated");
+        ASSERT_STREQ(qualifiers.parameter_error_name(), "none");
+        ASSERT_STREQ(qualifiers.parameter_error_message(), "constructed but not yet validated");
 
         qualifiers.parameter_error = error_type::success;
-        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "success");
-        ASSERT_STREQ(qualifiers.parameter_error_message().c_str(), "valid");
+        ASSERT_STREQ(qualifiers.parameter_error_name(), "success");
+        ASSERT_STREQ(qualifiers.parameter_error_message(), "valid");
 
         qualifiers.parameter_error = error_type::invalid_coeff_modulus_bit_count;
-        ASSERT_STREQ(qualifiers.parameter_error_name().c_str(), "invalid_coeff_modulus_bit_count");
+        ASSERT_STREQ(qualifiers.parameter_error_name(), "invalid_coeff_modulus_bit_count");
         ASSERT_STREQ(
-            qualifiers.parameter_error_message().c_str(),
+            qualifiers.parameter_error_message(),
             "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)");
 
         parms.set_poly_modulus_degree(127);
@@ -409,7 +409,7 @@ namespace SEALTest
         parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         context = SEALContext::Create(parms, false, sec_level_type::none);
         ASSERT_FALSE(context->parameters_set());
-        ASSERT_STREQ(context->parameter_error_name().c_str(), "invalid_poly_modulus_degree_non_power_of_two");
-        ASSERT_STREQ(context->parameter_error_message().c_str(), "poly_modulus_degree is not a power of two");
+        ASSERT_STREQ(context->parameter_error_name(), "invalid_poly_modulus_degree_non_power_of_two");
+        ASSERT_STREQ(context->parameter_error_message(), "poly_modulus_degree is not a power of two");
     }
 } // namespace SEALTest
