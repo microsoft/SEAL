@@ -92,7 +92,7 @@ namespace seal
             return "coeff_modulus's primes' count is not bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX)";
 
         case error_type::invalid_coeff_modulus_bit_count:
-            return "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_Min(MAX)";
+            return "coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_MIN(MAX)";
 
         case error_type::invalid_coeff_modulus_no_ntt:
             return "coeff_modulus's primes are not congruent to 1 modulo (2 * poly_modulus_degree)";
@@ -107,7 +107,7 @@ namespace seal
             return "parameters are too large to fit in size_t type";
 
         case error_type::invalid_parameters_insecure:
-            return "parameters are not secure according to HomomorphicEncryption.org security standard";
+            return "parameters are not compliant with HomomorphicEncryption.org security standard";
 
         case error_type::failed_creating_rns_base:
             return "RNSBase cannot be constructed";

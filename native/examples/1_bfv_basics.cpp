@@ -135,9 +135,9 @@ void example_bfv_basics()
 
     /*
     When parameters are used to create SEALContext, Microsoft SEAL will first
-    validate those parameters. The default parameters chosen now are valid.
+    validate those parameters. The parameters chosen here are valid.
     */
-    cout << "Parameter validation (good): " << context->parameter_error_message() << endl;
+    cout << "Parameter validation (success): " << context->parameter_error_message() << endl;
 
     cout << endl;
     cout << "~~~~~~ A naive way to calculate 4(x^2+1)(x+1)^2. ~~~~~~" << endl;
@@ -412,14 +412,16 @@ void example_bfv_basics()
     /*
     Sometimes we create customized encryption parameters which turn out to be invalid.
     Microsoft SEAL can interpret the reason why parameters are considered invalid.
-    Here we simply reduce the polynomial modulus degree to make it insecure.
+    Here we simply reduce the polynomial modulus degree to make the parameters not
+    compliant with the HomomorphicEncryption.org security standard.
     */
     print_line(__LINE__);
     cout << "An example of invalid parameters" << endl;
     parms.set_poly_modulus_degree(2048);
     context = SEALContext::Create(parms);
     print_parameters(context);
-    cout << "Parameter validation (bad): " << context->parameter_error_message() << endl;
+    cout << "Parameter validation (failed): " << context->parameter_error_message() << endl;
+
     /*
     This information is helpful to fix invalid encryption parameters.
     */

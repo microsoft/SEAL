@@ -80,7 +80,7 @@ namespace seal
             invalid_parameters_too_large = 7,
 
             /**
-            parameters are not secure according to HomomorphicEncryption.org security standard
+            parameters are not compliant with HomomorphicEncryption.org security standard
             */
             invalid_parameters_insecure = 8,
 
