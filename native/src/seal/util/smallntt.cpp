@@ -15,6 +15,97 @@ namespace seal
 {
     namespace util
     {
+        // floor(y * 2^64 / p) which is used to accelerate f(x) = x * y mod p
+        static inline uint64_t shoupify(uint64_t y, uint64_t p) {
+            uint64_t cnst_128[2]{0, y};
+            uint64_t shoup[2];
+            seal::util::divide_uint128_uint64_inplace(cnst_128, p, shoup);
+            return shoup[0];
+        }
+
+        // Workhorse for NTT & iNTT for a prime p.
+        struct SlothfulNTT {
+        public:
+            const uint64_t p, Lp; // prime p, and Lp = 2*p for now.
+            const uint64_t rdp; // floor(2^64 / p)
+            explicit SlothfulNTT(uint64_t p, uint64_t Lp, uint64_t rdp = 0) : p(p), Lp(Lp), rdp(rdp) {
+              if (p >= (1L << 59)) 
+              {
+                  throw std::logic_error("SlothfulNTT requires 59-bit modulus most, but got " + std::to_string(p));
+              }
+            }
+
+            // x0' <- x0 + w * x1 mod p
+            // x1' <- x0 - w * x1 mod p
+            inline void forward_lazy(uint64_t *x0, uint64_t *x1, uint64_t w, uint64_t wshoup) const {
+                uint64_t u, v;
+                u = *x0;
+                v = mulmod_lazy(*x1, w, wshoup);
+
+                *x0 = u + v;
+                *x1 = u - v + Lp;
+            }
+
+            inline void forward_last_lazy(uint64_t *x0, uint64_t *x1, uint64_t w, uint64_t wshoup) const {
+                uint64_t u, v;
+                u = reduce_barrett_lazy(*x0);
+                v = mulmod_lazy(*x1, w, wshoup);
+
+                *x0 = u + v;
+                *x1 = u - v + Lp;
+            }
+
+            // x0' <- x0 + x1 mod p
+            // x1' <- x0 - w * x1 mod p
+            inline void backward_lazy(uint64_t *x0, uint64_t *x1, uint64_t w, uint64_t wshoup) const {
+                uint64_t u = *x0;
+                uint64_t v = *x1;
+                uint64_t t = u + v;
+                t -= select(Lp, t < Lp);
+                *x0 = t;
+                *x1 = mulmod_lazy(u - v + Lp, w, wshoup);
+            }
+
+            inline void backward_last_lazy(uint64_t *x0, uint64_t *x1, uint64_t inv_n, uint64_t inv_n_shoup, uint64_t inv_n_w, uint64_t inv_n_w_shoup) const {
+                uint64_t u = *x0;
+                uint64_t v = *x1;
+                uint64_t t = u + v;
+                t -= select(Lp, t < Lp);
+                *x0 = mulmod_lazy(t, inv_n, inv_n_shoup);
+                *x1 = mulmod_lazy(u - v + Lp, inv_n_w, inv_n_w_shoup);
+            }
+        private:
+            // return 0 if cond = true, else return b if cond = false
+            inline uint64_t select(uint64_t b, bool cond) const {
+                return (b & -(uint64_t) cond) ^ b;
+            }
+
+            // x * y mod p using Shoup's trick, i.e., yshoup = floor(2^64 * y / p)
+            inline uint64_t mulmod_lazy(uint64_t x, uint64_t y, uint64_t yshoup) const {
+                unsigned long long q;
+                multiply_uint64_hw64(x, yshoup, &q);
+                return x * y - q * p;
+            }
+
+            inline uint64_t mulmod(uint64_t x, uint64_t y, uint64_t yshoup) const {
+                x = mulmod_lazy(x, y, yshoup);
+                return x - select(p, x < p);
+            }
+
+            // Basically mulmod_lazy(x, 1, shoup(1))
+            inline uint64_t reduce_barrett_lazy(uint64_t x) const {
+#ifdef SEAL_DEBUG
+                if (rdp == 0)
+                {
+                    throw invalid_argument("reduce_barrett_lazy: invalid parameter");
+                }
+#endif
+                unsigned long long q;
+                multiply_uint64_hw64(x, rdp, &q);
+                return x - q * p;
+            }
+        };
+
         SmallNTTTables::SmallNTTTables(int coeff_count_power,
             const SmallModulus &modulus, MemoryPoolHandle pool) :
             pool_(move(pool))
@@ -42,8 +133,6 @@ namespace seal
             scaled_root_powers_.release();
             inv_root_powers_.release();
             scaled_inv_root_powers_.release();
-            inv_root_powers_div_two_.release();
-            scaled_inv_root_powers_div_two_.release();
             inv_degree_modulo_ = 0;
             coeff_count_power_ = 0;
             coeff_count_ = 0;
@@ -68,8 +157,6 @@ namespace seal
             inv_root_powers_ = allocate_uint(coeff_count_, pool_);
             scaled_root_powers_ = allocate_uint(coeff_count_, pool_);
             scaled_inv_root_powers_ = allocate_uint(coeff_count_, pool_);
-            inv_root_powers_div_two_ = allocate_uint(coeff_count_, pool_);
-            scaled_inv_root_powers_div_two_ = allocate_uint(coeff_count_, pool_);
             modulus_ = modulus;
 
             // We defer parameter checking to try_minimal_primitive_root(...)
@@ -98,15 +185,21 @@ namespace seal
             ntt_scale_powers_of_primitive_root(inv_root_powers_.get(),
                 scaled_inv_root_powers_.get());
 
-            // Populate the tables storing (scaled version of ) 2 times
-            // powers of roots^-1 mod q  in bit-scrambled order.
-            for (size_t i = 0; i < coeff_count_; i++)
-            {
-                inv_root_powers_div_two_[i] =
-                    div2_uint_mod(inv_root_powers_[i], modulus_);
+            // Reordering inv_root_powers_ so that the access pattern at inverse NTT is sequential.
+            std::vector<uint64_t> tmp(coeff_count_);
+            uint64_t *ptr = tmp.data() + 1;
+            for (size_t i = coeff_count_ / 2; i > 0; i /= 2) {
+                for (size_t j = i; j < i * 2; ++j)
+                    *ptr++ = inv_root_powers_[j];
             }
-            ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(),
-                scaled_inv_root_powers_div_two_.get());
+            std::copy(tmp.cbegin(), tmp.cend(), inv_root_powers_.get());
+
+            ptr = tmp.data() + 1;
+            for (size_t i = coeff_count_ / 2; i > 0; i /= 2) {
+                for (size_t j = i; j < i * 2; ++j)
+                    *ptr++ = scaled_inv_root_powers_[j];
+            }
+            std::copy(tmp.cbegin(), tmp.cend(), scaled_inv_root_powers_.get());
 
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
@@ -140,12 +233,9 @@ namespace seal
         void SmallNTTTables::ntt_scale_powers_of_primitive_root(
             const uint64_t *input, uint64_t *destination) const
         {
-            for (size_t i = 0; i < coeff_count_; i++, input++, destination++)
+            for (size_t i = 0; i < coeff_count_; i++)
             {
-                uint64_t wide_quotient[2]{ 0, 0 };
-                uint64_t wide_coeff[2]{ 0, *input };
-                divide_uint128_uint64_inplace(wide_coeff, modulus_.value(), wide_quotient);
-                *destination = wide_quotient[0];
+                *destination++ = shoupify(*input++, modulus_.value());
             }
         }
 
@@ -162,184 +252,122 @@ namespace seal
         void ntt_negacyclic_harvey_lazy(uint64_t *operand,
             const SmallNTTTables &tables)
         {
-            uint64_t modulus = tables.modulus().value();
-            uint64_t two_times_modulus = modulus * 2;
+          const uint64_t p = tables.modulus().value();
+          SlothfulNTT ntt_body(p, p << 1, shoupify(1, p));
 
-            // Return the NTT in scrambled order
-            size_t n = size_t(1) << tables.coeff_count_power();
-            size_t t = n >> 1;
-            for (size_t m = 1; m < n; m <<= 1)
-            {
-                if (t >= 4)
-                {
-                    for (size_t i = 0; i < m; i++)
-                    {
-                        size_t j1 = 2 * i * t;
-                        size_t j2 = j1 + t;
-                        const uint64_t W = tables.get_from_root_powers(m + i);
-                        const uint64_t Wprime = tables.get_from_scaled_root_powers(m + i);
+          const size_t n = size_t(1) << tables.coeff_count_power();
+          size_t m = 1;
+          size_t h = n >> 1;
 
-                        uint64_t *X = operand + j1;
-                        uint64_t *Y = X + t;
-                        uint64_t currX;
-                        unsigned long long Q;
-                        for (size_t j = j1; j < j2; j += 4)
-                        {
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = *Y * W - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
+          const uint64_t *w = tables.get_root_powers() + 1;
+          const uint64_t *wshoup = tables.get_scaled_root_powers() + 1;
 
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = *Y * W - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
-
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = *Y * W - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
-
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = *Y * W - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
-                        }
-                    }
+          { // main loop: for h >= 4
+            for (; h > 2; m <<= 1, h >>= 1) {
+              auto x0 = operand;
+              auto x1 = x0 + h; 
+              for (size_t r = 0; r < m; ++r, ++w, ++wshoup) {
+                // buttefly group that use the same twiddle factor, i.e., w[r].
+                for (size_t i = 0; i < h; i += 4) { // unrolling
+                  ntt_body.forward_lazy(x0++, x1++, *w, *wshoup);
+                  ntt_body.forward_lazy(x0++, x1++, *w, *wshoup);
+                  ntt_body.forward_lazy(x0++, x1++, *w, *wshoup);
+                  ntt_body.forward_lazy(x0++, x1++, *w, *wshoup);
                 }
-                else
-                {
-                    for (size_t i = 0; i < m; i++)
-                    {
-                        size_t j1 = 2 * i * t;
-                        size_t j2 = j1 + t;
-                        const uint64_t W = tables.get_from_root_powers(m + i);
-                        const uint64_t Wprime = tables.get_from_scaled_root_powers(m + i);
-
-                        uint64_t *X = operand + j1;
-                        uint64_t *Y = X + t;
-                        uint64_t currX;
-                        unsigned long long Q;
-                        for (size_t j = j1; j < j2; j++)
-                        {
-                            // The Harvey butterfly: assume X, Y in [0, 2p), and return X', Y' in [0, 4p).
-                            // X', Y' = X + WY, X - WY (mod p).
-                            currX = *X - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = W * *Y - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
-                        }
-                    }
-                }
-                t >>= 1;
+                x0 += h;
+                x1 += h;
+              }
             }
+          }
+
+          { // m = degree / 4, h = 2
+            auto x0 = operand;
+            auto x1 = x0 + 2;
+            for (size_t r = 0; r < m; ++r, ++w, ++wshoup) { // unrolling
+              ntt_body.forward_lazy(x0++, x1++, *w, *wshoup);
+              ntt_body.forward_lazy(x0, x1, *w, *wshoup); // combine the incr to following steps
+              x0 += 3;
+              x1 += 3;
+            }
+            m <<= 1;
+          }
+
+          { // m = degree / 2, h = 1
+            auto x0 = operand;
+            auto x1 = x0 + 1;
+            for (size_t r = 0; r < m; ++r, ++w, ++wshoup) {
+              ntt_body.forward_last_lazy(x0, x1, *w, *wshoup);
+              x0 += 2;
+              x1 += 2;
+            }
+          }
+          // At the end operand[0 .. n) stay in [0, 4p).
         }
 
         // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig).
         void inverse_ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
         {
-            uint64_t modulus = tables.modulus().value();
-            uint64_t two_times_modulus = modulus * 2;
+          const uint64_t p = tables.modulus().value();
+          const uint64_t n = 1L << tables.coeff_count_power();
+          const uint64_t *w = tables.get_inv_root_powers() + 1;
+          const uint64_t *wshoup = tables.get_scaled_inv_root_powers() + 1;
 
-            // return the bit-reversed order of NTT.
-            size_t n = size_t(1) << tables.coeff_count_power();
-            size_t t = 1;
-
-            for (size_t m = n; m > 1; m >>= 1)
-            {
-                size_t j1 = 0;
-                size_t h = m >> 1;
-                if (t >= 4)
-                {
-                    for (size_t i = 0; i < h; i++)
-                    {
-                        size_t j2 = j1 + t;
-                        // Need the powers of phi^{-1} in bit-reversed order
-                        const uint64_t W = tables.get_from_inv_root_powers_div_two(h + i);
-                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers_div_two(h + i);
-
-                        uint64_t *U = operand + j1;
-                        uint64_t *V = U + t;
-                        uint64_t currU;
-                        uint64_t T;
-                        unsigned long long H;
-                        for (size_t j = j1; j < j2; j += 4)
-                        {
-                            T = two_times_modulus - *V + *U;
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
-                            *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
-                            multiply_uint64_hw64(Wprime, T, &H);
-                            *V++ = T * W - H * modulus;
-
-                            T = two_times_modulus - *V + *U;
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
-                            *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
-                            multiply_uint64_hw64(Wprime, T, &H);
-                            *V++ = T * W - H * modulus;
-
-                            T = two_times_modulus - *V + *U;
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
-                            *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
-                            multiply_uint64_hw64(Wprime, T, &H);
-                            *V++ = T * W - H * modulus;
-
-                            T = two_times_modulus - *V + *U;
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
-                            *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
-                            multiply_uint64_hw64(Wprime, T, &H);
-                            *V++ = T * W - H * modulus;
-                        }
-                        j1 += (t << 1);
-                    }
-                }
-                else
-                {
-                    for (size_t i = 0; i < h; i++)
-                    {
-                        size_t j2 = j1 + t;
-                        // Need the powers of  phi^{-1} in bit-reversed order
-                        const uint64_t W = tables.get_from_inv_root_powers_div_two(h + i);
-                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers_div_two(h + i);
-
-                        uint64_t *U = operand + j1;
-                        uint64_t *V = U + t;
-                        uint64_t currU;
-                        uint64_t T;
-                        unsigned long long H;
-                        for (size_t j = j1; j < j2; j++)
-                        {
-                            // U = x[i], V = x[i+m]
-
-                            // Compute U - V + 2q
-                            T = two_times_modulus - *V + *U;
-
-                            // Cleverly check whether currU + currV >= two_times_modulus
-                            currU = *U + *V - (two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>((*U << 1) >= T)));
-
-                            // Need to make it so that div2_uint_mod takes values that are > q.
-                            //div2_uint_mod(U, modulusptr, coeff_uint64_count, U);
-                            // We use also the fact that parity of currU is same as parity of T.
-                            // Since our modulus is always so small that currU + masked_modulus < 2^64,
-                            // we never need to worry about wrapping around when adding masked_modulus.
-                            //uint64_t masked_modulus = modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1));
-                            //uint64_t carry = add_uint64(currU, masked_modulus, 0, &currU);
-                            //currU += modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1));
-                            *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
-
-                            multiply_uint64_hw64(Wprime, T, &H);
-                            // effectively, the next two multiply perform multiply modulo beta = 2**wordsize.
-                            *V++ = W * T - H * modulus;
-                        }
-                        j1 += (t << 1);
-                    }
-                }
-                t <<= 1;
+          SlothfulNTT intt_body(p, 2 * p);
+          { // first loop: m = degree / 2, h = 1
+            const size_t m = n >> 1;
+            auto x0 = operand;
+            auto x1 = x0 + 1; // invariant: x1 = x0 + h during the iteration
+            for (size_t r = 0; r < m; ++r, ++w, ++wshoup) {
+              intt_body.backward_lazy(x0, x1, *w, *wshoup);
+              x0 += 2;
+              x1 += 2;
             }
+          }
+
+          { // second loop: m = degree / 4, h = 2
+            const size_t m = n / 4;
+            auto x0 = operand;
+            auto x1 = x0 + 2;
+            for (size_t r = 0; r < m; ++r, ++w, ++wshoup) {
+              intt_body.backward_lazy(x0++, x1++, *w, *wshoup);
+              intt_body.backward_lazy(x0, x1, *w, *wshoup);
+              x0 += 3;
+              x1 += 3;
+            }
+          }
+
+          { // main loop: for h >= 4
+            size_t m = n / 8;
+            size_t h = 4;
+            // m > 1 to skip the last layer
+            for (; m > 1; m >>= 1, h <<= 1) {
+              auto x0 = operand;
+              auto x1 = x0 + h;
+              for (size_t r = 0; r < m; ++r, ++w, ++wshoup) {
+                for (size_t i = 0; i < h; i += 4) { // unrolling
+                  intt_body.backward_lazy(x0++, x1++, *w, *wshoup);
+                  intt_body.backward_lazy(x0++, x1++, *w, *wshoup);
+                  intt_body.backward_lazy(x0++, x1++, *w, *wshoup);
+                  intt_body.backward_lazy(x0++, x1++, *w, *wshoup);
+                }
+                x0 += h;
+                x1 += h;
+              }
+            }
+          }
+
+          // Multiply n^{-1} merged with the last layer of butterfly.
+          const uint64_t inv_n = *(tables.get_inv_degree_modulo());
+          const uint64_t inv_n_shoup = shoupify(inv_n, p);
+          const uint64_t inv_n_w = multiply_uint_uint_mod(inv_n, *w, tables.modulus());
+          const uint64_t inv_n_w_shoup = shoupify(inv_n_w, p);
+
+          uint64_t *x0 = operand;
+          uint64_t *x1 = x0 + n / 2;
+          for (size_t i = n / 2; i < n; ++i) {
+            intt_body.backward_last_lazy(x0++, x1++, inv_n, inv_n_shoup, inv_n_w, inv_n_w_shoup);
+          }
+          // At the end operand[0 .. n) stay in [0, 2p).
         }
     }
 }

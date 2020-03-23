@@ -208,46 +208,38 @@ namespace seal
 
             namespace internal_mods
             {
-                const SmallModulus m_sk(0x1fffffffffe00001);
+                const SmallModulus m_sk(576460752213245953UL);
 
                 const SmallModulus m_tilde(uint64_t(1) << 32);
 
-                const SmallModulus gamma(0x1fffffffffc80001);
+                const SmallModulus gamma(576460752154525697UL);
 
                 const vector<SmallModulus> aux_small_mods{
-                    0x1fffffffffb40001, 0x1fffffffff500001, 0x1fffffffff380001, 0x1fffffffff000001,
-                    0x1ffffffffef00001, 0x1ffffffffee80001, 0x1ffffffffeb40001, 0x1ffffffffe780001,
-                    0x1ffffffffe600001, 0x1ffffffffe4c0001, 0x1ffffffffdf40001, 0x1ffffffffdac0001,
-                    0x1ffffffffda40001, 0x1ffffffffc680001, 0x1ffffffffc000001, 0x1ffffffffb880001,
-                    0x1ffffffffb7c0001, 0x1ffffffffb300001, 0x1ffffffffb1c0001, 0x1ffffffffadc0001,
-                    0x1ffffffffa400001, 0x1ffffffffa140001, 0x1ffffffff9d80001, 0x1ffffffff9140001,
-                    0x1ffffffff8ac0001, 0x1ffffffff8a80001, 0x1ffffffff81c0001, 0x1ffffffff7800001,
-                    0x1ffffffff7680001, 0x1ffffffff7080001, 0x1ffffffff6c80001, 0x1ffffffff6140001,
-                    0x1ffffffff5f40001, 0x1ffffffff5700001, 0x1ffffffff4bc0001, 0x1ffffffff4380001,
-                    0x1ffffffff3240001, 0x1ffffffff2dc0001, 0x1ffffffff1a40001, 0x1ffffffff11c0001,
-                    0x1ffffffff0fc0001, 0x1ffffffff0d80001, 0x1ffffffff0c80001, 0x1ffffffff08c0001,
-                    0x1fffffffefd00001, 0x1fffffffef9c0001, 0x1fffffffef600001, 0x1fffffffeef40001,
-                    0x1fffffffeed40001, 0x1fffffffeed00001, 0x1fffffffeebc0001, 0x1fffffffed540001,
-                    0x1fffffffed440001, 0x1fffffffed2c0001, 0x1fffffffed200001, 0x1fffffffec940001,
-                    0x1fffffffec6c0001, 0x1fffffffebe80001, 0x1fffffffebac0001, 0x1fffffffeba40001,
-                    0x1fffffffeb4c0001, 0x1fffffffeb280001, 0x1fffffffea780001, 0x1fffffffea440001,
-                    0x1fffffffe9f40001, 0x1fffffffe97c0001, 0x1fffffffe9300001, 0x1fffffffe8d00001,
-                    0x1fffffffe8400001, 0x1fffffffe7cc0001, 0x1fffffffe7bc0001, 0x1fffffffe7a80001,
-                    0x1fffffffe7600001, 0x1fffffffe7500001, 0x1fffffffe6fc0001, 0x1fffffffe6d80001,
-                    0x1fffffffe6ac0001, 0x1fffffffe6000001, 0x1fffffffe5d40001, 0x1fffffffe5a00001,
-                    0x1fffffffe5940001, 0x1fffffffe54c0001, 0x1fffffffe5340001, 0x1fffffffe4bc0001,
-                    0x1fffffffe4a40001, 0x1fffffffe3fc0001, 0x1fffffffe3540001, 0x1fffffffe2b00001,
-                    0x1fffffffe2680001, 0x1fffffffe0480001, 0x1fffffffe00c0001, 0x1fffffffdfd00001,
-                    0x1fffffffdfc40001, 0x1fffffffdf700001, 0x1fffffffdf340001, 0x1fffffffdef80001,
-                    0x1fffffffdea80001, 0x1fffffffde680001, 0x1fffffffde000001, 0x1fffffffdde40001,
-                    0x1fffffffddd80001, 0x1fffffffddd00001, 0x1fffffffddb40001, 0x1fffffffdd780001,
-                    0x1fffffffdd4c0001, 0x1fffffffdcb80001, 0x1fffffffdca40001, 0x1fffffffdc380001,
-                    0x1fffffffdc040001, 0x1fffffffdbb40001, 0x1fffffffdba80001, 0x1fffffffdb9c0001,
-                    0x1fffffffdb740001, 0x1fffffffdb380001, 0x1fffffffda600001, 0x1fffffffda340001,
-                    0x1fffffffda180001, 0x1fffffffd9700001, 0x1fffffffd9680001, 0x1fffffffd9440001,
-                    0x1fffffffd9080001, 0x1fffffffd8c80001, 0x1fffffffd8800001, 0x1fffffffd82c0001,
-                    0x1fffffffd7cc0001, 0x1fffffffd7b80001, 0x1fffffffd7840001, 0x1fffffffd73c0001
-                };
+                    576460752144039937UL, 576460752129359873UL,
+                    576460752118874113UL, 576460752066445313UL, 576460752034988033UL, 576460751821078529UL,
+                    576460751716220929UL, 576460751665889281UL, 576460751531671553UL, 576460751493922817UL,
+                    576460751464562689UL, 576460751357607937UL, 576460751336636417UL, 576460751300984833UL,
+                    576460751288401921UL, 576460751244361729UL, 576460751066103809UL, 576460751053520897UL,
+                    576460751022063617UL, 576460751003189249UL, 576460750961246209UL, 576460750902525953UL,
+                    576460750892040193UL, 576460750889943041UL, 576460750871068673UL, 576460750866874369UL,
+                    576460750864777217UL, 576460750791376897UL, 576460750776696833UL, 576460750745239553UL,
+                    576460750720073729UL, 576460750625701889UL, 576460750606827521UL, 576460750602633217UL,
+                    576460750594244609UL, 576460750489387009UL, 576460750430666753UL, 576460750426472449UL,
+                    576460750395015169UL, 576460750363557889UL, 576460750344683521UL, 576460750336294913UL,
+                    576460750330003457UL, 576460750279671809UL, 576460750256603137UL, 576460750218854401UL,
+                    576460750168522753UL, 576460750166425601UL, 576460750028013569UL, 576460749923155969UL,
+                    576460749921058817UL, 576460749904281601UL, 576460749822492673UL, 576460749809909761UL,
+                    576460749795229697UL, 576460749726023681UL, 576460749663109121UL, 576460749596000257UL,
+                    576460749476462593UL, 576460749451296769UL, 576460749398867969UL, 576460749350633473UL,
+                    576460749329661953UL, 576460749235290113UL, 576460749128335361UL, 576460749105266689UL,
+                    576460749084295169UL, 576460749073809409UL, 576460749040254977UL, 576460749010894849UL,
+                    576460748929105921UL, 576460748885065729UL, 576460748878774273UL, 576460748820054017UL,
+                    576460748750848001UL, 576460748746653697UL, 576460748700516353UL, 576460748690030593UL,
+                    576460748633407489UL, 576460748526452737UL, 576460748369166337UL, 576460748360777729UL,
+                    576460748331417601UL, 576460748291571713UL, 576460748281085953UL, 576460748278988801UL,
+                    576460748142673921UL, 576460748048302081UL, 576460747985387521UL, 576460747953930241UL,
+                    576460747882627073UL, 576460747876335617UL, 576460747872141313UL, 576460747870044161UL,
+                    576460747857461249UL, 576460747719049217UL, 576460747599511553UL, 576460747582734337UL};
             }
         }
     }
