@@ -112,8 +112,22 @@ SEAL_C_FUNC EPQ_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length
     IfNullRet(epq, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    string str = epq->parameter_error_name();
-    return ToStringHelper(str, outstr, length);
+    const char *str = epq->parameter_error_name();
+
+    uint64_t result_length = util::add_safe(static_cast<uint64_t>(strlen(str)), uint64_t(1));
+    if (nullptr == outstr)
+    {
+        // We need to return the string length.
+        // The string length will include the terminating character.
+        *length = result_length;
+        return S_OK;
+    }
+
+    *length = result_length;
+
+    fill_n(outstr, *length, char(0));
+    strncpy(outstr, str, result_length);
+    return S_OK;
 }
 
 SEAL_C_FUNC EPQ_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length)
@@ -136,6 +150,6 @@ SEAL_C_FUNC EPQ_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *len
     *length = result_length;
 
     fill_n(outstr, *length, char(0));
-    strcpy(outstr, str);
+    strncpy(outstr, str, result_length);
     return S_OK;
 }
