@@ -481,7 +481,7 @@ include(CheckTypeSize)
 check_type_size("size_t" SIZET LANGUAGE C)
 
 set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
-cmake_dependent_option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} ON "${SIZET} EQUAL 8" OFF)
+cmake_dependent_option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} OFF "${SIZET} EQUAL 8" OFF)
 
 # Create shared SEAL_C library but add no source files yet
 if(SEAL_BUILD_SEAL_C)
@@ -538,7 +538,7 @@ export(
 #####################
 
 set(SEAL_BUILD_EXAMPLES_OPTION_STR "Build C++ examples for Microsoft SEAL")
-option(SEAL_BUILD_EXAMPLES ${SEAL_BUILD_EXAMPLES_OPTION_STR} ON)
+option(SEAL_BUILD_EXAMPLES ${SEAL_BUILD_EXAMPLES_OPTION_STR} OFF)
 
 if(SEAL_BUILD_EXAMPLES)
     add_executable(sealexamples)
@@ -551,7 +551,7 @@ endif()
 ##################
 
 set(SEAL_BUILD_TESTS_OPTION_STR "Build C++ tests for Microsoft SEAL")
-option(SEAL_BUILD_TESTS ${SEAL_BUILD_TESTS_OPTION_STR} ON)
+option(SEAL_BUILD_TESTS ${SEAL_BUILD_TESTS_OPTION_STR} OFF)
 
 if(SEAL_BUILD_TESTS)
     add_executable(sealtest)
