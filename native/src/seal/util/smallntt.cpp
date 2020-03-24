@@ -102,21 +102,27 @@ namespace seal
             }
             ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(), scaled_inv_root_powers_div_two_.get());
 
-            // Reordering inv_root_powers_ so that the access pattern at inverse NTT is sequential.
-            std::vector<uint64_t> tmp(coeff_count_);
-            uint64_t *ptr = tmp.data() + 1;
-            for (size_t i = coeff_count_ / 2; i > 0; i /= 2) {
-                for (size_t j = i; j < i * 2; ++j)
-                    *ptr++ = inv_root_powers_[j];
+            // Reordering inv_root_powers_ so that the access pattern in inverse NTT is sequential.
+            auto temp = allocate_uint(coeff_count_, pool_);
+            uint64_t *temp_ptr = temp.get() + 1;
+            for (size_t i = coeff_count_ / 2; i > 0; i /= 2)
+            {
+                for (size_t j = i; j < i * 2; j++)
+                {
+                    *temp_ptr++ = inv_root_powers_[j];
+                }
             }
-            std::copy(tmp.cbegin(), tmp.cend(), inv_root_powers_.get());
+            set_uint_uint(temp.get(), coeff_count_, inv_root_powers_.get());
 
-            ptr = tmp.data() + 1;
-            for (size_t i = coeff_count_ / 2; i > 0; i /= 2) {
-                for (size_t j = i; j < i * 2; ++j)
-                    *ptr++ = scaled_inv_root_powers_[j];
+            temp_ptr = temp.get() + 1;
+            for (size_t i = coeff_count_ / 2; i > 0; i /= 2)
+            {
+                for (size_t j = i; j < i * 2; j++)
+                {
+                    *temp_ptr++ = scaled_inv_root_powers_[j];
+                }
             }
-            std::copy(tmp.cbegin(), tmp.cend(), scaled_inv_root_powers_.get());
+            set_uint_uint(temp.get(), coeff_count_, scaled_inv_root_powers_.get());
 
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
