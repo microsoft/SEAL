@@ -68,14 +68,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public string ParametersErrorName()
         {
-            ulong length = 0;
-
-            // Get string length
-            NativeMethods.EPQ_ParameterErrorName(NativePtr, null, ref length);
-
-            // Now get the string
+            NativeMethods.EPQ_ParameterErrorName(NativePtr, null, out ulong length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.EPQ_ParameterErrorName(NativePtr, buffer, ref length);
+            NativeMethods.EPQ_ParameterErrorName(NativePtr, buffer, out length);
             return buffer.ToString();
         }
 
@@ -85,14 +80,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public string ParametersErrorMessage()
         {
-            ulong length = 0;
-
-            // Get string length
-            NativeMethods.EPQ_ParameterErrorMessage(NativePtr, null, ref length);
-
-            // Now get the string
+            NativeMethods.EPQ_ParameterErrorMessage(NativePtr, null, out ulong length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.EPQ_ParameterErrorMessage(NativePtr, buffer, ref length);
+            NativeMethods.EPQ_ParameterErrorMessage(NativePtr, buffer, out length);
             return buffer.ToString();
         }
 

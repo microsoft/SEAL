@@ -133,7 +133,7 @@ namespace SEALNetExamples
             the allocated memory to the memory pool, speeding up further allocations.
             Another way would be to call GC::Collect() at a convenient point in the code,
             but this may be less optimal as it may still cause unnecessary allocations
-            of memory if native resources were not released early enough. In this program 
+            of memory if native resources were not released early enough. In this program
             we call GC::Collect() after every example (see Examples.cs) to make sure
             everything is returned to the memory pool at latest before running the next
             example.
@@ -146,6 +146,12 @@ namespace SEALNetExamples
             Utilities.PrintLine();
             Console.WriteLine("Set encryption parameters and print");
             Utilities.PrintParameters(context);
+
+            /*
+            When parameters are used to create SEALContext, Microsoft SEAL will first
+            validate those parameters. The parameters chosen here are valid.
+            */
+            Console.WriteLine("Parameter validation (success): {0}", context.ParameterErrorMessage());
 
             Console.WriteLine();
             Console.WriteLine("~~~~~~ A naive way to calculate 4(x^2+1)(x+1)^2. ~~~~~~");
@@ -418,6 +424,23 @@ namespace SEALNetExamples
             For x=6, 4(x^2+1)(x+1)^2 = 7252. Since the plaintext modulus is set to 1024,
             this result is computed in integers modulo 1024. Therefore the expected output
             should be 7252 % 1024 == 84, or 0x54 in hexadecimal.
+            */
+
+            /*
+            Sometimes we create customized encryption parameters which turn out to be invalid.
+            Microsoft SEAL can interpret the reason why parameters are considered invalid.
+            Here we simply reduce the polynomial modulus degree to make the parameters not
+            compliant with the HomomorphicEncryption.org security standard.
+            */
+            Utilities.PrintLine();
+            Console.WriteLine("An example of invalid parameters");
+            parms.PolyModulusDegree = 2048;
+            using SEALContext new_context = new SEALContext(parms);
+            Utilities.PrintParameters(context);
+            Console.WriteLine("Parameter validation (failed): {0}", new_context.ParameterErrorMessage());
+
+            /*
+            This information is helpful to fix invalid encryption parameters.
             */
         }
     }

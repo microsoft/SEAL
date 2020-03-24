@@ -126,12 +126,12 @@ namespace seal
         /**
         Returns the name of parameter_error.
         */
-        SEAL_NODISCARD const std::string parameter_error_name() const noexcept;
+        SEAL_NODISCARD const char *parameter_error_name() const noexcept;
 
         /**
         Returns a comprehensive message that interprets parameter_error.
         */
-        SEAL_NODISCARD const std::string parameter_error_message() const noexcept;
+        SEAL_NODISCARD const char *parameter_error_message() const noexcept;
 
         /**
         Tells whether parameter_error is error_type::success.
@@ -545,7 +545,7 @@ namespace seal
         /**
         Returns the name of encryption parameters' error.
         */
-        SEAL_NODISCARD inline std::string parameter_error_name() const
+        SEAL_NODISCARD inline const char *parameter_error_name() const
         {
             return first_context_data() ? first_context_data()->qualifiers_.parameter_error_name() : "SEALContext is empty";
         }
@@ -553,7 +553,7 @@ namespace seal
         /**
         Returns a comprehensive message that interprets encryption parameters' error.
         */
-        SEAL_NODISCARD inline std::string parameter_error_message() const
+        SEAL_NODISCARD inline const char *parameter_error_message() const
         {
             return first_context_data() ? first_context_data()->qualifiers_.parameter_error_message() : "SEALContext is empty";
         }

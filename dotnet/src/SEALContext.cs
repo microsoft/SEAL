@@ -156,7 +156,7 @@ namespace Microsoft.Research.SEAL
         /// If the encryption parameters are set but not validated yet, return "none".
         /// Otherwise, return a brief reason.
         /// </summary>
-        public string ParametersErrorName()
+        public string ParameterErrorName()
         {
             ulong length = 0;
 
@@ -173,7 +173,7 @@ namespace Microsoft.Research.SEAL
         /// If the encryption parameters are set in a way that is considered valid by SEAL, return "valid".
         /// Otherwise, return a comprehensive reason.
         /// </summary>
-        public string ParametersErrorMessage()
+        public string ParameterErrorMessage()
         {
             ulong length = 0;
 
