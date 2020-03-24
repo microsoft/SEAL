@@ -108,6 +108,22 @@ namespace seal
             ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(),
                 scaled_inv_root_powers_div_two_.get());
 
+            // Reordering inv_root_powers_ so that the access pattern at inverse NTT is sequential.
+            std::vector<uint64_t> tmp(coeff_count_);
+            uint64_t *ptr = tmp.data() + 1;
+            for (size_t i = coeff_count_ / 2; i > 0; i /= 2) {
+                for (size_t j = i; j < i * 2; ++j)
+                    *ptr++ = inv_root_powers_[j];
+            }
+            std::copy(tmp.cbegin(), tmp.cend(), inv_root_powers_.get());
+
+            ptr = tmp.data() + 1;
+            for (size_t i = coeff_count_ / 2; i > 0; i /= 2) {
+                for (size_t j = i; j < i * 2; ++j)
+                    *ptr++ = scaled_inv_root_powers_[j];
+            }
+            std::copy(tmp.cbegin(), tmp.cend(), scaled_inv_root_powers_.get());
+
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
             generated_ = try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_);
