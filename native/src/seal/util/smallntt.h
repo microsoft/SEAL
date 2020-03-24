@@ -113,38 +113,6 @@ namespace seal
                 return scaled_inv_root_powers_[index];
             }
 
-            SEAL_NODISCARD inline auto get_from_inv_root_powers_div_two(
-                std::size_t index) const -> std::uint64_t
-            {
-#ifdef SEAL_DEBUG
-                if (index >= coeff_count_)
-                {
-                    throw std::out_of_range("index");
-                }
-                if (!generated_)
-                {
-                    throw std::logic_error("tables are not generated");
-                }
-#endif
-                return inv_root_powers_div_two_[index];
-            }
-
-            SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers_div_two(
-                std::size_t index) const -> std::uint64_t
-            {
-#ifdef SEAL_DEBUG
-                if (index >= coeff_count_)
-                {
-                    throw std::out_of_range("index");
-                }
-                if (!generated_)
-                {
-                    throw std::logic_error("tables are not generated");
-                }
-#endif
-                return scaled_inv_root_powers_div_two_[index];
-            }
-
             SEAL_NODISCARD inline auto get_inv_degree_modulo() const
                 -> const std::uint64_t*
             {
@@ -202,12 +170,6 @@ namespace seal
 
             // Size coeff_count_
             Pointer<decltype(root_)> scaled_root_powers_;
-
-            // Size coeff_count_
-            Pointer<decltype(root_)> inv_root_powers_div_two_;
-
-            // Size coeff_count_
-            Pointer<decltype(root_)> scaled_inv_root_powers_div_two_;
 
             int coeff_count_power_ = 0;
 
