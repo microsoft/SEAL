@@ -198,6 +198,10 @@ namespace seal
 
             // First read the header
             LoadHeader(stream, header);
+            if (!IsCompatibleVersion(header))
+            {
+                throw logic_error("incompatible version");
+            }
             if (!IsValidHeader(header))
             {
                 throw logic_error("loaded SEALHeader is invalid");
@@ -227,7 +231,10 @@ namespace seal
 
                 constexpr int Z_OK = 0;
                 if (ztools::inflate_stream(
-                        stream, compr_size, temp_stream, MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)) != Z_OK)
+                        stream,
+                        safe_cast<streamoff>(compr_size),
+                        temp_stream,
+                        MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)) != Z_OK)
                 {
                     throw logic_error("stream inflate failed");
                 }

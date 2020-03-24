@@ -2450,7 +2450,7 @@ namespace seal
             unsigned long long wide_product[2]{ 0, 0 };
             unsigned long long *accumulator = nullptr;
             uint64_t *t_target_acc = t_target.get();
-            std::fill_n(t_poly_lazy.get(), mul_safe(coeff_count * 2, key_component_count), 0);
+            fill_n(t_poly_lazy.get(), mul_safe(coeff_count * 2, key_component_count), 0);
 
             // Multiply with keys and perform lazy reduction on product's coefficients
             for (size_t i = 0; i < decomp_mod_count; i++, t_target_acc += coeff_count)
@@ -2510,7 +2510,7 @@ namespace seal
                 }
             }
 
-            // Final modular reduction (might not be necessary)
+            // Final modular reduction
             accumulator = t_poly_lazy.get();
             for (size_t k = 0; k < key_component_count; k++)
             {
@@ -2519,7 +2519,7 @@ namespace seal
                 {
                     for (size_t l = 0; l < coeff_count; l++, accumulator += 2, t_poly_prod_acc++)
                     {
-                        *t_poly_prod_acc = (uint64_t)*accumulator;
+                        *t_poly_prod_acc = static_cast<uint64_t>(*accumulator);
                     }
                 }
                 else

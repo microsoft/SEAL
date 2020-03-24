@@ -155,8 +155,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid
-        /// or if the loaded compression mode is not supported</exception>
+        /// <exception cref="InvalidOperationException">if the data cannot be loaded
+        /// by this version of Microsoft SEAL, if the loaded data is invalid, or if the
+        /// loaded compression mode is not supported</exception>
         public long UnsafeLoad(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -186,8 +187,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid
-        /// or if the loaded compression mode is not supported</exception>
+        /// <exception cref="InvalidOperationException">if the data cannot be loaded
+        /// by this version of Microsoft SEAL, if the loaded data is invalid, or if the
+        /// loaded compression mode is not supported</exception>
         public long Load(SEALContext context, Stream stream)
         {
             if (null == context)

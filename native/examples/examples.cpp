@@ -8,9 +8,7 @@ using namespace seal;
 
 int main()
 {
-#ifdef SEAL_VERSION
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
-#endif
     while (true)
     {
         cout << "+---------------------------------------------------------+" << endl;

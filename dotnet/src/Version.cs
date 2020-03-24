@@ -16,30 +16,45 @@ namespace Microsoft.Research.SEAL
     public static class SEALVersion
     {
         /// <summary>
+        /// Returns Microsoft SEAL's version number string.
+        /// </summary>
+        static public string Version => new string($"{SEALVersion.Major}.{SEALVersion.Minor}.{SEALVersion.Patch}");
+
+        ///
+        /// <summary>
         /// Returns Microsoft SEAL's major version number.
         /// </summary>
-        static public byte Major()
+        static public byte Major
         {
-            NativeMethods.Version_Major(out byte result);
-            return result;
+            get
+            {
+                NativeMethods.Version_Major(out byte result);
+                return result;
+            }
         }
 
         /// <summary>
         /// Returns Microsoft SEAL's minor version number.
         /// </summary>
-        static public byte Minor()
+        static public byte Minor
         {
-            NativeMethods.Version_Minor(out byte result);
-            return result;
+            get
+            {
+                NativeMethods.Version_Minor(out byte result);
+                return result;
+            }
         }
 
         /// <summary>
         /// Returns Microsoft SEAL's patch version number.
         /// </summary>
-        static public byte Patch()
+        static public byte Patch
         {
-            NativeMethods.Version_Patch(out byte result);
-            return result;
+            get
+            {
+                NativeMethods.Version_Patch(out byte result);
+                return result;
+            }
         }
     }
 }

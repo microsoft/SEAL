@@ -1220,16 +1220,19 @@ namespace Microsoft.Research.SEAL
         internal static extern void Serialization_SEALMagic(out ushort result);
 
         [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Serialization_SEALHeaderSize(out byte result);
+
+        [DllImport(sealc, PreserveSig = false)]
         internal static extern void Serialization_IsSupportedComprMode(byte comprMode, out bool result);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Serialization_ComprModeDefault(out byte result);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Serialization_IsValidHeader(byte[] headerptr, ulong size, out bool result);
+        internal static extern void Serialization_IsCompatibleVersion(byte[] headerptr, ulong size, out bool result);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Serialization_SEALHeaderBytes(out uint result);
+        internal static extern void Serialization_IsValidHeader(byte[] headerptr, ulong size, out bool result);
 
         #endregion
 
