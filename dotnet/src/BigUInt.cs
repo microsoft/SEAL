@@ -459,9 +459,10 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid,
-        /// if the loaded compression mode is not supported, or if the loaded BigUInt
-        /// is too large for an aliased BigUInt</exception>
+        /// <exception cref="InvalidOperationException">if the data cannot be loaded
+        /// by this version of Microsoft SEAL, if the loaded data is invalid, if the
+        /// loaded compression mode is not supported, or if the loaded BigUInt is too
+        /// large for an aliased BigUInt</exception>
         public long Load(Stream stream)
         {
             return Serialization.Load(

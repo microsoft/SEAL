@@ -1602,8 +1602,9 @@ namespace seal
         Loads a BigUInt from an input stream overwriting the current BigUInt.
 
         @param[in] stream The stream to load the BigUInt from
-        @throws std::logic_error if the loaded data is invalid, if decompression
-        failed, or if the loaded BigUInt is too large for an aliased BigUInt
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
+        or if the loaded BigUInt is too large for an aliased BigUInt
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(std::istream &stream)
@@ -1641,8 +1642,9 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid, if decompression
-        failed, or if the loaded BigUInt is too large for an aliased BigUInt
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
+        or if the loaded BigUInt is too large for an aliased BigUInt
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)

@@ -10,6 +10,7 @@ namespace SEALNetExamples
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Microsoft SEAL version: " + SEALVersion.Version);
             while (true)
             {
                 Console.WriteLine("+---------------------------------------------------------+");

@@ -39,19 +39,7 @@ namespace SEALTest
                 RNSBase base({ 2 }, pool);
                 ASSERT_EQ(size_t(1), base.size());
                 ASSERT_EQ(SmallModulus(2), base[0]);
-#if SEAL_COMPILER == SEAL_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
-#elif SEAL_COMPILER == SEAL_COMPILER_GCC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif
-                ASSERT_THROW(auto b = base[1], out_of_range);
-#if SEAL_COMPILER == SEAL_COMPILER_CLANG
-#pragma clang diagnostic pop 
-#elif SEAL_COMPILER == SEAL_COMPILER_GCC
-#pragma GCC diagnostic pop 
-#endif
+                ASSERT_THROW([&]() { return base[1].value(); }(), out_of_range);
             }
             {
                 RNSBase base({ 2, 3, 5 }, pool);
@@ -59,19 +47,7 @@ namespace SEALTest
                 ASSERT_EQ(SmallModulus(2), base[0]);
                 ASSERT_EQ(SmallModulus(3), base[1]);
                 ASSERT_EQ(SmallModulus(5), base[2]);
-#if SEAL_COMPILER == SEAL_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
-#elif SEAL_COMPILER == SEAL_COMPILER_GCC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#endif
-                ASSERT_THROW(auto b = base[3], out_of_range);
-#if SEAL_COMPILER == SEAL_COMPILER_CLANG
-#pragma clang diagnostic pop 
-#elif SEAL_COMPILER == SEAL_COMPILER_GCC
-#pragma GCC diagnostic pop 
-#endif
+                ASSERT_THROW([&]() { return base[3].value(); }(), out_of_range);
             }
         }
 
@@ -400,8 +376,8 @@ namespace SEALTest
         {
             auto pool = MemoryManager::GetPool();
 
-            int poly_modulus_degree = 32;
-            int coeff_base_count = 4;
+            size_t poly_modulus_degree = 32;
+            size_t coeff_base_count = 4;
             int prime_bit_count = 20;
 
             SmallModulus plain_t = 65537;

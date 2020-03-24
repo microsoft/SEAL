@@ -44,7 +44,7 @@ namespace SEALTest
 
     TEST(SerializationTest, SEALHeader)
     {
-        ASSERT_EQ(sizeof(Serialization::SEALHeader), 16);
+        ASSERT_EQ(sizeof(Serialization::SEALHeader), Serialization::seal_header_size);
 
         Serialization::SEALHeader header, loaded_header, invalid_header;
         header.compr_mode = compr_mode_type::deflate;
@@ -54,22 +54,20 @@ namespace SEALTest
         ASSERT_TRUE(Serialization::IsValidHeader(header));
         Serialization::LoadHeader(stream, loaded_header);
         ASSERT_EQ(loaded_header.magic, Serialization::seal_magic);
+        ASSERT_EQ(loaded_header.header_size, Serialization::seal_header_size);
         ASSERT_EQ(loaded_header.version_major, SEAL_VERSION_MAJOR);
         ASSERT_EQ(loaded_header.version_minor, SEAL_VERSION_MINOR);
         ASSERT_EQ(loaded_header.compr_mode, compr_mode_type::deflate);
-        ASSERT_EQ(loaded_header.zero_byte, 0x00);
         ASSERT_EQ(loaded_header.reserved, 0x00);
         ASSERT_EQ(loaded_header.size, 256);
 
         invalid_header.magic = 0x1212;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
         invalid_header.magic = header.magic;
+        ASSERT_EQ(loaded_header.header_size, Serialization::seal_header_size);
         invalid_header.version_major = 0x02;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
         invalid_header.version_major = header.version_major;
-        invalid_header.zero_byte = 0x01;
-        ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
-        invalid_header.zero_byte = header.zero_byte;
         invalid_header.compr_mode = (compr_mode_type)0x02;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
     }

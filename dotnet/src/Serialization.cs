@@ -46,16 +46,22 @@ namespace Microsoft.Research.SEAL
             return sealMagic;
         }))();
 
+        /// <summary>The size in bytes of the SEALHeader.</summary>
+        public static readonly byte SEALHeaderSize = ((Func<byte>)(() => {
+            NativeMethods.Serialization_SEALHeaderSize(out byte sealHeaderSize);
+            return sealHeaderSize;
+        }))();
+
         /// <summary>Struct to contain header information for serialization.</summary>
         /// <remarks>
         /// Struct to contain header information for serialization. The size of the header is 16 bytes and it consists
         /// of the following fields:
         ///
         /// 1. a magic number identifying this is a SEALHeader struct (2 bytes)
-        /// 2. Microsoft SEAL's major version number (1 byte)
-        /// 3. Microsoft SEAL's minor version number (2 byte)
-        /// 4. a compr_mode_type indicating whether data after the header is compressed (1 byte)
-        /// 5. an empty byte 0x00 for data alignment (1 byte)
+        /// 2. size in bytes of the SEALHeader struct (1 byte)
+        /// 3. Microsoft SEAL's major version number (1 byte)
+        /// 4. Microsoft SEAL's minor version number (1 byte)
+        /// 5. a ComprModeType indicating whether data after the header is compressed (1 byte)
         /// 6. reserved for future use and data alignment (2 bytes)
         /// 7. the size in bytes of the entire serialized object, including the header (8 bytes)
         /// </remarks>
@@ -64,30 +70,23 @@ namespace Microsoft.Research.SEAL
             /// <summary>A magic number identifying this is a SEALHeader struct (2 bytes)</summary>
             public ushort Magic = SEALMagic;
 
+            /// <summary>Size in bytes of the SEALHeader struct (1 byte)</summary>
+            public byte HeaderSize = SEALHeaderSize;
+
             /// <summary>Microsoft SEAL's major version number (1 byte)</summary>
-            public byte VersionMajor = SEALVersion.Major();
+            public byte VersionMajor = SEALVersion.Major;
 
             /// <summary>Microsoft SEAL's minor version number (1 byte)</summary>
-            public byte VersionMinor = SEALVersion.Minor();
+            public byte VersionMinor = SEALVersion.Minor;
 
             /// <summary>A compr_mode_type indicating whether data after the header is compressed (1 byte)</summary>
             public ComprModeType ComprMode = ComprModeDefault;
-
-            /// <summary>An empty byte 0x00 for data alignment (1 byte)</summary>
-            public byte ZeroByte = 0x00;
 
             /// <summary>Reserved for future use and data alignment (2 bytes)</summary>
             public ushort Reserved = 0;
 
             /// <summary>The size in bytes of the entire serialized object, including the header (8 bytes)</summary>
             public ulong Size = 0;
-
-            /// <summary>Returns SEALHeader's size in bytes (16 bytes).</summary>
-            public static int Bytes()
-            {
-                NativeMethods.Serialization_SEALHeaderBytes(out uint result);
-                return checked((int)result);
-            }
         };
 
         private static bool IsSupportedComprMode(byte comprMode)
@@ -101,11 +100,27 @@ namespace Microsoft.Research.SEAL
         public static bool IsSupportedComprMode(ComprModeType comprMode) =>
             IsSupportedComprMode((byte)comprMode);
 
-        /// <summary>Returns true if the given SEALHeader is valid.</summary>
+        /// <summary>Returns true if the SEALHeader has a version number compatible with this version of
+        /// Microsoft SEAL.</summary>
+        /// <param name="header">The SEALHeader</param>
+        public static bool IsCompatibleVersion(SEALHeader header)
+        {
+            byte[] headerArray = new byte[SEALHeaderSize];
+            using (MemoryStream stream = new MemoryStream(headerArray))
+            {
+                SaveHeader(header, stream);
+                NativeMethods.Serialization_IsCompatibleVersion(
+                    headerArray, (ulong)headerArray.Length, out bool result);
+                return result;
+            }
+        }
+
+        /// <summary>Returns true if the given SEALHeader is valid and can be loaded by this version of
+        /// Microsoft SEAL.</summary>
         /// <param name="header">The SEALHeader</param>
         public static bool IsValidHeader(SEALHeader header)
         {
-            byte[] headerArray = new byte[SEALHeader.Bytes()];
+            byte[] headerArray = new byte[SEALHeaderSize];
             using (MemoryStream stream = new MemoryStream(headerArray))
             {
                 SaveHeader(header, stream);
@@ -136,10 +151,10 @@ namespace Microsoft.Research.SEAL
             using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
             {
                 writer.Write(header.Magic);
+                writer.Write(header.HeaderSize);
                 writer.Write(header.VersionMajor);
                 writer.Write(header.VersionMinor);
                 writer.Write((byte)header.ComprMode);
-                writer.Write(header.ZeroByte);
                 writer.Write(header.Reserved);
                 writer.Write(header.Size);
             }
@@ -166,10 +181,10 @@ namespace Microsoft.Research.SEAL
             using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, true))
             {
                 header.Magic = reader.ReadUInt16();
+                header.HeaderSize = reader.ReadByte();
                 header.VersionMajor = reader.ReadByte();
                 header.VersionMinor = reader.ReadByte();
                 header.ComprMode = (ComprModeType)reader.ReadByte();
-                header.ZeroByte = reader.ReadByte();
                 header.Reserved = reader.ReadUInt16();
                 header.Size = reader.ReadUInt64();
             }
@@ -267,6 +282,8 @@ namespace Microsoft.Research.SEAL
                 LoadHeader(stream, header);
 
                 // Check the validity of the header
+                if (!IsCompatibleVersion(header))
+                    throw new InvalidOperationException("Incompatible version");
                 if (!IsSupportedComprMode(header.ComprMode))
                     throw new InvalidOperationException("Unsupported compression mode");
                 if (!IsValidHeader(header))

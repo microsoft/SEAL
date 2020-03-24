@@ -526,6 +526,9 @@ namespace seal
 
         @param[in] stream The stream to load the IntArray from
         @param[in] in_size_bound A bound on the size of the loaded IntArray
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
+        or if the loaded size exceeds in_size_bound
         @throws std::logic_error if the loaded data is invalid, if the loaded size
         exceeds in_size_bound, or if decompression failed
         @throws std::runtime_error if I/O operations failed
@@ -570,8 +573,9 @@ namespace seal
         @param[in] in_size_bound A bound on the size of the loaded IntArray
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid, if the loaded size
-        exceeds in_size_bound, or if decompression failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
+        or if the loaded size exceeds in_size_bound
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(const SEAL_BYTE *in, std::size_t size, std::size_t in_size_bound = 0)

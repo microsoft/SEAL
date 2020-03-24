@@ -15,7 +15,7 @@ namespace SEALNetTest
         [TestMethod]
         public void SEALHeaderTest()
         {
-            Assert.AreEqual(Serialization.SEALHeader.Bytes(), 16);
+            Assert.AreEqual(Serialization.SEALHeaderSize, 0x10);
 
             Serialization.SEALHeader header = new Serialization.SEALHeader();
             Serialization.SEALHeader loaded = new Serialization.SEALHeader();
@@ -30,10 +30,10 @@ namespace SEALNetTest
                 Serialization.LoadHeader(mem, loaded);
 
                 Assert.AreEqual(loaded.Magic, header.Magic);
+                Assert.AreEqual(loaded.HeaderSize, header.HeaderSize);
                 Assert.AreEqual(loaded.VersionMajor, header.VersionMajor);
                 Assert.AreEqual(loaded.VersionMinor, header.VersionMinor);
                 Assert.AreEqual(loaded.ComprMode, header.ComprMode);
-                Assert.AreEqual(loaded.ZeroByte, header.ZeroByte);
                 Assert.AreEqual(loaded.Reserved, header.Reserved);
                 Assert.AreEqual(loaded.Size, header.Size);
             }
