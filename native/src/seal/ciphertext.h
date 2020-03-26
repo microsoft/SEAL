@@ -18,6 +18,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <iterator>
 #include <string>
 
 namespace seal

@@ -8,6 +8,7 @@
 #include "seal/util/polycore.h"
 #include "seal/util/scalingvariant.h"
 #include "seal/util/uintarith.h"
+#include "seal/util/iterator.h"
 #include <algorithm>
 #include <cmath>
 #include <functional>
@@ -342,40 +343,38 @@ namespace seal
         encrypted1.resize(context_, context_data.parms_id(), dest_count);
 
         size_t enc_ptr_increment = coeff_count * coeff_modulus_count;
-        size_t enc_Bsk_m_tilde_ptr_increment = coeff_count * base_Bsk_m_tilde_size;
         size_t enc_Bsk_ptr_increment = coeff_count * base_Bsk_size;
 
-        // Make temp polys for FastBConverter result from q ---> Bsk U {m_tilde}
-        auto tmp_encrypted1_Bsk_m_tilde(allocate_poly(coeff_count * encrypted1_size, base_Bsk_m_tilde_size, pool));
-        auto tmp_encrypted2_Bsk_m_tilde(allocate_poly(coeff_count * encrypted2_size, base_Bsk_m_tilde_size, pool));
-
-        // Make temp polys for FastBConverter result from Bsk U {m_tilde} -----> Bsk
+        // Make temp polys for BaseConverter result from Bsk U {m_tilde} -----> Bsk
         auto tmp_encrypted1_Bsk(allocate_poly(coeff_count * encrypted1_size, base_Bsk_size, pool));
         auto tmp_encrypted2_Bsk(allocate_poly(coeff_count * encrypted2_size, base_Bsk_size, pool));
 
-        // Step 0: convert from q to Bsk U {m_tilde}
-        // Step 1: reduce q-overflows in Bsk with Montgomery reduction
-        // Iterate over all the ciphertexts inside encrypted1
-        for (size_t i = 0; i < encrypted1_size; i++)
-        {
-            rns_tool->fastbconv_m_tilde(
-                encrypted1.data(i), tmp_encrypted1_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment), pool);
-            rns_tool->sm_mrq(
-                tmp_encrypted1_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment),
-                tmp_encrypted1_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
-        }
+        // Bajard-style RNS multiplication
 
-        // Iterate over all the ciphertexts inside encrypted2
-        for (size_t i = 0; i < encrypted2_size; i++)
-        {
-            rns_tool->fastbconv_m_tilde(
-                encrypted2.data(i), tmp_encrypted2_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment), pool);
-            rns_tool->sm_mrq(
-                tmp_encrypted2_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment),
-                tmp_encrypted2_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
-        }
+        auto tmp_encrypted1_Bsk_iter = poly_iterator::begin(tmp_encrypted1_Bsk.get(), coeff_count, base_Bsk_size);
+        // Note: we use for_each_n and encrypted1_size because encrypted1.size() would return the
+        // size of the output, which is not what we want.
+        for_each_n(const_poly_iterator::begin(encrypted1), encrypted1_size, [&](auto poly_ptr) {
+                auto temp(allocate_poly(coeff_count * encrypted1_size, base_Bsk_m_tilde_size, pool));
 
-        // Step 2: compute product and multiply plain modulus to the result
+                // Step 1: convert from q to Bsk U {m_tilde}
+                rns_tool->fastbconv_m_tilde(poly_ptr, temp.get(), pool);
+
+                // Step 2: reduce q-overflows in Bsk with Montgomery reduction
+                rns_tool->sm_mrq(temp.get(), *tmp_encrypted1_Bsk_iter, pool);
+                tmp_encrypted1_Bsk_iter++;
+            });
+
+        // Repeat the same for encrypted2
+        auto tmp_encrypted2_Bsk_iter = poly_iterator::begin(tmp_encrypted2_Bsk.get(), coeff_count, base_Bsk_size);
+        for_each_n(const_poly_iterator::begin(encrypted2), encrypted2_size, [&](auto poly_ptr) {
+                auto temp(allocate_poly(coeff_count * encrypted2_size, base_Bsk_m_tilde_size, pool));
+                rns_tool->fastbconv_m_tilde(poly_ptr, temp.get(), pool);
+                rns_tool->sm_mrq(temp.get(), *tmp_encrypted2_Bsk_iter, pool);
+                tmp_encrypted2_Bsk_iter++;
+            });
+
+        // Step 3: compute product and multiply plain modulus to the result
         // We need to multiply both in q and Bsk. Values in encrypted_safe are in
         // base q and values in tmp_encrypted_Bsk are in base Bsk. We iterate over
         // destination poly array and generate each poly based on the indices of
@@ -409,39 +408,66 @@ namespace seal
         set_poly_poly(
             tmp_encrypted2_Bsk.get(), coeff_count * encrypted2_size, base_Bsk_size, copy_encrypted2_ntt_Bsk.get());
 
-        for (size_t i = 0; i < encrypted1_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted1_ntt_q.get() + (j * coeff_count) + (i * enc_ptr_increment), base_q_ntt_tables[j]);
-            }
-            for (size_t j = 0; j < base_Bsk_size; j++)
-            {
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted1_ntt_Bsk.get() + (j * coeff_count) + (i * enc_Bsk_ptr_increment),
-                    base_Bsk_ntt_tables[j]);
-            }
-        }
+        for_each_n(
+                poly_iterator::begin(copy_encrypted1_ntt_q.get(), coeff_count, coeff_modulus_count),
+                encrypted1_size,
+                [&](auto poly_ptr) {
+                    auto base_q_ntt_tables_iter = base_q_ntt_tables;
+                    for_each_n(
+                            rns_iterator::begin(poly_ptr, coeff_count),
+                            coeff_modulus_count,
+                            [&](auto rns_ptr) {
+                                // Lazy reduction
+                                ntt_negacyclic_harvey_lazy(rns_ptr, *base_q_ntt_tables_iter);
+                                base_q_ntt_tables_iter++;
+                            });
+                });
 
-        for (size_t i = 0; i < encrypted2_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted2_ntt_q.get() + (j * coeff_count) + (i * enc_ptr_increment), base_q_ntt_tables[j]);
-            }
-            for (size_t j = 0; j < base_Bsk_size; j++)
-            {
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted2_ntt_Bsk.get() + (j * coeff_count) + (i * enc_Bsk_ptr_increment),
-                    base_Bsk_ntt_tables[j]);
-            }
-        }
+        for_each_n(
+                poly_iterator::begin(copy_encrypted1_ntt_Bsk.get(), coeff_count, base_Bsk_size),
+                encrypted1_size,
+                [&](auto poly_ptr) {
+                    auto base_Bsk_ntt_tables_iter = base_Bsk_ntt_tables;
+                    for_each_n(
+                            rns_iterator::begin(poly_ptr, coeff_count),
+                            base_Bsk_size,
+                            [&](auto rns_ptr) {
+                                // Lazy reduction
+                                ntt_negacyclic_harvey_lazy(rns_ptr, *base_Bsk_ntt_tables_iter);
+                                base_Bsk_ntt_tables_iter++;
+                            });
+                });
+
+        // Repeat for encrypted2
+        for_each_n(
+                poly_iterator::begin(copy_encrypted2_ntt_q.get(), coeff_count, coeff_modulus_count),
+                encrypted2_size,
+                [&](auto poly_ptr) {
+                    auto base_q_ntt_tables_iter = base_q_ntt_tables;
+                    for_each_n(
+                            rns_iterator::begin(poly_ptr, coeff_count),
+                            coeff_modulus_count,
+                            [&](auto rns_ptr) {
+                                // Lazy reduction
+                                ntt_negacyclic_harvey_lazy(rns_ptr, *base_q_ntt_tables_iter);
+                                base_q_ntt_tables_iter++;
+                            });
+                });
+
+        for_each_n(
+                poly_iterator::begin(copy_encrypted2_ntt_Bsk.get(), coeff_count, base_Bsk_size),
+                encrypted2_size,
+                [&](auto poly_ptr) {
+                    auto base_Bsk_ntt_tables_iter = base_Bsk_ntt_tables;
+                    for_each_n(
+                            rns_iterator::begin(poly_ptr, coeff_count),
+                            base_Bsk_size,
+                            [&](auto rns_ptr) {
+                                // Lazy reduction
+                                ntt_negacyclic_harvey_lazy(rns_ptr, *base_Bsk_ntt_tables_iter);
+                                base_Bsk_ntt_tables_iter++;
+                            });
+                });
 
         // Perform multiplication on arbitrary size ciphertexts
         for (size_t secret_power_index = 0; secret_power_index < dest_count; secret_power_index++)
@@ -731,10 +757,10 @@ namespace seal
         // Prepare destination
         encrypted.resize(context_, context_data.parms_id(), dest_count);
 
-        // Make temp poly for FastBConverter result from q ---> Bsk U {m_tilde}
+        // Make temp poly for BaseConverter result from q ---> Bsk U {m_tilde}
         auto tmp_encrypted_Bsk_m_tilde(allocate_poly(coeff_count * encrypted_size, base_Bsk_m_tilde_size, pool));
 
-        // Make temp poly for FastBConverter result from Bsk U {m_tilde} -----> Bsk
+        // Make temp poly for BaseConverter result from Bsk U {m_tilde} -----> Bsk
         auto tmp_encrypted_Bsk(allocate_poly(coeff_count * encrypted_size, base_Bsk_size, pool));
 
         // Step 0: fast base convert from q to Bsk U {m_tilde}

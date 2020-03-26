@@ -600,7 +600,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_PolyModulusDegree(IntPtr thisptr, out ulong polyModulusDegree);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Ciphertext_CoeffModCount(IntPtr thisptr, out ulong coeffModCount);
+        internal static extern void Ciphertext_CoeffModulusCount(IntPtr thisptr, out ulong coeffModCount);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_ParmsId(IntPtr thisptr, ulong[] parmsId);
