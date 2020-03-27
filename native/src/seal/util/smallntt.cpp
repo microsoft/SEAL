@@ -41,8 +41,6 @@ namespace seal
             scaled_root_powers_.release();
             inv_root_powers_.release();
             scaled_inv_root_powers_.release();
-            inv_root_powers_div_two_.release();
-            scaled_inv_root_powers_div_two_.release();
             inv_degree_modulo_ = 0;
             coeff_count_power_ = 0;
             coeff_count_ = 0;
@@ -66,8 +64,6 @@ namespace seal
             inv_root_powers_ = allocate_uint(coeff_count_, pool_);
             scaled_root_powers_ = allocate_uint(coeff_count_, pool_);
             scaled_inv_root_powers_ = allocate_uint(coeff_count_, pool_);
-            inv_root_powers_div_two_ = allocate_uint(coeff_count_, pool_);
-            scaled_inv_root_powers_div_two_ = allocate_uint(coeff_count_, pool_);
             modulus_ = modulus;
 
             // We defer parameter checking to try_minimal_primitive_root(...)
@@ -93,14 +89,6 @@ namespace seal
             // (root)^{-1} mod q in bit-scrambled order.
             ntt_powers_of_primitive_root(inverse_root, inv_root_powers_.get());
             ntt_scale_powers_of_primitive_root(inv_root_powers_.get(), scaled_inv_root_powers_.get());
-
-            // Populate the tables storing (scaled version of ) 2 times
-            // powers of roots^-1 mod q  in bit-scrambled order.
-            for (size_t i = 0; i < coeff_count_; i++)
-            {
-                inv_root_powers_div_two_[i] = div2_uint_mod(inv_root_powers_[i], modulus_);
-            }
-            ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(), scaled_inv_root_powers_div_two_.get());
 
             // Reordering inv_root_powers_ so that the access pattern in inverse NTT is sequential.
             auto temp = allocate_uint(coeff_count_, pool_);
