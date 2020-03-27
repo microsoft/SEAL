@@ -39,7 +39,11 @@ namespace SEALTest
                 RNSBase base({ 2 }, pool);
                 ASSERT_EQ(size_t(1), base.size());
                 ASSERT_EQ(SmallModulus(2), base[0]);
-                ASSERT_THROW([&]() { return base[1].value(); }(), out_of_range);
+                ASSERT_THROW(
+                    [&]() {
+                        return base[1].value();
+                    }(),
+                    out_of_range);
             }
             {
                 RNSBase base({ 2, 3, 5 }, pool);
@@ -47,7 +51,11 @@ namespace SEALTest
                 ASSERT_EQ(SmallModulus(2), base[0]);
                 ASSERT_EQ(SmallModulus(3), base[1]);
                 ASSERT_EQ(SmallModulus(5), base[2]);
-                ASSERT_THROW([&]() { return base[3].value(); }(), out_of_range);
+                ASSERT_THROW(
+                    [&]() {
+                        return base[3].value();
+                    }(),
+                    out_of_range);
             }
         }
 

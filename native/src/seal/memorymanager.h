@@ -729,7 +729,7 @@ namespace seal
 #ifdef _MSC_VER
         _Acquires_lock_(mm_switch_lock_)
 #endif
-        inline void lock(MMProf *&&mm_prof)
+            inline void lock(MMProf *&&mm_prof)
         {
             if (mm_switch_lock_.owns_lock())
             {
@@ -748,7 +748,7 @@ namespace seal
 #ifdef _MSC_VER
         _Releases_lock_(mm_switch_lock_)
 #endif
-        inline void unlock()
+            inline void unlock()
         {
             if (!mm_switch_lock_.owns_lock())
             {

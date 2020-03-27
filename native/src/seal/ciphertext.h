@@ -690,7 +690,8 @@ namespace seal
         struct CiphertextPrivateHelper;
 
     private:
-        void reserve_internal(std::size_t size_capacity, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count);
+        void reserve_internal(
+            std::size_t size_capacity, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count);
 
         void resize_internal(std::size_t size, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count);
 

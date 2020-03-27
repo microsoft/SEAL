@@ -395,14 +395,16 @@ namespace seal
 
         // First convert all the inputs into NTT form
         auto copy_encrypted1_ntt_q(allocate_poly(coeff_count * encrypted1_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted1.data(), coeff_count * encrypted1_size, coeff_modulus_count, copy_encrypted1_ntt_q.get());
+        set_poly_poly(
+            encrypted1.data(), coeff_count * encrypted1_size, coeff_modulus_count, copy_encrypted1_ntt_q.get());
 
         auto copy_encrypted1_ntt_Bsk(allocate_poly(coeff_count * encrypted1_size, base_Bsk_size, pool));
         set_poly_poly(
             tmp_encrypted1_Bsk.get(), coeff_count * encrypted1_size, base_Bsk_size, copy_encrypted1_ntt_Bsk.get());
 
         auto copy_encrypted2_ntt_q(allocate_poly(coeff_count * encrypted2_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted2.data(), coeff_count * encrypted2_size, coeff_modulus_count, copy_encrypted2_ntt_q.get());
+        set_poly_poly(
+            encrypted2.data(), coeff_count * encrypted2_size, coeff_modulus_count, copy_encrypted2_ntt_q.get());
 
         auto copy_encrypted2_ntt_Bsk(allocate_poly(coeff_count * encrypted2_size, base_Bsk_size, pool));
         set_poly_poly(
@@ -494,9 +496,11 @@ namespace seal
                             coeff_count, coeff_modulus[i], tmp1_poly_q.get() + (i * coeff_count));
                         add_poly_poly_coeffmod(
                             tmp1_poly_q.get() + (i * coeff_count),
-                            tmp_des_q.get() + (i * coeff_count) + (secret_power_index * coeff_count * coeff_modulus_count),
+                            tmp_des_q.get() + (i * coeff_count) +
+                                (secret_power_index * coeff_count * coeff_modulus_count),
                             coeff_count, coeff_modulus[i],
-                            tmp_des_q.get() + (i * coeff_count) + (secret_power_index * coeff_count * coeff_modulus_count));
+                            tmp_des_q.get() + (i * coeff_count) +
+                                (secret_power_index * coeff_count * coeff_modulus_count));
                     }
 
                     // NTT Multiplication and addition for results in Bsk
@@ -665,9 +669,11 @@ namespace seal
                         // Dest[i+j]
                         add_poly_poly_coeffmod(
                             tmp1_poly.get() + (i * coeff_count),
-                            tmp_des.get() + (i * coeff_count) + (secret_power_index * coeff_count * coeff_modulus_count),
+                            tmp_des.get() + (i * coeff_count) +
+                                (secret_power_index * coeff_count * coeff_modulus_count),
                             coeff_count, coeff_modulus[i],
-                            tmp_des.get() + (i * coeff_count) + (secret_power_index * coeff_count * coeff_modulus_count));
+                            tmp_des.get() + (i * coeff_count) +
+                                (secret_power_index * coeff_count * coeff_modulus_count));
                     }
                 }
             }

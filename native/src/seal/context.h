@@ -547,7 +547,8 @@ namespace seal
         */
         SEAL_NODISCARD inline const char *parameter_error_name() const
         {
-            return first_context_data() ? first_context_data()->qualifiers_.parameter_error_name() : "SEALContext is empty";
+            return first_context_data() ? first_context_data()->qualifiers_.parameter_error_name()
+                                        : "SEALContext is empty";
         }
 
         /**
@@ -555,7 +556,8 @@ namespace seal
         */
         SEAL_NODISCARD inline const char *parameter_error_message() const
         {
-            return first_context_data() ? first_context_data()->qualifiers_.parameter_error_message() : "SEALContext is empty";
+            return first_context_data() ? first_context_data()->qualifiers_.parameter_error_message()
+                                        : "SEALContext is empty";
         }
 
         /**
