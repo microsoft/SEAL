@@ -143,11 +143,13 @@ y_combinator<std::decay_t<F>> make_y_combinator(F&& f) {
 
 EMSCRIPTEN_BINDINGS(bindings) {
     emscripten::function("getException", &get_exception);
+    emscripten::function("jsArrayUint8FromVec", select_overload<val(const std::vector<uint8_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayInt32FromVec", select_overload<val(const std::vector<int32_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayUint32FromVec", select_overload<val(const std::vector<uint32_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayDoubleFromVec", select_overload<val(const std::vector<double> &)>(&jsArrayFromVec));
+    emscripten::function("vecFromArrayUint8", select_overload<std::vector<uint8_t>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
-    emscripten::function("vecFromArrayUInt32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
+    emscripten::function("vecFromArrayUint32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayDouble", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
     emscripten::function("gcd", optional_override([](std::string a, std::string b) {
             uint64_t aa;
@@ -164,6 +166,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     register_vector<Plaintext>("std::vector<Plaintext>");
     register_vector<Ciphertext>("std::vector<Ciphertext>");
+    register_vector<uint8_t>("std::vector<uint8_t>");
     register_vector<int32_t>("std::vector<int32_t>");
     register_vector<uint32_t>("std::vector<uint32_t>");
     register_vector<double>("std::vector<double>");
@@ -255,11 +258,38 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::string encoded = b64encode(contents);
             return encoded;
         }))
+        .function("saveToArray", optional_override([](SmallModulus &self,
+            compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
+        }))
         .function("loadFromString", optional_override([](SmallModulus &self,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(is);
+        }))
+        .function("loadFromArray", optional_override([](SmallModulus &self,
+            const val &v) {
+            // Get the size of the TypedArray input
+            const size_t length = v["length"].as<unsigned>();
+            // Create a temporary vector to store the TypedArray values
+            std::vector<std::uint8_t> temp;
+            // Resize to the number of elements in the TypedArray
+            temp.resize(length);
+            // Construct a memory view on the temp vector
+            const val memoryView { typed_memory_view(length, temp.data()) };
+            // Set the data in the vector from the JS side.
+            memoryView.call<void>("set", v);
+            // Convert the vector into a stringstream
+            std::stringstream ss;
+            // Copy the vector to the stringstream
+            std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::uint8_t>(ss));
+            // Load from the stringstream
+            self.load(ss);
         }))
         .function("setValue", optional_override([](SmallModulus &self,
             const std::string &v) {
@@ -301,11 +331,38 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::string encoded = b64encode(contents);
             return encoded;
         }))
+        .function("saveToArray", optional_override([](EncryptionParameters &self,
+            compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
+        }))
         .function("loadFromString", optional_override([](EncryptionParameters &self,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(is);
+        }))
+        .function("loadFromArray", optional_override([](EncryptionParameters &self,
+            const val &v) {
+            // Get the size of the TypedArray input
+            const size_t length = v["length"].as<unsigned>();
+            // Create a temporary vector to store the TypedArray values
+            std::vector<std::uint8_t> temp;
+            // Resize to the number of elements in the TypedArray
+            temp.resize(length);
+            // Construct a memory view on the temp vector
+            const val memoryView { typed_memory_view(length, temp.data()) };
+            // Set the data in the vector from the JS side.
+            memoryView.call<void>("set", v);
+            // Convert the vector into a stringstream
+            std::stringstream ss;
+            // Copy the vector to the stringstream
+            std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::uint8_t>(ss));
+            // Load from the stringstream
+            self.load(ss);
         }));
 
     class_<EncryptionParameterQualifiers>("EncryptionParameterQualifiers")
@@ -536,12 +593,39 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::string encoded = b64encode(contents);
             return encoded;
         }))
+        .function("saveToArray", optional_override([](KSwitchKeys &self,
+            compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
+        }))
         .function("loadFromString", optional_override([](KSwitchKeys &self,
             std::shared_ptr<SEALContext>context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
+        }))
+        .function("loadFromArray", optional_override([](KSwitchKeys &self,
+            std::shared_ptr<SEALContext>context, const val &v) {
+            // Get the size of the TypedArray input
+            const size_t length = v["length"].as<unsigned>();
+            // Create a temporary vector to store the TypedArray values
+            std::vector<std::uint8_t> temp;
+            // Resize to the number of elements in the TypedArray
+            temp.resize(length);
+            // Construct a memory view on the temp vector
+            const val memoryView { typed_memory_view(length, temp.data()) };
+            // Set the data in the vector from the JS side.
+            memoryView.call<void>("set", v);
+            // Convert the vector into a stringstream
+            std::stringstream ss;
+            // Copy the vector to the stringstream
+            std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::uint8_t>(ss));
+            // Load from the stringstream
+            self.load(context, ss);
         }));
 
     class_<RelinKeys, base<KSwitchKeys>> ("RelinKeys")
@@ -627,12 +711,39 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::string encoded = b64encode(contents);
             return encoded;
         }))
+        .function("saveToArray", optional_override([](PublicKey &self,
+            compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
+        }))
         .function("loadFromString", optional_override([](PublicKey &self,
             std::shared_ptr<SEALContext>context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
+        }))
+        .function("loadFromArray", optional_override([](PublicKey &self,
+            std::shared_ptr<SEALContext>context, const val &v) {
+            // Get the size of the TypedArray input
+            const size_t length = v["length"].as<unsigned>();
+            // Create a temporary vector to store the TypedArray values
+            std::vector<std::uint8_t> temp;
+            // Resize to the number of elements in the TypedArray
+            temp.resize(length);
+            // Construct a memory view on the temp vector
+            const val memoryView { typed_memory_view(length, temp.data()) };
+            // Set the data in the vector from the JS side.
+            memoryView.call<void>("set", v);
+            // Convert the vector into a stringstream
+            std::stringstream ss;
+            // Copy the vector to the stringstream
+            std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::uint8_t>(ss));
+            // Load from the stringstream
+            self.load(context, ss);
         }));
 
     class_<SecretKey>("SecretKey")
@@ -657,12 +768,39 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::string encoded = b64encode(contents);
             return encoded;
         }))
+        .function("saveToArray", optional_override([](SecretKey &self,
+            compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
+        }))
         .function("loadFromString", optional_override([](SecretKey &self,
             std::shared_ptr<SEALContext>context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
+        }))
+        .function("loadFromArray", optional_override([](SecretKey &self,
+            std::shared_ptr<SEALContext>context, const val &v) {
+            // Get the size of the TypedArray input
+            const size_t length = v["length"].as<unsigned>();
+            // Create a temporary vector to store the TypedArray values
+            std::vector<std::uint8_t> temp;
+            // Resize to the number of elements in the TypedArray
+            temp.resize(length);
+            // Construct a memory view on the temp vector
+            const val memoryView { typed_memory_view(length, temp.data()) };
+            // Set the data in the vector from the JS side.
+            memoryView.call<void>("set", v);
+            // Convert the vector into a stringstream
+            std::stringstream ss;
+            // Copy the vector to the stringstream
+            std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::uint8_t>(ss));
+            // Load from the stringstream
+            self.load(context, ss);
         }));
 
     class_<Plaintext>("Plaintext")
@@ -688,12 +826,39 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::string encoded = b64encode(contents);
             return encoded;
         }))
+        .function("saveToArray", optional_override([](Plaintext &self,
+            compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
+        }))
         .function("loadFromString", optional_override([](Plaintext &self,
             std::shared_ptr<SEALContext>context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
+        }))
+        .function("loadFromArray", optional_override([](Plaintext &self,
+            std::shared_ptr<SEALContext>context, const val &v) {
+            // Get the size of the TypedArray input
+            const size_t length = v["length"].as<unsigned>();
+            // Create a temporary vector to store the TypedArray values
+            std::vector<std::uint8_t> temp;
+            // Resize to the number of elements in the TypedArray
+            temp.resize(length);
+            // Construct a memory view on the temp vector
+            const val memoryView { typed_memory_view(length, temp.data()) };
+            // Set the data in the vector from the JS side.
+            memoryView.call<void>("set", v);
+            // Convert the vector into a stringstream
+            std::stringstream ss;
+            // Copy the vector to the stringstream
+            std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::uint8_t>(ss));
+            // Load from the stringstream
+            self.load(context, ss);
         }))
         .function("reserve", &Plaintext::reserve)
         .function("shrinkToFit", &Plaintext::shrink_to_fit)
@@ -745,12 +910,39 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::string encoded = b64encode(contents);
             return encoded;
         }))
+        .function("saveToArray", optional_override([](Ciphertext &self,
+            compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
+        }))
         .function("loadFromString", optional_override([](Ciphertext &self,
             std::shared_ptr<SEALContext>context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
+        }))
+        .function("loadFromArray", optional_override([](Ciphertext &self,
+            std::shared_ptr<SEALContext>context, const val &v) {
+            // Get the size of the TypedArray input
+            const size_t length = v["length"].as<unsigned>();
+            // Create a temporary vector to store the TypedArray values
+            std::vector<std::uint8_t> temp;
+            // Resize to the number of elements in the TypedArray
+            temp.resize(length);
+            // Construct a memory view on the temp vector
+            const val memoryView { typed_memory_view(length, temp.data()) };
+            // Set the data in the vector from the JS side.
+            memoryView.call<void>("set", v);
+            // Convert the vector into a stringstream
+            std::stringstream ss;
+            // Copy the vector to the stringstream
+            std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::uint8_t>(ss));
+            // Load from the stringstream
+            self.load(context, ss);
         }))
         .function("reserve", optional_override([](Ciphertext &self,
                     std::shared_ptr<SEALContext>context,
