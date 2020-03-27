@@ -369,7 +369,8 @@ namespace seal
             increment_uint(
                 context_data.total_coeff_modulus(), coeff_modulus_count, context_data.upper_half_threshold_.get());
             right_shift_uint(
-                context_data.upper_half_threshold_.get(), 1, coeff_modulus_count, context_data.upper_half_threshold_.get());
+                context_data.upper_half_threshold_.get(), 1, coeff_modulus_count,
+                context_data.upper_half_threshold_.get());
         }
         else
         {

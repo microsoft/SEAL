@@ -231,9 +231,7 @@ namespace seal
 
                 constexpr int Z_OK = 0;
                 if (ztools::inflate_stream(
-                        stream,
-                        safe_cast<streamoff>(compr_size),
-                        temp_stream,
+                        stream, safe_cast<streamoff>(compr_size), temp_stream,
                         MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)) != Z_OK)
                 {
                     throw logic_error("stream inflate failed");

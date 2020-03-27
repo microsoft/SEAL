@@ -5,9 +5,9 @@
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
+#include <numeric>
 #include <random>
 #include <tuple>
-#include <numeric>
 
 using namespace std;
 
