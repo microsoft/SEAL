@@ -100,7 +100,7 @@ namespace seal
                     *temp_ptr++ = inv_root_powers_[m + i];
                 }
             }
-            set_uint_uint(temp.get(), coeff_count_, inv_root_powers_.get());
+            set_uint_uint(temp.get() + 1, coeff_count_ - 1, inv_root_powers_.get() + 1);
 
             temp_ptr = temp.get() + 1;
             for (size_t m = (coeff_count_ >> 1); m > 0; m >>= 1)
@@ -110,7 +110,7 @@ namespace seal
                     *temp_ptr++ = scaled_inv_root_powers_[m + i];
                 }
             }
-            set_uint_uint(temp.get(), coeff_count_, scaled_inv_root_powers_.get());
+            set_uint_uint(temp.get() + 1, coeff_count_ - 1, scaled_inv_root_powers_.get() + 1);
 
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
