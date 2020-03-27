@@ -101,29 +101,29 @@ namespace seal
                 inv_root_powers_div_two_[i] = div2_uint_mod(inv_root_powers_[i], modulus_);
             }
             ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(), scaled_inv_root_powers_div_two_.get());
-            /*
-                        // Reordering inv_root_powers_ so that the access pattern in inverse NTT is sequential.
-                        auto temp = allocate_uint(coeff_count_, pool_);
-                        uint64_t *temp_ptr = temp.get() + 1;
-                        for (size_t i = coeff_count_ / 2; i > 0; i /= 2)
-                        {
-                            for (size_t j = i; j < i * 2; j++)
-                            {
-                                *temp_ptr++ = inv_root_powers_[j];
-                            }
-                        }
-                        set_uint_uint(temp.get(), coeff_count_, inv_root_powers_.get());
 
-                        temp_ptr = temp.get() + 1;
-                        for (size_t i = coeff_count_ / 2; i > 0; i /= 2)
-                        {
-                            for (size_t j = i; j < i * 2; j++)
-                            {
-                                *temp_ptr++ = scaled_inv_root_powers_[j];
-                            }
-                        }
-                        set_uint_uint(temp.get(), coeff_count_, scaled_inv_root_powers_.get());
-            */
+            // Reordering inv_root_powers_ so that the access pattern in inverse NTT is sequential.
+            auto temp = allocate_uint(coeff_count_, pool_);
+            uint64_t *temp_ptr = temp.get() + 1;
+            for (size_t m = (coeff_count_ >> 1); m > 0; m >>= 1)
+            {
+                for (size_t i = 0; i < m; i++)
+                {
+                    *temp_ptr++ = inv_root_powers_[m + i];
+                }
+            }
+            set_uint_uint(temp.get(), coeff_count_, inv_root_powers_.get());
+
+            temp_ptr = temp.get() + 1;
+            for (size_t m = (coeff_count_ >> 1); m > 0; m >>= 1)
+            {
+                for (size_t i = 0; i < m; i++)
+                {
+                    *temp_ptr++ = scaled_inv_root_powers_[m + i];
+                }
+            }
+            set_uint_uint(temp.get(), coeff_count_, scaled_inv_root_powers_.get());
+
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
             is_initialized_ = try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_);
@@ -197,37 +197,37 @@ namespace seal
 
                         uint64_t *X = operand + j1;
                         uint64_t *Y = X + t;
-                        uint64_t currX;
+                        uint64_t tx;
                         unsigned long long Q;
                         for (size_t j = j1; j < j2; j += 4)
                         {
-                            currX = *X - (two_times_modulus &
+                            tx = *X - (two_times_modulus &
                                           static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
+                            *X++ = tx + Q;
+                            *Y++ = tx + two_times_modulus - Q;
 
-                            currX = *X - (two_times_modulus &
+                            tx = *X - (two_times_modulus &
                                           static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
+                            *X++ = tx + Q;
+                            *Y++ = tx + two_times_modulus - Q;
 
-                            currX = *X - (two_times_modulus &
+                            tx = *X - (two_times_modulus &
                                           static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
+                            *X++ = tx + Q;
+                            *Y++ = tx + two_times_modulus - Q;
 
-                            currX = *X - (two_times_modulus &
+                            tx = *X - (two_times_modulus &
                                           static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
+                            *X++ = tx + Q;
+                            *Y++ = tx + two_times_modulus - Q;
                         }
                         j1 += (t << 1);
                     }
@@ -242,18 +242,18 @@ namespace seal
 
                         uint64_t *X = operand + j1;
                         uint64_t *Y = X + t;
-                        uint64_t currX;
+                        uint64_t tx;
                         unsigned long long Q;
                         for (size_t j = j1; j < j2; j++)
                         {
                             // The Harvey butterfly: assume X, Y in [0, 2p), and return X', Y' in [0, 4p).
                             // X', Y' = X + WY, X - WY (mod p).
-                            currX = *X - (two_times_modulus &
+                            tx = *X - (two_times_modulus &
                                           static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = W * *Y - Q * modulus;
-                            *X++ = currX + Q;
-                            *Y++ = currX + (two_times_modulus - Q);
+                            *X++ = tx + Q;
+                            *Y++ = tx + two_times_modulus - Q;
                         }
                         j1 += (t << 1);
                     }
@@ -277,91 +277,113 @@ namespace seal
             // return the bit-reversed order of NTT.
             size_t n = size_t(1) << tables.coeff_count_power();
             size_t t = 1;
-            for (size_t m = (n >> 1); m > 0; m >>= 1)
+            size_t root_index = 1;
+            for (size_t m = (n >> 1); m > 1; m >>= 1)
             {
                 size_t j1 = 0;
                 if (t >= 4)
                 {
-                    for (size_t i = 0; i < m; i++)
+                    for (size_t i = 0; i < m; i++, root_index++)
                     {
                         size_t j2 = j1 + t;
-                        const uint64_t W = tables.get_from_inv_root_powers(m + i);
-                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers(m + i);
+                        const uint64_t W = tables.get_from_inv_root_powers(root_index);
+                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers(root_index);
 
                         uint64_t *X = operand + j1;
                         uint64_t *Y = X + t;
-                        uint64_t currX;
-                        uint64_t T;
+                        uint64_t tx;
+                        uint64_t ty;
                         unsigned long long Q;
                         for (size_t j = j1; j < j2; j += 4)
                         {
-                            T = *X + two_times_modulus - *Y;
-                            currX = *X + *Y;
-                            currX -= two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = currX;
-                            multiply_uint64_hw64(Wprime, T, &Q);
-                            *Y++ = T * W - Q * modulus;
+                            tx = *X + *Y;
+                            ty = *X + two_times_modulus - *Y;
+                            *X++ = tx - (two_times_modulus &
+                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                            multiply_uint64_hw64(Wprime, ty, &Q);
+                            *Y++ = ty * W - Q * modulus;
 
-                            T = *X + two_times_modulus - *Y;
-                            currX = *X + *Y;
-                            currX -= two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = currX;
-                            multiply_uint64_hw64(Wprime, T, &Q);
-                            *Y++ = T * W - Q * modulus;
+                            tx = *X + *Y;
+                            ty = *X + two_times_modulus - *Y;
+                            *X++ = tx - (two_times_modulus &
+                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                            multiply_uint64_hw64(Wprime, ty, &Q);
+                            *Y++ = ty * W - Q * modulus;
 
-                            T = *X + two_times_modulus - *Y;
-                            currX = *X + *Y;
-                            currX -= two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = currX;
-                            multiply_uint64_hw64(Wprime, T, &Q);
-                            *Y++ = T * W - Q * modulus;
+                            tx = *X + *Y;
+                            ty = *X + two_times_modulus - *Y;
+                            *X++ = tx - (two_times_modulus &
+                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                            multiply_uint64_hw64(Wprime, ty, &Q);
+                            *Y++ = ty * W - Q * modulus;
 
-                            T = *X + two_times_modulus - *Y;
-                            currX = *X + *Y;
-                            currX -= two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = currX;
-                            multiply_uint64_hw64(Wprime, T, &Q);
-                            *Y++ = T * W - Q * modulus;
+                            tx = *X + *Y;
+                            ty = *X + two_times_modulus - *Y;
+                            *X++ = tx - (two_times_modulus &
+                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                            multiply_uint64_hw64(Wprime, ty, &Q);
+                            *Y++ = ty * W - Q * modulus;
                         }
                         j1 += (t << 1);
                     }
                 }
                 else
                 {
-                    for (size_t i = 0; i < m; i++)
+                    for (size_t i = 0; i < m; i++, root_index++)
                     {
                         size_t j2 = j1 + t;
-                        const uint64_t W = tables.get_from_inv_root_powers(m + i);
-                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers(m + i);
+                        const uint64_t W = tables.get_from_inv_root_powers(root_index);
+                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers(root_index);
 
                         uint64_t *X = operand + j1;
                         uint64_t *Y = X + t;
-                        uint64_t currX;
-                        uint64_t T;
+                        uint64_t tx;
+                        uint64_t ty;
                         unsigned long long Q;
                         for (size_t j = j1; j < j2; j++)
                         {
-                            T = *X + two_times_modulus - *Y;
-                            currX = *X + *Y;
-                            currX -= two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = currX;
-                            multiply_uint64_hw64(Wprime, T, &Q);
-                            *Y++ = W * T - Q * modulus;
+                            tx = *X + *Y;
+                            ty = *X + two_times_modulus - *Y;
+                            *X++ = tx - (two_times_modulus &
+                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                            multiply_uint64_hw64(Wprime, ty, &Q);
+                            *Y++ = ty * W - Q * modulus;
                         }
                         j1 += (t << 1);
                     }
                 }
                 t <<= 1;
             }
+
             const uint64_t inv_N = *(tables.get_inv_degree_modulo());
-            for (size_t j = 0; j < n; j++)
+            const uint64_t W = tables.get_from_inv_root_powers(root_index);
+            const uint64_t inv_N_W = multiply_uint_uint_mod(inv_N, W, tables.modulus());
+            uint64_t wide_quotient[2]{ 0, 0 };
+            uint64_t wide_coeff[2]{ 0, inv_N };
+            divide_uint128_uint64_inplace(wide_coeff, modulus, wide_quotient);
+            const uint64_t inv_Nprime = wide_quotient[0];
+            wide_quotient[0] = 0;
+            wide_quotient[1] = 0;
+            wide_coeff[0] = 0;
+            wide_coeff[1] = inv_N_W;
+            divide_uint128_uint64_inplace(wide_coeff, modulus, wide_quotient);
+            const uint64_t inv_N_Wprime = wide_quotient[0];
+
+            uint64_t *X = operand;
+            uint64_t *Y = X + (n >> 1);
+            uint64_t tx;
+            uint64_t ty;
+            unsigned long long Q;
+            for (size_t j = (n >> 1); j < n; j++)
             {
-                operand[j] = multiply_uint_uint_mod(operand[j], inv_N, modulus);
+                tx = *X + *Y;
+                tx -= two_times_modulus &
+                            static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus));
+                ty = *X + two_times_modulus - *Y;
+                multiply_uint64_hw64(inv_Nprime, tx, &Q);
+                *X++ = inv_N * tx - Q * modulus;
+                multiply_uint64_hw64(inv_N_Wprime, ty, &Q);
+                *Y++ = inv_N_W * ty - Q * modulus;
             }
         }
     } // namespace util
