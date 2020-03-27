@@ -285,8 +285,8 @@ namespace seal
                     for (size_t i = 0; i < m; i++)
                     {
                         size_t j2 = j1 + t;
-                        const uint64_t W = tables.get_from_inv_root_powers_div_two(m + i);
-                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers_div_two(m + i);
+                        const uint64_t W = tables.get_from_inv_root_powers(m + i);
+                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers(m + i);
 
                         uint64_t *X = operand + j1;
                         uint64_t *Y = X + t;
@@ -299,7 +299,7 @@ namespace seal
                             currX = *X + *Y;
                             currX -= two_times_modulus &
                                      static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = (currX + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
+                            *X++ = currX;
                             multiply_uint64_hw64(Wprime, T, &Q);
                             *Y++ = T * W - Q * modulus;
 
@@ -307,7 +307,7 @@ namespace seal
                             currX = *X + *Y;
                             currX -= two_times_modulus &
                                      static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = (currX + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
+                            *X++ = currX;
                             multiply_uint64_hw64(Wprime, T, &Q);
                             *Y++ = T * W - Q * modulus;
 
@@ -315,7 +315,7 @@ namespace seal
                             currX = *X + *Y;
                             currX -= two_times_modulus &
                                      static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = (currX + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
+                            *X++ = currX;
                             multiply_uint64_hw64(Wprime, T, &Q);
                             *Y++ = T * W - Q * modulus;
 
@@ -323,7 +323,7 @@ namespace seal
                             currX = *X + *Y;
                             currX -= two_times_modulus &
                                      static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = (currX + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
+                            *X++ = currX;
                             multiply_uint64_hw64(Wprime, T, &Q);
                             *Y++ = T * W - Q * modulus;
                         }
@@ -335,8 +335,8 @@ namespace seal
                     for (size_t i = 0; i < m; i++)
                     {
                         size_t j2 = j1 + t;
-                        const uint64_t W = tables.get_from_inv_root_powers_div_two(m + i);
-                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers_div_two(m + i);
+                        const uint64_t W = tables.get_from_inv_root_powers(m + i);
+                        const uint64_t Wprime = tables.get_from_scaled_inv_root_powers(m + i);
 
                         uint64_t *X = operand + j1;
                         uint64_t *Y = X + t;
@@ -349,7 +349,7 @@ namespace seal
                             currX = *X + *Y;
                             currX -= two_times_modulus &
                                      static_cast<uint64_t>(-static_cast<int64_t>(currX >= two_times_modulus));
-                            *X++ = (currX + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
+                            *X++ = currX;
                             multiply_uint64_hw64(Wprime, T, &Q);
                             *Y++ = W * T - Q * modulus;
                         }
@@ -357,6 +357,11 @@ namespace seal
                     }
                 }
                 t <<= 1;
+            }
+            const uint64_t inv_N = *(tables.get_inv_degree_modulo());
+            for (size_t j = 0; j < n; j++)
+            {
+                operand[j] = multiply_uint_uint_mod(operand[j], inv_N, modulus);
             }
         }
     } // namespace util
