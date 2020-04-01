@@ -165,8 +165,14 @@ SEAL_C_FUNC SEALContext_ParameterErrorName(void *thisptr, char *outstr, uint64_t
     IfNullRet(context, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    string str = context->parameter_error_name();
-    return ToStringHelper(str, outstr, length);
+    const char *str = context->parameter_error_name();
+    *length = static_cast<uint64_t>(strlen(str));
+
+    if (nullptr != outstr)
+    {
+        memcpy(outstr, str, *length);
+    }
+    return S_OK;
 }
 
 SEAL_C_FUNC SEALContext_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length)
@@ -175,6 +181,12 @@ SEAL_C_FUNC SEALContext_ParameterErrorMessage(void *thisptr, char *outstr, uint6
     IfNullRet(context, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    string str = context->parameter_error_message();
-    return ToStringHelper(str, outstr, length);
+    const char *str = context->parameter_error_message();
+    *length = static_cast<uint64_t>(strlen(str));
+
+    if (nullptr != outstr)
+    {
+        memcpy(outstr, str, *length);
+    }
+    return S_OK;
 }

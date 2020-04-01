@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 // STD
-#include <string>
+#include <string.h>
 
 // SEALNet
 #include "seal/c/encryptionparameterqualifiers.h"
@@ -113,20 +113,12 @@ SEAL_C_FUNC EPQ_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length
     IfNullRet(length, E_POINTER);
 
     const char *str = epq->parameter_error_name();
+    *length = static_cast<uint64_t>(strlen(str));
 
-    uint64_t result_length = util::add_safe(static_cast<uint64_t>(strlen(str)), uint64_t(1));
-    if (nullptr == outstr)
+    if (nullptr != outstr)
     {
-        // We need to return the string length.
-        // The string length will include the terminating character.
-        *length = result_length;
-        return S_OK;
+        memcpy(outstr, str, *length);
     }
-
-    *length = result_length;
-
-    fill_n(outstr, *length, char(0));
-    strncpy(outstr, str, result_length);
     return S_OK;
 }
 
@@ -137,19 +129,11 @@ SEAL_C_FUNC EPQ_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *len
     IfNullRet(length, E_POINTER);
 
     const char *str = epq->parameter_error_message();
+    *length = static_cast<uint64_t>(strlen(str));
 
-    uint64_t result_length = util::add_safe(static_cast<uint64_t>(strlen(str)), uint64_t(1));
-    if (nullptr == outstr)
+    if (nullptr != outstr)
     {
-        // We need to return the string length.
-        // The string length will include the terminating character.
-        *length = result_length;
-        return S_OK;
+        memcpy(outstr, str, *length);
     }
-
-    *length = result_length;
-
-    fill_n(outstr, *length, char(0));
-    strncpy(outstr, str, result_length);
     return S_OK;
 }

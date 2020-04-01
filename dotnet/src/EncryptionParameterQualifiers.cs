@@ -69,9 +69,9 @@ namespace Microsoft.Research.SEAL
         public string ParametersErrorName()
         {
             NativeMethods.EPQ_ParameterErrorName(NativePtr, null, out ulong length);
-            StringBuilder buffer = new StringBuilder(checked((int)length));
+            byte[] buffer = new byte[length];
             NativeMethods.EPQ_ParameterErrorName(NativePtr, buffer, out length);
-            return buffer.ToString();
+            return Encoding.ASCII.GetString(buffer);
         }
 
         /// <summary>
@@ -81,9 +81,9 @@ namespace Microsoft.Research.SEAL
         public string ParametersErrorMessage()
         {
             NativeMethods.EPQ_ParameterErrorMessage(NativePtr, null, out ulong length);
-            StringBuilder buffer = new StringBuilder(checked((int)length));
+            byte[] buffer = new byte[length];
             NativeMethods.EPQ_ParameterErrorMessage(NativePtr, buffer, out length);
-            return buffer.ToString();
+            return Encoding.ASCII.GetString(buffer);
         }
 
         /// <summary>

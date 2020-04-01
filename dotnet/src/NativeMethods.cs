@@ -226,11 +226,11 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void EPQ_SecLevel(IntPtr thisptr, out int secLevel);
 
-        [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void EPQ_ParameterErrorName(IntPtr thisptr, StringBuilder outstr, out ulong length);
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void EPQ_ParameterErrorName(IntPtr thisptr, byte[] outstr, out ulong length);
 
-        [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void EPQ_ParameterErrorMessage(IntPtr thisptr, StringBuilder outstr, out ulong length);
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void EPQ_ParameterErrorMessage(IntPtr thisptr, byte[] outstr, out ulong length);
 
         #endregion
 
@@ -395,11 +395,11 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void SEALContext_ParametersSet(IntPtr thisptr, out bool paramsSet);
 
-        [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void SEALContext_ParameterErrorName(IntPtr thisptr, StringBuilder outstr, ref ulong length);
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void SEALContext_ParameterErrorName(IntPtr thisptr, byte[] outstr, out ulong length);
 
-        [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void SEALContext_ParameterErrorMessage(IntPtr thisptr, StringBuilder outstr, ref ulong length);
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void SEALContext_ParameterErrorMessage(IntPtr thisptr, byte[] outstr, out ulong length);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void SEALContext_KeyContextData(IntPtr thisptr, out IntPtr contextData);
