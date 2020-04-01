@@ -92,16 +92,16 @@ SEAL_C_FUNC Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memo
     }
 }
 
-SEAL_C_FUNC Plaintext_Create4(char *hexPoly, void *memoryPoolHandle, void **plaintext)
+SEAL_C_FUNC Plaintext_Create4(char *hex_poly, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
-    IfNullRet(hexPoly, E_POINTER);
+    IfNullRet(hex_poly, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
-    string hexPolyStr(hexPoly);
+    string hex_poly_str(hex_poly);
 
     try
     {
-        Plaintext *plain = new Plaintext(hexPolyStr, *handle);
+        Plaintext *plain = new Plaintext(hex_poly_str, *handle);
         *plaintext = plain;
         return S_OK;
     }
@@ -223,21 +223,13 @@ SEAL_C_FUNC Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value)
     }
 }
 
-SEAL_C_FUNC Plaintext_ToString(void *thispt, uint64_t *length, char *outstr)
+SEAL_C_FUNC Plaintext_ToString(void *thispt, char *outstr, uint64_t *length)
 {
     Plaintext *plain = FromVoid<Plaintext>(thispt);
     IfNullRet(plain, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    try
-    {
-        string str = plain->to_string();
-        return ToStringHelper(str, outstr, length);
-    }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    ToStringHelper(plain->to_string(), outstr, length);
 }
 
 SEAL_C_FUNC Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form)

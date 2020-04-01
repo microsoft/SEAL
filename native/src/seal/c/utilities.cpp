@@ -79,24 +79,22 @@ const shared_ptr<SEALContext> &seal::c::SharedContextFromVoid(void *context)
 
 HRESULT seal::c::ToStringHelper(const string &str, char *outstr, uint64_t *length)
 {
-    uint64_t result_length = add_safe(static_cast<uint64_t>(str.length()), uint64_t(1));
-    if (nullptr == outstr)
+    *length = static_cast<uint64_t>(str.size());
+
+    if (nullptr != outstr)
     {
-        // We need to return the string length.
-        // The string length will include the terminating character.
-        *length = result_length;
-        return S_OK;
+        memcpy(outstr, str.c_str(), util::add_safe(*length, uint64_t(1)));
     }
+    return S_OK;
+}
 
-    // Verify the string fits
-    if (*length < result_length)
+HRESULT seal::c::ToStringHelper2(const char *str, char *outstr, uint64_t *length)
+{
+    *length = static_cast<uint64_t>(strlen(str));
+
+    if (nullptr != outstr)
     {
-        *length = result_length;
-        return HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
+        memcpy(outstr, str, util::add_safe(*length, uint64_t(1)));
     }
-
-    fill_n(outstr, *length, char(0));
-    str.copy(outstr, str.length());
-
     return S_OK;
 }
