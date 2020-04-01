@@ -112,14 +112,7 @@ SEAL_C_FUNC EPQ_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length
     IfNullRet(epq, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    const char *str = epq->parameter_error_name();
-    *length = static_cast<uint64_t>(strlen(str));
-
-    if (nullptr != outstr)
-    {
-        memcpy(outstr, str, *length);
-    }
-    return S_OK;
+    return ToStringHelper2(epq->parameter_error_name(), outstr, length);
 }
 
 SEAL_C_FUNC EPQ_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length)
@@ -128,12 +121,5 @@ SEAL_C_FUNC EPQ_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *len
     IfNullRet(epq, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    const char *str = epq->parameter_error_message();
-    *length = static_cast<uint64_t>(strlen(str));
-
-    if (nullptr != outstr)
-    {
-        memcpy(outstr, str, *length);
-    }
-    return S_OK;
+    return ToStringHelper2(epq->parameter_error_message(), outstr, length);
 }

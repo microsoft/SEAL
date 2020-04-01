@@ -357,8 +357,7 @@ SEAL_C_FUNC BigUInt_ToString(void *thisptr, char *outstr, uint64_t *length)
     IfNullRet(biguint, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    string str = biguint->to_string();
-    return ToStringHelper(str, outstr, length);
+    return ToStringHelper(biguint->to_string(), outstr, length);
 }
 
 SEAL_C_FUNC BigUInt_ToDecimalString(void *thisptr, char *outstr, uint64_t *length)
@@ -367,8 +366,7 @@ SEAL_C_FUNC BigUInt_ToDecimalString(void *thisptr, char *outstr, uint64_t *lengt
     IfNullRet(biguint, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    string str = biguint->to_dec_string();
-    return ToStringHelper(str, outstr, length);
+    return ToStringHelper(biguint->to_dec_string(), outstr, length);
 }
 
 SEAL_C_FUNC BigUInt_DuplicateTo(void *thisptr, void *destination)

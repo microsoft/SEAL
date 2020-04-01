@@ -106,10 +106,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void BigUInt_DivideRemainder(IntPtr thisptr, ulong operand2, IntPtr remainder, out IntPtr result);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void BigUInt_ToString(IntPtr thisptr, StringBuilder outstr, ref ulong length);
+        internal static extern void BigUInt_ToString(IntPtr thisptr, StringBuilder outstr, out ulong length);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void BigUInt_ToDecimalString(IntPtr thisptr, StringBuilder outstr, ref ulong length);
+        internal static extern void BigUInt_ToDecimalString(IntPtr thisptr, StringBuilder outstr, out ulong length);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
         internal static extern void BigUInt_DuplicateTo(IntPtr thisptr, IntPtr destination);
@@ -226,11 +226,11 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void EPQ_SecLevel(IntPtr thisptr, out int secLevel);
 
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void EPQ_ParameterErrorName(IntPtr thisptr, byte[] outstr, out ulong length);
+        [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
+        internal static extern void EPQ_ParameterErrorName(IntPtr thisptr, StringBuilder outstr, out ulong length);
 
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void EPQ_ParameterErrorMessage(IntPtr thisptr, byte[] outstr, out ulong length);
+        [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
+        internal static extern void EPQ_ParameterErrorMessage(IntPtr thisptr, StringBuilder outstr, out ulong length);
 
         #endregion
 
@@ -703,7 +703,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_SetCoeffAt(IntPtr thisptr, ulong index, ulong value);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void Plaintext_ToString(IntPtr thisptr, ref ulong length, StringBuilder outstr);
+        internal static extern void Plaintext_ToString(IntPtr thisptr, StringBuilder outstr, out ulong length);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Plaintext_IsNTTForm(IntPtr thisptr, out bool isNTTForm);

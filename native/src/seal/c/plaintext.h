@@ -19,7 +19,7 @@ SEAL_C_FUNC Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void 
 
 SEAL_C_FUNC Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memoryPoolHandle, void **plaintext);
 
-SEAL_C_FUNC Plaintext_Create4(char *hexPoly, void *memoryPoolHandle, void **plaintext);
+SEAL_C_FUNC Plaintext_Create4(char *hex_poly, void *memoryPoolHandle, void **plaintext);
 
 SEAL_C_FUNC Plaintext_Create5(void *copy, void **plaintext);
 
@@ -37,7 +37,7 @@ SEAL_C_FUNC Plaintext_CoeffAt(void *thisptr, uint64_t index, uint64_t *coeff);
 
 SEAL_C_FUNC Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value);
 
-SEAL_C_FUNC Plaintext_ToString(void *thispt, uint64_t *length, char *outstr);
+SEAL_C_FUNC Plaintext_ToString(void *thispt, char *outstr, uint64_t *length);
 
 SEAL_C_FUNC Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form);
 
