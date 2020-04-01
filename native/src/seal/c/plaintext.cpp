@@ -229,7 +229,7 @@ SEAL_C_FUNC Plaintext_ToString(void *thispt, char *outstr, uint64_t *length)
     IfNullRet(plain, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    ToStringHelper(plain->to_string(), outstr, length);
+    return ToStringHelper(plain->to_string(), outstr, length);
 }
 
 SEAL_C_FUNC Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form)

@@ -106,10 +106,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void BigUInt_DivideRemainder(IntPtr thisptr, ulong operand2, IntPtr remainder, out IntPtr result);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void BigUInt_ToString(IntPtr thisptr, StringBuilder outstr, ref ulong length);
+        internal static extern void BigUInt_ToString(IntPtr thisptr, StringBuilder outstr, out ulong length);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void BigUInt_ToDecimalString(IntPtr thisptr, StringBuilder outstr, ref ulong length);
+        internal static extern void BigUInt_ToDecimalString(IntPtr thisptr, StringBuilder outstr, out ulong length);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
         internal static extern void BigUInt_DuplicateTo(IntPtr thisptr, IntPtr destination);

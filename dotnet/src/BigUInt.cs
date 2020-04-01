@@ -511,14 +511,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public string ToDecimalString()
         {
-            ulong length = 0;
-
-            // Get string length
-            NativeMethods.BigUInt_ToDecimalString(NativePtr, null, ref length);
-
-            // Now get the string
+            NativeMethods.BigUInt_ToDecimalString(NativePtr, null, length: out ulong length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.BigUInt_ToDecimalString(NativePtr, buffer, ref length);
+            NativeMethods.BigUInt_ToDecimalString(NativePtr, buffer, out length);
             return buffer.ToString();
         }
 
@@ -1320,15 +1315,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public override string ToString()
         {
-            ulong length = 0;
-
-            // Get string length
-            NativeMethods.BigUInt_ToString(NativePtr, outstr: null, length: ref length);
-
-            // Now get the string
+            NativeMethods.BigUInt_ToString(NativePtr, null, length: out ulong length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.BigUInt_ToString(NativePtr, buffer, ref length);
-
+            NativeMethods.BigUInt_ToString(NativePtr, buffer, out length);
             return buffer.ToString();
         }
 
