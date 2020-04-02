@@ -370,14 +370,13 @@ namespace seal
             }
 #endif
             size_t coeff_count = size_t(1) << coeff_count_power;
-            uint64_t m_minus_one = 2 * coeff_count - 1;
-            for (size_t i = 0; i < coeff_count; i++)
+            uint64_t coeff_count_minus_one = coeff_count - 1;
+            for (size_t i = coeff_count; i < coeff_count << 1; i++)
             {
-                uint64_t reversed = reverse_bits(i, coeff_count_power);
-                uint64_t index_raw = galois_elt * (2 * reversed + 1);
-                index_raw &= m_minus_one;
-                uint64_t index = reverse_bits((index_raw - 1) >> 1, coeff_count_power);
-                result[i] = operand[index];
+                uint64_t reversed = reverse_bits(i, coeff_count_power + 1);
+                uint64_t index_raw = ((galois_elt * reversed) >> 1) & coeff_count_minus_one;
+                uint64_t index = reverse_bits(index_raw, coeff_count_power);
+                *result++ = operand[index];
             }
         }
 
