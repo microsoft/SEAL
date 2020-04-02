@@ -22,10 +22,13 @@ namespace seal
     class Ciphertext;
 
     // Forward-declaring the deflate_size_bound function
-    namespace util::ztools
+    namespace util
     {
-        SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
-    }
+        namespace ztools
+        {
+            SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
+        } // namespace ztools 
+    } // namespace util 
 
     /**
     A resizable container for storing an array of arithmetic data types or
