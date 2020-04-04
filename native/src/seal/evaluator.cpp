@@ -2181,7 +2181,7 @@ namespace seal
     }
 
     void Evaluator::apply_galois_inplace(
-        Ciphertext &encrypted, uint64_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
+        Ciphertext &encrypted, uint32_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -2201,6 +2201,7 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_count = coeff_modulus.size();
         size_t encrypted_size = encrypted.size();
+        auto galois_tool = context_data.galois_tool();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))
@@ -2215,7 +2216,6 @@ namespace seal
         }
 
         uint64_t m = mul_safe(static_cast<uint64_t>(coeff_count), uint64_t(2));
-        int n_power_of_two = get_power_of_two(static_cast<uint64_t>(coeff_count));
 
         // Verify parameters
         if (!(galois_elt & 1) || unsigned_geq(galois_elt, m))
@@ -2237,16 +2237,16 @@ namespace seal
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
-                util::apply_galois(
-                    encrypted.data(0) + i * coeff_count, n_power_of_two, galois_elt, coeff_modulus[i],
+                galois_tool->apply_galois(
+                    encrypted.data(0) + i * coeff_count, galois_elt, coeff_modulus[i],
                     temp.get() + i * coeff_count);
             }
             // copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
-                util::apply_galois(
-                    encrypted.data(1) + i * coeff_count, n_power_of_two, galois_elt, coeff_modulus[i],
+                galois_tool->apply_galois(
+                    encrypted.data(1) + i * coeff_count, galois_elt, coeff_modulus[i],
                     temp.get() + i * coeff_count);
             }
         }
@@ -2255,15 +2255,15 @@ namespace seal
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
-                util::apply_galois_ntt(
-                    encrypted.data(0) + i * coeff_count, n_power_of_two, galois_elt, temp.get() + i * coeff_count);
+                galois_tool->apply_galois_ntt(
+                    encrypted.data(0) + i * coeff_count, galois_elt, temp.get() + i * coeff_count);
             }
             // copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
-                util::apply_galois_ntt(
-                    encrypted.data(1) + i * coeff_count, n_power_of_two, galois_elt, temp.get() + i * coeff_count);
+                galois_tool->apply_galois_ntt(
+                    encrypted.data(1) + i * coeff_count, galois_elt, temp.get() + i * coeff_count);
             }
         }
         else
@@ -2313,12 +2313,13 @@ namespace seal
         }
 
         size_t coeff_count = context_data_ptr->parms().poly_modulus_degree();
+        auto galois_tool = context_data_ptr->galois_tool();
 
         // Check if Galois key is generated or not.
-        if (galois_keys.has_key(galois_elt_from_step(steps, coeff_count)))
+        if (galois_keys.has_key(galois_tool->get_elt_from_step(steps)))
         {
             // Perform rotation and key switching
-            apply_galois_inplace(encrypted, galois_elt_from_step(steps, coeff_count), galois_keys, move(pool));
+            apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(steps), galois_keys, move(pool));
         }
         else
         {

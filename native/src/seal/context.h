@@ -6,6 +6,7 @@
 #include "seal/encryptionparams.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
+#include "seal/util/galois.h"
 #include "seal/util/numth.h"
 #include "seal/util/pointer.h"
 #include "seal/util/rns.h"
@@ -112,7 +113,12 @@ namespace seal
             /**
             RNSTool cannot be constructed
             */
-            failed_creating_rns_tool = 14
+            failed_creating_rns_tool = 14,
+
+            /**
+            GaloisTool cannot be constructed
+            */
+            failed_creating_galois_tool = 15
         };
 
         /**
@@ -337,6 +343,14 @@ namespace seal
             }
 
             /**
+            Returns a constant pointer to the GaloisTool.
+            */
+            SEAL_NODISCARD inline auto galois_tool() const noexcept
+            {
+                return galois_tool_.get();
+            }
+
+            /**
             Return a pointer to BFV "Delta", i.e. coefficient modulus divided by
             plaintext modulus.
             */
@@ -447,6 +461,8 @@ namespace seal
             util::Pointer<util::SmallNTTTables> small_ntt_tables_;
 
             util::Pointer<util::SmallNTTTables> plain_ntt_tables_;
+
+            util::Pointer<util::GaloisTool> galois_tool_;
 
             util::Pointer<std::uint64_t> total_coeff_modulus_;
 

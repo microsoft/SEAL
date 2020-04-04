@@ -212,13 +212,6 @@ namespace seal
             divide_poly_poly_coeffmod_inplace(remainder, denominator, coeff_count, modulus, quotient);
         }
 
-        void apply_galois(
-            const std::uint64_t *operand, int coeff_count_power, std::uint64_t galois_elt, const SmallModulus &modulus,
-            std::uint64_t *result);
-
-        void apply_galois_ntt(
-            const std::uint64_t *operand, int coeff_count_power, std::uint64_t galois_elt, std::uint64_t *result);
-
         void dyadic_product_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
             const SmallModulus &modulus, std::uint64_t *result);

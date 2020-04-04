@@ -123,7 +123,7 @@ namespace seal
         keyswitching
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        SEAL_NODISCARD inline GaloisKeys galois_keys_local(const std::vector<std::uint64_t> &galois_elts)
+        SEAL_NODISCARD inline GaloisKeys galois_keys_local(const std::vector<std::uint32_t> &galois_elts)
         {
             return galois_keys(galois_elts, false);
         }
@@ -155,7 +155,7 @@ namespace seal
         keyswitching
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys(const std::vector<std::uint64_t> &galois_elts)
+        SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys(const std::vector<std::uint32_t> &galois_elts)
         {
             return galois_keys(galois_elts, true);
         }
@@ -316,13 +316,13 @@ namespace seal
         @param[in] save_seed If true, replace second poly in Ciphertext with seed
         @throws std::invalid_argument if the Galois elements are not valid
         */
-        GaloisKeys galois_keys(const std::vector<std::uint64_t> &galois_elts, bool save_seed);
+        GaloisKeys galois_keys(const std::vector<std::uint32_t> &galois_elts, bool save_seed);
 
         // Get a vector of galois_elts from a vector of steps.
-        std::vector<std::uint64_t> galois_elts_from_steps(const std::vector<int> &steps);
+        std::vector<std::uint32_t> galois_elts_from_steps(const std::vector<int> &steps);
 
         // Get a vector all necesssary galois_etls.
-        std::vector<std::uint64_t> galois_elts_all();
+        std::vector<std::uint32_t> galois_elts_all();
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);

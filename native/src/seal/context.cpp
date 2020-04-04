@@ -70,6 +70,9 @@ namespace seal
         case error_type::failed_creating_rns_tool:
             return "failed_creating_rns_tool";
 
+        case error_type::failed_creating_galois_tool:
+            return "failed_creating_galois_tool";
+
         default:
             return "invalid parameter_error";
         }
@@ -126,6 +129,9 @@ namespace seal
 
         case error_type::failed_creating_rns_tool:
             return "RNSTool cannot be constructed";
+
+        case error_type::failed_creating_galois_tool:
+            return "GaloisTool cannot be constructed";
 
         default:
             return "invalid parameter_error";
@@ -387,6 +393,28 @@ namespace seal
         {
             // Parameters are not valid
             context_data.qualifiers_.parameter_error = error_type::failed_creating_rns_tool;
+            return context_data;
+        }
+
+        // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
+        context_data.qualifiers_.using_descending_modulus_chain = true;
+        for (size_t i = 0; i < coeff_modulus_count - 1; i++)
+        {
+            context_data.qualifiers_.using_descending_modulus_chain &=
+                (coeff_modulus[i].value() > coeff_modulus[i + 1].value());
+        }
+
+        // Create GaloisTool
+        // GaloisTool's constructor may fail due to:
+        //   (1) cannot find inverse of the generator in extension field
+        try
+        {
+            context_data.galois_tool_ = allocate<GaloisTool>(pool_, coeff_count_power, pool_);
+        }
+        catch (const invalid_argument &)
+        {
+            // Parameters are not valid
+            context_data.qualifiers_.parameter_error = error_type::failed_creating_galois_tool;
             return context_data;
         }
 

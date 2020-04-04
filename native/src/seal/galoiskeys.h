@@ -9,6 +9,7 @@
 #include "seal/memorymanager.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
+#include "seal/util/galois.h"
 #include <iostream>
 #include <numeric>
 #include <vector>
@@ -48,14 +49,9 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if galois_elt is not valid
         */
-        SEAL_NODISCARD inline static std::size_t get_index(std::uint64_t galois_elt)
+        SEAL_NODISCARD inline static std::size_t get_index(std::uint32_t galois_elt)
         {
-            // Verify parameters
-            if (!(galois_elt & 1))
-            {
-                throw std::invalid_argument("galois_elt is not valid");
-            }
-            return util::safe_cast<std::size_t>((galois_elt - 1) >> 1);
+            return util::GaloisTool::get_index_from_elt(galois_elt);
         }
 
         /**
@@ -64,7 +60,7 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if galois_elt is not valid
         */
-        SEAL_NODISCARD inline bool has_key(std::uint64_t galois_elt) const
+        SEAL_NODISCARD inline bool has_key(std::uint32_t galois_elt) const
         {
             std::size_t index = get_index(galois_elt);
             return data().size() > index && !data()[index].empty();
@@ -77,7 +73,7 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if the key corresponding to galois_elt does not exist
         */
-        SEAL_NODISCARD inline const auto &key(std::uint64_t galois_elt) const
+        SEAL_NODISCARD inline const auto &key(std::uint32_t galois_elt) const
         {
             return KSwitchKeys::data(get_index(galois_elt));
         }

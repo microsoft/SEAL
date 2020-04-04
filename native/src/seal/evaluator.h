@@ -980,7 +980,7 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         void apply_galois_inplace(
-            Ciphertext &encrypted, std::uint64_t galois_elt, const GaloisKeys &galois_keys,
+            Ciphertext &encrypted, std::uint32_t galois_elt, const GaloisKeys &galois_keys,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
@@ -1017,7 +1017,7 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void apply_galois(
-            const Ciphertext &encrypted, std::uint64_t galois_elt, const GaloisKeys &galois_keys,
+            const Ciphertext &encrypted, std::uint32_t galois_elt, const GaloisKeys &galois_keys,
             Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
             destination = encrypted;
@@ -1354,11 +1354,10 @@ namespace seal
                 throw std::logic_error("encryption parameters do not support batching");
             }
 
-            auto &parms = context_data.parms();
-            std::size_t coeff_count = parms.poly_modulus_degree();
+            auto galois_tool = context_data.galois_tool();
 
             // Perform rotation and key switching
-            apply_galois_inplace(encrypted, util::galois_elt_from_step(0, coeff_count), galois_keys, std::move(pool));
+            apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(0), galois_keys, std::move(pool));
         }
 
         inline void decompose_single_coeff(
