@@ -77,8 +77,13 @@ namespace seal
         }
 
         /**
-        Convert std::string to char*
+        Convert std::string to char* with null terminator
         */
         HRESULT ToStringHelper(const std::string &str, char *outstr, uint64_t *length);
+
+        /**
+        Convert const char * to char* with null terminator
+        */
+        HRESULT ToStringHelper2(const char *str, char *outstr, uint64_t *length);
     } // namespace c
 } // namespace seal
