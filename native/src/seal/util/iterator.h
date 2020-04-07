@@ -3,38 +3,228 @@
 
 #pragma once
 
-#include "seal/util/defines.h"
-#include "seal/util/common.h"
 #include "seal/ciphertext.h"
 #include "seal/plaintext.h"
-#include <iterator>
-#include <cstdint>
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
 #include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <type_traits>
 
 namespace seal
 {
     namespace util
     {
-        template<class SelfT, typename ValueT>
-        class array_iterator_base
+        class coeff_iterator;
+
+        class const_coeff_iterator;
+
+        class rns_iterator;
+
+        class const_rns_iterator;
+
+        class poly_iterator;
+
+        class const_poly_iterator;
+
+        class coeff_iterator
         {
         public:
-            using self_type = SelfT;
-            using value_type = ValueT;
+            friend rns_iterator;
+
+            using self_type = coeff_iterator;
+            using value_type = std::uint64_t;
+            using pointer = std::uint64_t *;
+            using reference = std::uint64_t &;
+
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            using is_deref_to_iterator_type = std::false_type;
+
+            coeff_iterator(pointer ptr) : ptr_(ptr)
+            {}
+
+            coeff_iterator(Ciphertext &ct) : coeff_iterator(ct.data())
+            {}
+
+            coeff_iterator(const coeff_iterator &copy) = default;
+
+            coeff_iterator &operator=(const coeff_iterator &assign) = default;
+
+            SEAL_NODISCARD inline auto ptr() const noexcept
+            {
+                return ptr_;
+            }
+
+            SEAL_NODISCARD operator std::uint64_t *() const noexcept
+            {
+                return ptr();
+            }
+
+            inline auto &operator++() noexcept
+            {
+                ptr_++;
+                return *this;
+            }
+
+            inline auto operator++(int) noexcept
+            {
+                self_type result(ptr_);
+                ptr_++;
+                return result;
+            }
+
+            inline auto &operator--() noexcept
+            {
+                ptr_--;
+                return *this;
+            }
+
+            inline auto operator--(int) noexcept
+            {
+                self_type result(ptr_);
+                ptr_--;
+                return result;
+            }
+
+            SEAL_NODISCARD inline reference operator*() const noexcept
+            {
+                return *ptr_;
+            }
+
+            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
+            {
+                return (ptr_ == compare.ptr_);
+            }
+
+            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
+            {
+                return !(*this == compare);
+            }
+
+        private:
+            pointer ptr_;
+        };
+
+        class const_coeff_iterator
+        {
+        public:
+            friend const_rns_iterator;
+
+            using self_type = const_coeff_iterator;
+            using value_type = std::uint64_t;
+            using pointer = const std::uint64_t *;
+            using reference = const std::uint64_t &;
+
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            using is_deref_to_iterator_type = std::false_type;
+
+            const_coeff_iterator(pointer ptr) : ptr_(ptr)
+            {}
+
+            const_coeff_iterator(const Ciphertext &ct) : const_coeff_iterator(ct.data())
+            {}
+
+            const_coeff_iterator(const const_coeff_iterator &copy) = default;
+
+            const_coeff_iterator &operator=(const const_coeff_iterator &assign) = default;
+
+            SEAL_NODISCARD inline auto ptr() const noexcept
+            {
+                return ptr_;
+            }
+
+            SEAL_NODISCARD operator const std::uint64_t *() const noexcept
+            {
+                return ptr();
+            }
+
+            inline auto &operator++() noexcept
+            {
+                ptr_++;
+                return *this;
+            }
+
+            inline auto operator++(int) noexcept
+            {
+                self_type result(ptr_);
+                ptr_++;
+                return result;
+            }
+
+            inline auto &operator--() noexcept
+            {
+                ptr_--;
+                return *this;
+            }
+
+            inline auto operator--(int) noexcept
+            {
+                self_type result(ptr_);
+                ptr_--;
+                return result;
+            }
+
+            SEAL_NODISCARD inline reference operator*() const noexcept
+            {
+                return *ptr_;
+            }
+
+            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
+            {
+                return (ptr_ == compare.ptr_);
+            }
+
+            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
+            {
+                return !(*this == compare);
+            }
+
+        private:
+            pointer ptr_;
+        };
+
+        class rns_iterator
+        {
+        public:
+            friend class poly_iterator;
+
+            using self_type = rns_iterator;
+            using value_type = coeff_iterator;
             using pointer = void;
             using reference = void;
 
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            array_iterator_base(value_type ptr, std::size_t step_size) : ptr_(ptr), step_size_(step_size)
+            using is_deref_to_iterator_type = std::true_type;
+
+            rns_iterator(std::uint64_t *ptr, std::size_t poly_modulus_degree)
+                : ptr_(ptr), step_size_(poly_modulus_degree)
             {}
 
-            array_iterator_base(const array_iterator_base &copy) = default; 
+            rns_iterator(Ciphertext &ct) : rns_iterator(ct.data(), ct.poly_modulus_degree())
+            {}
 
-            array_iterator_base &operator=(const array_iterator_base &assign) = default;
+            rns_iterator(const rns_iterator &copy) = default;
 
-            SEAL_NODISCARD inline value_type operator*() noexcept
+            rns_iterator &operator=(const rns_iterator &assign) = default;
+
+            SEAL_NODISCARD inline auto ptr() const noexcept
+            {
+                return ptr_;
+            }
+
+            SEAL_NODISCARD operator std::uint64_t *() const noexcept
+            {
+                return ptr();
+            }
+
+            SEAL_NODISCARD inline value_type operator*() const noexcept
             {
                 return ptr_;
             }
@@ -49,19 +239,6 @@ namespace seal
                 return !(*this == compare);
             }
 
-        protected:
-            value_type ptr_;
-
-            const std::size_t step_size_;
-        };
-
-        class poly_iterator : public array_iterator_base<poly_iterator, std::uint64_t*>
-        {
-        public:
-            poly_iterator(const poly_iterator &copy) = default;
-
-            poly_iterator &operator=(const poly_iterator &assign) = default;
-
             inline auto &operator++() noexcept
             {
                 ptr_ += step_size_;
@@ -88,224 +265,68 @@ namespace seal
                 return result;
             }
 
-            static inline poly_iterator begin(
-                    value_type ptr,
-                    std::size_t poly_modulus_degree,
-                    std::size_t coeff_modulus_count)
-            {
-                return poly_iterator(ptr, poly_modulus_degree, coeff_modulus_count);
-            }
-
-            static inline poly_iterator end(
-                    value_type ptr,
-                    std::size_t poly_modulus_degree,
-                    std::size_t coeff_modulus_count,
-                    std::size_t size)
-            {
-                poly_iterator end_iter(ptr, poly_modulus_degree, coeff_modulus_count);
-                end_iter.ptr_ += size * end_iter.step_size_;
-                return end_iter;
-            }
-
-            static inline poly_iterator begin(Ciphertext &ct)
-            {
-                return begin(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count());
-            }
-
-            static inline poly_iterator end(Ciphertext &ct)
-            {
-                return end(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count(), ct.size());
-            }
-
             SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
             {
-                return poly_modulus_degree_;
-            }
-
-            SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
-            {
-                return coeff_modulus_count_;
+                return step_size_;
             }
 
         private:
-            poly_iterator(value_type ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count) :
-                array_iterator_base<poly_iterator, value_type>(
-                        ptr,
-                        mul_safe(poly_modulus_degree, coeff_modulus_count)),
-                poly_modulus_degree_(poly_modulus_degree),
-                coeff_modulus_count_(coeff_modulus_count)
-            {}
+            std::uint64_t *ptr_;
 
-            std::size_t poly_modulus_degree_;
-
-            std::size_t coeff_modulus_count_;
+            std::size_t step_size_;
         };
 
-        class const_poly_iterator : public array_iterator_base<const_poly_iterator, const std::uint64_t*>
+        class const_rns_iterator
         {
         public:
-            const_poly_iterator(const const_poly_iterator &copy) = default;
+            friend class const_poly_iterator;
 
-            const_poly_iterator &operator=(const const_poly_iterator &assign) = default;
+            using self_type = const_rns_iterator;
+            using value_type = const_coeff_iterator;
+            using pointer = void;
+            using reference = void;
 
-            inline auto &operator++() noexcept
-            {
-                ptr_ += step_size_;
-                return *this;
-            }
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type = std::ptrdiff_t;
 
-            inline auto operator++(int) noexcept
-            {
-                self_type result(*this);
-                ptr_ += step_size_;
-                return result;
-            }
+            using is_deref_to_iterator_type = std::true_type;
 
-            inline auto &operator--() noexcept
-            {
-                ptr_ -= step_size_;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                ptr_ -= step_size_;
-                return result;
-            }
-
-            static inline const_poly_iterator begin(
-                    value_type ptr,
-                    std::size_t poly_modulus_degree,
-                    std::size_t coeff_modulus_count)
-            {
-                return const_poly_iterator(ptr, poly_modulus_degree, coeff_modulus_count);
-            }
-
-            static inline const_poly_iterator end(
-                    value_type ptr,
-                    std::size_t poly_modulus_degree,
-                    std::size_t coeff_modulus_count,
-                    std::size_t size)
-            {
-                const_poly_iterator end_iter(ptr, poly_modulus_degree, coeff_modulus_count);
-                end_iter.ptr_ += size * end_iter.step_size_;
-                return end_iter;
-            }
-
-            static inline const_poly_iterator begin(const Ciphertext &ct)
-            {
-                return begin(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count());
-            }
-
-            static inline const_poly_iterator end(const Ciphertext &ct)
-            {
-                return end(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count(), ct.size());
-            }
-
-            SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
-            {
-                return poly_modulus_degree_;
-            }
-
-            SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
-            {
-                return coeff_modulus_count_;
-            }
-
-        private:
-            const_poly_iterator(value_type ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count) :
-                array_iterator_base<const_poly_iterator, value_type>(
-                        ptr,
-                        mul_safe(poly_modulus_degree, coeff_modulus_count)),
-                poly_modulus_degree_(poly_modulus_degree),
-                coeff_modulus_count_(coeff_modulus_count)
+            const_rns_iterator(const Ciphertext &ct) : const_rns_iterator(ct.data(), ct.poly_modulus_degree())
             {}
 
-            std::size_t poly_modulus_degree_;
-
-            std::size_t coeff_modulus_count_;
-        };
-
-        class rns_iterator : public array_iterator_base<rns_iterator, std::uint64_t*>
-        {
-        public:
-            rns_iterator(const rns_iterator &copy) = default;
-
-            rns_iterator &operator=(const rns_iterator &assign) = default;
-
-            inline auto &operator++() noexcept
-            {
-                ptr_ += step_size_;
-                return *this;
-            }
-
-            inline auto operator++(int) noexcept
-            {
-                self_type result(*this);
-                ptr_ += step_size_;
-                return result;
-            }
-
-            inline auto &operator--() noexcept
-            {
-                ptr_ -= step_size_;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                ptr_ -= step_size_;
-                return result;
-            }
-
-            static inline rns_iterator begin(value_type ptr, std::size_t poly_modulus_degree)
-            {
-                return rns_iterator(ptr, poly_modulus_degree);
-            }
-
-            static inline rns_iterator end(
-                    value_type ptr,
-                    std::size_t poly_modulus_degree,
-                    std::size_t coeff_modulus_count)
-            {
-                rns_iterator end_iter(ptr, poly_modulus_degree);
-                end_iter.ptr_ += coeff_modulus_count * end_iter.step_size_;
-                return end_iter;
-            }
-
-            static inline rns_iterator begin(poly_iterator &poly_iter)
-            {
-                return begin(*poly_iter, poly_iter.poly_modulus_degree());
-            }
-
-            static inline rns_iterator end(poly_iterator &poly_iter)
-            {
-                return end(*poly_iter, poly_iter.poly_modulus_degree(), poly_iter.coeff_modulus_count());
-            }
-
-            SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
-            {
-                return poly_modulus_degree_;
-            }
-
-        private:
-            rns_iterator(value_type ptr, std::size_t poly_modulus_degree) :
-                array_iterator_base<rns_iterator, value_type>(ptr, poly_modulus_degree),
-                poly_modulus_degree_(poly_modulus_degree)
+            const_rns_iterator(const std::uint64_t *ptr, std::size_t poly_modulus_degree)
+                : ptr_(ptr), step_size_(poly_modulus_degree)
             {}
 
-            std::size_t poly_modulus_degree_;
-        };
-
-        class const_rns_iterator : public array_iterator_base<const_rns_iterator, const std::uint64_t*>
-        {
-        public:
             const_rns_iterator(const const_rns_iterator &copy) = default;
 
             const_rns_iterator &operator=(const const_rns_iterator &assign) = default;
 
+            SEAL_NODISCARD inline auto ptr() const noexcept
+            {
+                return ptr_;
+            }
+
+            SEAL_NODISCARD operator const std::uint64_t *() const noexcept
+            {
+                return ptr();
+            }
+
+            SEAL_NODISCARD inline value_type operator*() const noexcept
+            {
+                return ptr_;
+            }
+
+            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
+            {
+                return (ptr_ == compare.ptr_);
+            }
+
+            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
+            {
+                return !(*this == compare);
+            }
+
             inline auto &operator++() noexcept
             {
                 ptr_ += step_size_;
@@ -332,39 +353,91 @@ namespace seal
                 return result;
             }
 
-            static inline const_rns_iterator begin(value_type ptr, std::size_t poly_modulus_degree)
+            SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
             {
-                return const_rns_iterator(ptr, poly_modulus_degree);
+                return step_size_;
             }
 
-            static inline const_rns_iterator end(
-                    value_type ptr,
-                    std::size_t poly_modulus_degree,
-                    std::size_t coeff_modulus_count)
+        private:
+            const std::uint64_t *ptr_;
+
+            std::size_t step_size_;
+        };
+
+        class poly_iterator
+        {
+        public:
+            using self_type = poly_iterator;
+            using value_type = rns_iterator;
+            using pointer = void;
+            using reference = void;
+
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            using is_deref_to_iterator_type = std::true_type;
+
+            poly_iterator(std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
+                : ptr_(ptr), step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count)),
+                  poly_modulus_degree_(poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count)
+            {}
+
+            poly_iterator(Ciphertext &ct) : poly_iterator(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+            {}
+
+            poly_iterator(const poly_iterator &copy) = default;
+
+            poly_iterator &operator=(const poly_iterator &assign) = default;
+
+            SEAL_NODISCARD inline auto ptr() const noexcept
             {
-                const_rns_iterator end_iter(ptr, poly_modulus_degree);
-                end_iter.ptr_ += coeff_modulus_count * end_iter.step_size_;
-                return end_iter;
+                return ptr_;
             }
 
-            static inline const_rns_iterator begin(const_poly_iterator &poly_iter)
+            SEAL_NODISCARD operator std::uint64_t *() const noexcept
             {
-                return begin(*poly_iter, poly_iter.poly_modulus_degree());
+                return ptr();
             }
 
-            static inline const_rns_iterator end(const_poly_iterator &poly_iter)
+            SEAL_NODISCARD inline value_type operator*() const noexcept
             {
-                return end(*poly_iter, poly_iter.poly_modulus_degree(), poly_iter.coeff_modulus_count());
+                return value_type(ptr_, poly_modulus_degree_);
             }
 
-            static inline const_rns_iterator begin(poly_iterator &poly_iter)
+            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return begin(*poly_iter, poly_iter.poly_modulus_degree());
+                return (ptr_ == compare.ptr_);
             }
 
-            static inline const_rns_iterator end(poly_iterator &poly_iter)
+            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
             {
-                return end(*poly_iter, poly_iter.poly_modulus_degree(), poly_iter.coeff_modulus_count());
+                return !(*this == compare);
+            }
+
+            inline auto &operator++() noexcept
+            {
+                ptr_ += step_size_;
+                return *this;
+            }
+
+            inline auto operator++(int) noexcept
+            {
+                self_type result(*this);
+                ptr_ += step_size_;
+                return result;
+            }
+
+            inline auto &operator--() noexcept
+            {
+                ptr_ -= step_size_;
+                return *this;
+            }
+
+            inline auto operator--(int) noexcept
+            {
+                self_type result(*this);
+                ptr_ -= step_size_;
+                return result;
             }
 
             SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
@@ -372,62 +445,61 @@ namespace seal
                 return poly_modulus_degree_;
             }
 
+            SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
+            {
+                return coeff_modulus_count_;
+            }
+
         private:
-            const_rns_iterator(value_type ptr, std::size_t poly_modulus_degree) :
-                array_iterator_base<const_rns_iterator, value_type>(ptr, poly_modulus_degree),
-                poly_modulus_degree_(poly_modulus_degree)
-            {}
+            std::uint64_t *ptr_;
+
+            std::size_t step_size_;
 
             std::size_t poly_modulus_degree_;
+
+            std::size_t coeff_modulus_count_;
         };
 
-        class coeff_iterator
+        class const_poly_iterator
         {
         public:
-            using self_type = coeff_iterator;
-            using value_type = std::uint64_t;
-            using pointer = std::uint64_t*;
-            using reference = std::uint64_t&;
+            using self_type = const_poly_iterator;
+            using value_type = const_rns_iterator;
+            using pointer = void;
+            using reference = void;
 
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            coeff_iterator(pointer ptr) : ptr_(ptr)
+            using is_deref_to_iterator_type = std::true_type;
+
+            const_poly_iterator(
+                const std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
+                : ptr_(ptr), step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count)),
+                  poly_modulus_degree_(poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count)
             {}
 
-            coeff_iterator(const coeff_iterator &copy) = default;
+            const_poly_iterator(const Ciphertext &ct)
+                : const_poly_iterator(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+            {}
 
-            coeff_iterator &operator=(const coeff_iterator &assign) = default;
+            const_poly_iterator(const const_poly_iterator &copy) = default;
 
-            inline auto &operator++() noexcept
+            const_poly_iterator &operator=(const const_poly_iterator &assign) = default;
+
+            SEAL_NODISCARD inline auto ptr() const noexcept
             {
-                ptr_++;
-                return *this;
+                return ptr_;
             }
 
-            inline auto operator++(int) noexcept
+            SEAL_NODISCARD operator const std::uint64_t *() const noexcept
             {
-                self_type result(ptr_);
-                ptr_++;
-                return result;
+                return ptr();
             }
 
-            inline auto &operator--() noexcept
+            SEAL_NODISCARD inline value_type operator*() const noexcept
             {
-                ptr_--;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(ptr_);
-                ptr_--;
-                return result;
-            }
-
-            SEAL_NODISCARD inline value_type operator*() noexcept
-            {
-                return *ptr_;
+                return value_type(ptr_, poly_modulus_degree_);
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -440,69 +512,76 @@ namespace seal
                 return !(*this == compare);
             }
 
-            static inline coeff_iterator begin(rns_iterator &rns_iter)
-            {
-                return coeff_iterator(*rns_iter);
-            }
-
-            static inline coeff_iterator end(rns_iterator &rns_iter)
-            {
-                coeff_iterator end_iter(*rns_iter);
-                end_iter.ptr_ += rns_iter.poly_modulus_degree();
-                return end_iter;
-            }
-
-        private:
-            pointer ptr_;
-        };
-
-        class const_coeff_iterator
-        {
-        public:
-            using self_type = const_coeff_iterator;
-            using value_type = std::uint64_t;
-            using pointer = const std::uint64_t*;
-            using reference = const std::uint64_t&;
-
-            using iterator_category = std::bidirectional_iterator_tag;
-            using difference_type = std::ptrdiff_t;
-
-            const_coeff_iterator(pointer ptr) : ptr_(ptr)
-            {}
-
-            const_coeff_iterator(const const_coeff_iterator &copy) = default;
-
-            const_coeff_iterator &operator=(const const_coeff_iterator &assign) = default;
-
             inline auto &operator++() noexcept
             {
-                ptr_++;
+                ptr_ += step_size_;
                 return *this;
             }
 
             inline auto operator++(int) noexcept
             {
-                self_type result(ptr_);
-                ptr_++;
+                self_type result(*this);
+                ptr_ += step_size_;
                 return result;
             }
 
             inline auto &operator--() noexcept
             {
-                ptr_--;
+                ptr_ -= step_size_;
                 return *this;
             }
 
             inline auto operator--(int) noexcept
             {
-                self_type result(ptr_);
-                ptr_--;
+                self_type result(*this);
+                ptr_ -= step_size_;
                 return result;
             }
 
-            SEAL_NODISCARD inline value_type operator*() noexcept
+            SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
             {
-                return *ptr_;
+                return poly_modulus_degree_;
+            }
+
+            SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
+            {
+                return coeff_modulus_count_;
+            }
+
+        private:
+            const std::uint64_t *ptr_;
+
+            std::size_t step_size_;
+
+            std::size_t poly_modulus_degree_;
+
+            std::size_t coeff_modulus_count_;
+        };
+
+        template <class PtrT>
+        class iterator_wrapper
+        {
+        public:
+            using self_type = iterator_wrapper<PtrT>;
+            using value_type = PtrT;
+            using pointer = void;
+            using reference = void;
+
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            using is_deref_to_iterator_type = std::false_type;
+
+            iterator_wrapper(PtrT ptr) : ptr_(ptr)
+            {}
+
+            iterator_wrapper(const iterator_wrapper &copy) = default;
+
+            iterator_wrapper &operator=(const iterator_wrapper &assign) = default;
+
+            SEAL_NODISCARD inline value_type operator*() const noexcept
+            {
+                return ptr_;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -515,32 +594,384 @@ namespace seal
                 return !(*this == compare);
             }
 
-            static inline const_coeff_iterator begin(const_rns_iterator &rns_iter)
+            inline auto &operator++() noexcept
             {
-                return const_coeff_iterator(*rns_iter);
+                ptr_++;
+                return *this;
             }
 
-            static inline const_coeff_iterator end(const_rns_iterator &rns_iter)
+            inline auto operator++(int) noexcept
             {
-                const_coeff_iterator end_iter(*rns_iter);
-                end_iter.ptr_ += rns_iter.poly_modulus_degree();
-                return end_iter;
+                self_type result(*this);
+                ptr_++;
+                return result;
             }
 
-            static inline const_coeff_iterator begin(rns_iterator &rns_iter)
+            inline auto &operator--() noexcept
             {
-                return const_coeff_iterator(*rns_iter);
+                ptr_--;
+                return *this;
             }
 
-            static inline const_coeff_iterator end(rns_iterator &rns_iter)
+            inline auto operator--(int) noexcept
             {
-                const_coeff_iterator end_iter(*rns_iter);
-                end_iter.ptr_ += rns_iter.poly_modulus_degree();
-                return end_iter;
+                self_type result(*this);
+                ptr_--;
+                return result;
             }
 
         private:
-            pointer ptr_;
+            value_type ptr_;
         };
-    }
-}
+
+        template <class It1, class It2>
+        class iterator_tuple_2
+        {
+        public:
+            using value_type_1 = std::conditional_t<
+                It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It1>::value_type>>;
+            using value_type_2 = std::conditional_t<
+                It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It2>::value_type>>;
+
+            using is_deref_to_iterator_type = std::conditional_t<
+                It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value, std::true_type,
+                std::false_type>;
+
+            using self_type = iterator_tuple_2<It1, It2>;
+            using value_type = iterator_tuple_2<value_type_1, value_type_2>;
+            using pointer = void;
+            using reference = void;
+
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            self_type(const It1 &it1, const It2 &it2) : it1_(it1), it2_(it2)
+            {}
+
+            self_type(const self_type &copy) = default;
+
+            self_type &operator=(const self_type &assign) = default;
+
+            SEAL_NODISCARD inline const It1 &it1() const noexcept
+            {
+                return it1_;
+            }
+
+            SEAL_NODISCARD inline const It2 &it2() const noexcept
+            {
+                return it2_;
+            }
+
+            SEAL_NODISCARD inline value_type operator*() const noexcept
+            {
+                return { *it1_, *it2_ };
+            }
+
+            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
+            {
+                return (it1_ == compare.it1_ && it2_ == compare.it2_);
+            }
+
+            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
+            {
+                return !(*this == compare);
+            }
+
+            inline auto &operator++() noexcept
+            {
+                it1_++;
+                it2_++;
+                return *this;
+            }
+
+            inline auto operator++(int) noexcept
+            {
+                self_type result(*this);
+                it1_++;
+                it2_++;
+                return result;
+            }
+
+            inline auto &operator--() noexcept
+            {
+                it1_--;
+                it2_--;
+                return *this;
+            }
+
+            inline auto operator--(int) noexcept
+            {
+                self_type result(*this);
+                it1_--;
+                it2_--;
+                return result;
+            }
+
+        private:
+            It1 it1_;
+
+            It2 it2_;
+        };
+
+        template <class It1, class It2, class It3>
+        class iterator_tuple_3
+        {
+        public:
+            using value_type_1 = std::conditional_t<
+                It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It1>::value_type>>;
+            using value_type_2 = std::conditional_t<
+                It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It2>::value_type>>;
+            using value_type_3 = std::conditional_t<
+                It3::is_deref_to_iterator_type::value, typename std::iterator_traits<It3>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It3>::value_type>>;
+
+            using is_deref_to_iterator_type = std::conditional_t<
+                It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value &&
+                    It3::is_deref_to_iterator_type::value,
+                std::true_type, std::false_type>;
+
+            using self_type = iterator_tuple_3<It1, It2, It3>;
+            using value_type = iterator_tuple_3<value_type_1, value_type_2, value_type_3>;
+            using pointer = void;
+            using reference = void;
+
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            self_type(const It1 &it1, const It2 &it2, const It3 &it3) : it1_(it1), it2_(it2), it3_(it3)
+            {}
+
+            self_type(const self_type &copy) = default;
+
+            self_type &operator=(const self_type &assign) = default;
+
+            SEAL_NODISCARD inline const It1 &it1() const noexcept
+            {
+                return it1_;
+            }
+
+            SEAL_NODISCARD inline const It2 &it2() const noexcept
+            {
+                return it2_;
+            }
+
+            SEAL_NODISCARD inline const It3 &it3() const noexcept
+            {
+                return it3_;
+            }
+
+            SEAL_NODISCARD inline value_type operator*() const noexcept
+            {
+                return { *it1_, *it2_, *it3_ };
+            }
+
+            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
+            {
+                return (it1_ == compare.it1_ && it2_ == compare.it2_ && it3_ == compare.it3_);
+            }
+
+            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
+            {
+                return !(*this == compare);
+            }
+
+            inline auto &operator++() noexcept
+            {
+                it1_++;
+                it2_++;
+                it3_++;
+                return *this;
+            }
+
+            inline auto operator++(int) noexcept
+            {
+                self_type result(*this);
+                it1_++;
+                it2_++;
+                it3_++;
+                return result;
+            }
+
+            inline auto &operator--() noexcept
+            {
+                it1_--;
+                it2_--;
+                it3_--;
+                return *this;
+            }
+
+            inline auto operator--(int) noexcept
+            {
+                self_type result(*this);
+                it1_--;
+                it2_--;
+                it3_--;
+                return result;
+            }
+
+        private:
+            It1 it1_;
+
+            It2 it2_;
+
+            It3 it3_;
+        };
+
+        template <class It1, class It2, class It3, class It4>
+        class iterator_tuple_4
+        {
+        public:
+            using value_type_1 = std::conditional_t<
+                It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It1>::value_type>>;
+            using value_type_2 = std::conditional_t<
+                It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It2>::value_type>>;
+            using value_type_3 = std::conditional_t<
+                It3::is_deref_to_iterator_type::value, typename std::iterator_traits<It3>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It3>::value_type>>;
+            using value_type_4 = std::conditional_t<
+                It4::is_deref_to_iterator_type::value, typename std::iterator_traits<It4>::value_type,
+                iterator_wrapper<typename std::iterator_traits<It4>::value_type>>;
+
+            using is_deref_to_iterator_type = std::conditional_t<
+                It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value &&
+                    It3::is_deref_to_iterator_type::value && It4::is_deref_to_iterator_type::value,
+                std::true_type, std::false_type>;
+
+            using self_type = iterator_tuple_4<It1, It2, It3, It4>;
+            using value_type = iterator_tuple_4<value_type_1, value_type_2, value_type_3, value_type_4>;
+            using pointer = void;
+            using reference = void;
+
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            self_type(const It1 &it1, const It2 &it2, const It3 &it3, const It4 &it4)
+                : it1_(it1), it2_(it2), it3_(it3), it4_(it4)
+            {}
+
+            self_type(const self_type &copy) = default;
+
+            self_type &operator=(const self_type &assign) = default;
+
+            SEAL_NODISCARD inline const It1 &it1() const noexcept
+            {
+                return it1_;
+            }
+
+            SEAL_NODISCARD inline const It2 &it2() const noexcept
+            {
+                return it2_;
+            }
+
+            SEAL_NODISCARD inline const It3 &it3() const noexcept
+            {
+                return it3_;
+            }
+
+            SEAL_NODISCARD inline const It4 &it4() const noexcept
+            {
+                return it4_;
+            }
+
+            SEAL_NODISCARD inline value_type operator*() const noexcept
+            {
+                return { *it1_, *it2_, *it3_, *it4_ };
+            }
+
+            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
+            {
+                return (it1_ == compare.it1_ && it2_ == compare.it2_ && it3_ == compare.it3_ && it4_ == compare.it4_);
+            }
+
+            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
+            {
+                return !(*this == compare);
+            }
+
+            inline auto &operator++() noexcept
+            {
+                it1_++;
+                it2_++;
+                it3_++;
+                it4_++;
+                return *this;
+            }
+
+            inline auto operator++(int) noexcept
+            {
+                self_type result(*this);
+                it1_++;
+                it2_++;
+                it3_++;
+                it4_++;
+                return result;
+            }
+
+            inline auto &operator--() noexcept
+            {
+                it1_--;
+                it2_--;
+                it3_--;
+                it4_--;
+                return *this;
+            }
+
+            inline auto operator--(int) noexcept
+            {
+                self_type result(*this);
+                it1_--;
+                it2_--;
+                it3_--;
+                it4_--;
+                return result;
+            }
+
+        private:
+            It1 it1_;
+
+            It2 it2_;
+
+            It3 it3_;
+
+            It4 it4_;
+        };
+
+        template <class It>
+        class reverse_iterator : public It
+        {
+        public:
+            using self_type = reverse_iterator<It>;
+
+            self_type(const It &copy) : It(copy)
+            {}
+
+            self_type &operator=(const self_type &assign) = default;
+
+            inline auto &operator++() noexcept
+            {
+                return It::operator--();
+            }
+
+            inline auto operator++(int) noexcept
+            {
+                return It::operator--(0);
+            }
+
+            inline auto &operator--() noexcept
+            {
+                return It::operator++();
+            }
+
+            inline auto operator--(int) noexcept
+            {
+                return It::operator++(0);
+            }
+        };
+    } // namespace util
+} // namespace seal

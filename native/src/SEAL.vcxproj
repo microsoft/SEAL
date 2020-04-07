@@ -56,6 +56,7 @@
     <ClInclude Include="seal\util\globals.h" />
     <ClInclude Include="seal\util\hash.h" />
     <ClInclude Include="seal\util\hestdparms.h" />
+    <ClInclude Include="seal\util\iterator.h" />
     <ClInclude Include="seal\util\locks.h" />
     <ClInclude Include="seal\util\mempool.h" />
     <ClInclude Include="seal\util\msvc.h" />

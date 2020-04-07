@@ -200,6 +200,9 @@
     <ClInclude Include="seal\util\rns.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="seal\util\iterator.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\batchencoder.cpp">
