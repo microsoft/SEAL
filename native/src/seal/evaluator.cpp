@@ -2201,7 +2201,8 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_count = coeff_modulus.size();
         size_t encrypted_size = encrypted.size();
-        auto galois_tool = context_data.galois_tool();
+        // Use key_context_data where permutation tables exist since previous runs.
+        auto galois_tool = context_->key_context_data()->galois_tool();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))

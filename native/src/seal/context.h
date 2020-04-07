@@ -114,11 +114,6 @@ namespace seal
             RNSTool cannot be constructed
             */
             failed_creating_rns_tool = 14,
-
-            /**
-            GaloisTool cannot be constructed
-            */
-            failed_creating_galois_tool = 15
         };
 
         /**
