@@ -719,6 +719,15 @@ namespace seal
         }
 
         /**
+        Sets the scale manually
+        */
+        inline void set_scale(double scale)
+        {
+	    this->scale() = scale;
+        }
+
+
+        /**
         Enables access to private members of seal::Ciphertext for .NET wrapper.
         */
         struct CiphertextPrivateHelper;

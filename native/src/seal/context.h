@@ -462,6 +462,17 @@ namespace seal
         }
 
         /**
+	Returns a copy of EncryptionParameterQualifiers corresponding to the
+        current encryption parameters. Note that to change the qualifiers it is
+	necessary to create a new instance of SEALContext once appropriate changes
+	to the encryption parameters have been made.
+	*/
+        SEAL_NODISCARD inline auto qualifiers() const noexcept
+        {
+  	  return first_context_data()->qualifiers();
+        }
+
+        /**
         Returns a parms_id_type corresponding to the set of encryption parameters
         that are used for keys.
         */
