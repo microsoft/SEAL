@@ -11,50 +11,6 @@ namespace seal
 {
     namespace util
     {
-
-        class GaloisPermutationTables
-        {
-        public:
-
-            static void generate_table_ntt(int coeff_count_power, std::uint32_t galois_elt, std::uint32_t *result);
-
-            GaloisPermutationTables(int coeff_count_power, std::uint32_t generator, MemoryPoolHandle pool)
-                : pool_(std::move(pool))
-            {
-                if (!pool_)
-                {
-                    throw std::invalid_argument("pool is uninitialized");
-                }
-
-                initialize(coeff_count_power, generator);
-            }
-
-            SEAL_NODISCARD const std::uint32_t *get_table(std::uint32_t galois_elt) const;
-
-        private:
-            GaloisPermutationTables(const GaloisPermutationTables &copy) = delete;
-
-            GaloisPermutationTables(GaloisPermutationTables &&source) = delete;
-
-            GaloisPermutationTables &operator=(const GaloisPermutationTables &assign) = delete;
-
-            GaloisPermutationTables &operator=(GaloisPermutationTables &&assign) = delete;
-
-            void initialize(int coeff_count_power, std::uint32_t generator);
-
-            MemoryPoolHandle pool_;
-
-            int coeff_count_power_ = 0;
-
-            std::size_t coeff_count_ = 0;
-
-            std::size_t elt_count_ = 0;
-
-            std::uint32_t generator_ = 0;
-
-            std::vector<Pointer<std::uint32_t>> tables_;
-        };
-
         class GaloisTool
         {
         public:
@@ -79,10 +35,16 @@ namespace seal
 
             void apply_galois(const std::uint64_t *operand, std::uint32_t galois_elt, const SmallModulus &modulus, std::uint64_t *result) const;
 
-            void apply_galois_ntt(const std::uint64_t *operand, std::uint32_t galois_elt, std::uint64_t *result) const;
+            void apply_galois_ntt(const std::uint64_t *operand, std::uint32_t galois_elt, std::uint64_t *result);
 
+            /**
+            Compute the Galois element corresponding to a given rotation step.
+            */
             SEAL_NODISCARD std::uint32_t get_elt_from_step(int step) const;
 
+            /**
+            Compute the index in the range of 0 to (coeff_count_ - 1) of a given Galois element.
+            */
             SEAL_NODISCARD static inline std::size_t get_index_from_elt(std::uint32_t galois_elt)
             {
     #ifdef SEAL_DEBUG
@@ -105,6 +67,8 @@ namespace seal
 
             void initialize(int coeff_count_power, std::uint32_t generator);
 
+            void generate_table_ntt(std::uint32_t galois_elt, Pointer<std::uint32_t> &result);
+
             MemoryPoolHandle pool_;
 
             int coeff_count_power_ = 0;
@@ -113,7 +77,9 @@ namespace seal
 
             std::uint32_t generator_ = 0;
 
-            Pointer<GaloisPermutationTables> permutation_tables_;
+            std::vector<Pointer<std::uint32_t>> permutation_tables_;
+
+            mutable util::ReaderWriterLocker permutation_tables_locker_;
         };
     } // namespace util
 } // namespace seal

@@ -231,7 +231,7 @@ namespace seal
             auto rotated_secret_key(allocate_poly(coeff_count, coeff_modulus_count, pool_));
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
-                galois_tool->apply_galois_ntt(secret_key_.data().data() + i * coeff_count, galois_elt, rotated_secret_key.get() + i * coeff_count);
+                const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(secret_key_.data().data() + i * coeff_count, galois_elt, rotated_secret_key.get() + i * coeff_count);
             }
 
             // Initialize Galois key
