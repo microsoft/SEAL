@@ -342,9 +342,6 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
-        size_t enc_ptr_increment = coeff_count * coeff_modulus_count;
-        size_t enc_Bsk_ptr_increment = coeff_count * base_Bsk_size;
-
         // Make temp polys for BaseConverter result from Bsk U {m_tilde} -----> Bsk
         auto temp_encrypted1_Bsk(allocate_poly(coeff_count * encrypted1_size, base_Bsk_size, pool));
         poly_iterator temp_encrypted1_Bsk_iter(temp_encrypted1_Bsk.get(), coeff_count, base_Bsk_size);
@@ -457,7 +454,7 @@ namespace seal
             size_t curr_encrypted1_last = min(secret_power_index, encrypted1_size - 1);
             size_t curr_encrypted2_first = min(secret_power_index, encrypted2_size - 1);
             size_t curr_encrypted1_first = secret_power_index - curr_encrypted2_first;
-            size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
+            //size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
 
             // The number of steps
             size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;

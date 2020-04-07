@@ -647,10 +647,10 @@ namespace seal
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            self_type(const It1 &it1, const It2 &it2) : it1_(it1), it2_(it2)
+            iterator_tuple_2(const It1 &it1, const It2 &it2) : it1_(it1), it2_(it2)
             {}
 
-            self_type(const self_type &copy) = default;
+            iterator_tuple_2(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
@@ -742,10 +742,10 @@ namespace seal
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            self_type(const It1 &it1, const It2 &it2, const It3 &it3) : it1_(it1), it2_(it2), it3_(it3)
+            iterator_tuple_3(const It1 &it1, const It2 &it2, const It3 &it3) : it1_(it1), it2_(it2), it3_(it3)
             {}
 
-            self_type(const self_type &copy) = default;
+            iterator_tuple_3(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
@@ -851,11 +851,11 @@ namespace seal
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            self_type(const It1 &it1, const It2 &it2, const It3 &it3, const It4 &it4)
+            iterator_tuple_4(const It1 &it1, const It2 &it2, const It3 &it3, const It4 &it4)
                 : it1_(it1), it2_(it2), it3_(it3), it4_(it4)
             {}
 
-            self_type(const self_type &copy) = default;
+            iterator_tuple_4(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
@@ -948,7 +948,7 @@ namespace seal
         public:
             using self_type = reverse_iterator<It>;
 
-            self_type(const It &copy) : It(copy)
+            reverse_iterator(const It &copy) : It(copy)
             {}
 
             self_type &operator=(const self_type &assign) = default;
