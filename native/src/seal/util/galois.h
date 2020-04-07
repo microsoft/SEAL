@@ -43,6 +43,16 @@ namespace seal
             SEAL_NODISCARD std::uint32_t get_elt_from_step(int step) const;
 
             /**
+            Compute the Galois elements corresponding to a vector of given rotation steps.
+            */
+            SEAL_NODISCARD std::vector<std::uint32_t> get_elts_from_steps(const std::vector<int> &steps) const;
+
+            /**
+            Compute a vector all necesssary galois_etls.
+            */
+            SEAL_NODISCARD std::vector<std::uint32_t> get_elts_all() const;
+
+            /**
             Compute the index in the range of 0 to (coeff_count_ - 1) of a given Galois element.
             */
             SEAL_NODISCARD static inline std::size_t get_index_from_elt(std::uint32_t galois_elt)

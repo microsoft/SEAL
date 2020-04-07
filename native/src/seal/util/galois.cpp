@@ -86,6 +86,42 @@ namespace seal
             }
         }
 
+        vector<uint32_t> GaloisTool::get_elts_from_steps(const vector<int> &steps) const
+        {
+            vector<uint32_t> galois_elts;
+            transform(steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) {
+                return get_elt_from_step(s);
+            });
+            return galois_elts;
+        }
+
+        vector<uint32_t> GaloisTool::get_elts_all() const
+        {
+            uint32_t m = safe_cast<uint32_t>(static_cast<uint64_t>(coeff_count_) << 1);
+            vector<uint32_t> galois_elts{};
+
+            // Generate Galois keys for m - 1 (X -> X^{m-1})
+            galois_elts.push_back(m - 1);
+
+            // Generate Galois key for power of 3 mod m (X -> X^{3^k}) and
+            // for negative power of 3 mod m (X -> X^{-3^k})
+            uint64_t two_power_of_three = 3;
+            uint64_t neg_two_power_of_three = 0;
+            try_invert_uint_mod(3, m, neg_two_power_of_three);
+            for (int i = 0; i < coeff_count_power_ - 1; i++)
+            {
+                galois_elts.push_back(static_cast<uint32_t>(two_power_of_three));
+                two_power_of_three *= two_power_of_three;
+                two_power_of_three &= (m - 1);
+
+                galois_elts.push_back(static_cast<uint32_t>(neg_two_power_of_three));
+                neg_two_power_of_three *= neg_two_power_of_three;
+                neg_two_power_of_three &= (m - 1);
+            }
+
+            return galois_elts;
+        }
+
         void GaloisTool::initialize(int coeff_count_power, uint32_t generator)
         {
 #ifdef SEAL_DEBUG

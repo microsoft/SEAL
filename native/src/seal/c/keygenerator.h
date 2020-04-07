@@ -22,7 +22,7 @@ SEAL_C_FUNC KeyGenerator_Destroy(void *thisptr);
 SEAL_C_FUNC KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys);
 
 SEAL_C_FUNC KeyGenerator_GaloisKeysFromElts(
-    void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys);
+    void *thisptr, uint64_t count, uint32_t *galois_elts, bool save_seed, void **galois_keys);
 
 SEAL_C_FUNC KeyGenerator_GaloisKeysFromSteps(
     void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys);

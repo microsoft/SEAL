@@ -229,7 +229,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeysLocal(galoisElts: new ulong[] { 1, 3 });
+            GaloisKeys keys = keygen.GaloisKeysLocal(galoisElts: new uint[] { 1, 3 });
             Assert.IsNotNull(keys);
 
             Assert.AreEqual(2ul, keys.Size);

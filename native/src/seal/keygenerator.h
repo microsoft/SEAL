@@ -178,7 +178,7 @@ namespace seal
         */
         SEAL_NODISCARD inline GaloisKeys galois_keys_local(const std::vector<int> &steps)
         {
-            return galois_keys_local(galois_elts_from_steps(steps));
+            return galois_keys_local(context_->key_context_data()->galois_tool()->get_elts_from_steps(steps));
         }
 
         /**
@@ -204,7 +204,7 @@ namespace seal
         */
         SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys(const std::vector<int> &steps)
         {
-            return galois_keys(galois_elts_from_steps(steps));
+            return galois_keys(context_->key_context_data()->galois_tool()->get_elts_from_steps(steps));
         }
 
         /**
@@ -222,7 +222,7 @@ namespace seal
         */
         SEAL_NODISCARD inline GaloisKeys galois_keys_local()
         {
-            return galois_keys_local(galois_elts_all());
+            return galois_keys_local(context_->key_context_data()->galois_tool()->get_elts_all());
         }
 
         /**
@@ -243,7 +243,7 @@ namespace seal
         */
         SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys()
         {
-            return galois_keys(galois_elts_all());
+            return galois_keys(context_->key_context_data()->galois_tool()->get_elts_all());
         }
 
         /**
@@ -317,12 +317,6 @@ namespace seal
         @throws std::invalid_argument if the Galois elements are not valid
         */
         GaloisKeys galois_keys(const std::vector<std::uint32_t> &galois_elts, bool save_seed);
-
-        // Get a vector of galois_elts from a vector of steps.
-        std::vector<std::uint32_t> galois_elts_from_steps(const std::vector<int> &steps);
-
-        // Get a vector all necesssary galois_etls.
-        std::vector<std::uint32_t> galois_elts_all();
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);

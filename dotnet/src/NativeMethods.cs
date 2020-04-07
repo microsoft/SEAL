@@ -533,7 +533,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Evaluator_TransformFromNTT(IntPtr thisptr, IntPtr encryptedNTT, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Evaluator_ApplyGalois(IntPtr thisptr, IntPtr encrypted, ulong galoisElt, IntPtr galoisKeys, IntPtr destination, IntPtr pool);
+        internal static extern void Evaluator_ApplyGalois(IntPtr thisptr, IntPtr encrypted, uint galoisElt, IntPtr galoisKeys, IntPtr destination, IntPtr pool);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_RotateRows(IntPtr thisptr, IntPtr encrypted, int steps, IntPtr galoisKeys, IntPtr destination, IntPtr pool);
@@ -837,7 +837,7 @@ namespace Microsoft.Research.SEAL
         #region GaloisKeys methods
 
         [DllImport(sealc, EntryPoint = "GaloisKeys_GetIndex", PreserveSig = false)]
-        internal static extern void GaloisKeys_GetIndex(ulong galoisElt, out ulong index);
+        internal static extern void GaloisKeys_GetIndex(uint galoisElt, out ulong index);
 
         #endregion
 
@@ -859,7 +859,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void KeyGenerator_GaloisKeysAll(IntPtr thisptr, bool save_seed, out IntPtr galoisKeys);
 
         [DllImport(sealc, EntryPoint = "KeyGenerator_GaloisKeysFromElts", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeysFromElts(IntPtr thisptr, ulong count, ulong[] galoisElts, bool save_seed, out IntPtr galoisKeys);
+        internal static extern void KeyGenerator_GaloisKeysFromElts(IntPtr thisptr, ulong count, uint[] galoisElts, bool save_seed, out IntPtr galoisKeys);
 
         [DllImport(sealc, EntryPoint = "KeyGenerator_GaloisKeysFromSteps", PreserveSig = false)]
         internal static extern void KeyGenerator_GaloisKeysFromSteps(IntPtr thisptr, ulong count, int[] steps, bool save_seed, out IntPtr galoisKeys);

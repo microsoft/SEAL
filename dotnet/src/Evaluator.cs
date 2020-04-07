@@ -1232,7 +1232,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void ApplyGaloisInplace(Ciphertext encrypted, ulong galoisElt,
+        public void ApplyGaloisInplace(Ciphertext encrypted, uint galoisElt,
             GaloisKeys galoisKeys, MemoryPoolHandle pool = null)
         {
             ApplyGalois(encrypted, galoisElt, galoisKeys, destination: encrypted, pool: pool);
@@ -1276,7 +1276,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
         /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void ApplyGalois(Ciphertext encrypted, ulong galoisElt, GaloisKeys galoisKeys,
+        public void ApplyGalois(Ciphertext encrypted, uint galoisElt, GaloisKeys galoisKeys,
             Ciphertext destination, MemoryPoolHandle pool = null)
         {
             if (null == encrypted)
