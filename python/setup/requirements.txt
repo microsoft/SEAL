@@ -1,0 +1,4 @@
+pybind11
+cppimport
+jupyter
+numpy
