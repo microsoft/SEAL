@@ -185,23 +185,7 @@ namespace seal
         class RNSTool
         {
         public:
-            RNSTool(MemoryPoolHandle pool) : pool_(std::move(pool))
-            {
-#ifdef SEAL_DEBUG
-                if (!pool_)
-                {
-                    throw std::invalid_argument("pool is uninitialized");
-                }
-#endif
-            }
-
             RNSTool(std::size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t, MemoryPoolHandle pool);
-
-            /**
-            Generates the pre-computations for the given parameters.
-            */
-            bool initialize(
-                std::size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus);
 
             void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
 
@@ -232,18 +216,6 @@ namespace seal
             Compute round(t/q * |input|_q) mod t exactly
             */
             void decrypt_scale_and_round(const uint64_t *phase, uint64_t *destination, MemoryPoolHandle pool) const;
-
-            void reset() noexcept;
-
-            SEAL_NODISCARD inline bool is_initialized() const noexcept
-            {
-                return is_initialized_;
-            }
-
-            SEAL_NODISCARD inline operator bool() const noexcept
-            {
-                return is_initialized();
-            }
 
             SEAL_NODISCARD inline auto inv_q_last_mod_q() const noexcept
             {
@@ -309,9 +281,12 @@ namespace seal
 
             RNSTool &operator=(RNSTool &&assign) = delete;
 
-            MemoryPoolHandle pool_;
+            /**
+            Generates the pre-computations for the given parameters.
+            */
+            void initialize(std::size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus);
 
-            bool is_initialized_ = false;
+            MemoryPoolHandle pool_;
 
             std::size_t coeff_count_ = 0;
 

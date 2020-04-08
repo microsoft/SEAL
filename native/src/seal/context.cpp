@@ -382,8 +382,11 @@ namespace seal
         // RNSTool's constructor may fail due to:
         //   (1) auxiliary base being too large
         //   (2) cannot find inverse of punctured products in auxiliary base
-        context_data.rns_tool_ = allocate<RNSTool>(pool_, pool_);
-        if (!context_data.rns_tool_->initialize(poly_modulus_degree, *coeff_modulus_base, plain_modulus))
+        try
+        {
+            context_data.rns_tool_ = allocate<RNSTool>(pool_, poly_modulus_degree, *coeff_modulus_base, plain_modulus, pool_);
+        }
+        catch (const invalid_argument &)
         {
             // Parameters are not valid
             context_data.qualifiers_.parameter_error = error_type::failed_creating_rns_tool;
