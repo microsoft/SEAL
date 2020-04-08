@@ -149,7 +149,7 @@ namespace seal
                 release();
             }
 
-            SEAL_NODISCARD operator bool() const noexcept
+            SEAL_NODISCARD explicit operator bool() const noexcept
             {
                 return (data_ != nullptr);
             }
@@ -433,7 +433,7 @@ namespace seal
                 release();
             }
 
-            SEAL_NODISCARD operator bool() const noexcept
+            SEAL_NODISCARD explicit operator bool() const noexcept
             {
                 return (data_ != nullptr);
             }
@@ -654,7 +654,7 @@ namespace seal
                 release();
             }
 
-            SEAL_NODISCARD operator bool() const
+            SEAL_NODISCARD explicit operator bool() const
             {
                 return (data_ != nullptr);
             }
@@ -1046,7 +1046,7 @@ namespace seal
                 release();
             }
 
-            SEAL_NODISCARD operator bool() const noexcept
+            SEAL_NODISCARD explicit operator bool() const noexcept
             {
                 return (data_ != nullptr);
             }

@@ -16,24 +16,22 @@ namespace seal
 {
     namespace util
     {
-        class coeff_iterator;
+        class CoeffIterator;
 
-        class const_coeff_iterator;
+        class ConstCoeffIterator;
 
-        class rns_iterator;
+        class RNSIterator;
 
-        class const_rns_iterator;
+        class ConstRNSIterator;
 
-        class poly_iterator;
+        class PolyIterator;
 
-        class const_poly_iterator;
+        class ConstPolyIterator;
 
-        class coeff_iterator
+        class CoeffIterator
         {
         public:
-            friend rns_iterator;
-
-            using self_type = coeff_iterator;
+            using self_type = CoeffIterator;
             using value_type = std::uint64_t;
             using pointer = std::uint64_t *;
             using reference = std::uint64_t &;
@@ -43,15 +41,12 @@ namespace seal
 
             using is_deref_to_iterator_type = std::false_type;
 
-            coeff_iterator(pointer ptr) : ptr_(ptr)
+            CoeffIterator(pointer ptr) : ptr_(ptr)
             {}
 
-            coeff_iterator(Ciphertext &ct) : coeff_iterator(ct.data())
-            {}
+            CoeffIterator(const CoeffIterator &copy) = default;
 
-            coeff_iterator(const coeff_iterator &copy) = default;
-
-            coeff_iterator &operator=(const coeff_iterator &assign) = default;
+            CoeffIterator &operator=(const CoeffIterator &assign) = default;
 
             SEAL_NODISCARD inline auto ptr() const noexcept
             {
@@ -108,12 +103,10 @@ namespace seal
             pointer ptr_;
         };
 
-        class const_coeff_iterator
+        class ConstCoeffIterator
         {
         public:
-            friend const_rns_iterator;
-
-            using self_type = const_coeff_iterator;
+            using self_type = ConstCoeffIterator;
             using value_type = std::uint64_t;
             using pointer = const std::uint64_t *;
             using reference = const std::uint64_t &;
@@ -123,15 +116,21 @@ namespace seal
 
             using is_deref_to_iterator_type = std::false_type;
 
-            const_coeff_iterator(pointer ptr) : ptr_(ptr)
+            ConstCoeffIterator(pointer ptr) : ptr_(ptr)
             {}
 
-            const_coeff_iterator(const Ciphertext &ct) : const_coeff_iterator(ct.data())
+            ConstCoeffIterator(const ConstCoeffIterator &copy) = default;
+
+            ConstCoeffIterator &operator=(const ConstCoeffIterator &assign) = default;
+
+            ConstCoeffIterator(const CoeffIterator &copy) : ptr_(copy.ptr())
             {}
 
-            const_coeff_iterator(const const_coeff_iterator &copy) = default;
-
-            const_coeff_iterator &operator=(const const_coeff_iterator &assign) = default;
+            ConstCoeffIterator &operator=(const CoeffIterator &assign)
+            {
+                ptr_ = assign.ptr();
+                return *this;
+            }
 
             SEAL_NODISCARD inline auto ptr() const noexcept
             {
@@ -188,13 +187,11 @@ namespace seal
             pointer ptr_;
         };
 
-        class rns_iterator
+        class RNSIterator
         {
         public:
-            friend class poly_iterator;
-
-            using self_type = rns_iterator;
-            using value_type = coeff_iterator;
+            using self_type = RNSIterator;
+            using value_type = CoeffIterator;
             using pointer = void;
             using reference = void;
 
@@ -203,16 +200,13 @@ namespace seal
 
             using is_deref_to_iterator_type = std::true_type;
 
-            rns_iterator(std::uint64_t *ptr, std::size_t poly_modulus_degree)
+            RNSIterator(std::uint64_t *ptr, std::size_t poly_modulus_degree)
                 : ptr_(ptr), step_size_(poly_modulus_degree)
             {}
 
-            rns_iterator(Ciphertext &ct) : rns_iterator(ct.data(), ct.poly_modulus_degree())
-            {}
+            RNSIterator(const RNSIterator &copy) = default;
 
-            rns_iterator(const rns_iterator &copy) = default;
-
-            rns_iterator &operator=(const rns_iterator &assign) = default;
+            RNSIterator &operator=(const RNSIterator &assign) = default;
 
             SEAL_NODISCARD inline auto ptr() const noexcept
             {
@@ -276,13 +270,11 @@ namespace seal
             std::size_t step_size_;
         };
 
-        class const_rns_iterator
+        class ConstRNSIterator
         {
         public:
-            friend class const_poly_iterator;
-
-            using self_type = const_rns_iterator;
-            using value_type = const_coeff_iterator;
+            using self_type = ConstRNSIterator;
+            using value_type = ConstCoeffIterator;
             using pointer = void;
             using reference = void;
 
@@ -291,16 +283,23 @@ namespace seal
 
             using is_deref_to_iterator_type = std::true_type;
 
-            const_rns_iterator(const Ciphertext &ct) : const_rns_iterator(ct.data(), ct.poly_modulus_degree())
-            {}
-
-            const_rns_iterator(const std::uint64_t *ptr, std::size_t poly_modulus_degree)
+            ConstRNSIterator(const std::uint64_t *ptr, std::size_t poly_modulus_degree)
                 : ptr_(ptr), step_size_(poly_modulus_degree)
             {}
 
-            const_rns_iterator(const const_rns_iterator &copy) = default;
+            ConstRNSIterator(const ConstRNSIterator &copy) = default;
 
-            const_rns_iterator &operator=(const const_rns_iterator &assign) = default;
+            ConstRNSIterator &operator=(const ConstRNSIterator &assign) = default;
+
+            ConstRNSIterator(const RNSIterator &copy) : ptr_(copy.ptr()), step_size_(copy.poly_modulus_degree())
+            {}
+
+            ConstRNSIterator &operator=(const RNSIterator &assign)
+            {
+                ptr_ = assign.ptr();
+                step_size_ = assign.poly_modulus_degree();
+                return *this;
+            }
 
             SEAL_NODISCARD inline auto ptr() const noexcept
             {
@@ -364,11 +363,11 @@ namespace seal
             std::size_t step_size_;
         };
 
-        class poly_iterator
+        class PolyIterator
         {
         public:
-            using self_type = poly_iterator;
-            using value_type = rns_iterator;
+            using self_type = PolyIterator;
+            using value_type = RNSIterator;
             using pointer = void;
             using reference = void;
 
@@ -377,17 +376,17 @@ namespace seal
 
             using is_deref_to_iterator_type = std::true_type;
 
-            poly_iterator(std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
+            PolyIterator(std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
                 : ptr_(ptr), step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count)),
                   poly_modulus_degree_(poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count)
             {}
 
-            poly_iterator(Ciphertext &ct) : poly_iterator(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+            PolyIterator(Ciphertext &ct) : PolyIterator(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
             {}
 
-            poly_iterator(const poly_iterator &copy) = default;
+            PolyIterator(const PolyIterator &copy) = default;
 
-            poly_iterator &operator=(const poly_iterator &assign) = default;
+            PolyIterator &operator=(const PolyIterator &assign) = default;
 
             SEAL_NODISCARD inline auto ptr() const noexcept
             {
@@ -460,11 +459,11 @@ namespace seal
             std::size_t coeff_modulus_count_;
         };
 
-        class const_poly_iterator
+        class ConstPolyIterator
         {
         public:
-            using self_type = const_poly_iterator;
-            using value_type = const_rns_iterator;
+            using self_type = ConstPolyIterator;
+            using value_type = ConstRNSIterator;
             using pointer = void;
             using reference = void;
 
@@ -473,19 +472,33 @@ namespace seal
 
             using is_deref_to_iterator_type = std::true_type;
 
-            const_poly_iterator(
+            ConstPolyIterator(
                 const std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
                 : ptr_(ptr), step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count)),
                   poly_modulus_degree_(poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count)
             {}
 
-            const_poly_iterator(const Ciphertext &ct)
-                : const_poly_iterator(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+            ConstPolyIterator(const Ciphertext &ct)
+                : ConstPolyIterator(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
             {}
 
-            const_poly_iterator(const const_poly_iterator &copy) = default;
+            ConstPolyIterator(const ConstPolyIterator &copy) = default;
 
-            const_poly_iterator &operator=(const const_poly_iterator &assign) = default;
+            ConstPolyIterator &operator=(const ConstPolyIterator &assign) = default;
+
+            ConstPolyIterator(const PolyIterator &copy)
+                : ptr_(copy.ptr()), step_size_(copy.poly_modulus_degree() * copy.coeff_modulus_count()),
+                  poly_modulus_degree_(copy.poly_modulus_degree()), coeff_modulus_count_(copy.coeff_modulus_count())
+            {}
+
+            ConstPolyIterator &operator=(const PolyIterator &assign)
+            {
+                ptr_ = assign.ptr();
+                step_size_ = assign.poly_modulus_degree() * assign.coeff_modulus_count();
+                poly_modulus_degree_ = assign.poly_modulus_degree();
+                coeff_modulus_count_ = assign.coeff_modulus_count();
+                return *this;
+            }
 
             SEAL_NODISCARD inline auto ptr() const noexcept
             {
@@ -559,10 +572,10 @@ namespace seal
         };
 
         template <class PtrT>
-        class iterator_wrapper
+        class IteratorWrapper
         {
         public:
-            using self_type = iterator_wrapper<PtrT>;
+            using self_type = IteratorWrapper<PtrT>;
             using value_type = PtrT;
             using pointer = void;
             using reference = void;
@@ -572,12 +585,12 @@ namespace seal
 
             using is_deref_to_iterator_type = std::false_type;
 
-            iterator_wrapper(PtrT ptr) : ptr_(ptr)
+            IteratorWrapper(PtrT ptr) : ptr_(ptr)
             {}
 
-            iterator_wrapper(const iterator_wrapper &copy) = default;
+            IteratorWrapper(const IteratorWrapper &copy) = default;
 
-            iterator_wrapper &operator=(const iterator_wrapper &assign) = default;
+            IteratorWrapper &operator=(const IteratorWrapper &assign) = default;
 
             SEAL_NODISCARD inline value_type operator*() const noexcept
             {
@@ -625,32 +638,32 @@ namespace seal
         };
 
         template <class It1, class It2>
-        class iterator_tuple_2
+        class IteratorTuple2
         {
         public:
             using value_type_1 = std::conditional_t<
                 It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It1>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It1>::value_type>>;
             using value_type_2 = std::conditional_t<
                 It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It2>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It2>::value_type>>;
 
             using is_deref_to_iterator_type = std::conditional_t<
                 It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value, std::true_type,
                 std::false_type>;
 
-            using self_type = iterator_tuple_2<It1, It2>;
-            using value_type = iterator_tuple_2<value_type_1, value_type_2>;
+            using self_type = IteratorTuple2<It1, It2>;
+            using value_type = IteratorTuple2<value_type_1, value_type_2>;
             using pointer = void;
             using reference = void;
 
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            iterator_tuple_2(const It1 &it1, const It2 &it2) : it1_(it1), it2_(it2)
+            IteratorTuple2(const It1 &it1, const It2 &it2) : it1_(it1), it2_(it2)
             {}
 
-            iterator_tuple_2(const self_type &copy) = default;
+            IteratorTuple2(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
@@ -716,36 +729,36 @@ namespace seal
         };
 
         template <class It1, class It2, class It3>
-        class iterator_tuple_3
+        class IteratorTuple3
         {
         public:
             using value_type_1 = std::conditional_t<
                 It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It1>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It1>::value_type>>;
             using value_type_2 = std::conditional_t<
                 It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It2>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It2>::value_type>>;
             using value_type_3 = std::conditional_t<
                 It3::is_deref_to_iterator_type::value, typename std::iterator_traits<It3>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It3>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It3>::value_type>>;
 
             using is_deref_to_iterator_type = std::conditional_t<
                 It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value &&
                     It3::is_deref_to_iterator_type::value,
                 std::true_type, std::false_type>;
 
-            using self_type = iterator_tuple_3<It1, It2, It3>;
-            using value_type = iterator_tuple_3<value_type_1, value_type_2, value_type_3>;
+            using self_type = IteratorTuple3<It1, It2, It3>;
+            using value_type = IteratorTuple3<value_type_1, value_type_2, value_type_3>;
             using pointer = void;
             using reference = void;
 
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            iterator_tuple_3(const It1 &it1, const It2 &it2, const It3 &it3) : it1_(it1), it2_(it2), it3_(it3)
+            IteratorTuple3(const It1 &it1, const It2 &it2, const It3 &it3) : it1_(it1), it2_(it2), it3_(it3)
             {}
 
-            iterator_tuple_3(const self_type &copy) = default;
+            IteratorTuple3(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
@@ -822,40 +835,40 @@ namespace seal
         };
 
         template <class It1, class It2, class It3, class It4>
-        class iterator_tuple_4
+        class IteratorTuple4
         {
         public:
             using value_type_1 = std::conditional_t<
                 It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It1>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It1>::value_type>>;
             using value_type_2 = std::conditional_t<
                 It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It2>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It2>::value_type>>;
             using value_type_3 = std::conditional_t<
                 It3::is_deref_to_iterator_type::value, typename std::iterator_traits<It3>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It3>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It3>::value_type>>;
             using value_type_4 = std::conditional_t<
                 It4::is_deref_to_iterator_type::value, typename std::iterator_traits<It4>::value_type,
-                iterator_wrapper<typename std::iterator_traits<It4>::value_type>>;
+                IteratorWrapper<typename std::iterator_traits<It4>::value_type>>;
 
             using is_deref_to_iterator_type = std::conditional_t<
                 It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value &&
                     It3::is_deref_to_iterator_type::value && It4::is_deref_to_iterator_type::value,
                 std::true_type, std::false_type>;
 
-            using self_type = iterator_tuple_4<It1, It2, It3, It4>;
-            using value_type = iterator_tuple_4<value_type_1, value_type_2, value_type_3, value_type_4>;
+            using self_type = IteratorTuple4<It1, It2, It3, It4>;
+            using value_type = IteratorTuple4<value_type_1, value_type_2, value_type_3, value_type_4>;
             using pointer = void;
             using reference = void;
 
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            iterator_tuple_4(const It1 &it1, const It2 &it2, const It3 &it3, const It4 &it4)
+            IteratorTuple4(const It1 &it1, const It2 &it2, const It3 &it3, const It4 &it4)
                 : it1_(it1), it2_(it2), it3_(it3), it4_(it4)
             {}
 
-            iterator_tuple_4(const self_type &copy) = default;
+            IteratorTuple4(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
@@ -943,12 +956,12 @@ namespace seal
         };
 
         template <class It>
-        class reverse_iterator : public It
+        class ReverseIterator : public It
         {
         public:
-            using self_type = reverse_iterator<It>;
+            using self_type = ReverseIterator<It>;
 
-            reverse_iterator(const It &copy) : It(copy)
+            ReverseIterator(const It &copy) : It(copy)
             {}
 
             self_type &operator=(const self_type &assign) = default;
