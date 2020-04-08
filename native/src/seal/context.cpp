@@ -382,13 +382,27 @@ namespace seal
         // RNSTool's constructor may fail due to:
         //   (1) auxiliary base being too large
         //   (2) cannot find inverse of punctured products in auxiliary base
-        context_data.rns_tool_ = allocate<RNSTool>(pool_, pool_);
-        if (!context_data.rns_tool_->initialize(poly_modulus_degree, *coeff_modulus_base, plain_modulus))
+        try
+        {
+            context_data.rns_tool_ = allocate<RNSTool>(pool_, poly_modulus_degree, *coeff_modulus_base, plain_modulus, pool_);
+        }
+        catch (const invalid_argument &)
         {
             // Parameters are not valid
             context_data.qualifiers_.parameter_error = error_type::failed_creating_rns_tool;
             return context_data;
         }
+
+        // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
+        context_data.qualifiers_.using_descending_modulus_chain = true;
+        for (size_t i = 0; i < coeff_modulus_count - 1; i++)
+        {
+            context_data.qualifiers_.using_descending_modulus_chain &=
+                (coeff_modulus[i].value() > coeff_modulus[i + 1].value());
+        }
+
+        // Create GaloisTool
+        context_data.galois_tool_ = allocate<GaloisTool>(pool_, coeff_count_power, pool_);
 
         // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
         context_data.qualifiers_.using_descending_modulus_chain = true;

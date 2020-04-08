@@ -302,8 +302,6 @@ namespace seal
             std::uint64_t *numerator, const SmallModulus &modulus, std::size_t uint64_count, std::uint64_t *quotient,
             MemoryPool &pool);
 
-        SEAL_NODISCARD std::uint64_t galois_elt_from_step(int steps, std::size_t coeff_count);
-
         // Computes a dot product of two uint64_t arrays
         std::uint64_t dot_product_mod(
             const std::uint64_t *operand1, std::size_t coeff_count, const std::uint64_t *operand2,

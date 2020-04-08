@@ -8,6 +8,7 @@ target_sources(seal_obj PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
     ${CMAKE_CURRENT_LIST_DIR}/croots.cpp
     ${CMAKE_CURRENT_LIST_DIR}/globals.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/galois.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
     ${CMAKE_CURRENT_LIST_DIR}/numth.cpp
     ${CMAKE_CURRENT_LIST_DIR}/polyarith.cpp
@@ -38,6 +39,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/config.h
         ${CMAKE_CURRENT_LIST_DIR}/croots.h
         ${CMAKE_CURRENT_LIST_DIR}/defines.h
+        ${CMAKE_CURRENT_LIST_DIR}/galois.h
         ${CMAKE_CURRENT_LIST_DIR}/gcc.h
         ${CMAKE_CURRENT_LIST_DIR}/globals.h
         ${CMAKE_CURRENT_LIST_DIR}/hash.h

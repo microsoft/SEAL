@@ -13,4 +13,4 @@
 #include "seal/c/defines.h"
 #include <stdint.h>
 
-SEAL_C_FUNC GaloisKeys_GetIndex(uint64_t galois_elt, uint64_t *index);
+SEAL_C_FUNC GaloisKeys_GetIndex(uint32_t galois_elt, uint64_t *index);

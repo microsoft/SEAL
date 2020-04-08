@@ -3547,7 +3547,7 @@ namespace SEALTest
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
-        GaloisKeys glk = keygen.galois_keys_local(vector<uint64_t>{ 1, 3, 5, 15 });
+        GaloisKeys glk = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 15 });
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);

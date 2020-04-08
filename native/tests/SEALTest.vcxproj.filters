@@ -95,6 +95,9 @@
     <ClCompile Include="seal\ciphertext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="seal\util\galois.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
     <ClCompile Include="seal\util\hash.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>

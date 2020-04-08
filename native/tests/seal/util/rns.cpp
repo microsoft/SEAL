@@ -391,14 +391,13 @@ namespace SEALTest
             SmallModulus plain_t = 65537;
             RNSBase coeff_base(get_primes(poly_modulus_degree, prime_bit_count, coeff_base_count), pool);
 
-            RNSTool rns_tool(poly_modulus_degree, coeff_base, plain_t, pool);
-            ASSERT_TRUE(rns_tool.is_initialized());
+            ASSERT_NO_THROW(RNSTool rns_tool(poly_modulus_degree, coeff_base, plain_t, pool));
 
             // Succeeds with 0 plain_modulus (case of CKKS)
-            ASSERT_TRUE(rns_tool.initialize(poly_modulus_degree, coeff_base, 0));
+            ASSERT_NO_THROW(RNSTool rns_tool(poly_modulus_degree, coeff_base, 0, pool));
 
             // Fails when poly_modulus_degree is too small
-            ASSERT_FALSE(rns_tool.initialize(1, coeff_base, plain_t));
+            ASSERT_THROW(RNSTool rns_tool(1, coeff_base, plain_t, pool), invalid_argument);
         }
 
         TEST(RNSToolTest, FastBConvMTilde)
@@ -408,16 +407,15 @@ namespace SEALTest
 
             SmallModulus plain_t = 0;
             auto pool = MemoryManager::GetPool();
-
+            Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * rns_tool.base_q()->size());
-                vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk_m_tilde()->size());
+                vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
+                vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.fastbconv_m_tilde(in.data(), out.data(), pool);
+                rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -425,30 +423,29 @@ namespace SEALTest
 
                 in[0] = 1;
                 in[1] = 2;
-                rns_tool.fastbconv_m_tilde(in.data(), out.data(), pool);
+                rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
 
                 // These are results for fase base conversion for a length-2 array ((m_tilde), (2*m_tilde))
                 // before reduction to target base.
-                uint64_t temp = rns_tool.m_tilde().value() % 3;
-                uint64_t temp2 = (2 * rns_tool.m_tilde().value()) % 3;
+                uint64_t temp = rns_tool->m_tilde().value() % 3;
+                uint64_t temp2 = (2 * rns_tool->m_tilde().value()) % 3;
 
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[0].value(), out[0]);
-                ASSERT_EQ(temp2 % (*rns_tool.base_Bsk_m_tilde())[0].value(), out[1]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[1].value(), out[2]);
-                ASSERT_EQ(temp2 % (*rns_tool.base_Bsk_m_tilde())[1].value(), out[3]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[2].value(), out[4]);
-                ASSERT_EQ(temp2 % (*rns_tool.base_Bsk_m_tilde())[2].value(), out[5]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[0].value(), out[0]);
+                ASSERT_EQ(temp2 % (*rns_tool->base_Bsk_m_tilde())[0].value(), out[1]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[1].value(), out[2]);
+                ASSERT_EQ(temp2 % (*rns_tool->base_Bsk_m_tilde())[1].value(), out[3]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[2].value(), out[4]);
+                ASSERT_EQ(temp2 % (*rns_tool->base_Bsk_m_tilde())[2].value(), out[5]);
             }
             {
                 size_t poly_modulus_degree = 2;
                 size_t coeff_modulus_count = 2;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * coeff_modulus_count);
-                vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk_m_tilde()->size());
+                vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.fastbconv_m_tilde(in.data(), out.data(), pool);
+                rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -458,21 +455,21 @@ namespace SEALTest
                 in[1] = 1;
                 in[2] = 2;
                 in[3] = 2;
-                rns_tool.fastbconv_m_tilde(in.data(), out.data(), pool);
-                uint64_t m_tilde = rns_tool.m_tilde().value();
+                rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
+                uint64_t m_tilde = rns_tool->m_tilde().value();
 
                 // This is the result of fast base conversion for a length-2 array
                 // ((m_tilde, 2*m_tilde), (m_tilde, 2*m_tilde)) before reduction to target base.
                 uint64_t temp = ((2 * m_tilde) % 3) * 5 + ((4 * m_tilde) % 5) * 3;
 
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[0].value(), out[0]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[0].value(), out[1]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[1].value(), out[2]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[1].value(), out[3]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[2].value(), out[4]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[2].value(), out[5]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[3].value(), out[6]);
-                ASSERT_EQ(temp % (*rns_tool.base_Bsk_m_tilde())[3].value(), out[7]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[0].value(), out[0]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[0].value(), out[1]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[1].value(), out[2]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[1].value(), out[3]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[2].value(), out[4]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[2].value(), out[5]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[3].value(), out[6]);
+                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[3].value(), out[7]);
             }
         }
 
@@ -486,16 +483,15 @@ namespace SEALTest
 
             SmallModulus plain_t = 0;
             auto pool = MemoryManager::GetPool();
-
+            Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * rns_tool.base_Bsk_m_tilde()->size());
-                vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk()->size());
+                vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
+                vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -504,17 +500,17 @@ namespace SEALTest
                 // Input base is Bsk U {m_tilde}, in this case consisting of 3 primes.
                 // m_tilde is always smaller than the primes in Bsk (SEAL_INTERNAL_MOD_BIT_COUNT (61) bits).
                 // Set the length-2 array to have values 1*m_tilde and 2*m_tilde.
-                in[0] = rns_tool.m_tilde().value();
-                in[1] = 2 * rns_tool.m_tilde().value();
-                in[2] = rns_tool.m_tilde().value();
-                in[3] = 2 * rns_tool.m_tilde().value();
+                in[0] = rns_tool->m_tilde().value();
+                in[1] = 2 * rns_tool->m_tilde().value();
+                in[2] = rns_tool->m_tilde().value();
+                in[3] = 2 * rns_tool->m_tilde().value();
 
                 // Modulo m_tilde
                 in[4] = 0;
                 in[5] = 0;
 
                 // This should simply get rid of the m_tilde factor
-                rns_tool.sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in.data(), out.data(), pool);
 
                 ASSERT_EQ(1, out[0]);
                 ASSERT_EQ(2, out[1]);
@@ -522,14 +518,14 @@ namespace SEALTest
                 ASSERT_EQ(2, out[3]);
 
                 // Next add a multiple of q to the input and see if it is reduced properly
-                in[0] = (*rns_tool.base_q())[0].value();
-                in[1] = (*rns_tool.base_q())[0].value();
-                in[2] = (*rns_tool.base_q())[0].value();
-                in[3] = (*rns_tool.base_q())[0].value();
-                in[4] = (*rns_tool.base_q())[0].value();
-                in[5] = (*rns_tool.base_q())[0].value();
+                in[0] = (*rns_tool->base_q())[0].value();
+                in[1] = (*rns_tool->base_q())[0].value();
+                in[2] = (*rns_tool->base_q())[0].value();
+                in[3] = (*rns_tool->base_q())[0].value();
+                in[4] = (*rns_tool->base_q())[0].value();
+                in[5] = (*rns_tool->base_q())[0].value();
 
-                rns_tool.sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -537,13 +533,12 @@ namespace SEALTest
             }
             {
                 size_t poly_modulus_degree = 2;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * rns_tool.base_Bsk_m_tilde()->size());
-                vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk()->size());
+                vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
+                vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -552,19 +547,19 @@ namespace SEALTest
                 // Input base is Bsk U {m_tilde}, in this case consisting of 6 primes.
                 // m_tilde is always smaller than the primes in Bsk (SEAL_INTERNAL_MOD_BIT_COUNT (61) bits).
                 // Set the length-2 array to have values 1*m_tilde and 2*m_tilde.
-                in[0] = rns_tool.m_tilde().value();
-                in[1] = 2 * rns_tool.m_tilde().value();
-                in[2] = rns_tool.m_tilde().value();
-                in[3] = 2 * rns_tool.m_tilde().value();
-                in[4] = rns_tool.m_tilde().value();
-                in[5] = 2 * rns_tool.m_tilde().value();
+                in[0] = rns_tool->m_tilde().value();
+                in[1] = 2 * rns_tool->m_tilde().value();
+                in[2] = rns_tool->m_tilde().value();
+                in[3] = 2 * rns_tool->m_tilde().value();
+                in[4] = rns_tool->m_tilde().value();
+                in[5] = 2 * rns_tool->m_tilde().value();
 
                 // Modulo m_tilde
                 in[6] = 0;
                 in[7] = 0;
 
                 // This should simply get rid of the m_tilde factor
-                rns_tool.sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in.data(), out.data(), pool);
 
                 ASSERT_EQ(1, out[0]);
                 ASSERT_EQ(2, out[1]);
@@ -583,23 +578,23 @@ namespace SEALTest
                 in[6] = 15;
                 in[7] = 30;
 
-                rns_tool.sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
                 }
 
                 // Now with a multiple of m_tilde + multiple of q
-                in[0] = 2 * rns_tool.m_tilde().value() + 15;
-                in[1] = 2 * rns_tool.m_tilde().value() + 30;
-                in[2] = 2 * rns_tool.m_tilde().value() + 15;
-                in[3] = 2 * rns_tool.m_tilde().value() + 30;
-                in[4] = 2 * rns_tool.m_tilde().value() + 15;
-                in[5] = 2 * rns_tool.m_tilde().value() + 30;
-                in[6] = 2 * rns_tool.m_tilde().value() + 15;
-                in[7] = 2 * rns_tool.m_tilde().value() + 30;
+                in[0] = 2 * rns_tool->m_tilde().value() + 15;
+                in[1] = 2 * rns_tool->m_tilde().value() + 30;
+                in[2] = 2 * rns_tool->m_tilde().value() + 15;
+                in[3] = 2 * rns_tool->m_tilde().value() + 30;
+                in[4] = 2 * rns_tool->m_tilde().value() + 15;
+                in[5] = 2 * rns_tool->m_tilde().value() + 30;
+                in[6] = 2 * rns_tool->m_tilde().value() + 15;
+                in[7] = 2 * rns_tool->m_tilde().value() + 30;
 
-                rns_tool.sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(2, val);
@@ -615,16 +610,15 @@ namespace SEALTest
 
             SmallModulus plain_t = 0;
             auto pool = MemoryManager::GetPool();
-
+            Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * (rns_tool.base_Bsk()->size() + rns_tool.base_q()->size()));
-                vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk()->size());
+                vector<uint64_t> in(poly_modulus_degree * (rns_tool->base_Bsk()->size() + rns_tool->base_q()->size()));
+                vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -639,7 +633,7 @@ namespace SEALTest
                 in[5] = 3;
 
                 // We get an exact result in this case since input base only has size 1
-                rns_tool.fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in.data(), out.data(), pool);
                 ASSERT_EQ(5ULL, out[0]);
                 ASSERT_EQ(1ULL, out[1]);
                 ASSERT_EQ(5ULL, out[2]);
@@ -654,7 +648,7 @@ namespace SEALTest
                 in[5] = 4;
 
                 // We get an exact result in this case since input base only has size 1
-                rns_tool.fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in.data(), out.data(), pool);
                 ASSERT_EQ(5ULL, out[0]);
                 ASSERT_EQ(1ULL, out[1]);
                 ASSERT_EQ(5ULL, out[2]);
@@ -662,13 +656,12 @@ namespace SEALTest
             }
             {
                 size_t poly_modulus_degree = 2;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * (rns_tool.base_Bsk()->size() + rns_tool.base_q()->size()));
-                vector<uint64_t> out(poly_modulus_degree * rns_tool.base_Bsk()->size());
+                vector<uint64_t> in(poly_modulus_degree * (rns_tool->base_Bsk()->size() + rns_tool->base_q()->size()));
+                vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -687,7 +680,7 @@ namespace SEALTest
                 in[9] = 30;
 
                 // We get an exact result in this case
-                rns_tool.fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in.data(), out.data(), pool);
                 ASSERT_EQ(1ULL, out[0]);
                 ASSERT_EQ(2ULL, out[1]);
                 ASSERT_EQ(1ULL, out[2]);
@@ -708,7 +701,7 @@ namespace SEALTest
                 in[9] = 32;
 
                 // The result is not exact but differs at most by 1
-                rns_tool.fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in.data(), out.data(), pool);
                 ASSERT_TRUE(fabs(1ULL - out[0]) <= 1);
                 ASSERT_TRUE(fabs(2ULL - out[1]) <= 1);
                 ASSERT_TRUE(fabs(1ULL - out[2]) <= 1);
@@ -725,16 +718,15 @@ namespace SEALTest
 
             SmallModulus plain_t = 0;
             auto pool = MemoryManager::GetPool();
-
+            Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * rns_tool.base_Bsk()->size());
-                vector<uint64_t> out(poly_modulus_degree * rns_tool.base_q()->size());
+                vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
+                vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.fastbconv_sk(in.data(), out.data(), pool);
+                rns_tool->fastbconv_sk(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -746,19 +738,18 @@ namespace SEALTest
                 in[2] = 1;
                 in[3] = 2;
 
-                rns_tool.fastbconv_sk(in.data(), out.data(), pool);
+                rns_tool->fastbconv_sk(in.data(), out.data(), pool);
                 ASSERT_EQ(1ULL, out[0]);
                 ASSERT_EQ(2ULL, out[1]);
             }
             {
                 size_t poly_modulus_degree = 2;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * rns_tool.base_Bsk()->size());
-                vector<uint64_t> out(poly_modulus_degree * rns_tool.base_q()->size());
+                vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
+                vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.fastbconv_sk(in.data(), out.data(), pool);
+                rns_tool->fastbconv_sk(in.data(), out.data(), pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -772,7 +763,7 @@ namespace SEALTest
                 in[4] = 1;
                 in[5] = 2;
 
-                rns_tool.fastbconv_sk(in.data(), out.data(), pool);
+                rns_tool->fastbconv_sk(in.data(), out.data(), pool);
                 ASSERT_EQ(1ULL, out[0]);
                 ASSERT_EQ(2ULL, out[1]);
                 ASSERT_EQ(1ULL, out[2]);
@@ -785,16 +776,15 @@ namespace SEALTest
             // This function computes [round(t/q * |input|_q)]_t exactly using the gamma-correction technique.
 
             auto pool = MemoryManager::GetPool();
-
+            Pointer<RNSTool> rns_tool;
             size_t poly_modulus_degree = 2;
             SmallModulus plain_t = 3;
-            RNSTool rns_tool(poly_modulus_degree, RNSBase({ 5, 7 }, pool), plain_t, pool);
-            ASSERT_TRUE(rns_tool.is_initialized());
+            ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 5, 7 }, pool), plain_t, pool));
 
-            vector<uint64_t> in(poly_modulus_degree * rns_tool.base_Bsk()->size());
-            vector<uint64_t> out(poly_modulus_degree * rns_tool.base_q()->size());
+            vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
+            vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
             set_zero_uint(in.size(), in.data());
-            rns_tool.decrypt_scale_and_round(in.data(), out.data(), pool);
+            rns_tool->decrypt_scale_and_round(in.data(), out.data(), pool);
             for (auto val : out)
             {
                 ASSERT_EQ(0, val);
@@ -807,7 +797,7 @@ namespace SEALTest
             in[3] = 70;
 
             // We expect to get a zero output in this case
-            rns_tool.decrypt_scale_and_round(in.data(), out.data(), pool);
+            rns_tool->decrypt_scale_and_round(in.data(), out.data(), pool);
             ASSERT_EQ(0ULL, out[0]);
             ASSERT_EQ(0ULL, out[1]);
 
@@ -819,7 +809,7 @@ namespace SEALTest
 
             // Here 29 will scale and round to 2 and 30 will scale and round to 0.
             // The added 35 should not make a difference.
-            rns_tool.decrypt_scale_and_round(in.data(), out.data(), pool);
+            rns_tool->decrypt_scale_and_round(in.data(), out.data(), pool);
             ASSERT_EQ(2ULL, out[0]);
             ASSERT_EQ(0ULL, out[1]);
         }
@@ -830,16 +820,15 @@ namespace SEALTest
             // Input is in base q; the last RNS component becomes invalid.
 
             auto pool = MemoryManager::GetPool();
-
+            Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
                 SmallModulus plain_t = 0;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 13, 7 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 13, 7 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * rns_tool.base_q()->size());
+                vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
                 ASSERT_EQ(0ULL, in[0]);
                 ASSERT_EQ(0ULL, in[1]);
 
@@ -850,7 +839,7 @@ namespace SEALTest
                 in[3] = 2;
 
                 // We expect to get a zero output also in this case
-                rns_tool.divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
                 ASSERT_EQ(0ULL, in[0]);
                 ASSERT_EQ(0ULL, in[1]);
 
@@ -860,7 +849,7 @@ namespace SEALTest
                 in[2] = 4;
                 in[3] = 12;
 
-                rns_tool.divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
                 ASSERT_EQ(1ULL, in[0]);
                 ASSERT_EQ(2ULL, in[1]);
 
@@ -870,19 +859,18 @@ namespace SEALTest
                 in[2] = 5;
                 in[3] = 1;
 
-                rns_tool.divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
                 ASSERT_EQ(3ULL, in[0]);
                 ASSERT_EQ(2ULL, in[1]);
             }
             {
                 size_t poly_modulus_degree = 2;
                 SmallModulus plain_t = 0;
-                RNSTool rns_tool(poly_modulus_degree, RNSBase({ 3, 5, 7, 11 }, pool), plain_t, pool);
-                ASSERT_TRUE(rns_tool.is_initialized());
+                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5, 7, 11 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * rns_tool.base_q()->size());
+                vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool.divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
                 ASSERT_EQ(0ULL, in[0]);
                 ASSERT_EQ(0ULL, in[1]);
                 ASSERT_EQ(0ULL, in[2]);
@@ -901,7 +889,7 @@ namespace SEALTest
                 in[7] = 2;
 
                 // We expect to get a zero output also in this case
-                rns_tool.divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
                 ASSERT_EQ(0ULL, in[0]);
                 ASSERT_EQ(0ULL, in[1]);
                 ASSERT_EQ(0ULL, in[2]);
@@ -920,7 +908,7 @@ namespace SEALTest
                 in[7] = 4;
 
                 // We get only approximate result in this case
-                rns_tool.divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
                 ASSERT_TRUE((3ULL + 2ULL - in[0]) % 3ULL <= 1);
                 ASSERT_TRUE((3ULL + 0ULL - in[1]) % 3ULL <= 1);
                 ASSERT_TRUE((5ULL + 0ULL - in[2]) % 5ULL <= 1);
@@ -937,16 +925,15 @@ namespace SEALTest
             // becomes invalid.
 
             auto pool = MemoryManager::GetPool();
-
+            Pointer<RNSTool> rns_tool;
             size_t poly_modulus_degree = 2;
             SmallNTTTables ntt[]{ { 1, SmallModulus(53) }, { 1, SmallModulus(13) } };
             SmallModulus plain_t = 0;
-            RNSTool rns_tool(poly_modulus_degree, RNSBase({ 53, 13 }, pool), plain_t, pool);
-            ASSERT_TRUE(rns_tool.is_initialized());
+            ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 53, 13 }, pool), plain_t, pool));
 
-            vector<uint64_t> in(poly_modulus_degree * rns_tool.base_q()->size());
+            vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
             set_zero_uint(in.size(), in.data());
-            rns_tool.divide_and_round_q_last_inplace(in.data(), pool);
+            rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
             ASSERT_EQ(0ULL, in[0]);
             ASSERT_EQ(0ULL, in[1]);
 
@@ -959,7 +946,7 @@ namespace SEALTest
             ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
 
             // We expect to get a zero output also in this case
-            rns_tool.divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
+            rns_tool->divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
             inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
             ASSERT_EQ(0ULL, in[0]);
             ASSERT_EQ(0ULL, in[1]);
@@ -972,7 +959,7 @@ namespace SEALTest
             ntt_negacyclic_harvey(in.data(), ntt[0]);
             ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
 
-            rns_tool.divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
+            rns_tool->divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
             inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
             ASSERT_TRUE((53ULL + 1ULL - in[0]) % 53ULL <= 1);
             ASSERT_TRUE((53ULL + 2ULL - in[1]) % 53ULL <= 1);
@@ -985,7 +972,7 @@ namespace SEALTest
             ntt_negacyclic_harvey(in.data(), ntt[0]);
             ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
 
-            rns_tool.divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
+            rns_tool->divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
             inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
             ASSERT_TRUE((53ULL + 2ULL - in[0]) % 53ULL <= 1);
             ASSERT_TRUE((53ULL + 3ULL - in[1]) % 53ULL <= 1);

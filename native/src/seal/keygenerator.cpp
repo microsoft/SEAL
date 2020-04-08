@@ -180,7 +180,7 @@ namespace seal
         return relin_keys;
     }
 
-    GaloisKeys KeyGenerator::galois_keys(const vector<uint64_t> &galois_elts, bool save_seed)
+    GaloisKeys KeyGenerator::galois_keys(const vector<uint32_t> &galois_elts, bool save_seed)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
@@ -197,9 +197,9 @@ namespace seal
 
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
+        auto galois_tool = context_data.galois_tool();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_count = coeff_modulus.size();
-        int coeff_count_power = get_power_of_two(coeff_count);
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count, size_t(2)))
@@ -213,10 +213,10 @@ namespace seal
         // The max number of keys is equal to number of coefficients
         galois_keys.data().resize(coeff_count);
 
-        for (uint64_t galois_elt : galois_elts)
+        for (auto galois_elt : galois_elts)
         {
             // Verify coprime conditions.
-            if (!(galois_elt & 1) || (galois_elt >= static_cast<uint64_t>(coeff_count) << 1))
+            if (!(galois_elt & 1) || (galois_elt >= coeff_count << 1))
             {
                 throw invalid_argument("Galois element is not valid");
             }
@@ -231,9 +231,7 @@ namespace seal
             auto rotated_secret_key(allocate_poly(coeff_count, coeff_modulus_count, pool_));
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
-                apply_galois_ntt(
-                    secret_key_.data().data() + i * coeff_count, coeff_count_power, galois_elt,
-                    rotated_secret_key.get() + i * coeff_count);
+                const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(secret_key_.data().data() + i * coeff_count, galois_elt, rotated_secret_key.get() + i * coeff_count);
             }
 
             // Initialize Galois key
@@ -249,48 +247,6 @@ namespace seal
         galois_keys.parms_id_ = context_data.parms_id();
 
         return galois_keys;
-    }
-
-    vector<uint64_t> KeyGenerator::galois_elts_from_steps(const vector<int> &steps)
-    {
-        vector<uint64_t> galois_elts;
-        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-
-        transform(steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) {
-            return galois_elt_from_step(s, coeff_count);
-        });
-
-        return galois_elts;
-    }
-
-    vector<uint64_t> KeyGenerator::galois_elts_all()
-    {
-        size_t coeff_count = static_cast<size_t>(context_->key_context_data()->parms().poly_modulus_degree());
-        uint64_t m = static_cast<uint64_t>(coeff_count) << 1;
-        int logn = get_power_of_two(static_cast<uint64_t>(coeff_count));
-
-        vector<uint64_t> galois_elts{};
-
-        // Generate Galois keys for m - 1 (X -> X^{m-1})
-        galois_elts.push_back(m - 1);
-
-        // Generate Galois key for power of 3 mod m (X -> X^{3^k}) and
-        // for negative power of 3 mod m (X -> X^{-3^k})
-        uint64_t two_power_of_three = 3;
-        uint64_t neg_two_power_of_three = 0;
-        try_invert_uint_mod(3, m, neg_two_power_of_three);
-        for (int i = 0; i < logn - 1; i++)
-        {
-            galois_elts.push_back(two_power_of_three);
-            two_power_of_three *= two_power_of_three;
-            two_power_of_three &= (m - 1);
-
-            galois_elts.push_back(neg_two_power_of_three);
-            neg_two_power_of_three *= neg_two_power_of_three;
-            neg_two_power_of_three &= (m - 1);
-        }
-
-        return galois_elts;
     }
 
     const SecretKey &KeyGenerator::secret_key() const

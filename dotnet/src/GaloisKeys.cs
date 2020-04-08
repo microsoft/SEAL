@@ -79,7 +79,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="galoisElt">The Galois element</param>
         /// <exception cref="ArgumentException">if Galois element is not valid</exception>
-        public static ulong GetIndex(ulong galoisElt)
+        public static ulong GetIndex(uint galoisElt)
         {
             NativeMethods.GaloisKeys_GetIndex(galoisElt, out ulong index);
             return index;
@@ -91,7 +91,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="galoisElt">The Galois element</param>
         /// <exception cref="ArgumentException">if Galois element is not valid</exception>
-        public bool HasKey(ulong galoisElt)
+        public bool HasKey(uint galoisElt)
         {
             ulong index = GetIndex(galoisElt);
             return (ulong)Data.LongCount() > index &&
@@ -108,7 +108,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElt">The Galois element</param>
         /// <exception cref="ArgumentException">if the key corresponding to galoisElt
         /// does not exist</exception>
-        public IEnumerable<PublicKey> Key(ulong galoisElt)
+        public IEnumerable<PublicKey> Key(uint galoisElt)
         {
             return Data.ElementAt(checked((int)GetIndex(galoisElt)));
         }

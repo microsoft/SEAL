@@ -573,7 +573,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeysLocal(galoisElts: new ulong[] { 1ul, 3ul, 5ul, 15ul });
+            GaloisKeys galoisKeys = keygen.GaloisKeysLocal(galoisElts: new uint[] { 1u, 3u, 5u, 15u });
 
             Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
