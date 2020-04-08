@@ -6,7 +6,6 @@
 #include "seal/util/rns.h"
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"
-#include <optional>
 #include <stdexcept>
 #include <vector>
 #include "gtest/gtest.h"
