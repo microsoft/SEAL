@@ -79,6 +79,7 @@
     <ClCompile Include="seal\testrunner.cpp" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
     <ClCompile Include="seal\util\common.cpp" />
+    <ClCompile Include="seal\util\galois.cpp" />
     <ClCompile Include="seal\util\hash.cpp" />
     <ClCompile Include="seal\util\locks.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />

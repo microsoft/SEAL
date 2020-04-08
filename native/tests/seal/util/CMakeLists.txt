@@ -5,6 +5,7 @@ target_sources(sealtest
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
         ${CMAKE_CURRENT_LIST_DIR}/common.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/galois.cpp
         ${CMAKE_CURRENT_LIST_DIR}/hash.cpp
         ${CMAKE_CURRENT_LIST_DIR}/locks.cpp
         ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp

@@ -21,16 +21,7 @@ namespace seal
                     throw std::invalid_argument("pool is uninitialized");
                 }
 
-                initialize(coeff_count_power, std::uint32_t(3));
-            }
-
-            GaloisTool(int coeff_count_power, std::uint32_t generator, MemoryPoolHandle pool) : pool_(std::move(pool)) {
-                if (!pool_)
-                {
-                    throw std::invalid_argument("pool is uninitialized");
-                }
-
-                initialize(coeff_count_power, generator);
+                initialize(coeff_count_power);
             }
 
             void apply_galois(const std::uint64_t *operand, std::uint32_t galois_elt, const SmallModulus &modulus, std::uint64_t *result) const;
@@ -57,12 +48,12 @@ namespace seal
             */
             SEAL_NODISCARD static inline std::size_t get_index_from_elt(std::uint32_t galois_elt)
             {
-    #ifdef SEAL_DEBUG
+#ifdef SEAL_DEBUG
                 if (!(galois_elt & 1))
                 {
                     throw std::invalid_argument("galois_elt is not valid");
                 }
-    #endif
+#endif
                 return util::safe_cast<std::size_t>((galois_elt - 1) >> 1);
             }
 
@@ -75,7 +66,7 @@ namespace seal
 
             GaloisTool &operator=(GaloisTool &&assign) = delete;
 
-            void initialize(int coeff_count_power, std::uint32_t generator);
+            void initialize(int coeff_count_power);
 
             void generate_table_ntt(std::uint32_t galois_elt, Pointer<std::uint32_t> &result);
 
@@ -85,7 +76,7 @@ namespace seal
 
             std::size_t coeff_count_ = 0;
 
-            std::uint32_t generator_ = 0;
+            std::uint32_t generator_ = 3;
 
             std::vector<Pointer<std::uint32_t>> permutation_tables_;
 
