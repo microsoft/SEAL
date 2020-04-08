@@ -103,7 +103,7 @@ namespace seal
         // Allocate a full size destination to write to
         destination.resize(coeff_count);
 
-        // Divide scaling variant using Bajard FullRNS techniques
+        // Divide scaling variant using BEHZ FullRNS techniques
         context_data.rns_tool()->decrypt_scale_and_round(tmp_dest_modq.get(), destination.data(), pool);
 
         // How many non-zero coefficients do we really have in the result?

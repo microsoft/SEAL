@@ -1097,7 +1097,7 @@ namespace seal
 
             // We need to multiply first the input with m_tilde mod q
             // This is to facilitate Montgomery reduction in the next step of multiplication
-            // This is NOT an ideal approach: as mentioned in Bajard et al., multiplication by
+            // This is NOT an ideal approach: as mentioned in BEHZ16, multiplication by
             // m_tilde can be easily merge into the base conversion operation; however, then
             // we could not use the BaseConvTool as below without modifications.
             auto temp(allocate_poly(coeff_count_, base_q_size, pool));

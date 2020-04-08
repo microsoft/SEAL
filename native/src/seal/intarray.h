@@ -27,8 +27,8 @@ namespace seal
         namespace ztools
         {
             SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
-        } // namespace ztools 
-    } // namespace util 
+        } // namespace ztools
+    }     // namespace util
 
     /**
     A resizable container for storing an array of arithmetic data types or

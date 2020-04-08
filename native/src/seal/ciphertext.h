@@ -16,9 +16,9 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
-#include <iterator>
 #include <string>
 
 namespace seal
