@@ -338,7 +338,7 @@ namespace seal
             {
                 if (!product_fits_in(count, size_))
                 {
-                    throw invalid_argument("count is too large");
+                    throw logic_error("invalid parameters");
                 }
 
                 // Decompose an array of multi-precision integers into an array of arrays,
@@ -414,7 +414,7 @@ namespace seal
             {
                 if (!product_fits_in(count, size_))
                 {
-                    throw invalid_argument("count is too large");
+                    throw logic_error("invalid parameters");
                 }
 
                 // Compose an array of arrays of integers (one array per base element) into
@@ -495,7 +495,7 @@ namespace seal
             // Verify that the size is not too large
             if (!product_fits_in(ibase_.size(), obase_.size()))
             {
-                throw invalid_argument("bases are too large");
+                throw logic_error("invalid parameters");
             }
 
             auto ibase_values = allocate<uint64_t>(ibase_.size(), pool_);
@@ -573,7 +573,7 @@ namespace seal
             // Size check
             if (!product_fits_in(coeff_count_, base_Bsk_m_tilde_size))
             {
-                throw invalid_argument("rnsbase is too large");
+                throw logic_error("invalid parameters");
             }
 
             // Sample primes for B and two more primes: m_sk and gamma
@@ -606,7 +606,7 @@ namespace seal
             {
                 if (!base_Bsk_small_ntt_tables_[i].initialize(coeff_count_power, (*base_Bsk_)[i]))
                 {
-                    throw invalid_argument("auxiliary base does not support NTT");
+                    throw logic_error("invalid rns bases");
                 }
             }
 
@@ -642,7 +642,7 @@ namespace seal
                 inv_prod_q_mod_Bsk_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
                 if (!try_invert_uint_mod(inv_prod_q_mod_Bsk_[i], (*base_Bsk_)[i], inv_prod_q_mod_Bsk_[i]))
                 {
-                    throw invalid_argument("auxiliary base and rnsbase are not coprime");
+                    throw logic_error("invalid rns bases");
                 }
             }
 
@@ -650,7 +650,7 @@ namespace seal
             inv_prod_B_mod_m_sk_ = modulo_uint(base_B_->base_prod(), base_B_size, m_sk_);
             if (!try_invert_uint_mod(inv_prod_B_mod_m_sk_, m_sk_, inv_prod_B_mod_m_sk_))
             {
-                throw invalid_argument("auxiliary base is not coprime");
+                throw logic_error("invalid rns bases");
             }
 
             // Compute m_tilde^(-1) mod Bsk
@@ -660,7 +660,7 @@ namespace seal
                 if (!try_invert_uint_mod(
                         m_tilde_.value() % (*base_Bsk_)[i].value(), (*base_Bsk_)[i], inv_m_tilde_mod_Bsk_[i]))
                 {
-                    throw invalid_argument("auxiliary base is not coprime");
+                    throw logic_error("invalid rns bases");
                 }
             }
 
@@ -668,7 +668,7 @@ namespace seal
             inv_prod_q_mod_m_tilde_ = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
             if (!try_invert_uint_mod(inv_prod_q_mod_m_tilde_, m_tilde_, inv_prod_q_mod_m_tilde_))
             {
-                throw invalid_argument("auxiliary base and rnsbase are not coprime");
+                throw logic_error("invalid rns bases");
             }
 
             // Compute prod(q) mod Bsk
@@ -683,7 +683,7 @@ namespace seal
                 // Compute gamma^(-1) mod t
                 if (!try_invert_uint_mod(gamma_.value() % t_.value(), t_, inv_gamma_mod_t_))
                 {
-                    throw invalid_argument("auxiliary base is not coprime");
+                    throw logic_error("invalid rns bases");
                 }
 
                 // Compute prod({t, gamma}) mod q
@@ -701,7 +701,7 @@ namespace seal
                     neg_inv_q_mod_t_gamma_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_t_gamma_)[i]);
                     if (!try_invert_uint_mod(neg_inv_q_mod_t_gamma_[i], (*base_t_gamma_)[i], neg_inv_q_mod_t_gamma_[i]))
                     {
-                        throw invalid_argument("auxiliary base and rnsbase are not coprime");
+                        throw logic_error("invalid rns bases");
                     }
                     neg_inv_q_mod_t_gamma_[i] = negate_uint_mod(neg_inv_q_mod_t_gamma_[i], (*base_t_gamma_)[i]);
                 }
@@ -714,7 +714,7 @@ namespace seal
             {
                 if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), (*base_q_)[i], inv_q_last_mod_q_[i]))
                 {
-                    throw invalid_argument("rnsbase is not coprime");
+                    throw logic_error("invalid rns bases");
                 }
             }
         }

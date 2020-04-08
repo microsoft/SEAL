@@ -185,6 +185,10 @@ namespace seal
         class RNSTool
         {
         public:
+            /**
+            @throws std::invalid_argument if poly_modulus_degree is out of range, q is not valid, or pool is invalid.
+            @throws std::logic_error if q and extended bases do not support NTT or are not coprime.
+            */
             RNSTool(std::size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t, MemoryPoolHandle pool);
 
             void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
@@ -284,7 +288,8 @@ namespace seal
             /**
             Generates the pre-computations for the given parameters.
             */
-            void initialize(std::size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus);
+            void initialize(
+                std::size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus);
 
             MemoryPoolHandle pool_;
 

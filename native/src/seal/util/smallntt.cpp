@@ -190,28 +190,28 @@ namespace seal
                         for (size_t j = j1; j < j2; j += 4)
                         {
                             tx = *X - (two_times_modulus &
-                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
                             *X++ = tx + Q;
                             *Y++ = tx + two_times_modulus - Q;
 
                             tx = *X - (two_times_modulus &
-                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
                             *X++ = tx + Q;
                             *Y++ = tx + two_times_modulus - Q;
 
                             tx = *X - (two_times_modulus &
-                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
                             *X++ = tx + Q;
                             *Y++ = tx + two_times_modulus - Q;
 
                             tx = *X - (two_times_modulus &
-                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = *Y * W - Q * modulus;
                             *X++ = tx + Q;
@@ -237,7 +237,7 @@ namespace seal
                             // The Harvey butterfly: assume X, Y in [0, 2p), and return X', Y' in [0, 4p).
                             // X', Y' = X + WY, X - WY (mod p).
                             tx = *X - (two_times_modulus &
-                                          static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
+                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, *Y, &Q);
                             Q = W * *Y - Q * modulus;
                             *X++ = tx + Q;
@@ -287,28 +287,28 @@ namespace seal
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, ty, &Q);
                             *Y++ = ty * W - Q * modulus;
 
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, ty, &Q);
                             *Y++ = ty * W - Q * modulus;
 
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, ty, &Q);
                             *Y++ = ty * W - Q * modulus;
 
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, ty, &Q);
                             *Y++ = ty * W - Q * modulus;
                         }
@@ -333,7 +333,7 @@ namespace seal
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
-                                     static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
+                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
                             multiply_uint64_hw64(Wprime, ty, &Q);
                             *Y++ = ty * W - Q * modulus;
                         }
@@ -365,8 +365,7 @@ namespace seal
             for (size_t j = (n >> 1); j < n; j++)
             {
                 tx = *X + *Y;
-                tx -= two_times_modulus &
-                            static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus));
+                tx -= two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus));
                 ty = *X + two_times_modulus - *Y;
                 multiply_uint64_hw64(inv_Nprime, tx, &Q);
                 *X++ = inv_N * tx - Q * modulus;

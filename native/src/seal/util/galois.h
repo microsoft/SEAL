@@ -14,8 +14,8 @@ namespace seal
         class GaloisTool
         {
         public:
-
-            GaloisTool(int coeff_count_power, MemoryPoolHandle pool) : pool_(std::move(pool)) {
+            GaloisTool(int coeff_count_power, MemoryPoolHandle pool) : pool_(std::move(pool))
+            {
                 if (!pool_)
                 {
                     throw std::invalid_argument("pool is uninitialized");
@@ -24,7 +24,9 @@ namespace seal
                 initialize(coeff_count_power);
             }
 
-            void apply_galois(const std::uint64_t *operand, std::uint32_t galois_elt, const SmallModulus &modulus, std::uint64_t *result) const;
+            void apply_galois(
+                const std::uint64_t *operand, std::uint32_t galois_elt, const SmallModulus &modulus,
+                std::uint64_t *result) const;
 
             void apply_galois_ntt(const std::uint64_t *operand, std::uint32_t galois_elt, std::uint64_t *result);
 

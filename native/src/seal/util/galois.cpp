@@ -89,9 +89,8 @@ namespace seal
         vector<uint32_t> GaloisTool::get_elts_from_steps(const vector<int> &steps) const
         {
             vector<uint32_t> galois_elts;
-            transform(steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) {
-                return get_elt_from_step(s);
-            });
+            transform(
+                steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) { return get_elt_from_step(s); });
             return galois_elts;
         }
 
@@ -137,7 +136,8 @@ namespace seal
             permutation_tables_.resize(coeff_count_);
         }
 
-        void GaloisTool::apply_galois(const uint64_t *operand, uint32_t galois_elt, const SmallModulus &modulus, uint64_t *result) const
+        void GaloisTool::apply_galois(
+            const uint64_t *operand, uint32_t galois_elt, const SmallModulus &modulus, uint64_t *result) const
         {
 #ifdef SEAL_DEBUG
             if (operand == nullptr)

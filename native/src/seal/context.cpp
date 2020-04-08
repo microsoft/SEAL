@@ -384,9 +384,10 @@ namespace seal
         //   (2) cannot find inverse of punctured products in auxiliary base
         try
         {
-            context_data.rns_tool_ = allocate<RNSTool>(pool_, poly_modulus_degree, *coeff_modulus_base, plain_modulus, pool_);
+            context_data.rns_tool_ =
+                allocate<RNSTool>(pool_, poly_modulus_degree, *coeff_modulus_base, plain_modulus, pool_);
         }
-        catch (const invalid_argument &)
+        catch (const exception &)
         {
             // Parameters are not valid
             context_data.qualifiers_.parameter_error = error_type::failed_creating_rns_tool;
