@@ -447,50 +447,46 @@ namespace seal
             // The total number of dyadic products is now easy to compute
             size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
 
-            // Create shifted iterators for the inputs in base q
-            auto shifted_encrypted1_q_iter = encrypted1_q_iter;
-            advance(shifted_encrypted1_q_iter, curr_encrypted1_first);
+            // This lambda function computes the ciphertext product for BFV multiplication. As in the
+            // BEHZ approach, the multiplication of individual polynomials is done using a dyadic product,
+            // so the inputs are assumed to be already in NTT form. The arguments of the lambda function
+            // are expected to be as follows:
+            //
+            // 1. a poly_iterator pointing to the beginning of the first input ciphertext (in NTT form) 
+            // 2. a poly_iterator pointing to the beginning of the second input ciphertext (in NTT form) 
+            // 3. an iterator_wrapper pointing to an array of SmallModulus elements for the base
+            // 4. the size of the base
+            // 5. a poly_iterator pointing to the beginning of the output ciphertext
+            auto behz_polynomial_product = [&](auto in1_iter, auto in2_iter, auto base_iter, size_t base_size,
+                                               auto out_iter) {
+                // Create a shifted iterator for the first input
+                auto shifted_in1_iter = in1_iter;
+                advance(shifted_in1_iter, curr_encrypted1_first);
 
-            auto shifted_encrypted2_q_iter = encrypted2_q_iter;
-            advance(shifted_encrypted2_q_iter, curr_encrypted2_first);
-            auto shifted_reversed_encrypted2_q_iter = util::reverse_iterator(shifted_encrypted2_q_iter);
+                // Create a shifted reverse iterator for the second input
+                auto shifted_in2_iter = in2_iter;
+                advance(shifted_in2_iter, curr_encrypted2_first);
+                auto shifted_reversed_in2_iter = util::reverse_iterator(shifted_in2_iter);
 
-            // Shifted iterator for output
-            auto shifted_temp_dest_q_iter = temp_dest_q_iter;
-            advance(shifted_temp_dest_q_iter, secret_power_index);
+                // Create a shifted iterator for the output
+                auto shifted_out_iter = out_iter;
+                advance(shifted_out_iter, secret_power_index);
 
-            for_each_n(
-                iterator_tuple_2(shifted_encrypted1_q_iter, shifted_reversed_encrypted2_q_iter), steps, [&](auto I) {
-                    // Extra care needed here: shifted_temp_dest_q_iter must be dereferenced once to
+                for_each_n(iterator_tuple_2(shifted_in1_iter, shifted_reversed_in2_iter), steps, [&](auto I) {
+                    // Extra care needed here: shifted_out_iter must be dereferenced once to
                     // produce an appropriate rns_iterator.
-                    for_each_n(iterator_tuple_3(I, base_q_iter, *shifted_temp_dest_q_iter), base_q_size, [&](auto J) {
+                    for_each_n(iterator_tuple_3(I, base_iter, *shifted_out_iter), base_size, [&](auto J) {
                         auto temp(allocate_uint(coeff_count, pool));
                         dyadic_product_coeffmod(J.it1().it1(), J.it1().it2(), coeff_count, **J.it2(), temp.get());
                         add_poly_poly_coeffmod(temp.get(), J.it3(), coeff_count, **J.it2(), J.it3());
                     });
                 });
+            };
 
-            // Repeat for base Bsk
-            auto shifted_encrypted1_Bsk_iter = encrypted1_Bsk_iter;
-            advance(shifted_encrypted1_Bsk_iter, curr_encrypted1_first);
-
-            auto shifted_encrypted2_Bsk_iter = encrypted2_Bsk_iter;
-            advance(shifted_encrypted2_Bsk_iter, curr_encrypted2_first);
-            auto shifted_reversed_encrypted2_Bsk_iter = util::reverse_iterator(shifted_encrypted2_Bsk_iter);
-
-            auto shifted_temp_dest_Bsk_iter = temp_dest_Bsk_iter;
-            advance(shifted_temp_dest_Bsk_iter, secret_power_index);
-
-            for_each_n(
-                iterator_tuple_2(shifted_encrypted1_Bsk_iter, shifted_reversed_encrypted2_Bsk_iter), steps,
-                [&](auto I) {
-                    for_each_n(
-                        iterator_tuple_3(I, base_Bsk_iter, *shifted_temp_dest_Bsk_iter), base_Bsk_size, [&](auto J) {
-                            auto temp(allocate_uint(coeff_count, pool));
-                            dyadic_product_coeffmod(J.it1().it1(), J.it1().it2(), coeff_count, **J.it2(), temp.get());
-                            add_poly_poly_coeffmod(temp.get(), J.it3(), coeff_count, **J.it2(), J.it3());
-                        });
-                });
+            // Perform the BEHZ polynomial product both for base q and base Bsk
+            behz_polynomial_product(encrypted1_q_iter, encrypted2_q_iter, base_q_iter, base_q_size, temp_dest_q_iter);
+            behz_polynomial_product(
+                encrypted1_Bsk_iter, encrypted2_Bsk_iter, base_Bsk_iter, base_Bsk_size, temp_dest_Bsk_iter);
         }
 
         // Perform BEHZ step (5): transform data from NTT form
