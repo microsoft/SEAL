@@ -7,7 +7,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(SmallModulusTest, CreateSmallModulus)
     {
@@ -146,4 +146,4 @@ namespace SEALTest
         ASSERT_EQ(mod2.const_ratio()[2], mod.const_ratio()[2]);
         ASSERT_EQ(mod2.is_prime(), mod.is_prime());
     }
-} // namespace SEALTest
+} // namespace sealtest

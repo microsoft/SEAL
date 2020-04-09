@@ -7,6 +7,7 @@ target_sources(sealtest
         ${CMAKE_CURRENT_LIST_DIR}/common.cpp
         ${CMAKE_CURRENT_LIST_DIR}/galois.cpp
         ${CMAKE_CURRENT_LIST_DIR}/hash.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/iterator.cpp
         ${CMAKE_CURRENT_LIST_DIR}/locks.cpp
         ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
         ${CMAKE_CURRENT_LIST_DIR}/numth.cpp

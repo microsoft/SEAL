@@ -9,7 +9,7 @@
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -293,4 +293,4 @@ namespace SEALTest
             ASSERT_TRUE(are_poly_coefficients_less_than(poly.get(), 3, 2, max.get(), 1));
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

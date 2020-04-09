@@ -8,7 +8,7 @@
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -792,4 +792,4 @@ namespace SEALTest
             ASSERT_EQ(0xA0A0A0A0ULL, hamming_weight_split(0xA0A0A0A0A0A0A0A0ULL));
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

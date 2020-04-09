@@ -19,7 +19,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(EvaluatorTest, BFVEncryptNegateDecrypt)
     {
@@ -3887,4 +3887,4 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
     }
-} // namespace SEALTest
+} // namespace sealtest

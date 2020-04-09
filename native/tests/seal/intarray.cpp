@@ -9,7 +9,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(IntArrayTest, IntArrayBasics)
     {
@@ -192,4 +192,4 @@ namespace SEALTest
         arr = move(arr2);
         ASSERT_EQ(&static_cast<util::MemoryPool &>(arr.pool()), addr);
     }
-} // namespace SEALTest
+} // namespace sealtest

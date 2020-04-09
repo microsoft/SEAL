@@ -32,16 +32,16 @@ namespace seal
         {
         public:
             using self_type = CoeffIterator;
-            using value_type = std::uint64_t;
-            using pointer = std::uint64_t *;
-            using reference = std::uint64_t &;
+            using value_type = std::uint64_t *;
+            using pointer = void;
+            using reference = void;
 
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
             using is_deref_to_iterator_type = std::false_type;
 
-            CoeffIterator(pointer ptr) : ptr_(ptr)
+            CoeffIterator(value_type ptr) : ptr_(ptr)
             {}
 
             CoeffIterator(const CoeffIterator &copy) = default;
@@ -84,9 +84,9 @@ namespace seal
                 return result;
             }
 
-            SEAL_NODISCARD inline reference operator*() const noexcept
+            SEAL_NODISCARD inline value_type operator*() const noexcept
             {
-                return *ptr_;
+                return ptr_;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -100,23 +100,23 @@ namespace seal
             }
 
         private:
-            pointer ptr_;
+            value_type ptr_;
         };
 
         class ConstCoeffIterator
         {
         public:
             using self_type = ConstCoeffIterator;
-            using value_type = std::uint64_t;
-            using pointer = const std::uint64_t *;
-            using reference = const std::uint64_t &;
+            using value_type = const std::uint64_t *;
+            using pointer = void;
+            using reference = void;
 
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
             using is_deref_to_iterator_type = std::false_type;
 
-            ConstCoeffIterator(pointer ptr) : ptr_(ptr)
+            ConstCoeffIterator(value_type ptr) : ptr_(ptr)
             {}
 
             ConstCoeffIterator(const ConstCoeffIterator &copy) = default;
@@ -168,9 +168,9 @@ namespace seal
                 return result;
             }
 
-            SEAL_NODISCARD inline reference operator*() const noexcept
+            SEAL_NODISCARD inline value_type operator*() const noexcept
             {
-                return *ptr_;
+                return ptr_;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -184,7 +184,7 @@ namespace seal
             }
 
         private:
-            pointer ptr_;
+            value_type ptr_;
         };
 
         class RNSIterator
@@ -637,6 +637,38 @@ namespace seal
             value_type ptr_;
         };
 
+        template <class It>
+        class ReverseIterator : public It
+        {
+        public:
+            using self_type = ReverseIterator<It>;
+
+            ReverseIterator(const It &copy) : It(copy)
+            {}
+
+            self_type &operator=(const self_type &assign) = default;
+
+            inline auto &operator++() noexcept
+            {
+                return It::operator--();
+            }
+
+            inline auto operator++(int) noexcept
+            {
+                return It::operator--(0);
+            }
+
+            inline auto &operator--() noexcept
+            {
+                return It::operator++();
+            }
+
+            inline auto operator--(int) noexcept
+            {
+                return It::operator++(0);
+            }
+        };
+
         template <class It1, class It2>
         class IteratorTuple2
         {
@@ -953,38 +985,6 @@ namespace seal
             It3 it3_;
 
             It4 it4_;
-        };
-
-        template <class It>
-        class ReverseIterator : public It
-        {
-        public:
-            using self_type = ReverseIterator<It>;
-
-            ReverseIterator(const It &copy) : It(copy)
-            {}
-
-            self_type &operator=(const self_type &assign) = default;
-
-            inline auto &operator++() noexcept
-            {
-                return It::operator--();
-            }
-
-            inline auto operator++(int) noexcept
-            {
-                return It::operator--(0);
-            }
-
-            inline auto &operator--() noexcept
-            {
-                return It::operator++();
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                return It::operator++(0);
-            }
         };
     } // namespace util
 } // namespace seal

@@ -465,7 +465,7 @@ namespace seal
                 // Create a shifted reverse iterator for the second input
                 auto shifted_in2_iter = in2_iter;
                 advance(shifted_in2_iter, curr_encrypted2_first);
-                auto shifted_reversed_in2_iter = util::ReverseIterator(shifted_in2_iter);
+                auto shifted_reversed_in2_iter = ReverseIterator(shifted_in2_iter);
 
                 // Create a shifted iterator for the output
                 auto shifted_out_iter = out_iter;

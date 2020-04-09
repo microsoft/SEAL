@@ -10,7 +10,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(PublicKeyTest, SaveLoadPublicKey)
     {
@@ -62,4 +62,4 @@ namespace SEALTest
             ASSERT_TRUE(pk.parms_id() == pk2.parms_id());
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

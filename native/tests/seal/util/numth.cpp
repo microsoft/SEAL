@@ -13,7 +13,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -219,4 +219,4 @@ namespace SEALTest
             ASSERT_EQ(249725733ULL, result);
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

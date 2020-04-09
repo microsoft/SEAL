@@ -9,7 +9,7 @@
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -310,4 +310,4 @@ namespace SEALTest
             delete writer2;
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

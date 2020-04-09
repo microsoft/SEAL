@@ -10,7 +10,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(CoeffModTest, CustomExceptionTest)
     {
@@ -68,4 +68,4 @@ namespace SEALTest
         ASSERT_EQ(1ULL, cm[3].value() % 64);
         ASSERT_EQ(1ULL, cm[4].value() % 64);
     }
-} // namespace SEALTest
+} // namespace sealtest

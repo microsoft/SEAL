@@ -14,7 +14,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(GaloisKeysTest, GaloisKeysSaveLoad)
     {
@@ -201,4 +201,4 @@ namespace SEALTest
             compare_kswitchkeys(keys, test_keys, secret_key, context);
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

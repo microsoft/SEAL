@@ -11,7 +11,7 @@ using namespace seal::util;
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -375,4 +375,4 @@ namespace SEALTest
             ASSERT_EQ(64, dot_product_mod(arr1, 64, arr2, mod));
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

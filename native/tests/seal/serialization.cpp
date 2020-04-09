@@ -12,7 +12,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     struct test_struct
     {
@@ -149,4 +149,4 @@ namespace SEALTest
         ASSERT_EQ(st.c, st3.c);
 #endif
     }
-} // namespace SEALTest
+} // namespace sealtest

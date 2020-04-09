@@ -12,7 +12,7 @@ using namespace seal::util;
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -43,4 +43,4 @@ namespace SEALTest
             ASSERT_TRUE(stddev >= 5.0 && stddev <= 15.0);
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

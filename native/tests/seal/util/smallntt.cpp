@@ -15,7 +15,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -124,4 +124,4 @@ namespace SEALTest
             }
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

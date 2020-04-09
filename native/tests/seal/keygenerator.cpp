@@ -14,7 +14,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(KeyGeneratorTest, BFVKeyGeneration)
     {
@@ -352,4 +352,4 @@ namespace SEALTest
             ASSERT_NE(pk3.data().data()[i], pk2.data().data()[i]);
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

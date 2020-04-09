@@ -13,7 +13,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(BatchEncoderTest, BatchUnbatchUIntVector)
     {
@@ -174,4 +174,4 @@ namespace SEALTest
             ASSERT_TRUE(short_plain[i] == 0);
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

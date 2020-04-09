@@ -14,7 +14,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -978,4 +978,4 @@ namespace SEALTest
             ASSERT_TRUE((53ULL + 3ULL - in[1]) % 53ULL <= 1);
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

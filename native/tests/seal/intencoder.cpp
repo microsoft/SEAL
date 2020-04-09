@@ -10,7 +10,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(Encoder, IntEncodeDecodeBigUInt)
     {
@@ -439,4 +439,4 @@ namespace SEALTest
             static_cast<int32_t>(1 + -1 * 2 + -2 * 4 + -32767 * 8 + 32767 * 16 + 32766 * 32),
             encoder2.decode_int32(poly11));
     }
-} // namespace SEALTest
+} // namespace sealtest

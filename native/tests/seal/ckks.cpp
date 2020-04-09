@@ -13,7 +13,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(CKKSEncoderTest, CKKSEncoderEncodeVectorDecodeTest)
     {
@@ -341,4 +341,4 @@ namespace SEALTest
             }
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

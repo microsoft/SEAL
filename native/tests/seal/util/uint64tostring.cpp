@@ -11,7 +11,7 @@
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -177,4 +177,4 @@ namespace SEALTest
             ASSERT_EQ(correct, poly_to_hex_string(number, 4, 1));
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest
