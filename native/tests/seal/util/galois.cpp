@@ -37,7 +37,6 @@ namespace sealtest
                 ASSERT_EQ(9, galois_tool.get_elt_from_step(-2));
                 ASSERT_EQ(11, galois_tool.get_elt_from_step(3));
                 ASSERT_EQ(11, galois_tool.get_elt_from_step(-1));
-
             }
         }
 
@@ -46,8 +45,8 @@ namespace sealtest
             auto pool = MemoryManager::GetPool();
             {
                 GaloisTool galois_tool(3, pool);
-                auto elts = galois_tool.get_elts_from_steps({ 0, 1, -3, 2, -2, 3, -1});
-                uint32_t elts_true[7] { 15, 3, 3, 9, 9, 11, 11 };
+                auto elts = galois_tool.get_elts_from_steps({ 0, 1, -3, 2, -2, 3, -1 });
+                uint32_t elts_true[7]{ 15, 3, 3, 9, 9, 11, 11 };
                 for (size_t i = 0; i < elts.size(); i++)
                 {
                     ASSERT_EQ(elts_true[i], elts[i]);
@@ -61,7 +60,7 @@ namespace sealtest
             {
                 GaloisTool galois_tool(3, pool);
                 auto elts = galois_tool.get_elts_all();
-                uint32_t elts_true[5] { 15, 3, 11, 9, 9 };
+                uint32_t elts_true[5]{ 15, 3, 11, 9, 9 };
                 for (size_t i = 0; i < elts.size(); i++)
                 {
                     ASSERT_EQ(elts_true[i], elts[i]);
@@ -81,13 +80,13 @@ namespace sealtest
         {
             EncryptionParameters parms(scheme_type::CKKS);
             parms.set_poly_modulus_degree(8);
-            parms.set_coeff_modulus({17});
+            parms.set_coeff_modulus({ 17 });
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto context_data = context->key_context_data();
             auto galois_tool = context_data->galois_tool();
-            uint64_t in[8] { 0, 1, 2, 3, 4, 5, 6, 7 };
+            uint64_t in[8]{ 0, 1, 2, 3, 4, 5, 6, 7 };
             uint64_t out[8];
-            uint64_t out_true[8] { 0, 14, 6, 1, 13, 7, 2, 12 };
+            uint64_t out_true[8]{ 0, 14, 6, 1, 13, 7, 2, 12 };
             galois_tool->apply_galois(in, 3, SmallModulus(17), out);
             for (size_t i = 0; i < 8; i++)
             {
@@ -99,13 +98,13 @@ namespace sealtest
         {
             EncryptionParameters parms(scheme_type::CKKS);
             parms.set_poly_modulus_degree(8);
-            parms.set_coeff_modulus({17});
+            parms.set_coeff_modulus({ 17 });
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto context_data = context->key_context_data();
             auto galois_tool = context_data->galois_tool();
-            uint64_t in[8] { 0, 1, 2, 3, 4, 5, 6, 7 };
+            uint64_t in[8]{ 0, 1, 2, 3, 4, 5, 6, 7 };
             uint64_t out[8];
-            uint64_t out_true[8] { 4, 5, 7, 6, 1, 0, 2, 3 };
+            uint64_t out_true[8]{ 4, 5, 7, 6, 1, 0, 2, 3 };
             const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(in, 3, out);
             for (size_t i = 0; i < 8; i++)
             {

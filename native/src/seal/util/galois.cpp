@@ -89,9 +89,8 @@ namespace seal
         vector<uint32_t> GaloisTool::get_elts_from_steps(const vector<int> &steps) const
         {
             vector<uint32_t> galois_elts;
-            transform(steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) {
-                return get_elt_from_step(s);
-            });
+            transform(
+                steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) { return get_elt_from_step(s); });
             return galois_elts;
         }
 
@@ -134,10 +133,11 @@ namespace seal
             coeff_count_ = size_t(1) << coeff_count_power_;
 
             // Capacity for coeff_count_ number of tables
-            permutation_tables_.resize(coeff_count_);
+            permutation_tables_ = allocate<Pointer<uint32_t>>(coeff_count_, pool_);
         }
 
-        void GaloisTool::apply_galois(const uint64_t *operand, uint32_t galois_elt, const SmallModulus &modulus, uint64_t *result) const
+        void GaloisTool::apply_galois(
+            const uint64_t *operand, uint32_t galois_elt, const SmallModulus &modulus, uint64_t *result) const
         {
 #ifdef SEAL_DEBUG
             if (operand == nullptr)
@@ -202,9 +202,9 @@ namespace seal
             }
 #endif
 
-            generate_table_ntt(galois_elt, permutation_tables_.at(get_index_from_elt(galois_elt)));
+            generate_table_ntt(galois_elt, permutation_tables_[get_index_from_elt(galois_elt)]);
 
-            auto &table = permutation_tables_.at(get_index_from_elt(galois_elt));
+            auto &table = permutation_tables_[get_index_from_elt(galois_elt)];
             // Perform permutation.
             for (size_t i = 0; i < coeff_count_; i++)
             {

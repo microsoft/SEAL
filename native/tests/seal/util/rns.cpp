@@ -410,7 +410,8 @@ namespace sealtest
             Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
@@ -440,7 +441,8 @@ namespace sealtest
             {
                 size_t poly_modulus_degree = 2;
                 size_t coeff_modulus_count = 2;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * coeff_modulus_count);
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
@@ -486,7 +488,8 @@ namespace sealtest
             Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
@@ -533,7 +536,8 @@ namespace sealtest
             }
             {
                 size_t poly_modulus_degree = 2;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
@@ -613,7 +617,8 @@ namespace sealtest
             Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * (rns_tool->base_Bsk()->size() + rns_tool->base_q()->size()));
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
@@ -656,7 +661,8 @@ namespace sealtest
             }
             {
                 size_t poly_modulus_degree = 2;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * (rns_tool->base_Bsk()->size() + rns_tool->base_q()->size()));
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
@@ -721,7 +727,8 @@ namespace sealtest
             Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
@@ -744,7 +751,8 @@ namespace sealtest
             }
             {
                 size_t poly_modulus_degree = 2;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
@@ -779,7 +787,8 @@ namespace sealtest
             Pointer<RNSTool> rns_tool;
             size_t poly_modulus_degree = 2;
             SmallModulus plain_t = 3;
-            ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 5, 7 }, pool), plain_t, pool));
+            ASSERT_NO_THROW(
+                rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 5, 7 }, pool), plain_t, pool));
 
             vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
             vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
@@ -824,7 +833,8 @@ namespace sealtest
             {
                 size_t poly_modulus_degree = 2;
                 SmallModulus plain_t = 0;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 13, 7 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 13, 7 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
@@ -866,7 +876,9 @@ namespace sealtest
             {
                 size_t poly_modulus_degree = 2;
                 SmallModulus plain_t = 0;
-                ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5, 7, 11 }, pool), plain_t, pool));
+                ASSERT_NO_THROW(
+                    rns_tool =
+                        allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5, 7, 11 }, pool), plain_t, pool));
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
@@ -929,7 +941,8 @@ namespace sealtest
             size_t poly_modulus_degree = 2;
             SmallNTTTables ntt[]{ { 1, SmallModulus(53) }, { 1, SmallModulus(13) } };
             SmallModulus plain_t = 0;
-            ASSERT_NO_THROW(rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 53, 13 }, pool), plain_t, pool));
+            ASSERT_NO_THROW(
+                rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 53, 13 }, pool), plain_t, pool));
 
             vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
             set_zero_uint(in.size(), in.data());

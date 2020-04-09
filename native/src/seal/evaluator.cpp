@@ -4,6 +4,7 @@
 #include "seal/evaluator.h"
 #include "seal/util/common.h"
 #include "seal/util/iterator.h"
+#include "seal/util/galois.h"
 #include "seal/util/numth.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"
@@ -2197,16 +2198,14 @@ namespace seal
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
                 galois_tool->apply_galois(
-                    encrypted.data(0) + i * coeff_count, galois_elt, coeff_modulus[i],
-                    temp.get() + i * coeff_count);
+                    encrypted.data(0) + i * coeff_count, galois_elt, coeff_modulus[i], temp.get() + i * coeff_count);
             }
             // copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
                 galois_tool->apply_galois(
-                    encrypted.data(1) + i * coeff_count, galois_elt, coeff_modulus[i],
-                    temp.get() + i * coeff_count);
+                    encrypted.data(1) + i * coeff_count, galois_elt, coeff_modulus[i], temp.get() + i * coeff_count);
             }
         }
         else if (parms.scheme() == scheme_type::CKKS)
@@ -2214,15 +2213,15 @@ namespace seal
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
-                const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(
-                    encrypted.data(0) + i * coeff_count, galois_elt, temp.get() + i * coeff_count);
+                const_cast<GaloisTool *>(galois_tool)
+                    ->apply_galois_ntt(encrypted.data(0) + i * coeff_count, galois_elt, temp.get() + i * coeff_count);
             }
             // copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
             for (size_t i = 0; i < coeff_modulus_count; i++)
             {
-                const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(
-                    encrypted.data(1) + i * coeff_count, galois_elt, temp.get() + i * coeff_count);
+                const_cast<GaloisTool *>(galois_tool)
+                    ->apply_galois_ntt(encrypted.data(1) + i * coeff_count, galois_elt, temp.get() + i * coeff_count);
             }
         }
         else
