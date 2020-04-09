@@ -133,7 +133,7 @@ namespace seal
             coeff_count_ = size_t(1) << coeff_count_power_;
 
             // Capacity for coeff_count_ number of tables
-            permutation_tables_.resize(coeff_count_);
+            permutation_tables_ = allocate<Pointer<uint32_t>>(coeff_count_, pool_);
         }
 
         void GaloisTool::apply_galois(
@@ -202,9 +202,9 @@ namespace seal
             }
 #endif
 
-            generate_table_ntt(galois_elt, permutation_tables_.at(get_index_from_elt(galois_elt)));
+            generate_table_ntt(galois_elt, permutation_tables_[get_index_from_elt(galois_elt)]);
 
-            auto &table = permutation_tables_.at(get_index_from_elt(galois_elt));
+            auto &table = permutation_tables_[get_index_from_elt(galois_elt)];
             // Perform permutation.
             for (size_t i = 0; i < coeff_count_; i++)
             {

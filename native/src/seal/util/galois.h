@@ -80,7 +80,7 @@ namespace seal
 
             std::uint32_t generator_ = 3;
 
-            std::vector<Pointer<std::uint32_t>> permutation_tables_;
+            Pointer<Pointer<std::uint32_t>> permutation_tables_;
 
             mutable util::ReaderWriterLocker permutation_tables_locker_;
         };
