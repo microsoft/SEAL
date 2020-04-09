@@ -3,6 +3,7 @@
 
 #include "seal/evaluator.h"
 #include "seal/util/common.h"
+#include "seal/util/galois.h"
 #include "seal/util/numth.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"

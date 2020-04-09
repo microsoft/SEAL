@@ -5,6 +5,7 @@
 #include "seal/randomtostd.h"
 #include "seal/util/clipnormal.h"
 #include "seal/util/common.h"
+#include "seal/util/galois.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"
 #include "seal/util/rlwe.h"
