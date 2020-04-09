@@ -104,7 +104,7 @@
     <ClCompile Include="seal\util\blake2xb.c" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
     <ClCompile Include="seal\util\croots.cpp" />
-    <ClInclude Include="seal\util\galois.cpp" />
+    <ClCompile Include="seal\util\galois.cpp" />
     <ClCompile Include="seal\util\globals.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
