@@ -3,8 +3,8 @@
 
 #include "seal/evaluator.h"
 #include "seal/util/common.h"
-#include "seal/util/iterator.h"
 #include "seal/util/galois.h"
+#include "seal/util/iterator.h"
 #include "seal/util/numth.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"
@@ -448,7 +448,7 @@ namespace seal
             // The total number of dyadic products is now easy to compute
             size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
 
-            // This lambda function computes the ciphertext product for BFV multiplication. Since we use the BEHZ 
+            // This lambda function computes the ciphertext product for BFV multiplication. Since we use the BEHZ
             // approach, the multiplication of individual polynomials is done using a dyadic product where the inputs
             // are already in NTT form. The arguments of the lambda function are expected to be as follows:
             //
@@ -815,11 +815,10 @@ namespace seal
                 dyadic_product_coeffmod(I.it1(), I.it1(), coeff_count, **I.it2(), I.it3());
             });
         };
-        
+
         // Perform the BEHZ ciphertext square both for base q and base Bsk
         behz_ciphertext_square(encrypted_q_iter, base_q_iter, base_q_size, temp_dest_q_iter);
         behz_ciphertext_square(encrypted_Bsk_iter, base_Bsk_iter, base_Bsk_size, temp_dest_Bsk_iter);
-
 
         // Perform BEHZ step (5): transform data from NTT form
         for_each_n(IteratorTuple2(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {

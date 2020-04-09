@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/iterator.h"
 #include "seal/memorymanager.h"
-#include <stdexcept>
-#include <cstdint>
-#include <array>
+#include "seal/util/iterator.h"
 #include <algorithm>
+#include <array>
+#include <cstdint>
+#include <stdexcept>
 #include <vector>
 #include "gtest/gtest.h"
 
@@ -27,12 +27,8 @@ namespace sealtest
             CoeffIterator ci(arr.data());
             ConstCoeffIterator cci(arr.data());
 
-            for_each(arr.begin(), arr.end(), [ci](auto a) mutable {
-                    ASSERT_EQ(a, **ci++);
-                });
-            for_each(arr.begin(), arr.end(), [cci](auto a) mutable {
-                    ASSERT_EQ(a, **cci++);
-                });
+            for_each(arr.begin(), arr.end(), [ci](auto a) mutable { ASSERT_EQ(a, **ci++); });
+            for_each(arr.begin(), arr.end(), [cci](auto a) mutable { ASSERT_EQ(a, **cci++); });
 
             ASSERT_EQ(arr.data(), ci.ptr());
             ASSERT_EQ(arr.data(), cci.ptr());
@@ -67,19 +63,15 @@ namespace sealtest
             {
                 vector<uint64_t> values;
                 for_each_n(ri, arr.size() / ri.poly_modulus_degree(), [&](auto ci) {
-                        for_each_n(ci, ri.poly_modulus_degree(), [&](auto c) {
-                            values.push_back(*c);
-                        });
-                    });
+                    for_each_n(ci, ri.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
+                });
                 ASSERT_TRUE(equal(arr.begin(), arr.end(), values.begin()));
             }
             {
                 vector<uint64_t> values;
                 for_each_n(cri, arr.size() / cri.poly_modulus_degree(), [&](auto cci) {
-                        for_each_n(cci, cri.poly_modulus_degree(), [&](auto c) {
-                            values.push_back(*c);
-                        });
-                    });
+                    for_each_n(cci, cri.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
+                });
                 ASSERT_TRUE(equal(arr.begin(), arr.end(), values.begin()));
             }
 
@@ -114,10 +106,8 @@ namespace sealtest
             {
                 vector<uint64_t> values;
                 for_each_n(pi, arr.size() / (pi.poly_modulus_degree() * pi.coeff_modulus_count()), [&](auto ri) {
-                        for_each_n(ri, pi.coeff_modulus_count(), [&](auto ci) {
-                            for_each_n(ci, pi.poly_modulus_degree(), [&](auto c) {
-                            values.push_back(*c);
-                        });
+                    for_each_n(ri, pi.coeff_modulus_count(), [&](auto ci) {
+                        for_each_n(ci, pi.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
                     });
                 });
                 ASSERT_TRUE(equal(arr.begin(), arr.end(), values.begin()));
@@ -125,10 +115,8 @@ namespace sealtest
             {
                 vector<uint64_t> values;
                 for_each_n(cpi, arr.size() / (cpi.poly_modulus_degree() * cpi.coeff_modulus_count()), [&](auto cri) {
-                        for_each_n(cri, cpi.coeff_modulus_count(), [&](auto cci) {
-                            for_each_n(cci, cpi.poly_modulus_degree(), [&](auto c) {
-                            values.push_back(*c);
-                        });
+                    for_each_n(cri, cpi.coeff_modulus_count(), [&](auto cci) {
+                        for_each_n(cci, cpi.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
                     });
                 });
                 ASSERT_TRUE(equal(arr.begin(), arr.end(), values.begin()));
@@ -164,16 +152,12 @@ namespace sealtest
 
             {
                 vector<int32_t> values;
-                for_each_n(int_iter, int_arr.size(), [&](auto int_ptr) {
-                        values.push_back(*int_ptr);
-                    });
+                for_each_n(int_iter, int_arr.size(), [&](auto int_ptr) { values.push_back(*int_ptr); });
                 ASSERT_TRUE(equal(int_arr.begin(), int_arr.end(), values.begin()));
             }
             {
                 vector<char> values;
-                for_each_n(char_iter, char_arr.size(), [&](auto char_ptr) {
-                        values.push_back(*char_ptr);
-                    });
+                for_each_n(char_iter, char_arr.size(), [&](auto char_ptr) { values.push_back(*char_ptr); });
                 ASSERT_TRUE(equal(char_arr.begin(), char_arr.end(), values.begin()));
             }
 
@@ -194,12 +178,8 @@ namespace sealtest
             advance(cci, arr.size() - 1);
             ReverseIterator<ConstCoeffIterator> rcci(cci);
 
-            for_each(arr.rbegin(), arr.rend(), [rci](auto a) mutable {
-                ASSERT_EQ(a, **rci++);
-            });
-            for_each(arr.rbegin(), arr.rend(), [rcci](auto a) mutable {
-                ASSERT_EQ(a, **rcci++);
-            });
+            for_each(arr.rbegin(), arr.rend(), [rci](auto a) mutable { ASSERT_EQ(a, **rci++); });
+            for_each(arr.rbegin(), arr.rend(), [rcci](auto a) mutable { ASSERT_EQ(a, **rcci++); });
 
             ASSERT_EQ(arr.data() + arr.size() - 1, rci.ptr());
             ASSERT_EQ(arr.data() + arr.size() - 1, rcci.ptr());
@@ -221,25 +201,21 @@ namespace sealtest
 
             {
                 vector<int32_t> values;
-                for_each_n(ReverseIterator(int_iter), int_arr.size(), [&](auto int_ptr) {
-                        values.push_back(*int_ptr);
-                    });
+                for_each_n(
+                    ReverseIterator(int_iter), int_arr.size(), [&](auto int_ptr) { values.push_back(*int_ptr); });
 
                 auto values_it = values.begin();
-                for_each(int_arr.rbegin(), int_arr.rend(), [&values_it](auto a) mutable {
-                    ASSERT_EQ(a, *values_it++);
-                });
+                for_each(
+                    int_arr.rbegin(), int_arr.rend(), [&values_it](auto a) mutable { ASSERT_EQ(a, *values_it++); });
             }
             {
                 vector<char> values;
-                for_each_n(ReverseIterator(char_iter), char_arr.size(), [&](auto char_ptr) {
-                        values.push_back(*char_ptr);
-                    });
+                for_each_n(
+                    ReverseIterator(char_iter), char_arr.size(), [&](auto char_ptr) { values.push_back(*char_ptr); });
 
                 auto values_it = values.begin();
-                for_each(char_arr.rbegin(), char_arr.rend(), [&values_it](auto a) mutable {
-                    ASSERT_EQ(a, *values_it++);
-                });
+                for_each(
+                    char_arr.rbegin(), char_arr.rend(), [&values_it](auto a) mutable { ASSERT_EQ(a, *values_it++); });
             }
         }
 
@@ -298,5 +274,5 @@ namespace sealtest
             it5--;
             ASSERT_TRUE(it5 == it4);
         }
-    }
-}
+    } // namespace util
+} // namespace sealtest
