@@ -273,6 +273,30 @@ namespace sealtest
             ASSERT_EQ(0, ***(*it1).it2());
             ASSERT_EQ(0, **(*it2).it1());
             ASSERT_EQ(0, ***(*it2).it2());
+
+            IteratorTuple3 it3(ci, ri, pi);
+            ASSERT_FALSE(decltype(it3)::is_deref_to_iterator_type::value);
+
+            ASSERT_EQ(0, **(*it3).it1());
+            ASSERT_EQ(0, **(*it3).it2());
+            ASSERT_EQ(0, ***(*it3).it3());
+
+            ++it3;
+            ASSERT_EQ(1, **(*it3).it1());
+            ASSERT_EQ(3, **(*it3).it2());
+            ASSERT_EQ(6, ***(*it3).it3());
+
+            --it3;
+            ASSERT_EQ(0, **(*it3).it1());
+            ASSERT_EQ(0, **(*it3).it2());
+            ASSERT_EQ(0, ***(*it3).it3());
+
+            IteratorTuple2 it4(it3, it2);
+            ASSERT_FALSE(decltype(it4)::is_deref_to_iterator_type::value);
+            auto it5 = it4;
+            it5++;
+            it5--;
+            ASSERT_TRUE(it5 == it4);
         }
     }
 }
