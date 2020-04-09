@@ -686,9 +686,47 @@ EMSCRIPTEN_BINDINGS(bindings) {
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &, const PublicKey &>()
         .function("getPublicKey", &KeyGenerator::public_key)
         .function("getSecretKey", &KeyGenerator::secret_key)
-        .function("createRelinKeys", select_overload<RelinKeys()>(&KeyGenerator::relin_keys))
-        .function("createGaloisKeys", select_overload<GaloisKeys()>(&KeyGenerator::galois_keys));
+        .function("genRelinKeys", select_overload<RelinKeys()>(&KeyGenerator::relin_keys))
+        .function("genGaloisKeysAll", select_overload<GaloisKeys()>(&KeyGenerator::galois_keys))
+        .function("genGaloisKeys", optional_override([](KeyGenerator &self, const val &v) {
+                // Get the size of the TypedArray input
+                const size_t length = v["length"].as<unsigned>();
+                // Create a temporary vector to store the TypedArray values
+                std::vector<std::int32_t> temp;
+                // Resize to the number of elements in the TypedArray
+                temp.resize(length);
+                // Construct a memory view on the temp vector
+                const val memoryView { typed_memory_view(length, temp.data()) };
+                // Set the data in the vector from the JS side.
+                memoryView.call<void>("set", v);
 
+                return self.galois_keys(temp);
+            }))
+        .function("galoisKeysSaveAll", optional_override([](KeyGenerator &self, compr_mode_type compr_mode) {
+                std::ostringstream buffer;
+                self.galois_keys_save(buffer, compr_mode);
+                std::string contents = buffer.str();
+                std::string encoded = b64encode(contents);
+                return encoded;
+            }))
+        .function("galoisKeysSave", optional_override([](KeyGenerator &self, const val &v, compr_mode_type compr_mode) {
+                // Get the size of the TypedArray input
+                const size_t length = v["length"].as<unsigned>();
+                // Create a temporary vector to store the TypedArray values
+                std::vector<std::int32_t> temp;
+                // Resize to the number of elements in the TypedArray
+                temp.resize(length);
+                // Construct a memory view on the temp vector
+                const val memoryView { typed_memory_view(length, temp.data()) };
+                // Set the data in the vector from the JS side.
+                memoryView.call<void>("set", v);
+
+                std::ostringstream buffer;
+                self.galois_keys_save(temp, buffer, compr_mode);
+                std::string contents = buffer.str();
+                std::string encoded = b64encode(contents);
+                return encoded;
+            }));
     class_<PublicKey>("PublicKey")
         .constructor<>()
         .constructor<PublicKey &&>() // Move via constructor overload
