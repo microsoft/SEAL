@@ -124,17 +124,13 @@ namespace sealtest
 
             ASSERT_EQ(arr[0], ****pi++);
             ASSERT_EQ(arr[6], ****pi++);
-            ASSERT_EQ(arr.end(), pi.ptr());
             ASSERT_EQ(arr[0], ****cpi++);
             ASSERT_EQ(arr[6], ****cpi++);
-            ASSERT_EQ(arr.cend(), cpi.ptr());
 
             ASSERT_EQ(arr[6], ****--pi);
             ASSERT_EQ(arr[0], ****--pi);
-            ASSERT_EQ(arr.begin(), pi.ptr());
             ASSERT_EQ(arr[6], ****--cpi);
             ASSERT_EQ(arr[0], ****--cpi);
-            ASSERT_EQ(arr.cbegin(), cpi.ptr());
 
             ASSERT_TRUE(pi == cpi);
             ASSERT_TRUE(pi == arr.data());

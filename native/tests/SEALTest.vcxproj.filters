@@ -146,7 +146,7 @@
     <ClCompile Include="seal\util\rns.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="seal\util\serialization.cpp">
+    <ClCompile Include="seal\util\iterator.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
