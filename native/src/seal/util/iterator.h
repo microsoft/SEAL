@@ -7,6 +7,7 @@
 #include "seal/plaintext.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -16,6 +17,18 @@ namespace seal
 {
     namespace util
     {
+#ifndef SEAL_USE_FOR_EACH
+        // C++14 does not have for_each_n so we define a custom version here.
+        template <class It, typename Size, class Func>
+        Func for_each_n(It first, Size size, Func func)
+        {
+            for (; size--; ++first)
+            {
+                func(*first);
+            }
+            return func;
+        }
+#endif
         class CoeffIterator;
 
         class ConstCoeffIterator;

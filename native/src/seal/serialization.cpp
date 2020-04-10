@@ -19,6 +19,15 @@ using namespace seal::util;
 
 namespace seal
 {
+#ifdef SEAL_USE_ZLIB
+    const compr_mode_type Serialization::compr_mode_default = compr_mode_type::deflate;
+#else
+    const compr_mode_type Serialization::compr_mode_default = compr_mode_type::none;
+#endif
+    const std::uint16_t Serialization::seal_magic = 0xA15E;
+
+    const std::uint8_t Serialization::seal_header_size = 0x10;
+
     size_t Serialization::ComprSizeEstimate(size_t in_size, compr_mode_type compr_mode)
     {
         if (!IsSupportedComprMode(compr_mode))

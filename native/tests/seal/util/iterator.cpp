@@ -147,8 +147,8 @@ namespace sealtest
             array<int32_t, 5> int_arr{ 0, 1, 2, 3, 4 };
             array<char, 5> char_arr{ 'a', 'b', 'c', 'd', 'e' };
 
-            IteratorWrapper int_iter(int_arr.data());
-            IteratorWrapper char_iter(char_arr.data());
+            IteratorWrapper<int32_t *> int_iter(int_arr.data());
+            IteratorWrapper<char *> char_iter(char_arr.data());
 
             {
                 vector<int32_t> values;
@@ -196,13 +196,14 @@ namespace sealtest
             array<int32_t, 5> int_arr{ 0, 1, 2, 3, 4 };
             array<char, 5> char_arr{ 'a', 'b', 'c', 'd', 'e' };
 
-            IteratorWrapper int_iter(int_arr.data() + int_arr.size() - 1);
-            IteratorWrapper char_iter(char_arr.data() + char_arr.size() - 1);
+            IteratorWrapper<int32_t *> int_iter(int_arr.data() + int_arr.size() - 1);
+            IteratorWrapper<char *> char_iter(char_arr.data() + char_arr.size() - 1);
 
             {
                 vector<int32_t> values;
-                for_each_n(
-                    ReverseIterator(int_iter), int_arr.size(), [&](auto int_ptr) { values.push_back(*int_ptr); });
+                for_each_n(ReverseIterator<IteratorWrapper<int32_t *>>(int_iter), int_arr.size(), [&](auto int_ptr) {
+                    values.push_back(*int_ptr);
+                });
 
                 auto values_it = values.begin();
                 for_each(
@@ -210,8 +211,9 @@ namespace sealtest
             }
             {
                 vector<char> values;
-                for_each_n(
-                    ReverseIterator(char_iter), char_arr.size(), [&](auto char_ptr) { values.push_back(*char_ptr); });
+                for_each_n(ReverseIterator<IteratorWrapper<char *>>(char_iter), char_arr.size(), [&](auto char_ptr) {
+                    values.push_back(*char_ptr);
+                });
 
                 auto values_it = values.begin();
                 for_each(
@@ -226,8 +228,8 @@ namespace sealtest
             RNSIterator ri(arr.data(), 3);
             PolyIterator pi(arr.data(), 3, 2);
 
-            IteratorTuple2 it1(ci, pi);
-            IteratorTuple2 it2(ri, pi);
+            IteratorTuple2<CoeffIterator, PolyIterator> it1(ci, pi);
+            IteratorTuple2<RNSIterator, PolyIterator> it2(ri, pi);
             ASSERT_FALSE(decltype(it1)::is_deref_to_iterator_type::value);
             ASSERT_TRUE(decltype(it2)::is_deref_to_iterator_type::value);
 
@@ -250,7 +252,7 @@ namespace sealtest
             ASSERT_EQ(0, **(*it2).it1());
             ASSERT_EQ(0, ***(*it2).it2());
 
-            IteratorTuple3 it3(ci, ri, pi);
+            IteratorTuple3<CoeffIterator, RNSIterator, PolyIterator> it3(ci, ri, pi);
             ASSERT_FALSE(decltype(it3)::is_deref_to_iterator_type::value);
 
             ASSERT_EQ(0, **(*it3).it1());
@@ -267,7 +269,9 @@ namespace sealtest
             ASSERT_EQ(0, **(*it3).it2());
             ASSERT_EQ(0, ***(*it3).it3());
 
-            IteratorTuple2 it4(it3, it2);
+            IteratorTuple2<
+                IteratorTuple3<CoeffIterator, RNSIterator, PolyIterator>, IteratorTuple2<RNSIterator, PolyIterator>>
+                it4(it3, it2);
             ASSERT_FALSE(decltype(it4)::is_deref_to_iterator_type::value);
             auto it5 = it4;
             it5++;

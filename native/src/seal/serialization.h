@@ -40,19 +40,19 @@ namespace seal
         The compression mode used by default.
         */
 #ifdef SEAL_USE_ZLIB
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::deflate;
+        static const compr_mode_type compr_mode_default;
 #else
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::none;
+        static const compr_mode_type compr_mode_default;
 #endif
         /**
         The magic value indicating a Microsoft SEAL header.
         */
-        static constexpr std::uint16_t seal_magic = 0xA15E;
+        static const std::uint16_t seal_magic;
 
         /**
         The size in bytes of the SEALHeader.
         */
-        static constexpr std::uint8_t seal_header_size = 0x10;
+        static const std::uint8_t seal_header_size;
 
         /**
         Struct to contain metadata for serialization comprising the following fields:
