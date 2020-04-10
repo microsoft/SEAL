@@ -42,7 +42,7 @@ namespace seal
             return;
         }
 
-        uint32_t GaloisTool::get_elt_from_step(int step) const noexcept
+        uint32_t GaloisTool::get_elt_from_step(int step) const
         {
             uint32_t n = safe_cast<uint32_t>(coeff_count_);
             uint32_t m32 = mul_safe(n, uint32_t(2));

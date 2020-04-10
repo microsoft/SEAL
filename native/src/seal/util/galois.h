@@ -35,7 +35,7 @@ namespace seal
             /**
             Compute the Galois element corresponding to a given rotation step.
             */
-            SEAL_NODISCARD std::uint32_t get_elt_from_step(int step) const noexcept;
+            SEAL_NODISCARD std::uint32_t get_elt_from_step(int step) const;
 
             /**
             Compute the Galois elements corresponding to a vector of given rotation steps.
@@ -80,7 +80,7 @@ namespace seal
 
             std::size_t coeff_count_ = 0;
 
-            constexpr std::uint32_t generator_ = 3;
+            static constexpr std::uint32_t generator_ = 3;
 
             Pointer<Pointer<std::uint32_t>> permutation_tables_;
 
