@@ -55,7 +55,7 @@ set(SEAL_USE_SHARED_MUTEX OFF)
 set(SEAL_USE_IF_CONSTEXPR OFF)
 set(SEAL_USE_MAYBE_UNUSED OFF)
 set(SEAL_USE_NODISCARD OFF)
-set(SEAL_USE_FOR_EACH OFF)
+set(SEAL_USE_STD_FOR_EACH_N OFF)
 set(SEAL_LANG_FLAG "-std=c++14")
 if(SEAL_USE_CXX17)
     set(SEAL_USE_STD_BYTE ON)
@@ -63,7 +63,7 @@ if(SEAL_USE_CXX17)
     set(SEAL_USE_IF_CONSTEXPR ON)
     set(SEAL_USE_MAYBE_UNUSED ON)
     set(SEAL_USE_NODISCARD ON)
-    set(SEAL_USE_FOR_EACH ON)
+    set(SEAL_USE_STD_FOR_EACH_N ON)
     set(SEAL_LANG_FLAG "-std=c++17")
 endif()
 
@@ -271,6 +271,31 @@ set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member o
 option(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR} ON)
 mark_as_advanced(FORCE SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT)
 
+# In some non-MSVC compilers std::for_each_n is not available even when compiling as C++17
+if(SEAL_USE_STD_FOR_EACH_N)
+    cmake_push_check_state(RESET)
+    set(CMAKE_REQUIRED_QUIET TRUE)
+
+    if(NOT MSVC)
+        set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
+        check_cxx_source_runs("
+            #include <algorithm>
+            int main() {
+                int a[1]{ 0 };
+                volatile auto fun = std::for_each_n(a, 1, [](auto b) {});
+                return 0;
+            }"
+            USE_STD_FOR_EACH_N
+        )
+        if(NOT USE_STD_FOR_EACH_N EQUAL 1)
+            set(SEAL_USE_STD_FOR_EACH_N OFF)
+        endif()
+        unset(USE_STD_FOR_EACH_N CACHE)
+    endif()
+
+    cmake_pop_check_state()
+endif()
+
 # Use intrinsics if available
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
 option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
@@ -287,6 +312,7 @@ if(SEAL_USE_INTRIN)
     if(NOT HAVE_INTRIN_HEADER)
         set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
     endif()
+    unset(HAVE_INTRIN_HEADER CACHE)
 endif()
 
 # Specific intrinsics depending on SEAL_USE_INTRIN
@@ -334,6 +360,7 @@ if(SEAL_USE_INTRIN)
             if(NOT USE_UMUL128 EQUAL 1)
                 set(SEAL_USE__UMUL128 OFF CACHE BOOL ${SEAL_USE__UMUL128_OPTION_STR} FORCE)
             endif()
+            unset(USE_UMUL128 CACHE)
         endif()
 
         # Check for _BitScanReverse64
@@ -350,14 +377,18 @@ if(SEAL_USE_INTRIN)
             if(NOT USE_BITSCANREVERSE64 EQUAL 1)
                 set(SEAL_USE__BITSCANREVERSE64 OFF CACHE BOOL ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} FORCE)
             endif()
+            unset(USE_BITSCANREVERSE64 CACHE)
         endif()
     else()
-        # Check for presence of ___int128
+        # Check for presence of __int128
         if(SEAL_USE___INT128)
+            set(CMAKE_EXTRA_INCLUDE_FILES ${SEAL_INTRIN_HEADER})
             check_type_size("__int128" INT128 LANGUAGE CXX)
             if(NOT INT128 EQUAL 16)
                 set(SEAL_USE___INT128 OFF CACHE BOOL ${SEAL_USE___INT128_OPTION_STR} FORCE)
             endif()
+            unset(HAVE_INT128 CACHE)
+            unset(INT128 CACHE)
         endif()
 
         # Check for __builtin_clzll
@@ -372,6 +403,7 @@ if(SEAL_USE_INTRIN)
             if(NOT USE_BUILTIN_CLZLL EQUAL 1)
                 set(SEAL_USE___BUILTIN_CLZLL OFF CACHE BOOL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} FORCE)
             endif()
+            unset(USE_BUILTIN_CLZLL CACHE)
         endif()
     endif()
 
@@ -389,6 +421,7 @@ if(SEAL_USE_INTRIN)
         if(NOT USE_ADDCARRY_U64 EQUAL 1)
             set(SEAL_USE__ADDCARRY_U64 OFF CACHE BOOL ${SEAL_USE__ADDCARRY_U64_OPTION_STR} FORCE)
         endif()
+        unset(USE_ADDCARRY_U64 CACHE)
     endif()
 
     # Check for _subborrow_u64
@@ -405,6 +438,7 @@ if(SEAL_USE_INTRIN)
         if(NOT USE_SUBBORROW_U64 EQUAL 1)
             set(SEAL_USE__SUBBORROW_U64 OFF CACHE BOOL ${SEAL_USE__SUBBORROW_U64_OPTION_STR} FORCE)
         endif()
+        unset(USE_SUBBORROW_U64 CACHE)
     endif()
 
     cmake_pop_check_state()
@@ -484,6 +518,9 @@ check_type_size("size_t" SIZET LANGUAGE C)
 
 set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
 cmake_dependent_option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} OFF "${SIZET} EQUAL 8" OFF)
+
+unset(SIZET CACHE)
+unset(HAVE_SIZET CACHE)
 
 # Create shared SEAL_C library but add no source files yet
 if(SEAL_BUILD_SEAL_C)

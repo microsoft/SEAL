@@ -52,6 +52,7 @@ namespace seal
 } // namespace seal
 #else
 #include <atomic>
+#include <utility>
 
 namespace seal
 {

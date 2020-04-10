@@ -17,7 +17,7 @@ namespace seal
 {
     namespace util
     {
-#ifndef SEAL_USE_FOR_EACH
+#ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.
         template <class It, typename Size, class Func>
         Func for_each_n(It first, Size size, Func func)

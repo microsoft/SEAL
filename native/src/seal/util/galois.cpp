@@ -89,8 +89,9 @@ namespace seal
         vector<uint32_t> GaloisTool::get_elts_from_steps(const vector<int> &steps) const
         {
             vector<uint32_t> galois_elts;
-            transform(
-                steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) { return get_elt_from_step(s); });
+            transform(steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) {
+                return this->get_elt_from_step(s);
+            });
             return galois_elts;
         }
 
