@@ -51,7 +51,7 @@ namespace seal
         */
         SEAL_NODISCARD inline static std::size_t get_index(std::uint32_t galois_elt)
         {
-            return util::GaloisTool::get_index_from_elt(galois_elt);
+            return util::GaloisTool::GetIndexFromElt(galois_elt);
         }
 
         /**

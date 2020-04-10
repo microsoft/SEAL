@@ -42,7 +42,7 @@ namespace seal
             return;
         }
 
-        uint32_t GaloisTool::get_elt_from_step(int step) const
+        uint32_t GaloisTool::get_elt_from_step(int step) const noexcept
         {
             uint32_t n = safe_cast<uint32_t>(coeff_count_);
             uint32_t m32 = mul_safe(n, uint32_t(2));
@@ -86,7 +86,7 @@ namespace seal
             }
         }
 
-        vector<uint32_t> GaloisTool::get_elts_from_steps(const vector<int> &steps) const
+        vector<uint32_t> GaloisTool::get_elts_from_steps(const vector<int> &steps) const noexcept
         {
             vector<uint32_t> galois_elts;
             transform(steps.begin(), steps.end(), back_inserter(galois_elts), [&](auto s) {
@@ -95,7 +95,7 @@ namespace seal
             return galois_elts;
         }
 
-        vector<uint32_t> GaloisTool::get_elts_all() const
+        vector<uint32_t> GaloisTool::get_elts_all() const noexcept
         {
             uint32_t m = safe_cast<uint32_t>(static_cast<uint64_t>(coeff_count_) << 1);
             vector<uint32_t> galois_elts{};
@@ -202,10 +202,9 @@ namespace seal
                 throw std::invalid_argument("Galois element is not valid");
             }
 #endif
+            generate_table_ntt(galois_elt, permutation_tables_[GetIndexFromElt(galois_elt)]);
 
-            generate_table_ntt(galois_elt, permutation_tables_[get_index_from_elt(galois_elt)]);
-
-            auto &table = permutation_tables_[get_index_from_elt(galois_elt)];
+            auto &table = permutation_tables_[GetIndexFromElt(galois_elt)];
             // Perform permutation.
             for (size_t i = 0; i < coeff_count_; i++)
             {

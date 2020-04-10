@@ -239,6 +239,7 @@ namespace seal
         // Can we use NTT with coeff_modulus?
         context_data.qualifiers_.using_ntt = true;
         context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_modulus_count, pool_, pool_);
+        // TODO context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_modulus_count, coeff_modulus.begin(), pool_, pool_)
         for (size_t i = 0; i < coeff_modulus_count; i++)
         {
             if (!context_data.small_ntt_tables_[i].initialize(coeff_count_power, coeff_modulus[i]))

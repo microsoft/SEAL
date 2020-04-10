@@ -5,6 +5,8 @@
 
 #include "seal/memorymanager.h"
 #include "seal/util/pointer.h"
+#include <cstdint>
+#include <cstddef>
 #include <stdexcept>
 
 namespace seal
@@ -33,22 +35,22 @@ namespace seal
             /**
             Compute the Galois element corresponding to a given rotation step.
             */
-            SEAL_NODISCARD std::uint32_t get_elt_from_step(int step) const;
+            SEAL_NODISCARD std::uint32_t get_elt_from_step(int step) const noexcept;
 
             /**
             Compute the Galois elements corresponding to a vector of given rotation steps.
             */
-            SEAL_NODISCARD std::vector<std::uint32_t> get_elts_from_steps(const std::vector<int> &steps) const;
+            SEAL_NODISCARD std::vector<std::uint32_t> get_elts_from_steps(const std::vector<int> &steps) const noexcept;
 
             /**
-            Compute a vector all necesssary galois_etls.
+            Compute a vector of all necessary galois_elts.
             */
-            SEAL_NODISCARD std::vector<std::uint32_t> get_elts_all() const;
+            SEAL_NODISCARD std::vector<std::uint32_t> get_elts_all() const noexcept;
 
             /**
             Compute the index in the range of 0 to (coeff_count_ - 1) of a given Galois element.
             */
-            SEAL_NODISCARD static inline std::size_t get_index_from_elt(std::uint32_t galois_elt)
+            SEAL_NODISCARD static inline std::size_t GetIndexFromElt(std::uint32_t galois_elt)
             {
 #ifdef SEAL_DEBUG
                 if (!(galois_elt & 1))
@@ -78,7 +80,7 @@ namespace seal
 
             std::size_t coeff_count_ = 0;
 
-            std::uint32_t generator_ = 3;
+            constexpr std::uint32_t generator_ = 3;
 
             Pointer<Pointer<std::uint32_t>> permutation_tables_;
 

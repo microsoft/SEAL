@@ -70,10 +70,10 @@ namespace sealtest
 
         TEST(GaloisToolTest, IndexFromElt)
         {
-            ASSERT_EQ(7, GaloisTool::get_index_from_elt(15));
-            ASSERT_EQ(1, GaloisTool::get_index_from_elt(3));
-            ASSERT_EQ(4, GaloisTool::get_index_from_elt(9));
-            ASSERT_EQ(5, GaloisTool::get_index_from_elt(11));
+            ASSERT_EQ(7, GaloisTool::GetIndexFromElt(15));
+            ASSERT_EQ(1, GaloisTool::GetIndexFromElt(3));
+            ASSERT_EQ(4, GaloisTool::GetIndexFromElt(9));
+            ASSERT_EQ(5, GaloisTool::GetIndexFromElt(11));
         }
 
         TEST(GaloisToolTest, ApplyGalois)
