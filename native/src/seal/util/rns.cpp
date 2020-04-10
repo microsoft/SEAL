@@ -517,7 +517,7 @@ namespace seal
             }
         }
 
-        RNSTool::RNSTool(size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t, MemoryPoolHandle pool)
+        RNSTool::RNSTool(size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus, MemoryPoolHandle pool)
             : pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
@@ -526,7 +526,7 @@ namespace seal
                 throw invalid_argument("pool is uninitialized");
             }
 #endif
-            initialize(poly_modulus_degree, q, t);
+            initialize(poly_modulus_degree, coeff_modulus, plain_modulus);
         }
 
         void RNSTool::initialize(size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t)
