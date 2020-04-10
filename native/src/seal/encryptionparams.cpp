@@ -10,6 +10,8 @@ using namespace seal::util;
 
 namespace seal
 {
+    const parms_id_type parms_id_zero = util::HashFunction::hash_zero_block;
+
     void EncryptionParameters::save_members(ostream &stream) const
     {
         // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit

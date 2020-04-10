@@ -107,6 +107,7 @@
     <ClCompile Include="seal\util\croots.cpp" />
     <ClCompile Include="seal\util\galois.cpp" />
     <ClCompile Include="seal\util\globals.cpp" />
+    <ClCompile Include="seal\util\hash.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
     <ClCompile Include="seal\util\polyarith.cpp" />
@@ -115,6 +116,7 @@
     <ClCompile Include="seal\util\rlwe.cpp" />
     <ClCompile Include="seal\util\scalingvariant.cpp" />
     <ClCompile Include="seal\util\smallntt.cpp" />
+    <ClCompile Include="seal\util\streambuf.cpp" />
     <ClCompile Include="seal\util\uintarith.cpp" />
     <ClCompile Include="seal\util\uintarithmod.cpp" />
     <ClCompile Include="seal\util\uintarithsmallmod.cpp" />

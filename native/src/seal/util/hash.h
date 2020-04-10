@@ -7,6 +7,8 @@
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include <array>
+#include <cstdint>
+#include <cstddef>
 
 namespace seal
 {

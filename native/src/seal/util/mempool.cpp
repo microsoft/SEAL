@@ -16,6 +16,18 @@ namespace seal
 {
     namespace util
     {
+        // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
+        // symbol is created.
+        constexpr double MemoryPool::alloc_size_multiplier;
+
+        // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
+        // symbol is created.
+        constexpr std::size_t MemoryPool::max_pool_head_count;
+
+        // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
+        // symbol is created.
+        constexpr std::size_t MemoryPool::first_alloc_count;
+
         MemoryPoolHeadMT::MemoryPoolHeadMT(size_t item_byte_count, bool clear_on_destruction)
             : clear_on_destruction_(clear_on_destruction), locked_(false), item_byte_count_(item_byte_count),
               item_count_(MemoryPool::first_alloc_count), first_item_(nullptr)

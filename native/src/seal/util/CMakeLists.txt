@@ -9,6 +9,7 @@ target_sources(seal_obj PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/croots.cpp
     ${CMAKE_CURRENT_LIST_DIR}/globals.cpp
     ${CMAKE_CURRENT_LIST_DIR}/galois.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hash.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
     ${CMAKE_CURRENT_LIST_DIR}/numth.cpp
     ${CMAKE_CURRENT_LIST_DIR}/polyarith.cpp
@@ -18,6 +19,7 @@ target_sources(seal_obj PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/rns.cpp
     ${CMAKE_CURRENT_LIST_DIR}/scalingvariant.cpp
     ${CMAKE_CURRENT_LIST_DIR}/smallntt.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/streambuf.cpp
     ${CMAKE_CURRENT_LIST_DIR}/uintarith.cpp
     ${CMAKE_CURRENT_LIST_DIR}/uintarithmod.cpp
     ${CMAKE_CURRENT_LIST_DIR}/uintarithsmallmod.cpp
