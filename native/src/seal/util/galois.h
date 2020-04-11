@@ -40,7 +40,7 @@ namespace seal
             /**
             Compute the Galois elements corresponding to a vector of given rotation steps.
             */
-            SEAL_NODISCARD std::vector<std::uint32_t> get_elts_from_steps(const std::vector<int> &steps) const noexcept;
+            SEAL_NODISCARD std::vector<std::uint32_t> get_elts_from_steps(const std::vector<int> &steps) const;
 
             /**
             Compute a vector of all necessary galois_elts.
