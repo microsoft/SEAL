@@ -11,8 +11,8 @@ namespace seal
 {
     namespace util
     {
-        // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
-        // symbol is created.
+        // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to
+        // ensure symbol is created.
         constexpr uint32_t GaloisTool::generator_;
 
         void GaloisTool::generate_table_ntt(uint32_t galois_elt, Pointer<uint32_t> &result)

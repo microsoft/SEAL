@@ -517,7 +517,9 @@ namespace seal
             }
         }
 
-        RNSTool::RNSTool(size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus, MemoryPoolHandle pool)
+        RNSTool::RNSTool(
+            size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus,
+            MemoryPoolHandle pool)
             : pool_(move(pool))
         {
 #ifdef SEAL_DEBUG

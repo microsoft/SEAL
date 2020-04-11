@@ -5,8 +5,8 @@
 
 #include "seal/memorymanager.h"
 #include "seal/util/pointer.h"
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 
 namespace seal
