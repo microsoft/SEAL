@@ -102,7 +102,7 @@ namespace seal
     Otherwise, returns true. This function only checks the metadata and not the
     GaloisKeys data itself.
 
-    @param[in] in The RelinKeys to check
+    @param[in] in The GaloisKeys to check
     @param[in] context The SEALContext
     */
     SEAL_NODISCARD bool is_metadata_valid_for(const GaloisKeys &in, std::shared_ptr<const SEALContext> context);
@@ -115,7 +115,6 @@ namespace seal
     the data buffer and not the plaintext data itself.
 
     @param[in] in The plaintext to check
-    @param[in] context The SEALContext
     */
     SEAL_NODISCARD bool is_buffer_valid(const Plaintext &in);
 
@@ -127,7 +126,6 @@ namespace seal
     the data buffer and not the ciphertext data itself.
 
     @param[in] in The ciphertext to check
-    @param[in] context The SEALContext
     */
     SEAL_NODISCARD bool is_buffer_valid(const Ciphertext &in);
 
@@ -139,7 +137,6 @@ namespace seal
     the data buffer and not the secret key data itself.
 
     @param[in] in The secret key to check
-    @param[in] context The SEALContext
     */
     SEAL_NODISCARD bool is_buffer_valid(const SecretKey &in);
 
@@ -151,7 +148,6 @@ namespace seal
     the data buffer and not the public key data itself.
 
     @param[in] in The public key to check
-    @param[in] context The SEALContext
     */
     SEAL_NODISCARD bool is_buffer_valid(const PublicKey &in);
 
@@ -163,7 +159,6 @@ namespace seal
     the data buffer and not the KSwitchKeys data itself.
 
     @param[in] in The KSwitchKeys to check
-    @param[in] context The SEALContext
     */
     SEAL_NODISCARD bool is_buffer_valid(const KSwitchKeys &in);
 
@@ -175,7 +170,6 @@ namespace seal
     the data buffer and not the RelinKeys data itself.
 
     @param[in] in The RelinKeys to check
-    @param[in] context The SEALContext
     */
     SEAL_NODISCARD bool is_buffer_valid(const RelinKeys &in);
 
@@ -186,8 +180,7 @@ namespace seal
     returns false. Otherwise, returns true. This function only checks the size of
     the data buffer and not the GaloisKeys data itself.
 
-    @param[in] in The RelinKeys to check
-    @param[in] context The SEALContext
+    @param[in] in The GaloisKeys to check
     */
     SEAL_NODISCARD bool is_buffer_valid(const GaloisKeys &in);
 
@@ -270,7 +263,7 @@ namespace seal
     false. Otherwise, returns true. This function can be slow, as it checks the
     correctness of the entire GaloisKeys data buffer.
 
-    @param[in] in The RelinKeys to check
+    @param[in] in The GaloisKeys to check
     @param[in] context The SEALContext
     */
     SEAL_NODISCARD bool is_data_valid_for(const GaloisKeys &in, std::shared_ptr<const SEALContext> context);
