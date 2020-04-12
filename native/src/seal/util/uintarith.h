@@ -18,7 +18,7 @@ namespace seal
 {
     namespace util
     {
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         SEAL_NODISCARD inline unsigned char add_uint64_generic(
             T operand1, S operand2, unsigned char carry, unsigned long long *result)
         {
@@ -33,21 +33,21 @@ namespace seal
             return (operand1 < operand2) || (~operand1 < carry);
         }
 
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         SEAL_NODISCARD inline unsigned char add_uint64(
             T operand1, S operand2, unsigned char carry, unsigned long long *result)
         {
             return SEAL_ADD_CARRY_UINT64(operand1, operand2, carry, result);
         }
 
-        template <typename T, typename S, typename R, typename = std::enable_if<is_uint64_v<T, S, R>>>
+        template <typename T, typename S, typename R, typename = std::enable_if_t<is_uint64_v<T, S, R>>>
         SEAL_NODISCARD inline unsigned char add_uint64(T operand1, S operand2, R *result)
         {
             *result = operand1 + operand2;
             return static_cast<unsigned char>(*result < operand1);
         }
 
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         inline unsigned char add_uint128(const T *operand1, const S *operand2, unsigned long long *result)
         {
 #ifdef SEAL_DEBUG
@@ -175,7 +175,7 @@ namespace seal
             return carry;
         }
 
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         SEAL_NODISCARD inline unsigned char sub_uint64_generic(
             T operand1, S operand2, unsigned char borrow, unsigned long long *result)
         {
@@ -190,14 +190,14 @@ namespace seal
             return (diff > operand1) || (diff < borrow);
         }
 
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         SEAL_NODISCARD inline unsigned char sub_uint64(
             T operand1, S operand2, unsigned char borrow, unsigned long long *result)
         {
             return SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result);
         }
 
-        template <typename T, typename S, typename R, typename = std::enable_if<is_uint64_v<T, S, R>>>
+        template <typename T, typename S, typename R, typename = std::enable_if_t<is_uint64_v<T, S, R>>>
         SEAL_NODISCARD inline unsigned char sub_uint64(T operand1, S operand2, R *result)
         {
             *result = operand1 - operand2;
@@ -773,7 +773,7 @@ namespace seal
             }
         }
 
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         inline void multiply_uint64_generic(T operand1, S operand2, unsigned long long *result128)
         {
 #ifdef SEAL_DEBUG
@@ -798,13 +798,13 @@ namespace seal
             result128[0] = static_cast<unsigned long long>((temp_sum << 32) | (right & 0x00000000FFFFFFFF));
         }
 
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         inline void multiply_uint64(T operand1, S operand2, unsigned long long *result128)
         {
             SEAL_MULTIPLY_UINT64(operand1, operand2, result128);
         }
 
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         inline void multiply_uint64_hw64_generic(T operand1, S operand2, unsigned long long *hw64)
         {
 #ifdef SEAL_DEBUG
@@ -828,7 +828,7 @@ namespace seal
             *hw64 = static_cast<unsigned long long>(left + (middle >> 32) + (temp_sum >> 32));
         }
 
-        template <typename T, typename S, typename = std::enable_if<is_uint64_v<T, S>>>
+        template <typename T, typename S, typename = std::enable_if_t<is_uint64_v<T, S>>>
         inline void multiply_uint64_hw64(T operand1, S operand2, unsigned long long *hw64)
         {
             SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64);
@@ -856,7 +856,7 @@ namespace seal
             multiply_uint_uint(operand1, uint64_count, operand2, uint64_count, uint64_count, result);
         }
 
-        template <typename T, typename = std::enable_if<is_uint64_v<T>>>
+        template <typename T, typename = std::enable_if_t<is_uint64_v<T>>>
         inline void multiply_many_uint64(T *operands, std::size_t count, T *result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
@@ -891,7 +891,7 @@ namespace seal
             }
         }
 
-        template <typename T, typename = std::enable_if<is_uint64_v<T>>>
+        template <typename T, typename = std::enable_if_t<is_uint64_v<T>>>
         inline void multiply_many_uint64_except(
             T *operands, std::size_t count, std::size_t except, T *result, MemoryPool &pool)
         {

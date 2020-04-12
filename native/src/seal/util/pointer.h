@@ -6,6 +6,7 @@
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/mempool.h"
+#include <iterator>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -43,6 +44,13 @@ namespace seal
             Pointer(Pointer<SEAL_BYTE> &&source, SEAL_BYTE value) : Pointer(std::move(source))
             {
                 std::fill_n(data_, head_->item_byte_count(), value);
+            }
+
+            // Copy a range of elements
+            template <typename InputIterator>
+            Pointer(InputIterator first, Pointer<SEAL_BYTE> &&source) : Pointer(std::move(source))
+            {
+                std::copy_n(first, head_->item_byte_count(), data_);
             }
 
             SEAL_NODISCARD inline SEAL_BYTE &operator[](std::size_t index)
@@ -277,6 +285,32 @@ namespace seal
                 source.alias_ = false;
             }
 
+            // Copy a range when T is not SEAL_BYTE
+            template <typename InputIterator>
+            Pointer(InputIterator first, Pointer<SEAL_BYTE> &&source)
+            {
+                // Cannot acquire a non-pool pointer of different type
+                if (!source.head_ && source.data_)
+                {
+                    throw std::invalid_argument("cannot acquire a non-pool pointer of different type");
+                }
+
+                head_ = source.head_;
+                item_ = source.item_;
+                if (head_)
+                {
+                    data_ = reinterpret_cast<T *>(item_->data());
+                    auto count = head_->item_byte_count() / sizeof(T);
+                    std::uninitialized_copy_n(first, count, data_);
+                }
+                alias_ = source.alias_;
+
+                source.data_ = nullptr;
+                source.head_ = nullptr;
+                source.item_ = nullptr;
+                source.alias_ = false;
+            }
+
             SEAL_NODISCARD inline T &operator[](std::size_t index)
             {
                 return data_[index];
@@ -496,6 +530,22 @@ namespace seal
                 }
             }
 
+            template <typename InputIterator>
+            Pointer(InputIterator first, class MemoryPoolHead *head)
+            {
+#ifdef SEAL_DEBUG
+                if (!head)
+                {
+                    throw std::invalid_argument("head cannot be null");
+                }
+#endif
+                head_ = head;
+                item_ = head->get();
+                data_ = reinterpret_cast<T *>(item_->data());
+                auto count = head_->item_byte_count() / sizeof(T);
+                std::uninitialized_copy_n(first, count, data_);
+            }
+
             T *data_ = nullptr;
 
             MemoryPoolHead *head_ = nullptr;
@@ -529,7 +579,7 @@ namespace seal
             }
 
             // Move of the same type
-            ConstPointer(Pointer<SEAL_BYTE> &&source, SEAL_BYTE value) noexcept : ConstPointer(std::move(source))
+            ConstPointer(Pointer<SEAL_BYTE> &&source, SEAL_BYTE value) : ConstPointer(std::move(source))
             {
                 std::fill_n(data_, head_->item_byte_count(), value);
             }
@@ -545,9 +595,16 @@ namespace seal
             }
 
             // Move of the same type
-            ConstPointer(ConstPointer<SEAL_BYTE> &&source, SEAL_BYTE value) noexcept : ConstPointer(std::move(source))
+            ConstPointer(ConstPointer<SEAL_BYTE> &&source, SEAL_BYTE value) : ConstPointer(std::move(source))
             {
                 std::fill_n(data_, head_->item_byte_count(), value);
+            }
+
+            // Copy a range of elements
+            template <typename InputIterator>
+            ConstPointer(InputIterator first, ConstPointer<SEAL_BYTE> &&source) : ConstPointer(std::move(source))
+            {
+                std::copy_n(first, head_->item_byte_count(), data_);
             }
 
             inline auto &operator=(ConstPointer<SEAL_BYTE> &&assign) noexcept
@@ -778,6 +835,32 @@ namespace seal
                 source.alias_ = false;
             }
 
+            // Copy a range when T is not SEAL_BYTE
+            template <typename InputIterator>
+            ConstPointer(InputIterator first, Pointer<SEAL_BYTE> &&source)
+            {
+                // Cannot acquire a non-pool pointer of different type
+                if (!source.head_ && source.data_)
+                {
+                    throw std::invalid_argument("cannot acquire a non-pool pointer of different type");
+                }
+
+                head_ = source.head_;
+                item_ = source.item_;
+                if (head_)
+                {
+                    data_ = reinterpret_cast<T *>(item_->data());
+                    auto count = head_->item_byte_count() / sizeof(T);
+                    std::uninitialized_copy_n(first, count, data_);
+                }
+                alias_ = source.alias_;
+
+                source.data_ = nullptr;
+                source.head_ = nullptr;
+                source.item_ = nullptr;
+                source.alias_ = false;
+            }
+
             // Move of the same type
             ConstPointer(ConstPointer<T> &&source) noexcept
                 : data_(source.data_), head_(source.head_), item_(source.item_), alias_(source.alias_)
@@ -839,6 +922,32 @@ namespace seal
                     {
                         new (alloc_ptr) T(std::forward<Args>(args)...);
                     }
+                }
+                alias_ = source.alias_;
+
+                source.data_ = nullptr;
+                source.head_ = nullptr;
+                source.item_ = nullptr;
+                source.alias_ = false;
+            }
+
+            // Copy a range when T is not SEAL_BYTE
+            template <typename InputIterator>
+            ConstPointer(InputIterator first, ConstPointer<SEAL_BYTE> &&source)
+            {
+                // Cannot acquire a non-pool pointer of different type
+                if (!source.head_ && source.data_)
+                {
+                    throw std::invalid_argument("cannot acquire a non-pool pointer of different type");
+                }
+
+                head_ = source.head_;
+                item_ = source.item_;
+                if (head_)
+                {
+                    data_ = reinterpret_cast<T *>(item_->data());
+                    auto count = head_->item_byte_count() / sizeof(T);
+                    std::uninitialized_copy_n(first, count, data_);
                 }
                 alias_ = source.alias_;
 
@@ -1109,6 +1218,22 @@ namespace seal
                 }
             }
 
+            template <typename InputIterator>
+            ConstPointer(InputIterator first, class MemoryPoolHead *head)
+            {
+#ifdef SEAL_DEBUG
+                if (!head)
+                {
+                    throw std::invalid_argument("head cannot be null");
+                }
+#endif
+                head_ = head;
+                item_ = head->get();
+                data_ = reinterpret_cast<T *>(item_->data());
+                auto count = head_->item_byte_count() / sizeof(T);
+                std::uninitialized_copy_n(first, count, data_);
+            }
+
             T *data_ = nullptr;
 
             MemoryPoolHead *head_ = nullptr;
@@ -1119,7 +1244,10 @@ namespace seal
         };
 
         // Allocate single element
-        template <typename T_, typename... Args, typename = std::enable_if<std::is_standard_layout<T_>::value>>
+        template <
+            typename T_, typename... Args,
+            typename = std::enable_if_t<std::is_standard_layout<
+                typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
         SEAL_NODISCARD inline auto allocate(MemoryPool &pool, Args &&... args)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
@@ -1127,14 +1255,30 @@ namespace seal
         }
 
         // Allocate array of elements
-        template <typename T_, typename... Args, typename = std::enable_if<std::is_standard_layout<T_>::value>>
+        template <
+            typename T_, typename... Args,
+            typename = std::enable_if_t<std::is_standard_layout<
+                typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
         SEAL_NODISCARD inline auto allocate(std::size_t count, MemoryPool &pool, Args &&... args)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
-            return Pointer<T>(pool.get_for_byte_count(util::mul_safe(count, sizeof(T))), std::forward<Args>(args)...);
+            return Pointer<T>(pool.get_for_byte_count(mul_safe(count, sizeof(T))), std::forward<Args>(args)...);
         }
 
-        template <typename T_, typename = std::enable_if<std::is_standard_layout<T_>::value>>
+        // Allocate and copy a range of elements
+        template <
+            typename InputIterator, typename T_ = typename std::iterator_traits<InputIterator>::value_type,
+            typename = std::enable_if_t<std::is_standard_layout<
+                typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
+        SEAL_NODISCARD inline auto allocate(InputIterator first, std::size_t count, MemoryPool &pool)
+        {
+            using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
+            return Pointer<T>(first, pool.get_for_byte_count(mul_safe(count, sizeof(T))));
+        }
+
+        template <
+            typename T_, typename = std::enable_if_t<std::is_standard_layout<
+                             typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
         SEAL_NODISCARD inline auto duplicate_if_needed(
             T_ *original, std::size_t count, bool condition, MemoryPool &pool)
         {
@@ -1154,7 +1298,9 @@ namespace seal
             return allocation;
         }
 
-        template <typename T_, typename = std::enable_if<std::is_standard_layout<T_>::value>>
+        template <
+            typename T_, typename = std::enable_if_t<std::is_standard_layout<
+                             typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
         SEAL_NODISCARD inline auto duplicate_if_needed(
             const T_ *original, std::size_t count, bool condition, MemoryPool &pool)
         {

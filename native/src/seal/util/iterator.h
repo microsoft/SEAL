@@ -19,7 +19,7 @@ namespace seal
     {
 #ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.
-        template <class It, typename Size, class Func>
+        template <typename It, typename Size, typename Func>
         Func for_each_n(It first, Size size, Func func)
         {
             for (; size--; ++first)
@@ -584,7 +584,7 @@ namespace seal
             std::size_t coeff_modulus_count_;
         };
 
-        template <class PtrT>
+        template <typename PtrT>
         class IteratorWrapper
         {
         public:
@@ -650,7 +650,7 @@ namespace seal
             value_type ptr_;
         };
 
-        template <class It>
+        template <typename It>
         class ReverseIterator : public It
         {
         public:
@@ -682,7 +682,7 @@ namespace seal
             }
         };
 
-        template <class It1, class It2>
+        template <typename It1, typename It2>
         class IteratorTuple2
         {
         public:
@@ -773,7 +773,7 @@ namespace seal
             It2 it2_;
         };
 
-        template <class It1, class It2, class It3>
+        template <typename It1, typename It2, typename It3>
         class IteratorTuple3
         {
         public:
@@ -879,7 +879,7 @@ namespace seal
             It3 it3_;
         };
 
-        template <class It1, class It2, class It3, class It4>
+        template <typename It1, typename It2, typename It3, typename It4>
         class IteratorTuple4
         {
         public:

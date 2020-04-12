@@ -6,6 +6,7 @@
 #include "seal/memorymanager.h"
 #include "seal/smallmodulus.h"
 #include "seal/util/pointer.h"
+#include "seal/util/uintcore.h"
 #include <stdexcept>
 
 namespace seal
@@ -23,6 +24,33 @@ namespace seal
                     throw std::invalid_argument("pool is uninitialized");
                 }
 #endif
+            }
+
+            ~SmallNTTTables()
+            {
+                reset();
+            }
+
+            SmallNTTTables(SmallNTTTables &&source) = default;
+
+            SmallNTTTables(SmallNTTTables &copy)
+                : pool_(copy.pool_), is_initialized_(copy.is_initialized_), root_(copy.root_),
+                  coeff_count_power_(copy.coeff_count_power_), coeff_count_(copy.coeff_count_), modulus_(copy.modulus_),
+                  inv_degree_modulo_(copy.inv_degree_modulo_)
+            {
+                // Copy over pre-computation data if SmallNTTTables is initialized
+                if (is_initialized_)
+                {
+                    root_powers_ = allocate_uint(coeff_count_, pool_);
+                    inv_root_powers_ = allocate_uint(coeff_count_, pool_);
+                    scaled_root_powers_ = allocate_uint(coeff_count_, pool_);
+                    scaled_inv_root_powers_ = allocate_uint(coeff_count_, pool_);
+
+                    set_uint_uint(copy.root_powers_.get(), coeff_count_, root_powers_.get());
+                    set_uint_uint(copy.inv_root_powers_.get(), coeff_count_, inv_root_powers_.get());
+                    set_uint_uint(copy.scaled_root_powers_.get(), coeff_count_, scaled_root_powers_.get());
+                    set_uint_uint(copy.scaled_inv_root_powers_.get(), coeff_count_, scaled_inv_root_powers_.get());
+                }
             }
 
             SmallNTTTables(
@@ -136,10 +164,6 @@ namespace seal
             }
 
         private:
-            SmallNTTTables(const SmallNTTTables &copy) = delete;
-
-            SmallNTTTables(SmallNTTTables &&source) = delete;
-
             SmallNTTTables &operator=(const SmallNTTTables &assign) = delete;
 
             SmallNTTTables &operator=(SmallNTTTables &&assign) = delete;

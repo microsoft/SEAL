@@ -1,10 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/modulus.h"
+#include "seal/smallmodulus.h"
 #include "seal/util/common.h"
 #include "seal/util/mempool.h"
 #include "seal/util/pointer.h"
+#include "seal/util/smallntt.h"
+#include "seal/util/uintcore.h"
+#include <algorithm>
 #include <memory>
+#include <vector>
 #include "gtest/gtest.h"
 
 using namespace seal;
@@ -668,6 +674,73 @@ namespace sealtest
                 ASSERT_TRUE(p1.get()[0] == 0x123);
                 ASSERT_TRUE(p1.get()[1] == 0x876);
                 p1.release();
+            }
+        }
+
+        TEST(MemoryPoolTests, Allocate)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            vector<SEAL_BYTE> bytes{ SEAL_BYTE(0), SEAL_BYTE(1), SEAL_BYTE(2), SEAL_BYTE(3), SEAL_BYTE(4) };
+            auto ptr = allocate(bytes.begin(), bytes.size(), pool);
+            ASSERT_TRUE(equal(bytes.begin(), bytes.end(), ptr.get()));
+
+            class NTTTablesCreateIter
+            {
+            public:
+                using self_type = NTTTablesCreateIter;
+                using difference_type = std::ptrdiff_t;
+                using value_type = SmallNTTTables;
+                using reference = SmallNTTTables &;
+                using pointer = void;
+                using iterator_category = std::input_iterator_tag;
+
+                NTTTablesCreateIter(size_t poly_modulus_degree, MemoryPoolHandle pool)
+                    : poly_modulus_degree_(poly_modulus_degree),
+                      sm_(CoeffModulus::Create(poly_modulus_degree_, { 20, 20, 20, 20, 20 })), pool_(pool)
+                {}
+
+                NTTTablesCreateIter(const NTTTablesCreateIter &copy) = default;
+
+                inline value_type operator*()
+                {
+                    return { get_power_of_two(poly_modulus_degree_), sm_[index_], pool_ };
+                }
+
+                inline auto operator++(int) noexcept
+                {
+                    self_type result(*this);
+                    index_++;
+                    return result;
+                }
+
+                inline auto operator++() noexcept
+                {
+                    index_++;
+                    return *this;
+                }
+
+                inline bool operator==(self_type &compare) noexcept
+                {
+                    return compare.index_ == index_;
+                }
+
+                inline bool operator!=(self_type &compare) noexcept
+                {
+                    return !operator==(compare);
+                }
+
+            private:
+                size_t index_ = 0;
+                size_t poly_modulus_degree_ = 0;
+                vector<SmallModulus> sm_;
+                MemoryPoolHandle pool_;
+            };
+
+            NTTTablesCreateIter ntt_iter(8, MemoryPoolHandle::Global());
+            auto ptr_ntt = allocate(ntt_iter, 5, pool);
+            for (size_t i = 0; i < 5; i++)
+            {
+                ASSERT_TRUE(!!ptr_ntt[i]);
             }
         }
     } // namespace util
