@@ -437,13 +437,13 @@ set_include_directories(seal)
 link_threads(seal)
 install_target(seal SEALTargets)
 
-if(SEAL_USE_MSGSL AND NOT MSVC)
+if(SEAL_USE_MSGSL AND NOT MSVC AND NOT CMAKE_HOST_WIN32)
     # In UNIX-like platforms copy Microsoft GSL include files into native/src
     add_custom_command(TARGET seal POST_BUILD
         COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
 endif()
 
-if(SEAL_USE_ZLIB AND NOT MSVC)
+if(SEAL_USE_ZLIB AND NOT MSVC AND NOT CMAKE_HOST_WIN32)
     # In UNIX-like platforms combine manually seal and zlibstatic
     # into a single archive; not pretty, but works
     add_custom_command(TARGET seal POST_BUILD
@@ -493,7 +493,18 @@ if(SEAL_BUILD_SEAL_C)
     set_soversion(sealc)
     set_language(sealc)
     set_include_directories(sealc)
+
+    if(SEAL_USE_MSGSL AND NOT MSVC)
+        target_include_directories(sealc PUBLIC $<BUILD_INTERFACE:${MSGSL_INCLUDE_DIR}>)
+    endif()
+
     target_link_libraries(sealc PUBLIC seal)
+
+    if(SEAL_USE_ZLIB AND NOT MSVC)
+        # Link zlibstatic into the shared SEAL_C library
+        target_link_libraries(sealc PRIVATE zlibstatic)
+    endif()
+
     install_target(sealc SEALTargets)
 endif()
 
