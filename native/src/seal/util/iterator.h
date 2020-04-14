@@ -20,7 +20,7 @@ namespace seal
 #ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.
         template <typename ForwardIt, typename Size, typename Func>
-        InputIt for_each_n(ForwardIt first, Size size, Func func)
+        ForwardIt for_each_n(ForwardIt first, Size size, Func func)
         {
             for (; size--; (void)++first)
             {
@@ -606,7 +606,7 @@ namespace seal
         class IteratorWrapper
         {
         public:
-            using self_type = typename IteratorWrapper<PtrT>;
+            using self_type = IteratorWrapper<PtrT>;
             using is_deref_to_iterator_type = std::false_type;
 
             // Standard iterator typedefs
