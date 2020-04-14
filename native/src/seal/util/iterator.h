@@ -19,14 +19,14 @@ namespace seal
     {
 #ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.
-        template <typename It, typename Size, typename Func>
-        Func for_each_n(It first, Size size, Func func)
+        template <typename ForwardIt, typename Size, typename Func>
+        InputIt for_each_n(ForwardIt first, Size size, Func func)
         {
-            for (; size--; ++first)
+            for (; size--; (void)++first)
             {
                 func(*first);
             }
-            return func;
+            return first;
         }
 #endif
         class CoeffIterator;
@@ -44,62 +44,62 @@ namespace seal
         class CoeffIterator
         {
         public:
+            friend class RNSIterator;
+            friend class PolyIterator;
+
             using self_type = CoeffIterator;
+            using is_deref_to_iterator_type = std::false_type;
+
+            // Standard iterator typedefs
             using value_type = std::uint64_t *;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            using is_deref_to_iterator_type = std::false_type;
+            CoeffIterator() : ptr_(nullptr)
+            {}
 
             CoeffIterator(value_type ptr) : ptr_(ptr)
             {}
 
-            CoeffIterator(const CoeffIterator &copy) = default;
+            CoeffIterator(const self_type &copy) = default;
 
-            CoeffIterator &operator=(const CoeffIterator &assign) = default;
+            self_type &operator=(const self_type &assign) = default;
 
-            SEAL_NODISCARD inline auto ptr() const noexcept
+            CoeffIterator(self_type &&source) = default;
+
+            self_type &operator=(self_type &&assign) = default;
+
+            SEAL_NODISCARD inline reference operator*() const noexcept
             {
                 return ptr_;
             }
 
-            SEAL_NODISCARD operator std::uint64_t *() const noexcept
-            {
-                return ptr();
-            }
-
-            inline auto &operator++() noexcept
+            inline self_type &operator++() noexcept
             {
                 ptr_++;
                 return *this;
             }
 
-            inline auto operator++(int) noexcept
+            inline self_type operator++(int) noexcept
             {
                 self_type result(ptr_);
                 ptr_++;
                 return result;
             }
 
-            inline auto &operator--() noexcept
+            inline self_type &operator--() noexcept
             {
                 ptr_--;
                 return *this;
             }
 
-            inline auto operator--(int) noexcept
+            inline self_type operator--(int) noexcept
             {
                 self_type result(ptr_);
                 ptr_--;
                 return result;
-            }
-
-            SEAL_NODISCARD inline value_type operator*() const noexcept
-            {
-                return ptr_;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -110,6 +110,11 @@ namespace seal
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
             {
                 return !(*this == compare);
+            }
+
+            SEAL_NODISCARD inline operator std::uint64_t *() const noexcept
+            {
+                return ptr_;
             }
 
         private:
@@ -119,71 +124,65 @@ namespace seal
         class ConstCoeffIterator
         {
         public:
+            friend class ConstRNSIterator;
+            friend class ConstPolyIterator;
+
             using self_type = ConstCoeffIterator;
+            using is_deref_to_iterator_type = std::false_type;
+
+            // Standard iterator typedefs
             using value_type = const std::uint64_t *;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            using is_deref_to_iterator_type = std::false_type;
+            ConstCoeffIterator() : ptr_(nullptr)
+            {}
 
             ConstCoeffIterator(value_type ptr) : ptr_(ptr)
             {}
 
-            ConstCoeffIterator(const ConstCoeffIterator &copy) = default;
+            ConstCoeffIterator(const self_type &copy) = default;
 
-            ConstCoeffIterator &operator=(const ConstCoeffIterator &assign) = default;
+            self_type &operator=(const self_type &assign) = default;
 
-            ConstCoeffIterator(const CoeffIterator &copy) : ptr_(copy.ptr())
+            ConstCoeffIterator(self_type &&source) = default;
+
+            self_type &operator=(self_type &&assign) = default;
+
+            ConstCoeffIterator(const CoeffIterator &copy) : ptr_(static_cast<const std::uint64_t *>(copy))
             {}
 
-            ConstCoeffIterator &operator=(const CoeffIterator &assign)
-            {
-                ptr_ = assign.ptr();
-                return *this;
-            }
-
-            SEAL_NODISCARD inline auto ptr() const noexcept
+            SEAL_NODISCARD inline reference operator*() const noexcept
             {
                 return ptr_;
             }
 
-            SEAL_NODISCARD operator const std::uint64_t *() const noexcept
-            {
-                return ptr();
-            }
-
-            inline auto &operator++() noexcept
+            inline self_type &operator++() noexcept
             {
                 ptr_++;
                 return *this;
             }
 
-            inline auto operator++(int) noexcept
+            inline self_type operator++(int) noexcept
             {
                 self_type result(ptr_);
                 ptr_++;
                 return result;
             }
 
-            inline auto &operator--() noexcept
+            inline self_type &operator--() noexcept
             {
                 ptr_--;
                 return *this;
             }
 
-            inline auto operator--(int) noexcept
+            inline self_type operator--(int) noexcept
             {
                 self_type result(ptr_);
                 ptr_--;
                 return result;
-            }
-
-            SEAL_NODISCARD inline value_type operator*() const noexcept
-            {
-                return ptr_;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -194,6 +193,11 @@ namespace seal
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
             {
                 return !(*this == compare);
+            }
+
+            SEAL_NODISCARD inline operator const std::uint64_t *() const noexcept
+            {
+                return ptr_;
             }
 
         private:
@@ -203,42 +207,67 @@ namespace seal
         class RNSIterator
         {
         public:
+            friend class PolyIterator;
+
             using self_type = RNSIterator;
+            using is_deref_to_iterator_type = std::true_type;
+
+            // Standard iterator typedefs
             using value_type = CoeffIterator;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            using is_deref_to_iterator_type = std::true_type;
-
-            RNSIterator(std::uint64_t *ptr, std::size_t poly_modulus_degree)
-                : ptr_(ptr), step_size_(poly_modulus_degree)
+            RNSIterator() : coeff_it_(nullptr), step_size_(0)
             {}
 
-            RNSIterator(const RNSIterator &copy) = default;
+            RNSIterator(std::uint64_t *ptr, std::size_t poly_modulus_degree)
+                : coeff_it_(ptr), step_size_(poly_modulus_degree)
+            {}
 
-            RNSIterator &operator=(const RNSIterator &assign) = default;
+            RNSIterator(const self_type &copy) = default;
 
-            SEAL_NODISCARD inline auto ptr() const noexcept
+            self_type &operator=(const self_type &assign) = default;
+
+            RNSIterator(self_type &&source) = default;
+
+            self_type &operator=(self_type &&assign) = default;
+
+            SEAL_NODISCARD inline reference operator*() const noexcept
             {
-                return ptr_;
+                return coeff_it_;
             }
 
-            SEAL_NODISCARD operator std::uint64_t *() const noexcept
+            inline self_type &operator++() noexcept
             {
-                return ptr();
+                coeff_it_.ptr_ += step_size_;
+                return *this;
             }
 
-            SEAL_NODISCARD inline value_type operator*() const noexcept
+            inline self_type operator++(int) noexcept
             {
-                return ptr_;
+                self_type result(*this);
+                coeff_it_.ptr_ += step_size_;
+                return result;
+            }
+
+            inline self_type &operator--() noexcept
+            {
+                coeff_it_.ptr_ -= step_size_;
+                return *this;
+            }
+
+            inline self_type operator--(int) noexcept
+            {
+                self_type result(*this);
+                coeff_it_.ptr_ -= step_size_;
+                return result;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return (ptr_ == compare.ptr_);
+                return (coeff_it_ == compare.coeff_it_) && (step_size_ == compare.step_size_);
             }
 
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
@@ -246,30 +275,14 @@ namespace seal
                 return !(*this == compare);
             }
 
-            inline auto &operator++() noexcept
+            SEAL_NODISCARD inline operator std::uint64_t *() const noexcept
             {
-                ptr_ += step_size_;
-                return *this;
+                return coeff_it_;
             }
 
-            inline auto operator++(int) noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
-                self_type result(*this);
-                ptr_ += step_size_;
-                return result;
-            }
-
-            inline auto &operator--() noexcept
-            {
-                ptr_ -= step_size_;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                ptr_ -= step_size_;
-                return result;
+                return **this;
             }
 
             SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
@@ -278,7 +291,7 @@ namespace seal
             }
 
         private:
-            std::uint64_t *ptr_;
+            CoeffIterator coeff_it_;
 
             std::size_t step_size_;
         };
@@ -286,52 +299,71 @@ namespace seal
         class ConstRNSIterator
         {
         public:
+            friend class ConstPolyIterator;
+
             using self_type = ConstRNSIterator;
+            using is_deref_to_iterator_type = std::true_type;
+
+            // Standard iterator typedefs
             using value_type = ConstCoeffIterator;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            using is_deref_to_iterator_type = std::true_type;
+            ConstRNSIterator() : coeff_it_(nullptr), step_size_(0)
+            {}
 
             ConstRNSIterator(const std::uint64_t *ptr, std::size_t poly_modulus_degree)
-                : ptr_(ptr), step_size_(poly_modulus_degree)
+                : coeff_it_(ptr), step_size_(poly_modulus_degree)
             {}
 
-            ConstRNSIterator(const ConstRNSIterator &copy) = default;
+            ConstRNSIterator(const self_type &copy) = default;
 
-            ConstRNSIterator &operator=(const ConstRNSIterator &assign) = default;
+            self_type &operator=(const self_type &assign) = default;
 
-            ConstRNSIterator(const RNSIterator &copy) : ptr_(copy.ptr()), step_size_(copy.poly_modulus_degree())
+            ConstRNSIterator(self_type &&source) = default;
+
+            self_type &operator=(self_type &&assign) = default;
+
+            ConstRNSIterator(const RNSIterator &copy)
+                : coeff_it_(static_cast<const std::uint64_t *>(copy)), step_size_(copy.poly_modulus_degree())
             {}
 
-            ConstRNSIterator &operator=(const RNSIterator &assign)
+            SEAL_NODISCARD inline reference operator*() const noexcept
             {
-                ptr_ = assign.ptr();
-                step_size_ = assign.poly_modulus_degree();
+                return coeff_it_;
+            }
+
+            inline self_type &operator++() noexcept
+            {
+                coeff_it_.ptr_ += step_size_;
                 return *this;
             }
 
-            SEAL_NODISCARD inline auto ptr() const noexcept
+            inline self_type operator++(int) noexcept
             {
-                return ptr_;
+                self_type result(*this);
+                coeff_it_.ptr_ += step_size_;
+                return result;
             }
 
-            SEAL_NODISCARD operator const std::uint64_t *() const noexcept
+            inline self_type &operator--() noexcept
             {
-                return ptr();
+                coeff_it_.ptr_ -= step_size_;
+                return *this;
             }
 
-            SEAL_NODISCARD inline value_type operator*() const noexcept
+            inline self_type operator--(int) noexcept
             {
-                return ptr_;
+                self_type result(*this);
+                coeff_it_.ptr_ -= step_size_;
+                return result;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return (ptr_ == compare.ptr_);
+                return (coeff_it_ == compare.coeff_it_) && (step_size_ == compare.step_size_);
             }
 
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
@@ -339,30 +371,14 @@ namespace seal
                 return !(*this == compare);
             }
 
-            inline auto &operator++() noexcept
+            SEAL_NODISCARD inline operator const std::uint64_t *() const noexcept
             {
-                ptr_ += step_size_;
-                return *this;
+                return coeff_it_;
             }
 
-            inline auto operator++(int) noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
-                self_type result(*this);
-                ptr_ += step_size_;
-                return result;
-            }
-
-            inline auto &operator--() noexcept
-            {
-                ptr_ -= step_size_;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                ptr_ -= step_size_;
-                return result;
+                return **this;
             }
 
             SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
@@ -371,7 +387,7 @@ namespace seal
             }
 
         private:
-            const std::uint64_t *ptr_;
+            ConstCoeffIterator coeff_it_;
 
             std::size_t step_size_;
         };
@@ -380,45 +396,68 @@ namespace seal
         {
         public:
             using self_type = PolyIterator;
+            using is_deref_to_iterator_type = std::true_type;
+
+            // Standard iterator typedefs
             using value_type = RNSIterator;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            using is_deref_to_iterator_type = std::true_type;
+            PolyIterator() : rns_it_(nullptr, 0), coeff_modulus_count_(0), step_size_(0)
+            {}
 
             PolyIterator(std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
-                : ptr_(ptr), step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count)),
-                  poly_modulus_degree_(poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count)
+                : rns_it_(ptr, poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count),
+                  step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count_))
             {}
 
-            PolyIterator(Ciphertext &ct) : PolyIterator(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+            PolyIterator(Ciphertext &ct) : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
             {}
 
-            PolyIterator(const PolyIterator &copy) = default;
+            PolyIterator(const self_type &copy) = default;
 
-            PolyIterator &operator=(const PolyIterator &assign) = default;
+            self_type &operator=(const self_type &assign) = default;
 
-            SEAL_NODISCARD inline auto ptr() const noexcept
+            PolyIterator(self_type &&source) = default;
+
+            self_type &operator=(self_type &&assign) = default;
+
+            SEAL_NODISCARD inline reference operator*() const noexcept
             {
-                return ptr_;
+                return rns_it_;
             }
 
-            SEAL_NODISCARD operator std::uint64_t *() const noexcept
+            inline self_type &operator++() noexcept
             {
-                return ptr();
+                rns_it_.coeff_it_.ptr_ += step_size_;
+                return *this;
             }
 
-            SEAL_NODISCARD inline value_type operator*() const noexcept
+            inline self_type operator++(int) noexcept
             {
-                return value_type(ptr_, poly_modulus_degree_);
+                self_type result(*this);
+                rns_it_.coeff_it_.ptr_ += step_size_;
+                return result;
+            }
+
+            inline self_type &operator--() noexcept
+            {
+                rns_it_.coeff_it_.ptr_ -= step_size_;
+                return *this;
+            }
+
+            inline self_type operator--(int) noexcept
+            {
+                self_type result(*this);
+                rns_it_.coeff_it_.ptr_ -= step_size_;
+                return result;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return (ptr_ == compare.ptr_);
+                return (rns_it_ == compare.rns_it_) && (coeff_modulus_count_ == compare.coeff_modulus_count_);
             }
 
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
@@ -426,35 +465,19 @@ namespace seal
                 return !(*this == compare);
             }
 
-            inline auto &operator++() noexcept
+            SEAL_NODISCARD inline operator std::uint64_t *() const noexcept
             {
-                ptr_ += step_size_;
-                return *this;
+                return rns_it_;
             }
 
-            inline auto operator++(int) noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
-                self_type result(*this);
-                ptr_ += step_size_;
-                return result;
-            }
-
-            inline auto &operator--() noexcept
-            {
-                ptr_ -= step_size_;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                ptr_ -= step_size_;
-                return result;
+                return **this;
             }
 
             SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
             {
-                return poly_modulus_degree_;
+                return rns_it_.step_size_;
             }
 
             SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
@@ -463,74 +486,87 @@ namespace seal
             }
 
         private:
-            std::uint64_t *ptr_;
-
-            std::size_t step_size_;
-
-            std::size_t poly_modulus_degree_;
+            RNSIterator rns_it_;
 
             std::size_t coeff_modulus_count_;
+
+            std::size_t step_size_;
         };
 
         class ConstPolyIterator
         {
         public:
             using self_type = ConstPolyIterator;
+            using is_deref_to_iterator_type = std::true_type;
+
+            // Standard iterator typedefs
             using value_type = ConstRNSIterator;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            using is_deref_to_iterator_type = std::true_type;
+            ConstPolyIterator() : rns_it_(nullptr, 0), coeff_modulus_count_(0), step_size_(0)
+            {}
 
             ConstPolyIterator(
                 const std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
-                : ptr_(ptr), step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count)),
-                  poly_modulus_degree_(poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count)
+                : rns_it_(ptr, poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count),
+                  step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count_))
             {}
 
             ConstPolyIterator(const Ciphertext &ct)
-                : ConstPolyIterator(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+                : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
             {}
 
-            ConstPolyIterator(const ConstPolyIterator &copy) = default;
+            ConstPolyIterator(const self_type &copy) = default;
 
-            ConstPolyIterator &operator=(const ConstPolyIterator &assign) = default;
+            self_type &operator=(const self_type &assign) = default;
+
+            ConstPolyIterator(self_type &&source) = default;
+
+            self_type &operator=(self_type &&assign) = default;
 
             ConstPolyIterator(const PolyIterator &copy)
-                : ptr_(copy.ptr()), step_size_(copy.poly_modulus_degree() * copy.coeff_modulus_count()),
-                  poly_modulus_degree_(copy.poly_modulus_degree()), coeff_modulus_count_(copy.coeff_modulus_count())
+                : rns_it_(static_cast<const std::uint64_t *>(copy), copy.poly_modulus_degree()),
+                  coeff_modulus_count_(copy.coeff_modulus_count()),
+                  step_size_(mul_safe(rns_it_.step_size_, coeff_modulus_count_))
             {}
 
-            ConstPolyIterator &operator=(const PolyIterator &assign)
+            SEAL_NODISCARD inline reference operator*() const noexcept
             {
-                ptr_ = assign.ptr();
-                step_size_ = assign.poly_modulus_degree() * assign.coeff_modulus_count();
-                poly_modulus_degree_ = assign.poly_modulus_degree();
-                coeff_modulus_count_ = assign.coeff_modulus_count();
+                return rns_it_;
+            }
+
+            inline self_type &operator++() noexcept
+            {
+                rns_it_.coeff_it_.ptr_ += step_size_;
                 return *this;
             }
 
-            SEAL_NODISCARD inline auto ptr() const noexcept
+            inline self_type operator++(int) noexcept
             {
-                return ptr_;
+                self_type result(*this);
+                rns_it_.coeff_it_.ptr_ += step_size_;
+                return result;
             }
 
-            SEAL_NODISCARD operator const std::uint64_t *() const noexcept
+            inline self_type &operator--() noexcept
             {
-                return ptr();
+                rns_it_.coeff_it_.ptr_ -= step_size_;
+                return *this;
             }
 
-            SEAL_NODISCARD inline value_type operator*() const noexcept
+            inline self_type operator--(int) noexcept
             {
-                return value_type(ptr_, poly_modulus_degree_);
+                self_type result(*this);
+                rns_it_.coeff_it_.ptr_ -= step_size_;
+                return result;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return (ptr_ == compare.ptr_);
+                return (rns_it_ == compare.rns_it_) && (coeff_modulus_count_ == compare.coeff_modulus_count_);
             }
 
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
@@ -538,35 +574,19 @@ namespace seal
                 return !(*this == compare);
             }
 
-            inline auto &operator++() noexcept
+            SEAL_NODISCARD inline operator const std::uint64_t *() const noexcept
             {
-                ptr_ += step_size_;
-                return *this;
+                return rns_it_;
             }
 
-            inline auto operator++(int) noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
-                self_type result(*this);
-                ptr_ += step_size_;
-                return result;
-            }
-
-            inline auto &operator--() noexcept
-            {
-                ptr_ -= step_size_;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                ptr_ -= step_size_;
-                return result;
+                return **this;
             }
 
             SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
             {
-                return poly_modulus_degree_;
+                return rns_it_.step_size_;
             }
 
             SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
@@ -575,39 +595,70 @@ namespace seal
             }
 
         private:
-            const std::uint64_t *ptr_;
-
-            std::size_t step_size_;
-
-            std::size_t poly_modulus_degree_;
+            ConstRNSIterator rns_it_;
 
             std::size_t coeff_modulus_count_;
+
+            std::size_t step_size_;
         };
 
         template <typename PtrT>
         class IteratorWrapper
         {
         public:
-            using self_type = IteratorWrapper<PtrT>;
+            using self_type = typename IteratorWrapper<PtrT>;
+            using is_deref_to_iterator_type = std::false_type;
+
+            // Standard iterator typedefs
             using value_type = PtrT;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            using is_deref_to_iterator_type = std::false_type;
-
-            IteratorWrapper(PtrT ptr) : ptr_(ptr)
+            IteratorWrapper() : ptr_(nullptr)
             {}
 
-            IteratorWrapper(const IteratorWrapper &copy) = default;
+            IteratorWrapper(value_type ptr) : ptr_(ptr)
+            {}
 
-            IteratorWrapper &operator=(const IteratorWrapper &assign) = default;
+            IteratorWrapper(const self_type &copy) = default;
 
-            SEAL_NODISCARD inline value_type operator*() const noexcept
+            self_type &operator=(const self_type &assign) = default;
+
+            IteratorWrapper(self_type &&source) = default;
+
+            self_type &operator=(self_type &&assign) = default;
+
+            SEAL_NODISCARD inline reference operator*() const noexcept
             {
                 return ptr_;
+            }
+
+            inline self_type &operator++() noexcept
+            {
+                ptr_++;
+                return *this;
+            }
+
+            inline self_type operator++(int) noexcept
+            {
+                self_type result(ptr_);
+                ptr_++;
+                return result;
+            }
+
+            inline self_type &operator--() noexcept
+            {
+                ptr_--;
+                return *this;
+            }
+
+            inline self_type operator--(int) noexcept
+            {
+                self_type result(ptr_);
+                ptr_--;
+                return result;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -620,65 +671,67 @@ namespace seal
                 return !(*this == compare);
             }
 
-            inline auto &operator++() noexcept
+            SEAL_NODISCARD inline operator value_type *() const noexcept
             {
-                ptr_++;
-                return *this;
+                return ptr_;
             }
 
-            inline auto operator++(int) noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
-                self_type result(*this);
-                ptr_++;
-                return result;
-            }
-
-            inline auto &operator--() noexcept
-            {
-                ptr_--;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                ptr_--;
-                return result;
+                return **this;
             }
 
         private:
             value_type ptr_;
         };
 
-        template <typename It>
-        class ReverseIterator : public It
+        template <typename BidirIt>
+        class ReverseIterator : public BidirIt
         {
         public:
-            using self_type = ReverseIterator<It>;
+            using self_type = ReverseIterator<BidirIt>;
 
-            ReverseIterator(const It &copy) : It(copy)
+            ReverseIterator() : BidirIt()
             {}
+
+            ReverseIterator(const BidirIt &copy) : BidirIt(copy)
+            {}
+
+            ReverseIterator(BidirIt &&source) : BidirIt(source)
+            {}
+
+            ReverseIterator(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
-            inline auto &operator++() noexcept
+            ReverseIterator(self_type &&source) = default;
+
+            self_type &operator=(self_type &&assign) = default;
+
+            inline self_type &operator++() noexcept
             {
-                return It::operator--();
+                BidirIt::operator--();
+                return *this;
             }
 
-            inline auto operator++(int) noexcept
+            inline self_type operator++(int) noexcept
             {
-                return It::operator--(0);
+                self_type result(*this);
+                BidirIt::operator--();
+                return result;
             }
 
-            inline auto &operator--() noexcept
+            inline self_type &operator--() noexcept
             {
-                return It::operator++();
+                BidirIt::operator++();
+                return *this;
             }
 
-            inline auto operator--(int) noexcept
+            inline self_type operator--(int) noexcept
             {
-                return It::operator++(0);
+                self_type result(*this);
+                BidirIt::operator++();
+                return result;
             }
         };
 

@@ -687,46 +687,70 @@ namespace sealtest
             class NTTTablesCreateIter
             {
             public:
-                using self_type = NTTTablesCreateIter;
-                using difference_type = std::ptrdiff_t;
                 using value_type = SmallNTTTables;
-                using reference = SmallNTTTables &;
                 using pointer = void;
+                using reference = value_type;
+                using difference_type = std::ptrdiff_t;
+
+                // LegacyInputIterator allows reference to be equal to value_type so we can construct
+                // the return objects on the fly and return by value.
                 using iterator_category = std::input_iterator_tag;
 
+                // Require default constructor
+                NTTTablesCreateIter()
+                {}
+
+                // Other constructors
                 NTTTablesCreateIter(size_t poly_modulus_degree, MemoryPoolHandle pool)
                     : poly_modulus_degree_(poly_modulus_degree),
                       sm_(CoeffModulus::Create(poly_modulus_degree_, { 20, 20, 20, 20, 20 })), pool_(pool)
                 {}
 
+                // Require copy and move constructors and assignments
                 NTTTablesCreateIter(const NTTTablesCreateIter &copy) = default;
 
-                inline value_type operator*()
+                NTTTablesCreateIter(NTTTablesCreateIter &&source) = default;
+
+                NTTTablesCreateIter &operator=(const NTTTablesCreateIter &assign) = default;
+
+                NTTTablesCreateIter &operator=(NTTTablesCreateIter &&assign) = default;
+
+                // Dereferencing creates SmallNTTTables and returns by value
+                inline value_type operator*() const
                 {
                     return { get_power_of_two(poly_modulus_degree_), sm_[index_], pool_ };
                 }
 
-                inline auto operator++(int) noexcept
-                {
-                    self_type result(*this);
-                    index_++;
-                    return result;
-                }
-
-                inline auto operator++() noexcept
+                // Pre-increment
+                inline NTTTablesCreateIter &operator++() noexcept
                 {
                     index_++;
                     return *this;
                 }
 
-                inline bool operator==(self_type &compare) noexcept
+                // Post-increment
+                inline NTTTablesCreateIter operator++(int) noexcept
                 {
-                    return compare.index_ == index_;
+                    NTTTablesCreateIter result(*this);
+                    index_++;
+                    return result;
                 }
 
-                inline bool operator!=(self_type &compare) noexcept
+                // Must be EqualityComparable
+                inline bool operator==(const NTTTablesCreateIter &compare) const noexcept
+                {
+                    return (compare.index_ == index_) && (poly_modulus_degree_ == compare.poly_modulus_degree_);
+                }
+
+                inline bool operator!=(const NTTTablesCreateIter &compare) const noexcept
                 {
                     return !operator==(compare);
+                }
+
+                // Arrow operator must be defined
+                value_type operator->() const
+                {
+                    return **this;
                 }
 
             private:

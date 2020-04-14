@@ -30,8 +30,8 @@ namespace sealtest
             for_each(arr.begin(), arr.end(), [ci](auto a) mutable { ASSERT_EQ(a, **ci++); });
             for_each(arr.begin(), arr.end(), [cci](auto a) mutable { ASSERT_EQ(a, **cci++); });
 
-            ASSERT_EQ(arr.data(), ci.ptr());
-            ASSERT_EQ(arr.data(), cci.ptr());
+            ASSERT_EQ(arr.data(), static_cast<uint64_t *>(ci));
+            ASSERT_EQ(arr.data(), static_cast<const uint64_t *>(cci));
 
             auto ci2 = ci++;
             auto cci2 = cci++;
@@ -82,8 +82,8 @@ namespace sealtest
             ASSERT_EQ(arr[4], ***cri++);
             ASSERT_EQ(arr[8], ***cri);
 
-            ASSERT_EQ(arr.data() + 8, ri.ptr());
-            ASSERT_EQ(arr.data() + 8, cri.ptr());
+            ASSERT_EQ(arr.data() + 8, static_cast<uint64_t *>(ri));
+            ASSERT_EQ(arr.data() + 8, static_cast<const uint64_t *>(cri));
 
             ASSERT_EQ(arr[4], ***--ri);
             ASSERT_EQ(arr[0], ***--ri);
@@ -177,8 +177,8 @@ namespace sealtest
             for_each(arr.rbegin(), arr.rend(), [rci](auto a) mutable { ASSERT_EQ(a, **rci++); });
             for_each(arr.rbegin(), arr.rend(), [rcci](auto a) mutable { ASSERT_EQ(a, **rcci++); });
 
-            ASSERT_EQ(arr.data() + arr.size() - 1, rci.ptr());
-            ASSERT_EQ(arr.data() + arr.size() - 1, rcci.ptr());
+            ASSERT_EQ(arr.data() + arr.size() - 1, static_cast<uint64_t *>(rci));
+            ASSERT_EQ(arr.data() + arr.size() - 1, static_cast<const uint64_t *>(rcci));
 
             ++rci;
             ASSERT_EQ(**rci, arr[8]);

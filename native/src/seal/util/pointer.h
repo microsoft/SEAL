@@ -47,8 +47,8 @@ namespace seal
             }
 
             // Copy a range of elements
-            template <typename InputIterator>
-            Pointer(InputIterator first, Pointer<SEAL_BYTE> &&source) : Pointer(std::move(source))
+            template <typename InputIt>
+            Pointer(InputIt first, Pointer<SEAL_BYTE> &&source) : Pointer(std::move(source))
             {
                 std::copy_n(first, head_->item_byte_count(), data_);
             }
@@ -286,8 +286,8 @@ namespace seal
             }
 
             // Copy a range when T is not SEAL_BYTE
-            template <typename InputIterator>
-            Pointer(InputIterator first, Pointer<SEAL_BYTE> &&source)
+            template <typename InputIt>
+            Pointer(InputIt first, Pointer<SEAL_BYTE> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -530,8 +530,8 @@ namespace seal
                 }
             }
 
-            template <typename InputIterator>
-            Pointer(InputIterator first, class MemoryPoolHead *head)
+            template <typename InputIt>
+            Pointer(InputIt first, class MemoryPoolHead *head)
             {
 #ifdef SEAL_DEBUG
                 if (!head)
@@ -601,8 +601,8 @@ namespace seal
             }
 
             // Copy a range of elements
-            template <typename InputIterator>
-            ConstPointer(InputIterator first, ConstPointer<SEAL_BYTE> &&source) : ConstPointer(std::move(source))
+            template <typename InputIt>
+            ConstPointer(InputIt first, ConstPointer<SEAL_BYTE> &&source) : ConstPointer(std::move(source))
             {
                 std::copy_n(first, head_->item_byte_count(), data_);
             }
@@ -836,8 +836,8 @@ namespace seal
             }
 
             // Copy a range when T is not SEAL_BYTE
-            template <typename InputIterator>
-            ConstPointer(InputIterator first, Pointer<SEAL_BYTE> &&source)
+            template <typename InputIt>
+            ConstPointer(InputIt first, Pointer<SEAL_BYTE> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -932,8 +932,8 @@ namespace seal
             }
 
             // Copy a range when T is not SEAL_BYTE
-            template <typename InputIterator>
-            ConstPointer(InputIterator first, ConstPointer<SEAL_BYTE> &&source)
+            template <typename InputIt>
+            ConstPointer(InputIt first, ConstPointer<SEAL_BYTE> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -1218,8 +1218,8 @@ namespace seal
                 }
             }
 
-            template <typename InputIterator>
-            ConstPointer(InputIterator first, class MemoryPoolHead *head)
+            template <typename InputIt>
+            ConstPointer(InputIt first, class MemoryPoolHead *head)
             {
 #ifdef SEAL_DEBUG
                 if (!head)
@@ -1267,10 +1267,10 @@ namespace seal
 
         // Allocate and copy a range of elements
         template <
-            typename InputIterator, typename T_ = typename std::iterator_traits<InputIterator>::value_type,
+            typename InputIt, typename T_ = typename std::iterator_traits<InputIt>::value_type,
             typename = std::enable_if_t<std::is_standard_layout<
                 typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
-        SEAL_NODISCARD inline auto allocate(InputIterator first, std::size_t count, MemoryPool &pool)
+        SEAL_NODISCARD inline auto allocate(InputIt first, std::size_t count, MemoryPool &pool)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
             return Pointer<T>(first, pool.get_for_byte_count(mul_safe(count, sizeof(T))));
