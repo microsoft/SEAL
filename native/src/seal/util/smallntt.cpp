@@ -24,31 +24,11 @@ namespace seal
                 throw invalid_argument("pool is uninitialized");
             }
 #endif
-            if (!initialize(coeff_count_power, modulus))
-            {
-                // Generation failed; probably modulus wasn't prime.
-                // It is necessary to check generated() after creating
-                // this class.
-            }
+            initialize(coeff_count_power, modulus);
         }
 
-        void SmallNTTTables::reset()
+        void SmallNTTTables::initialize(int coeff_count_power, const SmallModulus &modulus)
         {
-            is_initialized_ = false;
-            modulus_ = SmallModulus();
-            root_ = 0;
-            root_powers_.release();
-            scaled_root_powers_.release();
-            inv_root_powers_.release();
-            scaled_inv_root_powers_.release();
-            inv_degree_modulo_ = 0;
-            coeff_count_power_ = 0;
-            coeff_count_ = 0;
-        }
-
-        bool SmallNTTTables::initialize(int coeff_count_power, const SmallModulus &modulus)
-        {
-            reset();
 #ifdef SEAL_DEBUG
             if ((coeff_count_power < get_power_of_two(SEAL_POLY_MOD_DEGREE_MIN)) ||
                 coeff_count_power > get_power_of_two(SEAL_POLY_MOD_DEGREE_MAX))
@@ -69,15 +49,13 @@ namespace seal
             // We defer parameter checking to try_minimal_primitive_root(...)
             if (!try_minimal_primitive_root(2 * coeff_count_, modulus_, root_))
             {
-                reset();
-                return false;
+                throw invalid_argument("invalid modulus");
             }
 
             uint64_t inverse_root;
             if (!try_invert_uint_mod(root_, modulus_, inverse_root))
             {
-                reset();
-                return false;
+                throw invalid_argument("invalid modulus");
             }
 
             // Populate the tables storing (scaled version of) powers of root
@@ -114,14 +92,12 @@ namespace seal
 
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
-            is_initialized_ = try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_);
-
-            if (!is_initialized_)
+            if (!try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_))
             {
-                reset();
-                return false;
+                throw invalid_argument("invalid modulus");
             }
-            return true;
+
+            return;
         }
 
         void SmallNTTTables::ntt_powers_of_primitive_root(uint64_t root, uint64_t *destination) const
@@ -148,6 +124,99 @@ namespace seal
             }
         }
 
+        class NTTTablesCreateIter
+        {
+        public:
+            using value_type = SmallNTTTables;
+            using pointer = void;
+            using reference = value_type;
+            using difference_type = std::ptrdiff_t;
+
+            // LegacyInputIterator allows reference to be equal to value_type so we can construct
+            // the return objects on the fly and return by value.
+            using iterator_category = std::input_iterator_tag;
+
+            // Require default constructor
+            NTTTablesCreateIter()
+            {}
+
+            // Other constructors
+            NTTTablesCreateIter(int coeff_count_power, vector<SmallModulus> modulus, MemoryPoolHandle pool)
+                : coeff_count_power_(coeff_count_power), modulus_(modulus), pool_(pool)
+            {}
+
+            // Require copy and move constructors and assignments
+            NTTTablesCreateIter(const NTTTablesCreateIter &copy) = default;
+
+            NTTTablesCreateIter(NTTTablesCreateIter &&source) = default;
+
+            NTTTablesCreateIter &operator=(const NTTTablesCreateIter &assign) = default;
+
+            NTTTablesCreateIter &operator=(NTTTablesCreateIter &&assign) = default;
+
+            // Dereferencing creates SmallNTTTables and returns by value
+            inline value_type operator*() const
+            {
+                return { coeff_count_power_, modulus_[index_], pool_ };
+            }
+
+            // Pre-increment
+            inline NTTTablesCreateIter &operator++() noexcept
+            {
+                index_++;
+                return *this;
+            }
+
+            // Post-increment
+            inline NTTTablesCreateIter operator++(int) noexcept
+            {
+                NTTTablesCreateIter result(*this);
+                index_++;
+                return result;
+            }
+
+            // Must be EqualityComparable
+            inline bool operator==(const NTTTablesCreateIter &compare) const noexcept
+            {
+                return (compare.index_ == index_) && (coeff_count_power_ == compare.coeff_count_power_);
+            }
+
+            inline bool operator!=(const NTTTablesCreateIter &compare) const noexcept
+            {
+                return !operator==(compare);
+            }
+
+            // Arrow operator must be defined
+            value_type operator->() const
+            {
+                return **this;
+            }
+
+        private:
+            size_t index_ = 0;
+            int coeff_count_power_ = 0;
+            vector<SmallModulus> modulus_;
+            MemoryPoolHandle pool_;
+        };
+
+        void CreateSmallNTTTables(
+            int coeff_count_power, const vector<SmallModulus> &modulus, Pointer<SmallNTTTables> &tables,
+            MemoryPoolHandle pool)
+        {
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
+            }
+            if (!modulus.size())
+            {
+                throw invalid_argument("invalid modulus");
+            }
+            // coeff_count_power and modulus will be validated by "allocate"
+
+            NTTTablesCreateIter iter(coeff_count_power, modulus, pool);
+            tables = allocate(iter, modulus.size(), pool);
+        }
+
         /**
         This function computes in-place the negacyclic NTT. The input is
         a polynomial a of degree n in R_q, where n is assumed to be a power of
@@ -160,12 +229,6 @@ namespace seal
         */
         void ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
         {
-#ifdef SEAL_DEBUG
-            if (!tables)
-            {
-                throw std::logic_error("SmallNTTTables is uninitialized");
-            }
-#endif
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus << 1;
 
@@ -253,12 +316,6 @@ namespace seal
         // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig).
         void inverse_ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
         {
-#ifdef SEAL_DEBUG
-            if (!tables)
-            {
-                throw std::logic_error("SmallNTTTables is uninitialized");
-            }
-#endif
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus << 1;
 

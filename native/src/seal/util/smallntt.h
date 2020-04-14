@@ -16,75 +16,33 @@ namespace seal
         class SmallNTTTables
         {
         public:
-            SmallNTTTables(MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
-            {
-#ifdef SEAL_DEBUG
-                if (!pool_)
-                {
-                    throw std::invalid_argument("pool is uninitialized");
-                }
-#endif
-            }
-
-            ~SmallNTTTables()
-            {
-                reset();
-            }
-
             SmallNTTTables(SmallNTTTables &&source) = default;
 
             SmallNTTTables(SmallNTTTables &copy)
-                : pool_(copy.pool_), is_initialized_(copy.is_initialized_), root_(copy.root_),
-                  coeff_count_power_(copy.coeff_count_power_), coeff_count_(copy.coeff_count_), modulus_(copy.modulus_),
-                  inv_degree_modulo_(copy.inv_degree_modulo_)
+                : pool_(copy.pool_), root_(copy.root_), coeff_count_power_(copy.coeff_count_power_),
+                  coeff_count_(copy.coeff_count_), modulus_(copy.modulus_), inv_degree_modulo_(copy.inv_degree_modulo_)
             {
-                // Copy over pre-computation data if SmallNTTTables is initialized
-                if (is_initialized_)
-                {
-                    root_powers_ = allocate_uint(coeff_count_, pool_);
-                    inv_root_powers_ = allocate_uint(coeff_count_, pool_);
-                    scaled_root_powers_ = allocate_uint(coeff_count_, pool_);
-                    scaled_inv_root_powers_ = allocate_uint(coeff_count_, pool_);
+                root_powers_ = allocate_uint(coeff_count_, pool_);
+                inv_root_powers_ = allocate_uint(coeff_count_, pool_);
+                scaled_root_powers_ = allocate_uint(coeff_count_, pool_);
+                scaled_inv_root_powers_ = allocate_uint(coeff_count_, pool_);
 
-                    set_uint_uint(copy.root_powers_.get(), coeff_count_, root_powers_.get());
-                    set_uint_uint(copy.inv_root_powers_.get(), coeff_count_, inv_root_powers_.get());
-                    set_uint_uint(copy.scaled_root_powers_.get(), coeff_count_, scaled_root_powers_.get());
-                    set_uint_uint(copy.scaled_inv_root_powers_.get(), coeff_count_, scaled_inv_root_powers_.get());
-                }
+                set_uint_uint(copy.root_powers_.get(), coeff_count_, root_powers_.get());
+                set_uint_uint(copy.inv_root_powers_.get(), coeff_count_, inv_root_powers_.get());
+                set_uint_uint(copy.scaled_root_powers_.get(), coeff_count_, scaled_root_powers_.get());
+                set_uint_uint(copy.scaled_inv_root_powers_.get(), coeff_count_, scaled_inv_root_powers_.get());
             }
 
             SmallNTTTables(
                 int coeff_count_power, const SmallModulus &modulus, MemoryPoolHandle pool = MemoryManager::GetPool());
 
-            SEAL_NODISCARD inline bool is_initialized() const noexcept
-            {
-                return is_initialized_;
-            }
-
-            SEAL_NODISCARD inline operator bool() const noexcept
-            {
-                return is_initialized();
-            }
-
-            bool initialize(int coeff_count_power, const SmallModulus &modulus);
-
-            void reset();
-
             SEAL_NODISCARD inline std::uint64_t get_root() const
             {
-                if (!is_initialized_)
-                {
-                    throw std::logic_error("SmallNTTTables is uninitialized");
-                }
                 return root_;
             }
 
             SEAL_NODISCARD inline auto get_from_root_powers(std::size_t index) const -> std::uint64_t
             {
-                if (!is_initialized_)
-                {
-                    throw std::logic_error("SmallNTTTables is uninitialized");
-                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
@@ -96,10 +54,6 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_from_scaled_root_powers(std::size_t index) const -> std::uint64_t
             {
-                if (!is_initialized_)
-                {
-                    throw std::logic_error("SmallNTTTables is uninitialized");
-                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
@@ -111,10 +65,6 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_from_inv_root_powers(std::size_t index) const -> std::uint64_t
             {
-                if (!is_initialized_)
-                {
-                    throw std::logic_error("SmallNTTTables is uninitialized");
-                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
@@ -126,10 +76,6 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers(std::size_t index) const -> std::uint64_t
             {
-                if (!is_initialized_)
-                {
-                    throw std::logic_error("SmallNTTTables is uninitialized");
-                }
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
                 {
@@ -141,10 +87,6 @@ namespace seal
 
             SEAL_NODISCARD inline auto get_inv_degree_modulo() const -> const std::uint64_t *
             {
-                if (!is_initialized_)
-                {
-                    throw std::logic_error("SmallNTTTables is uninitialized");
-                }
                 return &inv_degree_modulo_;
             }
 
@@ -168,6 +110,8 @@ namespace seal
 
             SmallNTTTables &operator=(SmallNTTTables &&assign) = delete;
 
+            void initialize(int coeff_count_power, const SmallModulus &modulus);
+
             // Computed bit-scrambled vector of first 1 << coeff_count_power powers
             // of a primitive root.
             void ntt_powers_of_primitive_root(std::uint64_t root, std::uint64_t *destination) const;
@@ -177,8 +121,6 @@ namespace seal
             void ntt_scale_powers_of_primitive_root(const std::uint64_t *input, std::uint64_t *destination) const;
 
             MemoryPoolHandle pool_;
-
-            bool is_initialized_ = false;
 
             std::uint64_t root_ = 0;
 
@@ -202,6 +144,16 @@ namespace seal
 
             std::uint64_t inv_degree_modulo_ = 0;
         };
+
+        /**
+        Allocate and construct an array of SmallNTTTables each with different a modulus.
+
+        @throws std::invalid_argument if modulus is empty, modulus does not support NTT, coeff_count_power is invalid,
+        or pool is uninitialized.
+        */
+        void CreateSmallNTTTables(
+            int coeff_count_power, const std::vector<SmallModulus> &modulus, Pointer<SmallNTTTables> &tables,
+            MemoryPoolHandle pool);
 
         void ntt_negacyclic_harvey_lazy(std::uint64_t *operand, const SmallNTTTables &tables);
 
