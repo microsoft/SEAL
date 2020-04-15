@@ -378,32 +378,33 @@ namespace seal
         auto behz_extend_base_convert_to_ntt = [&](auto I) {
             // Make copy of input polynomial (in base q) and convert to NTT form
             for_each_n(
-                IteratorTuple3<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
-                    I.it1(), I.it2(), base_q_ntt_tables_iter),
+                IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                    get<0>(I), get<1>(I), base_q_ntt_tables_iter),
                 base_q_size, [&](auto J) {
                     // First copy to output
-                    set_uint_uint(J.it1(), coeff_count, J.it2());
+                    set_uint_uint(get<0>(J), coeff_count, get<1>(J));
 
                     // Transform to NTT form in base q
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(J.it2(), **J.it3());
+                    ntt_negacyclic_harvey_lazy(get<1>(J), **get<2>(J));
                 });
 
             // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
             auto temp(allocate_poly(coeff_count, base_Bsk_m_tilde_size, pool));
 
             // (1) Convert from base q to base Bsk U {m_tilde}
-            rns_tool->fastbconv_m_tilde(I.it1(), temp.get(), pool);
+            rns_tool->fastbconv_m_tilde(get<0>(I), temp.get(), pool);
 
             // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
-            rns_tool->sm_mrq(temp.get(), I.it3(), pool);
+            rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
 
             for_each_n(
-                IteratorTuple2<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(I.it3(), base_Bsk_ntt_tables_iter),
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                    get<2>(I), base_Bsk_ntt_tables_iter),
                 base_Bsk_size, [&](auto J) {
                     // Transform to NTT form in base Bsk
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(J.it1(), **J.it2());
+                    ntt_negacyclic_harvey_lazy(get<0>(J), **get<1>(J));
                 });
         };
 
@@ -417,7 +418,7 @@ namespace seal
 
         // Perform BEHZ steps (1)-(3) for encrypted1
         for_each_n(
-            IteratorTuple3<ConstPolyIterator, PolyIterator, PolyIterator>(
+            IteratorTuple<ConstPolyIterator, PolyIterator, PolyIterator>(
                 encrypted1_iter, encrypted1_q_iter, encrypted1_Bsk_iter),
             encrypted1_size, behz_extend_base_convert_to_ntt);
 
@@ -429,7 +430,7 @@ namespace seal
         PolyIterator encrypted2_Bsk_iter(encrypted2_Bsk.get(), coeff_count, base_Bsk_size);
 
         for_each_n(
-            IteratorTuple3<ConstPolyIterator, PolyIterator, PolyIterator>(
+            IteratorTuple<ConstPolyIterator, PolyIterator, PolyIterator>(
                 encrypted2_iter, encrypted2_q_iter, encrypted2_Bsk_iter),
             encrypted2_size, behz_extend_base_convert_to_ntt);
 
@@ -480,20 +481,20 @@ namespace seal
                 advance(shifted_out_iter, secret_power_index);
 
                 for_each_n(
-                    IteratorTuple2<PolyIterator, ReverseIterator<PolyIterator>>(
+                    IteratorTuple<PolyIterator, ReverseIterator<PolyIterator>>(
                         shifted_in1_iter, shifted_reversed_in2_iter),
                     steps, [&](auto I) {
                         // Extra care needed here: shifted_out_iter must be dereferenced once to
                         // produce an appropriate RNSIterator.
                         for_each_n(
-                            IteratorTuple3<
-                                IteratorTuple2<RNSIterator, RNSIterator>, IteratorWrapper<const SmallModulus *>,
+                            IteratorTuple<
+                                IteratorTuple<RNSIterator, RNSIterator>, IteratorWrapper<const SmallModulus *>,
                                 RNSIterator>(I, base_iter, *shifted_out_iter),
                             base_size, [&](auto J) {
                                 auto temp(allocate_uint(coeff_count, pool));
                                 dyadic_product_coeffmod(
-                                    J.it1().it1(), J.it1().it2(), coeff_count, **J.it2(), temp.get());
-                                add_poly_poly_coeffmod(temp.get(), J.it3(), coeff_count, **J.it2(), J.it3());
+                                    get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, **get<1>(J), temp.get());
+                                add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, **get<1>(J), get<2>(J));
                             });
                     });
             };
@@ -506,21 +507,21 @@ namespace seal
 
         // Perform BEHZ step (5): transform data from NTT form
         for_each_n(
-            IteratorTuple2<PolyIterator, PolyIterator>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
+            IteratorTuple<PolyIterator, PolyIterator>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
                 for_each_n(
-                    IteratorTuple2<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
-                        I.it1(), base_q_ntt_tables_iter),
-                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(J.it1(), **J.it2()); });
+                    IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                        get<0>(I), base_q_ntt_tables_iter),
+                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), **get<1>(J)); });
 
                 for_each_n(
-                    IteratorTuple2<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
-                        I.it2(), base_Bsk_ntt_tables_iter),
-                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(J.it1(), **J.it2()); });
+                    IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                        get<1>(I), base_Bsk_ntt_tables_iter),
+                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), **get<1>(J)); });
             });
 
         // Perform BEHZ steps (6)-(8)
         for_each_n(
-            IteratorTuple3<PolyIterator, PolyIterator, PolyIterator>(
+            IteratorTuple<PolyIterator, PolyIterator, PolyIterator>(
                 temp_dest_q_iter, temp_dest_Bsk_iter, encrypted1_iter),
             dest_size, [&](auto I) {
                 // Bring together the base q and base Bsk components into a single allocation
@@ -529,19 +530,19 @@ namespace seal
 
                 // Step (6): multiply base q components by t (plain_modulus)
                 for_each_n(
-                    IteratorTuple3<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
-                        I.it1(), temp_q_Bsk_iter, base_q_iter),
+                    IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        get<0>(I), temp_q_Bsk_iter, base_q_iter),
                     base_q_size, [&](auto J) {
-                        multiply_poly_scalar_coeffmod(J.it1(), coeff_count, plain_modulus, **J.it3(), J.it2());
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, **get<2>(J), get<1>(J));
                     });
 
                 // Advance to the base Bsk part in temp and multiply base Bsk components by t
                 advance(temp_q_Bsk_iter, base_q_size);
                 for_each_n(
-                    IteratorTuple3<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
-                        I.it2(), temp_q_Bsk_iter, base_Bsk_iter),
+                    IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        get<1>(I), temp_q_Bsk_iter, base_Bsk_iter),
                     base_Bsk_size, [&](auto J) {
-                        multiply_poly_scalar_coeffmod(J.it1(), coeff_count, plain_modulus, **J.it3(), J.it2());
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, **get<2>(J), get<1>(J));
                     });
 
                 // Allocate yet another temporary for fast divide-and-floor result in base Bsk
@@ -551,7 +552,7 @@ namespace seal
                 rns_tool->fast_floor(temp_q_Bsk.get(), temp_Bsk.get(), pool);
 
                 // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
-                rns_tool->fastbconv_sk(temp_Bsk.get(), I.it3(), pool);
+                rns_tool->fastbconv_sk(temp_Bsk.get(), get<2>(I), pool);
             });
     }
 
@@ -760,32 +761,33 @@ namespace seal
         auto behz_extend_base_convert_to_ntt = [&](auto I) {
             // Make copy of input polynomial (in base q) and convert to NTT form
             for_each_n(
-                IteratorTuple3<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
-                    I.it1(), I.it2(), base_q_ntt_tables_iter),
+                IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                    get<0>(I), get<1>(I), base_q_ntt_tables_iter),
                 base_q_size, [&](auto J) {
                     // First copy to output
-                    set_uint_uint(J.it1(), coeff_count, J.it2());
+                    set_uint_uint(get<0>(J), coeff_count, get<1>(J));
 
                     // Transform to NTT form in base q
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(J.it2(), **J.it3());
+                    ntt_negacyclic_harvey_lazy(get<1>(J), **get<2>(J));
                 });
 
             // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
             auto temp(allocate_poly(coeff_count, base_Bsk_m_tilde_size, pool));
 
             // (1) Convert from base q to base Bsk U {m_tilde}
-            rns_tool->fastbconv_m_tilde(I.it1(), temp.get(), pool);
+            rns_tool->fastbconv_m_tilde(get<0>(I), temp.get(), pool);
 
             // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
-            rns_tool->sm_mrq(temp.get(), I.it3(), pool);
+            rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
 
             for_each_n(
-                IteratorTuple2<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(I.it3(), base_Bsk_ntt_tables_iter),
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                    get<2>(I), base_Bsk_ntt_tables_iter),
                 base_Bsk_size, [&](auto J) {
                     // Transform to NTT form in base Bsk
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(J.it1(), **J.it2());
+                    ntt_negacyclic_harvey_lazy(get<0>(J), **get<1>(J));
                 });
         };
 
@@ -799,7 +801,7 @@ namespace seal
 
         // Perform BEHZ steps (1)-(3)
         for_each_n(
-            IteratorTuple3<ConstPolyIterator, PolyIterator, PolyIterator>(
+            IteratorTuple<ConstPolyIterator, PolyIterator, PolyIterator>(
                 encrypted_iter, encrypted_q_iter, encrypted_Bsk_iter),
             encrypted_size, behz_extend_base_convert_to_ntt);
 
@@ -827,9 +829,10 @@ namespace seal
 
             // Compute c0^2
             for_each_n(
-                IteratorTuple3<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                     *in_iter, base_iter, *out_iter),
-                base_size, [&](auto I) { dyadic_product_coeffmod(I.it1(), I.it1(), coeff_count, **I.it2(), I.it3()); });
+                base_size,
+                [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, **get<1>(I), get<2>(I)); });
 
             // Advance in_iter and out_iter
             ++in_iter;
@@ -837,11 +840,11 @@ namespace seal
 
             // Compute 2*c0*c1
             for_each_n(
-                IteratorTuple4<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                     *in_iter, *in_iter_copy, base_iter, *out_iter),
                 base_size, [&](auto I) {
-                    dyadic_product_coeffmod(I.it1(), I.it2(), coeff_count, **I.it3(), I.it4());
-                    add_poly_poly_coeffmod(I.it4(), I.it4(), coeff_count, **I.it3(), I.it4());
+                    dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, **get<2>(I), get<3>(I));
+                    add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, **get<2>(I), get<3>(I));
                 });
 
             // Advance out_iter manually
@@ -849,9 +852,10 @@ namespace seal
 
             // Compute c1^2
             for_each_n(
-                IteratorTuple3<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                     *in_iter, base_iter, *out_iter),
-                base_size, [&](auto I) { dyadic_product_coeffmod(I.it1(), I.it1(), coeff_count, **I.it2(), I.it3()); });
+                base_size,
+                [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, **get<1>(I), get<2>(I)); });
         };
 
         // Perform the BEHZ ciphertext square both for base q and base Bsk
@@ -860,21 +864,21 @@ namespace seal
 
         // Perform BEHZ step (5): transform data from NTT form
         for_each_n(
-            IteratorTuple2<PolyIterator, PolyIterator>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
+            IteratorTuple<PolyIterator, PolyIterator>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
                 for_each_n(
-                    IteratorTuple2<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
-                        I.it1(), base_q_ntt_tables_iter),
-                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(J.it1(), **J.it2()); });
+                    IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                        get<0>(I), base_q_ntt_tables_iter),
+                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), **get<1>(J)); });
 
                 for_each_n(
-                    IteratorTuple2<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
-                        I.it2(), base_Bsk_ntt_tables_iter),
-                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(J.it1(), **J.it2()); });
+                    IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                        get<1>(I), base_Bsk_ntt_tables_iter),
+                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), **get<1>(J)); });
             });
 
         // Perform BEHZ steps (6)-(8)
         for_each_n(
-            IteratorTuple3<PolyIterator, PolyIterator, PolyIterator>(
+            IteratorTuple<PolyIterator, PolyIterator, PolyIterator>(
                 temp_dest_q_iter, temp_dest_Bsk_iter, encrypted_iter),
             dest_size, [&](auto I) {
                 // Bring together the base q and base Bsk components into a single allocation
@@ -883,19 +887,19 @@ namespace seal
 
                 // Step (6): multiply base q components by t (plain_modulus)
                 for_each_n(
-                    IteratorTuple3<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
-                        I.it1(), temp_q_Bsk_iter, base_q_iter),
+                    IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        get<0>(I), temp_q_Bsk_iter, base_q_iter),
                     base_q_size, [&](auto J) {
-                        multiply_poly_scalar_coeffmod(J.it1(), coeff_count, plain_modulus, **J.it3(), J.it2());
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, **get<2>(J), get<1>(J));
                     });
 
                 // Advance to the base Bsk part in temp and multiply base Bsk components by t
                 advance(temp_q_Bsk_iter, base_q_size);
                 for_each_n(
-                    IteratorTuple3<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
-                        I.it2(), temp_q_Bsk_iter, base_Bsk_iter),
+                    IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        get<1>(I), temp_q_Bsk_iter, base_Bsk_iter),
                     base_Bsk_size, [&](auto J) {
-                        multiply_poly_scalar_coeffmod(J.it1(), coeff_count, plain_modulus, **J.it3(), J.it2());
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, **get<2>(J), get<1>(J));
                     });
 
                 // Allocate yet another temporary for fast divide-and-floor result in base Bsk
@@ -905,7 +909,7 @@ namespace seal
                 rns_tool->fast_floor(temp_q_Bsk.get(), temp_Bsk.get(), pool);
 
                 // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
-                rns_tool->fastbconv_sk(temp_Bsk.get(), I.it3(), pool);
+                rns_tool->fastbconv_sk(temp_Bsk.get(), get<2>(I), pool);
             });
     }
 

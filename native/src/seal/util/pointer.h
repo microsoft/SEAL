@@ -1267,13 +1267,14 @@ namespace seal
 
         // Allocate and copy a range of elements
         template <
-            typename InputIt, typename T_ = typename std::iterator_traits<InputIt>::value_type,
+            typename InputIt,
+            typename T_ = typename std::iterator_traits<typename std::remove_reference<InputIt>::type>::value_type,
             typename = std::enable_if_t<std::is_standard_layout<
                 typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
-        SEAL_NODISCARD inline auto allocate(InputIt first, std::size_t count, MemoryPool &pool)
+        SEAL_NODISCARD inline auto allocate(InputIt &&first, std::size_t count, MemoryPool &pool)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
-            return Pointer<T>(first, pool.get_for_byte_count(mul_safe(count, sizeof(T))));
+            return Pointer<T>(std::forward<InputIt>(first), pool.get_for_byte_count(mul_safe(count, sizeof(T))));
         }
 
         template <
