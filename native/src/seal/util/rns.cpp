@@ -603,13 +603,15 @@ namespace seal
             }
 
             // Generate the Bsk SmallNTTTables; these are used for NTT after base extension to Bsk
-            base_Bsk_small_ntt_tables_ = allocate<SmallNTTTables>(base_Bsk_size, pool_);
-            for (size_t i = 0; i < base_Bsk_size; i++)
+            try
             {
-                if (!base_Bsk_small_ntt_tables_[i].initialize(coeff_count_power, (*base_Bsk_)[i]))
-                {
-                    throw logic_error("invalid rns bases");
-                }
+                CreateSmallNTTTables(
+                    coeff_count_power, vector<SmallModulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_size),
+                    base_Bsk_small_ntt_tables_, pool_);
+            }
+            catch (const logic_error &)
+            {
+                throw logic_error("invalid rns bases");
             }
 
             // Set up BaseConvTool for q --> Bsk

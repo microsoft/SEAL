@@ -238,18 +238,16 @@ namespace seal
 
         // Can we use NTT with coeff_modulus?
         context_data.qualifiers_.using_ntt = true;
-        context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_modulus_count, pool_, pool_);
-        // TODO context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_modulus_count, coeff_modulus.begin(),
-        // pool_, pool_)
-        for (size_t i = 0; i < coeff_modulus_count; i++)
+        try
         {
-            if (!context_data.small_ntt_tables_[i].initialize(coeff_count_power, coeff_modulus[i]))
-            {
-                // Parameters are not valid
-                context_data.qualifiers_.using_ntt = false;
-                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_no_ntt;
-                return context_data;
-            }
+            CreateSmallNTTTables(coeff_count_power, coeff_modulus, context_data.small_ntt_tables_, pool_);
+        }
+        catch (const invalid_argument &)
+        {
+            context_data.qualifiers_.using_ntt = false;
+            // Parameters are not valid
+            context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_no_ntt;
+            return context_data;
         }
 
         if (parms.scheme() == scheme_type::BFV)
@@ -283,11 +281,14 @@ namespace seal
             }
 
             // Can we use batching? (NTT with plain_modulus)
-            context_data.qualifiers_.using_batching = false;
-            context_data.plain_ntt_tables_ = allocate<SmallNTTTables>(pool_);
-            if (context_data.plain_ntt_tables_->initialize(coeff_count_power, plain_modulus))
+            context_data.qualifiers_.using_batching = true;
+            try
             {
-                context_data.qualifiers_.using_batching = true;
+                CreateSmallNTTTables(coeff_count_power, { plain_modulus }, context_data.plain_ntt_tables_, pool_);
+            }
+            catch (const invalid_argument &)
+            {
+                context_data.qualifiers_.using_batching = false;
             }
 
             // Check for plain_lift
