@@ -181,18 +181,47 @@ set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    add_subdirectory(thirdparty/msgsl)
-    ExternalProject_Get_Property(msgsl_external SOURCE_DIR)
-    add_library(msgsl IMPORTED INTERFACE)
+    # Download
+    message(STATUS "Setting up MSGSL ...")
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        OUTPUT_QUIET
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY thirdparty/msgsl)
+    if(result)
+        message(WARNING "Failed to download MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
+    endif()
+
+    # Build
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        OUTPUT_QUIET
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY thirdparty/msgsl)
+    if(result)
+        message(WARNING "Failed to build MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
+    endif()
+
+    # Set up the targets
+    add_subdirectory(
+        thirdparty/msgsl/GSL-src
+        EXCLUDE_FROM_ALL)
+
+    set(MSGSL_INCLUDE_DIR ${GSL_SOURCE_DIR}/include)
+
+    # The GSL target does not carry header search path dependencies.
+    # include_directories("${MSGSL_INCLUDE_DIR}")
 
     # We need to create the include directory so it exists at the time
     # of configuration. Otherwise set_target_properties below will fail.
-    set(MSGSL_INCLUDE_DIR ${SOURCE_DIR}/include)
     file(MAKE_DIRECTORY ${MSGSL_INCLUDE_DIR})
 
-    set_target_properties(msgsl PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${MSGSL_INCLUDE_DIR})
-    add_dependencies(msgsl msgsl_external)
+    # TODO: Do we install MSGSL headers for Windows??
+    # Install GSL header files
+    install(
+        DIRECTORY
+            ${MSGSL_INCLUDE_DIR}/gsl
+        DESTINATION
+            ${SEAL_INCLUDES_INSTALL_DIR}
+    )
 endif()
 
 # Use ZLIB
@@ -200,17 +229,33 @@ set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
 
 if(SEAL_USE_ZLIB AND NOT MSVC)
-    add_subdirectory(thirdparty/zlib)
-    ExternalProject_Get_Property(zlib_external SOURCE_DIR BINARY_DIR)
-    add_library(zlibstatic STATIC IMPORTED)
+    # Download
+    message(STATUS "Setting up ZLIB ...")
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        OUTPUT_QUIET
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY thirdparty/zlib)
+    if(result)
+        message(WARNING "Failed to download ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
+    endif()
 
-    set(ZLIB_FILENAME "libz.a")
-    set(ZLIB_LIBRARY_PATH ${BINARY_DIR}/${ZLIB_FILENAME})
-    set_target_properties(zlibstatic PROPERTIES
-        IMPORTED_LOCATION ${ZLIB_LIBRARY_PATH})
-    set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${SOURCE_DIR})
-    add_dependencies(zlibstatic zlib_external)
+    # Build
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        OUTPUT_QUIET
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY thirdparty/zlib)
+    if(result)
+        message(WARNING "Failed to build ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
+    endif()
+
+    # Set up the targets
+    add_subdirectory(
+        thirdparty/zlib/zlib-src
+        ${ZLIB_BINARY_DIR}
+        EXCLUDE_FROM_ALL)
+
+    # The zlibstatic target does not carry header search path dependencies.
+    include_directories("${zlib_SOURCE_DIR}/")
 endif()
 
 # Use Google Test
@@ -456,7 +501,7 @@ set_include_directories(seal_obj)
 
 if(SEAL_USE_MSGSL AND NOT MSVC)
     # Make sure Microsoft GSL is downloaded
-    target_link_libraries(seal_obj PUBLIC msgsl)
+    target_link_libraries(seal_obj PUBLIC GSL)
 endif()
 
 if(SEAL_USE_ZLIB AND NOT MSVC)
@@ -479,16 +524,16 @@ if(SEAL_USE_MSGSL AND NOT MSVC)
         COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
 endif()
 
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    # In UNIX-like platforms combine manually seal and zlibstatic
-    # into a single archive; not pretty, but works
-    add_custom_command(TARGET seal POST_BUILD
-        COMMAND ar x $<TARGET_FILE:seal>
-        COMMAND ar x ${ZLIB_LIBRARY_PATH}
-        COMMAND ar rcs $<TARGET_FILE:seal> *.o
-        COMMAND rm -f *.o
-        WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
-endif()
+#if(SEAL_USE_ZLIB AND NOT MSVC)
+#    # In UNIX-like platforms combine manually seal and zlibstatic
+#    # into a single archive; not pretty, but works
+#    add_custom_command(TARGET seal POST_BUILD
+#        COMMAND ar x $<TARGET_FILE:seal>
+#        COMMAND ar x ${ZLIB_LIBRARY_PATH}
+#        COMMAND ar rcs $<TARGET_FILE:seal> *.o
+#        COMMAND rm -f *.o
+#        WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
+#endif()
 
 # Conditionally build the shared library
 if(BUILD_SHARED_LIBS)

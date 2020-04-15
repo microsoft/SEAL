@@ -14,13 +14,3 @@ ExternalProject_Add(msgsl_external
     INSTALL_COMMAND   ""
     TEST_COMMAND      ""
 )
-
-# Install the header files
-if(SEAL_USE_MSGSL)
-    install(
-        DIRECTORY
-            ${CMAKE_CURRENT_LIST_DIR}/GSL-src/include/gsl
-        DESTINATION
-            ${SEAL_INCLUDES_INSTALL_DIR}
-    )
-endif()
