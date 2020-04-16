@@ -1199,8 +1199,10 @@ namespace seal
 
         // Extract encryption parameters.
         auto &context_data = *context_data_ptr;
+        auto &ntt_tables = context_data.small_ntt_tables();
         auto &next_context_data = *context_data.next_context_data();
         auto &next_parms = next_context_data.parms();
+        const bool is_ckks = next_parms.scheme() == scheme_type::CKKS;
 
         // q_1,...,q_{k-1}
         auto &next_coeff_modulus = next_parms.coeff_modulus();
@@ -1217,15 +1219,8 @@ namespace seal
         }
 
         // In CKKS need to transform away from NTT form
-        Ciphertext encrypted_copy(pool);
-        encrypted_copy = encrypted;
-        if (next_parms.scheme() == scheme_type::CKKS)
-        {
-            transform_from_ntt_inplace(encrypted_copy);
-        }
-
+        // We only transform the last moduli since subtraction and scalar_mul is doable in NTT form.
         auto temp1(allocate_uint(coeff_count, pool));
-
         // Allocate enough room for the result
         auto temp2(allocate_poly(coeff_count * encrypted_size, next_coeff_mod_count, pool));
         auto temp2_ptr = temp2.get();
@@ -1234,8 +1229,13 @@ namespace seal
         {
             // Set temp1 to ct mod qk
             set_uint_uint(
-                encrypted_copy.data(poly_index) + next_coeff_mod_count * coeff_count,
+                encrypted.data(poly_index) + next_coeff_mod_count * coeff_count,
                 coeff_count, temp1.get());
+            if (is_ckks)
+            {
+                // We sure that (p-1)/2 + 2p < 2^64, so inv_ntt_lazy is ok here.
+                inverse_ntt_negacyclic_harvey_lazy(temp1.get(), ntt_tables[next_coeff_mod_count]);
+            }
             // Add (p-1)/2 to change from flooring to rounding.
             auto last_modulus = context_data.parms().coeff_modulus().back();
             uint64_t half = last_modulus.value() >> 1;
@@ -1243,7 +1243,10 @@ namespace seal
             {
                 temp1.get()[j] = barrett_reduce_63(temp1.get()[j] + half, last_modulus);
             }
+
+            const uint64_t *ct_qi_ptr = encrypted.data(poly_index);
             for (size_t mod_index = 0; mod_index < next_coeff_mod_count; mod_index++,
+                ct_qi_ptr += coeff_count,
                 temp2_ptr += coeff_count)
             {
                 // (ct mod qk) mod qi
@@ -1254,11 +1257,20 @@ namespace seal
                 {
                    temp2_ptr[j] = sub_uint_uint_mod(temp2_ptr[j], half_mod, next_coeff_modulus[mod_index]);
                 }
+
+                if (is_ckks)
+                {
+                    // convert back to NTT form
+                    ntt_negacyclic_harvey(temp2_ptr, ntt_tables[mod_index]);
+                }
                 // ((ct mod qi) - (ct mod qk)) mod qi
-                sub_poly_poly_coeffmod(
-                    encrypted_copy.data(poly_index) + mod_index * coeff_count, temp2_ptr,
-                    coeff_count, next_coeff_modulus[mod_index], temp2_ptr);
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
+                uint64_t qi = next_coeff_modulus[mod_index].value();
+                std::transform(ct_qi_ptr, ct_qi_ptr + coeff_count,
+                               temp2_ptr, temp2_ptr,
+                               [qi](uint64_t ct_qi, uint64_t ct_qk) -> uint64_t {
+                                   return ct_qi + qi - ct_qk;
+                               });
                 multiply_poly_scalar_coeffmod(temp2_ptr, coeff_count,
                     inv_last_coeff_mod_array[mod_index],
                     next_coeff_modulus[mod_index], temp2_ptr);
@@ -1273,9 +1285,9 @@ namespace seal
             destination.data());
 
         // In CKKS need to transform back to NTT form
-        if (next_parms.scheme() == scheme_type::CKKS)
+        if (is_ckks)
         {
-            transform_to_ntt_inplace(destination);
+            destination.is_ntt_form() = true;
 
             // Also change the scale
             destination.scale() = encrypted.scale() /
