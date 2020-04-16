@@ -18,6 +18,96 @@ namespace seal
 {
     namespace util
     {
+        /*
+        In this file we define a set of custom iterator classes ("SEAL iterators") that are used throughout Microsoft
+        SEAL for easier iteration over ciphertext polynomials, their RNS components, and the coefficients in the RNS
+        components. All SEAL iterators satisfy the C++ LegacyBidirectionalIterator requirements. Please note that they
+        are *not* random access iterators. The SEAL iterators are very helpful when used with std::for_each in C++17.
+        For C++14 compilers we have defined our own implementation of for_each below.
+
+        The SEAL iterator classes behave as illustrated by the following diagram:
+
+        +-------------------+
+        |    Pointer & Size |  Construct  +---------------------+
+        | or Ciphertext     +------------>+ (Const)PolyIterator |  Iterates over RNS polynomials in a ciphertext
+        +-------------------+             +---------------------+  (coeff_modulus_count-many RNS components)
+                                                    |
+                                                    |
+                                                    | Dereference
+                                                    |
+                                                    |
+                                                    v
+         +----------------+  Construct   +--------------------+
+         | Pointer & Size +------------->+ (Const)RNSIterator |  Iterates over RNS components in an RNS polynomial
+         +----------------+              +--------------------+  (poly_modulus_degree-many coefficients)
+                                                    |
+                                                    |
+                                                    | Dereference
+                                                    |
+                                                    |
+                                                    v
+        +----------------+  Construct  +----------------------+
+        | Pointer & Size +------------>+ (Const)CoeffIterator |  Iterates over coefficients (std::uint64_t) in a single
+        +----------------+             +----------------------+  RNS polynomial component
+                                                    |
+                                                    |
+                                                    | Dereference
+                                                    |
+                                                    |
+                                                    v
+                                       +------------------------+  Construct  +-----------------------+
+                                       | (const) std::uint64_t* +------------>+ IteratorWrapper<PtrT> | Simple wrapper
+                                       +------------------------+             +-----------------------+ for raw pointers
+                                                                                ^      |
+                            +---------+  Construct                              |      |
+                            | MyType* +-----------------------------------------+      | Dereference
+                            +---------+                                                |
+                                                                                       |
+                                                                                       v
+                                                                                   +------+
+                                                                                   | PtrT |  Unusual dereference to PtrT
+                                                                                   +------+
+
+        In addition to the types above, we define a ReverseIterator<SEALIter> that reverses the direction of iteration.
+
+        An extremely useful template class is the (variadic) IteratorTuple<...> that allows multiple SEAL iterators to
+        be zipped together. The IteratorTuple is itself a SEAL iterator and nested IteratorTuple instances are used
+        commonly in the library. One critically important aspect of the IteratorTuple is that dereferencing yields
+        another valid IteratorTuple, with each component dereferenced individually. When one of the components is not
+        immediately dereferenceable to a SEAL iterator (but instead to a raw pointer), the result is wrapped inside an
+        IteratorWrapper object to produce a valid tuple of SEAL iterators. As a curiosity, an IteratorTuple wrapping an
+        IteratorWrapper<PtrT> can be dereferenced indefinitely, always yielding the same IteratorTuple. The individual
+        components of an IteratorTuple can be accessed with the seal::util::get<i>(...) functions. The behavior of
+        IteratorTuple is summarized in the following diagram:
+
+                  +---------------------------------------------------------+
+                  | IteratorTuple<PolyIterator, RNSIterator, CoeffIterator> |
+                  +-----------------------------+---------------------------+
+                                                |
+                                                |
+                                                | Dereference
+                                                |
+                                                |
+                                                v
+        +---------------------------------------+------------------------------------+
+        | IteratorTuple<RNSIterator, CoeffIterator, IteratorWrapper<std::uint64_t*>> |
+        +-----------------+---------------------+----------------------+-------------+
+                          |                     |                      |
+                          |                     |                      |
+                          | get<0>              | get<1>               | get<2>
+                          |                     |                      |
+                          |                     |                      |
+                          v                     v                      v
+                   +------+------+      +-------+-------+   +----------+----------------------+
+                   | RNSIterator |      | CoeffIterator |   | IteratorWrapper<std::uint64_t*> |
+                   +-------------+      +---------------+   +---------------------------------+
+
+        Each SEAL iterator class defines a type called value_type_is_seal_iterator_type, which is equal to either
+        std::true_type or std::false_type, and signals whether instances of that particular SEAL iterator class, when
+        dereferenced, produce an instance of another SEAL iterator class. For example, CoeffIterator dereferences to
+        a raw pointer, so CoeffIterator::value_type_is_seal_iterator_type is equal to std::false_type. This type is
+        used mainly internally by the SEAL iterators and is unlikely to be useful elsewhere.
+        */
 #ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.
         template <typename ForwardIt, typename Size, typename Func>
@@ -49,7 +139,7 @@ namespace seal
             friend class PolyIterator;
 
             using self_type = CoeffIterator;
-            using is_deref_to_iterator_type = std::false_type;
+            using value_type_is_seal_iterator_type = std::false_type;
 
             // Standard iterator typedefs
             using value_type = std::uint64_t *;
@@ -129,7 +219,7 @@ namespace seal
             friend class ConstPolyIterator;
 
             using self_type = ConstCoeffIterator;
-            using is_deref_to_iterator_type = std::false_type;
+            using value_type_is_seal_iterator_type = std::false_type;
 
             // Standard iterator typedefs
             using value_type = const std::uint64_t *;
@@ -211,7 +301,7 @@ namespace seal
             friend class PolyIterator;
 
             using self_type = RNSIterator;
-            using is_deref_to_iterator_type = std::true_type;
+            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
             using value_type = CoeffIterator;
@@ -303,7 +393,7 @@ namespace seal
             friend class ConstPolyIterator;
 
             using self_type = ConstRNSIterator;
-            using is_deref_to_iterator_type = std::true_type;
+            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
             using value_type = ConstCoeffIterator;
@@ -397,7 +487,7 @@ namespace seal
         {
         public:
             using self_type = PolyIterator;
-            using is_deref_to_iterator_type = std::true_type;
+            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
             using value_type = RNSIterator;
@@ -498,7 +588,7 @@ namespace seal
         {
         public:
             using self_type = ConstPolyIterator;
-            using is_deref_to_iterator_type = std::true_type;
+            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
             using value_type = ConstRNSIterator;
@@ -608,7 +698,7 @@ namespace seal
         {
         public:
             using self_type = IteratorWrapper<PtrT>;
-            using is_deref_to_iterator_type = std::false_type;
+            using value_type_is_seal_iterator_type = std::false_type;
 
             // Standard iterator typedefs
             using value_type = PtrT;
@@ -686,19 +776,19 @@ namespace seal
             value_type ptr_;
         };
 
-        template <typename BidirIt>
-        class ReverseIterator : public BidirIt
+        template <typename SEALIter>
+        class ReverseIterator : public SEALIter
         {
         public:
-            using self_type = ReverseIterator<BidirIt>;
+            using self_type = ReverseIterator<SEALIter>;
 
-            ReverseIterator() : BidirIt()
+            ReverseIterator() : SEALIter()
             {}
 
-            ReverseIterator(const BidirIt &copy) : BidirIt(copy)
+            ReverseIterator(const SEALIter &copy) : SEALIter(copy)
             {}
 
-            ReverseIterator(BidirIt &&source) : BidirIt(source)
+            ReverseIterator(SEALIter &&source) : SEALIter(source)
             {}
 
             ReverseIterator(const self_type &copy) = default;
@@ -711,47 +801,48 @@ namespace seal
 
             inline self_type &operator++() noexcept
             {
-                BidirIt::operator--();
+                SEALIter::operator--();
                 return *this;
             }
 
             inline self_type operator++(int) noexcept
             {
                 self_type result(*this);
-                BidirIt::operator--();
+                SEALIter::operator--();
                 return result;
             }
 
             inline self_type &operator--() noexcept
             {
-                BidirIt::operator++();
+                SEALIter::operator++();
                 return *this;
             }
 
             inline self_type operator--(int) noexcept
             {
                 self_type result(*this);
-                BidirIt::operator++();
+                SEALIter::operator++();
                 return result;
             }
         };
 
-        template <typename... BidirIts>
+        template <typename... SEALIters>
         class IteratorTuple;
 
-        template <typename BidirIt, typename... Rest>
-        class IteratorTuple<BidirIt, Rest...>
+        template <typename SEALIter, typename... Rest>
+        class IteratorTuple<SEALIter, Rest...>
         {
         public:
-            using self_type = IteratorTuple<BidirIt, Rest...>;
-            using is_deref_to_iterator_type = std::conditional_t<
-                BidirIt::is_deref_to_iterator_type::value && IteratorTuple<Rest...>::is_deref_to_iterator_type::value,
-                std::true_type, std::false_type>;
+            using self_type = IteratorTuple<SEALIter, Rest...>;
+            using value_type_is_seal_iterator_type = std::true_type;
+            //using value_type_is_seal_iterator_type = std::conditional_t<
+                //SEALIter::value_type_is_seal_iterator_type::value && IteratorTuple<Rest...>::value_type_is_seal_iterator_type::value,
+                //std::true_type, std::false_type>;
 
             // Standard iterator typedefs
             using value_type_first = std::conditional_t<
-                BidirIt::is_deref_to_iterator_type::value, typename std::iterator_traits<BidirIt>::value_type,
-                IteratorWrapper<typename std::iterator_traits<BidirIt>::value_type>>;
+                SEALIter::value_type_is_seal_iterator_type::value, typename std::iterator_traits<SEALIter>::value_type,
+                IteratorWrapper<typename std::iterator_traits<SEALIter>::value_type>>;
             using value_type =
                 IteratorTuple<value_type_first, typename std::iterator_traits<IteratorTuple<Rest>>::value_type...>;
             using pointer = void;
@@ -761,9 +852,9 @@ namespace seal
 
             IteratorTuple() = default;
 
-            IteratorTuple(BidirIt first, IteratorTuple<Rest...> rest) : first_(first), rest_(rest){};
+            IteratorTuple(SEALIter first, IteratorTuple<Rest...> rest) : first_(first), rest_(rest){};
 
-            IteratorTuple(BidirIt first, Rest... rest) : first_(first), rest_(rest...)
+            IteratorTuple(SEALIter first, Rest... rest) : first_(first), rest_(rest...)
             {}
 
             IteratorTuple(const self_type &copy) = default;
@@ -824,7 +915,7 @@ namespace seal
                 return **this;
             }
 
-            SEAL_NODISCARD inline const BidirIt &first() const noexcept
+            SEAL_NODISCARD inline const SEALIter &first() const noexcept
             {
                 return first_;
             }
@@ -835,22 +926,23 @@ namespace seal
             }
 
         private:
-            BidirIt first_;
+            SEALIter first_;
 
             IteratorTuple<Rest...> rest_;
         };
 
-        template <typename BidirIt>
-        class IteratorTuple<BidirIt>
+        template <typename SEALIter>
+        class IteratorTuple<SEALIter>
         {
         public:
-            using self_type = IteratorTuple<BidirIt>;
-            using is_deref_to_iterator_type = typename BidirIt::is_deref_to_iterator_type;
+            using self_type = IteratorTuple<SEALIter>;
+            using value_type_is_seal_iterator_type = std::true_type;
+            //using value_type_is_seal_iterator_type = typename SEALIter::value_type_is_seal_iterator_type;
 
             // Standard iterator typedefs
             using value_type = std::conditional_t<
-                BidirIt::is_deref_to_iterator_type::value, typename std::iterator_traits<BidirIt>::value_type,
-                IteratorWrapper<typename std::iterator_traits<BidirIt>::value_type>>;
+                SEALIter::value_type_is_seal_iterator_type::value, typename std::iterator_traits<SEALIter>::value_type,
+                IteratorWrapper<typename std::iterator_traits<SEALIter>::value_type>>;
             using pointer = void;
             using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
@@ -858,7 +950,7 @@ namespace seal
 
             IteratorTuple(){};
 
-            IteratorTuple(BidirIt first) : first_(first)
+            IteratorTuple(SEALIter first) : first_(first)
             {}
 
             IteratorTuple(const self_type &copy) = default;
@@ -915,22 +1007,22 @@ namespace seal
                 return **this;
             }
 
-            SEAL_NODISCARD inline const BidirIt &first() const noexcept
+            SEAL_NODISCARD inline const SEALIter &first() const noexcept
             {
                 return first_;
             }
 
         private:
-            BidirIt first_;
+            SEALIter first_;
         };
 
         namespace iterator_tuple_internal
         {
-            template <unsigned N>
+            template <std::size_t N>
             struct GetHelperStruct
             {
-                template <typename BidirIt, typename... Rest>
-                static auto apply(const IteratorTuple<BidirIt, Rest...> &it)
+                template <typename SEALIter, typename... Rest>
+                static auto apply(const IteratorTuple<SEALIter, Rest...> &it)
                 {
                     return GetHelperStruct<N - 1>::apply(it.rest());
                 }
@@ -939,16 +1031,16 @@ namespace seal
             template <>
             struct GetHelperStruct<0>
             {
-                template <typename BidirIt, typename... Rest>
-                static auto apply(const IteratorTuple<BidirIt, Rest...> &it)
+                template <typename SEALIter, typename... Rest>
+                static auto apply(const IteratorTuple<SEALIter, Rest...> &it)
                 {
                     return it.first();
                 }
             };
         }; // namespace iterator_tuple_internal
 
-        template <unsigned N, typename... BidirIts>
-        auto get(const IteratorTuple<BidirIts...> &it)
+        template <std::size_t N, typename... SEALIters>
+        auto get(const IteratorTuple<SEALIters...> &it)
         {
             return iterator_tuple_internal::GetHelperStruct<N>::apply(it);
         }
