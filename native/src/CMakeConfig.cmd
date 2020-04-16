@@ -62,7 +62,7 @@ cd %MSGSLCONFIGDIR%
 "%CMAKEPATH%" --build . --config "%PROJECTCONFIGURATION%"
 
 rem Copy Microsoft GSL header files into the local source directory
-robocopy ..\..\..\GSL-src\include %~dp0 /s
+robocopy ..\..\..\src\include %~dp0 /s
 
 rem Download and build ZLIB
 set ZLIBCONFIGDIR="..\..\thirdparty\zlib\.config\%VSVERSION%\%PROJECTPLATFORM%"
