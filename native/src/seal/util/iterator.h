@@ -835,9 +835,6 @@ namespace seal
         public:
             using self_type = IteratorTuple<SEALIter, Rest...>;
             using value_type_is_seal_iterator_type = std::true_type;
-            //using value_type_is_seal_iterator_type = std::conditional_t<
-                //SEALIter::value_type_is_seal_iterator_type::value && IteratorTuple<Rest...>::value_type_is_seal_iterator_type::value,
-                //std::true_type, std::false_type>;
 
             // Standard iterator typedefs
             using value_type_first = std::conditional_t<
@@ -937,7 +934,6 @@ namespace seal
         public:
             using self_type = IteratorTuple<SEALIter>;
             using value_type_is_seal_iterator_type = std::true_type;
-            //using value_type_is_seal_iterator_type = typename SEALIter::value_type_is_seal_iterator_type;
 
             // Standard iterator typedefs
             using value_type = std::conditional_t<
