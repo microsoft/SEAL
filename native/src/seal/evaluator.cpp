@@ -74,20 +74,17 @@ namespace seal
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
+        size_t encrypted_size = encrypted.size();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_count = coeff_modulus.size();
-        size_t encrypted_size = encrypted.size();
 
         // Negate each poly in the array
-        for (size_t j = 0; j < encrypted_size; j++)
-        {
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                negate_poly_coeffmod(
-                    encrypted.data(j) + (i * coeff_count), coeff_count, coeff_modulus[i],
-                    encrypted.data(j) + (i * coeff_count));
-            }
-        }
+        for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                coeff_modulus_count,
+                [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, **get<1>(J), get<0>(J)); });
+        });
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
@@ -142,17 +139,14 @@ namespace seal
         encrypted1.resize(context_, context_data.parms_id(), max_count);
 
         // Add ciphertexts
-        for (size_t j = 0; j < min_count; j++)
-        {
-            uint64_t *encrypted1_ptr = encrypted1.data(j);
-            const uint64_t *encrypted2_ptr = encrypted2.data(j);
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                add_poly_poly_coeffmod(
-                    encrypted1_ptr + (i * coeff_count), encrypted2_ptr + (i * coeff_count), coeff_count,
-                    coeff_modulus[i], encrypted1_ptr + (i * coeff_count));
-            }
-        }
+        for_each_n(IteratorTuple<PolyIterator, ConstPolyIterator>(encrypted1, encrypted2), min_count, [&](auto I) {
+            for_each_n(
+                IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                coeff_modulus_count, [&](auto J) {
+                    add_poly_poly_coeffmod(
+                        get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, **get<1>(J), get<0>(get<0>(J)));
+                });
+        });
 
         // Copy the remainding polys of the array with larger count into encrypted1
         if (encrypted1_size < encrypted2_size)
@@ -234,29 +228,37 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), max_count);
 
-        // Subtract polynomials.
-        for (size_t j = 0; j < min_count; j++)
-        {
-            uint64_t *encrypted1_ptr = encrypted1.data(j);
-            const uint64_t *encrypted2_ptr = encrypted2.data(j);
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                sub_poly_poly_coeffmod(
-                    encrypted1_ptr + (i * coeff_count), encrypted2_ptr + (i * coeff_count), coeff_count,
-                    coeff_modulus[i], encrypted1_ptr + (i * coeff_count));
-            }
-        }
+        // Set up iterators in the function scope
+        PolyIterator encrypted1_iter(encrypted1);
+        ConstPolyIterator encrypted2_iter(encrypted2);
+
+        // Subtract polynomials
+        for_each_n(
+            IteratorTuple<PolyIterator, ConstPolyIterator>(encrypted1_iter, encrypted2_iter), min_count, [&](auto I) {
+                for_each_n(
+                    IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                    coeff_modulus_count, [&](auto J) {
+                        sub_poly_poly_coeffmod(
+                            get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, **get<1>(J), get<0>(get<0>(J)));
+                    });
+            });
 
         // If encrypted2 has larger count, negate remaining entries
         if (encrypted1_size < encrypted2_size)
         {
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                negate_poly_coeffmod(
-                    encrypted2.data(encrypted1_size) + (i * coeff_count),
-                    coeff_count * (encrypted2_size - encrypted1_size), coeff_modulus[i],
-                    encrypted1.data(encrypted1_size) + (i * coeff_count));
-            }
+            // Advance encrypted1_iter and encrypted2_iter to min_count (i.e., encrypted1_size)
+            advance(encrypted1_iter, min_count);
+            advance(encrypted2_iter, min_count);
+
+            for_each_n(
+                IteratorTuple<PolyIterator, ConstPolyIterator>(encrypted1_iter, encrypted2_iter),
+                encrypted2_size - min_count, [&](auto I) {
+                    for_each_n(
+                        IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                        coeff_modulus_count, [&](auto J) {
+                            negate_poly_coeffmod(get<1>(get<0>(J)), coeff_count, **get<1>(J), get<0>(get<0>(J)));
+                        });
+                });
         }
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
@@ -316,19 +318,15 @@ namespace seal
         // Extract encryption parameters.
         auto &context_data = *context_->get_context_data(encrypted1.parms_id());
         auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t base_q_size = coeff_modulus.size();
+        size_t base_q_size = parms.coeff_modulus().size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
 
         uint64_t plain_modulus = parms.plain_modulus().value();
         auto rns_tool = context_data.rns_tool();
-        auto &base_Bsk = *rns_tool->base_Bsk();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
         size_t base_Bsk_m_tilde_size = rns_tool->base_Bsk_m_tilde()->size();
-        auto base_q_ntt_tables = context_data.small_ntt_tables();
-        auto base_Bsk_ntt_tables = rns_tool->base_Bsk_small_ntt_tables();
 
         // Determine destination.size()
         size_t dest_size = sub_safe(add_safe(encrypted1_size, encrypted2_size), size_t(1));
@@ -340,12 +338,12 @@ namespace seal
         }
 
         // Set up iterators for bases
-        IteratorWrapper<const SmallModulus *> base_q_iter(coeff_modulus.data());
-        IteratorWrapper<const SmallModulus *> base_Bsk_iter(base_Bsk.base());
+        IteratorWrapper<const SmallModulus *> base_q_iter(parms.coeff_modulus());
+        IteratorWrapper<const SmallModulus *> base_Bsk_iter(rns_tool->base_Bsk()->base());
 
         // Set up iterators for NTT tables
-        IteratorWrapper<const SmallNTTTables *> base_q_ntt_tables_iter(base_q_ntt_tables);
-        IteratorWrapper<const SmallNTTTables *> base_Bsk_ntt_tables_iter(base_Bsk_ntt_tables);
+        IteratorWrapper<const SmallNTTTables *> base_q_ntt_tables_iter(context_data.small_ntt_tables());
+        IteratorWrapper<const SmallNTTTables *> base_Bsk_ntt_tables_iter(rns_tool->base_Bsk_small_ntt_tables());
 
         // Microsoft SEAL uses BEHZ-style RNS multiplication. This process is somewhat complex and consists of the
         // following steps:
@@ -487,9 +485,8 @@ namespace seal
                         // Extra care needed here: shifted_out_iter must be dereferenced once to
                         // produce an appropriate RNSIterator.
                         for_each_n(
-                            IteratorTuple<
-                                IteratorTuple<RNSIterator, RNSIterator>, IteratorWrapper<const SmallModulus *>,
-                                RNSIterator>(I, base_iter, *shifted_out_iter),
+                            IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                                I, base_iter, *shifted_out_iter),
                             base_size, [&](auto J) {
                                 auto temp(allocate_uint(coeff_count, pool));
                                 dyadic_product_coeffmod(
@@ -590,73 +587,62 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
+        // Set up iterator for the base
+        IteratorWrapper<const SmallModulus *> coeff_modulus_iter(parms.coeff_modulus());
+
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
-        // pointer increment to switch to a next polynomial
-        size_t enc_ptr_increment = coeff_count * coeff_modulus_count;
+        // Set up iterators for input ciphertexts
+        PolyIterator encrypted1_iter(encrypted1);
+        ConstPolyIterator encrypted2_iter(encrypted2);
 
-        // Step 1: naive multiplication modulo the coefficient modulus
-        // First allocate two temp polys :
-        // one for results in base q. This need to be zero
-        // for the arbitrary size multiplication; not for 2x2 though
-        auto temp_des(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
+        // Allocate temporary space for the result
+        auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
+        PolyIterator temp_iter(temp.get(), coeff_count, coeff_modulus_count);
 
-        // Allocate temp polys for NTT multiplication results in base q
-        auto temp1_poly(allocate_poly(coeff_count, coeff_modulus_count, pool));
-        auto temp2_poly(allocate_poly(coeff_count, coeff_modulus_count, pool));
-
-        // First convert all the inputs into NTT form
-        auto encrypted1_ntt(allocate_poly(coeff_count * encrypted1_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted1.data(), coeff_count * encrypted1_size, coeff_modulus_count, encrypted1_ntt.get());
-
-        auto encrypted2_ntt(allocate_poly(coeff_count * encrypted2_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted2.data(), coeff_count * encrypted2_size, coeff_modulus_count, encrypted2_ntt.get());
-
-        // Perform multiplication on arbitrary size ciphertexts
-
-        // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
-        // component [j] such that [i+j]=[secret_power_index]
-        // Only need to check encrypted1 components up to and including [secret_power_index],
-        // and strictly less than [encrypted_array.size()]
-
-        // Number of encrypted1 components to check
-        size_t current_encrypted1_limit = 0;
-
-        for (size_t secret_power_index = 0; secret_power_index < dest_size; secret_power_index++)
+        for (size_t secret_power_index = 0; secret_power_index < dest_size; secret_power_index++, ++temp_iter)
         {
-            current_encrypted1_limit = min(encrypted1_size, secret_power_index + 1);
+            // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
+            // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
+            // the relevant terms are obtained as follows.
+            size_t curr_encrypted1_last = min(secret_power_index, encrypted1_size - 1);
+            size_t curr_encrypted2_first = min(secret_power_index, encrypted2_size - 1);
+            size_t curr_encrypted1_first = secret_power_index - curr_encrypted2_first;
+            // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
 
-            for (size_t encrypted1_index = 0; encrypted1_index < current_encrypted1_limit; encrypted1_index++)
-            {
-                // check if a corresponding component in encrypted2 exists
-                if (encrypted2_size > secret_power_index - encrypted1_index)
-                {
-                    size_t encrypted2_index = secret_power_index - encrypted1_index;
+            // The total number of dyadic products is now easy to compute
+            size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
 
-                    // NTT Multiplication and addition for results in q
-                    for (size_t i = 0; i < coeff_modulus_count; i++)
-                    {
-                        // ci * dj
-                        dyadic_product_coeffmod(
-                            encrypted1_ntt.get() + (i * coeff_count) + (enc_ptr_increment * encrypted1_index),
-                            encrypted2_ntt.get() + (i * coeff_count) + (enc_ptr_increment * encrypted2_index),
-                            coeff_count, coeff_modulus[i], temp1_poly.get() + (i * coeff_count));
-                        // Dest[i+j]
-                        add_poly_poly_coeffmod(
-                            temp1_poly.get() + (i * coeff_count),
-                            temp_des.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_modulus_count),
-                            coeff_count, coeff_modulus[i],
-                            temp_des.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_modulus_count));
-                    }
-                }
-            }
+            // Create a shifted iterator for the first input
+            auto shifted_encrypted1_iter = encrypted1_iter;
+            advance(shifted_encrypted1_iter, curr_encrypted1_first);
+
+            // Create a shifted reverse iterator for the second input
+            auto shifted_encrypted2_iter = encrypted2_iter;
+            advance(shifted_encrypted2_iter, curr_encrypted2_first);
+            auto shifted_reversed_encrypted2_iter = ReverseIterator<ConstPolyIterator>(shifted_encrypted2_iter);
+
+            for_each_n(
+                IteratorTuple<PolyIterator, ReverseIterator<ConstPolyIterator>>(
+                    shifted_encrypted1_iter, shifted_reversed_encrypted2_iter),
+                steps, [&](auto I) {
+                    // Extra care needed here:
+                    // temp_iter must be dereferenced once to produce an appropriate RNSIterator
+                    for_each_n(
+                        IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                            I, coeff_modulus_iter, *temp_iter),
+                        coeff_modulus_count, [&](auto J) {
+                            auto temp(allocate_uint(coeff_count, pool));
+                            dyadic_product_coeffmod(
+                                get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, **get<1>(J), temp.get());
+                            add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, **get<1>(J), get<2>(J));
+                        });
+                });
         }
 
         // Set the final result
-        set_poly_poly(temp_des.get(), coeff_count * dest_size, coeff_modulus_count, encrypted1.data());
+        set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_count, encrypted1.data());
 
         // Set the scale
         encrypted1.scale() = new_scale;
@@ -703,18 +689,14 @@ namespace seal
         // Extract encryption parameters.
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t base_q_size = coeff_modulus.size();
+        size_t base_q_size = parms.coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
 
         uint64_t plain_modulus = parms.plain_modulus().value();
         auto rns_tool = context_data.rns_tool();
-        auto &base_Bsk = *rns_tool->base_Bsk();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
         size_t base_Bsk_m_tilde_size = rns_tool->base_Bsk_m_tilde()->size();
-        auto base_q_ntt_tables = context_data.small_ntt_tables();
-        auto base_Bsk_ntt_tables = rns_tool->base_Bsk_small_ntt_tables();
 
         // Optimization implemented currently only for size 2 ciphertexts
         if (encrypted_size != 2)
@@ -733,12 +715,12 @@ namespace seal
         }
 
         // Set up iterators for bases
-        IteratorWrapper<const SmallModulus *> base_q_iter(coeff_modulus.data());
-        IteratorWrapper<const SmallModulus *> base_Bsk_iter(base_Bsk.base());
+        IteratorWrapper<const SmallModulus *> base_q_iter(parms.coeff_modulus());
+        IteratorWrapper<const SmallModulus *> base_Bsk_iter(rns_tool->base_Bsk()->base());
 
         // Set up iterators for NTT tables
-        IteratorWrapper<const SmallNTTTables *> base_q_ntt_tables_iter(base_q_ntt_tables);
-        IteratorWrapper<const SmallNTTTables *> base_Bsk_ntt_tables_iter(base_Bsk_ntt_tables);
+        IteratorWrapper<const SmallNTTTables *> base_q_ntt_tables_iter(context_data.small_ntt_tables());
+        IteratorWrapper<const SmallNTTTables *> base_Bsk_ntt_tables_iter(rns_tool->base_Bsk_small_ntt_tables());
 
         // Microsoft SEAL uses BEHZ-style RNS multiplication. For details, see Evaluator::bfv_multiply. This function
         // uses additionally Karatsuba multiplication to reduce the complexity of squaring a size-2 ciphertext, but the
@@ -923,10 +905,16 @@ namespace seal
         // Extract encryption parameters.
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_count = parms.coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
+
+        // Optimization implemented currently only for size 2 ciphertexts
+        if (encrypted_size != 2)
+        {
+            ckks_multiply(encrypted, encrypted, move(pool));
+            return;
+        }
 
         double new_scale = encrypted.scale() * encrypted.scale();
 
@@ -946,104 +934,54 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
+        // Set up iterator for the base
+        IteratorWrapper<const SmallModulus *> coeff_modulus_iter(parms.coeff_modulus());
+
         // Prepare destination
         encrypted.resize(context_, context_data.parms_id(), dest_size);
 
-        // pointer increment to switch to a next polynomial
-        size_t enc_ptr_increment = coeff_count * coeff_modulus_count;
+        // Set up iterators for input ciphertext
+        PolyIterator encrypted_iter(encrypted);
 
-        // Step 1: naive multiplication modulo the coefficient modulus
-        // First allocate two temp polys :
-        // one for results in base q. This need to be zero
-        // for the arbitrary size multiplication; not for 2x2 though
-        auto temp_des(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
+        // Allocate temporary space for the result
+        auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
+        PolyIterator temp_iter(temp.get(), coeff_count, coeff_modulus_count);
 
-        // Allocate temp polys for NTT multiplication results in base q
-        auto temp1_poly(allocate_poly(coeff_count, coeff_modulus_count, pool));
-        auto temp2_poly(allocate_poly(coeff_count, coeff_modulus_count, pool));
+        // Make a copy of the input iterator
+        auto encrypted_iter_copy = encrypted_iter;
 
-        // First convert all the inputs into NTT form
-        auto copy_encrypted_ntt(allocate_poly(coeff_count * encrypted_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted.data(), coeff_count * encrypted_size, coeff_modulus_count, copy_encrypted_ntt.get());
+        // Compute c0^2
+        for_each_n(
+            IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                *encrypted_iter, coeff_modulus_iter, *temp_iter),
+            coeff_modulus_count,
+            [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, **get<1>(I), get<2>(I)); });
 
-        // The simplest case when the ciphertext dimension is 2
-        if (encrypted_size == 2)
-        {
-            // Compute c0^2, 2*c0 + c1 and c1^2 modulo q
-            // temp poly to keep 2 * c0 * c1
-            auto temp_second_mul(allocate_poly(coeff_count, coeff_modulus_count, pool));
+        // Advance encrypted_iter and temp_iter
+        ++encrypted_iter;
+        ++temp_iter;
 
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                // Des[0] = c0^2 in NTT
-                dyadic_product_coeffmod(
-                    copy_encrypted_ntt.get() + (i * coeff_count), copy_encrypted_ntt.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i], temp_des.get() + (i * coeff_count));
+        // Compute 2*c0*c1
+        for_each_n(
+            IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                *encrypted_iter, *encrypted_iter_copy, coeff_modulus_iter, *temp_iter),
+            coeff_modulus_count, [&](auto I) {
+                dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, **get<2>(I), get<3>(I));
+                add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, **get<2>(I), get<3>(I));
+            });
 
-                // Des[1] = 2 * c0 * c1
-                dyadic_product_coeffmod(
-                    copy_encrypted_ntt.get() + (i * coeff_count),
-                    copy_encrypted_ntt.get() + (i * coeff_count) + enc_ptr_increment, coeff_count, coeff_modulus[i],
-                    temp_second_mul.get() + (i * coeff_count));
-                add_poly_poly_coeffmod(
-                    temp_second_mul.get() + (i * coeff_count), temp_second_mul.get() + (i * coeff_count), coeff_count,
-                    coeff_modulus[i], temp_des.get() + (i * coeff_count) + enc_ptr_increment);
+        // Advance temp_iter manually
+        ++temp_iter;
 
-                // Des[2] = c1^2 in NTT
-                dyadic_product_coeffmod(
-                    copy_encrypted_ntt.get() + (i * coeff_count) + enc_ptr_increment,
-                    copy_encrypted_ntt.get() + (i * coeff_count) + enc_ptr_increment, coeff_count, coeff_modulus[i],
-                    temp_des.get() + (i * coeff_count) + (2 * enc_ptr_increment));
-            }
-        }
-        else
-        {
-            // Perform multiplication on arbitrary size ciphertexts
-
-            // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
-            // component [j] such that [i+j]=[secret_power_index]
-            // Only need to check encrypted1 components up to and including [secret_power_index],
-            // and strictly less than [encrypted_array.size()]
-
-            // Number of encrypted1 components to check
-            size_t current_encrypted_limit = 0;
-
-            for (size_t secret_power_index = 0; secret_power_index < dest_size; secret_power_index++)
-            {
-                current_encrypted_limit = min(encrypted_size, secret_power_index + 1);
-
-                for (size_t encrypted1_index = 0; encrypted1_index < current_encrypted_limit; encrypted1_index++)
-                {
-                    // check if a corresponding component in encrypted2 exists
-                    if (encrypted_size > secret_power_index - encrypted1_index)
-                    {
-                        size_t encrypted2_index = secret_power_index - encrypted1_index;
-
-                        // NTT Multiplication and addition for results in q
-                        for (size_t i = 0; i < coeff_modulus_count; i++)
-                        {
-                            // ci * dj
-                            dyadic_product_coeffmod(
-                                copy_encrypted_ntt.get() + (i * coeff_count) + (enc_ptr_increment * encrypted1_index),
-                                copy_encrypted_ntt.get() + (i * coeff_count) + (enc_ptr_increment * encrypted2_index),
-                                coeff_count, coeff_modulus[i], temp1_poly.get() + (i * coeff_count));
-
-                            // Dest[i+j]
-                            add_poly_poly_coeffmod(
-                                temp1_poly.get() + (i * coeff_count),
-                                temp_des.get() + (i * coeff_count) +
-                                    (secret_power_index * coeff_count * coeff_modulus_count),
-                                coeff_count, coeff_modulus[i],
-                                temp_des.get() + (i * coeff_count) +
-                                    (secret_power_index * coeff_count * coeff_modulus_count));
-                        }
-                    }
-                }
-            }
-        }
+        // Compute c1^2
+        for_each_n(
+            IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                *encrypted_iter, coeff_modulus_iter, *temp_iter),
+            coeff_modulus_count,
+            [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, **get<1>(I), get<2>(I)); });
 
         // Set the final result
-        set_poly_poly(temp_des.get(), coeff_count * dest_size, coeff_modulus_count, encrypted.data());
+        set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_count, encrypted.data());
 
         // Set the scale
         encrypted.scale() = new_scale;
@@ -1137,18 +1075,15 @@ namespace seal
         switch (next_parms.scheme())
         {
         case scheme_type::BFV:
-            for (size_t i = 0; i < encrypted_size; i++)
-            {
-                rns_tool->divide_and_round_q_last_inplace(encrypted_copy.data(i), pool);
-            }
+            for_each_n(PolyIterator(encrypted_copy), encrypted_size, [&](auto I) {
+                rns_tool->divide_and_round_q_last_inplace(I, pool);
+            });
             break;
 
         case scheme_type::CKKS:
-            for (size_t i = 0; i < encrypted_size; i++)
-            {
-                rns_tool->divide_and_round_q_last_ntt_inplace(
-                    encrypted_copy.data(i), context_data.small_ntt_tables(), pool);
-            }
+            for_each_n(PolyIterator(encrypted_copy), encrypted_size, [&](auto I) {
+                rns_tool->divide_and_round_q_last_ntt_inplace(I, context_data.small_ntt_tables(), pool);
+            });
             break;
 
         default:
@@ -1157,10 +1092,9 @@ namespace seal
 
         // Copy result to destination
         destination.resize(context_, next_context_data.parms_id(), encrypted_size);
-        for (size_t i = 0; i < encrypted_size; i++)
-        {
-            set_poly_poly(encrypted_copy.data(i), coeff_count, next_coeff_modulus_count, destination.data(i));
-        }
+        for_each_n(
+            IteratorTuple<ConstPolyIterator, PolyIterator>(encrypted_copy, destination), encrypted_size,
+            [&](auto I) { set_poly_poly(get<0>(I), coeff_count, next_coeff_modulus_count, get<1>(I)); });
 
         // Set other attributes
         destination.is_ntt_form() = encrypted.is_ntt_form();

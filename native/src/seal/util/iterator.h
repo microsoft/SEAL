@@ -7,12 +7,14 @@
 #include "seal/plaintext.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
+#include "seal/util/pointer.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace seal
 {
@@ -22,8 +24,8 @@ namespace seal
         In this file we define a set of custom iterator classes ("SEAL iterators") that are used throughout Microsoft
         SEAL for easier iteration over ciphertext polynomials, their RNS components, and the coefficients in the RNS
         components. All SEAL iterators satisfy the C++ LegacyBidirectionalIterator requirements. Please note that they
-        are *not* random access iterators. The SEAL iterators are very helpful when used with std::for_each in C++17.
-        For C++14 compilers we have defined our own implementation of for_each below.
+        are *not* random access iterators. The SEAL iterators are very helpful when used with std::for_each_n in C++17.
+        For C++14 compilers we have defined our own implementation of for_each_n below.
 
         The SEAL iterator classes behave as illustrated by the following diagram:
 
@@ -107,6 +109,31 @@ namespace seal
         dereferenced, produce an instance of another SEAL iterator class. For example, CoeffIterator dereferences to
         a raw pointer, so CoeffIterator::value_type_is_seal_iterator_type is equal to std::false_type. This type is
         used mainly internally by the SEAL iterators and is unlikely to be useful elsewhere.
+
+        As an example, the following snippet from Evaluator::negate_inplace iterates over the polynomials in an input
+        ciphertext, and for each polynomial iterates over the RNS components, and for each RNS component negates the
+        polynomial coefficients modulo a SmallModulus element corresponding to the RNS component:
+
+                for_each_n(PolyIterator(encrypted), encrypted.size(), [&](auto I) {
+                    for_each_n(
+                        IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                        coeff_modulus_count,
+                        [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, **get<1>(J), get<0>(J)); });
+                });
+
+        Here coeff_modulus is a std::vector<SmallModulus>, and IteratorWrapper<const SmallModulus *> was constructed
+        directly from it. IteratorWrapper provides a similar constructor from a SEAL Pointer type. Note also how we had
+        to dereference get<1>(J) twice in the innermost lambda function to access the value (SmallNTTTables). This is
+        because get<1>(J) is itself an IteratorWrapper<const SmallNTTTables *> as explained above; it dereferences to a
+        raw pointer to SmallNTTTables, which must be dereferenced to access the value.
+
+        There are two important coding conventions in the above code snippet that are to be observed:
+
+            1. Always explicitly write the class template arguments. This is important for C++14 compatibility, and can
+               help avoid confusing bugs resulting from mistakes in iterator types in nested for_each_n calls.
+            2. Use I, J, K, ... for the lambda function parameters representing SEAL iterators. This is compact and
+               makes it very clear that the objects in question are SEAL iterators since such variable names should not
+               be used in SEAL in any other context.
         */
 #ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.
@@ -610,6 +637,9 @@ namespace seal
                 : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
             {}
 
+            ConstPolyIterator(Ciphertext &ct) : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+            {}
+
             ConstPolyIterator(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
@@ -711,6 +741,14 @@ namespace seal
             {}
 
             IteratorWrapper(value_type ptr) : ptr_(ptr)
+            {}
+
+            IteratorWrapper(const std::vector<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr)
+                : IteratorWrapper(arr.data())
+            {}
+
+            IteratorWrapper(const Pointer<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr)
+                : IteratorWrapper(arr.get())
             {}
 
             IteratorWrapper(const self_type &copy) = default;
