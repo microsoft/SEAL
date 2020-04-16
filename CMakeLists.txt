@@ -82,6 +82,9 @@ function(enable_cxx_compiler_flag_if_supported flag)
     endif()
 endfunction()
 
+# Always build position-independent-code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # In Debug mode, enable extra compiler flags.
 if(SEAL_DEBUG)
   enable_cxx_compiler_flag_if_supported("-Wall")
@@ -176,123 +179,141 @@ endmacro()
 # External dependencies #
 #########################
 
-# Use Microsoft GSL
+set(THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
+
+# [option] SEAL_USE_MSGSL
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 
+# Download and configure
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    # Download
     message(STATUS "Setting up MSGSL ...")
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY thirdparty/msgsl)
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
     if(result)
         message(WARNING "Failed to download MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
     endif()
+endif()
 
-    # Build
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+# Build
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY thirdparty/msgsl)
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
     if(result)
         message(WARNING "Failed to build MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
     endif()
-
-    # Set up the targets
-    add_subdirectory(
-        thirdparty/msgsl/GSL-src
-        EXCLUDE_FROM_ALL)
-
-    set(MSGSL_INCLUDE_DIR ${GSL_SOURCE_DIR}/include)
-
-    # The GSL target does not carry header search path dependencies.
-    # include_directories("${MSGSL_INCLUDE_DIR}")
-
-    # We need to create the include directory so it exists at the time
-    # of configuration. Otherwise set_target_properties below will fail.
-    file(MAKE_DIRECTORY ${MSGSL_INCLUDE_DIR})
-
-    # TODO: Do we install MSGSL headers for Windows??
-    # Install GSL header files
-    install(
-        DIRECTORY
-            ${MSGSL_INCLUDE_DIR}/gsl
-        DESTINATION
-            ${SEAL_INCLUDES_INSTALL_DIR}
-    )
+    set(GSL_CXX_STANDARD "14" CACHE STRING "" FORCE)
+    mark_as_advanced(GSL_CXX_STANDARD )
+    set(GSL_TEST OFF CACHE BOOL "" FORCE)
+    mark_as_advanced(GSL_TEST)
 endif()
 
-# Use ZLIB
+# Set up the targets
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    add_subdirectory(
+        ${THIRDPARTY_DIR}/msgsl/src
+        EXCLUDE_FROM_ALL)
+    set(MSGSL_INCLUDE_DIR ${THIRDPARTY_DIR}/msgsl/src/include)
+endif()
+
+# [option] SEAL_USE_ZLIB
 set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
 
+# ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning for CMake 3.17.1+
+if(SEAL_USE_ZLIB AND NOT MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.17.1)
+    set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
+endif()
+
+# Download and configure
 if(SEAL_USE_ZLIB AND NOT MSVC)
-    # Download
     message(STATUS "Setting up ZLIB ...")
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY thirdparty/zlib)
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
     if(result)
         message(WARNING "Failed to download ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
     endif()
+    mark_as_advanced(AMD64)
+    mark_as_advanced(ASM686)
+    mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
+    mark_as_advanced(CMAKE_INSTALL_PREFIX)
+    mark_as_advanced(INSTALL_BIN_DIR)
+    mark_as_advanced(INSTALL_INC_DIR)
+    mark_as_advanced(INSTALL_LIB_DIR)
+    mark_as_advanced(INSTALL_MAN_DIR)
+    mark_as_advanced(INSTALL_PKGCONFIG_DIR)
+    mark_as_advanced(LIBRARY_OUTPUT_PATH)
+    mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
+endif()
 
-    # Build
+# Build
+if(SEAL_USE_ZLIB AND NOT MSVC)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY thirdparty/zlib)
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
     if(result)
         message(WARNING "Failed to build ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
     endif()
-
-    # Set up the targets
-    add_subdirectory(
-        thirdparty/zlib/zlib-src
-        ${ZLIB_BINARY_DIR}
-        EXCLUDE_FROM_ALL)
-
-    # The zlibstatic target does not carry header search path dependencies.
-    include_directories("${zlib_SOURCE_DIR}/")
 endif()
 
-# Use Google Test
-if(SEAL_BUILD_TESTS AND NOT MSVC)
-    # This follows the example in
-    # https://github.com/google/googletest/blob/release-1.10.0/googletest/README.md.
+# Set up the targets
+if(SEAL_USE_ZLIB AND NOT MSVC)
+    add_subdirectory(
+        ${THIRDPARTY_DIR}/zlib/src
+        EXCLUDE_FROM_ALL)
+    set_target_properties(zlibstatic PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES ${THIRDPARTY_DIR}/zlib/src)
+    set(zlibstatic_LIBRARY_PATH ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/libz.a)
+endif()
 
-    # Download
+# Google Test
+# This follows the example in
+# https://github.com/google/googletest/blob/release-1.10.0/googletest/README.md.
+
+# Download and configure
+if(SEAL_BUILD_TESTS AND NOT MSVC)
     message(STATUS "Setting up Google Test ...")
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY thirdparty/googletest)
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/googletest)
     if(result)
         message(WARNING "Failed to download Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
     endif()
-
     set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
     mark_as_advanced(BUILD_GMOCK)
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     mark_as_advanced(INSTALL_GTEST)
+endif()
 
-    # Build
+# Build
+if(SEAL_BUILD_TESTS AND NOT MSVC)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY thirdparty/googletest)
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/googletest)
     if(result)
         message(WARNING "Failed to build Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
     endif()
+endif()
 
+# Set up the targets
+if(SEAL_BUILD_TESTS AND NOT MSVC)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-    # Set up the targets
     add_subdirectory(
-        thirdparty/googletest/googletest-src
-        thirdparty/googletest/googletest-build
+        ${THIRDPARTY_DIR}/googletest/src
+        ${THIRDPARTY_DIR}/googletest/build
         EXCLUDE_FROM_ALL)
 endif()
 
@@ -307,9 +328,6 @@ if(MSVC AND BUILD_SHARED_LIBS)
     message(WARNING "This build system only supports a static build; disabling `BUILD_SHARED_LIBS`")
     set(BUILD_SHARED_LIBS OFF CACHE BOOL ${BUILD_SHARED_LIBS_STR} FORCE)
 endif()
-
-# Always build position-independent-code
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Throw on multiply_plain by a zero plaintext
 set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member of Evaluator outputs a transparent ciphertext")
@@ -500,12 +518,10 @@ set_language(seal_obj)
 set_include_directories(seal_obj)
 
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    # Make sure Microsoft GSL is downloaded
     target_link_libraries(seal_obj PUBLIC GSL)
 endif()
 
 if(SEAL_USE_ZLIB AND NOT MSVC)
-    # Make sure ZLIB is downloaded
     target_link_libraries(seal_obj PRIVATE zlibstatic)
 endif()
 
@@ -517,23 +533,6 @@ set_language(seal)
 set_include_directories(seal)
 link_threads(seal)
 install_target(seal SEALTargets)
-
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    # In UNIX-like platforms copy Microsoft GSL include files into native/src
-    add_custom_command(TARGET seal POST_BUILD
-        COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
-endif()
-
-#if(SEAL_USE_ZLIB AND NOT MSVC)
-#    # In UNIX-like platforms combine manually seal and zlibstatic
-#    # into a single archive; not pretty, but works
-#    add_custom_command(TARGET seal POST_BUILD
-#        COMMAND ar x $<TARGET_FILE:seal>
-#        COMMAND ar x ${ZLIB_LIBRARY_PATH}
-#        COMMAND ar rcs $<TARGET_FILE:seal> *.o
-#        COMMAND rm -f *.o
-#        WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
-#endif()
 
 # Conditionally build the shared library
 if(BUILD_SHARED_LIBS)
@@ -551,6 +550,24 @@ if(BUILD_SHARED_LIBS)
     endif()
 
     install_target(seal_shared SEALTargets)
+endif()
+
+# The following are executed post build
+
+# In UNIX-like platforms copy Microsoft GSL include files into native/src
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    add_custom_command(TARGET seal POST_BUILD
+        COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
+endif()
+
+# In UNIX-like platforms combine manually seal and zlibstatic into a single archive; not pretty, but works
+if(SEAL_USE_ZLIB AND NOT MSVC)
+    add_custom_command(TARGET seal POST_BUILD
+        COMMAND ar x $<TARGET_FILE:seal>
+        COMMAND ar x ${zlibstatic_LIBRARY_PATH}
+        COMMAND ar rcs $<TARGET_FILE:seal> *.o
+        COMMAND rm -f *.o
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
 endif()
 
 #########################
@@ -617,10 +634,21 @@ export(
     NAMESPACE SEAL::
     FILE ${SEAL_TARGETS_FILENAME})
 
+# In UNIX-like platforms install MSGSL header files
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    install(
+        DIRECTORY
+            ${MSGSL_INCLUDE_DIR}/gsl
+        DESTINATION
+            ${SEAL_INCLUDES_INSTALL_DIR}
+    )
+endif()
+
 #####################
 # SEAL C++ examples #
 #####################
 
+# [option] SEAL_BUILD_EXAMPLES
 set(SEAL_BUILD_EXAMPLES_OPTION_STR "Build C++ examples for Microsoft SEAL")
 option(SEAL_BUILD_EXAMPLES ${SEAL_BUILD_EXAMPLES_OPTION_STR} OFF)
 
@@ -634,6 +662,7 @@ endif()
 # SEAL C++ tests #
 ##################
 
+# [option] SEAL_BUILD_TESTS
 set(SEAL_BUILD_TESTS_OPTION_STR "Build C++ tests for Microsoft SEAL")
 option(SEAL_BUILD_TESTS ${SEAL_BUILD_TESTS_OPTION_STR} OFF)
 
