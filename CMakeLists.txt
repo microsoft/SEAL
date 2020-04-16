@@ -458,9 +458,11 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
         set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
         file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
         set(DEL_CMD "del")
+        set(DEL_CMD_OPTS "")
     else()
         set(AR_CMD_PATH "ar")
-        set(DEL_CMD "rm -rf")
+        set(DEL_CMD "rm")
+        set(DEL_CMD_OPTS "-rf")
     endif()
 
     # In UNIX-like platforms combine manually seal and zlibstatic
@@ -469,7 +471,7 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
         COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:seal>
         COMMAND "${AR_CMD_PATH}" x ${ZLIB_LIBRARY_PATH}
         COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:seal> *.o
-        COMMAND ${DEL_CMD} *.o
+        COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
         WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
 endif()
 
