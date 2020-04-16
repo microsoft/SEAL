@@ -89,10 +89,19 @@ if(SEAL_DEBUG)
   enable_cxx_compiler_flag_if_supported("-pedantic")
 endif()
 
+# Path for outupt
+if(ANDROID_ABI)
+    # Android compiles several targets at the same time. Need to specify
+    # separate directories for separate ABIs.
+    set(OUTLIB_PATH "lib/${ANDROID_ABI}")
+else()
+    set(OUTLIB_PATH "lib")
+endif()
+
 # Required files and directories
 include(GNUInstallDirs)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/${OUTLIB_PATH})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/${OUTLIB_PATH})
 set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
 set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
@@ -443,14 +452,24 @@ if(SEAL_USE_MSGSL AND NOT MSVC AND NOT CMAKE_HOST_WIN32)
         COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
 endif()
 
-if(SEAL_USE_ZLIB AND NOT MSVC AND NOT CMAKE_HOST_WIN32)
+if(SEAL_USE_ZLIB AND NOT MSVC)
+    if(CMAKE_HOST_WIN32)
+        get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
+        file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
+        set(DEL_CMD "del")
+    else()
+        set(AR_CMD_PATH "ar")
+        set(DEL_CMD "rm -rf")
+    endif()
+
     # In UNIX-like platforms combine manually seal and zlibstatic
     # into a single archive; not pretty, but works
     add_custom_command(TARGET seal POST_BUILD
-        COMMAND ar x $<TARGET_FILE:seal>
-        COMMAND ar x ${ZLIB_LIBRARY_PATH}
-        COMMAND ar rcs $<TARGET_FILE:seal> *.o
-        COMMAND rm -f *.o
+        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:seal>
+        COMMAND "${AR_CMD_PATH}" x ${ZLIB_LIBRARY_PATH}
+        COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:seal> *.o
+        COMMAND ${DEL_CMD} *.o
         WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
 endif()
 
@@ -499,11 +518,6 @@ if(SEAL_BUILD_SEAL_C)
     endif()
 
     target_link_libraries(sealc PUBLIC seal)
-
-    if(SEAL_USE_ZLIB AND NOT MSVC)
-        # Link zlibstatic into the shared SEAL_C library
-        target_link_libraries(sealc PRIVATE zlibstatic)
-    endif()
 
     install_target(sealc SEALTargets)
 endif()

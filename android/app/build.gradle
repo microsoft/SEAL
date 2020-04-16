@@ -17,6 +17,12 @@ android {
                           "-DSEAL_USE_INTRIN=0"
             }
         }
+        ndk {
+//            abiFilters 'x86'
+            abiFilters 'x86_64'
+//            abiFilters 'armeabi-v7a'
+            abiFilters 'arm64-v8a'
+        }
     }
     buildTypes {
         release {

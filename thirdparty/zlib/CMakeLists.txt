@@ -21,4 +21,3 @@ ExternalProject_Add(zlib_external
     INSTALL_COMMAND   ""
     TEST_COMMAND      ""
 )
-# -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
