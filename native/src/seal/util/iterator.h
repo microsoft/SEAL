@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <iterator>
 #include <type_traits>
+#include <utility>
 
 namespace seal
 {
@@ -735,154 +736,82 @@ namespace seal
             }
         };
 
-        template <typename It1, typename It2>
-        class IteratorTuple2
+        template <typename... BidirIts>
+        class IteratorTuple;
+
+        template <typename BidirIt, typename... Rest>
+        class IteratorTuple<BidirIt, Rest...>
         {
         public:
-            using value_type_1 = std::conditional_t<
-                It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It1>::value_type>>;
-            using value_type_2 = std::conditional_t<
-                It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It2>::value_type>>;
-
+            using self_type = IteratorTuple<BidirIt, Rest...>;
             using is_deref_to_iterator_type = std::conditional_t<
-                It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value, std::true_type,
-                std::false_type>;
-
-            using self_type = IteratorTuple2<It1, It2>;
-            using value_type = IteratorTuple2<value_type_1, value_type_2>;
-            using pointer = void;
-            using reference = void;
-
-            using iterator_category = std::bidirectional_iterator_tag;
-            using difference_type = std::ptrdiff_t;
-
-            IteratorTuple2(const It1 &it1, const It2 &it2) : it1_(it1), it2_(it2)
-            {}
-
-            IteratorTuple2(const self_type &copy) = default;
-
-            self_type &operator=(const self_type &assign) = default;
-
-            SEAL_NODISCARD inline const It1 &it1() const noexcept
-            {
-                return it1_;
-            }
-
-            SEAL_NODISCARD inline const It2 &it2() const noexcept
-            {
-                return it2_;
-            }
-
-            SEAL_NODISCARD inline value_type operator*() const noexcept
-            {
-                return { *it1_, *it2_ };
-            }
-
-            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
-            {
-                return (it1_ == compare.it1_ && it2_ == compare.it2_);
-            }
-
-            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
-            {
-                return !(*this == compare);
-            }
-
-            inline auto &operator++() noexcept
-            {
-                it1_++;
-                it2_++;
-                return *this;
-            }
-
-            inline auto operator++(int) noexcept
-            {
-                self_type result(*this);
-                it1_++;
-                it2_++;
-                return result;
-            }
-
-            inline auto &operator--() noexcept
-            {
-                it1_--;
-                it2_--;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                it1_--;
-                it2_--;
-                return result;
-            }
-
-        private:
-            It1 it1_;
-
-            It2 it2_;
-        };
-
-        template <typename It1, typename It2, typename It3>
-        class IteratorTuple3
-        {
-        public:
-            using value_type_1 = std::conditional_t<
-                It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It1>::value_type>>;
-            using value_type_2 = std::conditional_t<
-                It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It2>::value_type>>;
-            using value_type_3 = std::conditional_t<
-                It3::is_deref_to_iterator_type::value, typename std::iterator_traits<It3>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It3>::value_type>>;
-
-            using is_deref_to_iterator_type = std::conditional_t<
-                It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value &&
-                    It3::is_deref_to_iterator_type::value,
+                BidirIt::is_deref_to_iterator_type::value && IteratorTuple<Rest...>::is_deref_to_iterator_type::value,
                 std::true_type, std::false_type>;
 
-            using self_type = IteratorTuple3<It1, It2, It3>;
-            using value_type = IteratorTuple3<value_type_1, value_type_2, value_type_3>;
+            // Standard iterator typedefs
+            using value_type_first = std::conditional_t<
+                BidirIt::is_deref_to_iterator_type::value, typename std::iterator_traits<BidirIt>::value_type,
+                IteratorWrapper<typename std::iterator_traits<BidirIt>::value_type>>;
+            using value_type =
+                IteratorTuple<value_type_first, typename std::iterator_traits<IteratorTuple<Rest>>::value_type...>;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            IteratorTuple3(const It1 &it1, const It2 &it2, const It3 &it3) : it1_(it1), it2_(it2), it3_(it3)
+            IteratorTuple() = default;
+
+            IteratorTuple(BidirIt first, IteratorTuple<Rest...> rest) : first_(first), rest_(rest){};
+
+            IteratorTuple(BidirIt first, Rest... rest) : first_(first), rest_(rest...)
             {}
 
-            IteratorTuple3(const self_type &copy) = default;
+            IteratorTuple(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
-            SEAL_NODISCARD inline const It1 &it1() const noexcept
-            {
-                return it1_;
-            }
+            IteratorTuple(self_type &&source) = default;
 
-            SEAL_NODISCARD inline const It2 &it2() const noexcept
-            {
-                return it2_;
-            }
-
-            SEAL_NODISCARD inline const It3 &it3() const noexcept
-            {
-                return it3_;
-            }
+            self_type &operator=(self_type &&assign) = default;
 
             SEAL_NODISCARD inline value_type operator*() const noexcept
             {
-                return { *it1_, *it2_, *it3_ };
+                return { *first_, *rest_ };
+            }
+
+            inline self_type &operator++() noexcept
+            {
+                first_++;
+                rest_++;
+                return *this;
+            }
+
+            inline self_type operator++(int) noexcept
+            {
+                self_type result(*this);
+                first_++;
+                rest_++;
+                return result;
+            }
+
+            inline self_type &operator--() noexcept
+            {
+                first_--;
+                rest_--;
+                return *this;
+            }
+
+            inline self_type operator--(int) noexcept
+            {
+                self_type result(*this);
+                first_--;
+                rest_--;
+                return result;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return (it1_ == compare.it1_ && it2_ == compare.it2_ && it3_ == compare.it3_);
+                return (first_ == compare.first_) && (rest_ == compare.rest_);
             }
 
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
@@ -890,114 +819,90 @@ namespace seal
                 return !(*this == compare);
             }
 
-            inline auto &operator++() noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
-                it1_++;
-                it2_++;
-                it3_++;
-                return *this;
+                return **this;
             }
 
-            inline auto operator++(int) noexcept
+            SEAL_NODISCARD inline const BidirIt &first() const noexcept
             {
-                self_type result(*this);
-                it1_++;
-                it2_++;
-                it3_++;
-                return result;
+                return first_;
             }
 
-            inline auto &operator--() noexcept
+            SEAL_NODISCARD inline const IteratorTuple<Rest...> &rest() const noexcept
             {
-                it1_--;
-                it2_--;
-                it3_--;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                it1_--;
-                it2_--;
-                it3_--;
-                return result;
+                return rest_;
             }
 
         private:
-            It1 it1_;
+            BidirIt first_;
 
-            It2 it2_;
-
-            It3 it3_;
+            IteratorTuple<Rest...> rest_;
         };
 
-        template <typename It1, typename It2, typename It3, typename It4>
-        class IteratorTuple4
+        template <typename BidirIt>
+        class IteratorTuple<BidirIt>
         {
         public:
-            using value_type_1 = std::conditional_t<
-                It1::is_deref_to_iterator_type::value, typename std::iterator_traits<It1>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It1>::value_type>>;
-            using value_type_2 = std::conditional_t<
-                It2::is_deref_to_iterator_type::value, typename std::iterator_traits<It2>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It2>::value_type>>;
-            using value_type_3 = std::conditional_t<
-                It3::is_deref_to_iterator_type::value, typename std::iterator_traits<It3>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It3>::value_type>>;
-            using value_type_4 = std::conditional_t<
-                It4::is_deref_to_iterator_type::value, typename std::iterator_traits<It4>::value_type,
-                IteratorWrapper<typename std::iterator_traits<It4>::value_type>>;
+            using self_type = IteratorTuple<BidirIt>;
+            using is_deref_to_iterator_type = typename BidirIt::is_deref_to_iterator_type;
 
-            using is_deref_to_iterator_type = std::conditional_t<
-                It1::is_deref_to_iterator_type::value && It2::is_deref_to_iterator_type::value &&
-                    It3::is_deref_to_iterator_type::value && It4::is_deref_to_iterator_type::value,
-                std::true_type, std::false_type>;
-
-            using self_type = IteratorTuple4<It1, It2, It3, It4>;
-            using value_type = IteratorTuple4<value_type_1, value_type_2, value_type_3, value_type_4>;
+            // Standard iterator typedefs
+            using value_type = std::conditional_t<
+                BidirIt::is_deref_to_iterator_type::value, typename std::iterator_traits<BidirIt>::value_type,
+                IteratorWrapper<typename std::iterator_traits<BidirIt>::value_type>>;
             using pointer = void;
-            using reference = void;
-
+            using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            IteratorTuple4(const It1 &it1, const It2 &it2, const It3 &it3, const It4 &it4)
-                : it1_(it1), it2_(it2), it3_(it3), it4_(it4)
+            IteratorTuple(){};
+
+            IteratorTuple(BidirIt first) : first_(first)
             {}
 
-            IteratorTuple4(const self_type &copy) = default;
+            IteratorTuple(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
-            SEAL_NODISCARD inline const It1 &it1() const noexcept
-            {
-                return it1_;
-            }
+            IteratorTuple(self_type &&source) = default;
 
-            SEAL_NODISCARD inline const It2 &it2() const noexcept
-            {
-                return it2_;
-            }
-
-            SEAL_NODISCARD inline const It3 &it3() const noexcept
-            {
-                return it3_;
-            }
-
-            SEAL_NODISCARD inline const It4 &it4() const noexcept
-            {
-                return it4_;
-            }
+            self_type &operator=(self_type &&assign) = default;
 
             SEAL_NODISCARD inline value_type operator*() const noexcept
             {
-                return { *it1_, *it2_, *it3_, *it4_ };
+                return *first_;
+            }
+
+            inline self_type &operator++() noexcept
+            {
+                first_++;
+                return *this;
+            }
+
+            inline self_type operator++(int) noexcept
+            {
+                self_type result(*this);
+                first_++;
+                return result;
+            }
+
+            inline self_type &operator--() noexcept
+            {
+                first_--;
+                return *this;
+            }
+
+            inline self_type operator--(int) noexcept
+            {
+                self_type result(*this);
+                first_--;
+                return result;
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return (it1_ == compare.it1_ && it2_ == compare.it2_ && it3_ == compare.it3_ && it4_ == compare.it4_);
+                return first_ == compare.first_;
             }
 
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
@@ -1005,52 +910,47 @@ namespace seal
                 return !(*this == compare);
             }
 
-            inline auto &operator++() noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
-                it1_++;
-                it2_++;
-                it3_++;
-                it4_++;
-                return *this;
+                return **this;
             }
 
-            inline auto operator++(int) noexcept
+            SEAL_NODISCARD inline const BidirIt &first() const noexcept
             {
-                self_type result(*this);
-                it1_++;
-                it2_++;
-                it3_++;
-                it4_++;
-                return result;
-            }
-
-            inline auto &operator--() noexcept
-            {
-                it1_--;
-                it2_--;
-                it3_--;
-                it4_--;
-                return *this;
-            }
-
-            inline auto operator--(int) noexcept
-            {
-                self_type result(*this);
-                it1_--;
-                it2_--;
-                it3_--;
-                it4_--;
-                return result;
+                return first_;
             }
 
         private:
-            It1 it1_;
-
-            It2 it2_;
-
-            It3 it3_;
-
-            It4 it4_;
+            BidirIt first_;
         };
+
+        namespace iterator_tuple_internal
+        {
+            template <unsigned N>
+            struct GetHelperStruct
+            {
+                template <typename BidirIt, typename... Rest>
+                static auto apply(const IteratorTuple<BidirIt, Rest...> &it)
+                {
+                    return GetHelperStruct<N - 1>::apply(it.rest());
+                }
+            };
+
+            template <>
+            struct GetHelperStruct<0>
+            {
+                template <typename BidirIt, typename... Rest>
+                static auto apply(const IteratorTuple<BidirIt, Rest...> &it)
+                {
+                    return it.first();
+                }
+            };
+        }; // namespace iterator_tuple_internal
+
+        template <unsigned N, typename... BidirIts>
+        auto get(const IteratorTuple<BidirIts...> &it)
+        {
+            return iterator_tuple_internal::GetHelperStruct<N>::apply(it);
+        }
     } // namespace util
 } // namespace seal

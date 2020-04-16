@@ -224,55 +224,105 @@ namespace sealtest
             RNSIterator ri(arr.data(), 3);
             PolyIterator pi(arr.data(), 3, 2);
 
-            IteratorTuple2<CoeffIterator, PolyIterator> it1(ci, pi);
-            IteratorTuple2<RNSIterator, PolyIterator> it2(ri, pi);
+            IteratorTuple<CoeffIterator, PolyIterator> it1(ci, pi);
+            IteratorTuple<RNSIterator, PolyIterator> it2(ri, pi);
             ASSERT_FALSE(decltype(it1)::is_deref_to_iterator_type::value);
             ASSERT_TRUE(decltype(it2)::is_deref_to_iterator_type::value);
 
-            ASSERT_EQ(0, **(*it1).it1());
-            ASSERT_EQ(0, ***(*it1).it2());
-            ASSERT_EQ(0, **(*it2).it1());
-            ASSERT_EQ(0, ***(*it2).it2());
+            ASSERT_EQ(0, **get<0>(*it1));
+            ASSERT_EQ(0, ***get<1>(*it1));
+            ASSERT_EQ(0, **get<0>(*it2));
+            ASSERT_EQ(0, ***get<1>(*it2));
 
             ++it1;
             ++it2;
-            ASSERT_EQ(1, **(*it1).it1());
-            ASSERT_EQ(6, ***(*it1).it2());
-            ASSERT_EQ(3, **(*it2).it1());
-            ASSERT_EQ(6, ***(*it2).it2());
+            ASSERT_EQ(1, **get<0>(*it1));
+            ASSERT_EQ(6, ***get<1>(*it1));
+            ASSERT_EQ(3, **get<0>(*it2));
+            ASSERT_EQ(6, ***get<1>(*it2));
 
             --it1;
             --it2;
-            ASSERT_EQ(0, **(*it1).it1());
-            ASSERT_EQ(0, ***(*it1).it2());
-            ASSERT_EQ(0, **(*it2).it1());
-            ASSERT_EQ(0, ***(*it2).it2());
+            ASSERT_EQ(0, **get<0>(*it1));
+            ASSERT_EQ(0, ***get<1>(*it1));
+            ASSERT_EQ(0, **get<0>(*it2));
+            ASSERT_EQ(0, ***get<1>(*it2));
 
-            IteratorTuple3<CoeffIterator, RNSIterator, PolyIterator> it3(ci, ri, pi);
+            IteratorTuple<CoeffIterator, RNSIterator, PolyIterator> it3(ci, ri, pi);
             ASSERT_FALSE(decltype(it3)::is_deref_to_iterator_type::value);
 
-            ASSERT_EQ(0, **(*it3).it1());
-            ASSERT_EQ(0, **(*it3).it2());
-            ASSERT_EQ(0, ***(*it3).it3());
+            ASSERT_EQ(0, **get<0>(*it3));
+            ASSERT_EQ(0, **get<1>(*it3));
+            ASSERT_EQ(0, ***get<2>(*it3));
 
             ++it3;
-            ASSERT_EQ(1, **(*it3).it1());
-            ASSERT_EQ(3, **(*it3).it2());
-            ASSERT_EQ(6, ***(*it3).it3());
+            ASSERT_EQ(1, **get<0>(*it3));
+            ASSERT_EQ(3, **get<1>(*it3));
+            ASSERT_EQ(6, ***get<2>(*it3));
 
             --it3;
-            ASSERT_EQ(0, **(*it3).it1());
-            ASSERT_EQ(0, **(*it3).it2());
-            ASSERT_EQ(0, ***(*it3).it3());
+            ASSERT_EQ(0, **get<0>(*it3));
+            ASSERT_EQ(0, **get<1>(*it3));
+            ASSERT_EQ(0, ***get<2>(*it3));
 
-            IteratorTuple2<
-                IteratorTuple3<CoeffIterator, RNSIterator, PolyIterator>, IteratorTuple2<RNSIterator, PolyIterator>>
+            IteratorTuple<
+                IteratorTuple<CoeffIterator, RNSIterator, PolyIterator>, IteratorTuple<RNSIterator, PolyIterator>>
                 it4(it3, it2);
             ASSERT_FALSE(decltype(it4)::is_deref_to_iterator_type::value);
             auto it5 = it4;
             it5++;
             it5--;
             ASSERT_TRUE(it5 == it4);
+
+            // IteratorTuple2<CoeffIterator, PolyIterator> it1(ci, pi);
+            // IteratorTuple2<RNSIterator, PolyIterator> it2(ri, pi);
+            // ASSERT_FALSE(decltype(it1)::is_deref_to_iterator_type::value);
+            // ASSERT_TRUE(decltype(it2)::is_deref_to_iterator_type::value);
+
+            // ASSERT_EQ(0, **(*it1).it1());
+            // ASSERT_EQ(0, ***(*it1).it2());
+            // ASSERT_EQ(0, **(*it2).it1());
+            // ASSERT_EQ(0, ***(*it2).it2());
+
+            //++it1;
+            //++it2;
+            // ASSERT_EQ(1, **(*it1).it1());
+            // ASSERT_EQ(6, ***(*it1).it2());
+            // ASSERT_EQ(3, **(*it2).it1());
+            // ASSERT_EQ(6, ***(*it2).it2());
+
+            //--it1;
+            //--it2;
+            // ASSERT_EQ(0, **(*it1).it1());
+            // ASSERT_EQ(0, ***(*it1).it2());
+            // ASSERT_EQ(0, **(*it2).it1());
+            // ASSERT_EQ(0, ***(*it2).it2());
+
+            // IteratorTuple3<CoeffIterator, RNSIterator, PolyIterator> it3(ci, ri, pi);
+            // ASSERT_FALSE(decltype(it3)::is_deref_to_iterator_type::value);
+
+            // ASSERT_EQ(0, **(*it3).it1());
+            // ASSERT_EQ(0, **(*it3).it2());
+            // ASSERT_EQ(0, ***(*it3).it3());
+
+            //++it3;
+            // ASSERT_EQ(1, **(*it3).it1());
+            // ASSERT_EQ(3, **(*it3).it2());
+            // ASSERT_EQ(6, ***(*it3).it3());
+
+            //--it3;
+            // ASSERT_EQ(0, **(*it3).it1());
+            // ASSERT_EQ(0, **(*it3).it2());
+            // ASSERT_EQ(0, ***(*it3).it3());
+
+            // IteratorTuple2<
+            // IteratorTuple3<CoeffIterator, RNSIterator, PolyIterator>, IteratorTuple2<RNSIterator, PolyIterator>>
+            // it4(it3, it2);
+            // ASSERT_FALSE(decltype(it4)::is_deref_to_iterator_type::value);
+            // auto it5 = it4;
+            // it5++;
+            // it5--;
+            // ASSERT_TRUE(it5 == it4);
         }
     } // namespace util
 } // namespace sealtest
