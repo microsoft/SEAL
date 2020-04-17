@@ -20,9 +20,6 @@ namespace sealtest
     {
         TEST(IteratorTest, CoeffIterator)
         {
-            ASSERT_FALSE(CoeffIterator::value_type_is_seal_iterator_type::value);
-            ASSERT_FALSE(ConstCoeffIterator::value_type_is_seal_iterator_type::value);
-
             array<uint64_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             CoeffIterator ci(arr.data());
             ConstCoeffIterator cci(arr.data());
@@ -53,9 +50,6 @@ namespace sealtest
 
         TEST(IteratorTest, RNSIterator)
         {
-            ASSERT_TRUE(RNSIterator::value_type_is_seal_iterator_type::value);
-            ASSERT_TRUE(ConstRNSIterator::value_type_is_seal_iterator_type::value);
-
             array<uint64_t, 12> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
             RNSIterator ri(arr.data(), 4);
             ConstRNSIterator cri(arr.data(), 4);
@@ -96,9 +90,6 @@ namespace sealtest
 
         TEST(IteratorTest, PolyIterator)
         {
-            ASSERT_TRUE(PolyIterator::value_type_is_seal_iterator_type::value);
-            ASSERT_TRUE(ConstPolyIterator::value_type_is_seal_iterator_type::value);
-
             array<uint64_t, 12> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
             PolyIterator pi(arr.data(), 3, 2);
             ConstPolyIterator cpi(arr.data(), 3, 2);
@@ -138,8 +129,6 @@ namespace sealtest
 
         TEST(IteratorTest, IteratorWrapper)
         {
-            ASSERT_FALSE(IteratorWrapper<int>::value_type_is_seal_iterator_type::value);
-
             array<int32_t, 5> int_arr{ 0, 1, 2, 3, 4 };
             array<char, 5> char_arr{ 'a', 'b', 'c', 'd', 'e' };
 
@@ -163,9 +152,6 @@ namespace sealtest
 
         TEST(IteratorTest, ReverseIterator)
         {
-            ASSERT_FALSE(ReverseIterator<CoeffIterator>::value_type_is_seal_iterator_type::value);
-            ASSERT_TRUE(ReverseIterator<RNSIterator>::value_type_is_seal_iterator_type::value);
-
             array<uint64_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             CoeffIterator ci(arr.data());
             advance(ci, arr.size() - 1);
@@ -226,49 +212,44 @@ namespace sealtest
 
             IteratorTuple<CoeffIterator, PolyIterator> it1(ci, pi);
             IteratorTuple<RNSIterator, PolyIterator> it2(ri, pi);
-            ASSERT_TRUE(decltype(it1)::value_type_is_seal_iterator_type::value);
-            ASSERT_TRUE(decltype(it2)::value_type_is_seal_iterator_type::value);
 
-            ASSERT_EQ(0, **get<0>(*it1));
+            ASSERT_EQ(0, *get<0>(*it1));
             ASSERT_EQ(0, ***get<1>(*it1));
             ASSERT_EQ(0, **get<0>(*it2));
             ASSERT_EQ(0, ***get<1>(*it2));
 
             ++it1;
             ++it2;
-            ASSERT_EQ(1, **get<0>(*it1));
+            ASSERT_EQ(1, *get<0>(*it1));
             ASSERT_EQ(6, ***get<1>(*it1));
             ASSERT_EQ(3, **get<0>(*it2));
             ASSERT_EQ(6, ***get<1>(*it2));
 
             --it1;
             --it2;
-            ASSERT_EQ(0, **get<0>(*it1));
+            ASSERT_EQ(0, *get<0>(*it1));
             ASSERT_EQ(0, ***get<1>(*it1));
             ASSERT_EQ(0, **get<0>(*it2));
             ASSERT_EQ(0, ***get<1>(*it2));
 
             IteratorTuple<CoeffIterator, RNSIterator, PolyIterator> it3(ci, ri, pi);
-            ASSERT_TRUE(decltype(it3)::value_type_is_seal_iterator_type::value);
-
-            ASSERT_EQ(0, **get<0>(*it3));
+            ASSERT_EQ(0, *get<0>(*it3));
             ASSERT_EQ(0, **get<1>(*it3));
             ASSERT_EQ(0, ***get<2>(*it3));
 
             ++it3;
-            ASSERT_EQ(1, **get<0>(*it3));
+            ASSERT_EQ(1, *get<0>(*it3));
             ASSERT_EQ(3, **get<1>(*it3));
             ASSERT_EQ(6, ***get<2>(*it3));
 
             --it3;
-            ASSERT_EQ(0, **get<0>(*it3));
+            ASSERT_EQ(0, *get<0>(*it3));
             ASSERT_EQ(0, **get<1>(*it3));
             ASSERT_EQ(0, ***get<2>(*it3));
 
             IteratorTuple<
                 IteratorTuple<CoeffIterator, RNSIterator, PolyIterator>, IteratorTuple<RNSIterator, PolyIterator>>
                 it4(it3, it2);
-            ASSERT_TRUE(decltype(it4)::value_type_is_seal_iterator_type::value);
             auto it5 = it4;
             it5++;
             it5--;

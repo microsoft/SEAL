@@ -83,7 +83,7 @@ namespace seal
             for_each_n(
                 IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
                 coeff_modulus_count,
-                [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, **get<1>(J), get<0>(J)); });
+                [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J)); });
         });
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
@@ -144,7 +144,7 @@ namespace seal
                 IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
                 coeff_modulus_count, [&](auto J) {
                     add_poly_poly_coeffmod(
-                        get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, **get<1>(J), get<0>(get<0>(J)));
+                        get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
                 });
         });
 
@@ -239,7 +239,7 @@ namespace seal
                     IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
                     coeff_modulus_count, [&](auto J) {
                         sub_poly_poly_coeffmod(
-                            get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, **get<1>(J), get<0>(get<0>(J)));
+                            get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
                     });
             });
 
@@ -256,7 +256,7 @@ namespace seal
                     for_each_n(
                         IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
                         coeff_modulus_count, [&](auto J) {
-                            negate_poly_coeffmod(get<1>(get<0>(J)), coeff_count, **get<1>(J), get<0>(get<0>(J)));
+                            negate_poly_coeffmod(get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
                         });
                 });
         }
@@ -384,7 +384,7 @@ namespace seal
 
                     // Transform to NTT form in base q
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(get<1>(J), **get<2>(J));
+                    ntt_negacyclic_harvey_lazy(get<1>(J), *get<2>(J));
                 });
 
             // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
@@ -402,7 +402,7 @@ namespace seal
                 base_Bsk_size, [&](auto J) {
                     // Transform to NTT form in base Bsk
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(get<0>(J), **get<1>(J));
+                    ntt_negacyclic_harvey_lazy(get<0>(J), *get<1>(J));
                 });
         };
 
@@ -490,8 +490,8 @@ namespace seal
                             base_size, [&](auto J) {
                                 auto temp(allocate_uint(coeff_count, pool));
                                 dyadic_product_coeffmod(
-                                    get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, **get<1>(J), temp.get());
-                                add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, **get<1>(J), get<2>(J));
+                                    get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), temp.get());
+                                add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, *get<1>(J), get<2>(J));
                             });
                     });
             };
@@ -508,12 +508,12 @@ namespace seal
                 for_each_n(
                     IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
                         get<0>(I), base_q_ntt_tables_iter),
-                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), **get<1>(J)); });
+                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
 
                 for_each_n(
                     IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
                         get<1>(I), base_Bsk_ntt_tables_iter),
-                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), **get<1>(J)); });
+                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
             });
 
         // Perform BEHZ steps (6)-(8)
@@ -530,7 +530,7 @@ namespace seal
                     IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
                         get<0>(I), temp_q_Bsk_iter, base_q_iter),
                     base_q_size, [&](auto J) {
-                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, **get<2>(J), get<1>(J));
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
                     });
 
                 // Advance to the base Bsk part in temp and multiply base Bsk components by t
@@ -539,7 +539,7 @@ namespace seal
                     IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
                         get<1>(I), temp_q_Bsk_iter, base_Bsk_iter),
                     base_Bsk_size, [&](auto J) {
-                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, **get<2>(J), get<1>(J));
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
                     });
 
                 // Allocate yet another temporary for fast divide-and-floor result in base Bsk
@@ -635,8 +635,8 @@ namespace seal
                         coeff_modulus_count, [&](auto J) {
                             auto temp(allocate_uint(coeff_count, pool));
                             dyadic_product_coeffmod(
-                                get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, **get<1>(J), temp.get());
-                            add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, **get<1>(J), get<2>(J));
+                                get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), temp.get());
+                            add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, *get<1>(J), get<2>(J));
                         });
                 });
         }
@@ -751,7 +751,7 @@ namespace seal
 
                     // Transform to NTT form in base q
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(get<1>(J), **get<2>(J));
+                    ntt_negacyclic_harvey_lazy(get<1>(J), *get<2>(J));
                 });
 
             // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
@@ -769,7 +769,7 @@ namespace seal
                 base_Bsk_size, [&](auto J) {
                     // Transform to NTT form in base Bsk
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(get<0>(J), **get<1>(J));
+                    ntt_negacyclic_harvey_lazy(get<0>(J), *get<1>(J));
                 });
         };
 
@@ -814,7 +814,7 @@ namespace seal
                 IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                     *in_iter, base_iter, *out_iter),
                 base_size,
-                [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, **get<1>(I), get<2>(I)); });
+                [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
             // Advance in_iter and out_iter
             ++in_iter;
@@ -825,8 +825,8 @@ namespace seal
                 IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                     *in_iter, *in_iter_copy, base_iter, *out_iter),
                 base_size, [&](auto I) {
-                    dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, **get<2>(I), get<3>(I));
-                    add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, **get<2>(I), get<3>(I));
+                    dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<3>(I));
+                    add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, *get<2>(I), get<3>(I));
                 });
 
             // Advance out_iter manually
@@ -837,7 +837,7 @@ namespace seal
                 IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                     *in_iter, base_iter, *out_iter),
                 base_size,
-                [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, **get<1>(I), get<2>(I)); });
+                [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
         };
 
         // Perform the BEHZ ciphertext square both for base q and base Bsk
@@ -850,12 +850,12 @@ namespace seal
                 for_each_n(
                     IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
                         get<0>(I), base_q_ntt_tables_iter),
-                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), **get<1>(J)); });
+                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
 
                 for_each_n(
                     IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
                         get<1>(I), base_Bsk_ntt_tables_iter),
-                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), **get<1>(J)); });
+                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
             });
 
         // Perform BEHZ steps (6)-(8)
@@ -872,7 +872,7 @@ namespace seal
                     IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
                         get<0>(I), temp_q_Bsk_iter, base_q_iter),
                     base_q_size, [&](auto J) {
-                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, **get<2>(J), get<1>(J));
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
                     });
 
                 // Advance to the base Bsk part in temp and multiply base Bsk components by t
@@ -881,7 +881,7 @@ namespace seal
                     IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
                         get<1>(I), temp_q_Bsk_iter, base_Bsk_iter),
                     base_Bsk_size, [&](auto J) {
-                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, **get<2>(J), get<1>(J));
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
                     });
 
                 // Allocate yet another temporary for fast divide-and-floor result in base Bsk
@@ -955,7 +955,7 @@ namespace seal
             IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                 *encrypted_iter, coeff_modulus_iter, *temp_iter),
             coeff_modulus_count,
-            [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, **get<1>(I), get<2>(I)); });
+            [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
         // Advance encrypted_iter and temp_iter
         ++encrypted_iter;
@@ -966,8 +966,8 @@ namespace seal
             IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                 *encrypted_iter, *encrypted_iter_copy, coeff_modulus_iter, *temp_iter),
             coeff_modulus_count, [&](auto I) {
-                dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, **get<2>(I), get<3>(I));
-                add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, **get<2>(I), get<3>(I));
+                dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<3>(I));
+                add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, *get<2>(I), get<3>(I));
             });
 
         // Advance temp_iter manually
@@ -978,7 +978,7 @@ namespace seal
             IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
                 *encrypted_iter, coeff_modulus_iter, *temp_iter),
             coeff_modulus_count,
-            [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, **get<1>(I), get<2>(I)); });
+            [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
         // Set the final result
         set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_count, encrypted.data());
@@ -1567,7 +1567,7 @@ namespace seal
                 IteratorTuple<RNSIterator, ConstRNSIterator, IteratorWrapper<const SmallModulus *>>(
                     encrypted_iter, plain_iter, coeff_modulus),
                 coeff_modulus_count,
-                [&](auto I) { add_poly_poly_coeffmod(get<0>(I), get<1>(I), coeff_count, **get<2>(I), get<0>(I)); });
+                [&](auto I) { add_poly_poly_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<0>(I)); });
             break;
         }
 
@@ -1645,7 +1645,7 @@ namespace seal
                 IteratorTuple<RNSIterator, ConstRNSIterator, IteratorWrapper<const SmallModulus *>>(
                     encrypted_iter, plain_iter, coeff_modulus),
                 coeff_modulus_count,
-                [&](auto I) { sub_poly_poly_coeffmod(get<0>(I), get<1>(I), coeff_count, **get<2>(I), get<0>(I)); });
+                [&](auto I) { sub_poly_poly_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<0>(I)); });
             break;
         }
 
@@ -1749,7 +1749,7 @@ namespace seal
                             I, mono_iter, coeff_modulus),
                         coeff_modulus_count, [&](auto J) {
                             negacyclic_multiply_poly_mono_coeffmod(
-                                get<0>(J), coeff_count, **get<1>(J), mono_exponent, **get<2>(J), get<0>(J), pool);
+                                get<0>(J), coeff_count, *get<1>(J), mono_exponent, *get<2>(J), get<0>(J), pool);
                         });
                 });
             };
@@ -1785,7 +1785,7 @@ namespace seal
                         IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
                         coeff_modulus_count, [&](auto J) {
                             negacyclic_multiply_poly_mono_coeffmod(
-                                get<0>(J), coeff_count, plain[mono_exponent], mono_exponent, **get<1>(J), get<0>(J),
+                                get<0>(J), coeff_count, plain[mono_exponent], mono_exponent, *get<1>(J), get<0>(J),
                                 pool);
                         });
                 });
@@ -1806,7 +1806,7 @@ namespace seal
             for_each_n(
                 IteratorTuple<ConstCoeffIterator, RNSIterator>(plain.data(), temp_iter), plain_coeff_count,
                 [&](auto I) {
-                    auto plain_value = **get<0>(I);
+                    auto plain_value = *get<0>(I);
                     if (plain_value >= plain_upper_half_threshold)
                     {
                         add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
@@ -1833,17 +1833,17 @@ namespace seal
                     for_each_n(
                         IteratorTuple<CoeffIterator, ConstCoeffIterator>(get<0>(I), plain.data()), plain_coeff_count,
                         [&](auto J) {
-                            SEAL_ASSERT_TYPE(get<0>(J), IteratorWrapper<uint64_t *>, "temp");
-                            SEAL_ASSERT_TYPE(get<1>(J), IteratorWrapper<const uint64_t *>, "plain");
+                            SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "temp");
+                            SEAL_ASSERT_TYPE(get<1>(J), const uint64_t *, "plain");
 
-                            auto plain_value = **get<1>(J);
+                            auto plain_value = *get<1>(J);
                             if (plain_value >= plain_upper_half_threshold)
                             {
-                                **get<0>(J) = plain_value + **get<1>(I);
+                                *get<0>(J) = plain_value + *get<1>(I);
                             }
                             else
                             {
-                                **get<0>(J) = plain_value;
+                                *get<0>(J) = plain_value;
                             }
                         });
                 });
@@ -1853,7 +1853,7 @@ namespace seal
         RNSIterator temp_iter(temp.get(), coeff_count);
         for_each_n(
             IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(temp_iter, coeff_modulus_ntt_tables),
-            coeff_modulus_count, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), **get<1>(I)); });
+            coeff_modulus_count, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
 
         for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
@@ -1863,14 +1863,14 @@ namespace seal
                 coeff_modulus_count, [&](auto J) {
                     SEAL_ASSERT_TYPE(get<0>(J), CoeffIterator, "encrypted");
                     SEAL_ASSERT_TYPE(get<1>(J), ConstCoeffIterator, "temp");
-                    SEAL_ASSERT_TYPE(get<2>(J), IteratorWrapper<const SmallModulus *>, "coeff_modulus");
-                    SEAL_ASSERT_TYPE(get<3>(J), IteratorWrapper<const SmallNTTTables *>, "coeff_modulus_ntt_tables");
+                    SEAL_ASSERT_TYPE(get<2>(J), const SmallModulus *, "coeff_modulus");
+                    SEAL_ASSERT_TYPE(get<3>(J), const SmallNTTTables *, "coeff_modulus_ntt_tables");
 
                     // Lazy reduction
-                    ntt_negacyclic_harvey_lazy(get<0>(J), **get<3>(J));
+                    ntt_negacyclic_harvey_lazy(get<0>(J), *get<3>(J));
 
-                    dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, **get<2>(J), get<0>(J));
-                    inverse_ntt_negacyclic_harvey(get<0>(J), **get<3>(J));
+                    dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J));
+                    inverse_ntt_negacyclic_harvey(get<0>(J), *get<3>(J));
                 });
         });
     }
@@ -1914,7 +1914,7 @@ namespace seal
                 IteratorTuple<RNSIterator, ConstRNSIterator, IteratorWrapper<const SmallModulus *>>(
                     I, { plain_ntt.data(), coeff_count }, coeff_modulus),
                 coeff_modulus_count,
-                [&](auto J) { dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, **get<2>(J), get<0>(J)); });
+                [&](auto J) { dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J)); });
         });
 
         // Set the scale

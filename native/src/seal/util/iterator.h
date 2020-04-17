@@ -74,14 +74,15 @@ namespace seal
         In addition to the types above, we define a ReverseIterator<SEALIter> that reverses the direction of iteration.
 
         An extremely useful template class is the (variadic) IteratorTuple<...> that allows multiple SEAL iterators to
-        be zipped together. The IteratorTuple is itself a SEAL iterator and nested IteratorTuple instances are used
-        commonly in the library. One critically important aspect of the IteratorTuple is that dereferencing yields
-        another valid IteratorTuple, with each component dereferenced individually. When one of the components is not
-        immediately dereferenceable to a SEAL iterator (but instead to a raw pointer), the result is wrapped inside an
-        IteratorWrapper object to produce a valid tuple of SEAL iterators. As a curiosity, an IteratorTuple wrapping an
-        IteratorWrapper<PtrT> can be dereferenced indefinitely, always yielding the same IteratorTuple. The individual
-        components of an IteratorTuple can be accessed with the seal::util::get<i>(...) functions. The behavior of
-        IteratorTuple is summarized in the following diagram:
+        be zipped together. An IteratorTuple is itself a SEAL iterator and nested IteratorTuple types are used commonly
+        in the library. Dereferencing an IteratorTuple always yields another valid IteratorTuple, with each component
+        dereferenced individually. An IteratorTuple can in fact also hold raw pointers as its components, but such an
+        IteratorTuple cannot be dereferenced. Instead, the raw pointer should be first wrapped into an IteratorWrapper
+        object. Dereferencing an IteratorWrapper yields the wrapped raw pointer; hence, an IteratorTuple holding
+        IteratorWrapper objects can be dereferenced once.
+
+        The individual components of an IteratorTuple can be accessed with the seal::util::get<i>(...) functions. The
+        behavior of IteratorTuple is summarized in the following diagram:
 
                   +---------------------------------------------------------+
                   | IteratorTuple<PolyIterator, RNSIterator, CoeffIterator> |
@@ -101,9 +102,9 @@ namespace seal
                           |                     |                      |
                           |                     |                      |
                           v                     v                      v
-                   +------+------+      +-------+-------+   +----------+----------------------+
-                   | RNSIterator |      | CoeffIterator |   | IteratorWrapper<std::uint64_t*> |
-                   +-------------+      +---------------+   +---------------------------------+
+                   +------+------+      +-------+-------+      +----------------+
+                   | RNSIterator |      | CoeffIterator |      | std::uint64_t* |
+                   +-------------+      +---------------+      +----------------+
 
         Each SEAL iterator class defines a type called value_type_is_seal_iterator_type, which is equal to either
         std::true_type or std::false_type, and signals whether instances of that particular SEAL iterator class, when
@@ -149,7 +150,7 @@ namespace seal
                         coeff_modulus_count,
                         [&](auto J) {
                             SEAL_ASSERT_TYPE(get<0>(J), CoeffIterator, "encrypted");
-                            SEAL_ASSERT_TYPE(get<1>(J), IteratorWrapper<const SmallModulus *>, "coeff_modulus");
+                            SEAL_ASSERT_TYPE(get<1>(J), const SmallModulus *, "coeff_modulus");
                             negate_poly_coeffmod(get<0>(J), coeff_count, **get<1>(J), get<0>(J));
                         });
                 });
@@ -190,7 +191,6 @@ namespace seal
             friend class PolyIterator;
 
             using self_type = CoeffIterator;
-            using value_type_is_seal_iterator_type = std::false_type;
 
             // Standard iterator typedefs
             using value_type = std::uint64_t *;
@@ -270,7 +270,6 @@ namespace seal
             friend class ConstPolyIterator;
 
             using self_type = ConstCoeffIterator;
-            using value_type_is_seal_iterator_type = std::false_type;
 
             // Standard iterator typedefs
             using value_type = const std::uint64_t *;
@@ -352,7 +351,6 @@ namespace seal
             friend class PolyIterator;
 
             using self_type = RNSIterator;
-            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
             using value_type = CoeffIterator;
@@ -444,7 +442,6 @@ namespace seal
             friend class ConstPolyIterator;
 
             using self_type = ConstRNSIterator;
-            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
             using value_type = ConstCoeffIterator;
@@ -538,7 +535,6 @@ namespace seal
         {
         public:
             using self_type = PolyIterator;
-            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
             using value_type = RNSIterator;
@@ -639,7 +635,6 @@ namespace seal
         {
         public:
             using self_type = ConstPolyIterator;
-            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
             using value_type = ConstRNSIterator;
@@ -752,7 +747,6 @@ namespace seal
         {
         public:
             using self_type = IteratorWrapper<PtrT>;
-            using value_type_is_seal_iterator_type = std::false_type;
 
             // Standard iterator typedefs
             using value_type = PtrT;
@@ -896,14 +890,11 @@ namespace seal
         {
         public:
             using self_type = IteratorTuple<SEALIter, Rest...>;
-            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
-            using value_type_first = std::conditional_t<
-                SEALIter::value_type_is_seal_iterator_type::value, typename std::iterator_traits<SEALIter>::value_type,
-                IteratorWrapper<typename std::iterator_traits<SEALIter>::value_type>>;
-            using value_type =
-                IteratorTuple<value_type_first, typename std::iterator_traits<IteratorTuple<Rest>>::value_type...>;
+            using value_type = IteratorTuple<
+                typename std::iterator_traits<SEALIter>::value_type,
+                typename std::iterator_traits<IteratorTuple<Rest>>::value_type...>;
             using pointer = void;
             using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
@@ -995,12 +986,9 @@ namespace seal
         {
         public:
             using self_type = IteratorTuple<SEALIter>;
-            using value_type_is_seal_iterator_type = std::true_type;
 
             // Standard iterator typedefs
-            using value_type = std::conditional_t<
-                SEALIter::value_type_is_seal_iterator_type::value, typename std::iterator_traits<SEALIter>::value_type,
-                IteratorWrapper<typename std::iterator_traits<SEALIter>::value_type>>;
+            using value_type = typename std::iterator_traits<SEALIter>::value_type;
             using pointer = void;
             using reference = const value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
