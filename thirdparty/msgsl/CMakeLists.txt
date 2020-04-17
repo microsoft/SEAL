@@ -15,6 +15,7 @@ ExternalProject_Add(EP_MSGSL
     GIT_REPOSITORY      https://github.com/microsoft/GSL.git
     GIT_TAG             v${PROJECT_VERSION}
     GIT_CONFIG          advice.detachedHead=false
+    CMAKE_ARGS          -DCMAKE_BUILD_TYPE=Release -DGSL_TEST=OFF
     INSTALL_COMMAND     ""
     TEST_COMMAND        ""
 )

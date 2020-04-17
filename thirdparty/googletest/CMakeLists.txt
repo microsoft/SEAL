@@ -15,6 +15,7 @@ ExternalProject_Add(EP_GTEST
     GIT_REPOSITORY      https://github.com/google/googletest.git
     GIT_TAG             release-${PROJECT_VERSION}
     GIT_CONFIG          advice.detachedHead=false
+    CMAKE_ARGS          -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     CONFIGURE_COMMAND   ""
     BUILD_COMMAND       ""
     INSTALL_COMMAND     ""
