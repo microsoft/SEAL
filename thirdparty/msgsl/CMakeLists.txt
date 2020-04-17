@@ -15,8 +15,6 @@ ExternalProject_Add(EP_MSGSL
     GIT_REPOSITORY      https://github.com/microsoft/GSL.git
     GIT_TAG             v${PROJECT_VERSION}
     GIT_CONFIG          advice.detachedHead=false
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
     INSTALL_COMMAND     ""
     TEST_COMMAND        ""
 )

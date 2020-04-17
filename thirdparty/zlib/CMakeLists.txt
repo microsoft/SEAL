@@ -21,8 +21,6 @@ ExternalProject_Add(EP_ZLIB
     GIT_REPOSITORY      https://github.com/madler/zlib.git
     GIT_TAG             v${PROJECT_VERSION}
     GIT_CONFIG          advice.detachedHead=false
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
     INSTALL_COMMAND     ""
     TEST_COMMAND        ""
 )
