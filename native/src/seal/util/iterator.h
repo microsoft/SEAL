@@ -259,6 +259,11 @@ namespace seal
                 return ptr_;
             }
 
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return nullptr != ptr_;
+            }
+
         private:
             value_type ptr_;
         };
@@ -341,6 +346,11 @@ namespace seal
                 return ptr_;
             }
 
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return nullptr != ptr_;
+            }
+
         private:
             value_type ptr_;
         };
@@ -418,6 +428,11 @@ namespace seal
             SEAL_NODISCARD inline operator std::uint64_t *() const noexcept
             {
                 return coeff_it_;
+            }
+
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return static_cast<bool>(coeff_it_);
             }
 
             SEAL_NODISCARD inline value_type operator->() const noexcept
@@ -515,6 +530,11 @@ namespace seal
                 return coeff_it_;
             }
 
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return static_cast<bool>(coeff_it_);
+            }
+
             SEAL_NODISCARD inline value_type operator->() const noexcept
             {
                 return **this;
@@ -606,6 +626,11 @@ namespace seal
             SEAL_NODISCARD inline operator std::uint64_t *() const noexcept
             {
                 return rns_it_;
+            }
+
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return static_cast<bool>(rns_it_);
             }
 
             SEAL_NODISCARD inline value_type operator->() const noexcept
@@ -719,6 +744,11 @@ namespace seal
                 return rns_it_;
             }
 
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return static_cast<bool>(rns_it_);
+            }
+
             SEAL_NODISCARD inline value_type operator->() const noexcept
             {
                 return **this;
@@ -821,6 +851,11 @@ namespace seal
             SEAL_NODISCARD inline operator value_type *() const noexcept
             {
                 return ptr_;
+            }
+
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return nullptr != ptr_;
             }
 
             SEAL_NODISCARD inline value_type operator->() const noexcept
@@ -965,6 +1000,11 @@ namespace seal
                 return **this;
             }
 
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return static_cast<bool>(first_) && static_cast<bool>(rest_);
+            }
+
             SEAL_NODISCARD inline const SEALIter &first() const noexcept
             {
                 return first_;
@@ -1051,6 +1091,11 @@ namespace seal
             SEAL_NODISCARD inline value_type operator->() const noexcept
             {
                 return **this;
+            }
+
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return static_cast<bool>(first_);
             }
 
             SEAL_NODISCARD inline const SEALIter &first() const noexcept

@@ -1021,10 +1021,15 @@ namespace seal
 
         // Calculate number of relinearize_one_step calls needed
         size_t relins_needed = encrypted_size - destination_size;
+
+        // Iterator pointing to the last component of encrypted
+        PolyIterator encrypted_iter(encrypted);
+        advance(encrypted_iter, encrypted_size - 1);
+
         for (size_t i = 0; i < relins_needed; i++)
         {
             switch_key_inplace(
-                encrypted, encrypted.data(encrypted_size - 1), static_cast<const KSwitchKeys &>(relin_keys),
+                encrypted, *encrypted_iter, static_cast<const KSwitchKeys &>(relin_keys),
                 RelinKeys::get_index(encrypted_size - 1), pool);
             encrypted_size--;
         }
@@ -1827,24 +1832,17 @@ namespace seal
             // primes.
             RNSIterator temp_iter(temp.get(), coeff_count);
             for_each_n(
-                IteratorTuple<RNSIterator, IteratorWrapper<const uint64_t *>>(
-                    temp_iter, plain_upper_half_increment),
+                IteratorTuple<RNSIterator, IteratorWrapper<const uint64_t *>>(temp_iter, plain_upper_half_increment),
                 coeff_modulus_count, [&](auto I) {
+                    SEAL_ASSERT_TYPE(get<0>(I), CoeffIterator, "temp");
+                    SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "plain_upper_half_increment");
                     for_each_n(
                         IteratorTuple<CoeffIterator, ConstCoeffIterator>(get<0>(I), plain.data()), plain_coeff_count,
                         [&](auto J) {
                             SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "temp");
                             SEAL_ASSERT_TYPE(get<1>(J), const uint64_t *, "plain");
-
-                            auto plain_value = *get<1>(J);
-                            if (plain_value >= plain_upper_half_threshold)
-                            {
-                                *get<0>(J) = plain_value + *get<1>(I);
-                            }
-                            else
-                            {
-                                *get<0>(J) = plain_value;
-                            }
+                            *get<0>(J) = *get<1>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
+                                                                        *get<1>(J) >= plain_upper_half_threshold)));
                         });
                 });
         }
@@ -1909,10 +1907,11 @@ namespace seal
             throw invalid_argument("scale out of bounds");
         }
 
+        ConstRNSIterator plain_ntt_iter(plain_ntt.data(), coeff_count);
         for_each_n(PolyIterator(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
             for_each_n(
                 IteratorTuple<RNSIterator, ConstRNSIterator, IteratorWrapper<const SmallModulus *>>(
-                    I, { plain_ntt.data(), coeff_count }, coeff_modulus),
+                    I, plain_ntt_iter, coeff_modulus),
                 coeff_modulus_count,
                 [&](auto J) { dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J)); });
         });
@@ -2009,24 +2008,18 @@ namespace seal
             auto reversed_helper_iter = ReverseIterator<decltype(helper_iter)>(helper_iter);
 
             for_each_n(reversed_helper_iter, coeff_modulus_count, [&](auto I) {
-                    SEAL_ASSERT_TYPE(get<0>(I), CoeffIterator, "reversed plain");
-                    SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "reversed plain_upper_half_increment");
+                SEAL_ASSERT_TYPE(get<0>(I), CoeffIterator, "reversed plain");
+                SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "reversed plain_upper_half_increment");
 
-                    for_each_n(IteratorTuple<CoeffIterator, CoeffIterator>(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
-                            SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "plain");
-                            SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "reversed plain");
-
-                            auto plain_value = *get<0>(J);
-                            if (plain_value >= plain_upper_half_threshold)
-                            {
-                                *get<1>(J) = plain_value + *get<1>(I);
-                            }
-                            else
-                            {
-                                *get<1>(J) = plain_value;
-                            }
-                        });
-                });
+                for_each_n(
+                    IteratorTuple<CoeffIterator, CoeffIterator>(*plain_iter, get<0>(I)), plain_coeff_count,
+                    [&](auto J) {
+                        SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "plain");
+                        SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "reversed plain");
+                        *get<1>(J) = *get<0>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
+                                                                    *get<0>(J) >= plain_upper_half_threshold)));
+                    });
+            });
         }
 
         // Transform to NTT domain
@@ -2076,9 +2069,7 @@ namespace seal
         for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
                 IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables),
-                coeff_modulus_count, [&](auto J) {
-                    ntt_negacyclic_harvey(get<0>(J), *get<1>(J));
-                });
+                coeff_modulus_count, [&](auto J) { ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
         });
 
         // Finally change the is_ntt_transformed flag
@@ -2253,7 +2244,7 @@ namespace seal
 
         // Calculate (temp * galois_key[0], temp * galois_key[1]) + (ct[0], 0)
         switch_key_inplace(
-            encrypted, temp.get(), static_cast<const KSwitchKeys &>(galois_keys), GaloisKeys::get_index(galois_elt),
+            encrypted, temp_iter, static_cast<const KSwitchKeys &>(galois_keys), GaloisKeys::get_index(galois_elt),
             pool);
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
@@ -2309,23 +2300,21 @@ namespace seal
                 throw invalid_argument("Galois key not present");
             }
 
-            for (size_t i = 0; i < naf_steps.size(); i++)
+            for_each_n(naf_steps.cbegin(), naf_steps.size(), [&](auto step)
             {
                 // We might have a NAF-term of size coeff_count / 2; this corresponds
-                // to no rotation so we skip it.
-                if (safe_cast<size_t>(abs(naf_steps[i])) == (coeff_count >> 1))
+                // to no rotation so we skip it. Otherwise call rotate_internal.
+                if (safe_cast<size_t>(abs(step)) != (coeff_count >> 1))
                 {
-                    continue;
+                    // Apply rotation for this step
+                    rotate_internal(encrypted, step, galois_keys, pool);
                 }
-
-                // Apply rotation for this step
-                rotate_internal(encrypted, naf_steps[i], galois_keys, pool);
-            }
+            });
         }
     }
 
     void Evaluator::switch_key_inplace(
-        Ciphertext &encrypted, const uint64_t *target, const KSwitchKeys &kswitch_keys, size_t kswitch_keys_index,
+        Ciphertext &encrypted, ConstRNSIterator target, const KSwitchKeys &kswitch_keys, size_t kswitch_keys_index,
         MemoryPoolHandle pool)
     {
         auto parms_id = encrypted.parms_id();
@@ -2402,6 +2391,7 @@ namespace seal
 
         // Temporary results
         Pointer<uint64_t> t_target(allocate_poly(coeff_count, decomp_mod_count, pool));
+        RNSIterator t_target_iter(t_target.get(), coeff_count);
         set_uint_uint(target, decomp_mod_count * coeff_count, t_target.get());
         if (scheme == scheme_type::CKKS)
         {

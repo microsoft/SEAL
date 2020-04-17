@@ -14,6 +14,7 @@
 #include "seal/smallmodulus.h"
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
+#include "seal/util/iterator.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <map>
@@ -1361,7 +1362,7 @@ namespace seal
         }
 
         void switch_key_inplace(
-            Ciphertext &encrypted, const std::uint64_t *target, const KSwitchKeys &kswitch_keys, std::size_t key_index,
+            Ciphertext &encrypted, util::ConstRNSIterator target, const KSwitchKeys &kswitch_keys, std::size_t key_index,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool);
