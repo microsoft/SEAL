@@ -247,9 +247,7 @@ namespace sealtest
             ASSERT_EQ(0, **get<1>(*it3));
             ASSERT_EQ(0, ***get<2>(*it3));
 
-            IterTuple<
-                IterTuple<CoeffIter, RNSIter, PolyIter>, IterTuple<RNSIter, PolyIter>>
-                it4(it3, it2);
+            IterTuple<IterTuple<CoeffIter, RNSIter, PolyIter>, IterTuple<RNSIter, PolyIter>> it4(it3, it2);
             auto it5 = it4;
             it5++;
             it5--;

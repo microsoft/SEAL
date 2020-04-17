@@ -144,8 +144,8 @@ namespace seal
         // Add ciphertexts
         for_each_n(IterTuple<PolyIter, ConstPolyIter>(encrypted1, encrypted2), min_count, [&](auto I) {
             for_each_n(
-                IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus),
-                coeff_modulus_count, [&](auto J) {
+                IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                [&](auto J) {
                     add_poly_poly_coeffmod(
                         get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
                 });
@@ -236,15 +236,14 @@ namespace seal
         ConstPolyIter encrypted2_iter(encrypted2);
 
         // Subtract polynomials
-        for_each_n(
-            IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter), min_count, [&](auto I) {
-                for_each_n(
-                    IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus),
-                    coeff_modulus_count, [&](auto J) {
-                        sub_poly_poly_coeffmod(
-                            get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
-                    });
-            });
+        for_each_n(IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter), min_count, [&](auto I) {
+            for_each_n(
+                IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                [&](auto J) {
+                    sub_poly_poly_coeffmod(
+                        get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                });
+        });
 
         // If encrypted2 has larger count, negate remaining entries
         if (encrypted1_size < encrypted2_size)
@@ -254,11 +253,11 @@ namespace seal
             advance(encrypted2_iter, min_count);
 
             for_each_n(
-                IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter),
-                encrypted2_size - min_count, [&](auto I) {
+                IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter), encrypted2_size - min_count,
+                [&](auto I) {
                     for_each_n(
-                        IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus),
-                        coeff_modulus_count, [&](auto J) {
+                        IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                        [&](auto J) {
                             negate_poly_coeffmod(get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
                         });
                 });
@@ -400,9 +399,8 @@ namespace seal
             rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
 
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(
-                    get<2>(I), base_Bsk_ntt_tables_iter),
-                base_Bsk_size, [&](auto J) {
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(get<2>(I), base_Bsk_ntt_tables_iter), base_Bsk_size,
+                [&](auto J) {
                     // Transform to NTT form in base Bsk
                     // Lazy reduction
                     ntt_negacyclic_harvey_lazy(get<0>(J), *get<1>(J));
@@ -419,8 +417,7 @@ namespace seal
 
         // Perform BEHZ steps (1)-(3) for encrypted1
         for_each_n(
-            IterTuple<ConstPolyIter, PolyIter, PolyIter>(
-                encrypted1_iter, encrypted1_q_iter, encrypted1_Bsk_iter),
+            IterTuple<ConstPolyIter, PolyIter, PolyIter>(encrypted1_iter, encrypted1_q_iter, encrypted1_Bsk_iter),
             encrypted1_size, behz_extend_base_convert_to_ntt);
 
         // Repeat for encrypted2
@@ -431,8 +428,7 @@ namespace seal
         PolyIter encrypted2_Bsk_iter(encrypted2_Bsk.get(), coeff_count, base_Bsk_size);
 
         for_each_n(
-            IterTuple<ConstPolyIter, PolyIter, PolyIter>(
-                encrypted2_iter, encrypted2_q_iter, encrypted2_Bsk_iter),
+            IterTuple<ConstPolyIter, PolyIter, PolyIter>(encrypted2_iter, encrypted2_q_iter, encrypted2_Bsk_iter),
             encrypted2_size, behz_extend_base_convert_to_ntt);
 
         // Allocate temporary space for the output of step (4)
@@ -482,9 +478,8 @@ namespace seal
                 advance(shifted_out_iter, secret_power_index);
 
                 for_each_n(
-                    IterTuple<PolyIter, ReverseIter<PolyIter>>(
-                        shifted_in1_iter, shifted_reversed_in2_iter),
-                    steps, [&](auto I) {
+                    IterTuple<PolyIter, ReverseIter<PolyIter>>(shifted_in1_iter, shifted_reversed_in2_iter), steps,
+                    [&](auto I) {
                         // Extra care needed here: shifted_out_iter must be dereferenced once to
                         // produce an appropriate RNSIter.
                         for_each_n(
@@ -506,24 +501,20 @@ namespace seal
         }
 
         // Perform BEHZ step (5): transform data from NTT form
-        for_each_n(
-            IterTuple<PolyIter, PolyIter>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
-                for_each_n(
-                    IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(
-                        get<0>(I), base_q_ntt_tables_iter),
-                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+        for_each_n(IterTuple<PolyIter, PolyIter>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
+            for_each_n(
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(get<0>(I), base_q_ntt_tables_iter), base_q_size,
+                [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
 
-                for_each_n(
-                    IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(
-                        get<1>(I), base_Bsk_ntt_tables_iter),
-                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
-            });
+            for_each_n(
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(get<1>(I), base_Bsk_ntt_tables_iter), base_Bsk_size,
+                [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+        });
 
         // Perform BEHZ steps (6)-(8)
         for_each_n(
-            IterTuple<PolyIter, PolyIter, PolyIter>(
-                temp_dest_q_iter, temp_dest_Bsk_iter, encrypted1_iter),
-            dest_size, [&](auto I) {
+            IterTuple<PolyIter, PolyIter, PolyIter>(temp_dest_q_iter, temp_dest_Bsk_iter, encrypted1_iter), dest_size,
+            [&](auto I) {
                 // Bring together the base q and base Bsk components into a single allocation
                 auto temp_q_Bsk(allocate_poly(coeff_count, base_q_size + base_Bsk_size, pool));
                 RNSIter temp_q_Bsk_iter(temp_q_Bsk.get(), coeff_count);
@@ -767,9 +758,8 @@ namespace seal
             rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
 
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(
-                    get<2>(I), base_Bsk_ntt_tables_iter),
-                base_Bsk_size, [&](auto J) {
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(get<2>(I), base_Bsk_ntt_tables_iter), base_Bsk_size,
+                [&](auto J) {
                     // Transform to NTT form in base Bsk
                     // Lazy reduction
                     ntt_negacyclic_harvey_lazy(get<0>(J), *get<1>(J));
@@ -786,8 +776,7 @@ namespace seal
 
         // Perform BEHZ steps (1)-(3)
         for_each_n(
-            IterTuple<ConstPolyIter, PolyIter, PolyIter>(
-                encrypted_iter, encrypted_q_iter, encrypted_Bsk_iter),
+            IterTuple<ConstPolyIter, PolyIter, PolyIter>(encrypted_iter, encrypted_q_iter, encrypted_Bsk_iter),
             encrypted_size, behz_extend_base_convert_to_ntt);
 
         // Allocate temporary space for the output of step (4)
@@ -814,9 +803,7 @@ namespace seal
 
             // Compute c0^2
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
-                    *in_iter, base_iter, *out_iter),
-                base_size,
+                IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(*in_iter, base_iter, *out_iter), base_size,
                 [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
             // Advance in_iter and out_iter
@@ -837,9 +824,7 @@ namespace seal
 
             // Compute c1^2
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
-                    *in_iter, base_iter, *out_iter),
-                base_size,
+                IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(*in_iter, base_iter, *out_iter), base_size,
                 [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
         };
 
@@ -848,32 +833,27 @@ namespace seal
         behz_ciphertext_square(encrypted_Bsk_iter, base_Bsk_iter, base_Bsk_size, temp_dest_Bsk_iter);
 
         // Perform BEHZ step (5): transform data from NTT form
-        for_each_n(
-            IterTuple<PolyIter, PolyIter>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
-                for_each_n(
-                    IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(
-                        get<0>(I), base_q_ntt_tables_iter),
-                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+        for_each_n(IterTuple<PolyIter, PolyIter>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
+            for_each_n(
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(get<0>(I), base_q_ntt_tables_iter), base_q_size,
+                [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
 
-                for_each_n(
-                    IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(
-                        get<1>(I), base_Bsk_ntt_tables_iter),
-                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
-            });
+            for_each_n(
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(get<1>(I), base_Bsk_ntt_tables_iter), base_Bsk_size,
+                [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+        });
 
         // Perform BEHZ steps (6)-(8)
         for_each_n(
-            IterTuple<PolyIter, PolyIter, PolyIter>(
-                temp_dest_q_iter, temp_dest_Bsk_iter, encrypted_iter),
-            dest_size, [&](auto I) {
+            IterTuple<PolyIter, PolyIter, PolyIter>(temp_dest_q_iter, temp_dest_Bsk_iter, encrypted_iter), dest_size,
+            [&](auto I) {
                 // Bring together the base q and base Bsk components into a single allocation
                 auto temp_q_Bsk(allocate_poly(coeff_count, base_q_size + base_Bsk_size, pool));
                 RNSIter temp_q_Bsk_iter(temp_q_Bsk.get(), coeff_count);
 
                 // Step (6): multiply base q components by t (plain_modulus)
                 for_each_n(
-                    IterTuple<RNSIter, RNSIter, PtrIter<const SmallModulus *>>(
-                        get<0>(I), temp_q_Bsk_iter, base_q_iter),
+                    IterTuple<RNSIter, RNSIter, PtrIter<const SmallModulus *>>(get<0>(I), temp_q_Bsk_iter, base_q_iter),
                     base_q_size, [&](auto J) {
                         multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
                     });
@@ -955,8 +935,7 @@ namespace seal
 
         // Compute c0^2
         for_each_n(
-            IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
-                *encrypted_iter, coeff_modulus_iter, *temp_iter),
+            IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(*encrypted_iter, coeff_modulus_iter, *temp_iter),
             coeff_modulus_count,
             [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
@@ -978,8 +957,7 @@ namespace seal
 
         // Compute c1^2
         for_each_n(
-            IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
-                *encrypted_iter, coeff_modulus_iter, *temp_iter),
+            IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(*encrypted_iter, coeff_modulus_iter, *temp_iter),
             coeff_modulus_count,
             [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
@@ -1100,9 +1078,9 @@ namespace seal
 
         // Copy result to destination
         destination.resize(context_, next_context_data.parms_id(), encrypted_size);
-        for_each_n(
-            IterTuple<ConstPolyIter, PolyIter>(encrypted_copy, destination), encrypted_size,
-            [&](auto I) { set_poly_poly(get<0>(I), coeff_count, next_coeff_modulus_count, get<1>(I)); });
+        for_each_n(IterTuple<ConstPolyIter, PolyIter>(encrypted_copy, destination), encrypted_size, [&](auto I) {
+            set_poly_poly(get<0>(I), coeff_count, next_coeff_modulus_count, get<1>(I));
+        });
 
         // Set other attributes
         destination.is_ntt_form() = encrypted.is_ntt_form();
@@ -1753,8 +1731,7 @@ namespace seal
             auto rns_monomial_multiply = [&](PolyIter in_iter, ConstCoeffIter mono_iter) {
                 for_each_n(in_iter, encrypted_size, [&](auto I) {
                     for_each_n(
-                        IterTuple<RNSIter, ConstCoeffIter, PtrIter<const SmallModulus *>>(
-                            I, mono_iter, coeff_modulus),
+                        IterTuple<RNSIter, ConstCoeffIter, PtrIter<const SmallModulus *>>(I, mono_iter, coeff_modulus),
                         coeff_modulus_count, [&](auto J) {
                             negacyclic_multiply_poly_mono_coeffmod(
                                 get<0>(J), coeff_count, *get<1>(J), mono_exponent, *get<2>(J), get<0>(J), pool);
@@ -1790,8 +1767,8 @@ namespace seal
                 // The monomial represents a positive number, so no RNS multiplication is needed.
                 for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
                     for_each_n(
-                        IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus),
-                        coeff_modulus_count, [&](auto J) {
+                        IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                        [&](auto J) {
                             negacyclic_multiply_poly_mono_coeffmod(
                                 get<0>(J), coeff_count, plain[mono_exponent], mono_exponent, *get<1>(J), get<0>(J),
                                 pool);
@@ -1811,19 +1788,17 @@ namespace seal
             // Slight semantic misuse of RNSIter here, but this works well
             RNSIter temp_iter(temp.get(), coeff_modulus_count);
 
-            for_each_n(
-                IterTuple<ConstCoeffIter, RNSIter>(plain.data(), temp_iter), plain_coeff_count,
-                [&](auto I) {
-                    auto plain_value = *get<0>(I);
-                    if (plain_value >= plain_upper_half_threshold)
-                    {
-                        add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
-                    }
-                    else
-                    {
-                        **get<1>(I) = plain_value;
-                    }
-                });
+            for_each_n(IterTuple<ConstCoeffIter, RNSIter>(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
+                auto plain_value = *get<0>(I);
+                if (plain_value >= plain_upper_half_threshold)
+                {
+                    add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
+                }
+                else
+                {
+                    **get<1>(I) = plain_value;
+                }
+            });
 
             for_each_n(RNSIter(temp.get(), coeff_count), coeff_modulus_count, [&](auto I) {
                 context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
@@ -1840,8 +1815,7 @@ namespace seal
                     SEAL_ASSERT_TYPE(get<0>(I), CoeffIter, "temp");
                     SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "plain_upper_half_increment");
                     for_each_n(
-                        IterTuple<CoeffIter, ConstCoeffIter>(get<0>(I), plain.data()), plain_coeff_count,
-                        [&](auto J) {
+                        IterTuple<CoeffIter, ConstCoeffIter>(get<0>(I), plain.data()), plain_coeff_count, [&](auto J) {
                             SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "temp");
                             SEAL_ASSERT_TYPE(get<1>(J), const uint64_t *, "plain");
                             *get<0>(J) = *get<1>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
@@ -1858,9 +1832,8 @@ namespace seal
 
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
-                IterTuple<
-                    RNSIter, ConstRNSIter, PtrIter<const SmallModulus *>,
-                    PtrIter<const SmallNTTTables *>>(I, temp_iter, coeff_modulus, coeff_modulus_ntt_tables),
+                IterTuple<RNSIter, ConstRNSIter, PtrIter<const SmallModulus *>, PtrIter<const SmallNTTTables *>>(
+                    I, temp_iter, coeff_modulus, coeff_modulus_ntt_tables),
                 coeff_modulus_count, [&](auto J) {
                     SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
                     SEAL_ASSERT_TYPE(get<1>(J), ConstCoeffIter, "temp");
@@ -1913,8 +1886,7 @@ namespace seal
         ConstRNSIter plain_ntt_iter(plain_ntt.data(), coeff_count);
         for_each_n(PolyIter(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
             for_each_n(
-                IterTuple<RNSIter, ConstRNSIter, PtrIter<const SmallModulus *>>(
-                    I, plain_ntt_iter, coeff_modulus),
+                IterTuple<RNSIter, ConstRNSIter, PtrIter<const SmallModulus *>>(I, plain_ntt_iter, coeff_modulus),
                 coeff_modulus_count,
                 [&](auto J) { dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J)); });
         });
@@ -1976,19 +1948,17 @@ namespace seal
             // Slight semantic misuse of RNSIter here, but this works well
             RNSIter temp_iter(temp.get(), coeff_modulus_count);
 
-            for_each_n(
-                IterTuple<ConstCoeffIter, RNSIter>(plain.data(), temp_iter), plain_coeff_count,
-                [&](auto I) {
-                    auto plain_value = *get<0>(I);
-                    if (plain_value >= plain_upper_half_threshold)
-                    {
-                        add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
-                    }
-                    else
-                    {
-                        **get<1>(I) = plain_value;
-                    }
-                });
+            for_each_n(IterTuple<ConstCoeffIter, RNSIter>(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
+                auto plain_value = *get<0>(I);
+                if (plain_value >= plain_upper_half_threshold)
+                {
+                    add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
+                }
+                else
+                {
+                    **get<1>(I) = plain_value;
+                }
+            });
 
             for_each_n(RNSIter(temp.get(), coeff_count), coeff_modulus_count, [&](auto I) {
                 context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
@@ -2005,8 +1975,7 @@ namespace seal
 
             // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
             // the plain_upper_half_increment values.
-            IterTuple<RNSIter, PtrIter<const uint64_t *>> helper_iter(
-                plain_iter, plain_upper_half_increment);
+            IterTuple<RNSIter, PtrIter<const uint64_t *>> helper_iter(plain_iter, plain_upper_half_increment);
             advance(helper_iter, coeff_modulus_count - 1);
             auto reversed_helper_iter = ReverseIter<decltype(helper_iter)>(helper_iter);
 
@@ -2014,14 +1983,12 @@ namespace seal
                 SEAL_ASSERT_TYPE(get<0>(I), CoeffIter, "reversed plain");
                 SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "reversed plain_upper_half_increment");
 
-                for_each_n(
-                    IterTuple<CoeffIter, CoeffIter>(*plain_iter, get<0>(I)), plain_coeff_count,
-                    [&](auto J) {
-                        SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "plain");
-                        SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "reversed plain");
-                        *get<1>(J) = *get<0>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
-                                                                    *get<0>(J) >= plain_upper_half_threshold)));
-                    });
+                for_each_n(IterTuple<CoeffIter, CoeffIter>(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
+                    SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "plain");
+                    SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "reversed plain");
+                    *get<1>(J) = *get<0>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
+                                                                *get<0>(J) >= plain_upper_half_threshold)));
+                });
             });
         }
 
@@ -2071,8 +2038,8 @@ namespace seal
         // Transform each polynomial to NTT domain
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables),
-                coeff_modulus_count, [&](auto J) { ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables), coeff_modulus_count,
+                [&](auto J) { ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
         });
 
         // Finally change the is_ntt_transformed flag
@@ -2122,8 +2089,8 @@ namespace seal
         // Transform each polynomial from NTT domain
         for_each_n(PolyIter(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables),
-                coeff_modulus_count, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables), coeff_modulus_count,
+                [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
         });
 
         // Finally change the is_ntt_transformed flag
@@ -2195,8 +2162,7 @@ namespace seal
         {
             auto apply_galois_helper = [&](auto in_iter, auto out_iter) {
                 for_each_n(
-                    IterTuple<RNSIter, RNSIter, PtrIter<const SmallModulus *>>(
-                        in_iter, out_iter, coeff_modulus),
+                    IterTuple<RNSIter, RNSIter, PtrIter<const SmallModulus *>>(in_iter, out_iter, coeff_modulus),
                     coeff_modulus_count,
                     [&](auto I) { galois_tool->apply_galois(get<0>(I), galois_elt, *get<2>(I), get<1>(I)); });
             };
@@ -2216,10 +2182,9 @@ namespace seal
         else if (parms.scheme() == scheme_type::CKKS)
         {
             auto apply_galois_helper_ntt = [&](auto in_iter, auto out_iter) {
-                for_each_n(
-                    IterTuple<RNSIter, RNSIter>(in_iter, out_iter), coeff_modulus_count, [&](auto I) {
-                        const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
-                    });
+                for_each_n(IterTuple<RNSIter, RNSIter>(in_iter, out_iter), coeff_modulus_count, [&](auto I) {
+                    const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
+                });
             };
 
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
@@ -2303,8 +2268,7 @@ namespace seal
                 throw invalid_argument("Galois key not present");
             }
 
-            for_each_n(naf_steps.cbegin(), naf_steps.size(), [&](auto step)
-            {
+            for_each_n(naf_steps.cbegin(), naf_steps.size(), [&](auto step) {
                 // We might have a NAF-term of size coeff_count / 2; this corresponds
                 // to no rotation so we skip it. Otherwise call rotate_internal.
                 if (safe_cast<size_t>(abs(step)) != (coeff_count >> 1))
@@ -2434,7 +2398,7 @@ namespace seal
                 // RNS-NTT form exists in input
                 if (scheme == scheme_type::CKKS && i == j)
                 {
-                    t_operand_ptr = static_cast<const uint64_t*>(target) + i * coeff_count;
+                    t_operand_ptr = static_cast<const uint64_t *>(target) + i * coeff_count;
                 }
                 // Perform RNS-NTT conversion
                 else

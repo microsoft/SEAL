@@ -662,8 +662,7 @@ namespace seal
             ConstPolyIter() : rns_it_(nullptr, 0), coeff_modulus_count_(0), step_size_(0)
             {}
 
-            ConstPolyIter(
-                const std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
+            ConstPolyIter(const std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
                 : rns_it_(ptr, poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count),
                   step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count_))
             {}
@@ -782,12 +781,10 @@ namespace seal
             PtrIter(value_type ptr) : ptr_(ptr)
             {}
 
-            PtrIter(const std::vector<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr)
-                : PtrIter(arr.data())
+            PtrIter(const std::vector<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr) : PtrIter(arr.data())
             {}
 
-            PtrIter(const Pointer<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr)
-                : PtrIter(arr.get())
+            PtrIter(const Pointer<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr) : PtrIter(arr.get())
             {}
 
             PtrIter(const self_type &copy) = default;
