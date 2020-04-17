@@ -25,11 +25,6 @@ static_assert(sizeof(int) == 4, "Require sizeof(int) == 4");
 // Check that unsigned long long is 64 bits
 static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long long) == 8");
 
-/**
- * Some modular arithmetic in SEAL requires moduli to be at most 62-bit.
- * Here we choose tighter bounds (60 or 61) when defining moduli.
- */
-
 // Bounds for bit-length of all coefficient moduli
 #define SEAL_MOD_BIT_COUNT_MAX 61
 #define SEAL_MOD_BIT_COUNT_MIN 2
@@ -176,3 +171,6 @@ namespace seal
 #ifndef SEAL_MSB_INDEX_UINT64
 #define SEAL_MSB_INDEX_UINT64(result, value) get_msb_index_generic(result, value)
 #endif
+
+// Check whether an object is of expected type; this requires the type_traits header to be included
+#define SEAL_ASSERT_TYPE(obj, expected, message) static_assert(std::is_same<decltype(obj), expected>::value, message)

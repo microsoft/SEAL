@@ -1360,109 +1360,11 @@ namespace seal
             apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(0), galois_keys, std::move(pool));
         }
 
-        inline void decompose_single_coeff(
-            const SEALContext::ContextData &context_data, const std::uint64_t *value, std::uint64_t *destination,
-            util::MemoryPool &pool)
-        {
-            auto &parms = context_data.parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            std::size_t coeff_modulus_count = coeff_modulus.size();
-#ifdef SEAL_DEBUG
-            if (value == nullptr)
-            {
-                throw std::invalid_argument("value cannot be null");
-            }
-            if (destination == nullptr)
-            {
-                throw std::invalid_argument("destination cannot be null");
-            }
-            if (destination == value)
-            {
-                throw std::invalid_argument("value cannot be the same as destination");
-            }
-#endif
-            if (coeff_modulus_count == 1)
-            {
-                util::set_uint_uint(value, coeff_modulus_count, destination);
-                return;
-            }
-
-            auto value_copy(util::allocate_uint(coeff_modulus_count, pool));
-            for (std::size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                // destination[j] = util::modulo_uint(
-                //    value, coeff_modulus_count, coeff_modulus_[j], pool);
-
-                // Manually inlined for efficiency
-                // Make a fresh copy of value
-                util::set_uint_uint(value, coeff_modulus_count, value_copy.get());
-
-                // Starting from the top, reduce always 128-bit blocks
-                for (std::size_t k = coeff_modulus_count - 1; k--;)
-                {
-                    value_copy[k] = util::barrett_reduce_128(value_copy.get() + k, coeff_modulus[j]);
-                }
-                destination[j] = value_copy[0];
-            }
-        }
-
-        inline void decompose(
-            const SEALContext::ContextData &context_data, const std::uint64_t *value, std::uint64_t *destination,
-            util::MemoryPool &pool)
-        {
-            auto &parms = context_data.parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            std::size_t coeff_count = parms.poly_modulus_degree();
-            std::size_t coeff_modulus_count = coeff_modulus.size();
-            std::size_t rns_poly_uint64_count = util::mul_safe(coeff_modulus_count, coeff_count);
-#ifdef SEAL_DEBUG
-            if (value == nullptr)
-            {
-                throw std::invalid_argument("value cannot be null");
-            }
-            if (destination == nullptr)
-            {
-                throw std::invalid_argument("destination cannot be null");
-            }
-            if (destination == value)
-            {
-                throw std::invalid_argument("value cannot be the same as destination");
-            }
-#endif
-            if (coeff_modulus_count == 1)
-            {
-                util::set_uint_uint(value, rns_poly_uint64_count, destination);
-                return;
-            }
-
-            auto value_copy(util::allocate_uint(coeff_modulus_count, pool));
-            for (std::size_t i = 0; i < coeff_count; i++)
-            {
-                for (std::size_t j = 0; j < coeff_modulus_count; j++)
-                {
-                    // destination[i + (j * coeff_count)] =
-                    //    util::modulo_uint(value + (i * coeff_modulus_count),
-                    //        coeff_modulus_count, coeff_modulus_[j], pool);
-
-                    // Manually inlined for efficiency
-                    // Make a fresh copy of value + (i * coeff_modulus_count)
-                    util::set_uint_uint(value + (i * coeff_modulus_count), coeff_modulus_count, value_copy.get());
-
-                    // Starting from the top, reduce always 128-bit blocks
-                    for (std::size_t k = coeff_modulus_count - 1; k--;)
-                    {
-                        value_copy[k] = util::barrett_reduce_128(value_copy.get() + k, coeff_modulus[j]);
-                    }
-                    destination[i + (j * coeff_count)] = value_copy[0];
-                }
-            }
-        }
-
         void switch_key_inplace(
             Ciphertext &encrypted, const std::uint64_t *target, const KSwitchKeys &kswitch_keys, std::size_t key_index,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
-        void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, util::MemoryPool &pool);
+        void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool);
 
         void multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt);
 

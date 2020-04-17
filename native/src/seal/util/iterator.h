@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -20,7 +21,7 @@ namespace seal
 {
     namespace util
     {
-        /*
+        /**
         In this file we define a set of custom iterator classes ("SEAL iterators") that are used throughout Microsoft
         SEAL for easier iteration over ciphertext polynomials, their RNS components, and the coefficients in the RNS
         components. All SEAL iterators satisfy the C++ LegacyBidirectionalIterator requirements. Please note that they
@@ -134,6 +135,29 @@ namespace seal
             2. Use I, J, K, ... for the lambda function parameters representing SEAL iterators. This is compact and
                makes it very clear that the objects in question are SEAL iterators since such variable names should not
                be used in SEAL in any other context.
+
+        It is not unusual to have multiple nested for_each_n calls operating on multiple/nested IteratorTuple objects.
+        It can become very difficult to keep track of what exactly the different iterators are pointing to, and what
+        their types are (the above convention of using I, J, K, ... does not reveal the type). Hence we sometimes
+        annotate the code and check that the types match what we expect them to be using the SEAL_ASSERT_TYPE macro.
+        For example, the above code snippet would be annotated as follows:
+
+                for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
+                    SEAL_ASSERT_TYPE(I, RNSIterator, "encrypted");
+                    for_each_n(
+                        IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                        coeff_modulus_count,
+                        [&](auto J) {
+                            SEAL_ASSERT_TYPE(get<0>(J), CoeffIterator, "encrypted");
+                            SEAL_ASSERT_TYPE(get<1>(J), IteratorWrapper<const SmallModulus *>, "coeff_modulus");
+                            negate_poly_coeffmod(get<0>(J), coeff_count, **get<1>(J), get<0>(J));
+                        });
+                });
+
+        Note how SEAL_ASSERT_TYPE makes it explicit what type the different iterators are, and includes a string that
+        describes what object is iterated over. We use this convention in particularly complex functions to make the
+        code easier to follow and less error-prone. The code will fail to compile if the type of the object in the first
+        parameter does not match the type in the second parameter of the macro.
         */
 #ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.
