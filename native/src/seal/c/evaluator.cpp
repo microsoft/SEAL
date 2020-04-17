@@ -613,7 +613,7 @@ SEAL_C_FUNC Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void 
 }
 
 SEAL_C_FUNC Evaluator_ApplyGalois(
-    void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool)
+    void *thisptr, void *encrypted, uint32_t galois_elt, void *galois_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);

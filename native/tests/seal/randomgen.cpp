@@ -14,7 +14,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace
     {
@@ -195,4 +195,4 @@ namespace SEALTest
             ASSERT_TRUE(find(results.begin(), results.end(), value) != results.end());
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

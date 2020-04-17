@@ -9,7 +9,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(EncryptionParametersTest, EncryptionParametersSet)
     {
@@ -145,4 +145,4 @@ namespace SEALTest
         ASSERT_TRUE(parms.poly_modulus_degree() == parms2.poly_modulus_degree());
         ASSERT_TRUE(parms == parms2);
     }
-} // namespace SEALTest
+} // namespace sealtest

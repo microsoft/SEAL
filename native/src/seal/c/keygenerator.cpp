@@ -26,19 +26,14 @@ struct seal::KeyGenerator::KeyGeneratorPrivateHelper
         return keygen->relin_keys(size_t(1), save_seed);
     }
 
-    static GaloisKeys galois_keys(KeyGenerator *keygen, const vector<uint64_t> &galois_elts, bool save_seed)
+    static GaloisKeys galois_keys(KeyGenerator *keygen, const vector<uint32_t> &galois_elts, bool save_seed)
     {
         return keygen->galois_keys(galois_elts, save_seed);
     }
 
-    static vector<uint64_t> galois_elts_from_steps(KeyGenerator *keygen, const vector<int> &steps)
+    static const GaloisTool *galois_tool(KeyGenerator *keygen)
     {
-        return keygen->galois_elts_from_steps(steps);
-    }
-
-    static vector<uint64_t> galois_elts_all(KeyGenerator *keygen)
-    {
-        return keygen->galois_elts_all();
+        return keygen->context_->key_context_data()->galois_tool();
     }
 
     static bool using_keyswitching(const KeyGenerator &keygen)
@@ -117,14 +112,14 @@ SEAL_C_FUNC KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_k
 }
 
 SEAL_C_FUNC KeyGenerator_GaloisKeysFromElts(
-    void *thisptr, uint64_t count, uint64_t *galois_elts, bool save_seed, void **galois_keys)
+    void *thisptr, uint64_t count, uint32_t *galois_elts, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
     IfNullRet(galois_elts, E_POINTER);
     IfNullRet(galois_keys, E_POINTER);
 
-    vector<uint64_t> galois_elts_vec;
+    vector<uint32_t> galois_elts_vec;
     copy_n(galois_elts, count, back_inserter(galois_elts_vec));
 
     try
@@ -154,11 +149,11 @@ SEAL_C_FUNC KeyGenerator_GaloisKeysFromSteps(
 
     vector<int> steps_vec;
     copy_n(steps, count, back_inserter(steps_vec));
-    vector<uint64_t> galois_elts_vec;
+    vector<uint32_t> galois_elts_vec;
 
     try
     {
-        galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_elts_from_steps(keygen, steps_vec);
+        galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_tool(keygen)->get_elts_from_steps(steps_vec);
         GaloisKeys *keys =
             new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
@@ -180,7 +175,7 @@ SEAL_C_FUNC KeyGenerator_GaloisKeysAll(void *thisptr, bool save_seed, void **gal
     IfNullRet(keygen, E_POINTER);
     IfNullRet(galois_keys, E_POINTER);
 
-    vector<uint64_t> galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_elts_all(keygen);
+    vector<uint32_t> galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_tool(keygen)->get_elts_all();
 
     try
     {

@@ -238,16 +238,16 @@ namespace seal
 
         // Can we use NTT with coeff_modulus?
         context_data.qualifiers_.using_ntt = true;
-        context_data.small_ntt_tables_ = allocate<SmallNTTTables>(coeff_modulus_count, pool_, pool_);
-        for (size_t i = 0; i < coeff_modulus_count; i++)
+        try
         {
-            if (!context_data.small_ntt_tables_[i].initialize(coeff_count_power, coeff_modulus[i]))
-            {
-                // Parameters are not valid
-                context_data.qualifiers_.using_ntt = false;
-                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_no_ntt;
-                return context_data;
-            }
+            CreateSmallNTTTables(coeff_count_power, coeff_modulus, context_data.small_ntt_tables_, pool_);
+        }
+        catch (const invalid_argument &)
+        {
+            context_data.qualifiers_.using_ntt = false;
+            // Parameters are not valid
+            context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_no_ntt;
+            return context_data;
         }
 
         if (parms.scheme() == scheme_type::BFV)
@@ -281,11 +281,14 @@ namespace seal
             }
 
             // Can we use batching? (NTT with plain_modulus)
-            context_data.qualifiers_.using_batching = false;
-            context_data.plain_ntt_tables_ = allocate<SmallNTTTables>(pool_);
-            if (context_data.plain_ntt_tables_->initialize(coeff_count_power, plain_modulus))
+            context_data.qualifiers_.using_batching = true;
+            try
             {
-                context_data.qualifiers_.using_batching = true;
+                CreateSmallNTTTables(coeff_count_power, { plain_modulus }, context_data.plain_ntt_tables_, pool_);
+            }
+            catch (const invalid_argument &)
+            {
+                context_data.qualifiers_.using_batching = false;
             }
 
             // Check for plain_lift
@@ -382,13 +385,28 @@ namespace seal
         // RNSTool's constructor may fail due to:
         //   (1) auxiliary base being too large
         //   (2) cannot find inverse of punctured products in auxiliary base
-        context_data.rns_tool_ = allocate<RNSTool>(pool_, pool_);
-        if (!context_data.rns_tool_->initialize(poly_modulus_degree, *coeff_modulus_base, plain_modulus))
+        try
+        {
+            context_data.rns_tool_ =
+                allocate<RNSTool>(pool_, poly_modulus_degree, *coeff_modulus_base, plain_modulus, pool_);
+        }
+        catch (const exception &)
         {
             // Parameters are not valid
             context_data.qualifiers_.parameter_error = error_type::failed_creating_rns_tool;
             return context_data;
         }
+
+        // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
+        context_data.qualifiers_.using_descending_modulus_chain = true;
+        for (size_t i = 0; i < coeff_modulus_count - 1; i++)
+        {
+            context_data.qualifiers_.using_descending_modulus_chain &=
+                (coeff_modulus[i].value() > coeff_modulus[i + 1].value());
+        }
+
+        // Create GaloisTool
+        context_data.galois_tool_ = allocate<GaloisTool>(pool_, coeff_count_power, pool_);
 
         // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
         context_data.qualifiers_.using_descending_modulus_chain = true;

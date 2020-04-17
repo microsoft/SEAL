@@ -20,13 +20,13 @@ namespace SEALNetTest
             Assert.IsNotNull(cipher);
             Assert.AreEqual(0ul, cipher.Size);
             Assert.AreEqual(0ul, cipher.PolyModulusDegree);
-            Assert.AreEqual(0ul, cipher.CoeffModCount);
+            Assert.AreEqual(0ul, cipher.CoeffModulusCount);
 
             Ciphertext copy = new Ciphertext(cipher);
             Assert.IsNotNull(copy);
             Assert.AreEqual(0ul, copy.Size);
             Assert.AreEqual(0ul, copy.PolyModulusDegree);
-            Assert.AreEqual(0ul, copy.CoeffModCount);
+            Assert.AreEqual(0ul, copy.CoeffModulusCount);
         }
 
         [TestMethod]
@@ -122,13 +122,13 @@ namespace SEALNetTest
 
             Assert.AreEqual(2ul, cipher.Size);
             Assert.AreEqual(8192ul, cipher.PolyModulusDegree);
-            Assert.AreEqual(4ul, cipher.CoeffModCount);
+            Assert.AreEqual(4ul, cipher.CoeffModulusCount);
 
             Ciphertext loaded = new Ciphertext();
 
             Assert.AreEqual(0ul, loaded.Size);
             Assert.AreEqual(0ul, loaded.PolyModulusDegree);
-            Assert.AreEqual(0ul, loaded.CoeffModCount);
+            Assert.AreEqual(0ul, loaded.CoeffModulusCount);
 
             using (MemoryStream mem = new MemoryStream())
             {
@@ -141,10 +141,10 @@ namespace SEALNetTest
 
             Assert.AreEqual(2ul, loaded.Size);
             Assert.AreEqual(8192ul, loaded.PolyModulusDegree);
-            Assert.AreEqual(4ul, loaded.CoeffModCount);
+            Assert.AreEqual(4ul, loaded.CoeffModulusCount);
             Assert.IsTrue(ValCheck.IsValidFor(loaded, context));
 
-            ulong ulongCount = cipher.Size * cipher.PolyModulusDegree * cipher.CoeffModCount;
+            ulong ulongCount = cipher.Size * cipher.PolyModulusDegree * cipher.CoeffModulusCount;
             for (ulong i = 0; i < ulongCount; i++)
             {
                 Assert.AreEqual(cipher[i], loaded[i]);

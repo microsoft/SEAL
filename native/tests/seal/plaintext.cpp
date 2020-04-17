@@ -14,7 +14,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(PlaintextTest, PlaintextBasics)
     {
@@ -161,4 +161,4 @@ namespace SEALTest
             ASSERT_TRUE(plain2.is_ntt_form());
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

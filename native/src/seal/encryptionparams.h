@@ -41,7 +41,7 @@ namespace seal
     /**
     A parms_id_type value consisting of zeros.
     */
-    static constexpr parms_id_type parms_id_zero = util::HashFunction::hash_zero_block;
+    extern const parms_id_type parms_id_zero;
 
     /**
     Represents user-customizable encryption scheme settings. The parameters (most

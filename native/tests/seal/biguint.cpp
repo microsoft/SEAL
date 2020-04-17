@@ -8,7 +8,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(BigUnsignedInt, EmptyBigUInt)
     {
@@ -375,4 +375,4 @@ namespace SEALTest
             ASSERT_TRUE(p3 == 456);
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

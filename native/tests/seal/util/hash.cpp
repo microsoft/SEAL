@@ -8,7 +8,7 @@
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -46,4 +46,4 @@ namespace SEALTest
             ASSERT_TRUE(hash1 != hash2);
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

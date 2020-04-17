@@ -10,6 +10,10 @@ namespace seal
 {
     namespace util
     {
+        // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to
+        // ensure symbol is created.
+        constexpr double ComplexRoots::PI_;
+
         ComplexRoots::ComplexRoots(size_t degree_of_roots, MemoryPoolHandle pool)
             : degree_of_roots_(degree_of_roots), pool_(std::move(pool))
         {

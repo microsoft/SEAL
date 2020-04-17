@@ -211,7 +211,7 @@ namespace seal
         /**
         Returns whether the MemoryPoolHandle is initialized.
         */
-        SEAL_NODISCARD inline operator bool() const noexcept
+        SEAL_NODISCARD inline explicit operator bool() const noexcept
         {
             return pool_.operator bool();
         }

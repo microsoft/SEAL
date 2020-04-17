@@ -13,7 +13,7 @@ using namespace std;
 using namespace seal;
 using namespace seal::c;
 
-SEAL_C_FUNC GaloisKeys_GetIndex(uint64_t galois_elt, uint64_t *index)
+SEAL_C_FUNC GaloisKeys_GetIndex(uint32_t galois_elt, uint64_t *index)
 {
     IfNullRet(index, E_POINTER);
 

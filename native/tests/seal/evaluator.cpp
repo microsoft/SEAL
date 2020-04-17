@@ -19,7 +19,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(EvaluatorTest, BFVEncryptNegateDecrypt)
     {
@@ -3547,7 +3547,7 @@ namespace SEALTest
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
-        GaloisKeys glk = keygen.galois_keys_local(vector<uint64_t>{ 1, 3, 5, 15 });
+        GaloisKeys glk = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 15 });
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
@@ -3887,4 +3887,4 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
     }
-} // namespace SEALTest
+} // namespace sealtest

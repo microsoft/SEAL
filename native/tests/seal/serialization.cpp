@@ -12,7 +12,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     struct test_struct
     {
@@ -47,19 +47,19 @@ namespace SEALTest
         ASSERT_EQ(sizeof(Serialization::SEALHeader), Serialization::seal_header_size);
 
         Serialization::SEALHeader header, loaded_header, invalid_header;
-        header.compr_mode = compr_mode_type::deflate;
+        header.compr_mode = compr_mode_type::none;
         header.size = 256;
         stringstream stream;
         Serialization::SaveHeader(header, stream);
         ASSERT_TRUE(Serialization::IsValidHeader(header));
         Serialization::LoadHeader(stream, loaded_header);
-        ASSERT_EQ(loaded_header.magic, Serialization::seal_magic);
-        ASSERT_EQ(loaded_header.header_size, Serialization::seal_header_size);
-        ASSERT_EQ(loaded_header.version_major, SEAL_VERSION_MAJOR);
-        ASSERT_EQ(loaded_header.version_minor, SEAL_VERSION_MINOR);
-        ASSERT_EQ(loaded_header.compr_mode, compr_mode_type::deflate);
-        ASSERT_EQ(loaded_header.reserved, 0x00);
-        ASSERT_EQ(loaded_header.size, 256);
+        ASSERT_EQ(Serialization::seal_magic, loaded_header.magic);
+        ASSERT_EQ(Serialization::seal_header_size, loaded_header.header_size);
+        ASSERT_EQ(SEAL_VERSION_MAJOR, loaded_header.version_major);
+        ASSERT_EQ(SEAL_VERSION_MINOR, loaded_header.version_minor);
+        ASSERT_EQ(compr_mode_type::none, loaded_header.compr_mode);
+        ASSERT_EQ(0x00, loaded_header.reserved);
+        ASSERT_EQ(256, loaded_header.size);
 
         invalid_header.magic = 0x1212;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
@@ -149,4 +149,4 @@ namespace SEALTest
         ASSERT_EQ(st.c, st3.c);
 #endif
     }
-} // namespace SEALTest
+} // namespace sealtest

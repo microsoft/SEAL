@@ -81,9 +81,9 @@ namespace SEALNetTest
 
                     Assert.AreEqual(keysCipher.Data.Size, otherCipher.Data.Size);
                     Assert.AreEqual(keysCipher.Data.PolyModulusDegree, otherCipher.Data.PolyModulusDegree);
-                    Assert.AreEqual(keysCipher.Data.CoeffModCount, otherCipher.Data.CoeffModCount);
+                    Assert.AreEqual(keysCipher.Data.CoeffModulusCount, otherCipher.Data.CoeffModulusCount);
 
-                    ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModCount;
+                    ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModulusCount;
                     for (ulong k = 0; k < coeffCount; k++)
                     {
                         Assert.AreEqual(keysCipher.Data[k], otherCipher.Data[k]);
@@ -229,7 +229,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            GaloisKeys keys = keygen.GaloisKeysLocal(galoisElts: new ulong[] { 1, 3 });
+            GaloisKeys keys = keygen.GaloisKeysLocal(galoisElts: new uint[] { 1, 3 });
             Assert.IsNotNull(keys);
 
             Assert.AreEqual(2ul, keys.Size);

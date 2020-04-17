@@ -52,10 +52,12 @@
     <ClInclude Include="seal\util\common.h" />
     <ClInclude Include="seal\util\croots.h" />
     <ClInclude Include="seal\util\defines.h" />
+    <ClInclude Include="seal\util\galois.h" />
     <ClInclude Include="seal\util\gcc.h" />
     <ClInclude Include="seal\util\globals.h" />
     <ClInclude Include="seal\util\hash.h" />
     <ClInclude Include="seal\util\hestdparms.h" />
+    <ClInclude Include="seal\util\iterator.h" />
     <ClInclude Include="seal\util\locks.h" />
     <ClInclude Include="seal\util\mempool.h" />
     <ClInclude Include="seal\util\msvc.h" />
@@ -103,7 +105,9 @@
     <ClCompile Include="seal\util\blake2xb.c" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
     <ClCompile Include="seal\util\croots.cpp" />
+    <ClCompile Include="seal\util\galois.cpp" />
     <ClCompile Include="seal\util\globals.cpp" />
+    <ClCompile Include="seal\util\hash.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
     <ClCompile Include="seal\util\polyarith.cpp" />
@@ -112,6 +116,7 @@
     <ClCompile Include="seal\util\rlwe.cpp" />
     <ClCompile Include="seal\util\scalingvariant.cpp" />
     <ClCompile Include="seal\util\smallntt.cpp" />
+    <ClCompile Include="seal\util\streambuf.cpp" />
     <ClCompile Include="seal\util\uintarith.cpp" />
     <ClCompile Include="seal\util\uintarithmod.cpp" />
     <ClCompile Include="seal\util\uintarithsmallmod.cpp" />
@@ -221,7 +226,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/zlib-src;$(SolutionDir)/thirdparty/zlib/zlib-build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform);$(SolutionDir)/thirdparty/zlib/src;$(ProjectDir)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -244,7 +249,7 @@
     </PreBuildEvent>
     <Lib>
       <AdditionalDependencies>Bcrypt.lib;zlibstaticd.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\zlib-build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -253,7 +258,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/zlib-src;$(SolutionDir)/thirdparty/zlib/zlib-build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/src;$(SolutionDir)/thirdparty/zlib/build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -275,7 +280,7 @@
     </PreBuildEvent>
     <Lib>
       <AdditionalDependencies>Bcrypt.lib;zlibstaticd.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\zlib-build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -286,7 +291,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/zlib-src;$(SolutionDir)/thirdparty/zlib/zlib-build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/src;$(SolutionDir)/thirdparty/zlib/build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -310,7 +315,7 @@
     </PreBuildEvent>
     <Lib>
       <AdditionalDependencies>Bcrypt.lib;zlibstatic.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\zlib-build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -321,7 +326,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/zlib-src;$(SolutionDir)/thirdparty/zlib/zlib-build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/src;$(SolutionDir)/thirdparty/zlib/build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -344,7 +349,7 @@
     </PreBuildEvent>
     <Lib>
       <AdditionalDependencies>Bcrypt.lib;zlibstatic.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\zlib-build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>

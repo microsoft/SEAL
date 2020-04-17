@@ -55,6 +55,7 @@ set(SEAL_USE_SHARED_MUTEX OFF)
 set(SEAL_USE_IF_CONSTEXPR OFF)
 set(SEAL_USE_MAYBE_UNUSED OFF)
 set(SEAL_USE_NODISCARD OFF)
+set(SEAL_USE_STD_FOR_EACH_N OFF)
 set(SEAL_LANG_FLAG "-std=c++14")
 if(SEAL_USE_CXX17)
     set(SEAL_USE_STD_BYTE ON)
@@ -62,6 +63,7 @@ if(SEAL_USE_CXX17)
     set(SEAL_USE_IF_CONSTEXPR ON)
     set(SEAL_USE_MAYBE_UNUSED ON)
     set(SEAL_USE_NODISCARD ON)
+    set(SEAL_USE_STD_FOR_EACH_N ON)
     set(SEAL_LANG_FLAG "-std=c++17")
 endif()
 
@@ -79,6 +81,9 @@ function(enable_cxx_compiler_flag_if_supported flag)
         unset(flag_supported CACHE)
     endif()
 endfunction()
+
+# Always build position-independent-code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # In Debug mode, enable extra compiler flags.
 if(SEAL_DEBUG)
@@ -183,78 +188,141 @@ endmacro()
 # External dependencies #
 #########################
 
-# Use Microsoft GSL
+set(THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
+
+# [option] SEAL_USE_MSGSL
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 
+# Download and configure
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    add_subdirectory(thirdparty/msgsl)
-    ExternalProject_Get_Property(msgsl_external SOURCE_DIR)
-    add_library(msgsl IMPORTED INTERFACE)
-
-    # We need to create the include directory so it exists at the time
-    # of configuration. Otherwise set_target_properties below will fail.
-    set(MSGSL_INCLUDE_DIR ${SOURCE_DIR}/include)
-    file(MAKE_DIRECTORY ${MSGSL_INCLUDE_DIR})
-
-    set_target_properties(msgsl PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${MSGSL_INCLUDE_DIR})
-    add_dependencies(msgsl msgsl_external)
+    message(STATUS "Setting up MSGSL ...")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        OUTPUT_QUIET
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+    if(result)
+        message(WARNING "Failed to download MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
+    endif()
 endif()
 
-# Use ZLIB
+# Build
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} --build .
+        OUTPUT_QUIET
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+    if(result)
+        message(WARNING "Failed to build MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
+    endif()
+    set(GSL_CXX_STANDARD "14" CACHE STRING "" FORCE)
+    mark_as_advanced(GSL_CXX_STANDARD )
+    set(GSL_TEST OFF CACHE BOOL "" FORCE)
+    mark_as_advanced(GSL_TEST)
+endif()
+
+# Set up the targets
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    add_subdirectory(
+        ${THIRDPARTY_DIR}/msgsl/src
+        EXCLUDE_FROM_ALL)
+    set(MSGSL_INCLUDE_DIR ${THIRDPARTY_DIR}/msgsl/src/include)
+endif()
+
+# [option] SEAL_USE_ZLIB
 set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
 
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    add_subdirectory(thirdparty/zlib)
-    ExternalProject_Get_Property(zlib_external SOURCE_DIR BINARY_DIR)
-    add_library(zlibstatic STATIC IMPORTED)
-
-    set(ZLIB_FILENAME "libz.a")
-    set(ZLIB_LIBRARY_PATH ${BINARY_DIR}/${ZLIB_FILENAME})
-    set_target_properties(zlibstatic PROPERTIES
-        IMPORTED_LOCATION ${ZLIB_LIBRARY_PATH})
-    set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${SOURCE_DIR})
-    add_dependencies(zlibstatic zlib_external)
+# ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning for CMake 3.17.1+
+if(SEAL_USE_ZLIB AND NOT MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.17.1)
+    set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
 endif()
 
-# Use Google Test
-if(SEAL_BUILD_TESTS AND NOT MSVC)
-    # This follows the example in
-    # https://github.com/google/googletest/blob/release-1.10.0/googletest/README.md.
-
-    # Download
-    message(STATUS "Setting up Google Test ...")
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+# Download and configure
+if(SEAL_USE_ZLIB AND NOT MSVC)
+    message(STATUS "Setting up ZLIB ...")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY thirdparty/googletest)
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+    if(result)
+        message(WARNING "Failed to download ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
+    endif()
+    mark_as_advanced(AMD64)
+    mark_as_advanced(ASM686)
+    mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
+    mark_as_advanced(CMAKE_INSTALL_PREFIX)
+    mark_as_advanced(INSTALL_BIN_DIR)
+    mark_as_advanced(INSTALL_INC_DIR)
+    mark_as_advanced(INSTALL_LIB_DIR)
+    mark_as_advanced(INSTALL_MAN_DIR)
+    mark_as_advanced(INSTALL_PKGCONFIG_DIR)
+    mark_as_advanced(LIBRARY_OUTPUT_PATH)
+    mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
+endif()
+
+# Build
+if(SEAL_USE_ZLIB AND NOT MSVC)
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        OUTPUT_QUIET
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+    if(result)
+        message(WARNING "Failed to build ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
+    endif()
+endif()
+
+# Set up the targets
+if(SEAL_USE_ZLIB AND NOT MSVC)
+    add_subdirectory(
+        ${THIRDPARTY_DIR}/zlib/src
+        EXCLUDE_FROM_ALL)
+    set_target_properties(zlibstatic PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES ${THIRDPARTY_DIR}/zlib/src)
+    set(zlibstatic_LIBRARY_PATH ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/libz.a)
+endif()
+
+# Google Test
+# This follows the example in
+# https://github.com/google/googletest/blob/release-1.10.0/googletest/README.md.
+
+# Download and configure
+if(SEAL_BUILD_TESTS AND NOT MSVC)
+    message(STATUS "Setting up Google Test ...")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        OUTPUT_QUIET
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/googletest)
     if(result)
         message(WARNING "Failed to download Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
     endif()
-
     set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
     mark_as_advanced(BUILD_GMOCK)
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     mark_as_advanced(INSTALL_GTEST)
+endif()
 
-    # Build
+# Build
+if(SEAL_BUILD_TESTS AND NOT MSVC)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY thirdparty/googletest)
+        WORKING_DIRECTORY ${THIRDPARTY_DIR}/googletest)
     if(result)
         message(WARNING "Failed to build Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
     endif()
+endif()
 
+# Set up the targets
+if(SEAL_BUILD_TESTS AND NOT MSVC)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-    # Set up the targets
     add_subdirectory(
-        thirdparty/googletest/googletest-src
-        thirdparty/googletest/googletest-build
+        ${THIRDPARTY_DIR}/googletest/src
+        ${THIRDPARTY_DIR}/googletest/build
         EXCLUDE_FROM_ALL)
 endif()
 
@@ -270,13 +338,35 @@ if(MSVC AND BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL ${BUILD_SHARED_LIBS_STR} FORCE)
 endif()
 
-# Always build position-independent-code
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 # Throw on multiply_plain by a zero plaintext
 set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member of Evaluator outputs a transparent ciphertext")
 option(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR} ON)
 mark_as_advanced(FORCE SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT)
+
+# In some non-MSVC compilers std::for_each_n is not available even when compiling as C++17
+if(SEAL_USE_STD_FOR_EACH_N)
+    cmake_push_check_state(RESET)
+    set(CMAKE_REQUIRED_QUIET TRUE)
+
+    if(NOT MSVC)
+        set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
+        check_cxx_source_runs("
+            #include <algorithm>
+            int main() {
+                int a[1]{ 0 };
+                volatile auto fun = std::for_each_n(a, 1, [](auto b) {});
+                return 0;
+            }"
+            USE_STD_FOR_EACH_N
+        )
+        if(NOT USE_STD_FOR_EACH_N EQUAL 1)
+            set(SEAL_USE_STD_FOR_EACH_N OFF)
+        endif()
+        unset(USE_STD_FOR_EACH_N CACHE)
+    endif()
+
+    cmake_pop_check_state()
+endif()
 
 # Use intrinsics if available
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
@@ -294,6 +384,7 @@ if(SEAL_USE_INTRIN)
     if(NOT HAVE_INTRIN_HEADER)
         set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
     endif()
+    unset(HAVE_INTRIN_HEADER CACHE)
 endif()
 
 # Specific intrinsics depending on SEAL_USE_INTRIN
@@ -341,6 +432,7 @@ if(SEAL_USE_INTRIN)
             if(NOT USE_UMUL128 EQUAL 1)
                 set(SEAL_USE__UMUL128 OFF CACHE BOOL ${SEAL_USE__UMUL128_OPTION_STR} FORCE)
             endif()
+            unset(USE_UMUL128 CACHE)
         endif()
 
         # Check for _BitScanReverse64
@@ -357,14 +449,18 @@ if(SEAL_USE_INTRIN)
             if(NOT USE_BITSCANREVERSE64 EQUAL 1)
                 set(SEAL_USE__BITSCANREVERSE64 OFF CACHE BOOL ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} FORCE)
             endif()
+            unset(USE_BITSCANREVERSE64 CACHE)
         endif()
     else()
-        # Check for presence of ___int128
+        # Check for presence of __int128
         if(SEAL_USE___INT128)
+            set(CMAKE_EXTRA_INCLUDE_FILES ${SEAL_INTRIN_HEADER})
             check_type_size("__int128" INT128 LANGUAGE CXX)
             if(NOT INT128 EQUAL 16)
                 set(SEAL_USE___INT128 OFF CACHE BOOL ${SEAL_USE___INT128_OPTION_STR} FORCE)
             endif()
+            unset(HAVE_INT128 CACHE)
+            unset(INT128 CACHE)
         endif()
 
         # Check for __builtin_clzll
@@ -379,6 +475,7 @@ if(SEAL_USE_INTRIN)
             if(NOT USE_BUILTIN_CLZLL EQUAL 1)
                 set(SEAL_USE___BUILTIN_CLZLL OFF CACHE BOOL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} FORCE)
             endif()
+            unset(USE_BUILTIN_CLZLL CACHE)
         endif()
     endif()
 
@@ -396,6 +493,7 @@ if(SEAL_USE_INTRIN)
         if(NOT USE_ADDCARRY_U64 EQUAL 1)
             set(SEAL_USE__ADDCARRY_U64 OFF CACHE BOOL ${SEAL_USE__ADDCARRY_U64_OPTION_STR} FORCE)
         endif()
+        unset(USE_ADDCARRY_U64 CACHE)
     endif()
 
     # Check for _subborrow_u64
@@ -412,6 +510,7 @@ if(SEAL_USE_INTRIN)
         if(NOT USE_SUBBORROW_U64 EQUAL 1)
             set(SEAL_USE__SUBBORROW_U64 OFF CACHE BOOL ${SEAL_USE__SUBBORROW_U64_OPTION_STR} FORCE)
         endif()
+        unset(USE_SUBBORROW_U64 CACHE)
     endif()
 
     cmake_pop_check_state()
@@ -428,12 +527,10 @@ set_language(seal_obj)
 set_include_directories(seal_obj)
 
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    # Make sure Microsoft GSL is downloaded
-    target_link_libraries(seal_obj PUBLIC msgsl)
+    target_link_libraries(seal_obj PUBLIC GSL)
 endif()
 
 if(SEAL_USE_ZLIB AND NOT MSVC)
-    # Make sure ZLIB is downloaded
     target_link_libraries(seal_obj PRIVATE zlibstatic)
 endif()
 
@@ -493,6 +590,24 @@ if(BUILD_SHARED_LIBS)
     install_target(seal_shared SEALTargets)
 endif()
 
+# The following are executed post build
+
+# In UNIX-like platforms copy Microsoft GSL include files into native/src
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    add_custom_command(TARGET seal POST_BUILD
+        COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
+endif()
+
+# In UNIX-like platforms combine manually seal and zlibstatic into a single archive; not pretty, but works
+if(SEAL_USE_ZLIB AND NOT MSVC)
+    add_custom_command(TARGET seal POST_BUILD
+        COMMAND ar x $<TARGET_FILE:seal>
+        COMMAND ar x ${zlibstatic_LIBRARY_PATH}
+        COMMAND ar rcs $<TARGET_FILE:seal> *.o
+        COMMAND rm -f *.o
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
+endif()
+
 #########################
 # SEAL C export library #
 #########################
@@ -503,6 +618,9 @@ check_type_size("size_t" SIZET LANGUAGE C)
 
 set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
 cmake_dependent_option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} OFF "${SIZET} EQUAL 8" OFF)
+
+unset(SIZET CACHE)
+unset(HAVE_SIZET CACHE)
 
 # Create shared SEAL_C library but add no source files yet
 if(SEAL_BUILD_SEAL_C)
@@ -560,10 +678,21 @@ export(
     NAMESPACE SEAL::
     FILE ${SEAL_TARGETS_FILENAME})
 
+# In UNIX-like platforms install MSGSL header files
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    install(
+        DIRECTORY
+            ${MSGSL_INCLUDE_DIR}/gsl
+        DESTINATION
+            ${SEAL_INCLUDES_INSTALL_DIR}
+    )
+endif()
+
 #####################
 # SEAL C++ examples #
 #####################
 
+# [option] SEAL_BUILD_EXAMPLES
 set(SEAL_BUILD_EXAMPLES_OPTION_STR "Build C++ examples for Microsoft SEAL")
 option(SEAL_BUILD_EXAMPLES ${SEAL_BUILD_EXAMPLES_OPTION_STR} OFF)
 
@@ -577,6 +706,7 @@ endif()
 # SEAL C++ tests #
 ##################
 
+# [option] SEAL_BUILD_TESTS
 set(SEAL_BUILD_TESTS_OPTION_STR "Build C++ tests for Microsoft SEAL")
 option(SEAL_BUILD_TESTS ${SEAL_BUILD_TESTS_OPTION_STR} OFF)
 

@@ -175,14 +175,14 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
-        public GaloisKeys GaloisKeysLocal(IEnumerable<ulong> galoisElts)
+        public GaloisKeys GaloisKeysLocal(IEnumerable<uint> galoisElts)
         {
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
             if (!UsingKeyswitching())
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            ulong[] galoisEltsArr = galoisElts.ToArray();
+            uint[] galoisEltsArr = galoisElts.ToArray();
             NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
                 (ulong)galoisEltsArr.Length, galoisEltsArr, false, out IntPtr galoisKeysPtr);
             return new GaloisKeys(galoisKeysPtr);
@@ -221,14 +221,14 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
-        public Serializable<GaloisKeys> GaloisKeys(IEnumerable<ulong> galoisElts)
+        public Serializable<GaloisKeys> GaloisKeys(IEnumerable<uint> galoisElts)
         {
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
             if (!UsingKeyswitching())
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            ulong[] galoisEltsArr = galoisElts.ToArray();
+            uint[] galoisEltsArr = galoisElts.ToArray();
             NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
                 (ulong)galoisEltsArr.Length, galoisEltsArr, true, out IntPtr galoisKeysPtr);
             GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr);

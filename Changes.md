@@ -22,7 +22,6 @@
 
 - [native/src/seal/serializable.h](native/src/seal/serializable.h)
 - [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
-- [native/src/seal/util/crootsquad.h](native/src/seal/util/crootsquad.h)
 - [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
 - [native/src/seal/c/version.h](native/src/seal/c/version.h)
 - [native/src/seal/c/version.cpp](native/src/seal/c/version.cpp)
@@ -43,6 +42,7 @@
 - Moved `dotnet/native/` to be under `native/src/c/`. The C export library in this directory can be used to build wrappers for other languages also -- not just .NET.
 - Changed the CMake file structure. Targets available are now: `SEAL::seal` (static library), `SEAL::seal_shared` (shared library), `SEAL::sealc` (C export library).
 - There is now a `.clang-format` for automated formatting of C++ (`.cpp` and `.h`) files. A bash script is added. Run `bash tools/scripts/clang-format-all.sh` for easy formatting. This is compatible with clang-format-9 and above. Support for C# is not yet ideal.
+- For the .NET projects we are switching to using C# 8.0 and hence require .NET Core 3.x (.NET Standard 2.1). Therefore, Visual Studio 2017 is no longer supported for building the .NET projects, but only for the C++ projects.
 
 ## Version 3.4.5
 

@@ -11,7 +11,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(MemoryPoolHandleTest, MemoryPoolHandleConstructAssign)
     {
@@ -67,4 +67,4 @@ namespace SEALTest
         }
         ASSERT_EQ(1L, pool.use_count());
     }
-} // namespace SEALTest
+} // namespace sealtest

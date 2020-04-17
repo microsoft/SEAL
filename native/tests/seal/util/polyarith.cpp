@@ -10,7 +10,7 @@ using namespace seal::util;
 using namespace std;
 using namespace seal;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -502,4 +502,4 @@ namespace SEALTest
             ASSERT_EQ(poly2[11], 0ULL);
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

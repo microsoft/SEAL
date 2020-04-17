@@ -136,7 +136,7 @@ namespace seal
             return static_cast<std::uint64_t>(temp) + (modulus.value() & static_cast<std::uint64_t>(-borrow));
         }
 
-        template <typename T, typename = std::enable_if<is_uint64_v<T>>>
+        template <typename T, typename = std::enable_if_t<is_uint64_v<T>>>
         SEAL_NODISCARD inline std::uint64_t barrett_reduce_128(const T *input, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -177,7 +177,7 @@ namespace seal
                    (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp3 >= modulus.value())));
         }
 
-        template <typename T, typename = std::enable_if<is_uint64_v<T>>>
+        template <typename T, typename = std::enable_if_t<is_uint64_v<T>>>
         SEAL_NODISCARD inline std::uint64_t barrett_reduce_63(T input, const SmallModulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -301,8 +301,6 @@ namespace seal
         void divide_uint_uint_mod_inplace(
             std::uint64_t *numerator, const SmallModulus &modulus, std::size_t uint64_count, std::uint64_t *quotient,
             MemoryPool &pool);
-
-        SEAL_NODISCARD std::uint64_t galois_elt_from_step(int steps, std::size_t coeff_count);
 
         // Computes a dot product of two uint64_t arrays
         std::uint64_t dot_product_mod(

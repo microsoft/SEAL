@@ -10,7 +10,7 @@
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -268,4 +268,4 @@ namespace SEALTest
             ASSERT_EQ(0, memcmp(correct, parsed, 3 * sizeof(uint64_t)));
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

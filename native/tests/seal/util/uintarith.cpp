@@ -8,7 +8,7 @@
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -1784,4 +1784,4 @@ namespace SEALTest
             ASSERT_EQ(12389286314587456613ULL, exponentiate_uint64(123456789ULL, 13ULL));
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

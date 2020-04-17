@@ -80,7 +80,7 @@ endif()
 if(TARGET SEAL::sealc)
     set(SEAL_C_FOUND TRUE)
 endif()
-        
+
 if(SEAL_FOUND)
     status_when_not_quiet("Microsoft SEAL -> Version ${SEAL_VERSION} detected")
     if(SEAL_DEBUG)

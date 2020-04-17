@@ -10,7 +10,7 @@
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -350,4 +350,4 @@ namespace SEALTest
             ASSERT_EQ(static_cast<uint64_t>(0), value[1]);
         }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

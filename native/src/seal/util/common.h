@@ -533,7 +533,7 @@ namespace seal
             return 0;
         }
 
-        template <typename T, typename = std::enable_if<std::is_integral<T>::value>>
+        template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
         SEAL_NODISCARD inline T divide_round_up(T value, T divisor)
         {
 #ifdef SEAL_DEBUG

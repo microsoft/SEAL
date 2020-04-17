@@ -338,7 +338,7 @@ namespace seal
             {
                 if (!product_fits_in(count, size_))
                 {
-                    throw invalid_argument("count is too large");
+                    throw logic_error("invalid parameters");
                 }
 
                 // Decompose an array of multi-precision integers into an array of arrays,
@@ -414,7 +414,7 @@ namespace seal
             {
                 if (!product_fits_in(count, size_))
                 {
-                    throw invalid_argument("count is too large");
+                    throw logic_error("invalid parameters");
                 }
 
                 // Compose an array of arrays of integers (one array per base element) into
@@ -495,7 +495,7 @@ namespace seal
             // Verify that the size is not too large
             if (!product_fits_in(ibase_.size(), obase_.size()))
             {
-                throw invalid_argument("bases are too large");
+                throw logic_error("invalid parameters");
             }
 
             auto ibase_values = allocate<uint64_t>(ibase_.size(), pool_);
@@ -517,7 +517,9 @@ namespace seal
             }
         }
 
-        RNSTool::RNSTool(size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t, MemoryPoolHandle pool)
+        RNSTool::RNSTool(
+            size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus,
+            MemoryPoolHandle pool)
             : pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
@@ -526,18 +528,15 @@ namespace seal
                 throw invalid_argument("pool is uninitialized");
             }
 #endif
-            initialize(poly_modulus_degree, q, t);
+            initialize(poly_modulus_degree, coeff_modulus, plain_modulus);
         }
 
-        bool RNSTool::initialize(size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t)
+        void RNSTool::initialize(size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t)
         {
-            // Reset all data
-            reset();
-
             // Return if q is out of bounds
             if (q.size() < SEAL_COEFF_MOD_COUNT_MIN || q.size() > SEAL_COEFF_MOD_COUNT_MAX)
             {
-                return is_initialized_;
+                throw invalid_argument("rnsbase is invalid");
             }
 
             // Return if coeff_count is not a power of two or out of bounds
@@ -545,7 +544,7 @@ namespace seal
             if (coeff_count_power < 0 || poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX ||
                 poly_modulus_degree < SEAL_POLY_MOD_DEGREE_MIN)
             {
-                return is_initialized_;
+                throw invalid_argument("poly_modulus_degree is invalid");
             }
 
             t_ = t;
@@ -576,7 +575,7 @@ namespace seal
             // Size check
             if (!product_fits_in(coeff_count_, base_Bsk_m_tilde_size))
             {
-                return is_initialized_;
+                throw logic_error("invalid parameters");
             }
 
             // Sample primes for B and two more primes: m_sk and gamma
@@ -604,14 +603,15 @@ namespace seal
             }
 
             // Generate the Bsk SmallNTTTables; these are used for NTT after base extension to Bsk
-            base_Bsk_small_ntt_tables_ = allocate<SmallNTTTables>(base_Bsk_size, pool_);
-            for (size_t i = 0; i < base_Bsk_size; i++)
+            try
             {
-                if (!base_Bsk_small_ntt_tables_[i].initialize(coeff_count_power, (*base_Bsk_)[i]))
-                {
-                    reset();
-                    return is_initialized_;
-                }
+                CreateSmallNTTTables(
+                    coeff_count_power, vector<SmallModulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_size),
+                    base_Bsk_small_ntt_tables_, pool_);
+            }
+            catch (const logic_error &)
+            {
+                throw logic_error("invalid rns bases");
             }
 
             // Set up BaseConvTool for q --> Bsk
@@ -646,8 +646,7 @@ namespace seal
                 inv_prod_q_mod_Bsk_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
                 if (!try_invert_uint_mod(inv_prod_q_mod_Bsk_[i], (*base_Bsk_)[i], inv_prod_q_mod_Bsk_[i]))
                 {
-                    reset();
-                    return is_initialized_;
+                    throw logic_error("invalid rns bases");
                 }
             }
 
@@ -655,8 +654,7 @@ namespace seal
             inv_prod_B_mod_m_sk_ = modulo_uint(base_B_->base_prod(), base_B_size, m_sk_);
             if (!try_invert_uint_mod(inv_prod_B_mod_m_sk_, m_sk_, inv_prod_B_mod_m_sk_))
             {
-                reset();
-                return is_initialized_;
+                throw logic_error("invalid rns bases");
             }
 
             // Compute m_tilde^(-1) mod Bsk
@@ -666,8 +664,7 @@ namespace seal
                 if (!try_invert_uint_mod(
                         m_tilde_.value() % (*base_Bsk_)[i].value(), (*base_Bsk_)[i], inv_m_tilde_mod_Bsk_[i]))
                 {
-                    reset();
-                    return is_initialized_;
+                    throw logic_error("invalid rns bases");
                 }
             }
 
@@ -675,8 +672,7 @@ namespace seal
             inv_prod_q_mod_m_tilde_ = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
             if (!try_invert_uint_mod(inv_prod_q_mod_m_tilde_, m_tilde_, inv_prod_q_mod_m_tilde_))
             {
-                reset();
-                return is_initialized_;
+                throw logic_error("invalid rns bases");
             }
 
             // Compute prod(q) mod Bsk
@@ -691,8 +687,7 @@ namespace seal
                 // Compute gamma^(-1) mod t
                 if (!try_invert_uint_mod(gamma_.value() % t_.value(), t_, inv_gamma_mod_t_))
                 {
-                    reset();
-                    return is_initialized_;
+                    throw logic_error("invalid rns bases");
                 }
 
                 // Compute prod({t, gamma}) mod q
@@ -710,8 +705,7 @@ namespace seal
                     neg_inv_q_mod_t_gamma_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_t_gamma_)[i]);
                     if (!try_invert_uint_mod(neg_inv_q_mod_t_gamma_[i], (*base_t_gamma_)[i], neg_inv_q_mod_t_gamma_[i]))
                     {
-                        reset();
-                        return is_initialized_;
+                        throw logic_error("invalid rns bases");
                     }
                     neg_inv_q_mod_t_gamma_[i] = negate_uint_mod(neg_inv_q_mod_t_gamma_[i], (*base_t_gamma_)[i]);
                 }
@@ -724,61 +718,13 @@ namespace seal
             {
                 if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), (*base_q_)[i], inv_q_last_mod_q_[i]))
                 {
-                    reset();
-                    return is_initialized_;
+                    throw logic_error("invalid rns bases");
                 }
             }
-
-            // Everything went well
-            is_initialized_ = true;
-
-            return is_initialized_;
-        }
-
-        void RNSTool::reset() noexcept
-        {
-            is_initialized_ = false;
-
-            coeff_count_ = 0;
-
-            base_q_.release();
-            base_B_.release();
-            base_Bsk_.release();
-            base_Bsk_m_tilde_.release();
-            base_t_gamma_.release();
-
-            base_q_to_Bsk_conv_.release();
-            base_q_to_m_tilde_conv_.release();
-            base_B_to_q_conv_.release();
-            base_B_to_m_sk_conv_.release();
-            base_q_to_t_gamma_conv_.release();
-
-            inv_prod_q_mod_Bsk_.release();
-            inv_prod_q_mod_m_tilde_ = 0;
-            inv_prod_B_mod_m_sk_ = 0;
-            inv_gamma_mod_t_ = 0;
-            prod_B_mod_q_.release();
-            inv_m_tilde_mod_Bsk_.release();
-            prod_q_mod_Bsk_.release();
-            neg_inv_q_mod_t_gamma_.release();
-            prod_t_gamma_mod_q_.release();
-            inv_q_last_mod_q_.release();
-
-            base_Bsk_small_ntt_tables_.release();
-
-            m_tilde_ = 0;
-            m_sk_ = 0;
-            t_ = 0;
-            gamma_ = 0;
-            coeff_count_ = 0;
         }
 
         void RNSTool::divide_and_round_q_last_inplace(uint64_t *input, MemoryPoolHandle pool) const
         {
-            if (!is_initialized_)
-            {
-                throw logic_error("RNSTool is uninitialized");
-            }
 #ifdef SEAL_DEBUG
             if (!input)
             {
@@ -826,10 +772,6 @@ namespace seal
         void RNSTool::divide_and_round_q_last_ntt_inplace(
             uint64_t *input, const SmallNTTTables *rns_ntt_tables, MemoryPoolHandle pool) const
         {
-            if (!is_initialized_)
-            {
-                throw logic_error("RNSTool is uninitialized");
-            }
 #ifdef SEAL_DEBUG
             if (!input)
             {
@@ -885,10 +827,6 @@ namespace seal
 
         void RNSTool::fastbconv_sk(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
         {
-            if (!is_initialized_)
-            {
-                throw logic_error("RNSTool is uninitialized");
-            }
 #ifdef SEAL_DEBUG
             if (!input)
             {
@@ -961,10 +899,6 @@ namespace seal
 
         void RNSTool::sm_mrq(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
         {
-            if (!is_initialized_)
-            {
-                throw logic_error("RNSTool is uninitialized");
-            }
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
@@ -1023,10 +957,6 @@ namespace seal
 
         void RNSTool::fast_floor(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
         {
-            if (!is_initialized_)
-            {
-                throw logic_error("RNSTool is uninitialized");
-            }
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
@@ -1069,10 +999,6 @@ namespace seal
 
         void RNSTool::fastbconv_m_tilde(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
         {
-            if (!is_initialized_)
-            {
-                throw logic_error("RNSTool is uninitialized");
-            }
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
@@ -1097,7 +1023,7 @@ namespace seal
 
             // We need to multiply first the input with m_tilde mod q
             // This is to facilitate Montgomery reduction in the next step of multiplication
-            // This is NOT an ideal approach: as mentioned in Bajard et al., multiplication by
+            // This is NOT an ideal approach: as mentioned in BEHZ16, multiplication by
             // m_tilde can be easily merge into the base conversion operation; however, then
             // we could not use the BaseConvTool as below without modifications.
             auto temp(allocate_poly(coeff_count_, base_q_size, pool));

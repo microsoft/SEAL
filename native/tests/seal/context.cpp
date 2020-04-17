@@ -10,7 +10,7 @@ using namespace std;
 
 using error_type = EncryptionParameterQualifiers::error_type;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(ContextTest, ContextConstructor)
     {
@@ -412,4 +412,4 @@ namespace SEALTest
         ASSERT_STREQ(context->parameter_error_name(), "invalid_poly_modulus_degree_non_power_of_two");
         ASSERT_STREQ(context->parameter_error_message(), "poly_modulus_degree is not a power of two");
     }
-} // namespace SEALTest
+} // namespace sealtest

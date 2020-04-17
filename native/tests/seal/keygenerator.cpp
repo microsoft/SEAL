@@ -14,7 +14,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(KeyGeneratorTest, BFVKeyGeneration)
     {
@@ -62,7 +62,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(10ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 1, 3, 5, 7 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
@@ -76,7 +76,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 1 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
@@ -84,7 +84,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 127 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 127 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
@@ -126,7 +126,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, galks.key(3).size());
             ASSERT_EQ(14ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 1, 3, 5, 7 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
@@ -140,7 +140,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 1 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
@@ -148,7 +148,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 511 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 511 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
@@ -202,7 +202,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(10ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 1, 3, 5, 7 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
@@ -216,7 +216,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 1 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
@@ -224,7 +224,7 @@ namespace SEALTest
             ASSERT_EQ(1ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 127 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 127 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
@@ -264,7 +264,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, galks.key(3).size());
             ASSERT_EQ(14ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 1, 3, 5, 7 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
@@ -278,7 +278,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 1 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
@@ -286,7 +286,7 @@ namespace SEALTest
             ASSERT_EQ(2ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint64_t>{ 511 });
+            galks = keygen.galois_keys_local(vector<uint32_t>{ 511 });
             ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
@@ -352,4 +352,4 @@ namespace SEALTest
             ASSERT_NE(pk3.data().data()[i], pk2.data().data()[i]);
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

@@ -88,8 +88,8 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             SecretKey secret = new SecretKey();
-            List<ulong> elts = new List<ulong> { 16385 };
-            List<ulong> elts_null = null;
+            List<uint> elts = new List<uint> { 16385 };
+            List<uint> elts_null = null;
             List<int> steps = new List<int> { 4096 };
             List<int> steps_null = null;
 

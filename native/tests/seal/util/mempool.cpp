@@ -1,17 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/modulus.h"
+#include "seal/smallmodulus.h"
 #include "seal/util/common.h"
 #include "seal/util/mempool.h"
 #include "seal/util/pointer.h"
+#include "seal/util/smallntt.h"
+#include "seal/util/uintcore.h"
+#include <algorithm>
 #include <memory>
+#include <vector>
 #include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -670,5 +676,13 @@ namespace SEALTest
                 p1.release();
             }
         }
+
+        TEST(MemoryPoolTests, Allocate)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            vector<SEAL_BYTE> bytes{ SEAL_BYTE(0), SEAL_BYTE(1), SEAL_BYTE(2), SEAL_BYTE(3), SEAL_BYTE(4) };
+            auto ptr = allocate(bytes.begin(), bytes.size(), pool);
+            ASSERT_TRUE(equal(bytes.begin(), bytes.end(), ptr.get()));
+        }
     } // namespace util
-} // namespace SEALTest
+} // namespace sealtest

@@ -3,6 +3,8 @@
 
 #include "seal/evaluator.h"
 #include "seal/util/common.h"
+#include "seal/util/galois.h"
+#include "seal/util/iterator.h"
 #include "seal/util/numth.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"
@@ -72,20 +74,17 @@ namespace seal
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
+        size_t encrypted_size = encrypted.size();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_count = coeff_modulus.size();
-        size_t encrypted_size = encrypted.size();
 
         // Negate each poly in the array
-        for (size_t j = 0; j < encrypted_size; j++)
-        {
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                negate_poly_coeffmod(
-                    encrypted.data(j) + (i * coeff_count), coeff_count, coeff_modulus[i],
-                    encrypted.data(j) + (i * coeff_count));
-            }
-        }
+        for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                coeff_modulus_count,
+                [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J)); });
+        });
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
@@ -140,17 +139,14 @@ namespace seal
         encrypted1.resize(context_, context_data.parms_id(), max_count);
 
         // Add ciphertexts
-        for (size_t j = 0; j < min_count; j++)
-        {
-            uint64_t *encrypted1_ptr = encrypted1.data(j);
-            const uint64_t *encrypted2_ptr = encrypted2.data(j);
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                add_poly_poly_coeffmod(
-                    encrypted1_ptr + (i * coeff_count), encrypted2_ptr + (i * coeff_count), coeff_count,
-                    coeff_modulus[i], encrypted1_ptr + (i * coeff_count));
-            }
-        }
+        for_each_n(IteratorTuple<PolyIterator, ConstPolyIterator>(encrypted1, encrypted2), min_count, [&](auto I) {
+            for_each_n(
+                IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                coeff_modulus_count, [&](auto J) {
+                    add_poly_poly_coeffmod(
+                        get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                });
+        });
 
         // Copy the remainding polys of the array with larger count into encrypted1
         if (encrypted1_size < encrypted2_size)
@@ -232,29 +228,37 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), max_count);
 
-        // Subtract polynomials.
-        for (size_t j = 0; j < min_count; j++)
-        {
-            uint64_t *encrypted1_ptr = encrypted1.data(j);
-            const uint64_t *encrypted2_ptr = encrypted2.data(j);
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                sub_poly_poly_coeffmod(
-                    encrypted1_ptr + (i * coeff_count), encrypted2_ptr + (i * coeff_count), coeff_count,
-                    coeff_modulus[i], encrypted1_ptr + (i * coeff_count));
-            }
-        }
+        // Set up iterators in the function scope
+        PolyIterator encrypted1_iter(encrypted1);
+        ConstPolyIterator encrypted2_iter(encrypted2);
+
+        // Subtract polynomials
+        for_each_n(
+            IteratorTuple<PolyIterator, ConstPolyIterator>(encrypted1_iter, encrypted2_iter), min_count, [&](auto I) {
+                for_each_n(
+                    IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                    coeff_modulus_count, [&](auto J) {
+                        sub_poly_poly_coeffmod(
+                            get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                    });
+            });
 
         // If encrypted2 has larger count, negate remaining entries
         if (encrypted1_size < encrypted2_size)
         {
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                negate_poly_coeffmod(
-                    encrypted2.data(encrypted1_size) + (i * coeff_count),
-                    coeff_count * (encrypted2_size - encrypted1_size), coeff_modulus[i],
-                    encrypted1.data(encrypted1_size) + (i * coeff_count));
-            }
+            // Advance encrypted1_iter and encrypted2_iter to min_count (i.e., encrypted1_size)
+            advance(encrypted1_iter, min_count);
+            advance(encrypted2_iter, min_count);
+
+            for_each_n(
+                IteratorTuple<PolyIterator, ConstPolyIterator>(encrypted1_iter, encrypted2_iter),
+                encrypted2_size - min_count, [&](auto I) {
+                    for_each_n(
+                        IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                        coeff_modulus_count, [&](auto J) {
+                            negate_poly_coeffmod(get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                        });
+                });
         }
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
@@ -314,244 +318,239 @@ namespace seal
         // Extract encryption parameters.
         auto &context_data = *context_->get_context_data(encrypted1.parms_id());
         auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t base_q_size = parms.coeff_modulus().size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
 
         uint64_t plain_modulus = parms.plain_modulus().value();
         auto rns_tool = context_data.rns_tool();
-        auto &base_Bsk = *rns_tool->base_Bsk();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
         size_t base_Bsk_m_tilde_size = rns_tool->base_Bsk_m_tilde()->size();
-        auto base_q_ntt_tables = context_data.small_ntt_tables();
-        auto base_Bsk_ntt_tables = rns_tool->base_Bsk_small_ntt_tables();
 
         // Determine destination.size()
-        // Default is 3 (c_0, c_1, c_2)
-        size_t dest_count = sub_safe(add_safe(encrypted1_size, encrypted2_size), size_t(1));
+        size_t dest_size = sub_safe(add_safe(encrypted1_size, encrypted2_size), size_t(1));
 
         // Size check
-        if (!product_fits_in(dest_count, coeff_count, base_Bsk_m_tilde_size))
+        if (!product_fits_in(dest_size, coeff_count, base_Bsk_m_tilde_size))
         {
             throw logic_error("invalid parameters");
         }
 
-        // Prepare destination
-        encrypted1.resize(context_, context_data.parms_id(), dest_count);
+        // Set up iterators for bases
+        IteratorWrapper<const SmallModulus *> base_q_iter(parms.coeff_modulus());
+        IteratorWrapper<const SmallModulus *> base_Bsk_iter(rns_tool->base_Bsk()->base());
 
-        size_t enc_ptr_increment = coeff_count * coeff_modulus_count;
-        size_t enc_Bsk_m_tilde_ptr_increment = coeff_count * base_Bsk_m_tilde_size;
-        size_t enc_Bsk_ptr_increment = coeff_count * base_Bsk_size;
+        // Set up iterators for NTT tables
+        IteratorWrapper<const SmallNTTTables *> base_q_ntt_tables_iter(context_data.small_ntt_tables());
+        IteratorWrapper<const SmallNTTTables *> base_Bsk_ntt_tables_iter(rns_tool->base_Bsk_small_ntt_tables());
 
-        // Make temp polys for FastBConverter result from q ---> Bsk U {m_tilde}
-        auto tmp_encrypted1_Bsk_m_tilde(allocate_poly(coeff_count * encrypted1_size, base_Bsk_m_tilde_size, pool));
-        auto tmp_encrypted2_Bsk_m_tilde(allocate_poly(coeff_count * encrypted2_size, base_Bsk_m_tilde_size, pool));
+        // Microsoft SEAL uses BEHZ-style RNS multiplication. This process is somewhat complex and consists of the
+        // following steps:
+        //
+        // (1) Lift encrypted1 and encrypted2 (initially in base q) to an extended base q U Bsk U {m_tilde}
+        // (2) Remove extra multiples of q from the results with Montgomery reduction, switching base to q U Bsk
+        // (3) Transform the data to NTT form
+        // (4) Compute the ciphertext polynomial product using dyadic multiplication
+        // (5) Transform the data back from NTT form
+        // (6) Multiply the result by t (plain_modulus)
+        // (7) Scale the result by q using a divide-and-floor algorithm, switching base to Bsk
+        // (8) Use Shenoy-Kumaresan method to convert the result to base q
 
-        // Make temp polys for FastBConverter result from Bsk U {m_tilde} -----> Bsk
-        auto tmp_encrypted1_Bsk(allocate_poly(coeff_count * encrypted1_size, base_Bsk_size, pool));
-        auto tmp_encrypted2_Bsk(allocate_poly(coeff_count * encrypted2_size, base_Bsk_size, pool));
+        // Resize encrypted1 to destination size
+        encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
-        // Step 0: convert from q to Bsk U {m_tilde}
-        // Step 1: reduce q-overflows in Bsk with Montgomery reduction
-        // Iterate over all the ciphertexts inside encrypted1
-        for (size_t i = 0; i < encrypted1_size; i++)
+        // Set up iterators for input ciphertexts
+        PolyIterator encrypted1_iter(encrypted1);
+        ConstPolyIterator encrypted2_iter(encrypted2);
+
+        // This lambda function takes as input an iterator_tuple with three components:
+        //
+        // 1. ConstRNSIterator to read an input polynomial from
+        // 2. RNSIterator for the output in base q
+        // 3. RNSIterator for the output in base Bsk
+        //
+        // It performs steps (1)-(3) of the BEHZ multiplication (see above) on the given input polynomial (given as an
+        // RNSIterator or ConstRNSIterator) and writes the results in base q and base Bsk to the given output
+        // iterators.
+        auto behz_extend_base_convert_to_ntt = [&](auto I) {
+            // Make copy of input polynomial (in base q) and convert to NTT form
+            for_each_n(
+                IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                    get<0>(I), get<1>(I), base_q_ntt_tables_iter),
+                base_q_size, [&](auto J) {
+                    // First copy to output
+                    set_uint_uint(get<0>(J), coeff_count, get<1>(J));
+
+                    // Transform to NTT form in base q
+                    // Lazy reduction
+                    ntt_negacyclic_harvey_lazy(get<1>(J), *get<2>(J));
+                });
+
+            // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
+            auto temp(allocate_poly(coeff_count, base_Bsk_m_tilde_size, pool));
+
+            // (1) Convert from base q to base Bsk U {m_tilde}
+            rns_tool->fastbconv_m_tilde(get<0>(I), temp.get(), pool);
+
+            // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
+            rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
+
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                    get<2>(I), base_Bsk_ntt_tables_iter),
+                base_Bsk_size, [&](auto J) {
+                    // Transform to NTT form in base Bsk
+                    // Lazy reduction
+                    ntt_negacyclic_harvey_lazy(get<0>(J), *get<1>(J));
+                });
+        };
+
+        // Allocate space for a base q output of behz_extend_base_convert_to_ntt for encrypted1
+        auto encrypted1_q(allocate_poly(coeff_count * encrypted1_size, base_q_size, pool));
+        PolyIterator encrypted1_q_iter(encrypted1_q.get(), coeff_count, base_q_size);
+
+        // Allocate space for a base Bsk output of behz_extend_base_convert_to_ntt for encrypted1
+        auto encrypted1_Bsk(allocate_poly(coeff_count * encrypted1_size, base_Bsk_size, pool));
+        PolyIterator encrypted1_Bsk_iter(encrypted1_Bsk.get(), coeff_count, base_Bsk_size);
+
+        // Perform BEHZ steps (1)-(3) for encrypted1
+        for_each_n(
+            IteratorTuple<ConstPolyIterator, PolyIterator, PolyIterator>(
+                encrypted1_iter, encrypted1_q_iter, encrypted1_Bsk_iter),
+            encrypted1_size, behz_extend_base_convert_to_ntt);
+
+        // Repeat for encrypted2
+        auto encrypted2_q(allocate_poly(coeff_count * encrypted2_size, base_q_size, pool));
+        PolyIterator encrypted2_q_iter(encrypted2_q.get(), coeff_count, base_q_size);
+
+        auto encrypted2_Bsk(allocate_poly(coeff_count * encrypted2_size, base_Bsk_size, pool));
+        PolyIterator encrypted2_Bsk_iter(encrypted2_Bsk.get(), coeff_count, base_Bsk_size);
+
+        for_each_n(
+            IteratorTuple<ConstPolyIterator, PolyIterator, PolyIterator>(
+                encrypted2_iter, encrypted2_q_iter, encrypted2_Bsk_iter),
+            encrypted2_size, behz_extend_base_convert_to_ntt);
+
+        // Allocate temporary space for the output of step (4)
+        // We allocate space separately for the base q and the base Bsk components
+        auto temp_dest_q(allocate_zero_poly(coeff_count * dest_size, base_q_size, pool));
+        PolyIterator temp_dest_q_iter(temp_dest_q.get(), coeff_count, base_q_size);
+
+        auto temp_dest_Bsk(allocate_zero_poly(coeff_count * dest_size, base_Bsk_size, pool));
+        PolyIterator temp_dest_Bsk_iter(temp_dest_Bsk.get(), coeff_count, base_Bsk_size);
+
+        // Perform BEHZ step (4): dyadic multiplication on arbitrary size ciphertexts
+        for (size_t secret_power_index = 0; secret_power_index < dest_size; secret_power_index++)
         {
-            rns_tool->fastbconv_m_tilde(
-                encrypted1.data(i), tmp_encrypted1_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment), pool);
-            rns_tool->sm_mrq(
-                tmp_encrypted1_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment),
-                tmp_encrypted1_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
+            // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
+            // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
+            // the relevant terms are obtained as follows.
+            size_t curr_encrypted1_last = min(secret_power_index, encrypted1_size - 1);
+            size_t curr_encrypted2_first = min(secret_power_index, encrypted2_size - 1);
+            size_t curr_encrypted1_first = secret_power_index - curr_encrypted2_first;
+            // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
+
+            // The total number of dyadic products is now easy to compute
+            size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
+
+            // This lambda function computes the ciphertext product for BFV multiplication. Since we use the BEHZ
+            // approach, the multiplication of individual polynomials is done using a dyadic product where the inputs
+            // are already in NTT form. The arguments of the lambda function are expected to be as follows:
+            //
+            // 1. a PolyIterator pointing to the beginning of the first input ciphertext (in NTT form)
+            // 2. a PolyIterator pointing to the beginning of the second input ciphertext (in NTT form)
+            // 3. an IteratorWrapper pointing to an array of SmallModulus elements for the base
+            // 4. the size of the base
+            // 5. a PolyIterator pointing to the beginning of the output ciphertext
+            auto behz_ciphertext_product = [&](auto in1_iter, auto in2_iter, auto base_iter, size_t base_size,
+                                               auto out_iter) {
+                // Create a shifted iterator for the first input
+                auto shifted_in1_iter = in1_iter;
+                advance(shifted_in1_iter, curr_encrypted1_first);
+
+                // Create a shifted reverse iterator for the second input
+                auto shifted_in2_iter = in2_iter;
+                advance(shifted_in2_iter, curr_encrypted2_first);
+                auto shifted_reversed_in2_iter = ReverseIterator<PolyIterator>(shifted_in2_iter);
+
+                // Create a shifted iterator for the output
+                auto shifted_out_iter = out_iter;
+                advance(shifted_out_iter, secret_power_index);
+
+                for_each_n(
+                    IteratorTuple<PolyIterator, ReverseIterator<PolyIterator>>(
+                        shifted_in1_iter, shifted_reversed_in2_iter),
+                    steps, [&](auto I) {
+                        // Extra care needed here: shifted_out_iter must be dereferenced once to
+                        // produce an appropriate RNSIterator.
+                        for_each_n(
+                            IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                                I, base_iter, *shifted_out_iter),
+                            base_size, [&](auto J) {
+                                auto temp(allocate_uint(coeff_count, pool));
+                                dyadic_product_coeffmod(
+                                    get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), temp.get());
+                                add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, *get<1>(J), get<2>(J));
+                            });
+                    });
+            };
+
+            // Perform the BEHZ ciphertext product both for base q and base Bsk
+            behz_ciphertext_product(encrypted1_q_iter, encrypted2_q_iter, base_q_iter, base_q_size, temp_dest_q_iter);
+            behz_ciphertext_product(
+                encrypted1_Bsk_iter, encrypted2_Bsk_iter, base_Bsk_iter, base_Bsk_size, temp_dest_Bsk_iter);
         }
 
-        // Iterate over all the ciphertexts inside encrypted2
-        for (size_t i = 0; i < encrypted2_size; i++)
-        {
-            rns_tool->fastbconv_m_tilde(
-                encrypted2.data(i), tmp_encrypted2_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment), pool);
-            rns_tool->sm_mrq(
-                tmp_encrypted2_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment),
-                tmp_encrypted2_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
-        }
+        // Perform BEHZ step (5): transform data from NTT form
+        for_each_n(
+            IteratorTuple<PolyIterator, PolyIterator>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
+                for_each_n(
+                    IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                        get<0>(I), base_q_ntt_tables_iter),
+                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
 
-        // Step 2: compute product and multiply plain modulus to the result
-        // We need to multiply both in q and Bsk. Values in encrypted_safe are in
-        // base q and values in tmp_encrypted_Bsk are in base Bsk. We iterate over
-        // destination poly array and generate each poly based on the indices of
-        // inputs (arbitrary sizes for ciphertexts). First allocate two temp polys:
-        // one for results in base q and the other for the result in base Bsk. These
-        // need to be zero for the arbitrary size multiplication; not for 2x2 though
-        auto tmp_des_q(allocate_zero_poly(coeff_count * dest_count, coeff_modulus_count, pool));
-        auto tmp_des_Bsk_base(allocate_zero_poly(coeff_count * dest_count, base_Bsk_size, pool));
+                for_each_n(
+                    IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                        get<1>(I), base_Bsk_ntt_tables_iter),
+                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+            });
 
-        // Allocate two tmp polys: one for NTT multiplication results in base q and
-        // one for result in base Bsk
-        auto tmp1_poly_q(allocate_poly(coeff_count, coeff_modulus_count, pool));
-        auto tmp1_poly_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
-        auto tmp2_poly_q(allocate_poly(coeff_count, coeff_modulus_count, pool));
-        auto tmp2_poly_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
+        // Perform BEHZ steps (6)-(8)
+        for_each_n(
+            IteratorTuple<PolyIterator, PolyIterator, PolyIterator>(
+                temp_dest_q_iter, temp_dest_Bsk_iter, encrypted1_iter),
+            dest_size, [&](auto I) {
+                // Bring together the base q and base Bsk components into a single allocation
+                auto temp_q_Bsk(allocate_poly(coeff_count, base_q_size + base_Bsk_size, pool));
+                RNSIterator temp_q_Bsk_iter(temp_q_Bsk.get(), coeff_count);
 
-        size_t current_encrypted1_limit = 0;
+                // Step (6): multiply base q components by t (plain_modulus)
+                for_each_n(
+                    IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        get<0>(I), temp_q_Bsk_iter, base_q_iter),
+                    base_q_size, [&](auto J) {
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
+                    });
 
-        // First convert all the inputs into NTT form
-        auto copy_encrypted1_ntt_q(allocate_poly(coeff_count * encrypted1_size, coeff_modulus_count, pool));
-        set_poly_poly(
-            encrypted1.data(), coeff_count * encrypted1_size, coeff_modulus_count, copy_encrypted1_ntt_q.get());
+                // Advance to the base Bsk part in temp and multiply base Bsk components by t
+                advance(temp_q_Bsk_iter, base_q_size);
+                for_each_n(
+                    IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        get<1>(I), temp_q_Bsk_iter, base_Bsk_iter),
+                    base_Bsk_size, [&](auto J) {
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
+                    });
 
-        auto copy_encrypted1_ntt_Bsk(allocate_poly(coeff_count * encrypted1_size, base_Bsk_size, pool));
-        set_poly_poly(
-            tmp_encrypted1_Bsk.get(), coeff_count * encrypted1_size, base_Bsk_size, copy_encrypted1_ntt_Bsk.get());
+                // Allocate yet another temporary for fast divide-and-floor result in base Bsk
+                auto temp_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
 
-        auto copy_encrypted2_ntt_q(allocate_poly(coeff_count * encrypted2_size, coeff_modulus_count, pool));
-        set_poly_poly(
-            encrypted2.data(), coeff_count * encrypted2_size, coeff_modulus_count, copy_encrypted2_ntt_q.get());
+                // Step (7): divide by q and floor, producing a result in base Bsk
+                rns_tool->fast_floor(temp_q_Bsk.get(), temp_Bsk.get(), pool);
 
-        auto copy_encrypted2_ntt_Bsk(allocate_poly(coeff_count * encrypted2_size, base_Bsk_size, pool));
-        set_poly_poly(
-            tmp_encrypted2_Bsk.get(), coeff_count * encrypted2_size, base_Bsk_size, copy_encrypted2_ntt_Bsk.get());
-
-        for (size_t i = 0; i < encrypted1_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted1_ntt_q.get() + (j * coeff_count) + (i * enc_ptr_increment), base_q_ntt_tables[j]);
-            }
-            for (size_t j = 0; j < base_Bsk_size; j++)
-            {
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted1_ntt_Bsk.get() + (j * coeff_count) + (i * enc_Bsk_ptr_increment),
-                    base_Bsk_ntt_tables[j]);
-            }
-        }
-
-        for (size_t i = 0; i < encrypted2_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted2_ntt_q.get() + (j * coeff_count) + (i * enc_ptr_increment), base_q_ntt_tables[j]);
-            }
-            for (size_t j = 0; j < base_Bsk_size; j++)
-            {
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted2_ntt_Bsk.get() + (j * coeff_count) + (i * enc_Bsk_ptr_increment),
-                    base_Bsk_ntt_tables[j]);
-            }
-        }
-
-        // Perform multiplication on arbitrary size ciphertexts
-        for (size_t secret_power_index = 0; secret_power_index < dest_count; secret_power_index++)
-        {
-            // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
-            // component [j] such that [i+j]=[secret_power_index]
-            // Only need to check encrypted1 components up to and including [secret_power_index],
-            // and strictly less than [encrypted_array.size()]
-            current_encrypted1_limit = min(encrypted1_size, secret_power_index + 1);
-
-            for (size_t encrypted1_index = 0; encrypted1_index < current_encrypted1_limit; encrypted1_index++)
-            {
-                // check if a corresponding component in encrypted2 exists
-                if (encrypted2_size > secret_power_index - encrypted1_index)
-                {
-                    size_t encrypted2_index = secret_power_index - encrypted1_index;
-
-                    // NTT Multiplication and addition for results in q
-                    for (size_t i = 0; i < coeff_modulus_count; i++)
-                    {
-                        dyadic_product_coeffmod(
-                            copy_encrypted1_ntt_q.get() + (i * coeff_count) + (enc_ptr_increment * encrypted1_index),
-                            copy_encrypted2_ntt_q.get() + (i * coeff_count) + (enc_ptr_increment * encrypted2_index),
-                            coeff_count, coeff_modulus[i], tmp1_poly_q.get() + (i * coeff_count));
-                        add_poly_poly_coeffmod(
-                            tmp1_poly_q.get() + (i * coeff_count),
-                            tmp_des_q.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_modulus_count),
-                            coeff_count, coeff_modulus[i],
-                            tmp_des_q.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_modulus_count));
-                    }
-
-                    // NTT Multiplication and addition for results in Bsk
-                    for (size_t i = 0; i < base_Bsk_size; i++)
-                    {
-                        dyadic_product_coeffmod(
-                            copy_encrypted1_ntt_Bsk.get() + (i * coeff_count) +
-                                (enc_Bsk_ptr_increment * encrypted1_index),
-                            copy_encrypted2_ntt_Bsk.get() + (i * coeff_count) +
-                                (enc_Bsk_ptr_increment * encrypted2_index),
-                            coeff_count, base_Bsk[i], tmp1_poly_Bsk.get() + (i * coeff_count));
-                        add_poly_poly_coeffmod(
-                            tmp1_poly_Bsk.get() + (i * coeff_count),
-                            tmp_des_Bsk_base.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * base_Bsk_size),
-                            coeff_count, base_Bsk[i],
-                            tmp_des_Bsk_base.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * base_Bsk_size));
-                    }
-                }
-            }
-        }
-
-        // Convert back outputs from NTT form
-        for (size_t i = 0; i < dest_count; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                inverse_ntt_negacyclic_harvey(
-                    tmp_des_q.get() + (i * (enc_ptr_increment)) + (j * coeff_count), base_q_ntt_tables[j]);
-            }
-            for (size_t j = 0; j < base_Bsk_size; j++)
-            {
-                inverse_ntt_negacyclic_harvey(
-                    tmp_des_Bsk_base.get() + (i * (enc_Bsk_ptr_increment)) + (j * coeff_count), base_Bsk_ntt_tables[j]);
-            }
-        }
-
-        // Now we multiply plain modulus to both results in base q and Bsk and
-        // allocate them together in one container as
-        // (te0)q(te'0)Bsk | ... |te count)q (te' count)Bsk to make it ready for
-        // fast_floor
-        auto tmp_q_Bsk_together(allocate_poly(coeff_count, dest_count * (coeff_modulus_count + base_Bsk_size), pool));
-        uint64_t *tmp_q_Bsk_together_ptr = tmp_q_Bsk_together.get();
-
-        // Base q
-        for (size_t i = 0; i < dest_count; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                multiply_poly_scalar_coeffmod(
-                    tmp_des_q.get() + (j * coeff_count) + (i * enc_ptr_increment), coeff_count, plain_modulus,
-                    coeff_modulus[j], tmp_q_Bsk_together_ptr + (j * coeff_count));
-            }
-            tmp_q_Bsk_together_ptr += enc_ptr_increment;
-
-            for (size_t k = 0; k < base_Bsk_size; k++)
-            {
-                multiply_poly_scalar_coeffmod(
-                    tmp_des_Bsk_base.get() + (k * coeff_count) + (i * enc_Bsk_ptr_increment), coeff_count,
-                    plain_modulus, base_Bsk[k], tmp_q_Bsk_together_ptr + (k * coeff_count));
-            }
-            tmp_q_Bsk_together_ptr += enc_Bsk_ptr_increment;
-        }
-
-        // Allocate a new poly for fast floor result in Bsk
-        auto tmp_result_Bsk(allocate_poly(coeff_count, dest_count * base_Bsk_size, pool));
-        for (size_t i = 0; i < dest_count; i++)
-        {
-            // Step 3: fast floor from q U {Bsk} to Bsk
-            rns_tool->fast_floor(
-                tmp_q_Bsk_together.get() + (i * (enc_ptr_increment + enc_Bsk_ptr_increment)),
-                tmp_result_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
-
-            // Step 4: fast base convert from Bsk to q
-            rns_tool->fastbconv_sk(tmp_result_Bsk.get() + (i * enc_Bsk_ptr_increment), encrypted1.data(i), pool);
-        }
+                // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
+                rns_tool->fastbconv_sk(temp_Bsk.get(), get<2>(I), pool);
+            });
     }
 
     void Evaluator::ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)
@@ -580,81 +579,70 @@ namespace seal
 
         // Determine destination.size()
         // Default is 3 (c_0, c_1, c_2)
-        size_t dest_count = sub_safe(add_safe(encrypted1_size, encrypted2_size), size_t(1));
+        size_t dest_size = sub_safe(add_safe(encrypted1_size, encrypted2_size), size_t(1));
 
         // Size check
-        if (!product_fits_in(dest_count, coeff_count, coeff_modulus_count))
+        if (!product_fits_in(dest_size, coeff_count, coeff_modulus_count))
         {
             throw logic_error("invalid parameters");
         }
 
+        // Set up iterator for the base
+        IteratorWrapper<const SmallModulus *> coeff_modulus_iter(parms.coeff_modulus());
+
         // Prepare destination
-        encrypted1.resize(context_, context_data.parms_id(), dest_count);
+        encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
-        // pointer increment to switch to a next polynomial
-        size_t enc_ptr_increment = coeff_count * coeff_modulus_count;
+        // Set up iterators for input ciphertexts
+        PolyIterator encrypted1_iter(encrypted1);
+        ConstPolyIterator encrypted2_iter(encrypted2);
 
-        // Step 1: naive multiplication modulo the coefficient modulus
-        // First allocate two temp polys :
-        // one for results in base q. This need to be zero
-        // for the arbitrary size multiplication; not for 2x2 though
-        auto tmp_des(allocate_zero_poly(coeff_count * dest_count, coeff_modulus_count, pool));
+        // Allocate temporary space for the result
+        auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
+        PolyIterator temp_iter(temp.get(), coeff_count, coeff_modulus_count);
 
-        // Allocate tmp polys for NTT multiplication results in base q
-        auto tmp1_poly(allocate_poly(coeff_count, coeff_modulus_count, pool));
-        auto tmp2_poly(allocate_poly(coeff_count, coeff_modulus_count, pool));
-
-        // First convert all the inputs into NTT form
-        auto copy_encrypted1_ntt(allocate_poly(coeff_count * encrypted1_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted1.data(), coeff_count * encrypted1_size, coeff_modulus_count, copy_encrypted1_ntt.get());
-
-        auto copy_encrypted2_ntt(allocate_poly(coeff_count * encrypted2_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted2.data(), coeff_count * encrypted2_size, coeff_modulus_count, copy_encrypted2_ntt.get());
-
-        // Perform multiplication on arbitrary size ciphertexts
-
-        // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
-        // component [j] such that [i+j]=[secret_power_index]
-        // Only need to check encrypted1 components up to and including [secret_power_index],
-        // and strictly less than [encrypted_array.size()]
-
-        // Number of encrypted1 components to check
-        size_t current_encrypted1_limit = 0;
-
-        for (size_t secret_power_index = 0; secret_power_index < dest_count; secret_power_index++)
+        for (size_t secret_power_index = 0; secret_power_index < dest_size; secret_power_index++, ++temp_iter)
         {
-            current_encrypted1_limit = min(encrypted1_size, secret_power_index + 1);
+            // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
+            // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
+            // the relevant terms are obtained as follows.
+            size_t curr_encrypted1_last = min(secret_power_index, encrypted1_size - 1);
+            size_t curr_encrypted2_first = min(secret_power_index, encrypted2_size - 1);
+            size_t curr_encrypted1_first = secret_power_index - curr_encrypted2_first;
+            // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
 
-            for (size_t encrypted1_index = 0; encrypted1_index < current_encrypted1_limit; encrypted1_index++)
-            {
-                // check if a corresponding component in encrypted2 exists
-                if (encrypted2_size > secret_power_index - encrypted1_index)
-                {
-                    size_t encrypted2_index = secret_power_index - encrypted1_index;
+            // The total number of dyadic products is now easy to compute
+            size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
 
-                    // NTT Multiplication and addition for results in q
-                    for (size_t i = 0; i < coeff_modulus_count; i++)
-                    {
-                        // ci * dj
-                        dyadic_product_coeffmod(
-                            copy_encrypted1_ntt.get() + (i * coeff_count) + (enc_ptr_increment * encrypted1_index),
-                            copy_encrypted2_ntt.get() + (i * coeff_count) + (enc_ptr_increment * encrypted2_index),
-                            coeff_count, coeff_modulus[i], tmp1_poly.get() + (i * coeff_count));
-                        // Dest[i+j]
-                        add_poly_poly_coeffmod(
-                            tmp1_poly.get() + (i * coeff_count),
-                            tmp_des.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_modulus_count),
-                            coeff_count, coeff_modulus[i],
-                            tmp_des.get() + (i * coeff_count) +
-                                (secret_power_index * coeff_count * coeff_modulus_count));
-                    }
-                }
-            }
+            // Create a shifted iterator for the first input
+            auto shifted_encrypted1_iter = encrypted1_iter;
+            advance(shifted_encrypted1_iter, curr_encrypted1_first);
+
+            // Create a shifted reverse iterator for the second input
+            auto shifted_encrypted2_iter = encrypted2_iter;
+            advance(shifted_encrypted2_iter, curr_encrypted2_first);
+            auto shifted_reversed_encrypted2_iter = ReverseIterator<ConstPolyIterator>(shifted_encrypted2_iter);
+
+            for_each_n(
+                IteratorTuple<PolyIterator, ReverseIterator<ConstPolyIterator>>(
+                    shifted_encrypted1_iter, shifted_reversed_encrypted2_iter),
+                steps, [&](auto I) {
+                    // Extra care needed here:
+                    // temp_iter must be dereferenced once to produce an appropriate RNSIterator
+                    for_each_n(
+                        IteratorTuple<decltype(I), IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                            I, coeff_modulus_iter, *temp_iter),
+                        coeff_modulus_count, [&](auto J) {
+                            auto temp(allocate_uint(coeff_count, pool));
+                            dyadic_product_coeffmod(
+                                get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), temp.get());
+                            add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, *get<1>(J), get<2>(J));
+                        });
+                });
         }
 
         // Set the final result
-        set_poly_poly(tmp_des.get(), coeff_count * dest_count, coeff_modulus_count, encrypted1.data());
+        set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_count, encrypted1.data());
 
         // Set the scale
         encrypted1.scale() = new_scale;
@@ -701,18 +689,14 @@ namespace seal
         // Extract encryption parameters.
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t base_q_size = parms.coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
 
         uint64_t plain_modulus = parms.plain_modulus().value();
         auto rns_tool = context_data.rns_tool();
-        auto &base_Bsk = *rns_tool->base_Bsk();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
         size_t base_Bsk_m_tilde_size = rns_tool->base_Bsk_m_tilde()->size();
-        auto base_q_ntt_tables = context_data.small_ntt_tables();
-        auto base_Bsk_ntt_tables = rns_tool->base_Bsk_small_ntt_tables();
 
         // Optimization implemented currently only for size 2 ciphertexts
         if (encrypted_size != 2)
@@ -721,184 +705,194 @@ namespace seal
             return;
         }
 
-        // Determine destination_array.size()
-        size_t dest_count = sub_safe(add_safe(encrypted_size, encrypted_size), size_t(1));
+        // Determine destination.size()
+        size_t dest_size = sub_safe(add_safe(encrypted_size, encrypted_size), size_t(1));
 
         // Size check
-        if (!product_fits_in(dest_count, coeff_count, base_Bsk_m_tilde_size))
+        if (!product_fits_in(dest_size, coeff_count, base_Bsk_m_tilde_size))
         {
             throw logic_error("invalid parameters");
         }
 
-        size_t enc_ptr_increment = coeff_count * coeff_modulus_count;
-        size_t enc_Bsk_m_tilde_ptr_increment = coeff_count * base_Bsk_m_tilde_size;
-        size_t enc_Bsk_ptr_increment = coeff_count * base_Bsk_size;
+        // Set up iterators for bases
+        IteratorWrapper<const SmallModulus *> base_q_iter(parms.coeff_modulus());
+        IteratorWrapper<const SmallModulus *> base_Bsk_iter(rns_tool->base_Bsk()->base());
 
-        // Prepare destination
-        encrypted.resize(context_, context_data.parms_id(), dest_count);
+        // Set up iterators for NTT tables
+        IteratorWrapper<const SmallNTTTables *> base_q_ntt_tables_iter(context_data.small_ntt_tables());
+        IteratorWrapper<const SmallNTTTables *> base_Bsk_ntt_tables_iter(rns_tool->base_Bsk_small_ntt_tables());
 
-        // Make temp poly for FastBConverter result from q ---> Bsk U {m_tilde}
-        auto tmp_encrypted_Bsk_m_tilde(allocate_poly(coeff_count * encrypted_size, base_Bsk_m_tilde_size, pool));
+        // Microsoft SEAL uses BEHZ-style RNS multiplication. For details, see Evaluator::bfv_multiply. This function
+        // uses additionally Karatsuba multiplication to reduce the complexity of squaring a size-2 ciphertext, but the
+        // steps are otherwise the same as in Evaluator::bfv_multiply.
 
-        // Make temp poly for FastBConverter result from Bsk U {m_tilde} -----> Bsk
-        auto tmp_encrypted_Bsk(allocate_poly(coeff_count * encrypted_size, base_Bsk_size, pool));
+        // Resize encrypted to destination size
+        encrypted.resize(context_, context_data.parms_id(), dest_size);
 
-        // Step 0: fast base convert from q to Bsk U {m_tilde}
-        // Step 1: reduce q-overflows in Bsk
-        // Iterate over all the ciphertexts inside encrypted1
-        for (size_t i = 0; i < encrypted_size; i++)
-        {
-            rns_tool->fastbconv_m_tilde(
-                encrypted.data(i), tmp_encrypted_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment), pool);
-            rns_tool->sm_mrq(
-                tmp_encrypted_Bsk_m_tilde.get() + (i * enc_Bsk_m_tilde_ptr_increment),
-                tmp_encrypted_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
-        }
+        // Set up iterators for input ciphertexts
+        PolyIterator encrypted_iter(encrypted);
 
-        // Step 2: compute product and multiply plain modulus to the result.
-        // We need to multiply both in q and Bsk. Values in encrypted_safe are
-        // in base q and values in tmp_encrypted_Bsk are in base Bsk. We iterate
-        // over destination poly array and generate each poly based on the indices
-        // of inputs (arbitrary sizes for ciphertexts). First allocate two temp polys:
-        // one for results in base q and the other for the result in base Bsk.
-        auto tmp_des_q(allocate_poly(coeff_count * dest_count, coeff_modulus_count, pool));
-        auto tmp_des_Bsk_base(allocate_poly(coeff_count * dest_count, base_Bsk_size, pool));
+        // This lambda function takes as input an iterator_tuple with three components:
+        //
+        // 1. ConstRNSIterator to read an input polynomial from
+        // 2. RNSIterator for the output in base q
+        // 3. RNSIterator for the output in base Bsk
+        //
+        // It performs steps (1)-(3) of the BEHZ multiplication on the given input polynomial (given as an RNSIterator
+        // or ConstRNSIterator) and writes the results in base q and base Bsk to the given output iterators.
+        auto behz_extend_base_convert_to_ntt = [&](auto I) {
+            // Make copy of input polynomial (in base q) and convert to NTT form
+            for_each_n(
+                IteratorTuple<ConstRNSIterator, RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                    get<0>(I), get<1>(I), base_q_ntt_tables_iter),
+                base_q_size, [&](auto J) {
+                    // First copy to output
+                    set_uint_uint(get<0>(J), coeff_count, get<1>(J));
 
-        // First convert all the inputs into NTT form
-        auto copy_encrypted_ntt_q(allocate_poly(coeff_count * encrypted_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted.data(), coeff_count * encrypted_size, coeff_modulus_count, copy_encrypted_ntt_q.get());
+                    // Transform to NTT form in base q
+                    // Lazy reduction
+                    ntt_negacyclic_harvey_lazy(get<1>(J), *get<2>(J));
+                });
 
-        auto copy_encrypted_ntt_Bsk(allocate_poly(coeff_count * encrypted_size, base_Bsk_size, pool));
-        set_poly_poly(
-            tmp_encrypted_Bsk.get(), coeff_count * encrypted_size, base_Bsk_size, copy_encrypted_ntt_Bsk.get());
+            // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
+            auto temp(allocate_poly(coeff_count, base_Bsk_m_tilde_size, pool));
 
-        for (size_t i = 0; i < encrypted_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted_ntt_q.get() + (j * coeff_count) + (i * enc_ptr_increment), base_q_ntt_tables[j]);
-            }
-            for (size_t j = 0; j < base_Bsk_size; j++)
-            {
-                ntt_negacyclic_harvey_lazy(
-                    copy_encrypted_ntt_Bsk.get() + (j * coeff_count) + (i * enc_Bsk_ptr_increment),
-                    base_Bsk_ntt_tables[j]);
-            }
-        }
+            // (1) Convert from base q to base Bsk U {m_tilde}
+            rns_tool->fastbconv_m_tilde(get<0>(I), temp.get(), pool);
 
-        // Perform fast squaring
-        // Compute c0^2 in q
-        for (size_t i = 0; i < coeff_modulus_count; i++)
-        {
-            // Des[0] in q
-            dyadic_product_coeffmod(
-                copy_encrypted_ntt_q.get() + (i * coeff_count), copy_encrypted_ntt_q.get() + (i * coeff_count),
-                coeff_count, coeff_modulus[i], tmp_des_q.get() + (i * coeff_count));
+            // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
+            rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
 
-            // Des[2] in q
-            dyadic_product_coeffmod(
-                copy_encrypted_ntt_q.get() + (i * coeff_count) + enc_ptr_increment,
-                copy_encrypted_ntt_q.get() + (i * coeff_count) + enc_ptr_increment, coeff_count, coeff_modulus[i],
-                tmp_des_q.get() + (i * coeff_count) + (2 * enc_ptr_increment));
-        }
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                    get<2>(I), base_Bsk_ntt_tables_iter),
+                base_Bsk_size, [&](auto J) {
+                    // Transform to NTT form in base Bsk
+                    // Lazy reduction
+                    ntt_negacyclic_harvey_lazy(get<0>(J), *get<1>(J));
+                });
+        };
 
-        // Compute c0^2 in Bsk
-        for (size_t i = 0; i < base_Bsk_size; i++)
-        {
-            // Des[0] in Bsk
-            dyadic_product_coeffmod(
-                copy_encrypted_ntt_Bsk.get() + (i * coeff_count), copy_encrypted_ntt_Bsk.get() + (i * coeff_count),
-                coeff_count, base_Bsk[i], tmp_des_Bsk_base.get() + (i * coeff_count));
+        // Allocate space for a base q output of behz_extend_base_convert_to_ntt
+        auto encrypted_q(allocate_poly(coeff_count * encrypted_size, base_q_size, pool));
+        PolyIterator encrypted_q_iter(encrypted_q.get(), coeff_count, base_q_size);
 
-            // Des[2] in Bsk
-            dyadic_product_coeffmod(
-                copy_encrypted_ntt_Bsk.get() + (i * coeff_count) + enc_Bsk_ptr_increment,
-                copy_encrypted_ntt_Bsk.get() + (i * coeff_count) + enc_Bsk_ptr_increment, coeff_count, base_Bsk[i],
-                tmp_des_Bsk_base.get() + (i * coeff_count) + (2 * enc_Bsk_ptr_increment));
-        }
+        // Allocate space for a base Bsk output of behz_extend_base_convert_to_ntt
+        auto encrypted_Bsk(allocate_poly(coeff_count * encrypted_size, base_Bsk_size, pool));
+        PolyIterator encrypted_Bsk_iter(encrypted_Bsk.get(), coeff_count, base_Bsk_size);
 
-        auto tmp_second_mul_q(allocate_poly(coeff_count, coeff_modulus_count, pool));
+        // Perform BEHZ steps (1)-(3)
+        for_each_n(
+            IteratorTuple<ConstPolyIterator, PolyIterator, PolyIterator>(
+                encrypted_iter, encrypted_q_iter, encrypted_Bsk_iter),
+            encrypted_size, behz_extend_base_convert_to_ntt);
 
-        // Compute 2*c0*c1 in q
-        for (size_t i = 0; i < coeff_modulus_count; i++)
-        {
-            dyadic_product_coeffmod(
-                copy_encrypted_ntt_q.get() + (i * coeff_count),
-                copy_encrypted_ntt_q.get() + (i * coeff_count) + enc_ptr_increment, coeff_count, coeff_modulus[i],
-                tmp_second_mul_q.get() + (i * coeff_count));
-            add_poly_poly_coeffmod(
-                tmp_second_mul_q.get() + (i * coeff_count), tmp_second_mul_q.get() + (i * coeff_count), coeff_count,
-                coeff_modulus[i], tmp_des_q.get() + (i * coeff_count) + enc_ptr_increment);
-        }
+        // Allocate temporary space for the output of step (4)
+        // We allocate space separately for the base q and the base Bsk components
+        auto temp_dest_q(allocate_zero_poly(coeff_count * dest_size, base_q_size, pool));
+        PolyIterator temp_dest_q_iter(temp_dest_q.get(), coeff_count, base_q_size);
 
-        auto tmp_second_mul_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
+        auto temp_dest_Bsk(allocate_zero_poly(coeff_count * dest_size, base_Bsk_size, pool));
+        PolyIterator temp_dest_Bsk_iter(temp_dest_Bsk.get(), coeff_count, base_Bsk_size);
 
-        // Compute 2*c0*c1 in Bsk
-        for (size_t i = 0; i < base_Bsk_size; i++)
-        {
-            dyadic_product_coeffmod(
-                copy_encrypted_ntt_Bsk.get() + (i * coeff_count),
-                copy_encrypted_ntt_Bsk.get() + (i * coeff_count) + enc_Bsk_ptr_increment, coeff_count, base_Bsk[i],
-                tmp_second_mul_Bsk.get() + (i * coeff_count));
-            add_poly_poly_coeffmod(
-                tmp_second_mul_Bsk.get() + (i * coeff_count), tmp_second_mul_Bsk.get() + (i * coeff_count), coeff_count,
-                base_Bsk[i], tmp_des_Bsk_base.get() + (i * coeff_count) + enc_Bsk_ptr_increment);
-        }
+        // Perform BEHZ step (4): dyadic Karatsuba-squaring on size-2 ciphertexts
 
-        // Convert back outputs from NTT form
-        for (size_t i = 0; i < dest_count; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                inverse_ntt_negacyclic_harvey_lazy(
-                    tmp_des_q.get() + (i * (enc_ptr_increment)) + (j * coeff_count), base_q_ntt_tables[j]);
-            }
-            for (size_t j = 0; j < base_Bsk_size; j++)
-            {
-                inverse_ntt_negacyclic_harvey_lazy(
-                    tmp_des_Bsk_base.get() + (i * (enc_Bsk_ptr_increment)) + (j * coeff_count), base_Bsk_ntt_tables[j]);
-            }
-        }
+        // This lambda function computes the size-2 ciphertext square for BFV multiplication. Since we use the BEHZ
+        // approach, the multiplication of individual polynomials is done using a dyadic product where the inputs
+        // are already in NTT form. The arguments of the lambda function are expected to be as follows:
+        //
+        // 1. a PolyIterator pointing to the beginning of the input ciphertext (in NTT form)
+        // 3. an IteratorWrapper pointing to an array of SmallModulus elements for the base
+        // 4. the size of the base
+        // 5. a PolyIterator pointing to the beginning of the output ciphertext
+        auto behz_ciphertext_square = [&](auto in_iter, auto base_iter, size_t base_size, auto out_iter) {
+            // Make a copy of the input iterator
+            auto in_iter_copy = in_iter;
 
-        // Now we multiply plain modulus to both results in base q and Bsk and
-        // allocate them together in one container as (te0)q(te'0)Bsk | ... |te count)q (te' count)Bsk
-        // to make it ready for fast_floor
-        auto tmp_q_Bsk_together(allocate_poly(coeff_count, dest_count * (coeff_modulus_count + base_Bsk_size), pool));
-        uint64_t *tmp_q_Bsk_together_ptr = tmp_q_Bsk_together.get();
+            // Compute c0^2
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                    *in_iter, base_iter, *out_iter),
+                base_size,
+                [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
-        // Base q
-        for (size_t i = 0; i < dest_count; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                multiply_poly_scalar_coeffmod(
-                    tmp_des_q.get() + (j * coeff_count) + (i * enc_ptr_increment), coeff_count, plain_modulus,
-                    coeff_modulus[j], tmp_q_Bsk_together_ptr + (j * coeff_count));
-            }
-            tmp_q_Bsk_together_ptr += enc_ptr_increment;
+            // Advance in_iter and out_iter
+            ++in_iter;
+            ++out_iter;
 
-            for (size_t k = 0; k < base_Bsk_size; k++)
-            {
-                multiply_poly_scalar_coeffmod(
-                    tmp_des_Bsk_base.get() + (k * coeff_count) + (i * enc_Bsk_ptr_increment), coeff_count,
-                    plain_modulus, base_Bsk[k], tmp_q_Bsk_together_ptr + (k * coeff_count));
-            }
-            tmp_q_Bsk_together_ptr += enc_Bsk_ptr_increment;
-        }
+            // Compute 2*c0*c1
+            for_each_n(
+                IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                    *in_iter, *in_iter_copy, base_iter, *out_iter),
+                base_size, [&](auto I) {
+                    dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<3>(I));
+                    add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, *get<2>(I), get<3>(I));
+                });
 
-        // Allocate a new poly for fast floor result in Bsk
-        auto tmp_result_Bsk(allocate_poly(coeff_count, dest_count * base_Bsk_size, pool));
-        for (size_t i = 0; i < dest_count; i++)
-        {
-            // Step 3: fast floor from q U {Bsk} to Bsk
-            rns_tool->fast_floor(
-                tmp_q_Bsk_together.get() + (i * (enc_ptr_increment + enc_Bsk_ptr_increment)),
-                tmp_result_Bsk.get() + (i * enc_Bsk_ptr_increment), pool);
+            // Advance out_iter manually
+            ++out_iter;
 
-            // Step 4: fast base convert from Bsk to q
-            rns_tool->fastbconv_sk(tmp_result_Bsk.get() + (i * enc_Bsk_ptr_increment), encrypted.data(i), pool);
-        }
+            // Compute c1^2
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                    *in_iter, base_iter, *out_iter),
+                base_size,
+                [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
+        };
+
+        // Perform the BEHZ ciphertext square both for base q and base Bsk
+        behz_ciphertext_square(encrypted_q_iter, base_q_iter, base_q_size, temp_dest_q_iter);
+        behz_ciphertext_square(encrypted_Bsk_iter, base_Bsk_iter, base_Bsk_size, temp_dest_Bsk_iter);
+
+        // Perform BEHZ step (5): transform data from NTT form
+        for_each_n(
+            IteratorTuple<PolyIterator, PolyIterator>(temp_dest_q_iter, temp_dest_Bsk_iter), dest_size, [&](auto I) {
+                for_each_n(
+                    IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                        get<0>(I), base_q_ntt_tables_iter),
+                    base_q_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+
+                for_each_n(
+                    IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(
+                        get<1>(I), base_Bsk_ntt_tables_iter),
+                    base_Bsk_size, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+            });
+
+        // Perform BEHZ steps (6)-(8)
+        for_each_n(
+            IteratorTuple<PolyIterator, PolyIterator, PolyIterator>(
+                temp_dest_q_iter, temp_dest_Bsk_iter, encrypted_iter),
+            dest_size, [&](auto I) {
+                // Bring together the base q and base Bsk components into a single allocation
+                auto temp_q_Bsk(allocate_poly(coeff_count, base_q_size + base_Bsk_size, pool));
+                RNSIterator temp_q_Bsk_iter(temp_q_Bsk.get(), coeff_count);
+
+                // Step (6): multiply base q components by t (plain_modulus)
+                for_each_n(
+                    IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        get<0>(I), temp_q_Bsk_iter, base_q_iter),
+                    base_q_size, [&](auto J) {
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
+                    });
+
+                // Advance to the base Bsk part in temp and multiply base Bsk components by t
+                advance(temp_q_Bsk_iter, base_q_size);
+                for_each_n(
+                    IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        get<1>(I), temp_q_Bsk_iter, base_Bsk_iter),
+                    base_Bsk_size, [&](auto J) {
+                        multiply_poly_scalar_coeffmod(get<0>(J), coeff_count, plain_modulus, *get<2>(J), get<1>(J));
+                    });
+
+                // Allocate yet another temporary for fast divide-and-floor result in base Bsk
+                auto temp_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
+
+                // Step (7): divide by q and floor, producing a result in base Bsk
+                rns_tool->fast_floor(temp_q_Bsk.get(), temp_Bsk.get(), pool);
+
+                // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
+                rns_tool->fastbconv_sk(temp_Bsk.get(), get<2>(I), pool);
+            });
     }
 
     void Evaluator::ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool)
@@ -911,10 +905,16 @@ namespace seal
         // Extract encryption parameters.
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_count = parms.coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
+
+        // Optimization implemented currently only for size 2 ciphertexts
+        if (encrypted_size != 2)
+        {
+            ckks_multiply(encrypted, encrypted, move(pool));
+            return;
+        }
 
         double new_scale = encrypted.scale() * encrypted.scale();
 
@@ -926,112 +926,62 @@ namespace seal
 
         // Determine destination.size()
         // Default is 3 (c_0, c_1, c_2)
-        size_t dest_count = sub_safe(add_safe(encrypted_size, encrypted_size), size_t(1));
+        size_t dest_size = sub_safe(add_safe(encrypted_size, encrypted_size), size_t(1));
 
         // Size check
-        if (!product_fits_in(dest_count, coeff_count, coeff_modulus_count))
+        if (!product_fits_in(dest_size, coeff_count, coeff_modulus_count))
         {
             throw logic_error("invalid parameters");
         }
 
+        // Set up iterator for the base
+        IteratorWrapper<const SmallModulus *> coeff_modulus_iter(parms.coeff_modulus());
+
         // Prepare destination
-        encrypted.resize(context_, context_data.parms_id(), dest_count);
+        encrypted.resize(context_, context_data.parms_id(), dest_size);
 
-        // pointer increment to switch to a next polynomial
-        size_t enc_ptr_increment = coeff_count * coeff_modulus_count;
+        // Set up iterators for input ciphertext
+        PolyIterator encrypted_iter(encrypted);
 
-        // Step 1: naive multiplication modulo the coefficient modulus
-        // First allocate two temp polys :
-        // one for results in base q. This need to be zero
-        // for the arbitrary size multiplication; not for 2x2 though
-        auto tmp_des(allocate_zero_poly(coeff_count * dest_count, coeff_modulus_count, pool));
+        // Allocate temporary space for the result
+        auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
+        PolyIterator temp_iter(temp.get(), coeff_count, coeff_modulus_count);
 
-        // Allocate tmp polys for NTT multiplication results in base q
-        auto tmp1_poly(allocate_poly(coeff_count, coeff_modulus_count, pool));
-        auto tmp2_poly(allocate_poly(coeff_count, coeff_modulus_count, pool));
+        // Make a copy of the input iterator
+        auto encrypted_iter_copy = encrypted_iter;
 
-        // First convert all the inputs into NTT form
-        auto copy_encrypted_ntt(allocate_poly(coeff_count * encrypted_size, coeff_modulus_count, pool));
-        set_poly_poly(encrypted.data(), coeff_count * encrypted_size, coeff_modulus_count, copy_encrypted_ntt.get());
+        // Compute c0^2
+        for_each_n(
+            IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                *encrypted_iter, coeff_modulus_iter, *temp_iter),
+            coeff_modulus_count,
+            [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
-        // The simplest case when the ciphertext dimension is 2
-        if (encrypted_size == 2)
-        {
-            // Compute c0^2, 2*c0 + c1 and c1^2 modulo q
-            // tmp poly to keep 2 * c0 * c1
-            auto tmp_second_mul(allocate_poly(coeff_count, coeff_modulus_count, pool));
+        // Advance encrypted_iter and temp_iter
+        ++encrypted_iter;
+        ++temp_iter;
 
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                // Des[0] = c0^2 in NTT
-                dyadic_product_coeffmod(
-                    copy_encrypted_ntt.get() + (i * coeff_count), copy_encrypted_ntt.get() + (i * coeff_count),
-                    coeff_count, coeff_modulus[i], tmp_des.get() + (i * coeff_count));
+        // Compute 2*c0*c1
+        for_each_n(
+            IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                *encrypted_iter, *encrypted_iter_copy, coeff_modulus_iter, *temp_iter),
+            coeff_modulus_count, [&](auto I) {
+                dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<3>(I));
+                add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, *get<2>(I), get<3>(I));
+            });
 
-                // Des[1] = 2 * c0 * c1
-                dyadic_product_coeffmod(
-                    copy_encrypted_ntt.get() + (i * coeff_count),
-                    copy_encrypted_ntt.get() + (i * coeff_count) + enc_ptr_increment, coeff_count, coeff_modulus[i],
-                    tmp_second_mul.get() + (i * coeff_count));
-                add_poly_poly_coeffmod(
-                    tmp_second_mul.get() + (i * coeff_count), tmp_second_mul.get() + (i * coeff_count), coeff_count,
-                    coeff_modulus[i], tmp_des.get() + (i * coeff_count) + enc_ptr_increment);
+        // Advance temp_iter manually
+        ++temp_iter;
 
-                // Des[2] = c1^2 in NTT
-                dyadic_product_coeffmod(
-                    copy_encrypted_ntt.get() + (i * coeff_count) + enc_ptr_increment,
-                    copy_encrypted_ntt.get() + (i * coeff_count) + enc_ptr_increment, coeff_count, coeff_modulus[i],
-                    tmp_des.get() + (i * coeff_count) + (2 * enc_ptr_increment));
-            }
-        }
-        else
-        {
-            // Perform multiplication on arbitrary size ciphertexts
-
-            // Loop over encrypted1 components [i], seeing if a match exists with an encrypted2
-            // component [j] such that [i+j]=[secret_power_index]
-            // Only need to check encrypted1 components up to and including [secret_power_index],
-            // and strictly less than [encrypted_array.size()]
-
-            // Number of encrypted1 components to check
-            size_t current_encrypted_limit = 0;
-
-            for (size_t secret_power_index = 0; secret_power_index < dest_count; secret_power_index++)
-            {
-                current_encrypted_limit = min(encrypted_size, secret_power_index + 1);
-
-                for (size_t encrypted1_index = 0; encrypted1_index < current_encrypted_limit; encrypted1_index++)
-                {
-                    // check if a corresponding component in encrypted2 exists
-                    if (encrypted_size > secret_power_index - encrypted1_index)
-                    {
-                        size_t encrypted2_index = secret_power_index - encrypted1_index;
-
-                        // NTT Multiplication and addition for results in q
-                        for (size_t i = 0; i < coeff_modulus_count; i++)
-                        {
-                            // ci * dj
-                            dyadic_product_coeffmod(
-                                copy_encrypted_ntt.get() + (i * coeff_count) + (enc_ptr_increment * encrypted1_index),
-                                copy_encrypted_ntt.get() + (i * coeff_count) + (enc_ptr_increment * encrypted2_index),
-                                coeff_count, coeff_modulus[i], tmp1_poly.get() + (i * coeff_count));
-
-                            // Dest[i+j]
-                            add_poly_poly_coeffmod(
-                                tmp1_poly.get() + (i * coeff_count),
-                                tmp_des.get() + (i * coeff_count) +
-                                    (secret_power_index * coeff_count * coeff_modulus_count),
-                                coeff_count, coeff_modulus[i],
-                                tmp_des.get() + (i * coeff_count) +
-                                    (secret_power_index * coeff_count * coeff_modulus_count));
-                        }
-                    }
-                }
-            }
-        }
+        // Compute c1^2
+        for_each_n(
+            IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>, RNSIterator>(
+                *encrypted_iter, coeff_modulus_iter, *temp_iter),
+            coeff_modulus_count,
+            [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
         // Set the final result
-        set_poly_poly(tmp_des.get(), coeff_count * dest_count, coeff_modulus_count, encrypted.data());
+        set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_count, encrypted.data());
 
         // Set the scale
         encrypted.scale() = new_scale;
@@ -1125,18 +1075,15 @@ namespace seal
         switch (next_parms.scheme())
         {
         case scheme_type::BFV:
-            for (size_t i = 0; i < encrypted_size; i++)
-            {
-                rns_tool->divide_and_round_q_last_inplace(encrypted_copy.data(i), pool);
-            }
+            for_each_n(PolyIterator(encrypted_copy), encrypted_size, [&](auto I) {
+                rns_tool->divide_and_round_q_last_inplace(I, pool);
+            });
             break;
 
         case scheme_type::CKKS:
-            for (size_t i = 0; i < encrypted_size; i++)
-            {
-                rns_tool->divide_and_round_q_last_ntt_inplace(
-                    encrypted_copy.data(i), context_data.small_ntt_tables(), pool);
-            }
+            for_each_n(PolyIterator(encrypted_copy), encrypted_size, [&](auto I) {
+                rns_tool->divide_and_round_q_last_ntt_inplace(I, context_data.small_ntt_tables(), pool);
+            });
             break;
 
         default:
@@ -1145,10 +1092,9 @@ namespace seal
 
         // Copy result to destination
         destination.resize(context_, next_context_data.parms_id(), encrypted_size);
-        for (size_t i = 0; i < encrypted_size; i++)
-        {
-            set_poly_poly(encrypted_copy.data(i), coeff_count, next_coeff_modulus_count, destination.data(i));
-        }
+        for_each_n(
+            IteratorTuple<ConstPolyIterator, PolyIterator>(encrypted_copy, destination), encrypted_size,
+            [&](auto I) { set_poly_poly(get<0>(I), coeff_count, next_coeff_modulus_count, get<1>(I)); });
 
         // Set other attributes
         destination.is_ntt_form() = encrypted.is_ntt_form();
@@ -1193,22 +1139,20 @@ namespace seal
 
         size_t rns_poly_total_count = next_coeff_modulus_count * coeff_count;
 
+        auto drop_moduli_and_copy = [&](ConstPolyIterator in_iter, PolyIterator out_iter) {
+            for_each_n(IteratorTuple<ConstPolyIterator, PolyIterator>(in_iter, out_iter), encrypted_size, [&](auto I) {
+                for_each_n(
+                    I, next_coeff_modulus_count, [&](auto J) { set_uint_uint(get<0>(J), coeff_count, get<1>(J)); });
+            });
+        };
+
         if (&encrypted == &destination)
         {
             // Switching in-place so need temporary space
             auto temp(allocate_uint(rns_poly_total_count * encrypted_size, pool));
 
-            // Copy data over to temp
-            for (size_t i = 0; i < encrypted_size; i++)
-            {
-                const uint64_t *encrypted_ptr = encrypted.data(i);
-                for (size_t j = 0; j < next_coeff_modulus_count; j++)
-                {
-                    set_uint_uint(
-                        encrypted_ptr + (j * coeff_count), coeff_count,
-                        temp.get() + (i * rns_poly_total_count) + (j * coeff_count));
-                }
-            }
+            // Copy data over to temp; only copy the RNS components relevant after modulus drop
+            drop_moduli_and_copy(encrypted, { temp.get(), coeff_count, next_coeff_modulus_count });
 
             // Resize destination before writing
             destination.resize(context_, next_context_data.parms_id(), encrypted_size);
@@ -1225,17 +1169,8 @@ namespace seal
             destination.is_ntt_form() = true;
             destination.scale() = encrypted.scale();
 
-            // Copy data directly to new destination
-            for (size_t i = 0; i < encrypted_size; i++)
-            {
-                for (size_t j = 0; j < next_coeff_modulus_count; j++)
-                {
-                    const uint64_t *encrypted_ptr = encrypted.data(i);
-                    set_uint_uint(
-                        encrypted_ptr + (j * coeff_count), coeff_count,
-                        destination.data() + (i * rns_poly_total_count) + (j * coeff_count));
-                }
-            }
+            // Copy data over to destination; only copy the RNS components relevant after modulus drop
+            drop_moduli_and_copy(encrypted, destination);
         }
     }
 
@@ -1626,12 +1561,13 @@ namespace seal
 
         case scheme_type::CKKS:
         {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                add_poly_poly_coeffmod(
-                    encrypted.data() + (j * coeff_count), plain.data() + (j * coeff_count), coeff_count,
-                    coeff_modulus[j], encrypted.data() + (j * coeff_count));
-            }
+            RNSIterator encrypted_iter(encrypted.data(), coeff_count);
+            ConstRNSIterator plain_iter(plain.data(), coeff_count);
+            for_each_n(
+                IteratorTuple<RNSIterator, ConstRNSIterator, IteratorWrapper<const SmallModulus *>>(
+                    encrypted_iter, plain_iter, coeff_modulus),
+                coeff_modulus_count,
+                [&](auto I) { add_poly_poly_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<0>(I)); });
             break;
         }
 
@@ -1703,12 +1639,13 @@ namespace seal
 
         case scheme_type::CKKS:
         {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                sub_poly_poly_coeffmod(
-                    encrypted.data() + (j * coeff_count), plain.data() + (j * coeff_count), coeff_count,
-                    coeff_modulus[j], encrypted.data() + (j * coeff_count));
-            }
+            RNSIterator encrypted_iter(encrypted.data(), coeff_count);
+            ConstRNSIterator plain_iter(plain.data(), coeff_count);
+            for_each_n(
+                IteratorTuple<RNSIterator, ConstRNSIterator, IteratorWrapper<const SmallModulus *>>(
+                    encrypted_iter, plain_iter, coeff_modulus),
+                coeff_modulus_count,
+                [&](auto I) { sub_poly_poly_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<0>(I)); });
             break;
         }
 
@@ -1761,7 +1698,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPool &pool)
+    void Evaluator::multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool)
     {
         // Extract encryption parameters.
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
@@ -1772,7 +1709,7 @@ namespace seal
 
         auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
         auto plain_upper_half_increment = context_data.plain_upper_half_increment();
-        auto coeff_small_ntt_tables = context_data.small_ntt_tables();
+        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         size_t encrypted_size = encrypted.size();
         size_t plain_coeff_count = plain.coeff_count();
@@ -1796,136 +1733,146 @@ namespace seal
         encrypted.scale() = new_scale;
 
         /*
-        Optimizations for constant / monomial multiplication can lead to the
-        presence of a timing side-channel in use-cases where the plaintext
-        data should also be kept private.
+        Optimizations for constant / monomial multiplication can lead to the presence of a timing side-channel in
+        use-cases where the plaintext data should also be kept private.
         */
         if (plain_nonzero_coeff_count == 1)
         {
             // Multiplying by a monomial?
             size_t mono_exponent = plain.significant_coeff_count() - 1;
 
+            // RNS monomial multiplication: monomial and multiplicand polynomial are in RNS form
+            auto rns_monomial_multiply = [&](PolyIterator in_iter, ConstCoeffIterator mono_iter) {
+                for_each_n(in_iter, encrypted_size, [&](auto I) {
+                    for_each_n(
+                        IteratorTuple<RNSIterator, ConstCoeffIterator, IteratorWrapper<const SmallModulus *>>(
+                            I, mono_iter, coeff_modulus),
+                        coeff_modulus_count, [&](auto J) {
+                            negacyclic_multiply_poly_mono_coeffmod(
+                                get<0>(J), coeff_count, *get<1>(J), mono_exponent, *get<2>(J), get<0>(J), pool);
+                        });
+                });
+            };
+
             if (plain[mono_exponent] >= plain_upper_half_threshold)
             {
                 if (!context_data.qualifiers().using_fast_plain_lift)
                 {
-                    auto adjusted_coeff(allocate_uint(coeff_modulus_count, pool));
-                    auto decomposed_coeff(allocate_uint(coeff_modulus_count, pool));
-                    add_uint_uint64(
-                        plain_upper_half_increment, plain[mono_exponent], coeff_modulus_count, adjusted_coeff.get());
-                    decompose_single_coeff(context_data, adjusted_coeff.get(), decomposed_coeff.get(), pool);
+                    // Allocate temporary space for a single RNS coefficient
+                    auto temp(allocate_uint(coeff_modulus_count, pool));
 
-                    for (size_t i = 0; i < encrypted_size; i++)
-                    {
-                        for (size_t j = 0; j < coeff_modulus_count; j++)
-                        {
-                            negacyclic_multiply_poly_mono_coeffmod(
-                                encrypted.data(i) + (j * coeff_count), coeff_count, decomposed_coeff[j], mono_exponent,
-                                coeff_modulus[j], encrypted.data(i) + (j * coeff_count), pool);
-                        }
-                    }
+                    // We need to adjust the monomial modulo each coeff_modulus prime separately when the coeff_modulus
+                    // primes may be larger than the plain_modulus. We add plain_upper_half_increment (i.e., q-t) to
+                    // the monomial to ensure it is smaller than coeff_modulus and then do an RNS multiplication. Note
+                    // that in this case plain_upper_half_increment contains a multi-precision integer, so after the
+                    // addition we decompose the multi-precision integer into RNS components, and then multiply.
+                    add_uint_uint64(plain_upper_half_increment, plain[mono_exponent], coeff_modulus_count, temp.get());
+                    context_data.rns_tool()->base_q()->decompose(temp.get(), pool);
+                    rns_monomial_multiply(encrypted, temp.get());
                 }
                 else
                 {
-                    for (size_t i = 0; i < encrypted_size; i++)
-                    {
-                        for (size_t j = 0; j < coeff_modulus_count; j++)
-                        {
-                            negacyclic_multiply_poly_mono_coeffmod(
-                                encrypted.data(i) + (j * coeff_count), coeff_count,
-                                plain[mono_exponent] + plain_upper_half_increment[j], mono_exponent, coeff_modulus[j],
-                                encrypted.data(i) + (j * coeff_count), pool);
-                        }
-                    }
+                    // Every coeff_modulus prime is larger than plain_modulus, so there is no need to adjust the
+                    // monomial. Instead, just do an RNS multiplication.
+                    rns_monomial_multiply(encrypted, plain.data());
                 }
             }
             else
             {
-                for (size_t i = 0; i < encrypted_size; i++)
-                {
-                    for (size_t j = 0; j < coeff_modulus_count; j++)
-                    {
-                        negacyclic_multiply_poly_mono_coeffmod(
-                            encrypted.data(i) + (j * coeff_count), coeff_count, plain[mono_exponent], mono_exponent,
-                            coeff_modulus[j], encrypted.data(i) + (j * coeff_count), pool);
-                    }
-                }
+                // The monomial represents a positive number, so no RNS multiplication is needed.
+                for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
+                    for_each_n(
+                        IteratorTuple<RNSIterator, IteratorWrapper<const SmallModulus *>>(I, coeff_modulus),
+                        coeff_modulus_count, [&](auto J) {
+                            negacyclic_multiply_poly_mono_coeffmod(
+                                get<0>(J), coeff_count, plain[mono_exponent], mono_exponent, *get<1>(J), get<0>(J),
+                                pool);
+                        });
+                });
             }
 
             return;
         }
 
-        // Generic plain case
-        auto adjusted_poly(allocate_zero_uint(coeff_count * coeff_modulus_count, pool));
-        auto decomposed_poly(allocate_uint(coeff_count * coeff_modulus_count, pool));
-        uint64_t *poly_to_transform = nullptr;
+        // Generic case: any plaintext polynomial
+        // Allocate temporary space for an entire RNS polynomial
+        auto temp(allocate_zero_uint(coeff_count * coeff_modulus_count, pool));
+
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
-            // Reposition coefficients.
-            const uint64_t *plain_ptr = plain.data();
-            uint64_t *adjusted_poly_ptr = adjusted_poly.get();
-            for (size_t i = 0; i < plain_coeff_count; i++, plain_ptr++, adjusted_poly_ptr += coeff_modulus_count)
-            {
-                if (*plain_ptr >= plain_upper_half_threshold)
-                {
-                    add_uint_uint64(plain_upper_half_increment, *plain_ptr, coeff_modulus_count, adjusted_poly_ptr);
-                }
-                else
-                {
-                    *adjusted_poly_ptr = *plain_ptr;
-                }
-            }
-            decompose(context_data, adjusted_poly.get(), decomposed_poly.get(), pool);
-            poly_to_transform = decomposed_poly.get();
+            // Slight semantic misuse of RNSIterator here, but this works well
+            RNSIterator temp_iter(temp.get(), coeff_modulus_count);
+
+            for_each_n(
+                IteratorTuple<ConstCoeffIterator, RNSIterator>(plain.data(), temp_iter), plain_coeff_count,
+                [&](auto I) {
+                    auto plain_value = *get<0>(I);
+                    if (plain_value >= plain_upper_half_threshold)
+                    {
+                        add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
+                    }
+                    else
+                    {
+                        **get<1>(I) = plain_value;
+                    }
+                });
+
+            for_each_n(RNSIterator(temp.get(), coeff_count), coeff_modulus_count, [&](auto I) {
+                context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
+            });
         }
         else
         {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                const uint64_t *plain_ptr = plain.data();
-                uint64_t *adjusted_poly_ptr = adjusted_poly.get() + (j * coeff_count);
-                uint64_t current_plain_upper_half_increment = plain_upper_half_increment[j];
-                for (size_t i = 0; i < plain_coeff_count; i++, plain_ptr++, adjusted_poly_ptr++)
-                {
-                    // Need to lift the coefficient in each qi
-                    if (*plain_ptr >= plain_upper_half_threshold)
-                    {
-                        *adjusted_poly_ptr = *plain_ptr + current_plain_upper_half_increment;
-                    }
-                    // No need for lifting
-                    else
-                    {
-                        *adjusted_poly_ptr = *plain_ptr;
-                    }
-                }
-            }
-            poly_to_transform = adjusted_poly.get();
+            // Note that in this case plain_upper_half_increment holds its value in RNS form modulo the coeff_modulus
+            // primes.
+            RNSIterator temp_iter(temp.get(), coeff_count);
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const uint64_t *>>(
+                    temp_iter, plain_upper_half_increment),
+                coeff_modulus_count, [&](auto I) {
+                    for_each_n(
+                        IteratorTuple<CoeffIterator, ConstCoeffIterator>(get<0>(I), plain.data()), plain_coeff_count,
+                        [&](auto J) {
+                            SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "temp");
+                            SEAL_ASSERT_TYPE(get<1>(J), const uint64_t *, "plain");
+
+                            auto plain_value = *get<1>(J);
+                            if (plain_value >= plain_upper_half_threshold)
+                            {
+                                *get<0>(J) = plain_value + *get<1>(I);
+                            }
+                            else
+                            {
+                                *get<0>(J) = plain_value;
+                            }
+                        });
+                });
         }
 
-        // Need to multiply each component in encrypted with decomposed_poly (plain poly)
-        // Transform plain poly only once
-        for (size_t i = 0; i < coeff_modulus_count; i++)
-        {
-            ntt_negacyclic_harvey(poly_to_transform + (i * coeff_count), coeff_small_ntt_tables[i]);
-        }
+        // Need to multiply each component in encrypted with temp; first step is to transform to NTT form
+        RNSIterator temp_iter(temp.get(), coeff_count);
+        for_each_n(
+            IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(temp_iter, coeff_modulus_ntt_tables),
+            coeff_modulus_count, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
 
-        for (size_t i = 0; i < encrypted_size; i++)
-        {
-            uint64_t *encrypted_ptr = encrypted.data(i);
-            for (size_t j = 0; j < coeff_modulus_count; j++, encrypted_ptr += coeff_count)
-            {
-                // Explicit inline to avoid unnecessary copy
-                // ntt_multiply_poly_nttpoly(encrypted.data(i) + (j * coeff_count),
-                // poly_to_transform + (j * coeff_count),
-                //    coeff_small_ntt_tables_[j], encrypted.data(i) + (j * coeff_count), pool);
+        for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
+            for_each_n(
+                IteratorTuple<
+                    RNSIterator, ConstRNSIterator, IteratorWrapper<const SmallModulus *>,
+                    IteratorWrapper<const SmallNTTTables *>>(I, temp_iter, coeff_modulus, coeff_modulus_ntt_tables),
+                coeff_modulus_count, [&](auto J) {
+                    SEAL_ASSERT_TYPE(get<0>(J), CoeffIterator, "encrypted");
+                    SEAL_ASSERT_TYPE(get<1>(J), ConstCoeffIterator, "temp");
+                    SEAL_ASSERT_TYPE(get<2>(J), const SmallModulus *, "coeff_modulus");
+                    SEAL_ASSERT_TYPE(get<3>(J), const SmallNTTTables *, "coeff_modulus_ntt_tables");
 
-                // Lazy reduction
-                ntt_negacyclic_harvey_lazy(encrypted_ptr, coeff_small_ntt_tables[j]);
-                dyadic_product_coeffmod(
-                    encrypted_ptr, poly_to_transform + (j * coeff_count), coeff_count, coeff_modulus[j], encrypted_ptr);
-                inverse_ntt_negacyclic_harvey(encrypted_ptr, coeff_small_ntt_tables[j]);
-            }
-        }
+                    // Lazy reduction
+                    ntt_negacyclic_harvey_lazy(get<0>(J), *get<3>(J));
+
+                    dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J));
+                    inverse_ntt_negacyclic_harvey(get<0>(J), *get<3>(J));
+                });
+        });
     }
 
     void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt)
@@ -1962,15 +1909,13 @@ namespace seal
             throw invalid_argument("scale out of bounds");
         }
 
-        for (size_t i = 0; i < encrypted_ntt_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                dyadic_product_coeffmod(
-                    encrypted_ntt.data(i) + (j * coeff_count), plain_ntt.data() + (j * coeff_count), coeff_count,
-                    coeff_modulus[j], encrypted_ntt.data(i) + (j * coeff_count));
-            }
-        }
+        for_each_n(PolyIterator(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
+            for_each_n(
+                IteratorTuple<RNSIterator, ConstRNSIterator, IteratorWrapper<const SmallModulus *>>(
+                    I, { plain_ntt.data(), coeff_count }, coeff_modulus),
+                coeff_modulus_count,
+                [&](auto J) { dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J)); });
+        });
 
         // Set the scale
         encrypted_ntt.scale() = new_scale;
@@ -2009,7 +1954,7 @@ namespace seal
         auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
         auto plain_upper_half_increment = context_data.plain_upper_half_increment();
 
-        auto coeff_small_ntt_tables = context_data.small_ntt_tables();
+        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))
@@ -2021,54 +1966,74 @@ namespace seal
         // Note that the new coefficients are automatically set to 0
         plain.resize(coeff_count * coeff_modulus_count);
 
-        // Verify if plain lift is needed
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
-            auto adjusted_poly(allocate_zero_uint(coeff_count * coeff_modulus_count, pool));
-            for (size_t i = 0; i < plain_coeff_count; i++)
-            {
-                if (plain[i] >= plain_upper_half_threshold)
-                {
-                    add_uint_uint64(
-                        plain_upper_half_increment, plain[i], coeff_modulus_count,
-                        adjusted_poly.get() + (i * coeff_modulus_count));
-                }
-                else
-                {
-                    adjusted_poly[i * coeff_modulus_count] = plain[i];
-                }
-            }
-            decompose(context_data, adjusted_poly.get(), plain.data(), pool);
-        }
-        // No need for composed plain lift and decomposition
-        else
-        {
-            for (size_t j = coeff_modulus_count; j--;)
-            {
-                const uint64_t *plain_ptr = plain.data();
-                uint64_t *adjusted_poly_ptr = plain.data() + (j * coeff_count);
-                uint64_t current_plain_upper_half_increment = plain_upper_half_increment[j];
-                for (size_t i = 0; i < plain_coeff_count; i++, plain_ptr++, adjusted_poly_ptr++)
-                {
-                    // Need to lift the coefficient in each qi
-                    if (*plain_ptr >= plain_upper_half_threshold)
+            // Allocate temporary space for an entire RNS polynomial
+            auto temp(allocate_zero_uint(coeff_count * coeff_modulus_count, pool));
+
+            // Slight semantic misuse of RNSIterator here, but this works well
+            RNSIterator temp_iter(temp.get(), coeff_modulus_count);
+
+            for_each_n(
+                IteratorTuple<ConstCoeffIterator, RNSIterator>(plain.data(), temp_iter), plain_coeff_count,
+                [&](auto I) {
+                    auto plain_value = *get<0>(I);
+                    if (plain_value >= plain_upper_half_threshold)
                     {
-                        *adjusted_poly_ptr = *plain_ptr + current_plain_upper_half_increment;
+                        add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
                     }
-                    // No need for lifting
                     else
                     {
-                        *adjusted_poly_ptr = *plain_ptr;
+                        **get<1>(I) = plain_value;
                     }
-                }
-            }
+                });
+
+            for_each_n(RNSIterator(temp.get(), coeff_count), coeff_modulus_count, [&](auto I) {
+                context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
+            });
+
+            // Copy data back to plain
+            set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, plain.data());
+        }
+        else
+        {
+            // Note that in this case plain_upper_half_increment holds its value in RNS form modulo the coeff_modulus
+            // primes.
+            RNSIterator plain_iter(plain.data(), coeff_count);
+
+            // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
+            // the plain_upper_half_increment values.
+            IteratorTuple<RNSIterator, IteratorWrapper<const uint64_t *>> helper_iter(
+                plain_iter, plain_upper_half_increment);
+            advance(helper_iter, coeff_modulus_count - 1);
+            auto reversed_helper_iter = ReverseIterator<decltype(helper_iter)>(helper_iter);
+
+            for_each_n(reversed_helper_iter, coeff_modulus_count, [&](auto I) {
+                    SEAL_ASSERT_TYPE(get<0>(I), CoeffIterator, "reversed plain");
+                    SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "reversed plain_upper_half_increment");
+
+                    for_each_n(IteratorTuple<CoeffIterator, CoeffIterator>(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
+                            SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "plain");
+                            SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "reversed plain");
+
+                            auto plain_value = *get<0>(J);
+                            if (plain_value >= plain_upper_half_threshold)
+                            {
+                                *get<1>(J) = plain_value + *get<1>(I);
+                            }
+                            else
+                            {
+                                *get<1>(J) = plain_value;
+                            }
+                        });
+                });
         }
 
         // Transform to NTT domain
-        for (size_t i = 0; i < coeff_modulus_count; i++)
-        {
-            ntt_negacyclic_harvey(plain.data() + (i * coeff_count), coeff_small_ntt_tables[i]);
-        }
+        RNSIterator plain_iter(plain.data(), coeff_count);
+        for_each_n(
+            IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(plain_iter, coeff_modulus_ntt_tables),
+            coeff_modulus_count, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
 
         plain.parms_id() = parms_id;
     }
@@ -2099,7 +2064,7 @@ namespace seal
         size_t coeff_modulus_count = coeff_modulus.size();
         size_t encrypted_size = encrypted.size();
 
-        auto coeff_small_ntt_tables = context_data.small_ntt_tables();
+        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))
@@ -2108,13 +2073,13 @@ namespace seal
         }
 
         // Transform each polynomial to NTT domain
-        for (size_t i = 0; i < encrypted_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                ntt_negacyclic_harvey(encrypted.data(i) + (j * coeff_count), coeff_small_ntt_tables[j]);
-            }
-        }
+        for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables),
+                coeff_modulus_count, [&](auto J) {
+                    ntt_negacyclic_harvey(get<0>(J), *get<1>(J));
+                });
+        });
 
         // Finally change the is_ntt_transformed flag
         encrypted.is_ntt_form() = true;
@@ -2152,7 +2117,7 @@ namespace seal
         size_t coeff_modulus_count = parms.coeff_modulus().size();
         size_t encrypted_ntt_size = encrypted_ntt.size();
 
-        auto coeff_small_ntt_tables = context_data.small_ntt_tables();
+        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))
@@ -2161,13 +2126,11 @@ namespace seal
         }
 
         // Transform each polynomial from NTT domain
-        for (size_t i = 0; i < encrypted_ntt_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                inverse_ntt_negacyclic_harvey(encrypted_ntt.data(i) + (j * coeff_count), coeff_small_ntt_tables[j]);
-            }
-        }
+        for_each_n(PolyIterator(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables),
+                coeff_modulus_count, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+        });
 
         // Finally change the is_ntt_transformed flag
         encrypted_ntt.is_ntt_form() = false;
@@ -2181,7 +2144,7 @@ namespace seal
     }
 
     void Evaluator::apply_galois_inplace(
-        Ciphertext &encrypted, uint64_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
+        Ciphertext &encrypted, uint32_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -2201,6 +2164,8 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_count = coeff_modulus.size();
         size_t encrypted_size = encrypted.size();
+        // Use key_context_data where permutation tables exist since previous runs.
+        auto galois_tool = context_->key_context_data()->galois_tool();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))
@@ -2215,7 +2180,6 @@ namespace seal
         }
 
         uint64_t m = mul_safe(static_cast<uint64_t>(coeff_count), uint64_t(2));
-        int n_power_of_two = get_power_of_two(static_cast<uint64_t>(coeff_count));
 
         // Verify parameters
         if (!(galois_elt & 1) || unsigned_geq(galois_elt, m))
@@ -2228,51 +2192,62 @@ namespace seal
         }
 
         auto temp(allocate_poly(coeff_count, coeff_modulus_count, pool));
+        RNSIterator temp_iter(temp.get(), coeff_count);
 
         // DO NOT CHANGE EXECUTION ORDER OF FOLLOWING SECTION
         // BEGIN: Apply Galois for each ciphertext
         // Execution order is sensitive, since apply_galois is not inplace!
         if (parms.scheme() == scheme_type::BFV)
         {
+            auto apply_galois_helper = [&](auto in_iter, auto out_iter) {
+                for_each_n(
+                    IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        in_iter, out_iter, coeff_modulus),
+                    coeff_modulus_count,
+                    [&](auto I) { galois_tool->apply_galois(get<0>(I), galois_elt, *get<2>(I), get<1>(I)); });
+            };
+
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                util::apply_galois(
-                    encrypted.data(0) + i * coeff_count, n_power_of_two, galois_elt, coeff_modulus[i],
-                    temp.get() + i * coeff_count);
-            }
-            // copy result to encrypted.data(0)
+
+            // First transform encrypted.data(0)
+            PolyIterator encrypted_iter(encrypted);
+            apply_galois_helper(*encrypted_iter++, temp_iter);
+
+            // Copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                util::apply_galois(
-                    encrypted.data(1) + i * coeff_count, n_power_of_two, galois_elt, coeff_modulus[i],
-                    temp.get() + i * coeff_count);
-            }
+
+            // Next transform encrypted.data(1)
+            apply_galois_helper(*encrypted_iter, temp_iter);
         }
         else if (parms.scheme() == scheme_type::CKKS)
         {
+            auto apply_galois_helper_ntt = [&](auto in_iter, auto out_iter) {
+                for_each_n(
+                    IteratorTuple<RNSIterator, RNSIterator>(in_iter, out_iter), coeff_modulus_count, [&](auto I) {
+                        const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
+                    });
+            };
+
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                util::apply_galois_ntt(
-                    encrypted.data(0) + i * coeff_count, n_power_of_two, galois_elt, temp.get() + i * coeff_count);
-            }
-            // copy result to encrypted.data(0)
+
+            // First transform encrypted.data(0)
+            PolyIterator encrypted_iter(encrypted);
+            apply_galois_helper_ntt(*encrypted_iter++, temp_iter);
+
+            // Copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                util::apply_galois_ntt(
-                    encrypted.data(1) + i * coeff_count, n_power_of_two, galois_elt, temp.get() + i * coeff_count);
-            }
+
+            // Next transform encrypted.data(1)
+            apply_galois_helper_ntt(*encrypted_iter, temp_iter);
         }
         else
         {
             throw logic_error("scheme not implemented");
         }
 
-        // wipe encrypted.data(1)
+        // Wipe encrypted.data(1)
         set_zero_poly(coeff_count, coeff_modulus_count, encrypted.data(1));
+
         // END: Apply Galois for each ciphertext
         // REORDERING IS SAFE NOW
 
@@ -2313,12 +2288,13 @@ namespace seal
         }
 
         size_t coeff_count = context_data_ptr->parms().poly_modulus_degree();
+        auto galois_tool = context_data_ptr->galois_tool();
 
         // Check if Galois key is generated or not.
-        if (galois_keys.has_key(galois_elt_from_step(steps, coeff_count)))
+        if (galois_keys.has_key(galois_tool->get_elt_from_step(steps)))
         {
             // Perform rotation and key switching
-            apply_galois_inplace(encrypted, galois_elt_from_step(steps, coeff_count), galois_keys, move(pool));
+            apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(steps), galois_keys, move(pool));
         }
         else
         {

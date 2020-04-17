@@ -63,7 +63,7 @@ SEAL_C_FUNC Evaluator_TransformToNTT2(void *thisptr, void *encrypted, void *dest
 SEAL_C_FUNC Evaluator_TransformFromNTT(void *thisptr, void *encrypted_ntt, void *destination);
 
 SEAL_C_FUNC Evaluator_ApplyGalois(
-    void *thisptr, void *encrypted, uint64_t galois_elt, void *galois_keys, void *destination, void *pool);
+    void *thisptr, void *encrypted, uint32_t galois_elt, void *galois_keys, void *destination, void *pool);
 
 SEAL_C_FUNC Evaluator_RotateRows(
     void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool);

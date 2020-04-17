@@ -17,7 +17,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(EncryptorTest, BFVEncryptDecrypt)
     {
@@ -656,4 +656,4 @@ namespace SEALTest
             }
         }
     }
-} // namespace SEALTest
+} // namespace sealtest

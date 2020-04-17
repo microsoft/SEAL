@@ -231,7 +231,7 @@ SEAL_C_FUNC Ciphertext_PolyModulusDegree(void *thisptr, uint64_t *poly_modulus_d
     return S_OK;
 }
 
-SEAL_C_FUNC Ciphertext_CoeffModCount(void *thisptr, uint64_t *coeff_modulus_count)
+SEAL_C_FUNC Ciphertext_CoeffModulusCount(void *thisptr, uint64_t *coeff_modulus_count)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);

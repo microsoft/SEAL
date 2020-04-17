@@ -13,7 +13,7 @@ using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(CiphertextTest, CiphertextBasics)
     {
@@ -124,4 +124,4 @@ namespace SEALTest
             ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
         ASSERT_TRUE(ctxt.data() != ctxt2.data());
     }
-} // namespace SEALTest
+} // namespace sealtest

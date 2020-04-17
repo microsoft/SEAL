@@ -10,7 +10,7 @@
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(RandomToStandard, RandomToStandardGenerate)
     {
@@ -48,4 +48,4 @@ namespace SEALTest
         ASSERT_TRUE(even);
         ASSERT_TRUE(odd);
     }
-} // namespace SEALTest
+} // namespace sealtest

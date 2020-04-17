@@ -8,13 +8,21 @@
 #define SEAL_VERSION_MINOR @SEAL_VERSION_MINOR@
 #define SEAL_VERSION_PATCH @SEAL_VERSION_PATCH@
 
+// Are we in debug mode?
 #cmakedefine SEAL_DEBUG
+
+// C++17 features
+#cmakedefine SEAL_USE_STD_BYTE
+#cmakedefine SEAL_USE_SHARED_MUTEX
 #cmakedefine SEAL_USE_IF_CONSTEXPR
 #cmakedefine SEAL_USE_MAYBE_UNUSED
 #cmakedefine SEAL_USE_NODISCARD
-#cmakedefine SEAL_USE_STD_BYTE
-#cmakedefine SEAL_USE_SHARED_MUTEX
+#cmakedefine SEAL_USE_STD_FOR_EACH_N
+
+// Security
 #cmakedefine SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
+
+// Intrinsics
 #cmakedefine SEAL_USE_INTRIN
 #cmakedefine SEAL_USE__UMUL128
 #cmakedefine SEAL_USE__BITSCANREVERSE64
@@ -22,5 +30,7 @@
 #cmakedefine SEAL_USE___INT128
 #cmakedefine SEAL_USE__ADDCARRY_U64
 #cmakedefine SEAL_USE__SUBBORROW_U64
+
+// Third-party dependencies
 #cmakedefine SEAL_USE_MSGSL
 #cmakedefine SEAL_USE_ZLIB
