@@ -1827,7 +1827,7 @@ namespace seal
             // primes.
             RNSIterator temp_iter(temp.get(), coeff_count);
             for_each_n(
-                IteratorTuple<RNSIterator, IteratorWrapper<const std::uint64_t *>>(
+                IteratorTuple<RNSIterator, IteratorWrapper<const uint64_t *>>(
                     temp_iter, plain_upper_half_increment),
                 coeff_modulus_count, [&](auto I) {
                     for_each_n(
@@ -1954,7 +1954,7 @@ namespace seal
         auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
         auto plain_upper_half_increment = context_data.plain_upper_half_increment();
 
-        auto coeff_small_ntt_tables = context_data.small_ntt_tables();
+        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))
@@ -1966,56 +1966,74 @@ namespace seal
         // Note that the new coefficients are automatically set to 0
         plain.resize(coeff_count * coeff_modulus_count);
 
-        // Verify if plain lift is needed
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
-            auto adjusted_poly(allocate_zero_uint(coeff_count * coeff_modulus_count, pool));
-            for (size_t i = 0; i < plain_coeff_count; i++)
-            {
-                if (plain[i] >= plain_upper_half_threshold)
-                {
-                    add_uint_uint64(
-                        plain_upper_half_increment, plain[i], coeff_modulus_count,
-                        adjusted_poly.get() + (i * coeff_modulus_count));
-                }
-                else
-                {
-                    adjusted_poly[i * coeff_modulus_count] = plain[i];
-                }
-            }
-            for_each_n(RNSIterator(adjusted_poly.get(), coeff_count), coeff_modulus_count, [&](auto I) {
-                context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
-            });
-        }
-        // No need for composed plain lift and decomposition
-        else
-        {
-            for (size_t j = coeff_modulus_count; j--;)
-            {
-                const uint64_t *plain_ptr = plain.data();
-                uint64_t *adjusted_poly_ptr = plain.data() + (j * coeff_count);
-                uint64_t current_plain_upper_half_increment = plain_upper_half_increment[j];
-                for (size_t i = 0; i < plain_coeff_count; i++, plain_ptr++, adjusted_poly_ptr++)
-                {
-                    // Need to lift the coefficient in each qi
-                    if (*plain_ptr >= plain_upper_half_threshold)
+            // Allocate temporary space for an entire RNS polynomial
+            auto temp(allocate_zero_uint(coeff_count * coeff_modulus_count, pool));
+
+            // Slight semantic misuse of RNSIterator here, but this works well
+            RNSIterator temp_iter(temp.get(), coeff_modulus_count);
+
+            for_each_n(
+                IteratorTuple<ConstCoeffIterator, RNSIterator>(plain.data(), temp_iter), plain_coeff_count,
+                [&](auto I) {
+                    auto plain_value = *get<0>(I);
+                    if (plain_value >= plain_upper_half_threshold)
                     {
-                        *adjusted_poly_ptr = *plain_ptr + current_plain_upper_half_increment;
+                        add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
                     }
-                    // No need for lifting
                     else
                     {
-                        *adjusted_poly_ptr = *plain_ptr;
+                        **get<1>(I) = plain_value;
                     }
-                }
-            }
+                });
+
+            for_each_n(RNSIterator(temp.get(), coeff_count), coeff_modulus_count, [&](auto I) {
+                context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
+            });
+
+            // Copy data back to plain
+            set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, plain.data());
+        }
+        else
+        {
+            // Note that in this case plain_upper_half_increment holds its value in RNS form modulo the coeff_modulus
+            // primes.
+            RNSIterator plain_iter(plain.data(), coeff_count);
+
+            // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
+            // the plain_upper_half_increment values.
+            IteratorTuple<RNSIterator, IteratorWrapper<const uint64_t *>> helper_iter(
+                plain_iter, plain_upper_half_increment);
+            advance(helper_iter, coeff_modulus_count - 1);
+            auto reversed_helper_iter = ReverseIterator<decltype(helper_iter)>(helper_iter);
+
+            for_each_n(reversed_helper_iter, coeff_modulus_count, [&](auto I) {
+                    SEAL_ASSERT_TYPE(get<0>(I), CoeffIterator, "reversed plain");
+                    SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "reversed plain_upper_half_increment");
+
+                    for_each_n(IteratorTuple<CoeffIterator, CoeffIterator>(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
+                            SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "plain");
+                            SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "reversed plain");
+
+                            auto plain_value = *get<0>(J);
+                            if (plain_value >= plain_upper_half_threshold)
+                            {
+                                *get<1>(J) = plain_value + *get<1>(I);
+                            }
+                            else
+                            {
+                                *get<1>(J) = plain_value;
+                            }
+                        });
+                });
         }
 
         // Transform to NTT domain
-        for (size_t i = 0; i < coeff_modulus_count; i++)
-        {
-            ntt_negacyclic_harvey(plain.data() + (i * coeff_count), coeff_small_ntt_tables[i]);
-        }
+        RNSIterator plain_iter(plain.data(), coeff_count);
+        for_each_n(
+            IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(plain_iter, coeff_modulus_ntt_tables),
+            coeff_modulus_count, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
 
         plain.parms_id() = parms_id;
     }
@@ -2046,7 +2064,7 @@ namespace seal
         size_t coeff_modulus_count = coeff_modulus.size();
         size_t encrypted_size = encrypted.size();
 
-        auto coeff_small_ntt_tables = context_data.small_ntt_tables();
+        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))
@@ -2055,13 +2073,13 @@ namespace seal
         }
 
         // Transform each polynomial to NTT domain
-        for (size_t i = 0; i < encrypted_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                ntt_negacyclic_harvey(encrypted.data(i) + (j * coeff_count), coeff_small_ntt_tables[j]);
-            }
-        }
+        for_each_n(PolyIterator(encrypted), encrypted_size, [&](auto I) {
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables),
+                coeff_modulus_count, [&](auto J) {
+                    ntt_negacyclic_harvey(get<0>(J), *get<1>(J));
+                });
+        });
 
         // Finally change the is_ntt_transformed flag
         encrypted.is_ntt_form() = true;
@@ -2099,7 +2117,7 @@ namespace seal
         size_t coeff_modulus_count = parms.coeff_modulus().size();
         size_t encrypted_ntt_size = encrypted_ntt.size();
 
-        auto coeff_small_ntt_tables = context_data.small_ntt_tables();
+        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_count))
@@ -2108,13 +2126,11 @@ namespace seal
         }
 
         // Transform each polynomial from NTT domain
-        for (size_t i = 0; i < encrypted_ntt_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
-            {
-                inverse_ntt_negacyclic_harvey(encrypted_ntt.data(i) + (j * coeff_count), coeff_small_ntt_tables[j]);
-            }
-        }
+        for_each_n(PolyIterator(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
+            for_each_n(
+                IteratorTuple<RNSIterator, IteratorWrapper<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables),
+                coeff_modulus_count, [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
+        });
 
         // Finally change the is_ntt_transformed flag
         encrypted_ntt.is_ntt_form() = false;
@@ -2176,49 +2192,62 @@ namespace seal
         }
 
         auto temp(allocate_poly(coeff_count, coeff_modulus_count, pool));
+        RNSIterator temp_iter(temp.get(), coeff_count);
 
         // DO NOT CHANGE EXECUTION ORDER OF FOLLOWING SECTION
         // BEGIN: Apply Galois for each ciphertext
         // Execution order is sensitive, since apply_galois is not inplace!
         if (parms.scheme() == scheme_type::BFV)
         {
+            auto apply_galois_helper = [&](auto in_iter, auto out_iter) {
+                for_each_n(
+                    IteratorTuple<RNSIterator, RNSIterator, IteratorWrapper<const SmallModulus *>>(
+                        in_iter, out_iter, coeff_modulus),
+                    coeff_modulus_count,
+                    [&](auto I) { galois_tool->apply_galois(get<0>(I), galois_elt, *get<2>(I), get<1>(I)); });
+            };
+
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                galois_tool->apply_galois(
-                    encrypted.data(0) + i * coeff_count, galois_elt, coeff_modulus[i], temp.get() + i * coeff_count);
-            }
-            // copy result to encrypted.data(0)
+
+            // First transform encrypted.data(0)
+            PolyIterator encrypted_iter(encrypted);
+            apply_galois_helper(*encrypted_iter++, temp_iter);
+
+            // Copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                galois_tool->apply_galois(
-                    encrypted.data(1) + i * coeff_count, galois_elt, coeff_modulus[i], temp.get() + i * coeff_count);
-            }
+
+            // Next transform encrypted.data(1)
+            apply_galois_helper(*encrypted_iter, temp_iter);
         }
         else if (parms.scheme() == scheme_type::CKKS)
         {
+            auto apply_galois_helper_ntt = [&](auto in_iter, auto out_iter) {
+                for_each_n(
+                    IteratorTuple<RNSIterator, RNSIterator>(in_iter, out_iter), coeff_modulus_count, [&](auto I) {
+                        const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
+                    });
+            };
+
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                const_cast<GaloisTool *>(galois_tool)
-                    ->apply_galois_ntt(encrypted.data(0) + i * coeff_count, galois_elt, temp.get() + i * coeff_count);
-            }
-            // copy result to encrypted.data(0)
+
+            // First transform encrypted.data(0)
+            PolyIterator encrypted_iter(encrypted);
+            apply_galois_helper_ntt(*encrypted_iter++, temp_iter);
+
+            // Copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
-            for (size_t i = 0; i < coeff_modulus_count; i++)
-            {
-                const_cast<GaloisTool *>(galois_tool)
-                    ->apply_galois_ntt(encrypted.data(1) + i * coeff_count, galois_elt, temp.get() + i * coeff_count);
-            }
+
+            // Next transform encrypted.data(1)
+            apply_galois_helper_ntt(*encrypted_iter, temp_iter);
         }
         else
         {
             throw logic_error("scheme not implemented");
         }
 
-        // wipe encrypted.data(1)
+        // Wipe encrypted.data(1)
         set_zero_poly(coeff_count, coeff_modulus_count, encrypted.data(1));
+
         // END: Apply Galois for each ciphertext
         // REORDERING IS SAFE NOW
 
