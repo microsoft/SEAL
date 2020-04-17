@@ -3,24 +3,18 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(GSL VERSION 2.1.0 LANGUAGES CXX C)
+project(MSGSL_DOWNLOAD VERSION 2.1.0)
 
 include(ExternalProject)
-ExternalProject_Add(msgsl_external
-    GIT_REPOSITORY    https://github.com/microsoft/GSL.git
-    GIT_TAG           v2.1.0
-    SOURCE_DIR        ${CMAKE_CURRENT_LIST_DIR}/GSL-src
-    CMAKE_ARGS        -DCMAKE_BUILD_TYPE=Release -DGSL_TEST=OFF
-    INSTALL_COMMAND   ""
-    TEST_COMMAND      ""
+ExternalProject_Add(EP_MSGSL
+    TMP_DIR             ${CMAKE_CURRENT_LIST_DIR}/tmp
+    STAMP_DIR           ${CMAKE_CURRENT_LIST_DIR}/stamp
+    DOWNLOAD_DIR        ""
+    SOURCE_DIR          ${CMAKE_CURRENT_LIST_DIR}/src
+    BINARY_DIR          ${CMAKE_CURRENT_LIST_DIR}/build
+    GIT_REPOSITORY      https://github.com/microsoft/GSL.git
+    GIT_TAG             v${PROJECT_VERSION}
+    GIT_CONFIG          advice.detachedHead=false
+    INSTALL_COMMAND     ""
+    TEST_COMMAND        ""
 )
-
-# Install the header files
-if(SEAL_USE_MSGSL)
-    install(
-        DIRECTORY
-            ${CMAKE_CURRENT_LIST_DIR}/GSL-src/include/gsl
-        DESTINATION
-            ${SEAL_INCLUDES_INSTALL_DIR}
-    )
-endif()

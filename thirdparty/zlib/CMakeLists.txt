@@ -3,21 +3,24 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(ZLIB VERSION 1.2.11 LANGUAGES CXX C)
+project(ZLIB_DOWNLOAD VERSION 1.2.11)
 
 if(MSVC)
-    set(ZLIB_BINARY_DIR ${CMAKE_CURRENT_LIST_DIR}/zlib-build/${ZLIB_PLATFORM})
+    set(TEMP_BINARY_DIR ${CMAKE_CURRENT_LIST_DIR}/build/${ZLIB_PLATFORM})
 else()
-    set(ZLIB_BINARY_DIR ${CMAKE_CURRENT_LIST_DIR}/zlib-src)
+    set(TEMP_BINARY_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 endif()
 
 include(ExternalProject)
-ExternalProject_Add(zlib_external
-    GIT_REPOSITORY    https://github.com/madler/zlib.git
-    GIT_TAG           v1.2.11
-    SOURCE_DIR        ${CMAKE_CURRENT_LIST_DIR}/zlib-src
-    BINARY_DIR        ${ZLIB_BINARY_DIR}
-    CMAKE_ARGS        -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DSKIP_INSTALL_ALL=ON
-    INSTALL_COMMAND   ""
-    TEST_COMMAND      ""
+ExternalProject_Add(EP_ZLIB
+    TMP_DIR             ${CMAKE_CURRENT_LIST_DIR}/tmp
+    STAMP_DIR           ${CMAKE_CURRENT_LIST_DIR}/stamp
+    DOWNLOAD_DIR        ""
+    SOURCE_DIR          ${CMAKE_CURRENT_LIST_DIR}/src
+    BINARY_DIR          ${TEMP_BINARY_DIR}
+    GIT_REPOSITORY      https://github.com/madler/zlib.git
+    GIT_TAG             v${PROJECT_VERSION}
+    GIT_CONFIG          advice.detachedHead=false
+    INSTALL_COMMAND     ""
+    TEST_COMMAND        ""
 )
