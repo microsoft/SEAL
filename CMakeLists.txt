@@ -194,11 +194,18 @@ set(THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 
+if (CMAKE_TOOLCHAIN_FILE)
+    set(CROSSC_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DANDROID_ABI=${ANDROID_ABI} -DANDROID_NDK=${ANDROID_NDK} -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DCMAKE_ANDROID_ARCH_ABI=${CMAKE_ANDROID_ARCH_ABI} -DCMAKE_ANDROID_NDK=${CMAKE_ANDROID_NDK} -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}")
+else()
+    set(CROSSC_OPTIONS "")
+endif()
+message(STATUS "Cross compiling options: ${CROSSC_OPTIONS}")
+
 # Download and configure
 if(SEAL_USE_MSGSL AND NOT MSVC)
     message(STATUS "Setting up MSGSL ...")
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . ${CROSSC_OPTIONS}
         OUTPUT_QUIET
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
@@ -210,7 +217,7 @@ endif()
 # Build
 if(SEAL_USE_MSGSL AND NOT MSVC)
     execute_process(
-        COMMAND ${CMAKE_COMMAND} --build .
+        COMMAND ${CMAKE_COMMAND} --build . ${CROSSC_OPTIONS}
         OUTPUT_QUIET
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
@@ -243,8 +250,15 @@ endif()
 # Download and configure
 if(SEAL_USE_ZLIB AND NOT MSVC)
     message(STATUS "Setting up ZLIB ...")
+
+#    if (CMAKE_TOOLCHAIN_FILE)
+#        set(CROSSC_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DANDROID_ABI=${ANDROID_ABI} -DANDROID_NDK=${ANDROID_NDK} -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DCMAKE_ANDROID_ARCH_ABI=${CMAKE_ANDROID_ARCH_ABI} -DCMAKE_ANDROID_NDK=${CMAKE_ANDROID_NDK} -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}")
+#    else()
+#        set(CROSSC_OPTIONS "")
+#    endif()
+
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . ${CROSSC_OPTIONS}
         OUTPUT_QUIET
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
@@ -266,7 +280,7 @@ endif()
 
 # Build
 if(SEAL_USE_ZLIB AND NOT MSVC)
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+    execute_process(COMMAND ${CMAKE_COMMAND} --build . ${CROSSC_OPTIONS}
         OUTPUT_QUIET
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
@@ -543,35 +557,6 @@ set_include_directories(seal)
 link_threads(seal)
 install_target(seal SEALTargets)
 
-if(SEAL_USE_MSGSL AND NOT MSVC AND NOT CMAKE_HOST_WIN32)
-    # In UNIX-like platforms copy Microsoft GSL include files into native/src
-    add_custom_command(TARGET seal POST_BUILD
-        COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
-endif()
-
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    if(CMAKE_HOST_WIN32)
-        get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
-        set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
-        file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
-        set(DEL_CMD "del")
-        set(DEL_CMD_OPTS "")
-    else()
-        set(AR_CMD_PATH "ar")
-        set(DEL_CMD "rm")
-        set(DEL_CMD_OPTS "-rf")
-    endif()
-
-    # In UNIX-like platforms combine manually seal and zlibstatic
-    # into a single archive; not pretty, but works
-    add_custom_command(TARGET seal POST_BUILD
-        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:seal>
-        COMMAND "${AR_CMD_PATH}" x ${ZLIB_LIBRARY_PATH}
-        COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:seal> *.o
-        COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
-        WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
-endif()
-
 # Conditionally build the shared library
 if(BUILD_SHARED_LIBS)
     add_library(seal_shared SHARED $<TARGET_OBJECTS:seal_obj>)
@@ -600,11 +585,23 @@ endif()
 
 # In UNIX-like platforms combine manually seal and zlibstatic into a single archive; not pretty, but works
 if(SEAL_USE_ZLIB AND NOT MSVC)
+    if(CMAKE_HOST_WIN32)
+        get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
+        file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
+        set(DEL_CMD "del")
+        set(DEL_CMD_OPTS "")
+    else()
+        set(AR_CMD_PATH "ar")
+        set(DEL_CMD "rm")
+        set(DEL_CMD_OPTS "-rf")
+    endif()
+
     add_custom_command(TARGET seal POST_BUILD
-        COMMAND ar x $<TARGET_FILE:seal>
-        COMMAND ar x ${zlibstatic_LIBRARY_PATH}
-        COMMAND ar rcs $<TARGET_FILE:seal> *.o
-        COMMAND rm -f *.o
+        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:seal>
+        COMMAND "${AR_CMD_PATH}" x ${ZLIB_LIBRARY_PATH}
+        COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:seal> *.o
+        COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
         WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
 endif()
 
