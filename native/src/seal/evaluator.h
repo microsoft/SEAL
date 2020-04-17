@@ -1362,7 +1362,7 @@ namespace seal
         }
 
         void switch_key_inplace(
-            Ciphertext &encrypted, util::ConstRNSIterator target, const KSwitchKeys &kswitch_keys, std::size_t key_index,
+            Ciphertext &encrypted, util::ConstRNSIter target, const KSwitchKeys &kswitch_keys, std::size_t key_index,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool);

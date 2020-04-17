@@ -18,11 +18,11 @@ namespace sealtest
 {
     namespace util
     {
-        TEST(IteratorTest, CoeffIterator)
+        TEST(IteratorTest, CoeffIter)
         {
             array<uint64_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            CoeffIterator ci(arr.data());
-            ConstCoeffIterator cci(arr.data());
+            CoeffIter ci(arr.data());
+            ConstCoeffIter cci(arr.data());
 
             for_each(arr.begin(), arr.end(), [ci](auto a) mutable { ASSERT_EQ(a, **ci++); });
             for_each(arr.begin(), arr.end(), [cci](auto a) mutable { ASSERT_EQ(a, **cci++); });
@@ -48,11 +48,11 @@ namespace sealtest
             ASSERT_TRUE(cci == cci2);
         }
 
-        TEST(IteratorTest, RNSIterator)
+        TEST(IteratorTest, RNSIter)
         {
             array<uint64_t, 12> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-            RNSIterator ri(arr.data(), 4);
-            ConstRNSIterator cri(arr.data(), 4);
+            RNSIter ri(arr.data(), 4);
+            ConstRNSIter cri(arr.data(), 4);
 
             {
                 vector<uint64_t> values;
@@ -88,11 +88,11 @@ namespace sealtest
             ASSERT_TRUE(ri == arr.data());
         }
 
-        TEST(IteratorTest, PolyIterator)
+        TEST(IteratorTest, PolyIter)
         {
             array<uint64_t, 12> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-            PolyIterator pi(arr.data(), 3, 2);
-            ConstPolyIterator cpi(arr.data(), 3, 2);
+            PolyIter pi(arr.data(), 3, 2);
+            ConstPolyIter cpi(arr.data(), 3, 2);
 
             {
                 vector<uint64_t> values;
@@ -127,13 +127,13 @@ namespace sealtest
             ASSERT_TRUE(pi == arr.data());
         }
 
-        TEST(IteratorTest, IteratorWrapper)
+        TEST(IteratorTest, PtrIter)
         {
             array<int32_t, 5> int_arr{ 0, 1, 2, 3, 4 };
             array<char, 5> char_arr{ 'a', 'b', 'c', 'd', 'e' };
 
-            IteratorWrapper<int32_t *> int_iter(int_arr.data());
-            IteratorWrapper<char *> char_iter(char_arr.data());
+            PtrIter<int32_t *> int_iter(int_arr.data());
+            PtrIter<char *> char_iter(char_arr.data());
 
             {
                 vector<int32_t> values;
@@ -150,15 +150,15 @@ namespace sealtest
             ASSERT_EQ(*char_iter, char_arr.data());
         }
 
-        TEST(IteratorTest, ReverseIterator)
+        TEST(IteratorTest, ReverseIter)
         {
             array<uint64_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            CoeffIterator ci(arr.data());
+            CoeffIter ci(arr.data());
             advance(ci, arr.size() - 1);
-            ReverseIterator<CoeffIterator> rci(ci);
-            ConstCoeffIterator cci(arr.data());
+            ReverseIter<CoeffIter> rci(ci);
+            ConstCoeffIter cci(arr.data());
             advance(cci, arr.size() - 1);
-            ReverseIterator<ConstCoeffIterator> rcci(cci);
+            ReverseIter<ConstCoeffIter> rcci(cci);
 
             for_each(arr.rbegin(), arr.rend(), [rci](auto a) mutable { ASSERT_EQ(a, **rci++); });
             for_each(arr.rbegin(), arr.rend(), [rcci](auto a) mutable { ASSERT_EQ(a, **rcci++); });
@@ -178,12 +178,12 @@ namespace sealtest
             array<int32_t, 5> int_arr{ 0, 1, 2, 3, 4 };
             array<char, 5> char_arr{ 'a', 'b', 'c', 'd', 'e' };
 
-            IteratorWrapper<int32_t *> int_iter(int_arr.data() + int_arr.size() - 1);
-            IteratorWrapper<char *> char_iter(char_arr.data() + char_arr.size() - 1);
+            PtrIter<int32_t *> int_iter(int_arr.data() + int_arr.size() - 1);
+            PtrIter<char *> char_iter(char_arr.data() + char_arr.size() - 1);
 
             {
                 vector<int32_t> values;
-                for_each_n(ReverseIterator<IteratorWrapper<int32_t *>>(int_iter), int_arr.size(), [&](auto int_ptr) {
+                for_each_n(ReverseIter<PtrIter<int32_t *>>(int_iter), int_arr.size(), [&](auto int_ptr) {
                     values.push_back(*int_ptr);
                 });
 
@@ -193,7 +193,7 @@ namespace sealtest
             }
             {
                 vector<char> values;
-                for_each_n(ReverseIterator<IteratorWrapper<char *>>(char_iter), char_arr.size(), [&](auto char_ptr) {
+                for_each_n(ReverseIter<PtrIter<char *>>(char_iter), char_arr.size(), [&](auto char_ptr) {
                     values.push_back(*char_ptr);
                 });
 
@@ -203,15 +203,15 @@ namespace sealtest
             }
         }
 
-        TEST(IteratorTest, IteratorTuple)
+        TEST(IteratorTest, IterTuple)
         {
             array<uint64_t, 12> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-            CoeffIterator ci(arr.data());
-            RNSIterator ri(arr.data(), 3);
-            PolyIterator pi(arr.data(), 3, 2);
+            CoeffIter ci(arr.data());
+            RNSIter ri(arr.data(), 3);
+            PolyIter pi(arr.data(), 3, 2);
 
-            IteratorTuple<CoeffIterator, PolyIterator> it1(ci, pi);
-            IteratorTuple<RNSIterator, PolyIterator> it2(ri, pi);
+            IterTuple<CoeffIter, PolyIter> it1(ci, pi);
+            IterTuple<RNSIter, PolyIter> it2(ri, pi);
 
             ASSERT_EQ(0, *get<0>(*it1));
             ASSERT_EQ(0, ***get<1>(*it1));
@@ -232,7 +232,7 @@ namespace sealtest
             ASSERT_EQ(0, **get<0>(*it2));
             ASSERT_EQ(0, ***get<1>(*it2));
 
-            IteratorTuple<CoeffIterator, RNSIterator, PolyIterator> it3(ci, ri, pi);
+            IterTuple<CoeffIter, RNSIter, PolyIter> it3(ci, ri, pi);
             ASSERT_EQ(0, *get<0>(*it3));
             ASSERT_EQ(0, **get<1>(*it3));
             ASSERT_EQ(0, ***get<2>(*it3));
@@ -247,8 +247,8 @@ namespace sealtest
             ASSERT_EQ(0, **get<1>(*it3));
             ASSERT_EQ(0, ***get<2>(*it3));
 
-            IteratorTuple<
-                IteratorTuple<CoeffIterator, RNSIterator, PolyIterator>, IteratorTuple<RNSIterator, PolyIterator>>
+            IterTuple<
+                IterTuple<CoeffIter, RNSIter, PolyIter>, IterTuple<RNSIter, PolyIter>>
                 it4(it3, it2);
             auto it5 = it4;
             it5++;
