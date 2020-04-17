@@ -2431,7 +2431,7 @@ namespace seal
                 // RNS-NTT form exists in input
                 if (scheme == scheme_type::CKKS && i == j)
                 {
-                    t_operand_ptr = target + i * coeff_count;
+                    t_operand_ptr = static_cast<const uint64_t*>(target) + i * coeff_count;
                 }
                 // Perform RNS-NTT conversion
                 else
