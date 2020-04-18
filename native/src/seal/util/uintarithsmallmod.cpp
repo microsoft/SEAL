@@ -127,7 +127,7 @@ namespace seal
             // Product of two numbers is up to 61 bit + 61 bit = 122 bit. We can sum up to 64 of them with no reduction.
             size_t lazy_reduction_summand_bound;
 #if SEAL_MOD_BIT_COUNT_MAX > 32
-            lazy_reduction_summand_bound = safe_cast<size_t>(1 << (128 - (SEAL_MOD_BIT_COUNT_MAX << 1)));
+            lazy_reduction_summand_bound = size_t(1) << (128 - (SEAL_MOD_BIT_COUNT_MAX << 1));
 #else
             lazy_reduction_summand_bound = numeric_limits<size_t>::max();
 #endif

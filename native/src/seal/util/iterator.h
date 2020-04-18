@@ -129,6 +129,7 @@ namespace seal
             2. Use I, J, K, ... for the lambda function parameters representing SEAL iterators. This is compact and
                makes it very clear that the objects in question are SEAL iterators since such variable names should not
                be used in SEAL in any other context.
+            3. Always pass SEAL iterators by value to the lambda function.
 
         It is not unusual to have multiple nested for_each_n calls operating on multiple/nested IterTuple objects.
         It can become very difficult to keep track of what exactly the different iterators are pointing to, and what
@@ -150,6 +151,11 @@ namespace seal
         describes what object is iterated over. We use this convention in particularly complex functions to make the
         code easier to follow and less error-prone. The code will fail to compile if the type of the object in the first
         parameter does not match the type in the second parameter of the macro.
+
+        In the future we hope to use the parallel version of std::for_each_n, introduced in C++17. For this to work,
+        be mindful of how you use heap allocations in the lambda functions. Specifically, in heavy lambda functions it
+        is probably a good idea to call seal::util::allocate inside the lambda function for any allocations needed,
+        rather than using allocations captured from outside the lambda function.
         */
 #ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.

@@ -4,7 +4,6 @@
 #include "seal/evaluator.h"
 #include "seal/util/common.h"
 #include "seal/util/galois.h"
-#include "seal/util/iterator.h"
 #include "seal/util/numth.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"
@@ -14,7 +13,6 @@
 #include <cmath>
 #include <functional>
 #include <limits>
-#include <stdexcept>
 
 using namespace std;
 using namespace seal::util;
@@ -180,6 +178,7 @@ namespace seal
                 throw invalid_argument("encrypteds must be different from destination");
             }
         }
+
         destination = encrypteds[0];
         for (size_t i = 1; i < encrypteds.size(); i++)
         {
@@ -798,33 +797,25 @@ namespace seal
         // 4. the size of the base
         // 5. a PolyIter pointing to the beginning of the output ciphertext
         auto behz_ciphertext_square = [&](auto in_iter, auto base_iter, size_t base_size, auto out_iter) {
-            // Make a copy of the input iterator
-            auto in_iter_copy = in_iter;
-
             // Compute c0^2
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(*in_iter, base_iter, *out_iter), base_size,
+                IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(in_iter[0], base_iter, out_iter[0]),
+                base_size,
                 [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
-
-            // Advance in_iter and out_iter
-            ++in_iter;
-            ++out_iter;
 
             // Compute 2*c0*c1
             for_each_n(
                 IterTuple<RNSIter, RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
-                    *in_iter, *in_iter_copy, base_iter, *out_iter),
+                    in_iter[1], in_iter[0], base_iter, out_iter[1]),
                 base_size, [&](auto I) {
                     dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<3>(I));
                     add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, *get<2>(I), get<3>(I));
                 });
 
-            // Advance out_iter manually
-            ++out_iter;
-
             // Compute c1^2
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(*in_iter, base_iter, *out_iter), base_size,
+                IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(in_iter[1], base_iter, out_iter[2]),
+                base_size,
                 [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
         };
 
@@ -930,34 +921,26 @@ namespace seal
         auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
         PolyIter temp_iter(temp.get(), coeff_count, coeff_modulus_count);
 
-        // Make a copy of the input iterator
-        auto encrypted_iter_copy = encrypted_iter;
-
         // Compute c0^2
         for_each_n(
-            IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(*encrypted_iter, coeff_modulus_iter, *temp_iter),
+            IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
+                encrypted_iter[0], coeff_modulus_iter, temp_iter[0]),
             coeff_modulus_count,
             [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
-
-        // Advance encrypted_iter and temp_iter
-        ++encrypted_iter;
-        ++temp_iter;
 
         // Compute 2*c0*c1
         for_each_n(
             IterTuple<RNSIter, RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
-                *encrypted_iter, *encrypted_iter_copy, coeff_modulus_iter, *temp_iter),
+                encrypted_iter[1], encrypted_iter[0], coeff_modulus_iter, temp_iter[1]),
             coeff_modulus_count, [&](auto I) {
                 dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<3>(I));
                 add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, *get<2>(I), get<3>(I));
             });
 
-        // Advance temp_iter manually
-        ++temp_iter;
-
         // Compute c1^2
         for_each_n(
-            IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(*encrypted_iter, coeff_modulus_iter, *temp_iter),
+            IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
+                encrypted_iter[1], coeff_modulus_iter, temp_iter[2]),
             coeff_modulus_count,
             [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
@@ -2171,13 +2154,13 @@ namespace seal
 
             // First transform encrypted.data(0)
             PolyIter encrypted_iter(encrypted);
-            apply_galois_helper(*encrypted_iter++, temp_iter);
+            apply_galois_helper(encrypted_iter[0], temp_iter);
 
             // Copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
 
             // Next transform encrypted.data(1)
-            apply_galois_helper(*encrypted_iter, temp_iter);
+            apply_galois_helper(encrypted_iter[1], temp_iter);
         }
         else if (parms.scheme() == scheme_type::CKKS)
         {
@@ -2191,13 +2174,13 @@ namespace seal
 
             // First transform encrypted.data(0)
             PolyIter encrypted_iter(encrypted);
-            apply_galois_helper_ntt(*encrypted_iter++, temp_iter);
+            apply_galois_helper_ntt(encrypted_iter[0], temp_iter);
 
             // Copy result to encrypted.data(0)
             set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
 
             // Next transform encrypted.data(1)
-            apply_galois_helper_ntt(*encrypted_iter, temp_iter);
+            apply_galois_helper_ntt(encrypted_iter[1], temp_iter);
         }
         else
         {
@@ -2281,7 +2264,7 @@ namespace seal
     }
 
     void Evaluator::switch_key_inplace(
-        Ciphertext &encrypted, ConstRNSIter target, const KSwitchKeys &kswitch_keys, size_t kswitch_keys_index,
+        Ciphertext &encrypted, ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys, size_t kswitch_keys_index,
         MemoryPoolHandle pool)
     {
         auto parms_id = encrypted.parms_id();
@@ -2296,9 +2279,9 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        if (!target)
+        if (!target_iter)
         {
-            throw invalid_argument("target");
+            throw invalid_argument("target_iter");
         }
         if (!context_->using_keyswitching())
         {
@@ -2330,15 +2313,15 @@ namespace seal
 
         // Extract encryption parameters.
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t decomp_mod_count = parms.coeff_modulus().size();
+        size_t decomp_modulus_size = parms.coeff_modulus().size();
         auto &key_modulus = key_parms.coeff_modulus();
-        size_t key_mod_count = key_modulus.size();
-        size_t rns_mod_count = decomp_mod_count + 1;
-        auto small_ntt_tables = key_context_data.small_ntt_tables();
+        size_t key_modulus_size = key_modulus.size();
+        size_t rns_modulus_size = decomp_modulus_size + 1;
+        auto key_ntt_tables = key_context_data.small_ntt_tables();
         auto modswitch_factors = key_context_data.rns_tool()->inv_q_last_mod_q();
 
         // Size check
-        if (!product_fits_in(coeff_count, rns_mod_count, size_t(2)))
+        if (!product_fits_in(coeff_count, rns_modulus_size, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -2357,48 +2340,52 @@ namespace seal
         }
 
         // Temporary results
-        Pointer<uint64_t> t_target(allocate_poly(coeff_count, decomp_mod_count, pool));
+        Pointer<uint64_t> t_target(allocate_poly(coeff_count, decomp_modulus_size, pool));
         RNSIter t_target_iter(t_target.get(), coeff_count);
-        set_uint_uint(target, decomp_mod_count * coeff_count, t_target.get());
+        set_uint_uint(target_iter, decomp_modulus_size * coeff_count, t_target.get());
+
+        // In CKKS t_target is in NTT form; switch back to normal form
         if (scheme == scheme_type::CKKS)
         {
-            uint64_t *ptr = t_target.get();
-            for (size_t i = 0; i < decomp_mod_count; i++, ptr += coeff_count)
-            {
-                inverse_ntt_negacyclic_harvey(ptr, small_ntt_tables[i]);
-            }
+            for_each_n(
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(t_target_iter, key_ntt_tables), decomp_modulus_size,
+                [&](auto I) { inverse_ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
         }
-        // Ciphertext-side operand of switch key operation is in integer space now.
 
-        // Temporary results
-        auto t_poly_prod(allocate_zero_poly(coeff_count, rns_mod_count * key_component_count, pool));
-        auto t_poly_lazy(allocate<unsigned long long>(mul_safe(coeff_count * 2, key_component_count), pool));
-        auto t_ntt(allocate_uint(coeff_count, pool));
+        // Temporary result
+        auto t_poly_prod(allocate_zero_poly(coeff_count, rns_modulus_size * key_component_count, pool));
 
-        for (size_t j = 0; j < rns_mod_count; j++)
+        for (size_t j = 0; j < rns_modulus_size; j++)
         {
-            size_t key_index = (j == decomp_mod_count ? key_mod_count - 1 : j);
+            size_t key_index = (j == decomp_modulus_size ? key_modulus_size - 1 : j);
+
             // Product of two numbers is up to 60 + 60 = 120 bits, so we can sum up to 256 of them without reduction.
             // Remark: This differs from the bound in uintarithsmallmod.cpp-->dot_product_mod.
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 32
-            size_t lazy_reduction_summand_bound = 1 << (128 - SEAL_USER_MOD_BIT_COUNT_MAX * 2);
+            size_t lazy_reduction_summand_bound = size_t(1) << (128 - SEAL_USER_MOD_BIT_COUNT_MAX * 2);
 #else
             lazy_reduction_summand_bound = numeric_limits<size_t>::max();
 #endif
             size_t lazy_reduction_counter = lazy_reduction_summand_bound;
-            unsigned long long wide_product[2]{ 0, 0 };
-            unsigned long long *accumulator = nullptr;
-            uint64_t *t_target_acc = t_target.get();
-            fill_n(t_poly_lazy.get(), mul_safe(coeff_count * 2, key_component_count), 0);
+
+            // Allocate memory for a lazy accumulator (128-bit coefficients)
+            auto t_poly_lazy(allocate<unsigned long long>(mul_safe(coeff_count * 2, key_component_count), pool));
+            set_zero_uint(mul_safe(coeff_count * 2, key_component_count), t_poly_lazy.get());
+
+            // Semantic misuse of PolyIter; this is really pointing to the data for a single RNS factor
+            PolyIter accumulator_iter(t_poly_lazy.get(), 2, coeff_count);
 
             // Multiply with keys and perform lazy reduction on product's coefficients
-            for (size_t i = 0; i < decomp_mod_count; i++, t_target_acc += coeff_count)
+            for (size_t i = 0; i < decomp_modulus_size; i++)
             {
-                const uint64_t *t_operand_ptr = nullptr;
+                auto t_ntt(allocate_uint(coeff_count, pool));
+                CoeffIter t_ntt_iter(t_ntt.get());
+                ConstCoeffIter t_operand_iter;
+
                 // RNS-NTT form exists in input
-                if (scheme == scheme_type::CKKS && i == j)
+                if ((scheme == scheme_type::CKKS) && (i == j))
                 {
-                    t_operand_ptr = static_cast<const uint64_t *>(target) + i * coeff_count;
+                    t_operand_iter = target_iter[i];
                 }
                 // Perform RNS-NTT conversion
                 else
@@ -2406,117 +2393,147 @@ namespace seal
                     // No need to perform RNS conversion (modular reduction)
                     if (key_modulus[i].value() <= key_modulus[key_index].value())
                     {
-                        set_uint_uint(t_target_acc, coeff_count, t_ntt.get());
+                        set_uint_uint(t_target_iter[i], coeff_count, t_ntt.get());
                     }
                     // Perform RNS conversion (modular reduction)
                     else
                     {
-                        modulo_poly_coeffs_63(t_target_acc, coeff_count, key_modulus[key_index], t_ntt.get());
+                        modulo_poly_coeffs_63(t_target_iter[i], coeff_count, key_modulus[key_index], t_ntt_iter);
                     }
                     // NTT conversion lazy outputs in [0, 4q)
-                    ntt_negacyclic_harvey_lazy(t_ntt.get(), small_ntt_tables[key_index]);
-                    t_operand_ptr = t_ntt.get();
+                    ntt_negacyclic_harvey_lazy(t_ntt_iter, key_ntt_tables[key_index]);
+                    t_operand_iter = t_ntt_iter;
                 }
+
                 // Multiply with keys and modular accumulate products in a lazy fashion
-                accumulator = t_poly_lazy.get();
-                for (size_t k = 0; k < key_component_count; k++)
-                {
-                    const uint64_t *t_key_acc = key_vector[i].data().data(k) + key_index * coeff_count;
-                    if (!lazy_reduction_counter)
-                    {
-                        for (size_t l = 0; l < coeff_count; l++, t_key_acc++, accumulator += 2)
+                for_each_n(
+                    IterTuple<ConstPolyIter, PolyIter>(key_vector[i].data(), accumulator_iter), key_component_count,
+                    [&](auto I) {
+                        SEAL_ASSERT_TYPE(get<0>(I), ConstRNSIter, "key_vector[i]");
+                        SEAL_ASSERT_TYPE(get<1>(I), RNSIter, "accumulator");
+
+                        if (!lazy_reduction_counter)
                         {
-                            multiply_uint64(t_operand_ptr[l], *t_key_acc, wide_product);
-                            // accumulate to t_poly_lazy
-                            add_uint128(wide_product, accumulator, accumulator);
-                            accumulator[0] = barrett_reduce_128(accumulator, key_modulus[key_index]);
-                            accumulator[1] = 0;
+                            for_each_n(
+                                IterTuple<ConstCoeffIter, ConstCoeffIter, RNSIter>(
+                                    t_operand_iter, get<0>(I)[key_index], get<1>(I)),
+                                coeff_count, [&](auto J) {
+                                    SEAL_ASSERT_TYPE(get<0>(J), const uint64_t *, "t_operand");
+                                    SEAL_ASSERT_TYPE(get<1>(J), const uint64_t *, "key_vector[i][key_index]");
+                                    SEAL_ASSERT_TYPE(get<2>(J), CoeffIter, "accumulator");
+
+                                    unsigned long long qword[2]{ 0, 0 };
+                                    multiply_uint64(*get<0>(J), *get<1>(J), qword);
+
+                                    // Accumulate product of t_operand and t_key_acc to t_poly_lazy and reduce
+                                    add_uint128(qword, *get<2>(J), *get<2>(J));
+                                    *get<2>(J)[0] = barrett_reduce_128(*get<2>(J), key_modulus[key_index]);
+                                    *get<2>(J)[1] = 0;
+                                });
                         }
-                    }
-                    else
-                    {
-                        for (size_t l = 0; l < coeff_count; l++, t_key_acc++, accumulator += 2)
+                        else
                         {
-                            multiply_uint64(t_operand_ptr[l], *t_key_acc, wide_product);
-                            // accumulate to t_poly_lazy
-                            add_uint128(wide_product, accumulator, accumulator);
+                            // Same as above but no reduction
+                            for_each_n(
+                                IterTuple<ConstCoeffIter, ConstCoeffIter, RNSIter>(
+                                    t_operand_iter, get<0>(I)[key_index], get<1>(I)),
+                                coeff_count, [&](auto J) {
+                                    unsigned long long qword[2]{ 0, 0 };
+                                    multiply_uint64(*get<0>(J), *get<1>(J), qword);
+                                    add_uint128(qword, *get<2>(J), *get<2>(J));
+                                });
                         }
-                    }
-                }
+                    });
+
                 if (!--lazy_reduction_counter)
                 {
                     lazy_reduction_counter = lazy_reduction_summand_bound;
                 }
             }
 
+            // PolyIter pointing to the destination t_poly_prod, shifted to the appropriate modulus
+            PolyIter t_poly_prod_iter(t_poly_prod.get() + (j * coeff_count), coeff_count, rns_modulus_size);
+
             // Final modular reduction
-            accumulator = t_poly_lazy.get();
-            for (size_t k = 0; k < key_component_count; k++)
-            {
-                uint64_t *t_poly_prod_acc = t_poly_prod.get() + (k * rns_mod_count + j) * coeff_count;
-                if (lazy_reduction_counter == lazy_reduction_summand_bound)
-                {
-                    for (size_t l = 0; l < coeff_count; l++, accumulator += 2, t_poly_prod_acc++)
+            for_each_n(
+                IterTuple<ConstPolyIter, PolyIter>(accumulator_iter, t_poly_prod_iter), key_component_count,
+                [&](auto I) {
+                    SEAL_ASSERT_TYPE(get<0>(I), ConstRNSIter, "accumulator");
+                    SEAL_ASSERT_TYPE(get<1>(I), RNSIter, "t_poly_prod");
+
+                    if (lazy_reduction_counter == lazy_reduction_summand_bound)
                     {
-                        *t_poly_prod_acc = static_cast<uint64_t>(*accumulator);
+                        for_each_n(IterTuple<ConstRNSIter, CoeffIter>(get<0>(I), *get<1>(I)), coeff_count, [&](auto J) {
+                            SEAL_ASSERT_TYPE(get<0>(J), ConstCoeffIter, "accumulator");
+                            SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "t_poly_prod");
+
+                            *get<1>(J) = static_cast<uint64_t>(**get<0>(J));
+                        });
                     }
-                }
-                else
-                {
-                    for (size_t l = 0; l < coeff_count; l++, accumulator += 2, t_poly_prod_acc++)
+                    else
                     {
-                        *t_poly_prod_acc = barrett_reduce_128(accumulator, key_modulus[key_index]);
+                        // Same as above except need to still do reduction
+                        for_each_n(IterTuple<ConstRNSIter, CoeffIter>(get<0>(I), *get<1>(I)), coeff_count, [&](auto J) {
+                            *get<1>(J) = barrett_reduce_128(*get<0>(J), key_modulus[key_index]);
+                        });
                     }
-                }
-            }
+                });
         }
         // Accumulated products are now stored in t_poly_prod
 
         // Perform modulus switching with scaling
-        for (size_t k = 0; k < key_component_count; k++)
-        {
-            uint64_t *encrypted_ptr = encrypted.data(k);
-            uint64_t *t_poly_prod_ptr = t_poly_prod.get() + k * rns_mod_count * coeff_count;
+        PolyIter t_poly_prod_iter(t_poly_prod.get(), coeff_count, rns_modulus_size);
+        for_each_n(IterTuple<PolyIter, PolyIter>(encrypted, t_poly_prod_iter), key_component_count, [&](auto I) {
+            SEAL_ASSERT_TYPE(get<0>(I), RNSIter, "encrypted");
+            SEAL_ASSERT_TYPE(get<1>(I), RNSIter, "t_poly_prod");
 
-            // Lazy reduction, they are then reduced mod qi
-            uint64_t *t_last = t_poly_prod_ptr + decomp_mod_count * coeff_count;
-            inverse_ntt_negacyclic_harvey_lazy(t_last, small_ntt_tables[key_mod_count - 1]);
+            // Lazy reduction; this needs to be then reduced mod qi
+            CoeffIter t_last(get<1>(I)[decomp_modulus_size]);
+            inverse_ntt_negacyclic_harvey_lazy(t_last, key_ntt_tables[key_modulus_size - 1]);
 
             // Add (p-1)/2 to change from flooring to rounding.
-            uint64_t half = key_modulus[key_mod_count - 1].value() >> 1;
-            for (size_t l = 0; l < coeff_count; l++)
-            {
-                t_last[l] = barrett_reduce_63(t_last[l] + half, key_modulus[key_mod_count - 1]);
-            }
+            uint64_t half = key_modulus[key_modulus_size - 1].value() >> 1;
+            for_each_n(t_last, coeff_count, [&](auto J) {
+                *J = barrett_reduce_63(*J + half, key_modulus[key_modulus_size - 1]);
+            });
 
-            for (size_t j = 0; j < decomp_mod_count; j++)
-            {
-                uint64_t *t_else = t_poly_prod_ptr + j * coeff_count;
-                // (ct mod 4qk) mod qi
-                modulo_poly_coeffs_63(t_last, coeff_count, key_modulus[j], t_ntt.get());
+            for_each_n(
+                IterTuple<
+                    decltype(I), PtrIter<const SmallModulus *>, PtrIter<const SmallNTTTables *>,
+                    PtrIter<const uint64_t *>>(I, key_modulus, key_ntt_tables, modswitch_factors),
+                decomp_modulus_size, [&](auto J) {
+                    SEAL_ASSERT_TYPE(get<0>(get<0>(J)), CoeffIter, "encrypted");
+                    SEAL_ASSERT_TYPE(get<1>(get<0>(J)), CoeffIter, "t_poly_prod");
+                    SEAL_ASSERT_TYPE(get<1>(J), const SmallModulus *, "key_modulus");
+                    SEAL_ASSERT_TYPE(get<2>(J), const SmallNTTTables *, "key_ntt_tables");
+                    SEAL_ASSERT_TYPE(get<3>(J), const uint64_t *, "modswitch_factors");
 
-                uint64_t fix = barrett_reduce_63(half, key_modulus[j]);
-                for (size_t l = 0; l < coeff_count; l++)
-                {
-                    t_ntt.get()[l] = sub_uint_uint_mod(t_ntt.get()[l], fix, key_modulus[j]);
-                }
+                    auto t_ntt(allocate_uint(coeff_count, pool));
+                    CoeffIter t_ntt_iter(t_ntt.get());
 
-                if (scheme == scheme_type::CKKS)
-                {
-                    ntt_negacyclic_harvey(t_ntt.get(), small_ntt_tables[j]);
-                }
-                else if (scheme == scheme_type::BFV)
-                {
-                    inverse_ntt_negacyclic_harvey(t_else, small_ntt_tables[j]);
-                }
-                // ((ct mod qi) - (ct mod qk)) mod qi
-                sub_poly_poly_coeffmod(t_else, t_ntt.get(), coeff_count, key_modulus[j], t_else);
-                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(t_else, coeff_count, modswitch_factors[j], key_modulus[j], t_else);
-                add_poly_poly_coeffmod(
-                    t_else, encrypted_ptr + j * coeff_count, coeff_count, key_modulus[j],
-                    encrypted_ptr + j * coeff_count);
-            }
-        }
+                    // (ct mod 4qk) mod qi
+                    modulo_poly_coeffs_63(t_last, coeff_count, *get<1>(J), t_ntt_iter);
+                    uint64_t fix = barrett_reduce_63(half, *get<1>(J));
+
+                    for_each_n(t_ntt_iter, coeff_count, [&](auto K) { *K = sub_uint_uint_mod(*K, fix, *get<1>(J)); });
+
+                    if (scheme == scheme_type::CKKS)
+                    {
+                        ntt_negacyclic_harvey(t_ntt_iter, *get<2>(J));
+                    }
+                    else if (scheme == scheme_type::BFV)
+                    {
+                        inverse_ntt_negacyclic_harvey(get<1>(get<0>(J)), *get<2>(J));
+                    }
+
+                    // ((ct mod qi) - (ct mod qk)) mod qi
+                    sub_poly_poly_coeffmod(get<1>(get<0>(J)), t_ntt_iter, coeff_count, *get<1>(J), get<1>(get<0>(J)));
+                    // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
+                    multiply_poly_scalar_coeffmod(
+                        get<1>(get<0>(J)), coeff_count, *get<3>(J), *get<1>(J), get<1>(get<0>(J)));
+                    add_poly_poly_coeffmod(
+                        get<1>(get<0>(J)), get<0>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                });
+        });
     }
 } // namespace seal

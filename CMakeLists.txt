@@ -86,7 +86,7 @@ endfunction()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # In Debug mode, enable extra compiler flags.
-if(SEAL_DEBUG)
+if(NOT MSVC AND SEAL_DEBUG)
   enable_cxx_compiler_flag_if_supported("-Wall")
   enable_cxx_compiler_flag_if_supported("-Wextra")
   enable_cxx_compiler_flag_if_supported("-Wconversion")

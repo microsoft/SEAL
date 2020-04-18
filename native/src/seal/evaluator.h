@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <stdexcept>
 
 namespace seal
 {
@@ -1362,8 +1363,8 @@ namespace seal
         }
 
         void switch_key_inplace(
-            Ciphertext &encrypted, util::ConstRNSIter target, const KSwitchKeys &kswitch_keys, std::size_t key_index,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
+            Ciphertext &encrypted, util::ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys,
+            std::size_t key_index, MemoryPoolHandle pool = MemoryManager::GetPool());
 
         void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool);
 
