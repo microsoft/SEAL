@@ -2369,8 +2369,7 @@ namespace seal
             size_t lazy_reduction_counter = lazy_reduction_summand_bound;
 
             // Allocate memory for a lazy accumulator (128-bit coefficients)
-            auto t_poly_lazy(allocate<unsigned long long>(mul_safe(coeff_count * 2, key_component_count), pool));
-            set_zero_uint(mul_safe(coeff_count * 2, key_component_count), t_poly_lazy.get());
+            auto t_poly_lazy(allocate_zero_poly(coeff_count * 2, key_component_count, pool));
 
             // Semantic misuse of PolyIter; this is really pointing to the data for a single RNS factor
             PolyIter accumulator_iter(t_poly_lazy.get(), 2, coeff_count);
@@ -2426,8 +2425,8 @@ namespace seal
                                     multiply_uint64(*get<0>(J), *get<1>(J), qword);
 
                                     // Accumulate product of t_operand and t_key_acc to t_poly_lazy and reduce
-                                    add_uint128(qword, *get<2>(J), *get<2>(J));
-                                    *get<2>(J)[0] = barrett_reduce_128(*get<2>(J), key_modulus[key_index]);
+                                    add_uint128(qword, *get<2>(J), qword);
+                                    *get<2>(J)[0] = barrett_reduce_128(qword, key_modulus[key_index]);
                                     *get<2>(J)[1] = 0;
                                 });
                         }
@@ -2440,7 +2439,9 @@ namespace seal
                                 coeff_count, [&](auto J) {
                                     unsigned long long qword[2]{ 0, 0 };
                                     multiply_uint64(*get<0>(J), *get<1>(J), qword);
-                                    add_uint128(qword, *get<2>(J), *get<2>(J));
+                                    add_uint128(qword, *get<2>(J), qword);
+                                    *get<2>(J)[0] = qword[0];
+                                    *get<2>(J)[1] = qword[1];
                                 });
                         }
                     });

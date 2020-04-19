@@ -215,7 +215,8 @@ namespace seal
                 return ptr_;
             }
 
-            SEAL_NODISCARD inline value_type operator[](difference_type n) const noexcept
+            template<typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
             {
                 return ptr_ + n;
             }
@@ -361,7 +362,8 @@ namespace seal
                 return ptr_;
             }
 
-            SEAL_NODISCARD inline value_type operator[](difference_type n) const noexcept
+            template<typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
             {
                 return ptr_ + n;
             }
@@ -504,10 +506,11 @@ namespace seal
                 return coeff_it_;
             }
 
-            SEAL_NODISCARD inline value_type operator[](difference_type n) const noexcept
+            template<typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
             {
                 self_type result(*this);
-                result += n;
+                result += static_cast<difference_type>(n);
                 return *result;
             }
 
@@ -676,10 +679,11 @@ namespace seal
                 return coeff_it_;
             }
 
-            SEAL_NODISCARD inline value_type operator[](difference_type n) const noexcept
+            template<typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
             {
                 self_type result(*this);
-                result += n;
+                result += static_cast<difference_type>(n);
                 return *result;
             }
 
@@ -847,10 +851,11 @@ namespace seal
                 return rns_it_;
             }
 
-            SEAL_NODISCARD inline value_type operator[](difference_type n) const noexcept
+            template<typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
             {
                 self_type result(*this);
-                result += n;
+                result += static_cast<difference_type>(n);
                 return *result;
             }
 
@@ -1039,10 +1044,11 @@ namespace seal
                 return rns_it_;
             }
 
-            SEAL_NODISCARD inline value_type operator[](difference_type n) const noexcept
+            template<typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
             {
                 self_type result(*this);
-                result += n;
+                result += static_cast<difference_type>(n);
                 return *result;
             }
 
@@ -1223,7 +1229,8 @@ namespace seal
                 return ptr_;
             }
 
-            SEAL_NODISCARD inline value_type operator[](difference_type n) const noexcept
+            template<typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
             {
                 return ptr_ + n;
             }
@@ -1368,12 +1375,12 @@ namespace seal
 
             self_type &operator=(self_type &&assign) = default;
 
-            template <typename Ignore = value_type>
-            SEAL_NODISCARD inline auto operator[](difference_type n) const noexcept
+            template <typename SizeT, typename Ignore = value_type>
+            SEAL_NODISCARD inline auto operator[](SizeT n) const noexcept
                 -> std::enable_if_t<std::is_same<iterator_category, std::random_access_iterator_tag>::value, Ignore>
             {
                 self_type result(*this);
-                result += n;
+                result += static_cast<difference_type>(n);
                 return *result;
             }
 
