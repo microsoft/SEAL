@@ -188,27 +188,44 @@ endmacro()
 # External dependencies #
 #########################
 
+function(create_cache_entries dir_name)
+    set(cce_file_name ${dir_name}/cache_init.txt)
+    file(WRITE  "${cce_file_name}" "set(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\" CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_CXX_COMPILER \"${CMAKE_CXX_COMPILER}\" CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_TOOLCHAIN_FILE \"${CMAKE_TOOLCHAIN_FILE}\" CACHE FILEPATH \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(ANDROID_ABI ${ANDROID_ABI} CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(ANDROID_NDK \"${ANDROID_NDK}\" CACHE FILEPATH \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(ANDROID_PLATFORM ${ANDROID_PLATFORM} CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_ANDROID_ARCH_ABI ${CMAKE_ANDROID_ARCH_ABI} CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_ANDROID_NDK \"${CMAKE_ANDROID_NDK}\" CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_MAKE_PROGRAM \"${CMAKE_MAKE_PROGRAM}\" CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_SYSTEM_VERSION ${CMAKE_SYSTEM_VERSION} CACHE STRING \"\" FORCE)\n")
+endfunction()
+
 set(THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
 
 # [option] SEAL_USE_MSGSL
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 
-if (CMAKE_TOOLCHAIN_FILE)
-    set(CROSSC_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DANDROID_ABI=${ANDROID_ABI} -DANDROID_NDK=${ANDROID_NDK} -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DCMAKE_ANDROID_ARCH_ABI=${CMAKE_ANDROID_ARCH_ABI} -DCMAKE_ANDROID_NDK=${CMAKE_ANDROID_NDK} -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}")
-else()
-    set(CROSSC_OPTIONS "")
-endif()
-message(STATUS "Cross compiling options: ${CROSSC_OPTIONS}")
-
 # Download and configure
 if(SEAL_USE_MSGSL AND NOT MSVC)
     message(STATUS "Setting up MSGSL ...")
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . ${CROSSC_OPTIONS}
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+    if(NOT CMAKE_TOOLCHAIN_FILE)
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+            OUTPUT_QUIET
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+    else()
+        create_cache_entries(${THIRDPARTY_DIR}/msgsl)
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
+            OUTPUT_QUIET
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+    endif()
     if(result)
         message(WARNING "Failed to download MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
     endif()
@@ -217,7 +234,7 @@ endif()
 # Build
 if(SEAL_USE_MSGSL AND NOT MSVC)
     execute_process(
-        COMMAND ${CMAKE_COMMAND} --build . ${CROSSC_OPTIONS}
+        COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
@@ -251,17 +268,22 @@ endif()
 if(SEAL_USE_ZLIB AND NOT MSVC)
     message(STATUS "Setting up ZLIB ...")
 
-#    if (CMAKE_TOOLCHAIN_FILE)
-#        set(CROSSC_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DANDROID_ABI=${ANDROID_ABI} -DANDROID_NDK=${ANDROID_NDK} -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DCMAKE_ANDROID_ARCH_ABI=${CMAKE_ANDROID_ARCH_ABI} -DCMAKE_ANDROID_NDK=${CMAKE_ANDROID_NDK} -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}")
-#    else()
-#        set(CROSSC_OPTIONS "")
-#    endif()
-
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . ${CROSSC_OPTIONS}
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+    if(NOT CMAKE_TOOLCHAIN_FILE)
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+            OUTPUT_QUIET
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+    else()
+        create_cache_entries(${THIRDPARTY_DIR}/zlib)
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
+            OUTPUT_QUIET
+            OUTPUT_FILE cmakeout.txt
+            ERROR_FILE cmakeout.txt
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+    endif()
     if(result)
         message(WARNING "Failed to download ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
     endif()
@@ -280,8 +302,10 @@ endif()
 
 # Build
 if(SEAL_USE_ZLIB AND NOT MSVC)
-    execute_process(COMMAND ${CMAKE_COMMAND} --build . ${CROSSC_OPTIONS}
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
+        OUTPUT_FILE cmakebuildout.txt
+        ERROR_FILE  cmakebuildout.txt
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
     if(result)
@@ -364,7 +388,7 @@ if(SEAL_USE_STD_FOR_EACH_N)
 
     if(NOT MSVC)
         set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
-        check_cxx_source_runs("
+        check_cxx_source_compiles("
             #include <algorithm>
             int main() {
                 int a[1]{ 0 };
