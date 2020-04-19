@@ -19,8 +19,8 @@
 #include "seal/util/uintarithsmallmod.h"
 #include <map>
 #include <memory>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 namespace seal
 {

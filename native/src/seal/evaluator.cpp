@@ -2339,7 +2339,7 @@ namespace seal
             }
         }
 
-        // Temporary results
+        // Create a copy of target_iter
         Pointer<uint64_t> t_target(allocate_poly(coeff_count, decomp_modulus_size, pool));
         RNSIter t_target_iter(t_target.get(), coeff_count);
         set_uint_uint(target_iter, decomp_modulus_size * coeff_count, t_target.get());

@@ -173,6 +173,7 @@ namespace seal
 #endif
 
 // Check whether an object is of expected type; this requires the type_traits header to be included
-#define SEAL_ASSERT_TYPE(obj, expected, message) static_assert( \
-    std::is_same<decltype(obj), expected>::value, \
+#define SEAL_ASSERT_TYPE(obj, expected, message)      \
+    static_assert(                                    \
+        std::is_same<decltype(obj), expected>::value, \
         "In " __FILE__ ":" SEAL_STRINGIZE(__LINE__) " expected " SEAL_STRINGIZE(expected) " (message: " message ")");

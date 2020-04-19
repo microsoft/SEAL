@@ -226,8 +226,8 @@ endif()
 set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
 
-# ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning for CMake 3.17.1+
-if(SEAL_USE_ZLIB AND NOT MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.17.1)
+# ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning
+if(SEAL_USE_ZLIB AND NOT MSVC)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
 endif()
 
