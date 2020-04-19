@@ -44,8 +44,8 @@
     n -= q * denominator;                                                           \
     numerator[0] = static_cast<std::uint64_t>(n);                                   \
     numerator[1] = static_cast<std::uint64_t>(n >> 64);                             \
-    quotient[0] = static_cast<std::uint64_t>(q);                                    \
-    quotient[1] = static_cast<std::uint64_t>(q >> 64);                              \
+    result[0] = static_cast<std::uint64_t>(q);                                      \
+    result[1] = static_cast<std::uint64_t>(q >> 64);                                \
 }
 #endif
 
