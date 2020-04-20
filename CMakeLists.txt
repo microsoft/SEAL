@@ -220,6 +220,11 @@ if(SEAL_USE_MSGSL AND NOT MSVC)
             WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
     else()
         create_cache_entries(${THIRDPARTY_DIR}/msgsl)
+        if(EXISTS ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+            # Force regenerating make files. When cross compiling we might be
+            # compiling more than one platform at a time.
+            file(REMOVE ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+        endif()
         execute_process(
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
             OUTPUT_QUIET
@@ -276,6 +281,11 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
             WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
     else()
         create_cache_entries(${THIRDPARTY_DIR}/zlib)
+        if(EXISTS ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+            # Force regenerating make files. When cross compiling we might be
+            # compiling more than one platform at a time.
+            file(REMOVE ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+        endif()
         execute_process(
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
             OUTPUT_QUIET
@@ -318,7 +328,7 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
     list(APPEND SEAL_ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
-    set(zlibstatic_LIBRARY_PATH ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/libz.a)
+    set(zlibstatic_LIBRARY_PATH ${THIRDPARTY_DIR}/zlib/src/libz.a)
 endif()
 
 # Google Test
@@ -618,10 +628,10 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
         set(DEL_CMD "rm")
         set(DEL_CMD_OPTS "-rf")
     endif()
-
+    file(COPY "${zlibstatic_LIBRARY_PATH}" DESTINATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     add_custom_command(TARGET seal POST_BUILD
         COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:seal>
-        COMMAND "${AR_CMD_PATH}" x ${ZLIB_LIBRARY_PATH}
+        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE_DIR:seal>/libz.a
         COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:seal> *.o
         COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
         WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
