@@ -279,8 +279,6 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
         execute_process(
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
             OUTPUT_QUIET
-            OUTPUT_FILE cmakeout.txt
-            ERROR_FILE cmakeout.txt
             RESULT_VARIABLE result
             WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
     endif()
@@ -304,8 +302,6 @@ endif()
 if(SEAL_USE_ZLIB AND NOT MSVC)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
-        OUTPUT_FILE cmakebuildout.txt
-        ERROR_FILE  cmakebuildout.txt
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
     if(result)
@@ -318,8 +314,10 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
     add_subdirectory(
         ${THIRDPARTY_DIR}/zlib/src
         EXCLUDE_FROM_ALL)
+    list(APPEND SEAL_ZLIB_INCLUDE_DIRS ${THIRDPARTY_DIR}/zlib/src)
+    list(APPEND SEAL_ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${THIRDPARTY_DIR}/zlib/src)
+        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
     set(zlibstatic_LIBRARY_PATH ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/libz.a)
 endif()
 
@@ -602,7 +600,7 @@ endif()
 # The following are executed post build
 
 # In UNIX-like platforms copy Microsoft GSL include files into native/src
-if(SEAL_USE_MSGSL AND NOT MSVC)
+if(SEAL_USE_MSGSL AND NOT MSVC AND NOT CMAKE_HOST_WIN32)
     add_custom_command(TARGET seal POST_BUILD
         COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
 endif()
