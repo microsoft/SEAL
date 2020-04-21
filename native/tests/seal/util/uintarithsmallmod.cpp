@@ -351,7 +351,7 @@ namespace sealtest
 
             ASSERT_EQ(0, dot_product_mod(arr1, arr2, 0, mod));
             ASSERT_EQ(1, dot_product_mod(arr1, arr2, 1, mod));
-            ASSERT_EQ(2, dot_product_mod(arr1, 2, arr2, mod));
+            ASSERT_EQ(2, dot_product_mod(arr1, arr2, 2, mod));
             ASSERT_EQ(15 % mod.value(), dot_product_mod(arr1, arr2, 15, mod));
             ASSERT_EQ(16 % mod.value(), dot_product_mod(arr1, arr2, 16, mod));
             ASSERT_EQ(17 % mod.value(), dot_product_mod(arr1, arr2, 17, mod));
