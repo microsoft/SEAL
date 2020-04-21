@@ -194,6 +194,7 @@ You can easily switch between `Debug` mode (no optimizations) or `Release` mode 
 
 ```shell
 cmake . -DCMAKE_BUILD_TYPE=Debug
+make
 ```
 
 Please note that `Debug` mode should not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude worse than in `Release` mode.
@@ -206,6 +207,7 @@ You can disable the dependency on Microsoft GSL in CMake configuration options a
 
 ```shell
 cmake . -DSEAL_USE_MSGSL=OFF
+make
 ```
 
 #### [Optional] ZLIB
@@ -216,6 +218,7 @@ You can disable the dependency on ZLIB in CMake configuration options as follows
 
 ```shell
 cmake . -DSEAL_USE_ZLIB=OFF
+make
 ```
 
 #### [Optional] Shared Library
@@ -227,6 +230,7 @@ You can enable building a shared library, `libseal.so*` in Linux or `libseal*.dy
 
 ```shell
 cmake . -DBUILD_SHARED_LIBS=ON
+make
 ```
 
 #### Building Examples
@@ -235,6 +239,7 @@ By default Microsoft SEAL does not build examples. You can enable building examp
 
 ```shell
 cmake . -DSEAL_BUILD_EXAMPLES=ON
+make
 ```
 
 The `sealexamples` executable is located in `native/bin/`.
@@ -246,6 +251,7 @@ You can enable building tests in CMake configuration options as follows:
 
 ```shell
 cmake . -DSEAL_BUILD_TESTS=ON
+make
 ```
 
 This downloads and compiles the [GoogleTest](https://github.com/google/googletest) framework as a part of Microsoft SEAL.
@@ -362,7 +368,7 @@ cmake . -DSEAL_BUILD_SEAL_C=ON
 make
 ```
 
-This results in a shared native library `libsealc.so` in Linux or `libsealc.dylib` in macOS.
+This results in a shared native library `libsealc.so*` in Linux or `libsealc*.dylib` in macOS.
 
 If you have root access to the system, you have the option to install the native shared library globally.
 Then your application will always be able to find and load it.
@@ -401,7 +407,6 @@ To build and run the .NET unit tests, do:
 
 ```shell
 dotnet test dotnet/tests
-cd ../..
 ```
 
 All unit tests should pass.
@@ -414,7 +419,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
 
 1. add a reference in your project to `SEALNet.dll`;
 1. ensure the native shared library is available for your application when run.
-The easiest way to ensure this is to copy `libsealnetnative.so` to the same directory where your application's executable is located.
+The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
 # Getting Started
 
