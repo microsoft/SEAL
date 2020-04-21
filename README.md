@@ -11,7 +11,7 @@ This document pertains to Microsoft SEAL version 3.5. Users of previous versions
 of the library should look at the [list of changes](Changes.md).
 
 # Contents
-
+TODO: Need to fix these.
 - [Introduction](#introduction)
   - [Core Concepts](#core-concepts)
   - [Homomorphic Encryption](#homomorphic-encryption)
@@ -112,32 +112,82 @@ the only choice.
 
 # Installing Microsoft SEAL
 
+## Optional Dependencies
+
+Microsoft SEAL has no required dependencies, but certain optional features can be enabled if it is compiled with support for specific third-party libraries.
+
+### Microsoft GSL
+
+Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provide safe (bounds-checked) array access to memory.
+For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder` and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`, which can in some cases have a significant performance benefit.
+
+### ZLIB
+
+ZLIB is a widely used compression library that implements the DEFLATE compression algorithm.
+Microsoft SEAL can use ZLIB (if present) to automatically compress data that is serialized.
+`Ciphertext` objects consist of a large number of integers modulo specific prime numbers (`coeff_modulus` primes).
+When using the CKKS scheme, although these prime numbers can often be quite small (e.g., 30 bits), the numbers are nevertheless serialized as 64-bit integers.
+In this case, more than half of data in a ciphertext are zeros that can be compressed away with a compression library, such as ZLIB.
+The BFV scheme benefits typically less from this technique, because the prime numbers used for the `coeff_modulus` encryption parameter tend to be larger, and integers modulo these prime numbers fill more of each 64-bit word.
+The compression is not only applied to `Ciphertext` objects, but to every serializable Microsoft SEAL object.
+
+If ZLIB is available, it will be automatically used for serialization (see `Serialization::compr_mode_default` in `native/src/seal/serialization.h`.
+However, it is always possible to explicitly pass `compr_mode_type::none` to serialization methods to disable compression.
+
+**WARNING:** The compression rate for a `SecretKey` can (in theory at least) reveal information about the key.
+In most common applications of Microsoft SEAL the size of a `SecretKey` would not be deliberately revealed to untrusted parties.
+If this is a concern, one can always save the `SecretKey` in an uncompressed form by passing `compr_mode_type::none` to `SecretKey::save`.
+
 ## Windows
 
-Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln`
-that can be used to conveniently build the library, examples, and unit tests. Visual
-Studio 2017 version 15.3 or newer is required to build Microsoft SEAL.
+Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln` that can be used to conveniently build the library, examples, and unit tests.
+Visual Studio 2017 version 15.3 or newer is required to build Microsoft SEAL.
 
 #### Platform
 
-The Visual Studio solution `SEAL.sln` is configured to build Microsoft SEAL both
-for `Win32` and `x64` platforms. Please choose the right platform before building
-Microsoft SEAL. The `SEAL_C` project and the .NET wrapper library `SEALNet` can only
-be built for `x64`.
-
-#### Debug and Release builds
-
-You can easily switch from Visual Studio build configuration menu whether Microsoft
-SEAL should be built in `Debug` mode (no optimizations) or in `Release` mode. Please
-note that `Debug` mode should not be used except for debugging Microsoft SEAL itself,
-as the performance will be orders of magnitude worse than in `Release` mode.
+The Visual Studio solution `SEAL.sln` is configured to build Microsoft SEAL both for `Win32` and `x64` platforms. Please choose the right platform before building Microsoft SEAL.
+The `SEAL_C` project and the .NET wrapper library `SEALNet` can only be built for `x64`.
 
 #### Building Microsoft SEAL
 
-Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`. This results in
-the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
-When linking with applications, you need to add `native\src\` (full path) as an
-include directory for Microsoft SEAL header files.
+Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`.
+This results in the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
+When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
+
+#### [Optional] Debug and Release builds
+
+You can easily switch from Visual Studio build configuration menu whether Microsoft SEAL should be built in `Debug` mode (no optimizations) or in `Release` mode.
+Please note that `Debug` mode should not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude worse than in `Release` mode.
+
+#### [Optional] Microsoft GSL
+
+To build Microsoft SEAL with support for Microsoft GSL, clone first the Microsoft GSL library from [GitHub.com/Microsoft/GSL](https://GitHub.com/Microsoft/GSL) to some convenient directory, e.g., `C:\MyLibs\GSL` in this example.
+
+Next, you will need to signal Microsoft SEAL to enable Microsoft GSL support by creating a new Windows environment variable `MSGSL_ROOT`, and setting its value to `C:\MyLibs\GSL\include`.
+Restart Visual Studio at this point if you had it open, otherwise it will not have captured the newly created environment variable.
+Rebuilding Microsoft SEAL should now automatically detect that Microsoft GSL is available, and enable both `gsl::span` and `gsl::multi_span` support.
+To disable Microsoft GSL support, delete the `MSGSL_ROOT` environment variable, restart Visual Studio, and rebuild Microsoft SEAL.
+
+If Microsoft SEAL is built with Microsoft GSL support, any programs or libraries consuming Microsoft SEAL will need access to the Microsoft GSL header files.
+You need to add `$(MSGSL_ROOT)` to *Additional Include Directories* under the *C/C++* tab in your Visual Studio project properties.
+Note that in the Microsoft SEAL projects this has already been set for you, so all projects in `SEAL.sln` should work without change.
+
+#### [Optional] ZLIB
+
+TODO: Is this part still accurate now?
+ZLIB is usually not found on a typical Windows system.
+You can clone it from [GitHub.com/madler/zlib](https://github.com/madler/zlib) to some convenient directory, e.g., `C:\MyLibs\zlib` in this example.
+You need to build ZLIB first by opening *Developer Command Prompt for VS 2019*, go to `C:\MyLibs\zlib`, and run the following:
+
+```shell
+cmake .
+cmake --build . --config Release
+```
+
+Next, you will need to signal Microsoft SEAL to enable ZLIB support by creating a new Windows environment variable `ZLIB_ROOT`, and setting its value to `C:\MyLibs\zlib`.
+Restart Visual Studio at this point if you had it open, otherwise it will not have captured the newly created environment variable.
+Rebuilding Microsoft SEAL should now automatically detect that ZLIB is available, and enable support for `compr_mode_type::deflate`.
+To disable ZLIB support, delete the `ZLIB_ROOT` environment variable, restart Visual Studio, and rebuild Microsoft SEAL.
 
 #### Building Examples
 
@@ -167,216 +217,116 @@ Below we give instructions for how to configure, build, and install Microsoft SE
 system-wide (global install), or for a single user (local install). A system-wide
 install requires elevated (root) privileges.
 
-#### Debug and Release Modes
-
-You can easily switch from CMake configuration options whether Microsoft SEAL should be
-built in `Debug` mode (no optimizations) or in `Release` mode. Please note that `Debug`
-mode should not be used except for debugging Microsoft SEAL itself, as the performance
-will be orders of magnitude worse than in `Release` mode.
-
 #### Building Microsoft SEAL
 
 We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and all
 commands presented below are assumed to be executed in the directory `SEAL`.
 
-You can build Microsoft SEAL for your machine by executing the following commands:
-````
-cd native/src
+You can build Microsoft SEAL library for your machine by executing the following commands:
+
+```shell
 cmake .
 make
-cd ../..
-````
+```
+
+#### [Optional] Debug and Release Modes
+
+By default Microsoft SEAL is built in `Release` mode.
+You can easily switch between `Debug` mode (no optimizations) or `Release` mode in CMake configuration options as follows:
+
+```shell
+cmake . -DCMAKE_BUILD_TYPE=Debug
+make
+```
+
+Please note that `Debug` mode should not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude worse than in `Release` mode.
+
+#### [Optional] Microsoft GSL
+
+By default Microsoft GSL is downloaded as part of Microsoft SEAL library.
+Microsoft GSL's header files are copied to `native/src/GSL` to be portable with Microsoft SEAL at the time of installation.
+You can disable the dependency on Microsoft GSL in CMake configuration options as follows:
+
+```shell
+cmake . -DSEAL_USE_MSGSL=OFF
+```
+
+#### [Optional] ZLIB
+
+By default ZLIB is downloaded and compiled as part of Microsoft SEAL library.
+ZLIB's static archive is included in Microsoft SEAL's static or shared target object.
+You can disable the dependency on ZLIB in CMake configuration options as follows:
+
+```shell
+cmake . -DSEAL_USE_ZLIB=OFF
+```
 
 #### Building Examples
 
-After building Microsoft SEAL, you can build the examples as follows:
-````
-cd native/examples
-cmake .
-make
-cd ../..
-````
-The `sealexamples` executable can now be found in `native/bin/`.
+By default Microsoft SEAL does not build examples. You can enable building examples in CMake configuration options as follows:
+
+```shell
+cmake . -DSEAL_BUILD_EXAMPLES=ON
+```
+
+The `sealexamples` executable is located in `native/bin/`.
 
 #### Building Unit Tests
 
-To build the unit tests you will need the [GoogleTest](https://github.com/google/googletest)
-framework, which is included in Microsoft SEAL as a git submodule. To download the GoogleTest
-source files, do:
-````
-git submodule update --init
-````
-This needs to be executed only once, and can be skipped if Microsoft SEAL was cloned with
-`git --recurse-submodules`. To build the tests, do:
-````
-cd native/tests
-cmake .
-make
-cd ../..
-````
-The `sealtest` executable can now be found in `native/bin/`. All unit tests should pass
-successfully.
+By default Microsoft SEAL does not build tests.
+You can enable building tests in CMake configuration options as follows:
+
+```shell
+cmake . -DSEAL_BUILD_TESTS=ON
+```
+
+This downloads and compiles the [GoogleTest](https://github.com/google/googletest) framework as a part of Microsoft SEAL.
+The `sealtest` executable is located `native/bin/`.
+All unit tests should pass successfully.
 
 ### Installing Microsoft SEAL
 
 If you have root access to the system you can install Microsoft SEAL system-wide as follows:
-````
-cd native/src
+
+```shell
 cmake .
 make
 sudo make install
-cd ../..
-````
+```
+
 To instead install Microsoft SEAL locally, e.g., to `~/mylibs/`, do the following:
-````
-cd native/src
+
+```shell
 cmake . -DCMAKE_INSTALL_PREFIX=~/mylibs
 make
 make install
-cd ../..
-````
+```
 
-### Linking with Microsoft SEAL through CMake
+#### Linking with Microsoft SEAL through CMake
 
-It is very easy to link your own applications and libraries with Microsoft SEAL if
-you use CMake. Simply add the following to your `CMakeLists.txt`:
-````
+It is very easy to link your own applications and libraries with Microsoft SEAL if you use CMake.
+Simply add the following to your `CMakeLists.txt`:
+
+```shell
 find_package(SEAL 3.5 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
-````
-If Microsoft SEAL was installed globally, the above `find_package` command will likely
-find the library automatically. To link with a locally installed Microsoft SEAL, e.g.,
-installed in `~/mylibs` as described above, you may need to tell CMake where to look for
-Microsoft SEAL when you configure your application by running:
-````
+```
+
+If Microsoft SEAL was installed globally, the above `find_package` command will likely find the library automatically.
+To link with a locally installed Microsoft SEAL, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
+
+```shell
 cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
-````
+```
 
 ## From NuGet package
-For .NET developers the easiest way of installing Microsoft SEAL is by using the
-multi-platform NuGet package available at
-[NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Simply add
-this package into your .NET project as a dependency and you are ready to go.
 
-# Enabling Optional Dependencies
-
-Microsoft SEAL has no required dependencies, but certain optional features can be
-enabled if it is compiled with support for specific third-party libraries.
-
-## Microsoft GSL
-
-Microsoft GSL (Guidelines Support Library) is a header-only library that implements
-`gsl::span`: a *view type* that provide safe (bounds-checked) array access to memory.
-For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder`
-and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`,
-which can in some cases have a significant performance benefit.
-
-#### Microsoft GSL in Windows
-
-To build Microsoft SEAL with support for Microsoft GSL, clone first the Microsoft GSL
-library from [GitHub.com/Microsoft/GSL](https://GitHub.com/Microsoft/GSL) to some
-convenient directory, e.g., `C:\MyLibs\GSL` in this example.
-
-Next, you will need to signal Microsoft SEAL to enable Microsoft GSL support by
-creating a new Windows environment variable `MSGSL_ROOT`, and setting its value to
-`C:\MyLibs\GSL\include`. Restart Visual Studio at this point if you had it open,
-otherwise it will not have captured the newly created environment variable.
-Rebuilding Microsoft SEAL should now automatically detect that Microsoft GSL is
-available, and enable both `gsl::span` and `gsl::multi_span` support. To disable
-Microsoft GSL support, delete the `MSGSL_ROOT` environment variable, restart Visual
-Studio, and rebuild Microsoft SEAL.
-
-If Microsoft SEAL is built with Microsoft GSL support, any programs or libraries
-consuming Microsoft SEAL will need access to the Microsoft GSL header files, so you
-need to add `$(MSGSL_ROOT)` to *Additional Include Directories* under the *C/C++* tab
-in your Visual Studio project properties. Note that in the Microsoft SEAL projects
-this has already been set for you, so all projects in `SEAL.sln` should work without
-change.
-
-#### Microsoft GSL in Linux and macOS
-
-On some Linux distributions Microsoft GSL can be conveniently obtained through
-a package manager, e.g., on Ubuntu it suffices to install the package `libmsgsl-dev`.
-Alternatively, you can simply clone it from
-[GitHub.com/Microsoft/GSL](https://github.com/Microsoft/GSL). When installed with
-a package manager, CMake will likely detect the Microsoft GSL location automatically.
-Otherwise, if Microsoft GSL is cloned to `~/mylibs/GSL`, you need to provide CMake
-with this location when building Microsoft SEAL as follows:
-````
-cd native/src
-cmake . -DMSGSL_ROOT=~/mylibs/GSL/include
-make
-````
-Note that you may need to give the same `-DMSGSL_ROOT=~/mylibs/GSL/include` hint
-to CMake when configuring your own applications linking with Microsoft SEAL.
-
-## ZLIB
-
-ZLIB is a widely used compression library that implements the DEFLATE compression
-algorithm. Microsoft SEAL can use ZLIB (if present) to automatically compress data
-that is serialized. For example, in some cases `Ciphertext` objects consist of a large
-number of integers modulo specific prime numbers (`coeff_modulus` primes). When using
-the CKKS scheme, although these prime numbers can often be quite small (e.g., 30 bits),
-the numbers are nevertheless serialized as 64-bit integers. In this case, more than
-half of data in a ciphertext are zeros that can be compressed away with a compression
-library, such as ZLIB. The BFV scheme benefits typically less from this technique, because
-the prime numbers used for the `coeff_modulus` encryption parameter tend to be larger,
-and integers modulo these prime numbers fill more of each 64-bit word. The compression is
-not only applied to `Ciphertext` objects, but to every serializable Microsoft SEAL object.
-
-If ZLIB is detected by CMake, it will be automatically used for serialization (see
-`Serialization::compr_mode_default` in `native/src/seal/serialization.h`. However, it is
-always possible to explicitly pass `compr_mode_type::none` to serialization methods to
-disable compression.
-
-**WARNING:** The compression rate for a `SecretKey` can (in theory at least) reveal
-information about the key. In most common applications of Microsoft SEAL the size of
-a `SecretKey` would not be deliberately revealed to untrusted parties. If this is
-a concern, one can always save the `SecretKey` in an uncompressed form by passing
-`compr_mode_type::none` to `SecretKey::save`.
-
-#### ZLIB in Windows
-
-ZLIB is usually not found on a typical Windows system. You can clone it from
-[GitHub.com/madler/zlib](https://github.com/madler/zlib) to some convenient directory,
-e.g., `C:\MyLibs\zlib` in this example. You need to build ZLIB first by opening
-*Developer Command Prompt for VS 2019*, go to `C:\MyLibs\zlib`, and run
-````
-cmake .
-cmake --build . --config Release
-````
-
-Next, you will need to signal Microsoft SEAL to enable ZLIB support by creating a new
-Windows environment variable `ZLIB_ROOT`, and setting its value to `C:\MyLibs\zlib`.
-Restart Visual Studio at this point if you had it open, otherwise it will not have
-captured the newly created environment variable. Rebuilding Microsoft SEAL should now
-automatically detect that ZLIB is available, and enable support for
-`compr_mode_type::deflate`. To disable ZLIB support, delete the `ZLIB_ROOT` environment
-variable, restart Visual Studio, and rebuild Microsoft SEAL.
-
-#### ZLIB in Linux and macOS
-
-The ZLIB (development package) can be conveniently obtained through a package manager
-on most Linux distributions, e.g., on Ubuntu it suffices to install the package
-`zlib1g-dev`. Alternatively, clone from [GitHub.com/madler/zlib](GitHub.com/madler/zlib)
-and build it yourself. For example, suppose you have cloned ZLIB to `~/mylibs/zlib`.
-To build ZLIB, simply execute:
-````
-cd ~/mylibs/zlib
-cmake .
-make
-````
-If ZLIB was installed with a package manager, CMake will likely detect the location
-of ZLIB automatically. Otherwise, if ZLIB was built in `~/mylibs/zlib`, you need
-to provide CMake with this location when building Microsoft SEAL as follows:
-````
-cd native/src
-cmake . -DZLIB_ROOT=~/mylibs/zlib
-make
-````
+For .NET developers the easiest way of installing Microsoft SEAL is by using the multi-platform NuGet package available at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
+Simply add this package into your .NET project as a dependency and you are ready to go.
 
 # Building Microsoft SEAL for .NET
+TODO: Need to work on sealc.
 
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in
 Microsoft SEAL for use in .NET development.
@@ -529,15 +479,16 @@ are designed to gradually teach such concepts as well as to demonstrate much of 
 The code examples are available (and identical) in C++ and C#, and are divided into
 several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows:
 
-|C++                |C#                |Description                                                                 |
-|-------------------|------------------|----------------------------------------------------------------------------|
-|`examples.cpp`     |`Examples.cs`     |The example runner application                                              |
-|`1_bfv_basics.cpp` |`1_BFV_Basics.cs` |Encrypted modular arithmetic using the BFV scheme                           |
-|`2_encoders.cpp`   |`2_Encoders.cs`   |Encoding more complex data into Microsoft SEAL plaintext objects            |
-|`3_levels.cpp`     |`3_Levels.cs`     |Introduces the concept of levels; prerequisite for using the CKKS scheme    |
-|`4_ckks_basics.cpp`|`4_CKKS_Basics.cs`|Encrypted real number arithmetic using the CKKS scheme                      |
-|`5_rotation.cpp`   |`5_Rotation.cs`   |Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes|
-|`6_performance.cpp`|`6_Performance.cs`|Performance tests for Microsoft SEAL                                        |
+|C++                  |C#                  |Description                                                                 |
+|---------------------|--------------------|----------------------------------------------------------------------------|
+|`examples.cpp`       |`Examples.cs`       |The example runner application                                              |
+|`1_bfv_basics.cpp`   |`1_BFV_Basics.cs`   |Encrypted modular arithmetic using the BFV scheme                           |
+|`2_encoders.cpp`     |`2_Encoders.cs`     |Encoding more complex data into Microsoft SEAL plaintext objects            |
+|`3_levels.cpp`       |`3_Levels.cs`       |Introduces the concept of levels; prerequisite for using the CKKS scheme    |
+|`4_ckks_basics.cpp`  |`4_CKKS_Basics.cs`  |Encrypted real number arithmetic using the CKKS scheme                      |
+|`5_rotation.cpp`     |`5_Rotation.cs`     |Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes|
+|`6_serialization.cpp`|`6_Serialization.cs`|Serializing data objects in Microsoft SEAL                                  |
+|`7_performance.cpp`  |`7_Performance.cs`  |Performance tests for Microsoft SEAL                                        |
 
 It is recommeded to read the comments and the code snippets along with command line printout
 from running an example. For easier navigation, command line printout provides the line number
@@ -547,30 +498,7 @@ in the associated source file where the associated code snippets start.
 or by simply re-using the code from examples. Any developer attempting to do so
 will inevitably produce code that is *vulnerable*, *malfunctioning*, or *extremely slow*.**
 
-# Incorporating Into An Existing CMake Project
-
 # Contributing
-
-This project welcomes contributions and suggestions. Most contributions require you
-to agree to a Contributor License Agreement (CLA) declaring that you have the right to,
-and actually do, grant us the rights to use your contribution. For details, visit
-https://cla.microsoft.com.
-
-When you submit a pull request, a CLA-bot will automatically determine whether you need
-to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow
-the instructions provided by the bot. You will only need to do this once across all
-repos using our CLA.
-
-Pull requests must be submitted to the branch called *contrib*.
-
-This project has adopted the
-[Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the
-[Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
-or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional
-questions or comments.
-
-# Pull Requests
 
 For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 

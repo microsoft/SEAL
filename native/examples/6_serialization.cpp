@@ -16,7 +16,7 @@ the encrypted computation, and the client decrypts.
 */
 void example_serialization()
 {
-    print_example_banner("Example: Rotation / Rotation in BFV");
+    print_example_banner("Example: Serialization");
 
     /*
     We require ZLIB support for this example to be available.
@@ -56,8 +56,8 @@ void example_serialization()
     accordingly.
     */
     {
-        size_t poly_modulus_degree = 8192;
         EncryptionParameters parms(scheme_type::CKKS);
+        size_t poly_modulus_degree = 8192;
         parms.set_poly_modulus_degree(poly_modulus_degree);
         parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 50, 20, 50 }));
 
