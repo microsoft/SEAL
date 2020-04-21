@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
+#include <functional>
 
 namespace seal
 {
@@ -180,6 +181,8 @@ namespace seal
             RNSBase obase_;
 
             Pointer<Pointer<std::uint64_t>> base_change_matrix_;
+
+            void (*dot_product_fun_)(const std::uint64_t *, const std::uint64_t *, unsigned long long *);
         };
 
         class RNSTool
