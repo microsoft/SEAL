@@ -5,6 +5,17 @@ trigger:
   branches:
     include:
     - master
+  paths:
+    exclude:
+    - 'tools/*'
+    - LICENSE
+    - NOTICE
+    - CHANGES.md
+    - CODE_OF_CONDUCT.md
+    - CONTRIBUTING.md
+    - ISSUES.md
+    - README.md
+    - SECURITY.md
 
 stages:
   - stage: build

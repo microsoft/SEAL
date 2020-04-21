@@ -27,6 +27,7 @@ of the library should look at the [list of changes](Changes.md).
   - [Windows](#windows-1)
   - [Linux and macOS](#linux-and-macos-1)
 - [Getting Started](#getting-started)
+- [Incorporating Into An Existing CMake Project](#incorporating-into-an-existing-cMake-project)
 - [Contributing](#contributing)
 - [Citing Microsoft SEAL](#citing-microsoft-seal)
 
@@ -546,6 +547,8 @@ in the associated source file where the associated code snippets start.
 or by simply re-using the code from examples. Any developer attempting to do so
 will inevitably produce code that is *vulnerable*, *malfunctioning*, or *extremely slow*.**
 
+# Incorporating Into An Existing CMake Project
+
 # Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you
@@ -580,7 +583,7 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.5)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
-        month = ???,
+        month = may,
         year = 2020,
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
