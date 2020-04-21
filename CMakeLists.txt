@@ -85,6 +85,9 @@ endfunction()
 # Always build position-independent-code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Don't make the install target depend on the all target.
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY ON)
+
 # In Debug mode, enable extra compiler flags.
 if(NOT MSVC AND SEAL_DEBUG)
   enable_cxx_compiler_flag_if_supported("-Wall")

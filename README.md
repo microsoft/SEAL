@@ -103,7 +103,7 @@ If this is a concern, one can always save the `SecretKey` in an uncompressed for
 ## Windows
 
 Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln` that can be used to conveniently build the library, examples, and unit tests.
-Visual Studio 2017 version 15.3 or newer is required to build Microsoft SEAL.
+Visual Studio 2019 is required to build Microsoft SEAL.
 
 #### Platform
 
@@ -194,7 +194,6 @@ You can easily switch between `Debug` mode (no optimizations) or `Release` mode 
 
 ```shell
 cmake . -DCMAKE_BUILD_TYPE=Debug
-make
 ```
 
 Please note that `Debug` mode should not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude worse than in `Release` mode.
@@ -221,8 +220,10 @@ cmake . -DSEAL_USE_ZLIB=OFF
 
 #### [Optional] Shared Library
 
+TODO: verify macOS shared lib names/links.
+
 By default Microsoft SEAL builds only a static library that is `libseal-3.5.a` on Unix-like platforms.
-You can enable building a shared library, `libseal.so` in Linux or `libseal.dylib` in macOS, in CMake configuration options as follows:
+You can enable building a shared library, `libseal.so*` in Linux or `libseal*.dylib` in macOS, in CMake configuration options as follows:
 
 ```shell
 cmake . -DBUILD_SHARED_LIBS=ON
