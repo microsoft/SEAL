@@ -472,10 +472,10 @@ namespace seal
             {
                 uint64_t inv_ibase_punctured_prod_mod_ibase_elt = ibase_.inv_punctured_prod_mod_base_array()[i];
                 SmallModulus ibase_elt = ibase_[i];
-                for (size_t k = 0; k < count; k++, in++)
+                uint64_t *temp_ptr = temp.get() + i;
+                for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_.size())
                 {
-                    temp[i + (k * ibase_.size())] =
-                        multiply_uint_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
+                    *temp_ptr = multiply_uint_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
                 }
             }
 
