@@ -1728,7 +1728,7 @@ namespace seal
                     return it.first();
                 }
             };
-        }; // namespace iterator_tuple_internal
+        } // namespace iterator_tuple_internal
 
         template <std::size_t N, typename... SEALIters>
         auto get(const IterTuple<SEALIters...> &it)

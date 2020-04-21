@@ -626,10 +626,10 @@ namespace seal
                         IterTuple<decltype(I), PtrIter<const SmallModulus *>, RNSIter>(
                             I, coeff_modulus_iter, *temp_iter),
                         coeff_modulus_count, [&](auto J) {
-                            auto temp(allocate_uint(coeff_count, pool));
+                            auto prod(allocate_uint(coeff_count, pool));
                             dyadic_product_coeffmod(
-                                get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), temp.get());
-                            add_poly_poly_coeffmod(temp.get(), get<2>(J), coeff_count, *get<1>(J), get<2>(J));
+                                get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), prod.get());
+                            add_poly_poly_coeffmod(prod.get(), get<2>(J), coeff_count, *get<1>(J), get<2>(J));
                         });
                 });
         }
