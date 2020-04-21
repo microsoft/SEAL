@@ -460,7 +460,7 @@ namespace seal
 
             for (size_t j = 0; j < obase_.size(); j++)
             {
-                out[j] = dot_product_mod(temp.get(), ibase_.size(), base_change_matrix_[j].get(), obase_[j]);
+                out[j] = dot_product_mod(temp.get(), base_change_matrix_[j].get(), ibase_.size(), obase_[j]);
             }
         }
 
@@ -485,7 +485,7 @@ namespace seal
                 SmallModulus obase_elt = obase_[j];
                 for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
                 {
-                    *out = dot_product_mod(temp_ptr, ibase_.size(), base_change_matrix_[j].get(), obase_elt);
+                    *out = dot_product_mod(temp_ptr, base_change_matrix_[j].get(), ibase_.size(), obase_elt);
                 }
             }
         }

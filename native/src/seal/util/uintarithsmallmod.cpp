@@ -106,52 +106,5 @@ namespace seal
                 return;
             }
         }
-
-        uint64_t dot_product_mod(
-            const uint64_t *operand1, size_t count, const uint64_t *operand2, const SmallModulus &modulus)
-        {
-#ifdef SEAL_DEBUG
-            if (!operand1 && count)
-            {
-                throw invalid_argument("operand1");
-            }
-            if (!operand2 && count)
-            {
-                throw invalid_argument("operand2");
-            }
-            if (modulus.is_zero())
-            {
-                throw invalid_argument("modulus");
-            }
-#endif
-            // Product of two numbers is up to 61 bit + 61 bit = 122 bit. We can sum up to 64 of them with no reduction.
-            size_t lazy_reduction_summand_bound;
-#if SEAL_MOD_BIT_COUNT_MAX > 32
-            lazy_reduction_summand_bound = size_t(1) << (128 - (SEAL_MOD_BIT_COUNT_MAX << 1));
-#else
-            lazy_reduction_summand_bound = numeric_limits<size_t>::max();
-#endif
-            // We may have to perform multiple lazy reductions depending on count
-            size_t r = lazy_reduction_summand_bound;
-            unsigned long long accumulator[2]{ 0, 0 };
-            for (size_t i = 0; i < count; i++, operand1++, operand2++)
-            {
-                // Compute current product
-                unsigned long long qword[2];
-                multiply_uint64(*operand1, *operand2, qword);
-
-                // 128-bit addition to accumulator; ignore carry bit since it can never be set
-                add_uint128(qword, accumulator, accumulator);
-
-                // Lazy reduction
-                if (!--r)
-                {
-                    r = lazy_reduction_summand_bound;
-                    accumulator[0] = barrett_reduce_128(accumulator, modulus);
-                    accumulator[1] = 0;
-                }
-            }
-            return barrett_reduce_128(accumulator, modulus);
-        }
     } // namespace util
 } // namespace seal
