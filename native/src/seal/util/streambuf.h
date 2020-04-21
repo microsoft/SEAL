@@ -23,7 +23,7 @@ namespace seal
         public:
             SafeByteBuffer(std::streamsize size = 1) : size_(size)
             {
-                if (!fits_in<int>(add_safe(size_, std::streamsize(1))))
+                if (!fits_in<std::size_t>(add_safe(size_, std::streamsize(1))))
                 {
                     throw std::invalid_argument("size is too large");
                 }

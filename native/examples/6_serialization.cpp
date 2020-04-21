@@ -16,7 +16,7 @@ the encrypted computation, and the client decrypts.
 */
 void example_serialization()
 {
-    print_example_banner("Example: Rotation / Rotation in BFV");
+    print_example_banner("Example: Serialization");
 
     /*
     We require ZLIB support for this example to be available.
