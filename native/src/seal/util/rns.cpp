@@ -452,201 +452,47 @@ namespace seal
 
         void BaseConverter::fast_convert(const uint64_t *in, uint64_t *out, MemoryPoolHandle pool) const
         {
-            auto temp(allocate_uint(ibase_.size(), pool));
-            for (size_t i = 0; i < ibase_.size(); i++)
+            size_t ibase_size = ibase_.size();
+            size_t obase_size = obase_.size();
+
+            auto temp(allocate_uint(ibase_size, pool));
+            for (size_t i = 0; i < ibase_size; i++)
             {
                 temp[i] = multiply_uint_uint_mod(in[i], ibase_.inv_punctured_prod_mod_base_array()[i], ibase_[i]);
             }
 
-            for (size_t j = 0; j < obase_.size(); j++)
+            for (size_t j = 0; j < obase_size; j++)
             {
-                out[j] = dot_product_mod(temp.get(), base_change_matrix_[j].get(), ibase_.size(), obase_[j]);
+                out[j] = dot_product_mod(temp.get(), base_change_matrix_[j].get(), ibase_size, obase_[j]);
             }
         }
 
         void BaseConverter::fast_convert_array(
             const uint64_t *in, size_t count, uint64_t *out, MemoryPoolHandle pool) const
         {
-            auto temp(allocate_uint(count * ibase_.size(), pool));
-            for (size_t i = 0; i < ibase_.size(); i++)
+            size_t ibase_size = ibase_.size();
+            size_t obase_size = obase_.size();
+
+            auto temp(allocate_uint(count * ibase_size, pool));
+            for (size_t i = 0; i < ibase_size; i++)
             {
                 uint64_t inv_ibase_punctured_prod_mod_ibase_elt = ibase_.inv_punctured_prod_mod_base_array()[i];
                 SmallModulus ibase_elt = ibase_[i];
                 uint64_t *temp_ptr = temp.get() + i;
-                for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_.size())
+                for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
                 {
                     *temp_ptr = multiply_uint_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
                 }
             }
 
-            for (size_t j = 0; j < obase_.size(); j++)
+            for (size_t j = 0; j < obase_size; j++)
             {
                 uint64_t *temp_ptr = temp.get();
                 SmallModulus obase_elt = obase_[j];
-                switch (ibase_.size())
+                for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_size)
                 {
-                    case 1:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<1>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 2:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<2>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 3:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<3>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 4:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<4>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 5:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<5>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 6:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<6>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 7:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<7>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 8:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<8>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 9:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<9>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 10:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<10>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 11:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<11>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 12:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<12>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 13:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<13>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 14:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<14>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 15:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<15>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 16:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<16>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 17:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<17>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 18:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<18>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 19:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<19>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                    case 20:
-                        for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
-                        {
-                            unsigned long long accumulator[2]{ 0, 0 };
-                            multiply_accumulate_uint64<20>(temp_ptr, base_change_matrix_[j].get(), accumulator);
-                            *out = barrett_reduce_128(accumulator, obase_elt);
-                        }
-                        break;
-                };
-                    //dot_product_fun_(temp_ptr, base_change_matrix_[j].get(), accumulator);
+                    *out = dot_product_mod(temp_ptr, base_change_matrix_[j].get(), ibase_size, obase_elt);
+                }
             }
         }
 
@@ -663,74 +509,6 @@ namespace seal
             {
                 ibase_values[i] = ibase_[i].value();
             }
-
-            // We need to pad the base change matrix to some hard-coded size (ibase dimension). This is so we can use
-            // a fast unrolled dot product.
-            switch (ibase_.size())
-            {
-                case 1:
-                    dot_product_fun_ = multiply_accumulate_uint64<1>;
-                    break;
-                case 2:
-                    dot_product_fun_ = multiply_accumulate_uint64<2>;
-                    break;
-                case 3:
-                    dot_product_fun_ = multiply_accumulate_uint64<3>;
-                    break;
-                case 4:
-                    dot_product_fun_ = multiply_accumulate_uint64<4>;
-                    break;
-                case 5:
-                    dot_product_fun_ = multiply_accumulate_uint64<5>;
-                    break;
-                case 6:
-                    dot_product_fun_ = multiply_accumulate_uint64<6>;
-                    break;
-                case 7:
-                    dot_product_fun_ = multiply_accumulate_uint64<7>;
-                    break;
-                case 8:
-                    dot_product_fun_ = multiply_accumulate_uint64<8>;
-                    break;
-                case 9:
-                    dot_product_fun_ = multiply_accumulate_uint64<9>;
-                    break;
-                case 10:
-                    dot_product_fun_ = multiply_accumulate_uint64<10>;
-                    break;
-                case 11:
-                    dot_product_fun_ = multiply_accumulate_uint64<11>;
-                    break;
-                case 12:
-                    dot_product_fun_ = multiply_accumulate_uint64<12>;
-                    break;
-                case 13:
-                    dot_product_fun_ = multiply_accumulate_uint64<13>;
-                    break;
-                case 14:
-                    dot_product_fun_ = multiply_accumulate_uint64<14>;
-                    break;
-                case 15:
-                    dot_product_fun_ = multiply_accumulate_uint64<15>;
-                    break;
-                case 16:
-                    dot_product_fun_ = multiply_accumulate_uint64<16>;
-                    break;
-                case 17:
-                    dot_product_fun_ = multiply_accumulate_uint64<17>;
-                    break;
-                case 18:
-                    dot_product_fun_ = multiply_accumulate_uint64<18>;
-                    break;
-                case 19:
-                    dot_product_fun_ = multiply_accumulate_uint64<19>;
-                    break;
-                case 20:
-                    dot_product_fun_ = multiply_accumulate_uint64<20>;
-                    break;
-                default:
-                    throw;
-            };
 
             // Compute the base-change matrix
             base_change_matrix_ = allocate<Pointer<uint64_t>>(obase_.size(), pool_);

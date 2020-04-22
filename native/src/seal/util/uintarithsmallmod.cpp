@@ -106,5 +106,69 @@ namespace seal
                 return;
             }
         }
+
+        uint64_t dot_product_mod(const uint64_t *operand1, const uint64_t *operand2, size_t count, const SmallModulus &modulus)
+        {
+            static_assert(SEAL_MULTIPLY_ACCUMULATE_MOD_MAX >= 16, "SEAL_MULTIPLY_ACCUMULATE_MOD_MAX");
+            unsigned long long accumulator[2]{ 0, 0 };
+            switch (count)
+            {
+                case 0:
+                    return 0;
+                case 1:
+                    multiply_accumulate_uint64<1>(operand1, operand2, accumulator);
+                    break;
+                case 2:
+                    multiply_accumulate_uint64<2>(operand1, operand2, accumulator);
+                    break;
+                case 3:
+                    multiply_accumulate_uint64<3>(operand1, operand2, accumulator);
+                    break;
+                case 4:
+                    multiply_accumulate_uint64<4>(operand1, operand2, accumulator);
+                    break;
+                case 5:
+                    multiply_accumulate_uint64<5>(operand1, operand2, accumulator);
+                    break;
+                case 6:
+                    multiply_accumulate_uint64<6>(operand1, operand2, accumulator);
+                    break;
+                case 7:
+                    multiply_accumulate_uint64<7>(operand1, operand2, accumulator);
+                    break;
+                case 8:
+                    multiply_accumulate_uint64<8>(operand1, operand2, accumulator);
+                    break;
+                case 9:
+                    multiply_accumulate_uint64<9>(operand1, operand2, accumulator);
+                    break;
+                case 10:
+                    multiply_accumulate_uint64<10>(operand1, operand2, accumulator);
+                    break;
+                case 11:
+                    multiply_accumulate_uint64<11>(operand1, operand2, accumulator);
+                    break;
+                case 12:
+                    multiply_accumulate_uint64<12>(operand1, operand2, accumulator);
+                    break;
+                case 13:
+                    multiply_accumulate_uint64<13>(operand1, operand2, accumulator);
+                    break;
+                case 14:
+                    multiply_accumulate_uint64<14>(operand1, operand2, accumulator);
+                    break;
+                case 15:
+                    multiply_accumulate_uint64<15>(operand1, operand2, accumulator);
+                    break;
+                case 16:
+largest_case:
+                    multiply_accumulate_uint64<16>(operand1, operand2, accumulator);
+                    break;
+                default:
+                    accumulator[0] = dot_product_mod(operand1 + 16, operand2 + 16, count - 16, modulus);
+                    goto largest_case;
+            };
+            return barrett_reduce_128(accumulator, modulus);
+        }
     } // namespace util
 } // namespace seal

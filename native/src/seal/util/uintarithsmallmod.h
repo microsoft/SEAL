@@ -302,49 +302,7 @@ namespace seal
             std::uint64_t *numerator, const SmallModulus &modulus, std::size_t uint64_count, std::uint64_t *quotient,
             MemoryPool &pool);
 
-        template <std::size_t ReduceAfter = SEAL_MULTIPLY_ACCUMULATE_MOD_MAX>
         SEAL_NODISCARD std::uint64_t dot_product_mod(
-            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t count, const SmallModulus &modulus)
-        {
-#ifdef SEAL_DEBUG
-            if (!operand1 && count)
-            {
-                throw std::invalid_argument("operand1");
-            }
-            if (!operand2 && count)
-            {
-                throw std::invalid_argument("operand2");
-            }
-            if (modulus.is_zero())
-            {
-                throw std::invalid_argument("modulus");
-            }
-#endif
-            // Product of two numbers is up to 61 bit + 61 bit = 122 bit. We can sum up to 64 of them with no reduction.
-            unsigned long long accumulator[2]{ 0, 0 };
-
-            // We may have to perform multiple lazy reductions depending on count
-            std::size_t lazy_reduction_count = count / ReduceAfter;
-            for (; lazy_reduction_count--; operand1 += ReduceAfter, operand2 += ReduceAfter, count -= ReduceAfter)
-            {
-                multiply_accumulate_uint64<ReduceAfter>(operand1, operand2, accumulator);
-                accumulator[0] = barrett_reduce_128(accumulator, modulus);
-                accumulator[1] = 0;
-            }
-
-            // Deal with remaining terms
-            for (; count--; operand1++, operand2++)
-            {
-                // Compute current product
-                unsigned long long qword[2];
-                multiply_uint64(*operand1, *operand2, qword);
-
-                // 128-bit addition to accumulator; ignore carry bit since it can never be set
-                add_uint128(qword, accumulator, accumulator);
-            }
-
-            // Last reduction
-            return barrett_reduce_128(accumulator, modulus);
-        }
+            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t count, const SmallModulus &modulus);
     } // namespace util
 } // namespace seal
