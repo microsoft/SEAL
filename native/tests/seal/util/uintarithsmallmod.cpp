@@ -349,14 +349,14 @@ namespace sealtest
                 arr2[i] = 3;
             }
 
-            ASSERT_EQ(0, dot_product_mod(arr1, 0, arr2, mod));
-            ASSERT_EQ(1, dot_product_mod(arr1, 1, arr2, mod));
-            ASSERT_EQ(2, dot_product_mod(arr1, 2, arr2, mod));
-            ASSERT_EQ(15 % mod.value(), dot_product_mod(arr1, 15, arr2, mod));
-            ASSERT_EQ(16 % mod.value(), dot_product_mod(arr1, 16, arr2, mod));
-            ASSERT_EQ(17 % mod.value(), dot_product_mod(arr1, 17, arr2, mod));
-            ASSERT_EQ(32 % mod.value(), dot_product_mod(arr1, 32, arr2, mod));
-            ASSERT_EQ(64 % mod.value(), dot_product_mod(arr1, 64, arr2, mod));
+            ASSERT_EQ(0, dot_product_mod(arr1, arr2, 0, mod));
+            ASSERT_EQ(1, dot_product_mod(arr1, arr2, 1, mod));
+            ASSERT_EQ(2, dot_product_mod(arr1, arr2, 2, mod));
+            ASSERT_EQ(15 % mod.value(), dot_product_mod(arr1, arr2, 15, mod));
+            ASSERT_EQ(16 % mod.value(), dot_product_mod(arr1, arr2, 16, mod));
+            ASSERT_EQ(17 % mod.value(), dot_product_mod(arr1, arr2, 17, mod));
+            ASSERT_EQ(32 % mod.value(), dot_product_mod(arr1, arr2, 32, mod));
+            ASSERT_EQ(64 % mod.value(), dot_product_mod(arr1, arr2, 64, mod));
 
             mod = get_prime(1024, SEAL_MOD_BIT_COUNT_MAX);
             for (size_t i = 0; i < 64; i++)
@@ -365,14 +365,14 @@ namespace sealtest
                 arr2[i] = mod.value() - 1;
             }
 
-            ASSERT_EQ(0, dot_product_mod(arr1, 0, arr2, mod));
-            ASSERT_EQ(1, dot_product_mod(arr1, 1, arr2, mod));
-            ASSERT_EQ(2, dot_product_mod(arr1, 2, arr2, mod));
-            ASSERT_EQ(15, dot_product_mod(arr1, 15, arr2, mod));
-            ASSERT_EQ(16, dot_product_mod(arr1, 16, arr2, mod));
-            ASSERT_EQ(17, dot_product_mod(arr1, 17, arr2, mod));
-            ASSERT_EQ(32, dot_product_mod(arr1, 32, arr2, mod));
-            ASSERT_EQ(64, dot_product_mod(arr1, 64, arr2, mod));
+            ASSERT_EQ(0, dot_product_mod(arr1, arr2, 0, mod));
+            ASSERT_EQ(1, dot_product_mod(arr1, arr2, 1, mod));
+            ASSERT_EQ(2, dot_product_mod(arr1, arr2, 2, mod));
+            ASSERT_EQ(15, dot_product_mod(arr1, arr2, 15, mod));
+            ASSERT_EQ(16, dot_product_mod(arr1, arr2, 16, mod));
+            ASSERT_EQ(17, dot_product_mod(arr1, arr2, 17, mod));
+            ASSERT_EQ(32, dot_product_mod(arr1, arr2, 32, mod));
+            ASSERT_EQ(64, dot_product_mod(arr1, arr2, 64, mod));
         }
     } // namespace util
 } // namespace sealtest

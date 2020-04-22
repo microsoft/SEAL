@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
+#include <functional>
 
 namespace seal
 {

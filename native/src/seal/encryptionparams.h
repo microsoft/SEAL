@@ -349,7 +349,7 @@ namespace seal
                 util::add_safe(
                     sizeof(scheme_),
                     sizeof(std::uint64_t), // poly_modulus_degree_
-                    sizeof(std::uint64_t), // coeff_modulus_count
+                    sizeof(std::uint64_t), // coeff_modulus_size
                     coeff_modulus_total_size,
                     util::safe_cast<std::size_t>(plain_modulus_.save_size(compr_mode_type::none))),
                 compr_mode);

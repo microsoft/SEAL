@@ -440,11 +440,11 @@ namespace sealtest
             }
             {
                 size_t poly_modulus_degree = 2;
-                size_t coeff_modulus_count = 2;
+                size_t coeff_modulus_size = 2;
                 ASSERT_NO_THROW(
                     rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * coeff_modulus_count);
+                vector<uint64_t> in(poly_modulus_degree * coeff_modulus_size);
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 set_zero_uint(in.size(), in.data());
                 rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);

@@ -424,11 +424,11 @@ namespace Microsoft.Research.SEAL
         /// associated encryption parameters. This directly affects the
         /// allocation size of the ciphertext.
         /// </summary>
-        public ulong CoeffModulusCount
+        public ulong CoeffModulusSize
         {
             get
             {
-                NativeMethods.Ciphertext_CoeffModulusCount(NativePtr, out ulong coeffModCount);
+                NativeMethods.Ciphertext_CoeffModulusSize(NativePtr, out ulong coeffModCount);
                 return coeffModCount;
             }
         }

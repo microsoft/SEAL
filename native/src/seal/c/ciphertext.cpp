@@ -20,9 +20,9 @@ namespace seal
     */
     struct Ciphertext::CiphertextPrivateHelper
     {
-        static void resize(Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree, size_t coeff_modulus_count)
+        static void resize(Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree, size_t coeff_modulus_size)
         {
-            ciphertext->resize_internal(size, poly_modulus_degree, coeff_modulus_count);
+            ciphertext->resize_internal(size, poly_modulus_degree, coeff_modulus_size);
         }
 
         static void set_ntt_form(Ciphertext *ciphertext, bool is_ntt_form)
@@ -231,13 +231,13 @@ SEAL_C_FUNC Ciphertext_PolyModulusDegree(void *thisptr, uint64_t *poly_modulus_d
     return S_OK;
 }
 
-SEAL_C_FUNC Ciphertext_CoeffModulusCount(void *thisptr, uint64_t *coeff_modulus_count)
+SEAL_C_FUNC Ciphertext_CoeffModulusSize(void *thisptr, uint64_t *coeff_modulus_size)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
-    IfNullRet(coeff_modulus_count, E_POINTER);
+    IfNullRet(coeff_modulus_size, E_POINTER);
 
-    *coeff_modulus_count = cipher->coeff_modulus_count();
+    *coeff_modulus_size = cipher->coeff_modulus_size();
     return S_OK;
 }
 
@@ -357,7 +357,7 @@ SEAL_C_FUNC Ciphertext_GetDataAt2(void *thisptr, uint64_t poly_index, uint64_t c
     IfNullRet(cipher, E_POINTER);
     IfNullRet(data, E_POINTER);
 
-    auto poly_uint64_count = util::mul_safe(cipher->poly_modulus_degree(), cipher->coeff_modulus_count());
+    auto poly_uint64_count = util::mul_safe(cipher->poly_modulus_degree(), cipher->coeff_modulus_size());
 
     // poly_index is verified by the data method, we need to verify coeff_index ourselves.
     if (coeff_index >= poly_uint64_count)

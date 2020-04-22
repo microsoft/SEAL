@@ -33,7 +33,7 @@ namespace seal
         +-------------------+
         |    Pointer & Size |  Construct  +-----------------+
         | or Ciphertext     +------------>+ (Const)PolyIter |  Iterates over RNS polynomials in a ciphertext
-        +-------------------+             +-----------------+  (coeff_modulus_count-many RNS components)
+        +-------------------+             +-----------------+  (coeff_modulus_size-many RNS components)
                                                    |
                                                    |
                                                    | Dereference
@@ -113,7 +113,7 @@ namespace seal
 
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size,
                 [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J)); });
         });
 
@@ -140,7 +140,7 @@ namespace seal
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             SEAL_ASSERT_TYPE(I, RNSIter, "encrypted");
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count, [&](auto J) {
+                IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
                     SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
                     SEAL_ASSERT_TYPE(get<1>(J), const SmallModulus *, "coeff_modulus");
                     negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J));
@@ -844,15 +844,15 @@ namespace seal
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            PolyIter() : rns_it_(nullptr, 0), coeff_modulus_count_(0), step_size_(0)
+            PolyIter() : rns_it_(nullptr, 0), coeff_modulus_size_(0), step_size_(0)
             {}
 
-            PolyIter(std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
-                : rns_it_(ptr, poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count),
-                  step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count_))
+            PolyIter(std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size)
+                : rns_it_(ptr, poly_modulus_degree), coeff_modulus_size_(coeff_modulus_size),
+                  step_size_(mul_safe(poly_modulus_degree, coeff_modulus_size_))
             {}
 
-            PolyIter(Ciphertext &ct) : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+            PolyIter(Ciphertext &ct) : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_size())
             {}
 
             PolyIter(const self_type &copy) = default;
@@ -941,7 +941,7 @@ namespace seal
                 {
                     throw std::invalid_argument("incompatible iterators");
                 }
-                if (coeff_modulus_count_ != b.coeff_modulus_count_)
+                if (coeff_modulus_size_ != b.coeff_modulus_size_)
                 {
                     throw std::invalid_argument("incompatible iterators");
                 }
@@ -999,15 +999,15 @@ namespace seal
                 return rns_it_.step_size_;
             }
 
-            SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
+            SEAL_NODISCARD inline std::size_t coeff_modulus_size() const noexcept
             {
-                return coeff_modulus_count_;
+                return coeff_modulus_size_;
             }
 
         private:
             RNSIter rns_it_;
 
-            std::size_t coeff_modulus_count_;
+            std::size_t coeff_modulus_size_;
 
             std::size_t step_size_;
         };
@@ -1031,19 +1031,19 @@ namespace seal
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            ConstPolyIter() : rns_it_(nullptr, 0), coeff_modulus_count_(0), step_size_(0)
+            ConstPolyIter() : rns_it_(nullptr, 0), coeff_modulus_size_(0), step_size_(0)
             {}
 
-            ConstPolyIter(const std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count)
-                : rns_it_(ptr, poly_modulus_degree), coeff_modulus_count_(coeff_modulus_count),
-                  step_size_(mul_safe(poly_modulus_degree, coeff_modulus_count_))
+            ConstPolyIter(const std::uint64_t *ptr, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size)
+                : rns_it_(ptr, poly_modulus_degree), coeff_modulus_size_(coeff_modulus_size),
+                  step_size_(mul_safe(poly_modulus_degree, coeff_modulus_size_))
             {}
 
             ConstPolyIter(const Ciphertext &ct)
-                : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+                : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_size())
             {}
 
-            ConstPolyIter(Ciphertext &ct) : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_count())
+            ConstPolyIter(Ciphertext &ct) : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_size())
             {}
 
             ConstPolyIter(const self_type &copy) = default;
@@ -1056,8 +1056,8 @@ namespace seal
 
             ConstPolyIter(const PolyIter &copy)
                 : rns_it_(static_cast<const std::uint64_t *>(copy), copy.poly_modulus_degree()),
-                  coeff_modulus_count_(copy.coeff_modulus_count()),
-                  step_size_(mul_safe(rns_it_.step_size_, coeff_modulus_count_))
+                  coeff_modulus_size_(copy.coeff_modulus_size()),
+                  step_size_(mul_safe(rns_it_.step_size_, coeff_modulus_size_))
             {}
 
             SEAL_NODISCARD inline reference operator*() const noexcept
@@ -1138,7 +1138,7 @@ namespace seal
                 {
                     throw std::invalid_argument("incompatible iterators");
                 }
-                if (coeff_modulus_count_ != b.coeff_modulus_count_)
+                if (coeff_modulus_size_ != b.coeff_modulus_size_)
                 {
                     throw std::invalid_argument("incompatible iterators");
                 }
@@ -1196,15 +1196,15 @@ namespace seal
                 return rns_it_.step_size_;
             }
 
-            SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
+            SEAL_NODISCARD inline std::size_t coeff_modulus_size() const noexcept
             {
-                return coeff_modulus_count_;
+                return coeff_modulus_size_;
             }
 
         private:
             ConstRNSIter rns_it_;
 
-            std::size_t coeff_modulus_count_;
+            std::size_t coeff_modulus_size_;
 
             std::size_t step_size_;
         };

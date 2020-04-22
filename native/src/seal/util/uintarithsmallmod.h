@@ -302,9 +302,7 @@ namespace seal
             std::uint64_t *numerator, const SmallModulus &modulus, std::size_t uint64_count, std::uint64_t *quotient,
             MemoryPool &pool);
 
-        // Computes a dot product of two uint64_t arrays
-        std::uint64_t dot_product_mod(
-            const std::uint64_t *operand1, std::size_t coeff_count, const std::uint64_t *operand2,
-            const SmallModulus &modulus);
+        SEAL_NODISCARD std::uint64_t dot_product_mod(
+            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t count, const SmallModulus &modulus);
     } // namespace util
 } // namespace seal

@@ -107,50 +107,67 @@ namespace seal
             }
         }
 
-        uint64_t dot_product_mod(
-            const uint64_t *operand1, size_t count, const uint64_t *operand2, const SmallModulus &modulus)
+        uint64_t dot_product_mod(const uint64_t *operand1, const uint64_t *operand2, size_t count, const SmallModulus &modulus)
         {
-#ifdef SEAL_DEBUG
-            if (!operand1 && count)
-            {
-                throw invalid_argument("operand1");
-            }
-            if (!operand2 && count)
-            {
-                throw invalid_argument("operand2");
-            }
-            if (modulus.is_zero())
-            {
-                throw invalid_argument("modulus");
-            }
-#endif
-            // Product of two numbers is up to 61 bit + 61 bit = 122 bit. We can sum up to 64 of them with no reduction.
-            size_t lazy_reduction_summand_bound;
-#if SEAL_MOD_BIT_COUNT_MAX > 32
-            lazy_reduction_summand_bound = size_t(1) << (128 - (SEAL_MOD_BIT_COUNT_MAX << 1));
-#else
-            lazy_reduction_summand_bound = numeric_limits<size_t>::max();
-#endif
-            // We may have to perform multiple lazy reductions depending on count
-            size_t r = lazy_reduction_summand_bound;
+            static_assert(SEAL_MULTIPLY_ACCUMULATE_MOD_MAX >= 16, "SEAL_MULTIPLY_ACCUMULATE_MOD_MAX");
             unsigned long long accumulator[2]{ 0, 0 };
-            for (size_t i = 0; i < count; i++, operand1++, operand2++)
+            switch (count)
             {
-                // Compute current product
-                unsigned long long qword[2];
-                multiply_uint64(*operand1, *operand2, qword);
-
-                // 128-bit addition to accumulator; ignore carry bit since it can never be set
-                add_uint128(qword, accumulator, accumulator);
-
-                // Lazy reduction
-                if (!--r)
-                {
-                    r = lazy_reduction_summand_bound;
-                    accumulator[0] = barrett_reduce_128(accumulator, modulus);
-                    accumulator[1] = 0;
-                }
-            }
+                case 0:
+                    return 0;
+                case 1:
+                    multiply_accumulate_uint64<1>(operand1, operand2, accumulator);
+                    break;
+                case 2:
+                    multiply_accumulate_uint64<2>(operand1, operand2, accumulator);
+                    break;
+                case 3:
+                    multiply_accumulate_uint64<3>(operand1, operand2, accumulator);
+                    break;
+                case 4:
+                    multiply_accumulate_uint64<4>(operand1, operand2, accumulator);
+                    break;
+                case 5:
+                    multiply_accumulate_uint64<5>(operand1, operand2, accumulator);
+                    break;
+                case 6:
+                    multiply_accumulate_uint64<6>(operand1, operand2, accumulator);
+                    break;
+                case 7:
+                    multiply_accumulate_uint64<7>(operand1, operand2, accumulator);
+                    break;
+                case 8:
+                    multiply_accumulate_uint64<8>(operand1, operand2, accumulator);
+                    break;
+                case 9:
+                    multiply_accumulate_uint64<9>(operand1, operand2, accumulator);
+                    break;
+                case 10:
+                    multiply_accumulate_uint64<10>(operand1, operand2, accumulator);
+                    break;
+                case 11:
+                    multiply_accumulate_uint64<11>(operand1, operand2, accumulator);
+                    break;
+                case 12:
+                    multiply_accumulate_uint64<12>(operand1, operand2, accumulator);
+                    break;
+                case 13:
+                    multiply_accumulate_uint64<13>(operand1, operand2, accumulator);
+                    break;
+                case 14:
+                    multiply_accumulate_uint64<14>(operand1, operand2, accumulator);
+                    break;
+                case 15:
+                    multiply_accumulate_uint64<15>(operand1, operand2, accumulator);
+                    break;
+                case 16:
+largest_case:
+                    multiply_accumulate_uint64<16>(operand1, operand2, accumulator);
+                    break;
+                default:
+                    accumulator[0] = dot_product_mod(operand1 + 16, operand2 + 16, count - 16, modulus);
+                    goto largest_case;
+            };
             return barrett_reduce_128(accumulator, modulus);
         }
     } // namespace util

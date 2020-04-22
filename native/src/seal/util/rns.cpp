@@ -452,40 +452,46 @@ namespace seal
 
         void BaseConverter::fast_convert(const uint64_t *in, uint64_t *out, MemoryPoolHandle pool) const
         {
-            auto temp(allocate_uint(ibase_.size(), pool));
-            for (size_t i = 0; i < ibase_.size(); i++)
+            size_t ibase_size = ibase_.size();
+            size_t obase_size = obase_.size();
+
+            auto temp(allocate_uint(ibase_size, pool));
+            for (size_t i = 0; i < ibase_size; i++)
             {
                 temp[i] = multiply_uint_uint_mod(in[i], ibase_.inv_punctured_prod_mod_base_array()[i], ibase_[i]);
             }
 
-            for (size_t j = 0; j < obase_.size(); j++)
+            for (size_t j = 0; j < obase_size; j++)
             {
-                out[j] = dot_product_mod(temp.get(), ibase_.size(), base_change_matrix_[j].get(), obase_[j]);
+                out[j] = dot_product_mod(temp.get(), base_change_matrix_[j].get(), ibase_size, obase_[j]);
             }
         }
 
         void BaseConverter::fast_convert_array(
             const uint64_t *in, size_t count, uint64_t *out, MemoryPoolHandle pool) const
         {
-            auto temp(allocate_uint(count * ibase_.size(), pool));
-            for (size_t i = 0; i < ibase_.size(); i++)
+            size_t ibase_size = ibase_.size();
+            size_t obase_size = obase_.size();
+
+            auto temp(allocate_uint(count * ibase_size, pool));
+            for (size_t i = 0; i < ibase_size; i++)
             {
                 uint64_t inv_ibase_punctured_prod_mod_ibase_elt = ibase_.inv_punctured_prod_mod_base_array()[i];
                 SmallModulus ibase_elt = ibase_[i];
-                for (size_t k = 0; k < count; k++, in++)
+                uint64_t *temp_ptr = temp.get() + i;
+                for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
                 {
-                    temp[i + (k * ibase_.size())] =
-                        multiply_uint_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
+                    *temp_ptr = multiply_uint_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
                 }
             }
 
-            for (size_t j = 0; j < obase_.size(); j++)
+            for (size_t j = 0; j < obase_size; j++)
             {
                 uint64_t *temp_ptr = temp.get();
                 SmallModulus obase_elt = obase_[j];
-                for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_.size())
+                for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_size)
                 {
-                    *out = dot_product_mod(temp_ptr, ibase_.size(), base_change_matrix_[j].get(), obase_elt);
+                    *out = dot_product_mod(temp_ptr, base_change_matrix_[j].get(), ibase_size, obase_elt);
                 }
             }
         }

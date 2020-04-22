@@ -96,8 +96,8 @@ namespace sealtest
 
             {
                 vector<uint64_t> values;
-                for_each_n(pi, arr.size() / (pi.poly_modulus_degree() * pi.coeff_modulus_count()), [&](auto ri) {
-                    for_each_n(ri, pi.coeff_modulus_count(), [&](auto ci) {
+                for_each_n(pi, arr.size() / (pi.poly_modulus_degree() * pi.coeff_modulus_size()), [&](auto ri) {
+                    for_each_n(ri, pi.coeff_modulus_size(), [&](auto ci) {
                         for_each_n(ci, pi.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
                     });
                 });
@@ -105,8 +105,8 @@ namespace sealtest
             }
             {
                 vector<uint64_t> values;
-                for_each_n(cpi, arr.size() / (cpi.poly_modulus_degree() * cpi.coeff_modulus_count()), [&](auto cri) {
-                    for_each_n(cri, cpi.coeff_modulus_count(), [&](auto cci) {
+                for_each_n(cpi, arr.size() / (cpi.poly_modulus_degree() * cpi.coeff_modulus_size()), [&](auto cri) {
+                    for_each_n(cri, cpi.coeff_modulus_size(), [&](auto cci) {
                         for_each_n(cci, cpi.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
                     });
                 });
