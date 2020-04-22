@@ -17,6 +17,7 @@
   - `bool parameters_set()` is added to replace the previous `bool parameters_set` member.
   - `string parameter_error_name()` is added to retrieve error code name.
   - `string parameter_error_message()` is added to retrieve a comprehensive error message.
+- `SmallModulus` class is renamed to `Modulus`, and is relocated to [native/src/seal/modulus.h](native/src/seal/modulus.h).
 
 ### File Changes
 
@@ -32,11 +33,22 @@ New files:
 - [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
 - [dotnet/tests/SerializationTests.cs](dotnet/tests/SerializationTests.cs)
 
-Renamed files:
+Renamed files and directories:
 
-- [native/src/seal/util/ntt.h](native/src/seal/util/ntt.h) was previously `smallntt.h`.
-- [native/src/seal/util/ntt.cpp](native/src/seal/util/ntt.cpp) was previously `smallntt.cpp`.
-- [native/tests/seal/util/ntt.cpp](native/tests/seal/util/ntt.cpp) was previously `smallntt.cpp`.
+- [native/src/seal/c](native/src/seal/c) was previously `dotnet/native/sealnet`.
+- [native/src/seal/util/ntt.h](native/src/seal/util/ntt.h) was previously `native/src/seal/util/ntt.h`.
+- [native/src/seal/util/ntt.cpp](native/src/seal/util/ntt.cpp) was previously `native/src/seal/util/ntt.cpp`.
+- [native/tests/seal/util/ntt.cpp](native/tests/seal/util/ntt.cpp) was previously `native/tests/seal/util/ntt.cpp`.
+
+Removed files:
+
+- `native/src/seal/smallmodulus.h` is merged to [native/src/seal/modulus.h](native/src/seal/modulus.h).
+- `native/src/seal/smallmodulus.cpp` is merged to [native/src/seal/modulus.cpp](native/src/seal/modulus.cpp).
+- `native/src/seal/c/smallmodulus.h` is merged to [native/src/seal/c/modulus.h](native/src/seal/c/modulus.h).
+- `native/src/seal/c/smallmodulus.cpp` is merged to [native/src/seal/c/modulus.cpp](native/src/seal/c/modulus.cpp).
+- `native/tests/seal/smallmodulus.cpp` is merged to [native/tests/seal/modulus.cpp](native/tests/seal/modulus.cpp).
+- `dotnet/src/SmallModulusTests.cs` is merged to [dotnet/src/ModulusTests.cs](dotnet/src/ModulusTests.cs).
+- `dotnet/tests/SmallModulusTests.cs` is merged to [dotnet/tests/ModulusTests.cs](dotnet/tests/ModulusTests.cs).
 
 ### Other changes
 
@@ -47,7 +59,7 @@ Renamed files:
 - Microsoft GSL is now downloaded automatically (can be disabled).
 - Google Test is now downloaded and compiled by CMake and is no longer included as a Git submodule.
 - Releases are now listed on GitHub.
-- Moved `dotnet/native/` to be under `native/src/c/`. The C export library in this directory can be used to build wrappers for other languages also -- not just .NET.
+- The C export library in [native/src/seal/c](native/src/seal/c) can be used to build wrappers for languages including but not limited to .NET.
 - Changed the CMake file structure. Targets available are now: `SEAL::seal` (static library), `SEAL::seal_shared` (shared library), `SEAL::sealc` (C export library).
 - There is now a `.clang-format` for automated formatting of C++ (`.cpp` and `.h`) files. A bash script is added. Run `bash tools/scripts/clang-format-all.sh` for easy formatting. This is compatible with clang-format-9 and above. Support for C# is not yet ideal.
 - For the .NET projects we are switching to using C# 8.0 and hence require .NET Core 3.x (.NET Standard 2.1). Therefore, Visual Studio 2017 is no longer supported for building the .NET projects, but only for the C++ projects.

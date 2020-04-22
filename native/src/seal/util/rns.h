@@ -4,14 +4,14 @@
 #pragma once
 
 #include "seal/memorymanager.h"
-#include "seal/smallmodulus.h"
-#include "seal/util/pointer.h"
+#include "seal/modulus.h"
 #include "seal/util/ntt.h"
+#include "seal/util/pointer.h"
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <stdexcept>
 #include <vector>
-#include <functional>
 
 namespace seal
 {
@@ -20,7 +20,7 @@ namespace seal
         class RNSBase
         {
         public:
-            RNSBase(const std::vector<SmallModulus> &rnsbase, MemoryPoolHandle pool);
+            RNSBase(const std::vector<Modulus> &rnsbase, MemoryPoolHandle pool);
 
             RNSBase(RNSBase &&source) = default;
 
@@ -31,7 +31,7 @@ namespace seal
 
             RNSBase &operator=(const RNSBase &assign) = delete;
 
-            SEAL_NODISCARD inline const SmallModulus &operator[](std::size_t index) const
+            SEAL_NODISCARD inline const Modulus &operator[](std::size_t index) const
             {
                 if (index >= size_)
                 {
@@ -45,7 +45,7 @@ namespace seal
                 return size_;
             }
 
-            SEAL_NODISCARD bool contains(const SmallModulus &value) const noexcept;
+            SEAL_NODISCARD bool contains(const Modulus &value) const noexcept;
 
             SEAL_NODISCARD bool is_subbase_of(const RNSBase &superbase) const noexcept;
 
@@ -64,13 +64,13 @@ namespace seal
                 return (size_ > subbase.size_) && !is_subbase_of(subbase);
             }
 
-            SEAL_NODISCARD RNSBase extend(SmallModulus value) const;
+            SEAL_NODISCARD RNSBase extend(Modulus value) const;
 
             SEAL_NODISCARD RNSBase extend(const RNSBase &other) const;
 
             SEAL_NODISCARD RNSBase drop() const;
 
-            SEAL_NODISCARD RNSBase drop(SmallModulus value) const;
+            SEAL_NODISCARD RNSBase drop(Modulus value) const;
 
             void decompose(std::uint64_t *value, MemoryPoolHandle pool) const;
 
@@ -80,7 +80,7 @@ namespace seal
 
             void compose_array(std::uint64_t *value, std::size_t count, MemoryPoolHandle pool) const;
 
-            SEAL_NODISCARD inline const SmallModulus *base() const noexcept
+            SEAL_NODISCARD inline const Modulus *base() const noexcept
             {
                 return base_.get();
             }
@@ -115,7 +115,7 @@ namespace seal
 
             std::size_t size_;
 
-            Pointer<SmallModulus> base_;
+            Pointer<Modulus> base_;
 
             Pointer<std::uint64_t> base_prod_;
 
@@ -192,7 +192,7 @@ namespace seal
             @throws std::logic_error if coeff_modulus and extended bases do not support NTT or are not coprime.
             */
             RNSTool(
-                std::size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus,
+                std::size_t poly_modulus_degree, const RNSBase &coeff_modulus, const Modulus &plain_modulus,
                 MemoryPoolHandle pool);
 
             void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
@@ -292,7 +292,7 @@ namespace seal
             /**
             Generates the pre-computations for the given parameters.
             */
-            void initialize(std::size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t);
+            void initialize(std::size_t poly_modulus_degree, const RNSBase &q, const Modulus &t);
 
             MemoryPoolHandle pool_;
 
@@ -356,13 +356,13 @@ namespace seal
             // NTTTables for Bsk
             Pointer<NTTTables> base_Bsk_small_ntt_tables_;
 
-            SmallModulus m_tilde_;
+            Modulus m_tilde_;
 
-            SmallModulus m_sk_;
+            Modulus m_sk_;
 
-            SmallModulus t_;
+            Modulus t_;
 
-            SmallModulus gamma_;
+            Modulus gamma_;
         };
     } // namespace util
 } // namespace seal

@@ -53,7 +53,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms, expandModChain: true, secLevel: SecLevelType.None);
@@ -102,7 +102,7 @@ namespace SEALNetTest
             parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 127,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
             };
             context = new SEALContext(parms, expandModChain: true, secLevel: SecLevelType.None);
@@ -158,7 +158,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 4096,
                 CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree: 4096),
-                PlainModulus = new SmallModulus(1 << 20)
+                PlainModulus = new Modulus(1 << 20)
             };
 
             SEALContext context1 = new SEALContext(parms,

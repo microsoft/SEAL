@@ -2,11 +2,10 @@
 // Licensed under the MIT license.
 
 #include "seal/modulus.h"
-#include "seal/smallmodulus.h"
 #include "seal/util/mempool.h"
+#include "seal/util/ntt.h"
 #include "seal/util/numth.h"
 #include "seal/util/polycore.h"
-#include "seal/util/ntt.h"
 #include "seal/util/uintcore.h"
 #include <cstddef>
 #include <cstdint>
@@ -26,7 +25,7 @@ namespace sealtest
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
             Pointer<NTTTables> tables;
             int coeff_count_power = 1;
-            SmallModulus modulus(get_prime(uint64_t(1) << coeff_count_power, 60));
+            Modulus modulus(get_prime(uint64_t(1) << coeff_count_power, 60));
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(2ULL, tables->coeff_count());
             ASSERT_EQ(1, tables->coeff_count_power());
@@ -59,7 +58,7 @@ namespace sealtest
             Pointer<NTTTables> tables;
 
             int coeff_count_power = 1;
-            SmallModulus modulus(0xffffffffffc0001ULL);
+            Modulus modulus(0xffffffffffc0001ULL);
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(1ULL, tables->get_from_root_powers(0));
             ASSERT_EQ(288794978602139552ULL, tables->get_from_root_powers(1));
@@ -81,7 +80,7 @@ namespace sealtest
             Pointer<NTTTables> tables;
 
             int coeff_count_power = 1;
-            SmallModulus modulus(0xffffffffffc0001ULL);
+            Modulus modulus(0xffffffffffc0001ULL);
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             auto poly(allocate_poly(2, 1, pool));
             poly[0] = 0;
@@ -109,7 +108,7 @@ namespace sealtest
             Pointer<NTTTables> tables;
 
             int coeff_count_power = 3;
-            SmallModulus modulus(0xffffffffffc0001ULL);
+            Modulus modulus(0xffffffffffc0001ULL);
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             auto poly(allocate_zero_poly(800, 1, pool));
             auto temp(allocate_zero_poly(800, 1, pool));

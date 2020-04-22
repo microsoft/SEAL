@@ -142,7 +142,7 @@ namespace seal
         }
 
         void GaloisTool::apply_galois(
-            const uint64_t *operand, uint32_t galois_elt, const SmallModulus &modulus, uint64_t *result) const
+            const uint64_t *operand, uint32_t galois_elt, const Modulus &modulus, uint64_t *result) const
         {
 #ifdef SEAL_DEBUG
             if (operand == nullptr)

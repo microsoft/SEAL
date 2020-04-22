@@ -63,7 +63,7 @@ namespace SEALNetExamples
             /*
             Next we set the [ciphertext] `coefficient modulus' (CoeffModulus). This
             parameter is a large integer, which is a product of distinct prime numbers,
-            numbers, each represented by an instance of the SmallModulus class. The
+            numbers, each represented by an instance of the Modulus class. The
             bit-length of CoeffModulus means the sum of the bit-lengths of its prime
             factors.
 
@@ -96,7 +96,7 @@ namespace SEALNetExamples
 
                 CoeffModulus.BFVDefault(polyModulusDegree),
 
-            which returns IEnumerable<SmallModulus> consisting of a generally good choice
+            which returns IEnumerable<Modulus> consisting of a generally good choice
             for the given PolyModulusDegree.
             */
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
@@ -118,7 +118,7 @@ namespace SEALNetExamples
             The plaintext modulus is specific to the BFV scheme, and cannot be set when
             using the CKKS scheme.
             */
-            parms.PlainModulus = new SmallModulus(1024);
+            parms.PlainModulus = new Modulus(1024);
 
             /*
             Now that all parameters are set, we are ready to construct a SEALContext

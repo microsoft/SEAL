@@ -939,8 +939,9 @@ namespace seal
             }
         }
 
-        template<std::size_t Count>
-        inline void multiply_accumulate_uint64(const std::uint64_t *operand1, const std::uint64_t *operand2, unsigned long long *accumulator)
+        template <std::size_t Count>
+        inline void multiply_accumulate_uint64(
+            const std::uint64_t *operand1, const std::uint64_t *operand2, unsigned long long *accumulator)
         {
             unsigned long long qword[2];
             multiply_uint64(*operand1, *operand2, qword);
@@ -948,8 +949,10 @@ namespace seal
             add_uint128(qword, accumulator, accumulator);
         }
 
-        template<>
-        inline void multiply_accumulate_uint64<0>(SEAL_MAYBE_UNUSED const std::uint64_t *operand1, SEAL_MAYBE_UNUSED const std::uint64_t *operand2, SEAL_MAYBE_UNUSED unsigned long long *accumulator)
+        template <>
+        inline void multiply_accumulate_uint64<0>(
+            SEAL_MAYBE_UNUSED const std::uint64_t *operand1, SEAL_MAYBE_UNUSED const std::uint64_t *operand2,
+            SEAL_MAYBE_UNUSED unsigned long long *accumulator)
         {
             // Base case; nothing to do
         }

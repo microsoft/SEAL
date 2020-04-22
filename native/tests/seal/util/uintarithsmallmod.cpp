@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 #include "seal/memorymanager.h"
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
 #include "gtest/gtest.h"
@@ -17,7 +17,7 @@ namespace sealtest
     {
         TEST(UIntArithSmallMod, IncrementUIntMod)
         {
-            SmallModulus mod(2);
+            Modulus mod(2);
             ASSERT_EQ(1ULL, increment_uint_mod(0, mod));
             ASSERT_EQ(0ULL, increment_uint_mod(1ULL, mod));
 
@@ -34,7 +34,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, DecrementUIntMod)
         {
-            SmallModulus mod(2);
+            Modulus mod(2);
             ASSERT_EQ(0ULL, decrement_uint_mod(1, mod));
             ASSERT_EQ(1ULL, decrement_uint_mod(0ULL, mod));
 
@@ -51,7 +51,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, NegateUIntMod)
         {
-            SmallModulus mod(2);
+            Modulus mod(2);
             ASSERT_EQ(0ULL, negate_uint_mod(0, mod));
             ASSERT_EQ(1ULL, negate_uint_mod(1, mod));
 
@@ -72,7 +72,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, Div2UIntMod)
         {
-            SmallModulus mod(3);
+            Modulus mod(3);
             ASSERT_EQ(0ULL, div2_uint_mod(0ULL, mod));
             ASSERT_EQ(2ULL, div2_uint_mod(1ULL, mod));
 
@@ -87,7 +87,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, AddUIntMod)
         {
-            SmallModulus mod(2);
+            Modulus mod(2);
             ASSERT_EQ(0ULL, add_uint_uint_mod(0, 0, mod));
             ASSERT_EQ(1ULL, add_uint_uint_mod(0, 1, mod));
             ASSERT_EQ(1ULL, add_uint_uint_mod(1, 0, mod));
@@ -113,7 +113,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, SubUIntMod)
         {
-            SmallModulus mod(2);
+            Modulus mod(2);
             ASSERT_EQ(0ULL, sub_uint_uint_mod(0, 0, mod));
             ASSERT_EQ(1ULL, sub_uint_uint_mod(0, 1, mod));
             ASSERT_EQ(1ULL, sub_uint_uint_mod(1, 0, mod));
@@ -143,7 +143,7 @@ namespace sealtest
         {
             uint64_t input[2];
 
-            SmallModulus mod(2);
+            Modulus mod(2);
             input[0] = 0;
             input[1] = 0;
             ASSERT_EQ(0ULL, barrett_reduce_128(input, mod));
@@ -185,7 +185,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, MultiplyUIntUIntMod)
         {
-            SmallModulus mod(2);
+            Modulus mod(2);
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(0, 0, mod));
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(0, 1, mod));
             ASSERT_EQ(0ULL, multiply_uint_uint_mod(1, 0, mod));
@@ -216,7 +216,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, MultiplyAddMod)
         {
-            SmallModulus mod(7);
+            Modulus mod(7);
             ASSERT_EQ(0ULL, multiply_add_uint_mod(0, 0, 0, mod));
             ASSERT_EQ(0ULL, multiply_add_uint_mod(1, 0, 0, mod));
             ASSERT_EQ(0ULL, multiply_add_uint_mod(0, 1, 0, mod));
@@ -236,7 +236,7 @@ namespace sealtest
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto value(allocate_uint(4, pool));
 
-            SmallModulus mod(2);
+            Modulus mod(2);
             value[0] = 0;
             value[1] = 0;
             value[2] = 0;
@@ -302,7 +302,7 @@ namespace sealtest
         TEST(UIntArithSmallMod, TryInvertUIntMod)
         {
             uint64_t result;
-            SmallModulus mod(5);
+            Modulus mod(5);
             ASSERT_FALSE(try_invert_uint_mod(0, mod, result));
             ASSERT_TRUE(try_invert_uint_mod(1, mod, result));
             ASSERT_EQ(1ULL, result);
@@ -326,7 +326,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, ExponentiateUIntMod)
         {
-            SmallModulus mod(5);
+            Modulus mod(5);
             ASSERT_EQ(1ULL, exponentiate_uint_mod(1, 0, mod));
             ASSERT_EQ(1ULL, exponentiate_uint_mod(1, 0xFFFFFFFFFFFFFFFFULL, mod));
             ASSERT_EQ(3ULL, exponentiate_uint_mod(2, 0xFFFFFFFFFFFFFFFFULL, mod));
@@ -341,7 +341,7 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, DotProductMod)
         {
-            SmallModulus mod(5);
+            Modulus mod(5);
             uint64_t arr1[64], arr2[64];
             for (size_t i = 0; i < 64; i++)
             {

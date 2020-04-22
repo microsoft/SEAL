@@ -27,7 +27,6 @@ target_sources(sealc PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/sealcontext.cpp
     ${CMAKE_CURRENT_LIST_DIR}/secretkey.cpp
     ${CMAKE_CURRENT_LIST_DIR}/serialization.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/valcheck.cpp
     ${CMAKE_CURRENT_LIST_DIR}/version.cpp
@@ -60,7 +59,6 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/sealcontext.h
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.h
         ${CMAKE_CURRENT_LIST_DIR}/serialization.h
-        ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.h
         ${CMAKE_CURRENT_LIST_DIR}/stdafx.h
         ${CMAKE_CURRENT_LIST_DIR}/targetver.h
         ${CMAKE_CURRENT_LIST_DIR}/utilities.h

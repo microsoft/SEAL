@@ -12,7 +12,7 @@
 // SEAL
 #include "seal/context.h"
 #include "seal/encryptionparams.h"
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/common.h"
 #include "seal/util/locks.h"
 
@@ -45,7 +45,7 @@ unique_ptr<MemoryPoolHandle> seal::c::MemHandleFromVoid(void *voidptr)
     return make_unique<MemoryPoolHandle>(*handle);
 }
 
-void seal::c::BuildSmallModulusPointers(const vector<SmallModulus> &in_mods, uint64_t *length, void **out_mods)
+void seal::c::BuildModulusPointers(const vector<Modulus> &in_mods, uint64_t *length, void **out_mods)
 {
     *length = static_cast<uint64_t>(in_mods.size());
     if (out_mods == nullptr)
@@ -54,8 +54,8 @@ void seal::c::BuildSmallModulusPointers(const vector<SmallModulus> &in_mods, uin
         return;
     }
 
-    SmallModulus **mod_ptr_array = reinterpret_cast<SmallModulus **>(out_mods);
-    transform(in_mods.begin(), in_mods.end(), mod_ptr_array, [](const auto &mod) { return new SmallModulus(mod); });
+    Modulus **mod_ptr_array = reinterpret_cast<Modulus **>(out_mods);
+    transform(in_mods.begin(), in_mods.end(), mod_ptr_array, [](const auto &mod) { return new Modulus(mod); });
 }
 
 const shared_ptr<SEALContext> &seal::c::SharedContextFromVoid(void *context)

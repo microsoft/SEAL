@@ -395,7 +395,7 @@ The optional `dotnet` parameter `--configuration <Debug|Release>` can be used to
 To build and run the .NET examples, do:
 
 ```shell
-dotnet run dotnet/examples
+dotnet run -p dotnet/examples
 ```
 
 As mentioned before, the .NET project will copy the shared native library to the assembly output directory.

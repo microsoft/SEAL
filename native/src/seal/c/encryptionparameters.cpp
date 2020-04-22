@@ -8,7 +8,7 @@
 
 // SEAL
 #include "seal/encryptionparams.h"
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/common.h"
 #include "seal/util/hash.h"
 
@@ -109,7 +109,7 @@ SEAL_C_FUNC EncParams_GetCoeffModulus(void *thisptr, uint64_t *length, void **co
     IfNullRet(params, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    BuildSmallModulusPointers(params->coeff_modulus(), length, coeffs);
+    BuildModulusPointers(params->coeff_modulus(), length, coeffs);
     return S_OK;
 }
 
@@ -119,8 +119,8 @@ SEAL_C_FUNC EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coe
     IfNullRet(params, E_POINTER);
     IfNullRet(coeffs, E_POINTER);
 
-    SmallModulus **coeff_array = reinterpret_cast<SmallModulus **>(coeffs);
-    vector<SmallModulus> coefficients(length);
+    Modulus **coeff_array = reinterpret_cast<Modulus **>(coeffs);
+    vector<Modulus> coefficients(length);
 
     for (uint64_t i = 0; i < length; i++)
     {
@@ -171,20 +171,20 @@ SEAL_C_FUNC EncParams_GetPlainModulus(void *thisptr, void **plain_modulus)
     IfNullRet(plain_modulus, E_POINTER);
 
     const auto plainmodulus = &params->plain_modulus();
-    *plain_modulus = const_cast<SmallModulus *>(plainmodulus);
+    *plain_modulus = const_cast<Modulus *>(plainmodulus);
     return S_OK;
 }
 
-SEAL_C_FUNC EncParams_SetPlainModulus1(void *thisptr, void *modulus)
+SEAL_C_FUNC EncParams_SetPlainModulus1(void *thisptr, void *plain_modulus)
 {
     EncryptionParameters *params = FromVoid<EncryptionParameters>(thisptr);
     IfNullRet(params, E_POINTER);
-    SmallModulus *smallmodulus = FromVoid<SmallModulus>(modulus);
-    IfNullRet(smallmodulus, E_POINTER);
+    Modulus *modulus = FromVoid<Modulus>(plain_modulus);
+    IfNullRet(modulus, E_POINTER);
 
     try
     {
-        params->set_plain_modulus(*smallmodulus);
+        params->set_plain_modulus(*modulus);
         return S_OK;
     }
     catch (const logic_error &)

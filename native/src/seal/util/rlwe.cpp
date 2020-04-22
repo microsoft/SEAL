@@ -6,10 +6,10 @@
 #include "seal/util/clipnormal.h"
 #include "seal/util/common.h"
 #include "seal/util/globals.h"
+#include "seal/util/ntt.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"
 #include "seal/util/rlwe.h"
-#include "seal/util/ntt.h"
 
 using namespace std;
 

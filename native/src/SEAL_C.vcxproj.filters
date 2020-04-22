@@ -95,9 +95,6 @@
     <ClInclude Include="seal\c\serialization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\c\smallmodulus.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="seal\c\valcheck.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -179,9 +176,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\c\secretkey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\c\smallmodulus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\c\serialization.cpp">

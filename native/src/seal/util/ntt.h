@@ -4,7 +4,7 @@
 #pragma once
 
 #include "seal/memorymanager.h"
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintcore.h"
 #include <stdexcept>
@@ -33,8 +33,7 @@ namespace seal
                 set_uint_uint(copy.scaled_inv_root_powers_.get(), coeff_count_, scaled_inv_root_powers_.get());
             }
 
-            NTTTables(
-                int coeff_count_power, const SmallModulus &modulus, MemoryPoolHandle pool = MemoryManager::GetPool());
+            NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool = MemoryManager::GetPool());
 
             SEAL_NODISCARD inline std::uint64_t get_root() const
             {
@@ -90,7 +89,7 @@ namespace seal
                 return &inv_degree_modulo_;
             }
 
-            SEAL_NODISCARD inline const SmallModulus &modulus() const
+            SEAL_NODISCARD inline const Modulus &modulus() const
             {
                 return modulus_;
             }
@@ -110,7 +109,7 @@ namespace seal
 
             NTTTables &operator=(NTTTables &&assign) = delete;
 
-            void initialize(int coeff_count_power, const SmallModulus &modulus);
+            void initialize(int coeff_count_power, const Modulus &modulus);
 
             // Computed bit-scrambled vector of first 1 << coeff_count_power powers
             // of a primitive root.
@@ -134,7 +133,7 @@ namespace seal
 
             std::size_t coeff_count_ = 0;
 
-            SmallModulus modulus_;
+            Modulus modulus_;
 
             // Size coeff_count_
             Pointer<std::uint64_t> inv_root_powers_;
@@ -152,7 +151,7 @@ namespace seal
         or pool is uninitialized.
         */
         void CreateNTTTables(
-            int coeff_count_power, const std::vector<SmallModulus> &modulus, Pointer<NTTTables> &tables,
+            int coeff_count_power, const std::vector<Modulus> &modulus, Pointer<NTTTables> &tables,
             MemoryPoolHandle pool);
 
         void ntt_negacyclic_harvey_lazy(std::uint64_t *operand, const NTTTables &tables);

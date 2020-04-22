@@ -44,7 +44,6 @@
     <ClInclude Include="seal\secretkey.h" />
     <ClInclude Include="seal\serializable.h" />
     <ClInclude Include="seal\serialization.h" />
-    <ClInclude Include="seal\smallmodulus.h" />
     <ClInclude Include="seal\util\blake2.h" />
     <ClInclude Include="seal\util\blake2-impl.h" />
     <ClInclude Include="seal\util\clang.h" />
@@ -97,7 +96,6 @@
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
     <ClCompile Include="seal\serialization.cpp" />
-    <ClCompile Include="seal\smallmodulus.cpp" />
     <ClCompile Include="seal\util\rns.cpp" />
     <ClCompile Include="seal\util\ztools.cpp" />
     <ClCompile Include="seal\valcheck.cpp" />

@@ -18,7 +18,7 @@ namespace SEALNetExamples
             Console.WriteLine();
 
             using EncryptionParameters parms = context.FirstContextData.Parms;
-            using SmallModulus plainModulus = parms.PlainModulus;
+            using Modulus plainModulus = parms.PlainModulus;
             ulong polyModulusDegree = parms.PolyModulusDegree;
 
             Console.Write("Generating secret/public keys: ");
@@ -569,7 +569,7 @@ namespace SEALNetExamples
             ulong polyModulusDegree = 4096;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-            parms.PlainModulus = new SmallModulus(786433);
+            parms.PlainModulus = new Modulus(786433);
             using (SEALContext context = new SEALContext(parms))
             {
                 BFVPerformanceTest(context);
@@ -579,7 +579,7 @@ namespace SEALNetExamples
             polyModulusDegree = 8192;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-            parms.PlainModulus = new SmallModulus(786433);
+            parms.PlainModulus = new Modulus(786433);
             using (SEALContext context = new SEALContext(parms))
             {
                 BFVPerformanceTest(context);
@@ -589,7 +589,7 @@ namespace SEALNetExamples
             polyModulusDegree = 16384;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-            parms.PlainModulus = new SmallModulus(786433);
+            parms.PlainModulus = new Modulus(786433);
             using (SEALContext context = new SEALContext(parms))
             {
                 BFVPerformanceTest(context);
@@ -602,7 +602,7 @@ namespace SEALNetExamples
             //polyModulusDegree = 32768;
             //parms.PolyModulusDegree = polyModulusDegree;
             //parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-            //parms.PlainModulus = new SmallModulus(786433);
+            //parms.PlainModulus = new Modulus(786433);
             //using (SEALContext context = new SEALContext(parms))
             //{
             //    BFVPerformanceTest(context);
@@ -635,11 +635,11 @@ namespace SEALNetExamples
             };
             if (polyModulusDegree == 1024)
             {
-                parms.PlainModulus = new SmallModulus(12289);
+                parms.PlainModulus = new Modulus(12289);
             }
             else
             {
-                parms.PlainModulus = new SmallModulus(786433);
+                parms.PlainModulus = new Modulus(786433);
             }
 
             using (SEALContext context = new SEALContext(parms))

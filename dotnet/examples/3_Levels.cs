@@ -116,7 +116,7 @@ namespace SEALNetExamples
                 contextData.ChainIndex);
             Console.WriteLine($"      ParmsId: {contextData.ParmsId}");
             Console.Write("      CoeffModulus primes: ");
-            foreach (SmallModulus prime in contextData.Parms.CoeffModulus)
+            foreach (Modulus prime in contextData.Parms.CoeffModulus)
             {
                 Console.Write($"{Utilities.ULongToString(prime.Value)} ");
             }
@@ -145,7 +145,7 @@ namespace SEALNetExamples
                 }
                 Console.WriteLine($"      ParmsId: {contextData.ParmsId}");
                 Console.Write("      CoeffModulus primes: ");
-                foreach (SmallModulus prime in contextData.Parms.CoeffModulus)
+                foreach (Modulus prime in contextData.Parms.CoeffModulus)
                 {
                     Console.Write($"{Utilities.ULongToString(prime.Value)} ");
                 }
@@ -326,7 +326,7 @@ namespace SEALNetExamples
                 Console.WriteLine($"Level (chain index): {contextData.ChainIndex}");
                 Console.WriteLine($"      ParmsId of encrypted: {contextData.ParmsId}");
                 Console.Write("      CoeffModulus primes: ");
-                foreach (SmallModulus prime in contextData.Parms.CoeffModulus)
+                foreach (Modulus prime in contextData.Parms.CoeffModulus)
                 {
                     Console.Write($"{Utilities.ULongToString(prime.Value)} ");
                 }

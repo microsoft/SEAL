@@ -17,7 +17,7 @@ namespace seal
     namespace util
     {
         void multiply_poly_scalar_coeffmod(
-            const uint64_t *poly, size_t coeff_count, uint64_t scalar, const SmallModulus &modulus, uint64_t *result)
+            const uint64_t *poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (poly == nullptr && coeff_count > 0)
@@ -71,7 +71,7 @@ namespace seal
 
         void multiply_poly_poly_coeffmod(
             const uint64_t *operand1, size_t operand1_coeff_count, const uint64_t *operand2,
-            size_t operand2_coeff_count, const SmallModulus &modulus, size_t result_coeff_count, uint64_t *result)
+            size_t operand2_coeff_count, const Modulus &modulus, size_t result_coeff_count, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (operand1 == nullptr && operand1_coeff_count > 0)
@@ -136,7 +136,7 @@ namespace seal
         }
 
         void multiply_poly_poly_coeffmod(
-            const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, const SmallModulus &modulus,
+            const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, const Modulus &modulus,
             uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -194,7 +194,7 @@ namespace seal
         }
 
         void divide_poly_poly_coeffmod_inplace(
-            uint64_t *numerator, const uint64_t *denominator, size_t coeff_count, const SmallModulus &modulus,
+            uint64_t *numerator, const uint64_t *denominator, size_t coeff_count, const Modulus &modulus,
             uint64_t *quotient)
         {
 #ifdef SEAL_DEBUG
@@ -295,7 +295,7 @@ namespace seal
         }
 
         void dyadic_product_coeffmod(
-            const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, const SmallModulus &modulus,
+            const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, const Modulus &modulus,
             uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -355,7 +355,7 @@ namespace seal
             }
         }
 
-        uint64_t poly_infty_norm_coeffmod(const uint64_t *operand, size_t coeff_count, const SmallModulus &modulus)
+        uint64_t poly_infty_norm_coeffmod(const uint64_t *operand, size_t coeff_count, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if (operand == nullptr && coeff_count > 0)
@@ -389,7 +389,7 @@ namespace seal
         }
 
         bool try_invert_poly_coeffmod(
-            const uint64_t *operand, const uint64_t *poly_modulus, size_t coeff_count, const SmallModulus &modulus,
+            const uint64_t *operand, const uint64_t *poly_modulus, size_t coeff_count, const Modulus &modulus,
             uint64_t *result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
@@ -559,7 +559,7 @@ namespace seal
         }
 
         void negacyclic_shift_poly_coeffmod(
-            const uint64_t *operand, size_t coeff_count, size_t shift, const SmallModulus &modulus, uint64_t *result)
+            const uint64_t *operand, size_t coeff_count, size_t shift, const Modulus &modulus, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (operand == nullptr)

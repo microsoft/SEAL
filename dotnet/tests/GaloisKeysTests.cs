@@ -98,7 +98,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 8,
-                PlainModulus = new SmallModulus(257),
+                PlainModulus = new Modulus(257),
                 CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,

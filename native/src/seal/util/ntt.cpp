@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/defines.h"
-#include "seal/util/polyarith.h"
 #include "seal/util/ntt.h"
+#include "seal/util/polyarith.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <algorithm>
@@ -15,8 +15,7 @@ namespace seal
 {
     namespace util
     {
-        NTTTables::NTTTables(int coeff_count_power, const SmallModulus &modulus, MemoryPoolHandle pool)
-            : pool_(move(pool))
+        NTTTables::NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool) : pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
             if (!pool_)
@@ -27,7 +26,7 @@ namespace seal
             initialize(coeff_count_power, modulus);
         }
 
-        void NTTTables::initialize(int coeff_count_power, const SmallModulus &modulus)
+        void NTTTables::initialize(int coeff_count_power, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if ((coeff_count_power < get_power_of_two(SEAL_POLY_MOD_DEGREE_MIN)) ||
@@ -141,7 +140,7 @@ namespace seal
             {}
 
             // Other constructors
-            NTTTablesCreateIter(int coeff_count_power, vector<SmallModulus> modulus, MemoryPoolHandle pool)
+            NTTTablesCreateIter(int coeff_count_power, vector<Modulus> modulus, MemoryPoolHandle pool)
                 : coeff_count_power_(coeff_count_power), modulus_(modulus), pool_(pool)
             {}
 
@@ -195,13 +194,12 @@ namespace seal
         private:
             size_t index_ = 0;
             int coeff_count_power_ = 0;
-            vector<SmallModulus> modulus_;
+            vector<Modulus> modulus_;
             MemoryPoolHandle pool_;
         };
 
         void CreateNTTTables(
-            int coeff_count_power, const vector<SmallModulus> &modulus, Pointer<NTTTables> &tables,
-            MemoryPoolHandle pool)
+            int coeff_count_power, const vector<Modulus> &modulus, Pointer<NTTTables> &tables, MemoryPoolHandle pool)
         {
             if (!pool)
             {

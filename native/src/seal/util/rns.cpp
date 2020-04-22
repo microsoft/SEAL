@@ -15,7 +15,7 @@ namespace seal
 {
     namespace util
     {
-        RNSBase::RNSBase(const vector<SmallModulus> &rnsbase, MemoryPoolHandle pool)
+        RNSBase::RNSBase(const vector<Modulus> &rnsbase, MemoryPoolHandle pool)
             : pool_(move(pool)), size_(rnsbase.size())
         {
             if (!size_)
@@ -45,7 +45,7 @@ namespace seal
             }
 
             // Base is good; now copy it over to rnsbase_
-            base_ = allocate<SmallModulus>(size_, pool_);
+            base_ = allocate<Modulus>(size_, pool_);
             for (size_t i = 0; i < size_; i++)
             {
                 base_[i] = rnsbase[i];
@@ -66,7 +66,7 @@ namespace seal
             }
 
             // Copy over the base
-            base_ = allocate<SmallModulus>(size_, pool_);
+            base_ = allocate<Modulus>(size_, pool_);
             copy_n(copy.base_.get(), size_, base_.get());
 
             // Copy over CRT data
@@ -80,7 +80,7 @@ namespace seal
             copy_n(copy.inv_punctured_prod_mod_base_array_.get(), size_, inv_punctured_prod_mod_base_array_.get());
         }
 
-        bool RNSBase::contains(const SmallModulus &value) const noexcept
+        bool RNSBase::contains(const Modulus &value) const noexcept
         {
             for (size_t i = 0; i < size_; i++)
             {
@@ -104,7 +104,7 @@ namespace seal
             return true;
         }
 
-        RNSBase RNSBase::extend(SmallModulus value) const
+        RNSBase RNSBase::extend(Modulus value) const
         {
             if (value.is_zero())
             {
@@ -123,7 +123,7 @@ namespace seal
             // Copy over this base
             RNSBase newbase(pool_);
             newbase.size_ = add_safe(size_, size_t(1));
-            newbase.base_ = allocate<SmallModulus>(newbase.size_, newbase.pool_);
+            newbase.base_ = allocate<Modulus>(newbase.size_, newbase.pool_);
             for (size_t i = 0; i < size_; i++)
             {
                 newbase.base_[i] = base_[i];
@@ -158,7 +158,7 @@ namespace seal
             // Copy over this base
             RNSBase newbase(pool_);
             newbase.size_ = add_safe(size_, other.size_);
-            newbase.base_ = allocate<SmallModulus>(newbase.size_, newbase.pool_);
+            newbase.base_ = allocate<Modulus>(newbase.size_, newbase.pool_);
             for (size_t i = 0; i < size_; i++)
             {
                 newbase.base_[i] = base_[i];
@@ -189,7 +189,7 @@ namespace seal
             // Copy over this base
             RNSBase newbase(pool_);
             newbase.size_ = size_ - 1;
-            newbase.base_ = allocate<SmallModulus>(newbase.size_, newbase.pool_);
+            newbase.base_ = allocate<Modulus>(newbase.size_, newbase.pool_);
             for (size_t i = 0; i < size_ - 1; i++)
             {
                 newbase.base_[i] = base_[i];
@@ -201,7 +201,7 @@ namespace seal
             return newbase;
         }
 
-        RNSBase RNSBase::drop(SmallModulus value) const
+        RNSBase RNSBase::drop(Modulus value) const
         {
             if (size_ == 1)
             {
@@ -215,7 +215,7 @@ namespace seal
             // Copy over this base
             RNSBase newbase(pool_);
             newbase.size_ = size_ - 1;
-            newbase.base_ = allocate<SmallModulus>(newbase.size_, newbase.pool_);
+            newbase.base_ = allocate<Modulus>(newbase.size_, newbase.pool_);
             size_t source_index = 0;
             size_t dest_index = 0;
             while (dest_index < size_ - 1)
@@ -477,7 +477,7 @@ namespace seal
             for (size_t i = 0; i < ibase_size; i++)
             {
                 uint64_t inv_ibase_punctured_prod_mod_ibase_elt = ibase_.inv_punctured_prod_mod_base_array()[i];
-                SmallModulus ibase_elt = ibase_[i];
+                Modulus ibase_elt = ibase_[i];
                 uint64_t *temp_ptr = temp.get() + i;
                 for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
                 {
@@ -488,7 +488,7 @@ namespace seal
             for (size_t j = 0; j < obase_size; j++)
             {
                 uint64_t *temp_ptr = temp.get();
-                SmallModulus obase_elt = obase_[j];
+                Modulus obase_elt = obase_[j];
                 for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_size)
                 {
                     *out = dot_product_mod(temp_ptr, base_change_matrix_[j].get(), ibase_size, obase_elt);
@@ -524,7 +524,7 @@ namespace seal
         }
 
         RNSTool::RNSTool(
-            size_t poly_modulus_degree, const RNSBase &coeff_modulus, const SmallModulus &plain_modulus,
+            size_t poly_modulus_degree, const RNSBase &coeff_modulus, const Modulus &plain_modulus,
             MemoryPoolHandle pool)
             : pool_(move(pool))
         {
@@ -537,7 +537,7 @@ namespace seal
             initialize(poly_modulus_degree, coeff_modulus, plain_modulus);
         }
 
-        void RNSTool::initialize(size_t poly_modulus_degree, const RNSBase &q, const SmallModulus &t)
+        void RNSTool::initialize(size_t poly_modulus_degree, const RNSBase &q, const Modulus &t)
         {
             // Return if q is out of bounds
             if (q.size() < SEAL_COEFF_MOD_COUNT_MIN || q.size() > SEAL_COEFF_MOD_COUNT_MAX)
@@ -589,7 +589,7 @@ namespace seal
             auto baseconv_primes_iter = baseconv_primes.cbegin();
             m_sk_ = *baseconv_primes_iter++;
             gamma_ = *baseconv_primes_iter++;
-            vector<SmallModulus> base_B_primes;
+            vector<Modulus> base_B_primes;
             copy_n(baseconv_primes_iter, base_B_size, back_inserter(base_B_primes));
 
             // Set m_tilde_ to a non-prime value
@@ -605,14 +605,14 @@ namespace seal
             if (!t_.is_zero())
             {
                 base_t_gamma_size = 2;
-                base_t_gamma_ = allocate<RNSBase>(pool_, vector<SmallModulus>{ t_, gamma_ }, pool_);
+                base_t_gamma_ = allocate<RNSBase>(pool_, vector<Modulus>{ t_, gamma_ }, pool_);
             }
 
             // Generate the Bsk NTTTables; these are used for NTT after base extension to Bsk
             try
             {
                 CreateNTTTables(
-                    coeff_count_power, vector<SmallModulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_size),
+                    coeff_count_power, vector<Modulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_size),
                     base_Bsk_small_ntt_tables_, pool_);
             }
             catch (const logic_error &)
@@ -745,7 +745,7 @@ namespace seal
             uint64_t *last_ptr = input + (base_q_size - 1) * coeff_count_;
 
             // Add (qi-1)/2 to change from flooring to rounding
-            SmallModulus last_modulus = (*base_q_)[base_q_size - 1];
+            Modulus last_modulus = (*base_q_)[base_q_size - 1];
             uint64_t half = last_modulus.value() >> 1;
             for (size_t j = 0; j < coeff_count_; j++)
             {
@@ -799,7 +799,7 @@ namespace seal
             inverse_ntt_negacyclic_harvey(last_ptr, rns_ntt_tables[base_q_size - 1]);
 
             // Add (qi-1)/2 to change from flooring to rounding
-            SmallModulus last_modulus = (*base_q_)[base_q_size - 1];
+            Modulus last_modulus = (*base_q_)[base_q_size - 1];
             uint64_t half = last_modulus.value() >> 1;
             for (size_t j = 0; j < coeff_count_; j++)
             {
@@ -882,7 +882,7 @@ namespace seal
             const uint64_t m_sk_div_2 = m_sk_value >> 1;
             for (size_t i = 0; i < base_q_size; i++)
             {
-                SmallModulus base_q_elt = (*base_q_)[i];
+                Modulus base_q_elt = (*base_q_)[i];
                 uint64_t prod_B_mod_q_elt = prod_B_mod_q_[i];
                 for (size_t k = 0; k < coeff_count_; k++, destination++)
                 {
@@ -940,7 +940,7 @@ namespace seal
 
             for (size_t k = 0; k < base_Bsk_size; k++)
             {
-                SmallModulus base_Bsk_elt = (*base_Bsk_)[k];
+                Modulus base_Bsk_elt = (*base_Bsk_)[k];
                 uint64_t inv_m_tilde_mod_Bsk_elt = inv_m_tilde_mod_Bsk_[k];
                 uint64_t prod_q_mod_Bsk_elt = prod_q_mod_Bsk_[k];
                 for (size_t i = 0; i < coeff_count_; i++, destination++, input++)
@@ -992,7 +992,7 @@ namespace seal
             input += base_q_size * coeff_count_;
             for (size_t i = 0; i < base_Bsk_size; i++)
             {
-                SmallModulus base_Bsk_elt = (*base_Bsk_)[i];
+                Modulus base_Bsk_elt = (*base_Bsk_)[i];
                 uint64_t inv_prod_q_mod_Bsk_elt = inv_prod_q_mod_Bsk_[i];
                 for (size_t k = 0; k < coeff_count_; k++, input++, destination++)
                 {

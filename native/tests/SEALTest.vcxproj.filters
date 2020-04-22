@@ -119,7 +119,7 @@
     <ClCompile Include="seal\plaintext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\smallmodulus.cpp">
+    <ClCompile Include="seal\modulus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\galoiskeys.cpp">
@@ -135,9 +135,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\testrunner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\modulus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\serialization.cpp">

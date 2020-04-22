@@ -6,8 +6,8 @@
 #include "seal/biguint.h"
 #include "seal/context.h"
 #include "seal/memorymanager.h"
+#include "seal/modulus.h"
 #include "seal/plaintext.h"
-#include "seal/smallmodulus.h"
 #include <cstdint>
 
 namespace seal
@@ -211,7 +211,7 @@ namespace seal
         /**
         Returns a reference to the plaintext modulus.
         */
-        SEAL_NODISCARD inline const SmallModulus &plain_modulus() const
+        SEAL_NODISCARD inline const Modulus &plain_modulus() const
         {
             auto &context_data = *context_->first_context_data();
             return context_data.parms().plain_modulus();

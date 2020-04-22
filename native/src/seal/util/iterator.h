@@ -109,15 +109,15 @@ namespace seal
 
         As an example, the following snippet from Evaluator::negate_inplace iterates over the polynomials in an input
         ciphertext, and for each polynomial iterates over the RNS components, and for each RNS component negates the
-        polynomial coefficients modulo a SmallModulus element corresponding to the RNS component:
+        polynomial coefficients modulo a Modulus element corresponding to the RNS component:
 
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size,
+                IterTuple<RNSIter, PtrIter<const Modulus *>>(I, coeff_modulus), coeff_modulus_size,
                 [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J)); });
         });
 
-        Here coeff_modulus is a std::vector<SmallModulus>, and PtrIter<const SmallModulus *> was constructed directly
+        Here coeff_modulus is a std::vector<Modulus>, and PtrIter<const Modulus *> was constructed directly
         from it. PtrIter provides a similar constructor from a seal::util::Pointer type. Note also how we had to
         dereference get<1>(J) in the innermost lambda function to access the value (NTTTables). This is because
         get<1>(J) is const NTTTables *, as was discussed above.
@@ -140,9 +140,9 @@ namespace seal
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             SEAL_ASSERT_TYPE(I, RNSIter, "encrypted");
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
+                IterTuple<RNSIter, PtrIter<const Modulus *>>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
                     SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
-                    SEAL_ASSERT_TYPE(get<1>(J), const SmallModulus *, "coeff_modulus");
+                    SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "coeff_modulus");
                     negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J));
                 });
         });
@@ -323,7 +323,7 @@ namespace seal
         };
 
         // Out-of-class definitions
-        template<typename SizeT>
+        template <typename SizeT>
         SEAL_NODISCARD inline CoeffIter operator+(SizeT n, const CoeffIter &it) noexcept
         {
             return it + n;
@@ -1508,8 +1508,7 @@ namespace seal
 
         // Out-of-class definitions
         template <
-            typename SizeT,
-            typename SEALIter,
+            typename SizeT, typename SEALIter,
             typename = std::enable_if_t<std::is_same<
                 typename std::iterator_traits<SEALIter>::iterator_category, std::random_access_iterator_tag>::value>>
         SEAL_NODISCARD inline ReverseIter<SEALIter> operator+(SizeT n, const ReverseIter<SEALIter> &it) noexcept

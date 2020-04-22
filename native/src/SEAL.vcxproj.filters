@@ -95,7 +95,7 @@
     <ClInclude Include="seal\secretkey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\smallmodulus.h">
+    <ClInclude Include="seal\modulus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="seal\valcheck.h">
@@ -188,9 +188,6 @@
     <ClInclude Include="seal\util\uintcore.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="seal\modulus.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="seal\serializable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -257,9 +254,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\serialization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\smallmodulus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\valcheck.cpp">

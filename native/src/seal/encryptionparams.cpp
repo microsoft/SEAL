@@ -84,7 +84,7 @@ namespace seal
             }
 
             // Read the coeff_modulus
-            vector<SmallModulus> coeff_modulus;
+            vector<Modulus> coeff_modulus;
             for (uint64_t i = 0; i < coeff_modulus_size64; i++)
             {
                 coeff_modulus.emplace_back();
@@ -92,7 +92,7 @@ namespace seal
             }
 
             // Read the plain_modulus
-            SmallModulus plain_modulus;
+            Modulus plain_modulus;
             plain_modulus.load(stream);
 
             // Supposedly everything worked so set the values of member variables

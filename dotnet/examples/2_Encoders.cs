@@ -83,7 +83,7 @@ namespace SEALNetExamples
             exceed this value at any point during our computation; otherwise the result
             will be incorrect.
             */
-            parms.PlainModulus = new SmallModulus(512);
+            parms.PlainModulus = new Modulus(512);
             using SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
             Console.WriteLine();

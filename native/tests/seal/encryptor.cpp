@@ -22,7 +22,7 @@ namespace sealtest
     TEST(EncryptorTest, BFVEncryptDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_plain_modulus(plain_modulus);
         {
             parms.set_poly_modulus_degree(64);
@@ -216,7 +216,7 @@ namespace sealtest
     TEST(EncryptorTest, BFVEncryptZeroDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_plain_modulus(plain_modulus);
         parms.set_poly_modulus_degree(64);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40 }));
