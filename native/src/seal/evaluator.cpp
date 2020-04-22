@@ -245,8 +245,8 @@ namespace seal
         if (encrypted1_size < encrypted2_size)
         {
             // Advance encrypted1_iter and encrypted2_iter to min_count (i.e., encrypted1_size)
-            advance(encrypted1_iter, min_count);
-            advance(encrypted2_iter, min_count);
+            advance(encrypted1_iter, safe_cast<ptrdiff_t>(min_count));
+            advance(encrypted2_iter, safe_cast<ptrdiff_t>(min_count));
 
             for_each_n(
                 IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter), encrypted2_size - min_count,
@@ -462,16 +462,16 @@ namespace seal
                                                auto out_iter) {
                 // Create a shifted iterator for the first input
                 auto shifted_in1_iter = in1_iter;
-                advance(shifted_in1_iter, curr_encrypted1_first);
+                advance(shifted_in1_iter, safe_cast<ptrdiff_t>(curr_encrypted1_first));
 
                 // Create a shifted reverse iterator for the second input
                 auto shifted_in2_iter = in2_iter;
-                advance(shifted_in2_iter, curr_encrypted2_first);
+                advance(shifted_in2_iter, safe_cast<ptrdiff_t>(curr_encrypted2_first));
                 auto shifted_reversed_in2_iter = ReverseIter<PolyIter>(shifted_in2_iter);
 
                 // Create a shifted iterator for the output
                 auto shifted_out_iter = out_iter;
-                advance(shifted_out_iter, secret_power_index);
+                advance(shifted_out_iter, safe_cast<ptrdiff_t>(secret_power_index));
 
                 for_each_n(
                     IterTuple<PolyIter, ReverseIter<PolyIter>>(shifted_in1_iter, shifted_reversed_in2_iter), steps,
@@ -522,7 +522,7 @@ namespace seal
                     });
 
                 // Advance to the base Bsk part in temp and multiply base Bsk components by t
-                advance(temp_q_Bsk_iter, base_q_size);
+                advance(temp_q_Bsk_iter, safe_cast<ptrdiff_t>(base_q_size));
                 for_each_n(
                     IterTuple<ConstRNSIter, RNSIter, PtrIter<const Modulus *>>(
                         get<1>(I), temp_q_Bsk_iter, base_Bsk_iter),
@@ -604,11 +604,11 @@ namespace seal
 
             // Create a shifted iterator for the first input
             auto shifted_encrypted1_iter = encrypted1_iter;
-            advance(shifted_encrypted1_iter, curr_encrypted1_first);
+            advance(shifted_encrypted1_iter, safe_cast<ptrdiff_t>(curr_encrypted1_first));
 
             // Create a shifted reverse iterator for the second input
             auto shifted_encrypted2_iter = encrypted2_iter;
-            advance(shifted_encrypted2_iter, curr_encrypted2_first);
+            advance(shifted_encrypted2_iter, safe_cast<ptrdiff_t>(curr_encrypted2_first));
             auto shifted_reversed_encrypted2_iter = ReverseIter<ConstPolyIter>(shifted_encrypted2_iter);
 
             for_each_n(
@@ -842,7 +842,7 @@ namespace seal
                     });
 
                 // Advance to the base Bsk part in temp and multiply base Bsk components by t
-                advance(temp_q_Bsk_iter, base_q_size);
+                advance(temp_q_Bsk_iter, safe_cast<ptrdiff_t>(base_q_size));
                 for_each_n(
                     IterTuple<RNSIter, RNSIter, PtrIter<const Modulus *>>(get<1>(I), temp_q_Bsk_iter, base_Bsk_iter),
                     base_Bsk_size, [&](auto J) {
@@ -977,7 +977,7 @@ namespace seal
 
         // Iterator pointing to the last component of encrypted
         PolyIter encrypted_iter(encrypted);
-        advance(encrypted_iter, encrypted_size - 1);
+        advance(encrypted_iter, safe_cast<ptrdiff_t>(encrypted_size - 1));
 
         for (size_t i = 0; i < relins_needed; i++)
         {
@@ -1946,7 +1946,7 @@ namespace seal
             // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
             // the plain_upper_half_increment values.
             IterTuple<RNSIter, PtrIter<const uint64_t *>> helper_iter(plain_iter, plain_upper_half_increment);
-            advance(helper_iter, coeff_modulus_size - 1);
+            advance(helper_iter, safe_cast<ptrdiff_t>(coeff_modulus_size - 1));
             auto reversed_helper_iter = ReverseIter<decltype(helper_iter)>(helper_iter);
 
             for_each_n(reversed_helper_iter, coeff_modulus_size, [&](auto I) {
