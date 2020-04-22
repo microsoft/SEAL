@@ -51,9 +51,9 @@ __extension__ typedef unsigned __int128 uint128_t;
         q = n / denominator;                                                                       \
         n -= q * denominator;                                                                      \
         numerator[0] = static_cast<std::uint64_t>(n);                                              \
-        numerator[1] = static_cast<std::uint64_t>(n >> 64);                                        \
-        quotient[0] = static_cast<std::uint64_t>(q);                                               \
-        quotient[1] = static_cast<std::uint64_t>(q >> 64);                                         \
+        numerator[1] = 0;                                                                          \
+        result[0] = static_cast<std::uint64_t>(q);                                                 \
+        result[1] = static_cast<std::uint64_t>(q >> 64);                                           \
     }
 #endif
 
