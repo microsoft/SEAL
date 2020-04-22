@@ -65,7 +65,7 @@ namespace seal
                 {
                     return traits_type::eof();
                 }
-                gbump(-1);
+                __safe_gbump(std::streamsize(-1));
                 return traits_type::to_int_type(*gptr());
             }
 
@@ -83,7 +83,7 @@ namespace seal
                 std::streamsize avail = std::max(
                     std::streamsize(0), std::min(count, safe_cast<std::streamsize>(std::distance(gptr(), egptr()))));
                 std::copy_n(gptr(), avail, s);
-                gbump(safe_cast<int>(avail));
+                __safe_gbump(avail);
                 return avail;
             }
 
@@ -159,7 +159,7 @@ namespace seal
 
                 // Set the get and put pointers appropriately
                 setp(buf_.begin(), buf_.begin() + size_);
-                pbump(safe_cast<int>(old_poff));
+                __safe_pbump(old_poff);
                 setg(buf_.begin(), buf_.begin() + old_goff, buf_.begin() + size_);
             }
 
@@ -173,7 +173,7 @@ namespace seal
 
                 // Output ch to the buffer (there is one byte left of space) and overflow
                 *pptr() = traits_type::to_char_type(ch);
-                pbump(1);
+                __safe_pbump(std::streamsize(1));
 
                 // Expand the size of the buffer
                 expand_size();
@@ -194,7 +194,7 @@ namespace seal
                         std::streamsize(0),
                         std::min(remaining, safe_cast<std::streamsize>(std::distance(pptr(), epptr()))));
                     std::copy_n(s, avail, pptr());
-                    pbump(safe_cast<int>(avail));
+                    __safe_pbump(avail);
                     remaining -= avail;
                     s += avail;
                 }
