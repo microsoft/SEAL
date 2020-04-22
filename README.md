@@ -9,21 +9,58 @@ Users of previous versions of the library should look at the [list of changes](C
 
 ## Contents
 
-- [Introduction](#introduction)
-  - [Core Concepts](#core-concepts)
-  - [Homomorphic Encryption](#homomorphic-encryption)
-  - [Microsoft SEAL](#microsoft-seal-1)
+- [Microsoft SEAL](#microsoft-seal)
+  - [Contents](#contents)
+  - [Introduction](#introduction)
+    - [Core Concepts](#core-concepts)
+    - [Homomorphic Encryption](#homomorphic-encryption)
+    - [Microsoft SEAL](#microsoft-seal-1)
 - [Installing Microsoft SEAL](#installing-microsoft-seal)
   - [Optional Dependencies](#optional-dependencies)
+    - [Microsoft GSL](#microsoft-gsl)
+    - [ZLIB](#zlib)
   - [Windows](#windows)
+      - [Platform](#platform)
+      - [Building Microsoft SEAL](#building-microsoft-seal)
+      - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
+      - [[Optional] Microsoft GSL](#optional-microsoft-gsl)
+      - [[Optional] ZLIB](#optional-zlib)
+      - [Building Examples](#building-examples)
+      - [Building Unit Tests](#building-unit-tests)
   - [Linux and macOS](#linux-and-macos)
+      - [Building Microsoft SEAL](#building-microsoft-seal-1)
+      - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
+      - [[Optional] Microsoft GSL](#optional-microsoft-gsl-1)
+      - [[Optional] ZLIB](#optional-zlib-1)
+      - [[Optional] Shared Library](#optional-shared-library)
+      - [Building Examples](#building-examples-1)
+      - [Building Unit Tests](#building-unit-tests-1)
+    - [Installing Microsoft SEAL](#installing-microsoft-seal-1)
+      - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
   - [From NuGet package](#from-nuget-package)
 - [Building Microsoft SEAL for .NET](#building-microsoft-seal-for-net)
   - [Windows](#windows-1)
+      - [Native Library](#native-library)
+      - [.NET Library](#net-library)
+      - [.NET Examples](#net-examples)
+      - [.NET Unit Tests](#net-unit-tests)
+      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
+      - [Building Your Own NuGet Package](#building-your-own-nuget-package)
   - [Linux and macOS](#linux-and-macos-1)
+      - [Native Library](#native-library-1)
+      - [.NET Library](#net-library-1)
+      - [.NET Examples](#net-examples-1)
+      - [.NET Unit Tests](#net-unit-tests-1)
+      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
 - [Getting Started](#getting-started)
 - [Contributing](#contributing)
 - [Citing Microsoft SEAL](#citing-microsoft-seal)
+    - [Version 3.5](#version-35)
+    - [Version 3.4](#version-34)
+    - [Version 3.3](#version-33)
+    - [Version 3.2](#version-32)
+    - [Version 3.1](#version-31)
+    - [Version 3.0](#version-30)
 
 ## Introduction
 
@@ -123,33 +160,17 @@ Please note that `Debug` mode should not be used except for debugging Microsoft 
 
 #### [Optional] Microsoft GSL
 
-To build Microsoft SEAL with support for Microsoft GSL, clone first the Microsoft GSL library from [GitHub.com/Microsoft/GSL](https://GitHub.com/Microsoft/GSL) to some convenient directory, e.g., `C:\MyLibs\GSL` in this example.
+**TODO:** GSL's header files copy location?
 
-Next, you will need to signal Microsoft SEAL to enable Microsoft GSL support by creating a new Windows environment variable `MSGSL_ROOT`, and setting its value to `C:\MyLibs\GSL\include`.
-Restart Visual Studio at this point if you had it open, otherwise it will not have captured the newly created environment variable.
-Rebuilding Microsoft SEAL should now automatically detect that Microsoft GSL is available, and enable both `gsl::span` and `gsl::multi_span` support.
-To disable Microsoft GSL support, delete the `MSGSL_ROOT` environment variable, restart Visual Studio, and rebuild Microsoft SEAL.
-
-If Microsoft SEAL is built with Microsoft GSL support, any programs or libraries consuming Microsoft SEAL will need access to the Microsoft GSL header files.
-You need to add `$(MSGSL_ROOT)` to *Additional Include Directories* under the *C/C++* tab in your Visual Studio project properties.
-Note that in the Microsoft SEAL projects this has already been set for you, so all projects in `SEAL.sln` should work without change.
+By default Microsoft GSL is downloaded as part of Microsoft SEAL library.
+Microsoft GSL's header files are copied to `native/src/GSL` to be portable with Microsoft SEAL at the time of installation.
+You can disable the dependency on Microsoft GSL by replacing `#define SEAL_USE_MSGSL` with `#undef SEAL_USE_MSGSL` in [native\src\util\config.h](native\src\util\config.h).
 
 #### [Optional] ZLIB
 
-TODO: Is this part still accurate now?
-ZLIB is usually not found on a typical Windows system.
-You can clone it from [GitHub.com/madler/zlib](https://github.com/madler/zlib) to some convenient directory, e.g., `C:\MyLibs\zlib` in this example.
-You need to build ZLIB first by opening *Developer Command Prompt for VS 2019*, go to `C:\MyLibs\zlib`, and run the following:
-
-```shell
-cmake .
-cmake --build . --config Release
-```
-
-Next, you will need to signal Microsoft SEAL to enable ZLIB support by creating a new Windows environment variable `ZLIB_ROOT`, and setting its value to `C:\MyLibs\zlib`.
-Restart Visual Studio at this point if you had it open, otherwise it will not have captured the newly created environment variable.
-Rebuilding Microsoft SEAL should now automatically detect that ZLIB is available, and enable support for `compr_mode_type::deflate`.
-To disable ZLIB support, delete the `ZLIB_ROOT` environment variable, restart Visual Studio, and rebuild Microsoft SEAL.
+By default ZLIB is downloaded and compiled as part of Microsoft SEAL library.
+ZLIB's static archive is included in Microsoft SEAL's static or shared target object.
+You can disable the dependency on ZLIB by replacing `#define SEAL_USE_ZLIB` with `#undef SEAL_USE_ZLIB` in [native\src\util\config.h](native\src\util\config.h).
 
 #### Building Examples
 
