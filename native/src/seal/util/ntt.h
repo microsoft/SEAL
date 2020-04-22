@@ -13,12 +13,12 @@ namespace seal
 {
     namespace util
     {
-        class SmallNTTTables
+        class NTTTables
         {
         public:
-            SmallNTTTables(SmallNTTTables &&source) = default;
+            NTTTables(NTTTables &&source) = default;
 
-            SmallNTTTables(SmallNTTTables &copy)
+            NTTTables(NTTTables &copy)
                 : pool_(copy.pool_), root_(copy.root_), coeff_count_power_(copy.coeff_count_power_),
                   coeff_count_(copy.coeff_count_), modulus_(copy.modulus_), inv_degree_modulo_(copy.inv_degree_modulo_)
             {
@@ -33,7 +33,7 @@ namespace seal
                 set_uint_uint(copy.scaled_inv_root_powers_.get(), coeff_count_, scaled_inv_root_powers_.get());
             }
 
-            SmallNTTTables(
+            NTTTables(
                 int coeff_count_power, const SmallModulus &modulus, MemoryPoolHandle pool = MemoryManager::GetPool());
 
             SEAL_NODISCARD inline std::uint64_t get_root() const
@@ -106,9 +106,9 @@ namespace seal
             }
 
         private:
-            SmallNTTTables &operator=(const SmallNTTTables &assign) = delete;
+            NTTTables &operator=(const NTTTables &assign) = delete;
 
-            SmallNTTTables &operator=(SmallNTTTables &&assign) = delete;
+            NTTTables &operator=(NTTTables &&assign) = delete;
 
             void initialize(int coeff_count_power, const SmallModulus &modulus);
 
@@ -146,18 +146,18 @@ namespace seal
         };
 
         /**
-        Allocate and construct an array of SmallNTTTables each with different a modulus.
+        Allocate and construct an array of NTTTables each with different a modulus.
 
         @throws std::invalid_argument if modulus is empty, modulus does not support NTT, coeff_count_power is invalid,
         or pool is uninitialized.
         */
-        void CreateSmallNTTTables(
-            int coeff_count_power, const std::vector<SmallModulus> &modulus, Pointer<SmallNTTTables> &tables,
+        void CreateNTTTables(
+            int coeff_count_power, const std::vector<SmallModulus> &modulus, Pointer<NTTTables> &tables,
             MemoryPoolHandle pool);
 
-        void ntt_negacyclic_harvey_lazy(std::uint64_t *operand, const SmallNTTTables &tables);
+        void ntt_negacyclic_harvey_lazy(std::uint64_t *operand, const NTTTables &tables);
 
-        inline void ntt_negacyclic_harvey(std::uint64_t *operand, const SmallNTTTables &tables)
+        inline void ntt_negacyclic_harvey(std::uint64_t *operand, const NTTTables &tables)
         {
             ntt_negacyclic_harvey_lazy(operand, tables);
 
@@ -181,9 +181,9 @@ namespace seal
             }
         }
 
-        void inverse_ntt_negacyclic_harvey_lazy(std::uint64_t *operand, const SmallNTTTables &tables);
+        void inverse_ntt_negacyclic_harvey_lazy(std::uint64_t *operand, const NTTTables &tables);
 
-        inline void inverse_ntt_negacyclic_harvey(std::uint64_t *operand, const SmallNTTTables &tables)
+        inline void inverse_ntt_negacyclic_harvey(std::uint64_t *operand, const NTTTables &tables)
         {
             inverse_ntt_negacyclic_harvey_lazy(operand, tables);
 

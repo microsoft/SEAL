@@ -90,7 +90,7 @@
     <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
     <ClCompile Include="seal\util\polycore.cpp" />
     <ClCompile Include="seal\util\rns.cpp" />
-    <ClCompile Include="seal\util\smallntt.cpp" />
+    <ClCompile Include="seal\util\ntt.cpp" />
     <ClCompile Include="seal\util\stringtouint64.cpp" />
     <ClCompile Include="seal\util\uint64tostring.cpp" />
     <ClCompile Include="seal\util\uintarith.cpp" />

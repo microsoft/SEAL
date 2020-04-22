@@ -939,7 +939,7 @@ namespace sealtest
             auto pool = MemoryManager::GetPool();
             Pointer<RNSTool> rns_tool;
             size_t poly_modulus_degree = 2;
-            SmallNTTTables ntt[]{ { 1, SmallModulus(53) }, { 1, SmallModulus(13) } };
+            NTTTables ntt[]{ { 1, SmallModulus(53) }, { 1, SmallModulus(13) } };
             SmallModulus plain_t = 0;
             ASSERT_NO_THROW(
                 rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 53, 13 }, pool), plain_t, pool));

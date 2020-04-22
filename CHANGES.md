@@ -18,17 +18,25 @@
   - `string parameter_error_name()` is added to retrieve error code name.
   - `string parameter_error_message()` is added to retrieve a comprehensive error message.
 
-### New files
+### File Changes
+
+New files:
 
 - [native/src/seal/serializable.h](native/src/seal/serializable.h)
-- [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
-- [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
 - [native/src/seal/c/version.h](native/src/seal/c/version.h)
 - [native/src/seal/c/version.cpp](native/src/seal/c/version.cpp)
+- [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
+- [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
 - [dotnet/src/Serializable.cs](dotnet/src/Serializable.cs)
 - [dotnet/src/Version.cs](dotnet/src/Version.cs)
 - [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
 - [dotnet/tests/SerializationTests.cs](dotnet/tests/SerializationTests.cs)
+
+Renamed files:
+
+- [native/src/seal/util/ntt.h](native/src/seal/util/ntt.h) was previously `smallntt.h`.
+- [native/src/seal/util/ntt.cpp](native/src/seal/util/ntt.cpp) was previously `smallntt.cpp`.
+- [native/tests/seal/util/ntt.cpp](native/tests/seal/util/ntt.cpp) was previously `smallntt.cpp`.
 
 ### Other changes
 

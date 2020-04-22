@@ -9,7 +9,7 @@
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"
 #include "seal/util/rlwe.h"
-#include "seal/util/smallntt.h"
+#include "seal/util/ntt.h"
 
 using namespace std;
 

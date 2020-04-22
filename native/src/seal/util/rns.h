@@ -6,7 +6,7 @@
 #include "seal/memorymanager.h"
 #include "seal/smallmodulus.h"
 #include "seal/util/pointer.h"
-#include "seal/util/smallntt.h"
+#include "seal/util/ntt.h"
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -198,7 +198,7 @@ namespace seal
             void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
 
             void divide_and_round_q_last_ntt_inplace(
-                std::uint64_t *input, const SmallNTTTables *rns_ntt_tables, MemoryPoolHandle pool) const;
+                std::uint64_t *input, const NTTTables *rns_ntt_tables, MemoryPoolHandle pool) const;
 
             /**
             Shenoy-Kumaresan conversion from Bsk to q
@@ -353,8 +353,8 @@ namespace seal
             // q[last]^(-1) mod q[i] for i = 0..last-1
             Pointer<std::uint64_t> inv_q_last_mod_q_;
 
-            // SmallNTTTables for Bsk
-            Pointer<SmallNTTTables> base_Bsk_small_ntt_tables_;
+            // NTTTables for Bsk
+            Pointer<NTTTables> base_Bsk_small_ntt_tables_;
 
             SmallModulus m_tilde_;
 

@@ -10,7 +10,7 @@
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rlwe.h"
 #include "seal/util/scalingvariant.h"
-#include "seal/util/smallntt.h"
+#include "seal/util/ntt.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"

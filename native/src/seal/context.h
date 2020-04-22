@@ -10,7 +10,7 @@
 #include "seal/util/numth.h"
 #include "seal/util/pointer.h"
 #include "seal/util/rns.h"
-#include "seal/util/smallntt.h"
+#include "seal/util/ntt.h"
 #include <functional>
 #include <memory>
 #include <unordered_map>
@@ -453,9 +453,9 @@ namespace seal
 
             util::Pointer<util::RNSTool> rns_tool_;
 
-            util::Pointer<util::SmallNTTTables> small_ntt_tables_;
+            util::Pointer<util::NTTTables> small_ntt_tables_;
 
-            util::Pointer<util::SmallNTTTables> plain_ntt_tables_;
+            util::Pointer<util::NTTTables> plain_ntt_tables_;
 
             util::Pointer<util::GaloisTool> galois_tool_;
 

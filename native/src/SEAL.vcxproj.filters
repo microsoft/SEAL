@@ -170,7 +170,7 @@
     <ClInclude Include="seal\util\scalingvariant.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="seal\util\smallntt.h">
+    <ClInclude Include="seal\util\ntt.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="seal\util\streambuf.h">
@@ -310,7 +310,7 @@
     <ClCompile Include="seal\util\scalingvariant.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="seal\util\smallntt.cpp">
+    <ClCompile Include="seal\util\ntt.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\streambuf.cpp">

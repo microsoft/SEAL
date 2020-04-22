@@ -119,8 +119,8 @@ namespace seal
 
         Here coeff_modulus is a std::vector<SmallModulus>, and PtrIter<const SmallModulus *> was constructed directly
         from it. PtrIter provides a similar constructor from a seal::util::Pointer type. Note also how we had to
-        dereference get<1>(J) in the innermost lambda function to access the value (SmallNTTTables). This is because
-        get<1>(J) is const SmallNTTTables *, as was discussed above.
+        dereference get<1>(J) in the innermost lambda function to access the value (NTTTables). This is because
+        get<1>(J) is const NTTTables *, as was discussed above.
 
         There are two important coding conventions in the above code snippet that are to be observed:
 

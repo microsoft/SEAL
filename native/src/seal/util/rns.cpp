@@ -608,10 +608,10 @@ namespace seal
                 base_t_gamma_ = allocate<RNSBase>(pool_, vector<SmallModulus>{ t_, gamma_ }, pool_);
             }
 
-            // Generate the Bsk SmallNTTTables; these are used for NTT after base extension to Bsk
+            // Generate the Bsk NTTTables; these are used for NTT after base extension to Bsk
             try
             {
-                CreateSmallNTTTables(
+                CreateNTTTables(
                     coeff_count_power, vector<SmallModulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_size),
                     base_Bsk_small_ntt_tables_, pool_);
             }
@@ -776,7 +776,7 @@ namespace seal
         }
 
         void RNSTool::divide_and_round_q_last_ntt_inplace(
-            uint64_t *input, const SmallNTTTables *rns_ntt_tables, MemoryPoolHandle pool) const
+            uint64_t *input, const NTTTables *rns_ntt_tables, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
             if (!input)

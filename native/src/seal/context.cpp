@@ -240,7 +240,7 @@ namespace seal
         context_data.qualifiers_.using_ntt = true;
         try
         {
-            CreateSmallNTTTables(coeff_count_power, coeff_modulus, context_data.small_ntt_tables_, pool_);
+            CreateNTTTables(coeff_count_power, coeff_modulus, context_data.small_ntt_tables_, pool_);
         }
         catch (const invalid_argument &)
         {
@@ -284,7 +284,7 @@ namespace seal
             context_data.qualifiers_.using_batching = true;
             try
             {
-                CreateSmallNTTTables(coeff_count_power, { plain_modulus }, context_data.plain_ntt_tables_, pool_);
+                CreateNTTTables(coeff_count_power, { plain_modulus }, context_data.plain_ntt_tables_, pool_);
             }
             catch (const invalid_argument &)
             {

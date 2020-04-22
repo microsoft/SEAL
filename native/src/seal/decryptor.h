@@ -14,7 +14,7 @@
 #include "seal/util/defines.h"
 #include "seal/util/locks.h"
 #include "seal/util/rns.h"
-#include "seal/util/smallntt.h"
+#include "seal/util/ntt.h"
 #include <memory>
 
 namespace seal
