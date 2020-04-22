@@ -21,7 +21,7 @@ namespace sealtest
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             auto qualifiers = context->first_context_data()->qualifiers();
             ASSERT_FALSE(qualifiers.parameters_set());
-            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_coeff_modulus_count);
+            ASSERT_EQ(qualifiers.parameter_error, error_type::invalid_coeff_modulus_size);
             ASSERT_FALSE(qualifiers.using_fft);
             ASSERT_FALSE(qualifiers.using_ntt);
             ASSERT_FALSE(qualifiers.using_batching);

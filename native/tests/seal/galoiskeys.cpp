@@ -104,15 +104,15 @@ namespace sealtest
                     auto &parms = ctx2_data.parms();
                     auto &coeff_modulus = parms.coeff_modulus();
                     size_t coeff_count = parms.poly_modulus_degree();
-                    size_t coeff_modulus_count = coeff_modulus.size();
-                    size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_modulus_count);
+                    size_t coeff_modulus_size = coeff_modulus.size();
+                    size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_modulus_size);
 
                     IntArray<Ciphertext::ct_coeff_type> error;
                     error.resize(rns_poly_uint64_count);
                     auto destination = error.begin();
 
                     auto copy_operand1(util::allocate_uint(coeff_count, pool));
-                    for (size_t i = 0; i < coeff_modulus_count; i++)
+                    for (size_t i = 0; i < coeff_modulus_size; i++)
                     {
                         // Initialize pointers for multiplication
                         const uint64_t *encrypted_ptr = encrypted.data(1) + (i * coeff_count);

@@ -74,13 +74,13 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         size_t encrypted_size = encrypted.size();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Negate each poly in the array
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             SEAL_ASSERT_TYPE(I, RNSIter, "encrypted");
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count, [&](auto J) {
+                IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
                     SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
                     SEAL_ASSERT_TYPE(get<1>(J), const SmallModulus *, "coeff_modulus");
                     negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J));
@@ -124,7 +124,7 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
         size_t max_count = max(encrypted1_size, encrypted2_size);
@@ -142,7 +142,7 @@ namespace seal
         // Add ciphertexts
         for_each_n(IterTuple<PolyIter, ConstPolyIter>(encrypted1, encrypted2), min_count, [&](auto I) {
             for_each_n(
-                IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size,
                 [&](auto J) {
                     add_poly_poly_coeffmod(
                         get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
@@ -153,7 +153,7 @@ namespace seal
         if (encrypted1_size < encrypted2_size)
         {
             set_poly_poly(
-                encrypted2.data(min_count), coeff_count * (encrypted2_size - encrypted1_size), coeff_modulus_count,
+                encrypted2.data(min_count), coeff_count * (encrypted2_size - encrypted1_size), coeff_modulus_size,
                 encrypted1.data(encrypted1_size));
         }
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
@@ -215,7 +215,7 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
         size_t max_count = max(encrypted1_size, encrypted2_size);
@@ -237,7 +237,7 @@ namespace seal
         // Subtract polynomials
         for_each_n(IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter), min_count, [&](auto I) {
             for_each_n(
-                IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size,
                 [&](auto J) {
                     sub_poly_poly_coeffmod(
                         get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
@@ -255,7 +255,7 @@ namespace seal
                 IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter), encrypted2_size - min_count,
                 [&](auto I) {
                     for_each_n(
-                        IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                        IterTuple<decltype(I), PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size,
                         [&](auto J) {
                             negate_poly_coeffmod(get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
                         });
@@ -558,7 +558,7 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
 
@@ -575,7 +575,7 @@ namespace seal
         size_t dest_size = sub_safe(add_safe(encrypted1_size, encrypted2_size), size_t(1));
 
         // Size check
-        if (!product_fits_in(dest_size, coeff_count, coeff_modulus_count))
+        if (!product_fits_in(dest_size, coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -591,8 +591,8 @@ namespace seal
         ConstPolyIter encrypted2_iter(encrypted2);
 
         // Allocate temporary space for the result
-        auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
-        PolyIter temp_iter(temp.get(), coeff_count, coeff_modulus_count);
+        auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_size, pool));
+        PolyIter temp_iter(temp.get(), coeff_count, coeff_modulus_size);
 
         for (size_t secret_power_index = 0; secret_power_index < dest_size; secret_power_index++, ++temp_iter)
         {
@@ -625,7 +625,7 @@ namespace seal
                     for_each_n(
                         IterTuple<decltype(I), PtrIter<const SmallModulus *>, RNSIter>(
                             I, coeff_modulus_iter, *temp_iter),
-                        coeff_modulus_count, [&](auto J) {
+                        coeff_modulus_size, [&](auto J) {
                             auto prod(allocate_uint(coeff_count, pool));
                             dyadic_product_coeffmod(
                                 get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), prod.get());
@@ -635,7 +635,7 @@ namespace seal
         }
 
         // Set the final result
-        set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_count, encrypted1.data());
+        set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_size, encrypted1.data());
 
         // Set the scale
         encrypted1.scale() = new_scale;
@@ -880,7 +880,7 @@ namespace seal
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = parms.coeff_modulus().size();
+        size_t coeff_modulus_size = parms.coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
 
         // Optimization implemented currently only for size 2 ciphertexts
@@ -903,7 +903,7 @@ namespace seal
         size_t dest_size = sub_safe(add_safe(encrypted_size, encrypted_size), size_t(1));
 
         // Size check
-        if (!product_fits_in(dest_size, coeff_count, coeff_modulus_count))
+        if (!product_fits_in(dest_size, coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -918,21 +918,21 @@ namespace seal
         PolyIter encrypted_iter(encrypted);
 
         // Allocate temporary space for the result
-        auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_count, pool));
-        PolyIter temp_iter(temp.get(), coeff_count, coeff_modulus_count);
+        auto temp(allocate_zero_poly(coeff_count * dest_size, coeff_modulus_size, pool));
+        PolyIter temp_iter(temp.get(), coeff_count, coeff_modulus_size);
 
         // Compute c0^2
         for_each_n(
             IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
                 encrypted_iter[0], coeff_modulus_iter, temp_iter[0]),
-            coeff_modulus_count,
+            coeff_modulus_size,
             [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
         // Compute 2*c0*c1
         for_each_n(
             IterTuple<RNSIter, RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
                 encrypted_iter[1], encrypted_iter[0], coeff_modulus_iter, temp_iter[1]),
-            coeff_modulus_count, [&](auto I) {
+            coeff_modulus_size, [&](auto I) {
                 dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<3>(I));
                 add_poly_poly_coeffmod(get<3>(I), get<3>(I), coeff_count, *get<2>(I), get<3>(I));
             });
@@ -941,11 +941,11 @@ namespace seal
         for_each_n(
             IterTuple<RNSIter, PtrIter<const SmallModulus *>, RNSIter>(
                 encrypted_iter[1], coeff_modulus_iter, temp_iter[2]),
-            coeff_modulus_count,
+            coeff_modulus_size,
             [&](auto I) { dyadic_product_coeffmod(get<0>(I), get<0>(I), coeff_count, *get<1>(I), get<2>(I)); });
 
         // Set the final result
-        set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_count, encrypted.data());
+        set_poly_poly(temp.get(), coeff_count * dest_size, coeff_modulus_size, encrypted.data());
 
         // Set the scale
         encrypted.scale() = new_scale;
@@ -1036,7 +1036,7 @@ namespace seal
 
         size_t encrypted_size = encrypted.size();
         size_t coeff_count = next_parms.poly_modulus_degree();
-        size_t next_coeff_modulus_count = next_parms.coeff_modulus().size();
+        size_t next_coeff_modulus_size = next_parms.coeff_modulus().size();
 
         Ciphertext encrypted_copy(pool);
         encrypted_copy = encrypted;
@@ -1062,7 +1062,7 @@ namespace seal
         // Copy result to destination
         destination.resize(context_, next_context_data.parms_id(), encrypted_size);
         for_each_n(IterTuple<ConstPolyIter, PolyIter>(encrypted_copy, destination), encrypted_size, [&](auto I) {
-            set_poly_poly(get<0>(I), coeff_count, next_coeff_modulus_count, get<1>(I));
+            set_poly_poly(get<0>(I), coeff_count, next_coeff_modulus_size, get<1>(I));
         });
 
         // Set other attributes
@@ -1096,22 +1096,22 @@ namespace seal
         }
 
         // q_1,...,q_{k-1}
-        size_t next_coeff_modulus_count = next_parms.coeff_modulus().size();
+        size_t next_coeff_modulus_size = next_parms.coeff_modulus().size();
         size_t coeff_count = next_parms.poly_modulus_degree();
         size_t encrypted_size = encrypted.size();
 
         // Size check
-        if (!product_fits_in(encrypted_size, coeff_count, next_coeff_modulus_count))
+        if (!product_fits_in(encrypted_size, coeff_count, next_coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
 
-        size_t rns_poly_total_count = next_coeff_modulus_count * coeff_count;
+        size_t rns_poly_total_count = next_coeff_modulus_size * coeff_count;
 
         auto drop_moduli_and_copy = [&](ConstPolyIter in_iter, PolyIter out_iter) {
             for_each_n(IterTuple<ConstPolyIter, PolyIter>(in_iter, out_iter), encrypted_size, [&](auto I) {
                 for_each_n(
-                    I, next_coeff_modulus_count, [&](auto J) { set_uint_uint(get<0>(J), coeff_count, get<1>(J)); });
+                    I, next_coeff_modulus_size, [&](auto J) { set_uint_uint(get<0>(J), coeff_count, get<1>(J)); });
             });
         };
 
@@ -1121,7 +1121,7 @@ namespace seal
             auto temp(allocate_uint(rns_poly_total_count * encrypted_size, pool));
 
             // Copy data over to temp; only copy the RNS components relevant after modulus drop
-            drop_moduli_and_copy(encrypted, { temp.get(), coeff_count, next_coeff_modulus_count });
+            drop_moduli_and_copy(encrypted, { temp.get(), coeff_count, next_coeff_modulus_size });
 
             // Resize destination before writing
             destination.resize(context_, next_context_data.parms_id(), encrypted_size);
@@ -1169,11 +1169,11 @@ namespace seal
 
         // q_1,...,q_{k-1}
         auto &next_coeff_modulus = next_parms.coeff_modulus();
-        size_t next_coeff_modulus_count = next_coeff_modulus.size();
+        size_t next_coeff_modulus_size = next_coeff_modulus.size();
         size_t coeff_count = next_parms.poly_modulus_degree();
 
         // Compute destination size first for exception safety
-        auto dest_size = mul_safe(next_coeff_modulus_count, coeff_count);
+        auto dest_size = mul_safe(next_coeff_modulus_size, coeff_count);
 
         plain.parms_id() = parms_id_zero;
         plain.resize(dest_size);
@@ -1512,10 +1512,10 @@ namespace seal
         // Extract encryption parameters.
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_modulus_count))
+        if (!product_fits_in(coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -1535,7 +1535,7 @@ namespace seal
             for_each_n(
                 IterTuple<RNSIter, ConstRNSIter, PtrIter<const SmallModulus *>>(
                     encrypted_iter, plain_iter, coeff_modulus),
-                coeff_modulus_count,
+                coeff_modulus_size,
                 [&](auto I) { add_poly_poly_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<0>(I)); });
             break;
         }
@@ -1590,10 +1590,10 @@ namespace seal
         // Extract encryption parameters.
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_modulus_count))
+        if (!product_fits_in(coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -1613,7 +1613,7 @@ namespace seal
             for_each_n(
                 IterTuple<RNSIter, ConstRNSIter, PtrIter<const SmallModulus *>>(
                     encrypted_iter, plain_iter, coeff_modulus),
-                coeff_modulus_count,
+                coeff_modulus_size,
                 [&](auto I) { sub_poly_poly_coeffmod(get<0>(I), get<1>(I), coeff_count, *get<2>(I), get<0>(I)); });
             break;
         }
@@ -1674,7 +1674,7 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
         auto plain_upper_half_increment = context_data.plain_upper_half_increment();
@@ -1685,7 +1685,7 @@ namespace seal
         size_t plain_nonzero_coeff_count = plain.nonzero_coeff_count();
 
         // Size check
-        if (!product_fits_in(encrypted_size, coeff_count, coeff_modulus_count))
+        if (!product_fits_in(encrypted_size, coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -1715,7 +1715,7 @@ namespace seal
                 for_each_n(in_iter, encrypted_size, [&](auto I) {
                     for_each_n(
                         IterTuple<RNSIter, ConstCoeffIter, PtrIter<const SmallModulus *>>(I, mono_iter, coeff_modulus),
-                        coeff_modulus_count, [&](auto J) {
+                        coeff_modulus_size, [&](auto J) {
                             negacyclic_multiply_poly_mono_coeffmod(
                                 get<0>(J), coeff_count, *get<1>(J), mono_exponent, *get<2>(J), get<0>(J), pool);
                         });
@@ -1727,14 +1727,14 @@ namespace seal
                 if (!context_data.qualifiers().using_fast_plain_lift)
                 {
                     // Allocate temporary space for a single RNS coefficient
-                    auto temp(allocate_uint(coeff_modulus_count, pool));
+                    auto temp(allocate_uint(coeff_modulus_size, pool));
 
                     // We need to adjust the monomial modulo each coeff_modulus prime separately when the coeff_modulus
                     // primes may be larger than the plain_modulus. We add plain_upper_half_increment (i.e., q-t) to
                     // the monomial to ensure it is smaller than coeff_modulus and then do an RNS multiplication. Note
                     // that in this case plain_upper_half_increment contains a multi-precision integer, so after the
                     // addition we decompose the multi-precision integer into RNS components, and then multiply.
-                    add_uint_uint64(plain_upper_half_increment, plain[mono_exponent], coeff_modulus_count, temp.get());
+                    add_uint_uint64(plain_upper_half_increment, plain[mono_exponent], coeff_modulus_size, temp.get());
                     context_data.rns_tool()->base_q()->decompose(temp.get(), pool);
                     rns_monomial_multiply(encrypted, temp.get());
                 }
@@ -1750,7 +1750,7 @@ namespace seal
                 // The monomial represents a positive number, so no RNS multiplication is needed.
                 for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
                     for_each_n(
-                        IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_count,
+                        IterTuple<RNSIter, PtrIter<const SmallModulus *>>(I, coeff_modulus), coeff_modulus_size,
                         [&](auto J) {
                             negacyclic_multiply_poly_mono_coeffmod(
                                 get<0>(J), coeff_count, plain[mono_exponent], mono_exponent, *get<1>(J), get<0>(J),
@@ -1764,18 +1764,18 @@ namespace seal
 
         // Generic case: any plaintext polynomial
         // Allocate temporary space for an entire RNS polynomial
-        auto temp(allocate_zero_uint(coeff_count * coeff_modulus_count, pool));
+        auto temp(allocate_zero_uint(coeff_count * coeff_modulus_size, pool));
 
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
             // Slight semantic misuse of RNSIter here, but this works well
-            RNSIter temp_iter(temp.get(), coeff_modulus_count);
+            RNSIter temp_iter(temp.get(), coeff_modulus_size);
 
             for_each_n(IterTuple<ConstCoeffIter, RNSIter>(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
                 auto plain_value = *get<0>(I);
                 if (plain_value >= plain_upper_half_threshold)
                 {
-                    add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
+                    add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_size, get<1>(I));
                 }
                 else
                 {
@@ -1783,7 +1783,7 @@ namespace seal
                 }
             });
 
-            for_each_n(RNSIter(temp.get(), coeff_count), coeff_modulus_count, [&](auto I) {
+            for_each_n(RNSIter(temp.get(), coeff_count), coeff_modulus_size, [&](auto I) {
                 context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
             });
         }
@@ -1794,7 +1794,7 @@ namespace seal
             RNSIter temp_iter(temp.get(), coeff_count);
             for_each_n(
                 IterTuple<RNSIter, PtrIter<const uint64_t *>>(temp_iter, plain_upper_half_increment),
-                coeff_modulus_count, [&](auto I) {
+                coeff_modulus_size, [&](auto I) {
                     SEAL_ASSERT_TYPE(get<0>(I), CoeffIter, "temp");
                     SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "plain_upper_half_increment");
                     for_each_n(
@@ -1811,13 +1811,13 @@ namespace seal
         RNSIter temp_iter(temp.get(), coeff_count);
         for_each_n(
             IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(temp_iter, coeff_modulus_ntt_tables),
-            coeff_modulus_count, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
+            coeff_modulus_size, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
 
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
                 IterTuple<RNSIter, ConstRNSIter, PtrIter<const SmallModulus *>, PtrIter<const SmallNTTTables *>>(
                     I, temp_iter, coeff_modulus, coeff_modulus_ntt_tables),
-                coeff_modulus_count, [&](auto J) {
+                coeff_modulus_size, [&](auto J) {
                     SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
                     SEAL_ASSERT_TYPE(get<1>(J), ConstCoeffIter, "temp");
                     SEAL_ASSERT_TYPE(get<2>(J), const SmallModulus *, "coeff_modulus");
@@ -1849,11 +1849,11 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted_ntt_size = encrypted_ntt.size();
 
         // Size check
-        if (!product_fits_in(encrypted_ntt_size, coeff_count, coeff_modulus_count))
+        if (!product_fits_in(encrypted_ntt_size, coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -1870,7 +1870,7 @@ namespace seal
         for_each_n(PolyIter(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
             for_each_n(
                 IterTuple<RNSIter, ConstRNSIter, PtrIter<const SmallModulus *>>(I, plain_ntt_iter, coeff_modulus),
-                coeff_modulus_count,
+                coeff_modulus_size,
                 [&](auto J) { dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J)); });
         });
 
@@ -1905,7 +1905,7 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t plain_coeff_count = plain.coeff_count();
 
         auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
@@ -1914,28 +1914,28 @@ namespace seal
         auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_modulus_count))
+        if (!product_fits_in(coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
 
         // Resize to fit the entire NTT transformed (ciphertext size) polynomial
         // Note that the new coefficients are automatically set to 0
-        plain.resize(coeff_count * coeff_modulus_count);
+        plain.resize(coeff_count * coeff_modulus_size);
 
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
             // Allocate temporary space for an entire RNS polynomial
-            auto temp(allocate_zero_uint(coeff_count * coeff_modulus_count, pool));
+            auto temp(allocate_zero_uint(coeff_count * coeff_modulus_size, pool));
 
             // Slight semantic misuse of RNSIter here, but this works well
-            RNSIter temp_iter(temp.get(), coeff_modulus_count);
+            RNSIter temp_iter(temp.get(), coeff_modulus_size);
 
             for_each_n(IterTuple<ConstCoeffIter, RNSIter>(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
                 auto plain_value = *get<0>(I);
                 if (plain_value >= plain_upper_half_threshold)
                 {
-                    add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_count, get<1>(I));
+                    add_uint_uint64(plain_upper_half_increment, plain_value, coeff_modulus_size, get<1>(I));
                 }
                 else
                 {
@@ -1943,12 +1943,12 @@ namespace seal
                 }
             });
 
-            for_each_n(RNSIter(temp.get(), coeff_count), coeff_modulus_count, [&](auto I) {
+            for_each_n(RNSIter(temp.get(), coeff_count), coeff_modulus_size, [&](auto I) {
                 context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
             });
 
             // Copy data back to plain
-            set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, plain.data());
+            set_poly_poly(temp.get(), coeff_count, coeff_modulus_size, plain.data());
         }
         else
         {
@@ -1959,10 +1959,10 @@ namespace seal
             // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
             // the plain_upper_half_increment values.
             IterTuple<RNSIter, PtrIter<const uint64_t *>> helper_iter(plain_iter, plain_upper_half_increment);
-            advance(helper_iter, coeff_modulus_count - 1);
+            advance(helper_iter, coeff_modulus_size - 1);
             auto reversed_helper_iter = ReverseIter<decltype(helper_iter)>(helper_iter);
 
-            for_each_n(reversed_helper_iter, coeff_modulus_count, [&](auto I) {
+            for_each_n(reversed_helper_iter, coeff_modulus_size, [&](auto I) {
                 SEAL_ASSERT_TYPE(get<0>(I), CoeffIter, "reversed plain");
                 SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "reversed plain_upper_half_increment");
 
@@ -1979,7 +1979,7 @@ namespace seal
         RNSIter plain_iter(plain.data(), coeff_count);
         for_each_n(
             IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(plain_iter, coeff_modulus_ntt_tables),
-            coeff_modulus_count, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
+            coeff_modulus_size, [&](auto I) { ntt_negacyclic_harvey(get<0>(I), *get<1>(I)); });
 
         plain.parms_id() = parms_id;
     }
@@ -2007,13 +2007,13 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted_size = encrypted.size();
 
         auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_modulus_count))
+        if (!product_fits_in(coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -2021,7 +2021,7 @@ namespace seal
         // Transform each polynomial to NTT domain
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables), coeff_modulus_count,
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables), coeff_modulus_size,
                 [&](auto J) { ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
         });
 
@@ -2058,13 +2058,13 @@ namespace seal
         auto &context_data = *context_data_ptr;
         auto &parms = context_data.parms();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = parms.coeff_modulus().size();
+        size_t coeff_modulus_size = parms.coeff_modulus().size();
         size_t encrypted_ntt_size = encrypted_ntt.size();
 
         auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_modulus_count))
+        if (!product_fits_in(coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -2072,7 +2072,7 @@ namespace seal
         // Transform each polynomial from NTT domain
         for_each_n(PolyIter(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables), coeff_modulus_count,
+                IterTuple<RNSIter, PtrIter<const SmallNTTTables *>>(I, coeff_modulus_ntt_tables), coeff_modulus_size,
                 [&](auto J) { inverse_ntt_negacyclic_harvey(get<0>(J), *get<1>(J)); });
         });
 
@@ -2106,13 +2106,13 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted_size = encrypted.size();
         // Use key_context_data where permutation tables exist since previous runs.
         auto galois_tool = context_->key_context_data()->galois_tool();
 
         // Size check
-        if (!product_fits_in(coeff_count, coeff_modulus_count))
+        if (!product_fits_in(coeff_count, coeff_modulus_size))
         {
             throw logic_error("invalid parameters");
         }
@@ -2135,7 +2135,7 @@ namespace seal
             throw invalid_argument("encrypted size must be 2");
         }
 
-        auto temp(allocate_poly(coeff_count, coeff_modulus_count, pool));
+        auto temp(allocate_poly(coeff_count, coeff_modulus_size, pool));
         RNSIter temp_iter(temp.get(), coeff_count);
 
         // DO NOT CHANGE EXECUTION ORDER OF FOLLOWING SECTION
@@ -2146,7 +2146,7 @@ namespace seal
             auto apply_galois_helper = [&](auto in_iter, auto out_iter) {
                 for_each_n(
                     IterTuple<RNSIter, RNSIter, PtrIter<const SmallModulus *>>(in_iter, out_iter, coeff_modulus),
-                    coeff_modulus_count,
+                    coeff_modulus_size,
                     [&](auto I) { galois_tool->apply_galois(get<0>(I), galois_elt, *get<2>(I), get<1>(I)); });
             };
 
@@ -2157,7 +2157,7 @@ namespace seal
             apply_galois_helper(encrypted_iter[0], temp_iter);
 
             // Copy result to encrypted.data(0)
-            set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
+            set_poly_poly(temp.get(), coeff_count, coeff_modulus_size, encrypted.data(0));
 
             // Next transform encrypted.data(1)
             apply_galois_helper(encrypted_iter[1], temp_iter);
@@ -2165,7 +2165,7 @@ namespace seal
         else if (parms.scheme() == scheme_type::CKKS)
         {
             auto apply_galois_helper_ntt = [&](auto in_iter, auto out_iter) {
-                for_each_n(IterTuple<RNSIter, RNSIter>(in_iter, out_iter), coeff_modulus_count, [&](auto I) {
+                for_each_n(IterTuple<RNSIter, RNSIter>(in_iter, out_iter), coeff_modulus_size, [&](auto I) {
                     const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
                 });
             };
@@ -2177,7 +2177,7 @@ namespace seal
             apply_galois_helper_ntt(encrypted_iter[0], temp_iter);
 
             // Copy result to encrypted.data(0)
-            set_poly_poly(temp.get(), coeff_count, coeff_modulus_count, encrypted.data(0));
+            set_poly_poly(temp.get(), coeff_count, coeff_modulus_size, encrypted.data(0));
 
             // Next transform encrypted.data(1)
             apply_galois_helper_ntt(encrypted_iter[1], temp_iter);
@@ -2188,7 +2188,7 @@ namespace seal
         }
 
         // Wipe encrypted.data(1)
-        set_zero_poly(coeff_count, coeff_modulus_count, encrypted.data(1));
+        set_zero_poly(coeff_count, coeff_modulus_size, encrypted.data(1));
 
         // END: Apply Galois for each ciphertext
         // REORDERING IS SAFE NOW

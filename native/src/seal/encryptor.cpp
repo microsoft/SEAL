@@ -39,10 +39,10 @@ namespace seal
         auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Quick sanity check
-        if (!util::product_fits_in(coeff_count, coeff_modulus_count, size_t(2)))
+        if (!util::product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -65,10 +65,10 @@ namespace seal
         auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Quick sanity check
-        if (!util::product_fits_in(coeff_count, coeff_modulus_count, size_t(2)))
+        if (!util::product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -93,10 +93,10 @@ namespace seal
         auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Quick sanity check
-        if (!util::product_fits_in(coeff_count, coeff_modulus_count, size_t(2)))
+        if (!util::product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -120,7 +120,7 @@ namespace seal
 
         auto &context_data = *context_->get_context_data(parms_id);
         auto &parms = context_data.parms();
-        size_t coeff_modulus_count = parms.coeff_modulus().size();
+        size_t coeff_modulus_size = parms.coeff_modulus().size();
         size_t coeff_count = parms.poly_modulus_degree();
         bool is_ntt_form = false;
 
@@ -163,7 +163,7 @@ namespace seal
                     {
                         rns_tool->divide_and_round_q_last_inplace(temp.data(j), pool);
                     }
-                    util::set_poly_poly(temp.data(j), coeff_count, coeff_modulus_count, destination.data(j));
+                    util::set_poly_poly(temp.data(j), coeff_count, coeff_modulus_size, destination.data(j));
                 }
                 destination.is_ntt_form() = is_ntt_form;
                 destination.scale() = temp.scale();
@@ -238,11 +238,11 @@ namespace seal
 
             auto &parms = context_->get_context_data(plain.parms_id())->parms();
             auto &coeff_modulus = parms.coeff_modulus();
-            size_t coeff_modulus_count = coeff_modulus.size();
+            size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
 
             // The plaintext gets added into the c_0 term of ciphertext (c_0,c_1).
-            for (size_t i = 0; i < coeff_modulus_count; i++)
+            for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 util::add_poly_poly_coeffmod(
                     destination.data() + (i * coeff_count), plain.data() + (i * coeff_count), coeff_count,

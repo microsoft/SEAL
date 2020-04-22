@@ -94,11 +94,11 @@ namespace seal
         auto &context_data = *context_data_ptr;
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t coeff_count = parms.poly_modulus_degree();
 
         // Quick sanity check
-        if (!product_fits_in(coeff_modulus_count, coeff_count))
+        if (!product_fits_in(coeff_modulus_size, coeff_count))
         {
             throw logic_error("invalid parameters");
         }
@@ -124,7 +124,7 @@ namespace seal
         // Need to first set parms_id to zero, otherwise resize
         // will throw an exception.
         destination.parms_id() = parms_id_zero;
-        destination.resize(coeff_count * coeff_modulus_count);
+        destination.resize(coeff_count * coeff_modulus_size);
 
         double coeffd = round(value);
         bool is_negative = signbit(coeffd);
@@ -137,7 +137,7 @@ namespace seal
 
             if (is_negative)
             {
-                for (size_t j = 0; j < coeff_modulus_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
                     fill_n(
                         destination.data() + (j * coeff_count), coeff_count,
@@ -146,7 +146,7 @@ namespace seal
             }
             else
             {
-                for (size_t j = 0; j < coeff_modulus_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
                     fill_n(destination.data() + (j * coeff_count), coeff_count, coeffu % coeff_modulus[j].value());
                 }
@@ -159,7 +159,7 @@ namespace seal
 
             if (is_negative)
             {
-                for (size_t j = 0; j < coeff_modulus_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
                     fill_n(
                         destination.data() + (j * coeff_count), coeff_count,
@@ -168,7 +168,7 @@ namespace seal
             }
             else
             {
-                for (size_t j = 0; j < coeff_modulus_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
                     fill_n(
                         destination.data() + (j * coeff_count), coeff_count,
@@ -179,10 +179,10 @@ namespace seal
         else
         {
             // Slow case
-            auto coeffu(allocate_uint(coeff_modulus_count, pool));
+            auto coeffu(allocate_uint(coeff_modulus_size, pool));
 
             // We are at this point guaranteed to fit in the allocated space
-            set_zero_uint(coeff_modulus_count, coeffu.get());
+            set_zero_uint(coeff_modulus_size, coeffu.get());
             auto coeffu_ptr = coeffu.get();
             while (coeffd >= 1)
             {
@@ -196,7 +196,7 @@ namespace seal
             // Finally replace the sign if necessary
             if (is_negative)
             {
-                for (size_t j = 0; j < coeff_modulus_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
                     fill_n(
                         destination.data() + (j * coeff_count), coeff_count,
@@ -205,7 +205,7 @@ namespace seal
             }
             else
             {
-                for (size_t j = 0; j < coeff_modulus_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
                     fill_n(destination.data() + (j * coeff_count), coeff_count, coeffu[j]);
                 }
@@ -228,11 +228,11 @@ namespace seal
         auto &context_data = *context_data_ptr;
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t coeff_count = parms.poly_modulus_degree();
 
         // Quick sanity check
-        if (!product_fits_in(coeff_modulus_count, coeff_count))
+        if (!product_fits_in(coeff_modulus_size, coeff_count))
         {
             throw logic_error("invalid parameters");
         }
@@ -247,11 +247,11 @@ namespace seal
         // Need to first set parms_id to zero, otherwise resize
         // will throw an exception.
         destination.parms_id() = parms_id_zero;
-        destination.resize(coeff_count * coeff_modulus_count);
+        destination.resize(coeff_count * coeff_modulus_size);
 
         if (value < 0)
         {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
+            for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 uint64_t tmp = static_cast<uint64_t>(value);
                 tmp += coeff_modulus[j].value();
@@ -261,7 +261,7 @@ namespace seal
         }
         else
         {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
+            for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 uint64_t tmp = static_cast<uint64_t>(value);
                 tmp %= coeff_modulus[j].value();

@@ -39,12 +39,12 @@ namespace seal
         auto &parms = context_->key_context_data()->parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Set the secret_key_array to have size 1 (first power of secret)
         // and copy over data
-        secret_key_array_ = allocate_poly(coeff_count, coeff_modulus_count, pool_);
-        set_poly_poly(secret_key.data().data(), coeff_count, coeff_modulus_count, secret_key_array_.get());
+        secret_key_array_ = allocate_poly(coeff_count, coeff_modulus_size, pool_);
+        set_poly_poly(secret_key.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
         secret_key_array_size_ = 1;
     }
 
@@ -85,7 +85,7 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Firstly find c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q
         // This is equal to Delta m + v where ||v|| < Delta/2.
@@ -93,7 +93,7 @@ namespace seal
         // Therefore, we can (integer) divide by Delta and the answer will round down to m.
 
         // Make a temp destination for all the arithmetic mod qi before calling FastBConverse
-        auto tmp_dest_modq(allocate_zero_poly(coeff_count, coeff_modulus_count, pool));
+        auto tmp_dest_modq(allocate_zero_poly(coeff_count, coeff_modulus_size, pool));
 
         // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
@@ -126,8 +126,8 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
-        size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_modulus_count);
+        size_t coeff_modulus_size = coeff_modulus.size();
+        size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_modulus_size);
 
         // Decryption consists in finding
         // c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q_1 * q_2 * q_3
@@ -142,7 +142,7 @@ namespace seal
         destination.resize(rns_poly_uint64_count);
 
         // Make a temp destination for all the arithmetic mod q1, q2, q3
-        // auto tmp_dest_modq(allocate_zero_poly(coeff_count, decryption_coeff_modulus_count, pool));
+        // auto tmp_dest_modq(allocate_zero_poly(coeff_count, decryption_coeff_modulus_size, pool));
         // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
@@ -170,8 +170,8 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
-        size_t key_rns_poly_uint64_count = mul_safe(coeff_count, coeff_modulus_count);
+        size_t coeff_modulus_size = coeff_modulus.size();
+        size_t key_rns_poly_uint64_count = mul_safe(coeff_count, coeff_modulus_size);
 
         ReaderLock reader_lock(secret_key_array_locker_.acquire_read());
 
@@ -187,11 +187,11 @@ namespace seal
 
         // Need to extend the array
         // Compute powers of secret key until max_power
-        auto new_secret_key_array(allocate_poly(mul_safe(new_size, coeff_count), coeff_modulus_count, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_count, new_secret_key_array.get());
+        auto new_secret_key_array(allocate_poly(mul_safe(new_size, coeff_count), coeff_modulus_size, pool_));
+        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_size, new_secret_key_array.get());
 
         set_poly_poly(
-            secret_key_array_.get(), mul_safe(old_size, coeff_count), coeff_modulus_count, new_secret_key_array.get());
+            secret_key_array_.get(), mul_safe(old_size, coeff_count), coeff_modulus_size, new_secret_key_array.get());
 
         uint64_t *prev_poly_ptr = new_secret_key_array.get() + mul_safe(old_size - 1, key_rns_poly_uint64_count);
         uint64_t *next_poly_ptr = prev_poly_ptr + key_rns_poly_uint64_count;
@@ -201,7 +201,7 @@ namespace seal
         // one with the first one [which is equal to NTT(secret_key_)].
         for (size_t i = old_size; i < new_size; i++)
         {
-            for (size_t j = 0; j < coeff_modulus_count; j++)
+            for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 dyadic_product_coeffmod(
                     prev_poly_ptr + (j * coeff_count), new_secret_key_array.get() + (j * coeff_count), coeff_count,
@@ -236,8 +236,8 @@ namespace seal
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
-        size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_modulus_count);
+        size_t coeff_modulus_size = coeff_modulus.size();
+        size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_modulus_size);
         size_t key_rns_poly_uint64_count =
             mul_safe(coeff_count, context_->key_context_data()->parms().coeff_modulus().size());
         size_t encrypted_size = encrypted.size();
@@ -254,7 +254,7 @@ namespace seal
         // The secret key powers are already NTT transformed.
         auto copy_operand1(allocate_uint(coeff_count, pool));
 
-        for (size_t i = 0; i < coeff_modulus_count; i++)
+        for (size_t i = 0; i < coeff_modulus_size; i++)
         {
             // Initialize pointers for multiplication
             const uint64_t *encrypted_ptr = encrypted.data(1) + (i * coeff_count);
@@ -309,13 +309,13 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         auto &plain_modulus = parms.plain_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // Storage for the infinity norm of noise poly
-        auto norm(allocate_uint(coeff_modulus_count, pool_));
+        auto norm(allocate_uint(coeff_modulus_size, pool_));
 
         // Storage for noise poly
-        auto noise_poly(allocate_zero_poly(coeff_count, coeff_modulus_count, pool_));
+        auto noise_poly(allocate_zero_poly(coeff_count, coeff_modulus_size, pool_));
 
         // Now need to compute c(s) - Delta*m (mod q)
         // Firstly find c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q
@@ -326,7 +326,7 @@ namespace seal
         // The secret key powers are already NTT transformed.
         dot_product_ct_sk_array(encrypted, noise_poly.get(), pool_);
 
-        for (size_t i = 0; i < coeff_modulus_count; i++)
+        for (size_t i = 0; i < coeff_modulus_size; i++)
         {
             // Multiply by plain_modulus and reduce mod coeff_modulus to get
             // coeff_modulus()*noise.
@@ -340,13 +340,13 @@ namespace seal
 
         // Next we compute the infinity norm mod parms.coeff_modulus()
         poly_infty_norm_coeffmod(
-            noise_poly.get(), coeff_count, coeff_modulus_count, context_data.total_coeff_modulus(), norm.get(), pool_);
+            noise_poly.get(), coeff_count, coeff_modulus_size, context_data.total_coeff_modulus(), norm.get(), pool_);
 
         // The -1 accounts for scaling the invariant noise by 2;
         // note that we already took plain_modulus into account in compose
         // so no need to subtract log(plain_modulus) from this
         int bit_count_diff = context_data.total_coeff_modulus_bit_count() -
-                             get_significant_bit_count_uint(norm.get(), coeff_modulus_count) - 1;
+                             get_significant_bit_count_uint(norm.get(), coeff_modulus_size) - 1;
         return max(0, bit_count_diff);
     }
 } // namespace seal

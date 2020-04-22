@@ -428,11 +428,11 @@ namespace seal
             auto &context_data = *context_data_ptr;
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
-            std::size_t coeff_modulus_count = coeff_modulus.size();
+            std::size_t coeff_modulus_size = coeff_modulus.size();
             std::size_t coeff_count = parms.poly_modulus_degree();
 
             // Quick sanity check
-            if (!util::product_fits_in(coeff_modulus_count, coeff_count))
+            if (!util::product_fits_in(coeff_modulus_size, coeff_count))
             {
                 throw std::logic_error("invalid parameters");
             }
@@ -509,7 +509,7 @@ namespace seal
             // Need to first set parms_id to zero, otherwise resize
             // will throw an exception.
             destination.parms_id() = parms_id_zero;
-            destination.resize(util::mul_safe(coeff_count, coeff_modulus_count));
+            destination.resize(util::mul_safe(coeff_count, coeff_modulus_size));
 
             // Use faster decomposition methods when possible
             if (max_coeff_bit_count <= 64)
@@ -523,7 +523,7 @@ namespace seal
 
                     if (is_negative)
                     {
-                        for (std::size_t j = 0; j < coeff_modulus_count; j++)
+                        for (std::size_t j = 0; j < coeff_modulus_size; j++)
                         {
                             destination[i + (j * coeff_count)] =
                                 util::negate_uint_mod(coeffu % coeff_modulus[j].value(), coeff_modulus[j]);
@@ -531,7 +531,7 @@ namespace seal
                     }
                     else
                     {
-                        for (std::size_t j = 0; j < coeff_modulus_count; j++)
+                        for (std::size_t j = 0; j < coeff_modulus_size; j++)
                         {
                             destination[i + (j * coeff_count)] = coeffu % coeff_modulus[j].value();
                         }
@@ -551,7 +551,7 @@ namespace seal
 
                     if (is_negative)
                     {
-                        for (std::size_t j = 0; j < coeff_modulus_count; j++)
+                        for (std::size_t j = 0; j < coeff_modulus_size; j++)
                         {
                             destination[i + (j * coeff_count)] = util::negate_uint_mod(
                                 util::barrett_reduce_128(coeffu, coeff_modulus[j]), coeff_modulus[j]);
@@ -559,7 +559,7 @@ namespace seal
                     }
                     else
                     {
-                        for (std::size_t j = 0; j < coeff_modulus_count; j++)
+                        for (std::size_t j = 0; j < coeff_modulus_size; j++)
                         {
                             destination[i + (j * coeff_count)] = util::barrett_reduce_128(coeffu, coeff_modulus[j]);
                         }
@@ -569,7 +569,7 @@ namespace seal
             else
             {
                 // Slow case
-                auto coeffu(util::allocate_uint(coeff_modulus_count, pool));
+                auto coeffu(util::allocate_uint(coeff_modulus_size, pool));
                 for (std::size_t i = 0; i < n; i++)
                 {
                     double coeffd = std::round(conj_values[i].real());
@@ -577,7 +577,7 @@ namespace seal
                     coeffd = std::fabs(coeffd);
 
                     // We are at this point guaranteed to fit in the allocated space
-                    util::set_zero_uint(coeff_modulus_count, coeffu.get());
+                    util::set_zero_uint(coeff_modulus_size, coeffu.get());
                     auto coeffu_ptr = coeffu.get();
                     while (coeffd >= 1)
                     {
@@ -591,14 +591,14 @@ namespace seal
                     // Finally replace the sign if necessary
                     if (is_negative)
                     {
-                        for (std::size_t j = 0; j < coeff_modulus_count; j++)
+                        for (std::size_t j = 0; j < coeff_modulus_size; j++)
                         {
                             destination[i + (j * coeff_count)] = util::negate_uint_mod(coeffu[j], coeff_modulus[j]);
                         }
                     }
                     else
                     {
-                        for (std::size_t j = 0; j < coeff_modulus_count; j++)
+                        for (std::size_t j = 0; j < coeff_modulus_size; j++)
                         {
                             destination[i + (j * coeff_count)] = coeffu[j];
                         }
@@ -607,7 +607,7 @@ namespace seal
             }
 
             // Transform to NTT domain
-            for (std::size_t i = 0; i < coeff_modulus_count; i++)
+            for (std::size_t i = 0; i < coeff_modulus_size; i++)
             {
                 util::ntt_negacyclic_harvey(destination.data(i * coeff_count), small_ntt_tables[i]);
             }
@@ -642,9 +642,9 @@ namespace seal
 
             auto &context_data = *context_->get_context_data(plain.parms_id());
             auto &parms = context_data.parms();
-            std::size_t coeff_modulus_count = parms.coeff_modulus().size();
+            std::size_t coeff_modulus_size = parms.coeff_modulus().size();
             std::size_t coeff_count = parms.poly_modulus_degree();
-            std::size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_modulus_count);
+            std::size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_modulus_size);
 
             auto small_ntt_tables = context_data.small_ntt_tables();
 
@@ -672,7 +672,7 @@ namespace seal
             util::set_uint_uint(plain.data(), rns_poly_uint64_count, plain_copy.get());
 
             // Transform each polynomial from NTT domain
-            for (std::size_t i = 0; i < coeff_modulus_count; i++)
+            for (std::size_t i = 0; i < coeff_modulus_size; i++)
             {
                 util::inverse_ntt_negacyclic_harvey(plain_copy.get() + (i * coeff_count), small_ntt_tables[i]);
             }
@@ -687,19 +687,19 @@ namespace seal
             {
                 res[i] = 0.0;
                 if (util::is_greater_than_or_equal_uint_uint(
-                        plain_copy.get() + (i * coeff_modulus_count), upper_half_threshold, coeff_modulus_count))
+                        plain_copy.get() + (i * coeff_modulus_size), upper_half_threshold, coeff_modulus_size))
                 {
                     double scaled_two_pow_64 = inv_scale;
-                    for (std::size_t j = 0; j < coeff_modulus_count; j++, scaled_two_pow_64 *= two_pow_64)
+                    for (std::size_t j = 0; j < coeff_modulus_size; j++, scaled_two_pow_64 *= two_pow_64)
                     {
-                        if (plain_copy[i * coeff_modulus_count + j] > decryption_modulus[j])
+                        if (plain_copy[i * coeff_modulus_size + j] > decryption_modulus[j])
                         {
-                            auto diff = plain_copy[i * coeff_modulus_count + j] - decryption_modulus[j];
+                            auto diff = plain_copy[i * coeff_modulus_size + j] - decryption_modulus[j];
                             res[i] += diff ? static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                         else
                         {
-                            auto diff = decryption_modulus[j] - plain_copy[i * coeff_modulus_count + j];
+                            auto diff = decryption_modulus[j] - plain_copy[i * coeff_modulus_size + j];
                             res[i] -= diff ? static_cast<double>(diff) * scaled_two_pow_64 : 0.0;
                         }
                     }
@@ -707,16 +707,16 @@ namespace seal
                 else
                 {
                     double scaled_two_pow_64 = inv_scale;
-                    for (std::size_t j = 0; j < coeff_modulus_count; j++, scaled_two_pow_64 *= two_pow_64)
+                    for (std::size_t j = 0; j < coeff_modulus_size; j++, scaled_two_pow_64 *= two_pow_64)
                     {
-                        auto curr_coeff = plain_copy[i * coeff_modulus_count + j];
+                        auto curr_coeff = plain_copy[i * coeff_modulus_size + j];
                         res[i] += curr_coeff ? static_cast<double>(curr_coeff) * scaled_two_pow_64 : 0.0;
                     }
                 }
 
                 // Scaling instead incorporated above; this can help in cases
                 // where otherwise pow(two_pow_64, j) would overflow due to very
-                // large coeff_modulus_count and very large scale
+                // large coeff_modulus_size and very large scale
                 // res[i] = res_accum * inv_scale;
             }
 
