@@ -23,7 +23,11 @@ namespace seal
         public:
             SafeByteBuffer(std::streamsize size = 1) : size_(size)
             {
-                buf_.resize(add_safe(size_, std::streamsize(1)));
+                if (!fits_in<std::size_t>(add_safe(size_, std::streamsize(1))))
+                {
+                    throw std::invalid_argument("size is too large");
+                }
+                buf_.resize(static_cast<std::size_t>(size_ + 1));
                 setp(buf_.begin(), buf_.begin() + size_);
                 setg(buf_.begin(), buf_.begin(), buf_.begin() + size_);
             }
