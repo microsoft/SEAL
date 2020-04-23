@@ -4,7 +4,7 @@
 #pragma once
 
 #include "seal/memorymanager.h"
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
@@ -133,26 +133,25 @@ namespace seal
             std::uint64_t modulus, std::uint64_t input, const std::vector<std::uint64_t> &baby_steps,
             const std::vector<std::uint64_t> &giant_steps) -> std::pair<std::size_t, std::size_t>;
 
-        SEAL_NODISCARD bool is_prime(const SmallModulus &modulus, std::size_t num_rounds = 40);
+        SEAL_NODISCARD bool is_prime(const Modulus &modulus, std::size_t num_rounds = 40);
 
-        SEAL_NODISCARD std::vector<SmallModulus> get_primes(std::size_t ntt_size, int bit_size, std::size_t count);
+        SEAL_NODISCARD std::vector<Modulus> get_primes(std::size_t ntt_size, int bit_size, std::size_t count);
 
-        SEAL_NODISCARD inline SmallModulus get_prime(std::size_t ntt_size, int bit_size)
+        SEAL_NODISCARD inline Modulus get_prime(std::size_t ntt_size, int bit_size)
         {
             return get_primes(ntt_size, bit_size, 1)[0];
         }
 
         bool try_invert_uint_mod(std::uint64_t value, std::uint64_t modulus, std::uint64_t &result);
 
-        bool is_primitive_root(std::uint64_t root, std::uint64_t degree, const SmallModulus &prime_modulus);
+        bool is_primitive_root(std::uint64_t root, std::uint64_t degree, const Modulus &prime_modulus);
 
         // Try to find a primitive degree-th root of unity modulo small prime
         // modulus, where degree must be a power of two.
-        bool try_primitive_root(std::uint64_t degree, const SmallModulus &prime_modulus, std::uint64_t &destination);
+        bool try_primitive_root(std::uint64_t degree, const Modulus &prime_modulus, std::uint64_t &destination);
 
         // Try to find the smallest (as integer) primitive degree-th root of
         // unity modulo small prime modulus, where degree must be a power of two.
-        bool try_minimal_primitive_root(
-            std::uint64_t degree, const SmallModulus &prime_modulus, std::uint64_t &destination);
+        bool try_minimal_primitive_root(std::uint64_t degree, const Modulus &prime_modulus, std::uint64_t &destination);
     } // namespace util
 } // namespace seal

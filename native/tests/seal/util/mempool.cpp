@@ -2,11 +2,10 @@
 // Licensed under the MIT license.
 
 #include "seal/modulus.h"
-#include "seal/smallmodulus.h"
 #include "seal/util/common.h"
 #include "seal/util/mempool.h"
+#include "seal/util/ntt.h"
 #include "seal/util/pointer.h"
-#include "seal/util/smallntt.h"
 #include "seal/util/uintcore.h"
 #include <algorithm>
 #include <memory>

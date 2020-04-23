@@ -26,7 +26,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -71,7 +71,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -125,7 +125,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -168,7 +168,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -203,7 +203,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -252,7 +252,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -296,7 +296,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -347,7 +347,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -390,7 +390,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -462,7 +462,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -508,7 +508,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -566,7 +566,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 8,
-                PlainModulus = new SmallModulus(257),
+                PlainModulus = new Modulus(257),
                 CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -669,7 +669,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -704,7 +704,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -757,7 +757,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms,
@@ -796,7 +796,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30, 30 })
             };
             SEALContext context = new SEALContext(parms,
@@ -933,7 +933,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 8,
-                PlainModulus = new SmallModulus(257),
+                PlainModulus = new Modulus(257),
                 CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -1008,7 +1008,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
             };
             SEALContext context = new SEALContext(parms,
@@ -1169,7 +1169,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 64,
-                PlainModulus = new SmallModulus(65537ul),
+                PlainModulus = new Modulus(65537ul),
                 CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,

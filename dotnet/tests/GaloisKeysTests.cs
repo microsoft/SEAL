@@ -81,9 +81,9 @@ namespace SEALNetTest
 
                     Assert.AreEqual(keysCipher.Data.Size, otherCipher.Data.Size);
                     Assert.AreEqual(keysCipher.Data.PolyModulusDegree, otherCipher.Data.PolyModulusDegree);
-                    Assert.AreEqual(keysCipher.Data.CoeffModulusCount, otherCipher.Data.CoeffModulusCount);
+                    Assert.AreEqual(keysCipher.Data.CoeffModulusSize, otherCipher.Data.CoeffModulusSize);
 
-                    ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModulusCount;
+                    ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModulusSize;
                     for (ulong k = 0; k < coeffCount; k++)
                     {
                         Assert.AreEqual(keysCipher.Data[k], otherCipher.Data[k]);
@@ -98,7 +98,7 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 8,
-                PlainModulus = new SmallModulus(257),
+                PlainModulus = new Modulus(257),
                 CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
             };
             SEALContext context = new SEALContext(parms,

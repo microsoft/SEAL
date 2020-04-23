@@ -28,7 +28,7 @@ namespace seal
         scale_ = assign.scale_;
 
         // Then resize
-        resize_internal(assign.size_, assign.poly_modulus_degree_, assign.coeff_modulus_count_);
+        resize_internal(assign.size_, assign.poly_modulus_degree_, assign.coeff_modulus_size_);
 
         // Size is guaranteed to be OK now so copy over
         copy(assign.data_.cbegin(), assign.data_.cend(), data_.begin());
@@ -61,14 +61,14 @@ namespace seal
         reserve_internal(size_capacity, parms.poly_modulus_degree(), parms.coeff_modulus().size());
     }
 
-    void Ciphertext::reserve_internal(size_t size_capacity, size_t poly_modulus_degree, size_t coeff_modulus_count)
+    void Ciphertext::reserve_internal(size_t size_capacity, size_t poly_modulus_degree, size_t coeff_modulus_size)
     {
         if (size_capacity < SEAL_CIPHERTEXT_SIZE_MIN || size_capacity > SEAL_CIPHERTEXT_SIZE_MAX)
         {
             throw invalid_argument("invalid size_capacity");
         }
 
-        size_t new_data_capacity = mul_safe(size_capacity, poly_modulus_degree, coeff_modulus_count);
+        size_t new_data_capacity = mul_safe(size_capacity, poly_modulus_degree, coeff_modulus_size);
         size_t new_data_size = min<size_t>(new_data_capacity, data_.size());
 
         // First reserve, then resize
@@ -78,7 +78,7 @@ namespace seal
         // Set the size
         size_ = min<size_t>(size_capacity, size_);
         poly_modulus_degree_ = poly_modulus_degree;
-        coeff_modulus_count_ = coeff_modulus_count;
+        coeff_modulus_size_ = coeff_modulus_size;
     }
 
     void Ciphertext::resize(shared_ptr<SEALContext> context, parms_id_type parms_id, size_t size)
@@ -106,7 +106,7 @@ namespace seal
         resize_internal(size, parms.poly_modulus_degree(), parms.coeff_modulus().size());
     }
 
-    void Ciphertext::resize_internal(size_t size, size_t poly_modulus_degree, size_t coeff_modulus_count)
+    void Ciphertext::resize_internal(size_t size, size_t poly_modulus_degree, size_t coeff_modulus_size)
     {
         if ((size < SEAL_CIPHERTEXT_SIZE_MIN && size != 0) || size > SEAL_CIPHERTEXT_SIZE_MAX)
         {
@@ -114,13 +114,13 @@ namespace seal
         }
 
         // Resize the data
-        size_t new_data_size = mul_safe(size, poly_modulus_degree, coeff_modulus_count);
+        size_t new_data_size = mul_safe(size, poly_modulus_degree, coeff_modulus_size);
         data_.resize(new_data_size);
 
         // Set the size parameters
         size_ = size;
         poly_modulus_degree_ = poly_modulus_degree;
-        coeff_modulus_count_ = coeff_modulus_count;
+        coeff_modulus_size_ = coeff_modulus_size;
     }
 
     void Ciphertext::expand_seed(shared_ptr<SEALContext> context, const random_seed_type &seed)
@@ -160,7 +160,7 @@ namespace seal
                 sizeof(SEAL_BYTE), // is_ntt_form_
                 sizeof(uint64_t),  // size_
                 sizeof(uint64_t),  // poly_modulus_degree_
-                sizeof(uint64_t),  // coeff_modulus_count_
+                sizeof(uint64_t),  // coeff_modulus_size_
                 sizeof(scale_), data_size),
             compr_mode);
 
@@ -182,8 +182,8 @@ namespace seal
             stream.write(reinterpret_cast<const char *>(&size64), sizeof(uint64_t));
             uint64_t poly_modulus_degree64 = safe_cast<uint64_t>(poly_modulus_degree_);
             stream.write(reinterpret_cast<const char *>(&poly_modulus_degree64), sizeof(uint64_t));
-            uint64_t coeff_modulus_count64 = safe_cast<uint64_t>(coeff_modulus_count_);
-            stream.write(reinterpret_cast<const char *>(&coeff_modulus_count64), sizeof(uint64_t));
+            uint64_t coeff_modulus_size64 = safe_cast<uint64_t>(coeff_modulus_size_);
+            stream.write(reinterpret_cast<const char *>(&coeff_modulus_size64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char *>(&scale_), sizeof(double));
 
             if (has_seed_marker())
@@ -253,8 +253,8 @@ namespace seal
             stream.read(reinterpret_cast<char *>(&size64), sizeof(uint64_t));
             uint64_t poly_modulus_degree64 = 0;
             stream.read(reinterpret_cast<char *>(&poly_modulus_degree64), sizeof(uint64_t));
-            uint64_t coeff_modulus_count64 = 0;
-            stream.read(reinterpret_cast<char *>(&coeff_modulus_count64), sizeof(uint64_t));
+            uint64_t coeff_modulus_size64 = 0;
+            stream.read(reinterpret_cast<char *>(&coeff_modulus_size64), sizeof(uint64_t));
             double scale = 0;
             stream.read(reinterpret_cast<char *>(&scale), sizeof(double));
 
@@ -263,7 +263,7 @@ namespace seal
             new_data.is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
             new_data.size_ = safe_cast<size_t>(size64);
             new_data.poly_modulus_degree_ = safe_cast<size_t>(poly_modulus_degree64);
-            new_data.coeff_modulus_count_ = safe_cast<size_t>(coeff_modulus_count64);
+            new_data.coeff_modulus_size_ = safe_cast<size_t>(coeff_modulus_size64);
             new_data.scale_ = scale;
 
             // Checking the validity of loaded metadata
@@ -282,7 +282,7 @@ namespace seal
             // Compute the total uint64 count required and reserve memory.
             // Note that this must be done after the metadata is checked for validity.
             auto total_uint64_count =
-                mul_safe(new_data.size_, new_data.poly_modulus_degree_, new_data.coeff_modulus_count_);
+                mul_safe(new_data.size_, new_data.poly_modulus_degree_, new_data.coeff_modulus_size_);
 
             // Reserve memory for the entire (expected) ciphertext data
             new_data.data_.reserve(total_uint64_count);
@@ -294,7 +294,7 @@ namespace seal
             new_data.data_.load(stream, total_uint64_count);
 
             // Expected buffer size in the seeded case
-            auto seeded_uint64_count = poly_modulus_degree64 * coeff_modulus_count64;
+            auto seeded_uint64_count = poly_modulus_degree64 * coeff_modulus_size64;
 
             // This is the case where we need to expand a seed, otherwise full
             // ciphertext data was (possibly) loaded and do nothing

@@ -176,7 +176,7 @@ namespace seal
             throw logic_error("failed to decompose input");
         }
 
-        bool is_prime(const SmallModulus &modulus, size_t num_rounds)
+        bool is_prime(const Modulus &modulus, size_t num_rounds)
         {
             uint64_t value = modulus.value();
             // First check the simplest cases.
@@ -274,7 +274,7 @@ namespace seal
             return true;
         }
 
-        vector<SmallModulus> get_primes(size_t ntt_size, int bit_size, size_t count)
+        vector<Modulus> get_primes(size_t ntt_size, int bit_size, size_t count)
         {
 #ifdef SEAL_DEBUG
             if (!count)
@@ -290,7 +290,7 @@ namespace seal
                 throw invalid_argument("bit_size is invalid");
             }
 #endif
-            vector<SmallModulus> destination;
+            vector<Modulus> destination;
             uint64_t factor = mul_safe(uint64_t(2), safe_cast<uint64_t>(ntt_size));
 
             // Start with 2^bit_size - 2 * ntt_size + 1
@@ -307,7 +307,7 @@ namespace seal
             uint64_t lower_bound = uint64_t(0x1) << (bit_size - 1);
             while (count > 0 && value > lower_bound)
             {
-                SmallModulus new_mod(value);
+                Modulus new_mod(value);
                 if (new_mod.is_prime())
                 {
                     destination.emplace_back(move(new_mod));
@@ -322,7 +322,7 @@ namespace seal
             return destination;
         }
 
-        bool is_primitive_root(uint64_t root, uint64_t degree, const SmallModulus &modulus)
+        bool is_primitive_root(uint64_t root, uint64_t degree, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if (modulus.bit_count() < 2)
@@ -349,7 +349,7 @@ namespace seal
             return exponentiate_uint_mod(root, degree >> 1, modulus) == (modulus.value() - 1);
         }
 
-        bool try_primitive_root(uint64_t degree, const SmallModulus &modulus, uint64_t &destination)
+        bool try_primitive_root(uint64_t degree, const Modulus &modulus, uint64_t &destination)
         {
 #ifdef SEAL_DEBUG
             if (modulus.bit_count() < 2)
@@ -395,7 +395,7 @@ namespace seal
             return is_primitive_root(destination, degree, modulus);
         }
 
-        bool try_minimal_primitive_root(uint64_t degree, const SmallModulus &modulus, uint64_t &destination)
+        bool try_minimal_primitive_root(uint64_t degree, const Modulus &modulus, uint64_t &destination)
         {
             uint64_t root;
             if (!try_primitive_root(degree, modulus, root))

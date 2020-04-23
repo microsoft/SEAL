@@ -4,9 +4,9 @@
 #pragma once
 
 #include "seal/memorymanager.h"
+#include "seal/modulus.h"
 #include "seal/randomgen.h"
 #include "seal/serialization.h"
-#include "seal/smallmodulus.h"
 #include "seal/util/defines.h"
 #include "seal/util/globals.h"
 #include "seal/util/hash.h"
@@ -170,7 +170,7 @@ namespace seal
         /**
         Sets the coefficient modulus parameter. The coefficient modulus consists
         of a list of distinct prime numbers, and is represented by a vector of
-        SmallModulus objects. The coefficient modulus directly affects the size
+        Modulus objects. The coefficient modulus directly affects the size
         of ciphertext elements, the amount of computation that the scheme can
         perform (bigger is better), and the security level (bigger is worse). In
         Microsoft SEAL each of the prime numbers in the coefficient modulus must
@@ -181,7 +181,7 @@ namespace seal
         is non-empty
         @throws std::invalid_argument if size of coeff_modulus is invalid
         */
-        inline void set_coeff_modulus(const std::vector<SmallModulus> &coeff_modulus)
+        inline void set_coeff_modulus(const std::vector<Modulus> &coeff_modulus)
         {
             // Check that a scheme is set
             if (scheme_ == scheme_type::none)
@@ -204,7 +204,7 @@ namespace seal
 
         /**
         Sets the plaintext modulus parameter. The plaintext modulus is an integer
-        modulus represented by the SmallModulus class. The plaintext modulus
+        modulus represented by the Modulus class. The plaintext modulus
         determines the largest coefficient that plaintext polynomials can represent.
         It also affects the amount of computation that the scheme can perform
         (bigger is worse). In Microsoft SEAL the plaintext modulus can be at most
@@ -216,7 +216,7 @@ namespace seal
         @throws std::logic_error if scheme is not scheme_type::BFV and plain_modulus
         is non-zero
         */
-        inline void set_plain_modulus(const SmallModulus &plain_modulus)
+        inline void set_plain_modulus(const Modulus &plain_modulus)
         {
             // Check that scheme is BFV
             if (scheme_ != scheme_type::BFV && !plain_modulus.is_zero())
@@ -232,8 +232,8 @@ namespace seal
 
         /**
         Sets the plaintext modulus parameter. The plaintext modulus is an integer
-        modulus represented by the SmallModulus class. This constructor instead
-        takes a std::uint64_t and automatically creates the SmallModulus object.
+        modulus represented by the Modulus class. This constructor instead
+        takes a std::uint64_t and automatically creates the Modulus object.
         The plaintext modulus determines the largest coefficient that plaintext
         polynomials can represent. It also affects the amount of computation that
         the scheme can perform (bigger is worse). In Microsoft SEAL the plaintext
@@ -246,7 +246,7 @@ namespace seal
         */
         inline void set_plain_modulus(std::uint64_t plain_modulus)
         {
-            set_plain_modulus(SmallModulus(plain_modulus));
+            set_plain_modulus(Modulus(plain_modulus));
         }
 
         /**
@@ -281,7 +281,7 @@ namespace seal
         /**
         Returns a const reference to the currently set coefficient modulus parameter.
         */
-        SEAL_NODISCARD inline auto coeff_modulus() const noexcept -> const std::vector<SmallModulus> &
+        SEAL_NODISCARD inline auto coeff_modulus() const noexcept -> const std::vector<Modulus> &
         {
             return coeff_modulus_;
         }
@@ -289,7 +289,7 @@ namespace seal
         /**
         Returns a const reference to the currently set plaintext modulus parameter.
         */
-        SEAL_NODISCARD inline const SmallModulus &plain_modulus() const noexcept
+        SEAL_NODISCARD inline const Modulus &plain_modulus() const noexcept
         {
             return plain_modulus_;
         }
@@ -349,7 +349,7 @@ namespace seal
                 util::add_safe(
                     sizeof(scheme_),
                     sizeof(std::uint64_t), // poly_modulus_degree_
-                    sizeof(std::uint64_t), // coeff_modulus_count
+                    sizeof(std::uint64_t), // coeff_modulus_size
                     coeff_modulus_total_size,
                     util::safe_cast<std::size_t>(plain_modulus_.save_size(compr_mode_type::none))),
                 compr_mode);
@@ -491,11 +491,11 @@ namespace seal
 
         std::size_t poly_modulus_degree_ = 0;
 
-        std::vector<SmallModulus> coeff_modulus_{};
+        std::vector<Modulus> coeff_modulus_{};
 
         std::shared_ptr<UniformRandomGeneratorFactory> random_generator_{ nullptr };
 
-        SmallModulus plain_modulus_{};
+        Modulus plain_modulus_{};
 
         parms_id_type parms_id_ = parms_id_zero;
     };

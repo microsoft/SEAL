@@ -7,10 +7,10 @@
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/util/galois.h"
+#include "seal/util/ntt.h"
 #include "seal/util/numth.h"
 #include "seal/util/pointer.h"
 #include "seal/util/rns.h"
-#include "seal/util/smallntt.h"
 #include <functional>
 #include <memory>
 #include <unordered_map>
@@ -53,7 +53,7 @@ namespace seal
             /**
             coeff_modulus's primes' count is not bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX)
             */
-            invalid_coeff_modulus_count = 2,
+            invalid_coeff_modulus_size = 2,
 
             /**
             coeff_modulus's primes' bit counts are not bounded by SEAL_USER_MOD_BIT_COUNT_MIN(MAX)
@@ -453,9 +453,9 @@ namespace seal
 
             util::Pointer<util::RNSTool> rns_tool_;
 
-            util::Pointer<util::SmallNTTTables> small_ntt_tables_;
+            util::Pointer<util::NTTTables> small_ntt_tables_;
 
-            util::Pointer<util::SmallNTTTables> plain_ntt_tables_;
+            util::Pointer<util::NTTTables> plain_ntt_tables_;
 
             util::Pointer<util::GaloisTool> galois_tool_;
 

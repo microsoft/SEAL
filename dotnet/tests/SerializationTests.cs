@@ -13,10 +13,28 @@ namespace SEALNetTest
     public class SerializationTests
     {
         [TestMethod]
-        public void SEALHeaderTest()
+        public void IsValidHeader()
         {
             Assert.AreEqual(Serialization.SEALHeaderSize, 0x10);
 
+            Serialization.SEALHeader header = new Serialization.SEALHeader();
+            Assert.IsTrue(Serialization.IsValidHeader(header));
+
+            Serialization.SEALHeader invalidHeader = new Serialization.SEALHeader();
+            invalidHeader.Magic = 0x1212;
+            Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
+            invalidHeader.Magic = Serialization.SEALMagic;
+            Assert.AreEqual(Serialization.SEALHeaderSize, invalidHeader.HeaderSize);
+            invalidHeader.VersionMajor = 0x02;
+            Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
+            invalidHeader.VersionMajor = SEALVersion.Major;
+            invalidHeader.ComprMode = (ComprModeType)0x02;
+            Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
+        }
+
+        [TestMethod]
+        public void SEALHeaderSaveLoad()
+        {
             Serialization.SEALHeader header = new Serialization.SEALHeader();
             Serialization.SEALHeader loaded = new Serialization.SEALHeader();
             using (MemoryStream mem = new MemoryStream())
@@ -36,6 +54,36 @@ namespace SEALNetTest
                 Assert.AreEqual(loaded.ComprMode, header.ComprMode);
                 Assert.AreEqual(loaded.Reserved, header.Reserved);
                 Assert.AreEqual(loaded.Size, header.Size);
+            }
+        }
+
+        [TestMethod]
+        public void SEALHeaderUpgrade()
+        {
+            LegacyHeaders.SEALHeader_3_4 header_3_4 = new LegacyHeaders.SEALHeader_3_4();
+
+            using MemoryStream mem = new MemoryStream();
+            using BinaryWriter writer = new BinaryWriter(mem, Encoding.UTF8, true);
+            writer.Write(header_3_4.Magic);
+            writer.Write(header_3_4.ZeroByte);
+            writer.Write((byte)header_3_4.ComprMode);
+            writer.Write(header_3_4.Size);
+            writer.Write(header_3_4.Reserved);
+            mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+            {
+                Serialization.SEALHeader loaded = new Serialization.SEALHeader();
+                Serialization.LoadHeader(mem, loaded);
+                Assert.IsTrue(Serialization.IsValidHeader(loaded));
+                Assert.AreEqual(header_3_4.ComprMode, loaded.ComprMode);
+                Assert.AreEqual(header_3_4.Size, loaded.Size);
+                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+            }
+            {
+                Serialization.SEALHeader loaded = new Serialization.SEALHeader();
+                Serialization.LoadHeader(mem, loaded, false);
+                Assert.IsFalse(Serialization.IsValidHeader(loaded));
+                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
             }
         }
 

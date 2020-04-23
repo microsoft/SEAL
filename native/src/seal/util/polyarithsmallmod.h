@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/common.h"
 #include "seal/util/pointer.h"
 #include "seal/util/polycore.h"
@@ -17,7 +17,7 @@ namespace seal
     namespace util
     {
         inline void modulo_poly_coeffs(
-            const std::uint64_t *poly, std::size_t coeff_count, const SmallModulus &modulus, std::uint64_t *result)
+            const std::uint64_t *poly, std::size_t coeff_count, const Modulus &modulus, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (poly == nullptr && coeff_count > 0)
@@ -40,7 +40,7 @@ namespace seal
         }
 
         inline void modulo_poly_coeffs_63(
-            const std::uint64_t *poly, std::size_t coeff_count, const SmallModulus &modulus, std::uint64_t *result)
+            const std::uint64_t *poly, std::size_t coeff_count, const Modulus &modulus, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (poly == nullptr && coeff_count > 0)
@@ -64,7 +64,7 @@ namespace seal
         }
 
         inline void negate_poly_coeffmod(
-            const std::uint64_t *poly, std::size_t coeff_count, const SmallModulus &modulus, std::uint64_t *result)
+            const std::uint64_t *poly, std::size_t coeff_count, const Modulus &modulus, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (poly == nullptr && coeff_count > 0)
@@ -98,7 +98,7 @@ namespace seal
 
         inline void add_poly_poly_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
-            const SmallModulus &modulus, std::uint64_t *result)
+            const Modulus &modulus, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (operand1 == nullptr && coeff_count > 0)
@@ -141,7 +141,7 @@ namespace seal
 
         inline void sub_poly_poly_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
-            const SmallModulus &modulus, std::uint64_t *result)
+            const Modulus &modulus, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (operand1 == nullptr && coeff_count > 0)
@@ -181,32 +181,32 @@ namespace seal
         }
 
         void multiply_poly_scalar_coeffmod(
-            const std::uint64_t *poly, std::size_t coeff_count, std::uint64_t scalar, const SmallModulus &modulus,
+            const std::uint64_t *poly, std::size_t coeff_count, std::uint64_t scalar, const Modulus &modulus,
             std::uint64_t *result);
 
         void multiply_poly_poly_coeffmod(
             const std::uint64_t *operand1, std::size_t operand1_coeff_count, const std::uint64_t *operand2,
-            std::size_t operand2_coeff_count, const SmallModulus &modulus, std::size_t result_coeff_count,
+            std::size_t operand2_coeff_count, const Modulus &modulus, std::size_t result_coeff_count,
             std::uint64_t *result);
 
         void multiply_poly_poly_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
-            const SmallModulus &modulus, std::uint64_t *result);
+            const Modulus &modulus, std::uint64_t *result);
 
         inline void multiply_truncate_poly_poly_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
-            const SmallModulus &modulus, std::uint64_t *result)
+            const Modulus &modulus, std::uint64_t *result)
         {
             multiply_poly_poly_coeffmod(operand1, coeff_count, operand2, coeff_count, modulus, coeff_count, result);
         }
 
         void divide_poly_poly_coeffmod_inplace(
-            std::uint64_t *numerator, const std::uint64_t *denominator, std::size_t coeff_count,
-            const SmallModulus &modulus, std::uint64_t *quotient);
+            std::uint64_t *numerator, const std::uint64_t *denominator, std::size_t coeff_count, const Modulus &modulus,
+            std::uint64_t *quotient);
 
         inline void divide_poly_poly_coeffmod(
             const std::uint64_t *numerator, const std::uint64_t *denominator, std::size_t coeff_count,
-            const SmallModulus &modulus, std::uint64_t *quotient, std::uint64_t *remainder)
+            const Modulus &modulus, std::uint64_t *quotient, std::uint64_t *remainder)
         {
             set_uint_uint(numerator, coeff_count, remainder);
             divide_poly_poly_coeffmod_inplace(remainder, denominator, coeff_count, modulus, quotient);
@@ -214,22 +214,22 @@ namespace seal
 
         void dyadic_product_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
-            const SmallModulus &modulus, std::uint64_t *result);
+            const Modulus &modulus, std::uint64_t *result);
 
         std::uint64_t poly_infty_norm_coeffmod(
-            const std::uint64_t *operand, std::size_t coeff_count, const SmallModulus &modulus);
+            const std::uint64_t *operand, std::size_t coeff_count, const Modulus &modulus);
 
         bool try_invert_poly_coeffmod(
             const std::uint64_t *operand, const std::uint64_t *poly_modulus, std::size_t coeff_count,
-            const SmallModulus &modulus, std::uint64_t *result, MemoryPool &pool);
+            const Modulus &modulus, std::uint64_t *result, MemoryPool &pool);
 
         void negacyclic_shift_poly_coeffmod(
-            const std::uint64_t *operand, std::size_t coeff_count, std::size_t shift, const SmallModulus &modulus,
+            const std::uint64_t *operand, std::size_t coeff_count, std::size_t shift, const Modulus &modulus,
             std::uint64_t *result);
 
         inline void negacyclic_multiply_poly_mono_coeffmod(
             const std::uint64_t *operand, std::size_t coeff_count, std::uint64_t mono_coeff, std::size_t mono_exponent,
-            const SmallModulus &modulus, std::uint64_t *result, MemoryPool &pool)
+            const Modulus &modulus, std::uint64_t *result, MemoryPool &pool)
         {
             auto temp(util::allocate_uint(coeff_count, pool));
             multiply_poly_scalar_coeffmod(operand, coeff_count, mono_coeff, modulus, temp.get());

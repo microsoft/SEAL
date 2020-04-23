@@ -234,58 +234,58 @@ namespace Microsoft.Research.SEAL
 
         #endregion
 
-        #region SmallModulus methods
+        #region Modulus methods
 
-        [DllImport(sealc, EntryPoint = "SmallModulus_Create1", PreserveSig = false)]
-        internal static extern void SmallModulus_Create(ulong value, out IntPtr smallModulus);
+        [DllImport(sealc, EntryPoint = "Modulus_Create1", PreserveSig = false)]
+        internal static extern void Modulus_Create(ulong value, out IntPtr smallModulus);
 
-        [DllImport(sealc, EntryPoint = "SmallModulus_Create2", PreserveSig = false)]
-        internal static extern void SmallModulus_Create(IntPtr copy, out IntPtr smallModulus);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_Destroy(IntPtr thisptr);
+        [DllImport(sealc, EntryPoint = "Modulus_Create2", PreserveSig = false)]
+        internal static extern void Modulus_Create(IntPtr copy, out IntPtr smallModulus);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_IsZero(IntPtr thisptr, out bool isZero);
+        internal static extern void Modulus_Destroy(IntPtr thisptr);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_IsPrime(IntPtr thisptr, out bool isPrime);
+        internal static extern void Modulus_IsZero(IntPtr thisptr, out bool isZero);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_Value(IntPtr thisptr, out ulong value);
+        internal static extern void Modulus_IsPrime(IntPtr thisptr, out bool isPrime);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_BitCount(IntPtr thisptr, out int bitCount);
+        internal static extern void Modulus_Value(IntPtr thisptr, out ulong value);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_UInt64Count(IntPtr thisptr, out ulong uint64Count);
-
-        [DllImport(sealc, EntryPoint = "SmallModulus_Set1", PreserveSig = false)]
-        internal static extern void SmallModulus_Set(IntPtr thisptr, IntPtr assign);
-
-        [DllImport(sealc, EntryPoint = "SmallModulus_Set2", PreserveSig = false)]
-        internal static extern void SmallModulus_Set(IntPtr thisptr, ulong value);
+        internal static extern void Modulus_BitCount(IntPtr thisptr, out int bitCount);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_ConstRatio(
+        internal static extern void Modulus_UInt64Count(IntPtr thisptr, out ulong uint64Count);
+
+        [DllImport(sealc, EntryPoint = "Modulus_Set1", PreserveSig = false)]
+        internal static extern void Modulus_Set(IntPtr thisptr, IntPtr assign);
+
+        [DllImport(sealc, EntryPoint = "Modulus_Set2", PreserveSig = false)]
+        internal static extern void Modulus_Set(IntPtr thisptr, ulong value);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Modulus_ConstRatio(
             IntPtr thisptr,
             ulong length,
             [MarshalAs(UnmanagedType.LPArray)] ulong[] ratio);
 
-        [DllImport(sealc, EntryPoint = "SmallModulus_Equals1", PreserveSig = false)]
-        internal static extern void SmallModulus_Equals(IntPtr thisptr, IntPtr other, out bool result);
+        [DllImport(sealc, EntryPoint = "Modulus_Equals1", PreserveSig = false)]
+        internal static extern void Modulus_Equals(IntPtr thisptr, IntPtr other, out bool result);
 
-        [DllImport(sealc, EntryPoint = "SmallModulus_Equals2", PreserveSig = false)]
-        internal static extern void SmallModulus_Equals(IntPtr thisptr, ulong other, out bool result);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_SaveSize(IntPtr thisptr, byte comprMode, out long result);
+        [DllImport(sealc, EntryPoint = "Modulus_Equals2", PreserveSig = false)]
+        internal static extern void Modulus_Equals(IntPtr thisptr, ulong other, out bool result);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+        internal static extern void Modulus_SaveSize(IntPtr thisptr, byte comprMode, out long result);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void SmallModulus_Load(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
+        internal static extern void Modulus_Save(IntPtr thisptr, byte[] outptr, ulong size, byte comprMode, out long outBytes);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Modulus_Load(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
 
         #endregion
 
@@ -600,7 +600,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Ciphertext_PolyModulusDegree(IntPtr thisptr, out ulong polyModulusDegree);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Ciphertext_CoeffModulusCount(IntPtr thisptr, out ulong coeffModCount);
+        internal static extern void Ciphertext_CoeffModulusSize(IntPtr thisptr, out ulong coeffModCount);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_ParmsId(IntPtr thisptr, ulong[] parmsId);

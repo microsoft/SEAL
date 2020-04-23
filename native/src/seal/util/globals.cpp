@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/globals.h"
 #include <cstdint>
 
@@ -19,7 +19,7 @@ namespace seal
 #else
 #pragma message("WARNING: Thread-local memory pools disabled to support /clr")
 #endif
-            const map<size_t, vector<SmallModulus>> default_coeff_modulus_128{
+            const map<size_t, vector<Modulus>> default_coeff_modulus_128{
                 /*
                 Polynomial modulus: 1x^1024 + 1
                 Modulus count: 1
@@ -69,7 +69,7 @@ namespace seal
                     0xfffffffff70001 } }
             };
 
-            const map<size_t, vector<SmallModulus>> default_coeff_modulus_192{
+            const map<size_t, vector<Modulus>> default_coeff_modulus_192{
                 /*
                 Polynomial modulus: 1x^1024 + 1
                 Modulus count: 1
@@ -118,7 +118,7 @@ namespace seal
                     0x7fffffffa50001 } }
             };
 
-            const map<size_t, vector<SmallModulus>> default_coeff_modulus_256{
+            const map<size_t, vector<Modulus>> default_coeff_modulus_256{
                 /*
                 Polynomial modulus: 1x^1024 + 1
                 Modulus count: 1

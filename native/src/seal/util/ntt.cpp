@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/smallmodulus.h"
+#include "seal/modulus.h"
 #include "seal/util/defines.h"
+#include "seal/util/ntt.h"
 #include "seal/util/polyarith.h"
-#include "seal/util/smallntt.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <algorithm>
@@ -15,8 +15,7 @@ namespace seal
 {
     namespace util
     {
-        SmallNTTTables::SmallNTTTables(int coeff_count_power, const SmallModulus &modulus, MemoryPoolHandle pool)
-            : pool_(move(pool))
+        NTTTables::NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool) : pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
             if (!pool_)
@@ -27,7 +26,7 @@ namespace seal
             initialize(coeff_count_power, modulus);
         }
 
-        void SmallNTTTables::initialize(int coeff_count_power, const SmallModulus &modulus)
+        void NTTTables::initialize(int coeff_count_power, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if ((coeff_count_power < get_power_of_two(SEAL_POLY_MOD_DEGREE_MIN)) ||
@@ -100,7 +99,7 @@ namespace seal
             return;
         }
 
-        void SmallNTTTables::ntt_powers_of_primitive_root(uint64_t root, uint64_t *destination) const
+        void NTTTables::ntt_powers_of_primitive_root(uint64_t root, uint64_t *destination) const
         {
             uint64_t *destination_start = destination;
             *destination_start = 1;
@@ -113,7 +112,7 @@ namespace seal
         }
 
         // Compute floor (input * beta /q), where beta is a 64k power of 2 and  0 < q < beta.
-        void SmallNTTTables::ntt_scale_powers_of_primitive_root(const uint64_t *input, uint64_t *destination) const
+        void NTTTables::ntt_scale_powers_of_primitive_root(const uint64_t *input, uint64_t *destination) const
         {
             for (size_t i = 0; i < coeff_count_; i++, input++, destination++)
             {
@@ -127,7 +126,7 @@ namespace seal
         class NTTTablesCreateIter
         {
         public:
-            using value_type = SmallNTTTables;
+            using value_type = NTTTables;
             using pointer = void;
             using reference = value_type;
             using difference_type = std::ptrdiff_t;
@@ -141,7 +140,7 @@ namespace seal
             {}
 
             // Other constructors
-            NTTTablesCreateIter(int coeff_count_power, vector<SmallModulus> modulus, MemoryPoolHandle pool)
+            NTTTablesCreateIter(int coeff_count_power, vector<Modulus> modulus, MemoryPoolHandle pool)
                 : coeff_count_power_(coeff_count_power), modulus_(modulus), pool_(pool)
             {}
 
@@ -154,7 +153,7 @@ namespace seal
 
             NTTTablesCreateIter &operator=(NTTTablesCreateIter &&assign) = default;
 
-            // Dereferencing creates SmallNTTTables and returns by value
+            // Dereferencing creates NTTTables and returns by value
             inline value_type operator*() const
             {
                 return { coeff_count_power_, modulus_[index_], pool_ };
@@ -195,13 +194,12 @@ namespace seal
         private:
             size_t index_ = 0;
             int coeff_count_power_ = 0;
-            vector<SmallModulus> modulus_;
+            vector<Modulus> modulus_;
             MemoryPoolHandle pool_;
         };
 
-        void CreateSmallNTTTables(
-            int coeff_count_power, const vector<SmallModulus> &modulus, Pointer<SmallNTTTables> &tables,
-            MemoryPoolHandle pool)
+        void CreateNTTTables(
+            int coeff_count_power, const vector<Modulus> &modulus, Pointer<NTTTables> &tables, MemoryPoolHandle pool)
         {
             if (!pool)
             {
@@ -227,7 +225,7 @@ namespace seal
 
         For details, see Michael Naehrig and Patrick Longa.
         */
-        void ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
+        void ntt_negacyclic_harvey_lazy(uint64_t *operand, const NTTTables &tables)
         {
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus << 1;
@@ -314,7 +312,7 @@ namespace seal
         }
 
         // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig).
-        void inverse_ntt_negacyclic_harvey_lazy(uint64_t *operand, const SmallNTTTables &tables)
+        void inverse_ntt_negacyclic_harvey_lazy(uint64_t *operand, const NTTTables &tables)
         {
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus << 1;

@@ -199,7 +199,7 @@ SEAL_C_FUNC IntegerEncoder_PlainModulus(void *thisptr, void **smallModPtr)
     IfNullRet(intenc, E_POINTER);
     IfNullRet(smallModPtr, E_POINTER);
 
-    SmallModulus *sm = new SmallModulus(intenc->plain_modulus());
+    Modulus *sm = new Modulus(intenc->plain_modulus());
     *smallModPtr = sm;
     return S_OK;
 }

@@ -23,11 +23,7 @@ namespace seal
         public:
             SafeByteBuffer(std::streamsize size = 1) : size_(size)
             {
-                if (!fits_in<int>(add_safe(size_, std::streamsize(1))))
-                {
-                    throw std::invalid_argument("size is too large");
-                }
-                buf_.resize(static_cast<std::size_t>(size_ + 1));
+                buf_.resize(add_safe(size_, std::streamsize(1)));
                 setp(buf_.begin(), buf_.begin() + size_);
                 setg(buf_.begin(), buf_.begin(), buf_.begin() + size_);
             }
@@ -49,6 +45,32 @@ namespace seal
             }
 
         private:
+            void safe_gbump(std::streamsize count)
+            {
+                std::streamsize int_max = static_cast<std::streamsize>(std::numeric_limits<int>::max());
+                while (count > int_max)
+                {
+                    gbump(std::numeric_limits<int>::max());
+                    count -= int_max;
+                }
+
+                // This is now safe
+                gbump(static_cast<int>(count));
+            }
+
+            void safe_pbump(std::streamsize count)
+            {
+                std::streamsize int_max = static_cast<std::streamsize>(std::numeric_limits<int>::max());
+                while (count > int_max)
+                {
+                    pbump(std::numeric_limits<int>::max());
+                    count -= int_max;
+                }
+
+                // This is now safe
+                pbump(static_cast<int>(count));
+            }
+
             int_type underflow() override
             {
                 if (gptr() == egptr())
@@ -65,7 +87,7 @@ namespace seal
                 {
                     return traits_type::eof();
                 }
-                gbump(-1);
+                safe_gbump(std::streamsize(-1));
                 return traits_type::to_int_type(*gptr());
             }
 
@@ -83,7 +105,7 @@ namespace seal
                 std::streamsize avail = std::max(
                     std::streamsize(0), std::min(count, safe_cast<std::streamsize>(std::distance(gptr(), egptr()))));
                 std::copy_n(gptr(), avail, s);
-                gbump(safe_cast<int>(avail));
+                safe_gbump(avail);
                 return avail;
             }
 
@@ -159,21 +181,21 @@ namespace seal
 
                 // Set the get and put pointers appropriately
                 setp(buf_.begin(), buf_.begin() + size_);
-                pbump(safe_cast<int>(old_poff));
+                safe_pbump(old_poff);
                 setg(buf_.begin(), buf_.begin() + old_goff, buf_.begin() + size_);
             }
 
             int_type overflow(int_type ch = traits_type::eof()) override
             {
                 if (traits_type::eq_int_type(eof_, ch) ||
-                    !fits_in<int>(ceil(static_cast<double>(buf_.size()) * expansion_factor_) + 1))
+                    !fits_in<std::size_t>(ceil(static_cast<double>(buf_.size()) * expansion_factor_) + 1))
                 {
                     return eof_;
                 }
 
                 // Output ch to the buffer (there is one byte left of space) and overflow
                 *pptr() = traits_type::to_char_type(ch);
-                pbump(1);
+                safe_pbump(std::streamsize(1));
 
                 // Expand the size of the buffer
                 expand_size();
@@ -194,7 +216,7 @@ namespace seal
                         std::streamsize(0),
                         std::min(remaining, safe_cast<std::streamsize>(std::distance(pptr(), epptr()))));
                     std::copy_n(s, avail, pptr());
-                    pbump(safe_cast<int>(avail));
+                    safe_pbump(avail);
                     remaining -= avail;
                     s += avail;
                 }
@@ -357,6 +379,11 @@ namespace seal
             ArrayPutBuffer(const ArrayPutBuffer &copy) = delete;
 
             ArrayPutBuffer &operator=(const ArrayPutBuffer &assign) = delete;
+
+            SEAL_NODISCARD bool at_end() const noexcept
+            {
+                return head_ == end_;
+            }
 
         private:
             int_type overflow(int_type ch = traits_type::eof()) override

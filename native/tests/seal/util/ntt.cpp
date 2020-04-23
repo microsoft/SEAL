@@ -2,11 +2,10 @@
 // Licensed under the MIT license.
 
 #include "seal/modulus.h"
-#include "seal/smallmodulus.h"
 #include "seal/util/mempool.h"
+#include "seal/util/ntt.h"
 #include "seal/util/numth.h"
 #include "seal/util/polycore.h"
-#include "seal/util/smallntt.h"
 #include "seal/util/uintcore.h"
 #include <cstddef>
 #include <cstdint>
@@ -21,29 +20,29 @@ namespace sealtest
 {
     namespace util
     {
-        TEST(SmallNTTTablesTest, SmallNTTBasics)
+        TEST(NTTTablesTest, NTTBasics)
         {
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
-            Pointer<SmallNTTTables> tables;
+            Pointer<NTTTables> tables;
             int coeff_count_power = 1;
-            SmallModulus modulus(get_prime(uint64_t(1) << coeff_count_power, 60));
-            ASSERT_NO_THROW(tables = allocate<SmallNTTTables>(pool, coeff_count_power, modulus, pool));
+            Modulus modulus(get_prime(uint64_t(1) << coeff_count_power, 60));
+            ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(2ULL, tables->coeff_count());
             ASSERT_EQ(1, tables->coeff_count_power());
 
             coeff_count_power = 2;
             modulus = get_prime(uint64_t(1) << coeff_count_power, 50);
-            ASSERT_NO_THROW(tables = allocate<SmallNTTTables>(pool, coeff_count_power, modulus, pool));
+            ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(4ULL, tables->coeff_count());
             ASSERT_EQ(2, tables->coeff_count_power());
 
             coeff_count_power = 10;
             modulus = get_prime(uint64_t(1) << coeff_count_power, 40);
-            ASSERT_NO_THROW(tables = allocate<SmallNTTTables>(pool, coeff_count_power, modulus, pool));
+            ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(1024ULL, tables->coeff_count());
             ASSERT_EQ(10, tables->coeff_count_power());
 
-            ASSERT_NO_THROW(CreateSmallNTTTables(
+            ASSERT_NO_THROW(CreateNTTTables(
                 coeff_count_power, CoeffModulus::Create(uint64_t(1) << coeff_count_power, { 20, 20, 20, 20, 20 }),
                 tables, pool));
             for (size_t i = 0; i < 5; i++)
@@ -53,14 +52,14 @@ namespace sealtest
             }
         }
 
-        TEST(SmallNTTTablesTest, SmallNTTPrimitiveRootsTest)
+        TEST(NTTTablesTest, NTTPrimitiveRootsTest)
         {
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
-            Pointer<SmallNTTTables> tables;
+            Pointer<NTTTables> tables;
 
             int coeff_count_power = 1;
-            SmallModulus modulus(0xffffffffffc0001ULL);
-            ASSERT_NO_THROW(tables = allocate<SmallNTTTables>(pool, coeff_count_power, modulus, pool));
+            Modulus modulus(0xffffffffffc0001ULL);
+            ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(1ULL, tables->get_from_root_powers(0));
             ASSERT_EQ(288794978602139552ULL, tables->get_from_root_powers(1));
             uint64_t inv;
@@ -68,21 +67,21 @@ namespace sealtest
             ASSERT_EQ(inv, tables->get_from_inv_root_powers(1));
 
             coeff_count_power = 2;
-            ASSERT_NO_THROW(tables = allocate<SmallNTTTables>(pool, coeff_count_power, modulus, pool));
+            ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(1ULL, tables->get_from_root_powers(0));
             ASSERT_EQ(288794978602139552ULL, tables->get_from_root_powers(1));
             ASSERT_EQ(178930308976060547ULL, tables->get_from_root_powers(2));
             ASSERT_EQ(748001537669050592ULL, tables->get_from_root_powers(3));
         }
 
-        TEST(SmallNTTTablesTest, NegacyclicSmallNTTTest)
+        TEST(NTTTablesTest, NegacyclicNTTTest)
         {
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
-            Pointer<SmallNTTTables> tables;
+            Pointer<NTTTables> tables;
 
             int coeff_count_power = 1;
-            SmallModulus modulus(0xffffffffffc0001ULL);
-            ASSERT_NO_THROW(tables = allocate<SmallNTTTables>(pool, coeff_count_power, modulus, pool));
+            Modulus modulus(0xffffffffffc0001ULL);
+            ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             auto poly(allocate_poly(2, 1, pool));
             poly[0] = 0;
             poly[1] = 0;
@@ -103,14 +102,14 @@ namespace sealtest
             ASSERT_EQ(864126526004445282ULL, poly[1]);
         }
 
-        TEST(SmallNTTTablesTest, InverseNegacyclicSmallNTTTest)
+        TEST(NTTTablesTest, InverseNegacyclicNTTTest)
         {
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
-            Pointer<SmallNTTTables> tables;
+            Pointer<NTTTables> tables;
 
             int coeff_count_power = 3;
-            SmallModulus modulus(0xffffffffffc0001ULL);
-            ASSERT_NO_THROW(tables = allocate<SmallNTTTables>(pool, coeff_count_power, modulus, pool));
+            Modulus modulus(0xffffffffffc0001ULL);
+            ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             auto poly(allocate_zero_poly(800, 1, pool));
             auto temp(allocate_zero_poly(800, 1, pool));
 

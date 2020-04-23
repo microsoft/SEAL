@@ -939,6 +939,24 @@ namespace seal
             }
         }
 
+        template <std::size_t Count>
+        inline void multiply_accumulate_uint64(
+            const std::uint64_t *operand1, const std::uint64_t *operand2, unsigned long long *accumulator)
+        {
+            unsigned long long qword[2];
+            multiply_uint64(*operand1, *operand2, qword);
+            multiply_accumulate_uint64<Count - 1>(operand1 + 1, operand2 + 1, accumulator);
+            add_uint128(qword, accumulator, accumulator);
+        }
+
+        template <>
+        inline void multiply_accumulate_uint64<0>(
+            SEAL_MAYBE_UNUSED const std::uint64_t *operand1, SEAL_MAYBE_UNUSED const std::uint64_t *operand2,
+            SEAL_MAYBE_UNUSED unsigned long long *accumulator)
+        {
+            // Base case; nothing to do
+        }
+
         void divide_uint_uint_inplace(
             std::uint64_t *numerator, const std::uint64_t *denominator, std::size_t uint64_count,
             std::uint64_t *quotient, MemoryPool &pool);

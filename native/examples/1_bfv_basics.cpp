@@ -62,7 +62,7 @@ void example_bfv_basics()
     Next we set the [ciphertext] `coefficient modulus' (coeff_modulus). This
     parameter is a large integer, which is a product of distinct prime numbers,
     each up to 60 bits in size. It is represented as a vector of these prime
-    numbers, each represented by an instance of the SmallModulus class. The
+    numbers, each represented by an instance of the Modulus class. The
     bit-length of coeff_modulus means the sum of the bit-lengths of its prime
     factors.
 
@@ -95,7 +95,7 @@ void example_bfv_basics()
 
         CoeffModulus::BFVDefault(poly_modulus_degree),
 
-    which returns std::vector<SmallModulus> consisting of a generally good choice
+    which returns std::vector<Modulus> consisting of a generally good choice
     for the given poly_modulus_degree.
     */
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));

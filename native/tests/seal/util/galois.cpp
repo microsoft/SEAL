@@ -87,7 +87,7 @@ namespace sealtest
             uint64_t in[8]{ 0, 1, 2, 3, 4, 5, 6, 7 };
             uint64_t out[8];
             uint64_t out_true[8]{ 0, 14, 6, 1, 13, 7, 2, 12 };
-            galois_tool->apply_galois(in, 3, SmallModulus(17), out);
+            galois_tool->apply_galois(in, 3, Modulus(17), out);
             for (size_t i = 0; i < 8; i++)
             {
                 ASSERT_EQ(out_true[i], out[i]);

@@ -6,7 +6,6 @@
 #include "seal/util/uintcore.h"
 #include <algorithm>
 #include <array>
-#include <functional>
 
 using namespace std;
 
@@ -324,7 +323,7 @@ namespace seal
                 throw invalid_argument("quotient cannot point to same value as numerator");
             }
 #endif
-            // We expect 129-bit input
+            // We expect 128-bit input
             constexpr size_t uint64_count = 2;
 
             // Clear quotient. Set it to zero.

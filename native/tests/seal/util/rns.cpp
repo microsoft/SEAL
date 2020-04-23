@@ -38,7 +38,7 @@ namespace sealtest
             {
                 RNSBase base({ 2 }, pool);
                 ASSERT_EQ(size_t(1), base.size());
-                ASSERT_EQ(SmallModulus(2), base[0]);
+                ASSERT_EQ(Modulus(2), base[0]);
                 ASSERT_THROW(
                     [&]() {
                         return base[1].value();
@@ -48,9 +48,9 @@ namespace sealtest
             {
                 RNSBase base({ 2, 3, 5 }, pool);
                 ASSERT_EQ(size_t(3), base.size());
-                ASSERT_EQ(SmallModulus(2), base[0]);
-                ASSERT_EQ(SmallModulus(3), base[1]);
-                ASSERT_EQ(SmallModulus(5), base[2]);
+                ASSERT_EQ(Modulus(2), base[0]);
+                ASSERT_EQ(Modulus(3), base[1]);
+                ASSERT_EQ(Modulus(5), base[2]);
                 ASSERT_THROW(
                     [&]() {
                         return base[3].value();
@@ -141,14 +141,14 @@ namespace sealtest
             ASSERT_EQ(3l, pool.use_count());
             ASSERT_EQ(size_t(2), base2.size());
             ASSERT_EQ(base[0], base2[0]);
-            ASSERT_EQ(SmallModulus(5), base2[1]);
+            ASSERT_EQ(Modulus(5), base2[1]);
 
             RNSBase base3 = base2.extend(7);
             ASSERT_EQ(4l, pool.use_count());
             ASSERT_EQ(size_t(3), base3.size());
             ASSERT_EQ(base2[0], base3[0]);
             ASSERT_EQ(base2[1], base3[1]);
-            ASSERT_EQ(SmallModulus(7), base3[2]);
+            ASSERT_EQ(Modulus(7), base3[2]);
 
             ASSERT_THROW(auto base4 = base3.extend(0), invalid_argument);
             ASSERT_THROW(auto base4 = base3.extend(14), logic_error);
@@ -157,13 +157,13 @@ namespace sealtest
             RNSBase base5({ 7, 11, 13, 17 }, pool);
             RNSBase base6 = base4.extend(base5);
             ASSERT_EQ(size_t(7), base6.size());
-            ASSERT_EQ(SmallModulus(3), base6[0]);
-            ASSERT_EQ(SmallModulus(4), base6[1]);
-            ASSERT_EQ(SmallModulus(5), base6[2]);
-            ASSERT_EQ(SmallModulus(7), base6[3]);
-            ASSERT_EQ(SmallModulus(11), base6[4]);
-            ASSERT_EQ(SmallModulus(13), base6[5]);
-            ASSERT_EQ(SmallModulus(17), base6[6]);
+            ASSERT_EQ(Modulus(3), base6[0]);
+            ASSERT_EQ(Modulus(4), base6[1]);
+            ASSERT_EQ(Modulus(5), base6[2]);
+            ASSERT_EQ(Modulus(7), base6[3]);
+            ASSERT_EQ(Modulus(11), base6[4]);
+            ASSERT_EQ(Modulus(13), base6[5]);
+            ASSERT_EQ(Modulus(17), base6[6]);
 
             ASSERT_THROW(auto base7 = base4.extend(RNSBase({ 7, 11, 15 }, pool)), logic_error);
         }
@@ -388,7 +388,7 @@ namespace sealtest
             size_t coeff_base_count = 4;
             int prime_bit_count = 20;
 
-            SmallModulus plain_t = 65537;
+            Modulus plain_t = 65537;
             RNSBase coeff_base(get_primes(poly_modulus_degree, prime_bit_count, coeff_base_count), pool);
 
             ASSERT_NO_THROW(RNSTool rns_tool(poly_modulus_degree, coeff_base, plain_t, pool));
@@ -405,7 +405,7 @@ namespace sealtest
             // This function multiplies an input array with m_tilde (modulo q-base) and subsequently
             // performs base conversion to Bsk U {m_tilde}.
 
-            SmallModulus plain_t = 0;
+            Modulus plain_t = 0;
             auto pool = MemoryManager::GetPool();
             Pointer<RNSTool> rns_tool;
             {
@@ -440,11 +440,11 @@ namespace sealtest
             }
             {
                 size_t poly_modulus_degree = 2;
-                size_t coeff_modulus_count = 2;
+                size_t coeff_modulus_size = 2;
                 ASSERT_NO_THROW(
                     rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5 }, pool), plain_t, pool));
 
-                vector<uint64_t> in(poly_modulus_degree * coeff_modulus_count);
+                vector<uint64_t> in(poly_modulus_degree * coeff_modulus_size);
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 set_zero_uint(in.size(), in.data());
                 rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
@@ -483,7 +483,7 @@ namespace sealtest
             // of q in the Bsk U {m_tilde} representation. The functions works correctly for
             // sufficiently small values of u.
 
-            SmallModulus plain_t = 0;
+            Modulus plain_t = 0;
             auto pool = MemoryManager::GetPool();
             Pointer<RNSTool> rns_tool;
             {
@@ -612,7 +612,7 @@ namespace sealtest
             // the value divided by q floored in base Bsk. The approximation has absolute value up
             // to k-1, where k is the number of primes in the base q.
 
-            SmallModulus plain_t = 0;
+            Modulus plain_t = 0;
             auto pool = MemoryManager::GetPool();
             Pointer<RNSTool> rns_tool;
             {
@@ -722,7 +722,7 @@ namespace sealtest
             // This function assumes the input is in base Bsk and outputs a fast base conversion
             // with Shenoy-Kumaresan correction to base q. The conversion is exact.
 
-            SmallModulus plain_t = 0;
+            Modulus plain_t = 0;
             auto pool = MemoryManager::GetPool();
             Pointer<RNSTool> rns_tool;
             {
@@ -786,7 +786,7 @@ namespace sealtest
             auto pool = MemoryManager::GetPool();
             Pointer<RNSTool> rns_tool;
             size_t poly_modulus_degree = 2;
-            SmallModulus plain_t = 3;
+            Modulus plain_t = 3;
             ASSERT_NO_THROW(
                 rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 5, 7 }, pool), plain_t, pool));
 
@@ -832,7 +832,7 @@ namespace sealtest
             Pointer<RNSTool> rns_tool;
             {
                 size_t poly_modulus_degree = 2;
-                SmallModulus plain_t = 0;
+                Modulus plain_t = 0;
                 ASSERT_NO_THROW(
                     rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 13, 7 }, pool), plain_t, pool));
 
@@ -875,7 +875,7 @@ namespace sealtest
             }
             {
                 size_t poly_modulus_degree = 2;
-                SmallModulus plain_t = 0;
+                Modulus plain_t = 0;
                 ASSERT_NO_THROW(
                     rns_tool =
                         allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 3, 5, 7, 11 }, pool), plain_t, pool));
@@ -939,8 +939,8 @@ namespace sealtest
             auto pool = MemoryManager::GetPool();
             Pointer<RNSTool> rns_tool;
             size_t poly_modulus_degree = 2;
-            SmallNTTTables ntt[]{ { 1, SmallModulus(53) }, { 1, SmallModulus(13) } };
-            SmallModulus plain_t = 0;
+            NTTTables ntt[]{ { 1, Modulus(53) }, { 1, Modulus(13) } };
+            Modulus plain_t = 0;
             ASSERT_NO_THROW(
                 rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 53, 13 }, pool), plain_t, pool));
 

@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
@@ -65,28 +66,48 @@ namespace Microsoft.Research.SEAL
         /// 6. reserved for future use and data alignment (2 bytes)
         /// 7. the size in bytes of the entire serialized object, including the header (8 bytes)
         /// </remarks>
-        public class SEALHeader
+        [StructLayout(LayoutKind.Explicit, Size=16)]
+        public class SEALHeader : ISettable<SEALHeader>
         {
             /// <summary>A magic number identifying this is a SEALHeader struct (2 bytes)</summary>
-            public ushort Magic = SEALMagic;
+            [FieldOffset(0)]public ushort Magic = SEALMagic;
 
             /// <summary>Size in bytes of the SEALHeader struct (1 byte)</summary>
-            public byte HeaderSize = SEALHeaderSize;
+            [FieldOffset(2)]public byte HeaderSize = SEALHeaderSize;
 
             /// <summary>Microsoft SEAL's major version number (1 byte)</summary>
-            public byte VersionMajor = SEALVersion.Major;
+            [FieldOffset(3)]public byte VersionMajor = SEALVersion.Major;
 
             /// <summary>Microsoft SEAL's minor version number (1 byte)</summary>
-            public byte VersionMinor = SEALVersion.Minor;
+            [FieldOffset(4)]public byte VersionMinor = SEALVersion.Minor;
 
             /// <summary>A compr_mode_type indicating whether data after the header is compressed (1 byte)</summary>
-            public ComprModeType ComprMode = ComprModeDefault;
+            [FieldOffset(5)]public ComprModeType ComprMode = ComprModeDefault;
 
             /// <summary>Reserved for future use and data alignment (2 bytes)</summary>
-            public ushort Reserved = 0;
+            [FieldOffset(6)]public ushort Reserved = 0;
 
             /// <summary>The size in bytes of the entire serialized object, including the header (8 bytes)</summary>
-            public ulong Size = 0;
+            [FieldOffset(8)]public ulong Size = 0;
+
+            /// <summary>
+            /// Copies a given SEALHeader to the current one.
+            /// </summary>
+            /// <param name="assign">The SEALHeader to copy from</param>
+            /// <exception cref="ArgumentNullException">if assign is null</exception>
+            public void Set(SEALHeader assign)
+            {
+                if (null == assign)
+                    throw new ArgumentNullException(nameof(assign));
+
+                Magic = assign.Magic;
+                HeaderSize = assign.HeaderSize;
+                VersionMajor = assign.VersionMajor;
+                VersionMinor = assign.VersionMinor;
+                ComprMode = assign.ComprMode;
+                Reserved = assign.Reserved;
+                Size = assign.Size;
+            }
         };
 
         private static bool IsSupportedComprMode(byte comprMode)
@@ -115,8 +136,7 @@ namespace Microsoft.Research.SEAL
             }
         }
 
-        /// <summary>Returns true if the given SEALHeader is valid and can be loaded by this version of
-        /// Microsoft SEAL.</summary>
+        /// <summary>Returns true if the given SEALHeader is valid for this version of Microsoft SEAL.</summary>
         /// <param name="header">The SEALHeader</param>
         public static bool IsValidHeader(SEALHeader header)
         {
@@ -163,13 +183,15 @@ namespace Microsoft.Research.SEAL
         /// <summary>Loads a SEALHeader from a given stream.</summary>
         /// <param name="stream">The stream to load the SEALHeader from</param>
         /// <param name="header">The SEALHeader to populate with the loaded data</param>
+        /// <param name="tryUpgradeIfInvalid">If the loaded SEALHeader is invalid, attempt to identify its format and
+        /// upgrade to the current SEALHeader version</param>
         /// <exception cref="ArgumentNullException">if header or stream is null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not support reading</exception>
         /// <exception cref="InvalidOperationException">if the loaded data is not a valid SEALHeader or if the loaded
         /// compression mode is not supported</exception>
         /// <exception cref="EndOfStreamException">if the stream ended unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        public static void LoadHeader(Stream stream, SEALHeader header)
+        public static void LoadHeader(Stream stream, SEALHeader header, bool tryUpgradeIfInvalid = true)
         {
             if (null == header)
                 throw new ArgumentNullException(nameof(header));
@@ -187,6 +209,25 @@ namespace Microsoft.Research.SEAL
                 header.ComprMode = (ComprModeType)reader.ReadByte();
                 header.Reserved = reader.ReadUInt16();
                 header.Size = reader.ReadUInt64();
+            }
+
+            // If header is invalid this may be an older header and we can try to automatically upgrade it
+            if (tryUpgradeIfInvalid && !IsValidHeader(header))
+            {
+                // Try interpret the data as a Microsoft SEAL 3.4 header
+                LegacyHeaders.SEALHeader_3_4 header_3_4 = new LegacyHeaders.SEALHeader_3_4(header);
+
+                SEALHeader newHeader = new SEALHeader();
+                // Copy over the fields; of course the result may not be valid depending on whether the input was a
+                // valid version 3.4 header
+                newHeader.ComprMode = header_3_4.ComprMode;
+                newHeader.Size = header_3_4.Size;
+
+                // Now validate the new header and discard if still not valid; something else is probably wrong
+                if (IsValidHeader(newHeader))
+                {
+                    header.Set(newHeader);
+                }
             }
         }
 
@@ -312,5 +353,75 @@ namespace Microsoft.Research.SEAL
                 throw new InvalidOperationException("Size indicated by loaded SEALHeader is out of bounds", ex);
             }
         }
+    }
+
+    /// <summary>Class to contain header information for legacy headers.</summary>
+    public abstract class LegacyHeaders
+    {
+        /// <summary>Class to enable compatibility with Microsoft SEAL 3.4 headers.</summary>
+        [StructLayout(LayoutKind.Explicit, Size=16)]
+        public class SEALHeader_3_4 : ISettable<SEALHeader_3_4>, ISettable<Serialization.SEALHeader>
+        {
+            /// <summary>SEALMagic</summary>
+            [FieldOffset(0)]public ushort Magic = Serialization.SEALMagic;
+
+            /// <summary>ZeroByte</summary>
+            [FieldOffset(2)]public byte ZeroByte = 0;
+
+            /// <summary>ComprModeType</summary>
+            [FieldOffset(3)]public ComprModeType ComprMode = Serialization.ComprModeDefault;
+
+            /// <summary>Size</summary>
+            [FieldOffset(4)]public uint Size = 0;
+
+            /// <summary>Reserved</summary>
+            [FieldOffset(8)]public ulong Reserved = 0;
+
+            /// <summary>Creates a new SEALHeader_3_4.</summary>
+            public SEALHeader_3_4()
+            {
+            }
+
+            /// <summary>
+            /// Constructs a new SEALHeader_3_4 by copying a given one.
+            /// </summary>
+            /// <param name="copy">The SEALHeader_3_4 to copy from</param>
+            /// <exception cref="ArgumentNullException">if copy is null</exception>
+            public SEALHeader_3_4(Serialization.SEALHeader copy)
+            {
+                if (null == copy)
+                    throw new ArgumentNullException(nameof(copy));
+
+                Set(copy);
+            }
+
+            /// <summary>Copies a given SEALHeader_3_4 to the current one.</summary>
+            /// <param name="assign">The SEALHeader_3_4 to copy from</param>
+            /// <exception cref="ArgumentNullException">if assign is null</exception>
+            public void Set(SEALHeader_3_4 assign)
+            {
+                if (null == assign)
+                    throw new ArgumentNullException(nameof(assign));
+
+                Magic = assign.Magic;
+                ZeroByte = assign.ZeroByte;
+                ComprMode = assign.ComprMode;
+                Size = assign.Size;
+                Reserved = assign.Reserved;
+            }
+
+            /// <summary>Copies a given SEALHeader to the current one as a byte array.</summary>
+            /// <param name="assign">The SEALHeader to copy from</param>
+            /// <exception cref="ArgumentNullException">if assign is null</exception>
+            public void Set(Serialization.SEALHeader assign)
+            {
+                if (null == assign)
+                    throw new ArgumentNullException(nameof(assign));
+
+                GCHandle gch = GCHandle.Alloc(this, GCHandleType.Pinned);
+                Marshal.StructureToPtr(assign, gch.AddrOfPinnedObject(), false);
+                gch.Free();
+            }
+        };
     }
 }

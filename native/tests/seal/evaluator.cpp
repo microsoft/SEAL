@@ -24,7 +24,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptNegateDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -78,7 +78,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptAddDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -697,7 +697,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptSubDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -757,7 +757,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptAddPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -812,7 +812,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptSubPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -867,7 +867,7 @@ namespace sealtest
     {
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 6);
+            Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -933,7 +933,7 @@ namespace sealtest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus((1ULL << 20) - 1);
+            Modulus plain_modulus((1ULL << 20) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 60, 60 }));
@@ -963,7 +963,7 @@ namespace sealtest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus((1ULL << 40) - 1);
+            Modulus plain_modulus((1ULL << 40) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 60, 60 }));
@@ -997,7 +997,7 @@ namespace sealtest
     {
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 6);
+            Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -1063,7 +1063,7 @@ namespace sealtest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus((1ULL << 60) - 1);
+            Modulus plain_modulus((1ULL << 60) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60, 60 }));
@@ -1129,7 +1129,7 @@ namespace sealtest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 6);
+            Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -1195,7 +1195,7 @@ namespace sealtest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 8);
+            Modulus plain_modulus(1 << 8);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -1223,7 +1223,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVRelinearize)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40 }));
@@ -3080,7 +3080,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptSquareDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 8);
+        Modulus plain_modulus(1 << 8);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -3142,7 +3142,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptMultiplyManyDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -3229,7 +3229,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptExponentiateDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -3273,7 +3273,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptAddManyDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -3357,7 +3357,7 @@ namespace sealtest
     TEST(EvaluatorTest, TransformPlainToNTT)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -3429,7 +3429,7 @@ namespace sealtest
     TEST(EvaluatorTest, TransformEncryptedToFromNTT)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -3471,7 +3471,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptMultiplyPlainNTTDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -3540,7 +3540,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptApplyGaloisDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(257);
+        Modulus plain_modulus(257);
         parms.set_poly_modulus_degree(8);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
@@ -3618,7 +3618,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptRotateMatrixDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(257);
+        Modulus plain_modulus(257);
         parms.set_poly_modulus_degree(8);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
@@ -3666,7 +3666,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptModSwitchToNextDecrypt)
     {
         // the common parameters: the plaintext and the polynomial moduli
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
 
         // the parameters and the context of the higher level
         EncryptionParameters parms(scheme_type::BFV);
@@ -3749,7 +3749,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptModSwitchToDecrypt)
     {
         // the common parameters: the plaintext and the polynomial moduli
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
 
         // the parameters and the context of the higher level
         EncryptionParameters parms(scheme_type::BFV);

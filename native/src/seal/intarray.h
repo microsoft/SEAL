@@ -546,7 +546,7 @@ namespace seal
         Saves the IntArray to a given memory location. The output is in binary
         format and not human-readable.
 
-        @param[out] out The memory location to write the SmallModulus to
+        @param[out] out The memory location to write the Modulus to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
@@ -571,7 +571,7 @@ namespace seal
         metadata exceeds the provided value. The check is omitted if in_size_bound
         is zero.
 
-        @param[in] in The memory location to load the SmallModulus from
+        @param[in] in The memory location to load the Modulus from
         @param[in] size The number of bytes available in the given memory location
         @param[in] in_size_bound A bound on the size of the loaded IntArray
         @throws std::invalid_argument if in is null or if size is too small to

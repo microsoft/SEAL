@@ -85,8 +85,11 @@ endfunction()
 # Always build position-independent-code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Don't make the install target depend on the all target.
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY ON)
+
 # In Debug mode, enable extra compiler flags.
-if(SEAL_DEBUG)
+if(NOT MSVC AND SEAL_DEBUG)
   enable_cxx_compiler_flag_if_supported("-Wall")
   enable_cxx_compiler_flag_if_supported("-Wextra")
   enable_cxx_compiler_flag_if_supported("-Wconversion")
@@ -264,8 +267,8 @@ endif()
 set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
 
-# ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning for CMake 3.17.1+
-if(SEAL_USE_ZLIB AND NOT MSVC AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.17.1)
+# ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning
+if(SEAL_USE_ZLIB AND NOT MSVC)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
 endif()
 

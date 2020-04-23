@@ -31,8 +31,8 @@ namespace seal
         case error_type::invalid_scheme:
             return "invalid_scheme";
 
-        case error_type::invalid_coeff_modulus_count:
-            return "invalid_coeff_modulus_count";
+        case error_type::invalid_coeff_modulus_size:
+            return "invalid_coeff_modulus_size";
 
         case error_type::invalid_coeff_modulus_bit_count:
             return "invalid_coeff_modulus_bit_count";
@@ -88,7 +88,7 @@ namespace seal
         case error_type::invalid_scheme:
             return "scheme must be BFV or CKKS";
 
-        case error_type::invalid_coeff_modulus_count:
+        case error_type::invalid_coeff_modulus_size:
             return "coeff_modulus's primes' count is not bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX)";
 
         case error_type::invalid_coeff_modulus_bit_count:
@@ -150,12 +150,12 @@ namespace seal
         // The number of coeff moduli is restricted to 64 to prevent unexpected behaviors
         if (coeff_modulus.size() > SEAL_COEFF_MOD_COUNT_MAX || coeff_modulus.size() < SEAL_COEFF_MOD_COUNT_MIN)
         {
-            context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_count;
+            context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_size;
             return context_data;
         }
 
-        size_t coeff_modulus_count = coeff_modulus.size();
-        for (size_t i = 0; i < coeff_modulus_count; i++)
+        size_t coeff_modulus_size = coeff_modulus.size();
+        for (size_t i = 0; i < coeff_modulus_size; i++)
         {
             // Check coefficient moduli bounds
             if (coeff_modulus[i].value() >> SEAL_USER_MOD_BIT_COUNT_MAX ||
@@ -167,16 +167,16 @@ namespace seal
         }
 
         // Compute the product of all coeff moduli
-        context_data.total_coeff_modulus_ = allocate_uint(coeff_modulus_count, pool_);
-        auto coeff_modulus_values(allocate_uint(coeff_modulus_count, pool_));
-        for (size_t i = 0; i < coeff_modulus_count; i++)
+        context_data.total_coeff_modulus_ = allocate_uint(coeff_modulus_size, pool_);
+        auto coeff_modulus_values(allocate_uint(coeff_modulus_size, pool_));
+        for (size_t i = 0; i < coeff_modulus_size; i++)
         {
             coeff_modulus_values[i] = coeff_modulus[i].value();
         }
         multiply_many_uint64(
-            coeff_modulus_values.get(), coeff_modulus_count, context_data.total_coeff_modulus_.get(), pool_);
+            coeff_modulus_values.get(), coeff_modulus_size, context_data.total_coeff_modulus_.get(), pool_);
         context_data.total_coeff_modulus_bit_count_ =
-            get_significant_bit_count_uint(context_data.total_coeff_modulus_.get(), coeff_modulus_count);
+            get_significant_bit_count_uint(context_data.total_coeff_modulus_.get(), coeff_modulus_size);
 
         // Check polynomial modulus degree and create poly_modulus
         size_t poly_modulus_degree = parms.poly_modulus_degree();
@@ -195,7 +195,7 @@ namespace seal
         }
 
         // Quick sanity check
-        if (!product_fits_in(coeff_modulus_count, poly_modulus_degree))
+        if (!product_fits_in(coeff_modulus_size, poly_modulus_degree))
         {
             context_data.qualifiers_.parameter_error = error_type::invalid_parameters_too_large;
             return context_data;
@@ -240,7 +240,7 @@ namespace seal
         context_data.qualifiers_.using_ntt = true;
         try
         {
-            CreateSmallNTTTables(coeff_count_power, coeff_modulus, context_data.small_ntt_tables_, pool_);
+            CreateNTTTables(coeff_count_power, coeff_modulus, context_data.small_ntt_tables_, pool_);
         }
         catch (const invalid_argument &)
         {
@@ -261,7 +261,7 @@ namespace seal
             }
 
             // Check that all coeff moduli are relatively prime to plain_modulus
-            for (size_t i = 0; i < coeff_modulus_count; i++)
+            for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 if (!are_coprime(coeff_modulus[i].value(), plain_modulus.value()))
                 {
@@ -273,7 +273,7 @@ namespace seal
             // Check that plain_modulus is smaller than total coeff modulus
             if (!is_less_than_uint_uint(
                     plain_modulus.data(), plain_modulus.uint64_count(), context_data.total_coeff_modulus_.get(),
-                    coeff_modulus_count))
+                    coeff_modulus_size))
             {
                 // Parameters are not valid
                 context_data.qualifiers_.parameter_error = error_type::invalid_plain_modulus_too_large;
@@ -284,7 +284,7 @@ namespace seal
             context_data.qualifiers_.using_batching = true;
             try
             {
-                CreateSmallNTTTables(coeff_count_power, { plain_modulus }, context_data.plain_ntt_tables_, pool_);
+                CreateNTTTables(coeff_count_power, { plain_modulus }, context_data.plain_ntt_tables_, pool_);
             }
             catch (const invalid_argument &)
             {
@@ -295,18 +295,18 @@ namespace seal
             // If all the small coefficient moduli are larger than plain modulus, we can quickly
             // lift plain coefficients to RNS form
             context_data.qualifiers_.using_fast_plain_lift = true;
-            for (size_t i = 0; i < coeff_modulus_count; i++)
+            for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 context_data.qualifiers_.using_fast_plain_lift &= (coeff_modulus[i].value() > plain_modulus.value());
             }
 
             // Calculate coeff_div_plain_modulus (BFV-"Delta") and the remainder upper_half_increment
-            context_data.coeff_div_plain_modulus_ = allocate_uint(coeff_modulus_count, pool_);
-            context_data.upper_half_increment_ = allocate_uint(coeff_modulus_count, pool_);
+            context_data.coeff_div_plain_modulus_ = allocate_uint(coeff_modulus_size, pool_);
+            context_data.upper_half_increment_ = allocate_uint(coeff_modulus_size, pool_);
             auto wide_plain_modulus(duplicate_uint_if_needed(
-                plain_modulus.data(), plain_modulus.uint64_count(), coeff_modulus_count, false, pool_));
+                plain_modulus.data(), plain_modulus.uint64_count(), coeff_modulus_size, false, pool_));
             divide_uint_uint(
-                context_data.total_coeff_modulus_.get(), wide_plain_modulus.get(), coeff_modulus_count,
+                context_data.total_coeff_modulus_.get(), wide_plain_modulus.get(), coeff_modulus_size,
                 context_data.coeff_div_plain_modulus_.get(), context_data.upper_half_increment_.get(), pool_);
 
             // Store the non-RNS form of upper_half_increment for BFV encryption
@@ -322,11 +322,11 @@ namespace seal
             context_data.plain_upper_half_threshold_ = (plain_modulus.value() + 1) >> 1;
 
             // Calculate coeff_modulus - plain_modulus.
-            context_data.plain_upper_half_increment_ = allocate_uint(coeff_modulus_count, pool_);
+            context_data.plain_upper_half_increment_ = allocate_uint(coeff_modulus_size, pool_);
             if (context_data.qualifiers_.using_fast_plain_lift)
             {
                 // Calculate coeff_modulus[i] - plain_modulus if using_fast_plain_lift
-                for (size_t i = 0; i < coeff_modulus_count; i++)
+                for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
                     context_data.plain_upper_half_increment_[i] = coeff_modulus[i].value() - plain_modulus.value();
                 }
@@ -334,7 +334,7 @@ namespace seal
             else
             {
                 sub_uint_uint(
-                    context_data.total_coeff_modulus(), wide_plain_modulus.get(), coeff_modulus_count,
+                    context_data.total_coeff_modulus(), wide_plain_modulus.get(), coeff_modulus_size,
                     context_data.plain_upper_half_increment_.get());
             }
         }
@@ -359,8 +359,8 @@ namespace seal
             context_data.plain_upper_half_threshold_ = uint64_t(1) << 63;
 
             // Calculate plain_upper_half_increment = 2^64 mod coeff_modulus for CKKS plaintexts
-            context_data.plain_upper_half_increment_ = allocate_uint(coeff_modulus_count, pool_);
-            for (size_t i = 0; i < coeff_modulus_count; i++)
+            context_data.plain_upper_half_increment_ = allocate_uint(coeff_modulus_size, pool_);
+            for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 uint64_t tmp = (uint64_t(1) << 63) % coeff_modulus[i].value();
                 context_data.plain_upper_half_increment_[i] =
@@ -368,11 +368,11 @@ namespace seal
             }
 
             // Compute the upper_half_threshold for this modulus.
-            context_data.upper_half_threshold_ = allocate_uint(coeff_modulus_count, pool_);
+            context_data.upper_half_threshold_ = allocate_uint(coeff_modulus_size, pool_);
             increment_uint(
-                context_data.total_coeff_modulus(), coeff_modulus_count, context_data.upper_half_threshold_.get());
+                context_data.total_coeff_modulus(), coeff_modulus_size, context_data.upper_half_threshold_.get());
             right_shift_uint(
-                context_data.upper_half_threshold_.get(), 1, coeff_modulus_count,
+                context_data.upper_half_threshold_.get(), 1, coeff_modulus_size,
                 context_data.upper_half_threshold_.get());
         }
         else
@@ -399,7 +399,7 @@ namespace seal
 
         // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
         context_data.qualifiers_.using_descending_modulus_chain = true;
-        for (size_t i = 0; i < coeff_modulus_count - 1; i++)
+        for (size_t i = 0; i < coeff_modulus_size - 1; i++)
         {
             context_data.qualifiers_.using_descending_modulus_chain &=
                 (coeff_modulus[i].value() > coeff_modulus[i + 1].value());
@@ -410,7 +410,7 @@ namespace seal
 
         // Check whether the coefficient modulus consists of a set of primes that are in decreasing order
         context_data.qualifiers_.using_descending_modulus_chain = true;
-        for (size_t i = 0; i < coeff_modulus_count - 1; i++)
+        for (size_t i = 0; i < coeff_modulus_size - 1; i++)
         {
             context_data.qualifiers_.using_descending_modulus_chain &=
                 (coeff_modulus[i].value() > coeff_modulus[i + 1].value());

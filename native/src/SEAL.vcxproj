@@ -44,7 +44,6 @@
     <ClInclude Include="seal\secretkey.h" />
     <ClInclude Include="seal\serializable.h" />
     <ClInclude Include="seal\serialization.h" />
-    <ClInclude Include="seal\smallmodulus.h" />
     <ClInclude Include="seal\util\blake2.h" />
     <ClInclude Include="seal\util\blake2-impl.h" />
     <ClInclude Include="seal\util\clang.h" />
@@ -70,7 +69,7 @@
     <ClInclude Include="seal\util\rlwe.h" />
     <ClInclude Include="seal\util\rns.h" />
     <ClInclude Include="seal\util\scalingvariant.h" />
-    <ClInclude Include="seal\util\smallntt.h" />
+    <ClInclude Include="seal\util\ntt.h" />
     <ClInclude Include="seal\util\streambuf.h" />
     <ClInclude Include="seal\util\uintarith.h" />
     <ClInclude Include="seal\util\uintarithmod.h" />
@@ -97,7 +96,6 @@
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
     <ClCompile Include="seal\serialization.cpp" />
-    <ClCompile Include="seal\smallmodulus.cpp" />
     <ClCompile Include="seal\util\rns.cpp" />
     <ClCompile Include="seal\util\ztools.cpp" />
     <ClCompile Include="seal\valcheck.cpp" />
@@ -115,7 +113,7 @@
     <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
     <ClCompile Include="seal\util\rlwe.cpp" />
     <ClCompile Include="seal\util\scalingvariant.cpp" />
-    <ClCompile Include="seal\util\smallntt.cpp" />
+    <ClCompile Include="seal\util\ntt.cpp" />
     <ClCompile Include="seal\util\streambuf.cpp" />
     <ClCompile Include="seal\util\uintarith.cpp" />
     <ClCompile Include="seal\util\uintarithmod.cpp" />

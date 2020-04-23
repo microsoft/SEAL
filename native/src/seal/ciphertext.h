@@ -214,9 +214,9 @@ namespace seal
         */
         inline void reserve(std::size_t size_capacity)
         {
-            // Note: poly_modulus_degree_ and coeff_modulus_count_ are either valid
-            // or coeff_modulus_count_ is zero (in which case no memory is allocated).
-            reserve_internal(size_capacity, poly_modulus_degree_, coeff_modulus_count_);
+            // Note: poly_modulus_degree_ and coeff_modulus_size_ are either valid
+            // or coeff_modulus_size_ is zero (in which case no memory is allocated).
+            reserve_internal(size_capacity, poly_modulus_degree_, coeff_modulus_size_);
         }
 
         /**
@@ -284,9 +284,9 @@ namespace seal
         */
         inline void resize(std::size_t size)
         {
-            // Note: poly_modulus_degree_ and coeff_modulus_count_ are either valid
-            // or coeff_modulus_count_ is zero (in which case no memory is allocated).
-            resize_internal(size, poly_modulus_degree_, coeff_modulus_count_);
+            // Note: poly_modulus_degree_ and coeff_modulus_size_ are either valid
+            // or coeff_modulus_size_ is zero (in which case no memory is allocated).
+            resize_internal(size, poly_modulus_degree_, coeff_modulus_size_);
         }
 
         /**
@@ -300,7 +300,7 @@ namespace seal
             is_ntt_form_ = false;
             size_ = 0;
             poly_modulus_degree_ = 0;
-            coeff_modulus_count_ = 0;
+            coeff_modulus_size_ = 0;
             scale_ = 1.0;
             data_.release();
         }
@@ -356,7 +356,7 @@ namespace seal
         */
         SEAL_NODISCARD inline ct_coeff_type *data(std::size_t poly_index)
         {
-            auto poly_uint64_count = util::mul_safe(poly_modulus_degree_, coeff_modulus_count_);
+            auto poly_uint64_count = util::mul_safe(poly_modulus_degree_, coeff_modulus_size_);
             if (poly_uint64_count == 0)
             {
                 return nullptr;
@@ -380,7 +380,7 @@ namespace seal
         */
         SEAL_NODISCARD inline const ct_coeff_type *data(std::size_t poly_index) const
         {
-            auto poly_uint64_count = util::mul_safe(poly_modulus_degree_, coeff_modulus_count_);
+            auto poly_uint64_count = util::mul_safe(poly_modulus_degree_, coeff_modulus_size_);
             if (poly_uint64_count == 0)
             {
                 return nullptr;
@@ -427,9 +427,9 @@ namespace seal
         associated encryption parameters. This directly affects the
         allocation size of the ciphertext.
         */
-        SEAL_NODISCARD inline std::size_t coeff_modulus_count() const noexcept
+        SEAL_NODISCARD inline std::size_t coeff_modulus_size() const noexcept
         {
-            return coeff_modulus_count_;
+            return coeff_modulus_size_;
         }
 
         /**
@@ -457,7 +457,7 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t size_capacity() const noexcept
         {
-            std::size_t poly_uint64_count = poly_modulus_degree_ * coeff_modulus_count_;
+            std::size_t poly_uint64_count = poly_modulus_degree_ * coeff_modulus_size_;
             return poly_uint64_count ? data_.capacity() / poly_uint64_count : std::size_t(0);
         }
 
@@ -691,9 +691,9 @@ namespace seal
 
     private:
         void reserve_internal(
-            std::size_t size_capacity, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count);
+            std::size_t size_capacity, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size);
 
-        void resize_internal(std::size_t size, std::size_t poly_modulus_degree, std::size_t coeff_modulus_count);
+        void resize_internal(std::size_t size, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size);
 
         void expand_seed(std::shared_ptr<SEALContext> context, const random_seed_type &seed);
 
@@ -714,7 +714,7 @@ namespace seal
 
         std::size_t poly_modulus_degree_ = 0;
 
-        std::size_t coeff_modulus_count_ = 0;
+        std::size_t coeff_modulus_size_ = 0;
 
         double scale_ = 1.0;
 

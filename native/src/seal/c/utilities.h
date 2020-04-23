@@ -18,7 +18,7 @@
 
 namespace seal
 {
-    class SmallModulus;
+    class Modulus;
     class SEALContext;
     class MemoryPoolHandle;
 } // namespace seal
@@ -44,10 +44,9 @@ namespace seal
         std::unique_ptr<seal::MemoryPoolHandle> MemHandleFromVoid(void *voidptr);
 
         /**
-        Build and array of SmallModulus pointers from a vector
+        Build and array of Modulus pointers from a vector
         */
-        void BuildSmallModulusPointers(
-            const std::vector<seal::SmallModulus> &in_mods, uint64_t *length, void **out_mods);
+        void BuildModulusPointers(const std::vector<seal::Modulus> &in_mods, uint64_t *length, void **out_mods);
 
         /**
         Get a shared pointer to a SEALContext from a void pointer.

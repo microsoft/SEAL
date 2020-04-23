@@ -13,7 +13,7 @@
 
 namespace seal
 {
-    class SmallModulus;
+    class Modulus;
 
     namespace util
     {
@@ -43,30 +43,30 @@ For .NET Framework wrapper support (C++/CLI) we need to
 
             /**
             This data structure is a key-value storage that maps degrees of the polynomial modulus
-            to vectors of SmallModulus elements so that when used with the default value for the
+            to vectors of Modulus elements so that when used with the default value for the
             standard deviation of the noise distribution (noise_standard_deviation), the security
             level is at least 128 bits according to http://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
-            extern const std::map<std::size_t, std::vector<SmallModulus>> default_coeff_modulus_128;
+            extern const std::map<std::size_t, std::vector<Modulus>> default_coeff_modulus_128;
 
             /**
             This data structure is a key-value storage that maps degrees of the polynomial modulus
-            to vectors of SmallModulus elements so that when used with the default value for the
+            to vectors of Modulus elements so that when used with the default value for the
             standard deviation of the noise distribution (noise_standard_deviation), the security
             level is at least 192 bits according to http://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
-            extern const std::map<std::size_t, std::vector<SmallModulus>> default_coeff_modulus_192;
+            extern const std::map<std::size_t, std::vector<Modulus>> default_coeff_modulus_192;
 
             /**
             This data structure is a key-value storage that maps degrees of the polynomial modulus
-            to vectors of SmallModulus elements so that when used with the default value for the
+            to vectors of Modulus elements so that when used with the default value for the
             standard deviation of the noise distribution (noise_standard_deviation), the security
             level is at least 256 bits according to http://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
-            extern const std::map<std::size_t, std::vector<SmallModulus>> default_coeff_modulus_256;
+            extern const std::map<std::size_t, std::vector<Modulus>> default_coeff_modulus_256;
         } // namespace global_variables
     }     // namespace util
 } // namespace seal

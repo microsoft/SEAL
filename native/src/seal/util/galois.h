@@ -27,7 +27,7 @@ namespace seal
             }
 
             void apply_galois(
-                const std::uint64_t *operand, std::uint32_t galois_elt, const SmallModulus &modulus,
+                const std::uint64_t *operand, std::uint32_t galois_elt, const Modulus &modulus,
                 std::uint64_t *result) const;
 
             void apply_galois_ntt(const std::uint64_t *operand, std::uint32_t galois_elt, std::uint64_t *result);

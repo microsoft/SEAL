@@ -8,16 +8,18 @@
 #include "seal/galoiskeys.h"
 #include "seal/kswitchkeys.h"
 #include "seal/memorymanager.h"
+#include "seal/modulus.h"
 #include "seal/plaintext.h"
 #include "seal/relinkeys.h"
 #include "seal/secretkey.h"
-#include "seal/smallmodulus.h"
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
+#include "seal/util/iterator.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 namespace seal
@@ -1361,8 +1363,8 @@ namespace seal
         }
 
         void switch_key_inplace(
-            Ciphertext &encrypted, const std::uint64_t *target, const KSwitchKeys &kswitch_keys, std::size_t key_index,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
+            Ciphertext &encrypted, util::ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys,
+            std::size_t key_index, MemoryPoolHandle pool = MemoryManager::GetPool());
 
         void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool);
 

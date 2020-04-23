@@ -155,7 +155,7 @@ namespace sealtest
         TEST(NumberTheory, TryPrimitiveRootMod)
         {
             uint64_t result;
-            SmallModulus mod(11);
+            Modulus mod(11);
 
             ASSERT_TRUE(try_primitive_root(2, mod, result));
             ASSERT_EQ(10ULL, result);
@@ -178,7 +178,7 @@ namespace sealtest
 
         TEST(NumberTheory, IsPrimitiveRootMod)
         {
-            SmallModulus mod(11);
+            Modulus mod(11);
             ASSERT_TRUE(is_primitive_root(10, 2, mod));
             ASSERT_FALSE(is_primitive_root(9, 2, mod));
             ASSERT_FALSE(is_primitive_root(10, 4, mod));
@@ -200,7 +200,7 @@ namespace sealtest
 
         TEST(NumberTheory, TryMinimalPrimitiveRootMod)
         {
-            SmallModulus mod(11);
+            Modulus mod(11);
 
             uint64_t result;
             ASSERT_TRUE(try_minimal_primitive_root(2, mod, result));

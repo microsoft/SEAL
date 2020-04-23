@@ -12,7 +12,7 @@
 #include "seal/secretkey.h"
 #include "seal/serializable.h"
 #include "seal/util/defines.h"
-#include "seal/util/smallntt.h"
+#include "seal/util/ntt.h"
 #include <memory>
 #include <random>
 
