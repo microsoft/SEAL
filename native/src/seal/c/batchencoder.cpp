@@ -117,34 +117,30 @@ SEAL_C_FUNC BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, ui
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(count, E_POINTER);
+    IfNullRet(destination, E_POINTER);
     Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
+    vector<uint64_t> result;
     try
     {
-        vector<uint64_t> result;
         encoder->decode(*plainptr, result, *handle);
-
-        *count = result.size();
-
-        if (nullptr == destination)
-        {
-            // We only wanted the count.
-            return S_OK;
-        }
-
-        for (uint64_t i = 0; i < *count; i++)
-        {
-            destination[i] = result[i];
-        }
-
-        return S_OK;
     }
     catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
+
+    // Copy to actual destination
+    *count = result.size();
+
+    for (uint64_t i = 0; i < *count; i++)
+    {
+        destination[i] = result[i];
+    }
+
+    return S_OK;
 }
 
 SEAL_C_FUNC BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, int64_t *destination, void *pool)
@@ -152,34 +148,30 @@ SEAL_C_FUNC BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, in
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(count, E_POINTER);
+    IfNullRet(destination, E_POINTER);
     Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
+    vector<int64_t> result;
     try
     {
-        vector<int64_t> result;
         encoder->decode(*plainptr, result, *handle);
-
-        *count = result.size();
-
-        if (nullptr == destination)
-        {
-            // We only wanted the count.
-            return S_OK;
-        }
-
-        for (uint64_t i = 0; i < *count; i++)
-        {
-            destination[i] = result[i];
-        }
-
-        return S_OK;
     }
     catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
+
+    *count = result.size();
+
+    // Copy to actual destination
+    for (uint64_t i = 0; i < *count; i++)
+    {
+        destination[i] = result[i];
+    }
+
+    return S_OK;
 }
 
 SEAL_C_FUNC BatchEncoder_Decode3(void *thisptr, void *plain, void *pool)

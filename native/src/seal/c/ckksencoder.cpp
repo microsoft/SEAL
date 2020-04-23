@@ -188,6 +188,7 @@ SEAL_C_FUNC CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_coun
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(value_count, E_POINTER);
+    IfNullRet(values, E_POINTER);
     Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
@@ -205,12 +206,6 @@ SEAL_C_FUNC CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_coun
 
     *value_count = destination.size();
 
-    if (nullptr == values)
-    {
-        // We only wanted to know the size.
-        return S_OK;
-    }
-
     // Copy to actual destination
     for (uint64_t i = 0; i < destination.size(); i++)
     {
@@ -226,6 +221,7 @@ SEAL_C_FUNC CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_coun
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
     IfNullRet(value_count, E_POINTER);
+    IfNullRet(values, E_POINTER);
     Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
     unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
@@ -242,12 +238,6 @@ SEAL_C_FUNC CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_coun
     }
 
     *value_count = destination.size();
-
-    if (nullptr == values)
-    {
-        // We only wanted to know the size.
-        return S_OK;
-    }
 
     // Copy to actual destination
     for (uint64_t i = 0; i < destination.size(); i++)

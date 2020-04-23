@@ -178,17 +178,17 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            ulong destCount = 0;
 
-            ulong count = 0;
-            NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref count, (ulong[])null, poolPtr);
+            // Allocate a big enough array to hold the result
+            ulong[] destArray = new ulong[SlotCount];
+            NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref destCount, destArray, poolPtr);
 
-            ulong[] dest = new ulong[count];
-            NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref count, dest, poolPtr);
-
+            // Transfer result to actual destination
             destination.Clear();
-            for (ulong i = 0; i < count; i++)
+            for (ulong i = 0; i < destCount; i++)
             {
-                destination.Add(dest[i]);
+                destination.Add(destArray[i]);
             }
         }
 
@@ -215,17 +215,17 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            ulong destCount = 0;
 
-            ulong count = 0;
-            NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref count, (long[])null, poolPtr);
+            // Allocate a big enough array to hold the result
+            long[] destArray = new long[SlotCount];
+            NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref destCount, destArray, poolPtr);
 
-            long[] dest = new long[count];
-            NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref count, dest, poolPtr);
-
+            // Transfer result to actual destination
             destination.Clear();
-            for (ulong i = 0; i < count; i++)
+            for (ulong i = 0; i < destCount; i++)
             {
-                destination.Add(dest[i]);
+                destination.Add(destArray[i]);
             }
         }
 
