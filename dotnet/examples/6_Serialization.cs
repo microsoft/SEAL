@@ -371,6 +371,53 @@ namespace SEALNetExamples
                 Console.WriteLine("Result: ");
                 Utilities.PrintVector(result, 3, 7);
             }
+
+            /*
+            Finally, we give a little bit more explanation of the structure of data
+            serialized by Microsoft SEAL. Serialized data always starts with a 16-byte
+            SEALHeader struct, as defined in dotnet/src/Serialization.cs, and is
+            followed by the possibly compressed data for the object.
+
+            A SEALHeader contains the following data:
+
+                [offset 0] 2-byte magic number 0xA15E (Serialization.SEALMagic)
+                [offset 2] 1-byte indicating the header size in bytes (always 16)
+                [offset 3] 1-byte indicating the Microsoft SEAL major version number
+                [offset 4] 1-byte indicating the Microsoft SEAL minor version number
+                [offset 5] 1-byte indicating the compression mode type
+                [offset 6] 2-byte reserved field (unused)
+                [offset 8] 8-byte size in bytes of the serialized data, including the header
+
+            Currently Microsoft SEAL supports only little-endian systems.
+
+            As an example, we demonstrate the SEALHeader created by saving a plaintext.
+            Note that the SEALHeader is never compressed, so there is no need to specify
+            the compression mode.
+            */
+            using Plaintext pt = new Plaintext("1x^2 + 3");
+            MemoryStream stream = new MemoryStream();
+            long dataSize = pt.Save(stream);
+
+            /*
+            Seek the stream head back to beginning of the stream.
+            */
+            stream.Seek(0, SeekOrigin.Begin);
+
+            /*
+            We can now load just the SEALHeader back from the stream as follows.
+            */
+            Serialization.SEALHeader header = new Serialization.SEALHeader();
+            Serialization.LoadHeader(stream, header);
+
+            /*
+            Now confirm that the size of data written to stream matches with what is
+            indicated by the SEALHeader.
+            */
+            Utilities.PrintLine();
+            Console.WriteLine($"Size written to stream: {dataSize} bytes");
+            Console.Write("             ");
+            Console.WriteLine($"Size indicated in SEALHeader: {header.Size} bytes");
+            Console.WriteLine();
         }
     }
 }
