@@ -15,11 +15,11 @@ Users of previous versions of the library should look at the [list of changes](C
     - [Core Concepts](#core-concepts)
     - [Homomorphic Encryption](#homomorphic-encryption)
     - [Microsoft SEAL](#microsoft-seal-1)
-- [Installing Microsoft SEAL](#installing-microsoft-seal)
-  - [Optional Dependencies](#optional-dependencies)
-    - [Microsoft GSL](#microsoft-gsl)
-    - [ZLIB](#zlib)
-  - [Windows](#windows)
+  - [Installing Microsoft SEAL](#installing-microsoft-seal)
+    - [Optional Dependencies](#optional-dependencies)
+      - [Microsoft GSL](#microsoft-gsl)
+      - [ZLIB](#zlib)
+    - [Windows](#windows)
       - [Platform](#platform)
       - [Building Microsoft SEAL](#building-microsoft-seal)
       - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
@@ -27,7 +27,7 @@ Users of previous versions of the library should look at the [list of changes](C
       - [[Optional] ZLIB](#optional-zlib)
       - [Building Examples](#building-examples)
       - [Building Unit Tests](#building-unit-tests)
-  - [Linux and macOS](#linux-and-macos)
+    - [Linux and macOS](#linux-and-macos)
       - [Building Microsoft SEAL](#building-microsoft-seal-1)
       - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl-1)
@@ -35,26 +35,26 @@ Users of previous versions of the library should look at the [list of changes](C
       - [[Optional] Shared Library](#optional-shared-library)
       - [Building Examples](#building-examples-1)
       - [Building Unit Tests](#building-unit-tests-1)
-    - [Installing Microsoft SEAL](#installing-microsoft-seal-1)
+      - [Installing Microsoft SEAL](#installing-microsoft-seal-1)
       - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
-  - [From NuGet package](#from-nuget-package)
-- [Building Microsoft SEAL for .NET](#building-microsoft-seal-for-net)
-  - [Windows](#windows-1)
+    - [From NuGet package](#from-nuget-package)
+  - [Building Microsoft SEAL for .NET](#building-microsoft-seal-for-net)
+    - [Windows](#windows-1)
       - [Native Library](#native-library)
       - [.NET Library](#net-library)
       - [.NET Examples](#net-examples)
       - [.NET Unit Tests](#net-unit-tests)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
       - [Building Your Own NuGet Package](#building-your-own-nuget-package)
-  - [Linux and macOS](#linux-and-macos-1)
+    - [Linux and macOS](#linux-and-macos-1)
       - [Native Library](#native-library-1)
       - [.NET Library](#net-library-1)
       - [.NET Examples](#net-examples-1)
       - [.NET Unit Tests](#net-unit-tests-1)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
-- [Getting Started](#getting-started)
-- [Contributing](#contributing)
-- [Citing Microsoft SEAL](#citing-microsoft-seal)
+  - [Getting Started](#getting-started)
+  - [Contributing](#contributing)
+  - [Citing Microsoft SEAL](#citing-microsoft-seal)
     - [Version 3.5](#version-35)
     - [Version 3.4](#version-34)
     - [Version 3.3](#version-33)
@@ -109,18 +109,18 @@ The CKKS scheme allows additions and multiplications on encrypted real or comple
 In applications such as summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances of encrypted locations CKKS is going to be by far the best choice.
 For applications where exact values are necessary, the BFV scheme is the only choice.
 
-# Installing Microsoft SEAL
+## Installing Microsoft SEAL
 
-## Optional Dependencies
+### Optional Dependencies
 
 Microsoft SEAL has no required dependencies, but certain optional features can be enabled if it is compiled with support for specific third-party libraries.
 
-### Microsoft GSL
+#### Microsoft GSL
 
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provide safe (bounds-checked) array access to memory.
 For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder` and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`, which can in some cases have a significant performance benefit.
 
-### ZLIB
+#### ZLIB
 
 ZLIB is a widely used compression library that implements the DEFLATE compression algorithm.
 Microsoft SEAL can use ZLIB (if present) to automatically compress data that is serialized.
@@ -137,7 +137,7 @@ However, it is always possible to explicitly pass `compr_mode_type::none` to ser
 In most common applications of Microsoft SEAL the size of a `SecretKey` would not be deliberately revealed to untrusted parties.
 If this is a concern, one can always save the `SecretKey` in an uncompressed form by passing `compr_mode_type::none` to `SecretKey::save`.
 
-## Windows
+### Windows
 
 Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln` that can be used to conveniently build the library, examples, and unit tests.
 Visual Studio 2019 is required to build Microsoft SEAL.
@@ -182,7 +182,7 @@ This results in an executable `sealexamples.exe` to be created in `bin\$(Platfor
 The unit tests require the Google Test framework to be installed.
 The appropriate NuGet package is already listed in `native\tests\packages.config`, so once you attempt to build the SEALTest project `native\tests\SEALTest.vcxproj` from `SEAL.sln` Visual Studio will automatically download and install it for you.
 
-## Linux and macOS
+### Linux and macOS
 
 Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
 A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed.
@@ -244,8 +244,6 @@ make
 
 #### [Optional] Shared Library
 
-TODO: verify macOS shared lib names/links.
-
 By default Microsoft SEAL builds only a static library that is `libseal-3.5.a` on Unix-like platforms.
 You can enable building a shared library, `libseal.so*` in Linux or `libseal*.dylib` in macOS, in CMake configuration options as follows:
 
@@ -279,7 +277,7 @@ This downloads and compiles the [GoogleTest](https://github.com/google/googletes
 The `sealtest` executable is located `native/bin/`.
 All unit tests should pass successfully.
 
-### Installing Microsoft SEAL
+#### Installing Microsoft SEAL
 
 If you have root access to the system you can install Microsoft SEAL system-wide as follows:
 
@@ -315,19 +313,19 @@ cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
-## From NuGet package
+### From NuGet package
 
 For .NET developers the easiest way of installing Microsoft SEAL is by using the multi-platform NuGet package available at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
 Simply add this package into your .NET project as a dependency and you are ready to go.
 
-# Building Microsoft SEAL for .NET
+## Building Microsoft SEAL for .NET
 
 TODO: Verify library locations in Windows.
 TODO: Verify library .NET standard versions in Windows.
 
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL for use in .NET development.
 
-## Windows
+### Windows
 
 The Microsoft Visual Studio 2019 solution file `SEAL.sln` contains the projects necessary to build the .NET assembly, a backing native shared library, .NET examples, and unit tests.
 
@@ -368,7 +366,7 @@ The easiest way to ensure this is to copy `sealc.dll` to the same directory wher
 
 You can build your own NuGet package for Microsoft SEAL by following the instructions in [NUGET.md](dotnet/nuget/NUGET.md).
 
-## Linux and macOS
+### Linux and macOS
 
 Microsoft SEAL for .NET relies on a native shared library that can be easily configured and built using CMake (>= 3.12) and a modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
 In macOS the Xcode toolchain (>= 9.3) will work.
@@ -442,7 +440,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
 1. ensure the native shared library is available for your application when run.
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
-# Getting Started
+## Getting Started
 
 Using Microsoft SEAL will require the user to invest some time in learning fundamental concepts in homomorphic encryption.
 The code comes with heavily commented examples that are designed to gradually teach such concepts as well as to demonstrate much of the API.
@@ -465,16 +463,17 @@ For easier navigation, command line printout provides the line number in the ass
 **WARNING: It is impossible to use Microsoft SEAL correctly without reading all examples or by simply re-using the code from examples.
 Any developer attempting to do so will inevitably produce code that is *vulnerable*, *malfunctioning*, or *extremely slow*.**
 
-# Contributing
+## Contributing
 
 For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-# Citing Microsoft SEAL
+## Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
 
 ### Version 3.5
 
+```tex
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.5)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
@@ -483,9 +482,11 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
     }
+```
 
 ### Version 3.4
 
+```tex
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.4)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
@@ -494,9 +495,11 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
     }
+```
 
 ### Version 3.3
 
+```tex
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.3)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
@@ -505,9 +508,11 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
     }
+```
 
 ### Version 3.2
 
+```tex
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.2)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
@@ -516,9 +521,11 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
     }
+```
 
 ### Version 3.1
 
+```tex
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.1)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
@@ -527,9 +534,11 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
     }
+```
 
 ### Version 3.0
 
+```tex
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.0)},
         howpublished = {\url{http://sealcrypto.org}},
@@ -538,3 +547,4 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
     }
+```
