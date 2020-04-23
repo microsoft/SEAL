@@ -21,7 +21,7 @@ ExternalProject_Add(EP_ZLIB
     GIT_REPOSITORY      https://github.com/madler/zlib.git
     GIT_TAG             v${PROJECT_VERSION}
     GIT_CONFIG          advice.detachedHead=false
-    CMAKE_ARGS          -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DSKIP_INSTALL_ALL=ON
+    CMAKE_ARGS          -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DSKIP_INSTALL_ALL=ON -Wno-dev
     INSTALL_COMMAND     ""
     TEST_COMMAND        ""
 )
