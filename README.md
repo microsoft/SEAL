@@ -434,8 +434,6 @@ And you can use `--verbosity detailed` to print the list of unit tests that are 
 
 #### Using Microsoft SEAL for .NET in Your Own Application
 
-**TODO:** `SEALNet.dll` on Linux/macOS?
-
 To use Microsoft SEAL for .NET in your own application you need to:
 
 1. add a reference in your project to `SEALNet.dll`;
