@@ -14,62 +14,119 @@ using namespace std;
 
 namespace sealtest
 {
-    struct test_struct
+    namespace
     {
-        int a;
-        int b;
-        double c;
-
-        void save_members(ostream &stream)
+        struct test_struct
         {
-            stream.write(reinterpret_cast<const char *>(&a), sizeof(int));
-            stream.write(reinterpret_cast<const char *>(&b), sizeof(int));
-            stream.write(reinterpret_cast<const char *>(&c), sizeof(double));
-        }
+            int a;
+            int b;
+            double c;
 
-        void load_members(istream &stream)
-        {
-            stream.read(reinterpret_cast<char *>(&a), sizeof(int));
-            stream.read(reinterpret_cast<char *>(&b), sizeof(int));
-            stream.read(reinterpret_cast<char *>(&c), sizeof(double));
-        }
+            void save_members(ostream &stream)
+            {
+                stream.write(reinterpret_cast<const char *>(&a), sizeof(int));
+                stream.write(reinterpret_cast<const char *>(&b), sizeof(int));
+                stream.write(reinterpret_cast<const char *>(&c), sizeof(double));
+            }
 
-        streamoff save_size(compr_mode_type compr_mode) const
-        {
-            size_t members_size = Serialization::ComprSizeEstimate(sizeof(test_struct), compr_mode);
+            void load_members(istream &stream)
+            {
+                stream.read(reinterpret_cast<char *>(&a), sizeof(int));
+                stream.read(reinterpret_cast<char *>(&b), sizeof(int));
+                stream.read(reinterpret_cast<char *>(&c), sizeof(double));
+            }
 
-            return static_cast<streamoff>(sizeof(Serialization::SEALHeader) + members_size);
-        }
-    };
+            streamoff save_size(compr_mode_type compr_mode) const
+            {
+                size_t members_size = Serialization::ComprSizeEstimate(sizeof(test_struct), compr_mode);
 
-    TEST(SerializationTest, SEALHeader)
+                return static_cast<streamoff>(sizeof(Serialization::SEALHeader) + members_size);
+            }
+        };
+    } // namespace
+
+    TEST(SerializationTest, IsValidHeader)
     {
         ASSERT_EQ(sizeof(Serialization::SEALHeader), Serialization::seal_header_size);
 
-        Serialization::SEALHeader header, loaded_header, invalid_header;
-        header.compr_mode = compr_mode_type::none;
-        header.size = 256;
-        stringstream stream;
-        Serialization::SaveHeader(header, stream);
+        Serialization::SEALHeader header;
         ASSERT_TRUE(Serialization::IsValidHeader(header));
-        Serialization::LoadHeader(stream, loaded_header);
-        ASSERT_EQ(Serialization::seal_magic, loaded_header.magic);
-        ASSERT_EQ(Serialization::seal_header_size, loaded_header.header_size);
-        ASSERT_EQ(SEAL_VERSION_MAJOR, loaded_header.version_major);
-        ASSERT_EQ(SEAL_VERSION_MINOR, loaded_header.version_minor);
-        ASSERT_EQ(compr_mode_type::none, loaded_header.compr_mode);
-        ASSERT_EQ(0x00, loaded_header.reserved);
-        ASSERT_EQ(256, loaded_header.size);
 
+        Serialization::SEALHeader invalid_header;
         invalid_header.magic = 0x1212;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
-        invalid_header.magic = header.magic;
-        ASSERT_EQ(loaded_header.header_size, Serialization::seal_header_size);
+        invalid_header.magic = Serialization::seal_magic;
+        ASSERT_EQ(invalid_header.header_size, Serialization::seal_header_size);
         invalid_header.version_major = 0x02;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
-        invalid_header.version_major = header.version_major;
+        invalid_header.version_major = SEAL_VERSION_MAJOR;
         invalid_header.compr_mode = (compr_mode_type)0x02;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
+    }
+
+    TEST(SerializationTest, SEALHeaderSaveLoad)
+    {
+        {
+            // Serialize to stream
+            Serialization::SEALHeader header, loaded_header;
+            header.compr_mode = compr_mode_type::none;
+            header.size = 256;
+
+            stringstream stream;
+            Serialization::SaveHeader(header, stream);
+            ASSERT_TRUE(Serialization::IsValidHeader(header));
+            Serialization::LoadHeader(stream, loaded_header);
+            ASSERT_EQ(Serialization::seal_magic, loaded_header.magic);
+            ASSERT_EQ(Serialization::seal_header_size, loaded_header.header_size);
+            ASSERT_EQ(SEAL_VERSION_MAJOR, loaded_header.version_major);
+            ASSERT_EQ(SEAL_VERSION_MINOR, loaded_header.version_minor);
+            ASSERT_EQ(compr_mode_type::none, loaded_header.compr_mode);
+            ASSERT_EQ(0x00, loaded_header.reserved);
+            ASSERT_EQ(256, loaded_header.size);
+        }
+        {
+            // Serialize to buffer
+            Serialization::SEALHeader header, loaded_header;
+            header.compr_mode = compr_mode_type::none;
+            header.size = 256;
+
+            vector<SEAL_BYTE> buffer(16);
+            Serialization::SaveHeader(header, buffer.data(), buffer.size());
+            ASSERT_TRUE(Serialization::IsValidHeader(header));
+            Serialization::LoadHeader(buffer.data(), buffer.size(), loaded_header);
+            ASSERT_EQ(Serialization::seal_magic, loaded_header.magic);
+            ASSERT_EQ(Serialization::seal_header_size, loaded_header.header_size);
+            ASSERT_EQ(SEAL_VERSION_MAJOR, loaded_header.version_major);
+            ASSERT_EQ(SEAL_VERSION_MINOR, loaded_header.version_minor);
+            ASSERT_EQ(compr_mode_type::none, loaded_header.compr_mode);
+            ASSERT_EQ(0x00, loaded_header.reserved);
+            ASSERT_EQ(256, loaded_header.size);
+        }
+    }
+
+    TEST(SerializationTest, SEALHeaderUpgrade)
+    {
+        legacy_headers::SEALHeader_3_4 header_3_4;
+        header_3_4.compr_mode = compr_mode_type::deflate;
+        header_3_4.size = 0xF3F3;
+
+        {
+            Serialization::SEALHeader header;
+            Serialization::LoadHeader(
+                reinterpret_cast<const SEAL_BYTE *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header);
+            ASSERT_TRUE(Serialization::IsValidHeader(header));
+            ASSERT_EQ(header_3_4.compr_mode, header.compr_mode);
+            ASSERT_EQ(header_3_4.size, header.size);
+        }
+        {
+            Serialization::SEALHeader header;
+            Serialization::LoadHeader(
+                reinterpret_cast<const SEAL_BYTE *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header,
+                false);
+
+            // No upgrade requested
+            ASSERT_FALSE(Serialization::IsValidHeader(header));
+        }
     }
 
     TEST(SerializationTest, SaveLoadToStream)

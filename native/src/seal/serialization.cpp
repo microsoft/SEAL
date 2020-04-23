@@ -9,9 +9,9 @@
 #include "seal/util/streambuf.h"
 #include "seal/util/ztools.h"
 #include <algorithm>
-#include <cstdint>
 #include <stdexcept>
 #include <type_traits>
+#include <typeinfo>
 #include <utility>
 
 using namespace std;
@@ -30,6 +30,61 @@ namespace seal
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
     constexpr std::uint8_t Serialization::seal_header_size;
+
+    namespace
+    {
+        [[noreturn]] void expressive_rethrow_on_ios_base_failure(const ostream &stream)
+        {
+            if (!stream.rdbuf())
+            {
+                throw runtime_error("I/O error: output stream has no associated buffer");
+            }
+
+            // Use RTTI to determine if this is an ArrayPutBuffer
+            auto &rdbuf_ref = *stream.rdbuf();
+            if (typeid(rdbuf_ref).hash_code() == typeid(ArrayPutBuffer).hash_code())
+            {
+                auto buffer = reinterpret_cast<ArrayPutBuffer *>(stream.rdbuf());
+
+                // Determine if write overflow occurred
+                if (buffer->at_end())
+                {
+                    // Return a more expressive error
+                    throw runtime_error("I/O error: insufficient output buffer");
+                }
+            }
+
+            // Generic message
+            throw runtime_error("I/O error");
+        }
+
+        [[noreturn]] void expressive_rethrow_on_ios_base_failure(const istream &stream)
+        {
+            if (!stream.rdbuf())
+            {
+                throw runtime_error("I/O error: input stream has no associated buffer");
+            }
+
+            // Use RTTI to determine if this is an ArrayGetBuffer
+            if (stream.eof())
+            {
+                auto &rdbuf_ref = *stream.rdbuf();
+                if (typeid(rdbuf_ref).hash_code() == typeid(ArrayGetBuffer).hash_code())
+                {
+                    // Report buffer underflow
+                    throw runtime_error("I/O error: input buffer ended unexpectedly");
+                }
+                else
+                {
+                    // Report generic underflow
+                    throw runtime_error("I/O error: input stream ended unexpectedly");
+                }
+            }
+
+            // Generic message
+            throw runtime_error("I/O error");
+        }
+    } // namespace
 
     size_t Serialization::ComprSizeEstimate(size_t in_size, compr_mode_type compr_mode)
     {
@@ -53,7 +108,7 @@ namespace seal
         }
     }
 
-    void Serialization::SaveHeader(const SEALHeader &header, ostream &stream)
+    streamoff Serialization::SaveHeader(const SEALHeader &header, ostream &stream)
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -66,7 +121,7 @@ namespace seal
         catch (const ios_base::failure &)
         {
             stream.exceptions(old_except_mask);
-            throw runtime_error("I/O error");
+            expressive_rethrow_on_ios_base_failure(stream);
         }
         catch (...)
         {
@@ -74,9 +129,12 @@ namespace seal
             throw;
         }
         stream.exceptions(old_except_mask);
+
+        // Return the size of the SEALHeader
+        return static_cast<streamoff>(sizeof(SEALHeader));
     }
 
-    void Serialization::LoadHeader(istream &stream, SEALHeader &header)
+    streamoff Serialization::LoadHeader(istream &stream, SEALHeader &header, bool try_upgrade_if_invalid)
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -85,11 +143,30 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             stream.read(reinterpret_cast<char *>(&header), sizeof(SEALHeader));
+
+            // If header is invalid this may be an older header and we can try to automatically upgrade it
+            if (try_upgrade_if_invalid && !IsValidHeader(header))
+            {
+                // Try interpret the data as a Microsoft SEAL 3.4 header
+                legacy_headers::SEALHeader_3_4 header_3_4(header);
+
+                SEALHeader new_header;
+                // Copy over the fields; of course the result may not be valid depending on whether the input was a
+                // valid version 3.4 header
+                new_header.compr_mode = header_3_4.compr_mode;
+                new_header.size = header_3_4.size;
+
+                // Now validate the new header and discard if still not valid; something else is probably wrong
+                if (IsValidHeader(new_header))
+                {
+                    header = new_header;
+                }
+            }
         }
         catch (const ios_base::failure &)
         {
             stream.exceptions(old_except_mask);
-            throw runtime_error("I/O error");
+            expressive_rethrow_on_ios_base_failure(stream);
         }
         catch (...)
         {
@@ -97,6 +174,48 @@ namespace seal
             throw;
         }
         stream.exceptions(old_except_mask);
+
+        // Return the size of the SEALHeader
+        return static_cast<streamoff>(sizeof(SEALHeader));
+    }
+
+    streamoff Serialization::SaveHeader(const SEALHeader &header, SEAL_BYTE *out, size_t size)
+    {
+        if (!out)
+        {
+            throw invalid_argument("out cannot be null");
+        }
+        if (size < sizeof(SEALHeader))
+        {
+            throw invalid_argument("insufficient size");
+        }
+        if (!fits_in<streamsize>(size))
+        {
+            throw invalid_argument("size is too large");
+        }
+        ArrayPutBuffer apbuf(reinterpret_cast<char *>(out), static_cast<streamsize>(size));
+        ostream stream(&apbuf);
+        return SaveHeader(header, stream);
+    }
+
+    streamoff Serialization::LoadHeader(
+        const SEAL_BYTE *in, size_t size, SEALHeader &header, bool try_upgrade_if_invalid)
+    {
+        if (!in)
+        {
+            throw invalid_argument("in cannot be null");
+        }
+        if (size < sizeof(SEALHeader))
+        {
+            throw invalid_argument("insufficient size");
+        }
+        if (!fits_in<streamsize>(size))
+        {
+            throw invalid_argument("size is too large");
+        }
+        ArrayGetBuffer agbuf(reinterpret_cast<const char *>(in), static_cast<streamsize>(size));
+        istream stream(&agbuf);
+        return LoadHeader(stream, header, try_upgrade_if_invalid);
     }
 
     streamoff Serialization::Save(
@@ -177,7 +296,7 @@ namespace seal
         catch (const ios_base::failure &)
         {
             stream.exceptions(old_except_mask);
-            throw runtime_error("I/O error");
+            expressive_rethrow_on_ios_base_failure(stream);
         }
         catch (...)
         {
@@ -261,7 +380,7 @@ namespace seal
         catch (const ios_base::failure &)
         {
             stream.exceptions(old_except_mask);
-            throw runtime_error("I/O error");
+            expressive_rethrow_on_ios_base_failure(stream);
         }
         catch (...)
         {

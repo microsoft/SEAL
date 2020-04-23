@@ -5,6 +5,7 @@
 
 #include "seal/util/defines.h"
 #include <cstdint>
+#include <cstring>
 #include <functional>
 #include <iostream>
 
@@ -129,11 +130,11 @@ namespace seal
         */
         SEAL_NODISCARD static bool IsCompatibleVersion(const SEALHeader &header) noexcept
         {
-            return (header.version_major == 3 && header.version_minor == 5);
+            return (header.version_major == SEAL_VERSION_MAJOR && header.version_minor == SEAL_VERSION_MINOR);
         }
 
         /**
-        Returns true if the given SEALHeader is valid and can be loaded by this version of Microsoft SEAL.
+        Returns true if the given SEALHeader is valid for this version of Microsoft SEAL.
 
         @param[in] header The SEALHeader
         */
@@ -166,16 +167,44 @@ namespace seal
         @param[out] stream The stream to save the SEALHeader to
         @throws std::runtime_error if I/O operations failed
         */
-        static void SaveHeader(const SEALHeader &header, std::ostream &stream);
+        static std::streamoff SaveHeader(const SEALHeader &header, std::ostream &stream);
 
         /**
         Loads a SEALHeader from a given stream.
 
         @param[in] stream The stream to load the SEALHeader from
         @param[in] header The SEALHeader to populate with the loaded data
+        @param[in] try_upgrade_if_invalid If the loaded SEALHeader is invalid,
+        attempt to identify its format and upgrade to the current SEALHeader version
         @throws std::runtime_error if I/O operations failed
         */
-        static void LoadHeader(std::istream &stream, SEALHeader &header);
+        static std::streamoff LoadHeader(std::istream &stream, SEALHeader &header, bool try_upgrade_if_invalid = true);
+
+        /**
+        Saves a SEALHeader to a given memory location. The output is in binary
+        format and is not human-readable.
+
+        @param[out] out The memory location to write the SEALHeader to
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::runtime_error if I/O operations failed
+        */
+        static std::streamoff SaveHeader(const SEALHeader &header, SEAL_BYTE *out, std::size_t size);
+
+        /**
+        Loads a SEALHeader from a given memory location.
+
+        @param[in] in The memory location to load the SEALHeader from
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] try_upgrade_if_invalid If the loaded SEALHeader is invalid,
+        attempt to identify its format and upgrade to the current SEALHeader version
+        @throws std::invalid_argument if in is null or if size is too small to
+        contain a SEALHeader
+        @throws std::runtime_error if I/O operations failed
+        */
+        static std::streamoff LoadHeader(
+            const SEAL_BYTE *in, std::size_t size, SEALHeader &header, bool try_upgrade_if_invalid = true);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -271,4 +300,36 @@ namespace seal
     private:
         Serialization() = delete;
     };
+
+    namespace legacy_headers
+    {
+        /**
+        Struct to enable compatibility with Microsoft SEAL 3.4 headers.
+        */
+        struct SEALHeader_3_4
+        {
+            std::uint16_t magic = Serialization::seal_magic;
+
+            std::uint8_t zero_byte = 0x00;
+
+            compr_mode_type compr_mode = compr_mode_type::none;
+
+            std::uint32_t size = 0;
+
+            std::uint64_t reserved = 0;
+
+            SEALHeader_3_4 &operator=(const Serialization::SEALHeader assign)
+            {
+                std::memcpy(this, &assign, sizeof(Serialization::SEALHeader));
+                return *this;
+            }
+
+            SEALHeader_3_4() = default;
+
+            SEALHeader_3_4(const Serialization::SEALHeader &copy)
+            {
+                operator=(copy);
+            }
+        };
+    } // namespace legacy_headers
 } // namespace seal

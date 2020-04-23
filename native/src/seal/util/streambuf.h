@@ -57,7 +57,9 @@ namespace seal
                     gbump(std::numeric_limits<int>::max());
                     count -= int_max;
                 }
-                gbump(safe_cast<int>(count));
+
+                // This is now safe
+                gbump(static_cast<int>(count));
             }
 
             void safe_pbump(std::streamsize count)
@@ -68,7 +70,9 @@ namespace seal
                     pbump(std::numeric_limits<int>::max());
                     count -= int_max;
                 }
-                pbump(safe_cast<int>(count));
+
+                // This is now safe
+                pbump(static_cast<int>(count));
             }
 
             int_type underflow() override
@@ -379,6 +383,11 @@ namespace seal
             ArrayPutBuffer(const ArrayPutBuffer &copy) = delete;
 
             ArrayPutBuffer &operator=(const ArrayPutBuffer &assign) = delete;
+
+            SEAL_NODISCARD bool at_end() const noexcept
+            {
+                return head_ == end_;
+            }
 
         private:
             int_type overflow(int_type ch = traits_type::eof()) override
