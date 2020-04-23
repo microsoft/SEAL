@@ -23,11 +23,7 @@ namespace seal
         public:
             SafeByteBuffer(std::streamsize size = 1) : size_(size)
             {
-                if (!fits_in<std::size_t>(add_safe(size_, std::streamsize(1))))
-                {
-                    throw std::invalid_argument("size is too large");
-                }
-                buf_.resize(static_cast<std::size_t>(size_ + 1));
+                buf_.resize(add_safe(size_, std::streamsize(1)));
                 setp(buf_.begin(), buf_.begin() + size_);
                 setg(buf_.begin(), buf_.begin(), buf_.begin() + size_);
             }
@@ -192,7 +188,7 @@ namespace seal
             int_type overflow(int_type ch = traits_type::eof()) override
             {
                 if (traits_type::eq_int_type(eof_, ch) ||
-                    !fits_in<int>(ceil(static_cast<double>(buf_.size()) * expansion_factor_) + 1))
+                    !fits_in<std::size_t>(ceil(static_cast<double>(buf_.size()) * expansion_factor_) + 1))
                 {
                     return eof_;
                 }
