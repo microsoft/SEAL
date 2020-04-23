@@ -160,17 +160,17 @@ Please note that `Debug` mode should not be used except for debugging Microsoft 
 
 #### [Optional] Microsoft GSL
 
-**TODO:** GSL's header files copy location?
-
 By default Microsoft GSL is downloaded as part of Microsoft SEAL library.
 Microsoft GSL's header files are copied to `native/src/GSL` to be portable with Microsoft SEAL at the time of installation.
-You can disable the dependency on Microsoft GSL by replacing `#define SEAL_USE_MSGSL` with `#undef SEAL_USE_MSGSL` in [native\src\util\config.h](native\src\util\config.h).
+~~You can disable the dependency on Microsoft GSL by replacing `#define SEAL_USE_MSGSL` with `#undef SEAL_USE_MSGSL` in [native\src\util\config.h](native\src\util\config.h).~~
+TODO:
 
 #### [Optional] ZLIB
 
 By default ZLIB is downloaded and compiled as part of Microsoft SEAL library.
 ZLIB's static archive is included in Microsoft SEAL's static or shared target object.
-You can disable the dependency on ZLIB by replacing `#define SEAL_USE_ZLIB` with `#undef SEAL_USE_ZLIB` in [native\src\util\config.h](native\src\util\config.h).
+~~You can disable the dependency on ZLIB by replacing `#define SEAL_USE_ZLIB` with `#undef SEAL_USE_ZLIB` in [native\src\util\config.h](native\src\util\config.h).~~
+TODO:
 
 #### Building Examples
 
@@ -320,9 +320,6 @@ Simply add this package into your .NET project as a dependency and you are ready
 
 ## Building Microsoft SEAL for .NET
 
-TODO: Verify library locations in Windows.
-TODO: Verify library .NET standard versions in Windows.
-
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL for use in .NET development.
 
 ### Windows
@@ -345,13 +342,13 @@ This is the assembly you can reference in your application.
 #### .NET Examples
 
 Build the SEALNetExamples project `dotnet\examples\SEALNetExamples.csproj` from `SEAL.sln`.
-This results in the assembly `SEALNetExamples.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp2.1`.
+This results in the assembly `SEALNetExamples.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp3.1`.
 The project takes care of copying the native SEAL_C library to the output directory.
 
 #### .NET Unit Tests
 
 Build the SEALNet Test project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`.
-This results in the `SEALNetTest.dll` assembly to be created in `lib\dotnet\$(Configuration)\netcoreapp2.1`.
+This results in the assembly `SEALNetTest.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp3.1`.
 The project takes care of copying the native SEALNetNative library to the output directory.
 
 #### Using Microsoft SEAL for .NET in Your Own Application
@@ -371,7 +368,7 @@ You can build your own NuGet package for Microsoft SEAL by following the instruc
 Microsoft SEAL for .NET relies on a native shared library that can be easily configured and built using CMake (>= 3.12) and a modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
 In macOS the Xcode toolchain (>= 9.3) will work.
 
-For compiling .NET code you will need to install a .NET Core SDK (>= 2.1).
+For compiling .NET code you will need to install a .NET Core SDK (>= 3.1).
 You can follow these [instructions for installing in Linux](https://dotnet.microsoft.com/download?initial-os=linux), or for [installing in macOS](https://dotnet.microsoft.com/download?initial-os=macos).
 
 #### Native Library
