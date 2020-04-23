@@ -220,10 +220,10 @@ if(SEAL_USE_MSGSL AND NOT MSVC)
             WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
     else()
         create_cache_entries(${THIRDPARTY_DIR}/msgsl)
-        if(EXISTS ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+        if(EXISTS ${THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
             # Force regenerating make files. When cross compiling we might be
             # compiling more than one platform at a time.
-            file(REMOVE ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+            file(REMOVE ${THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
         endif()
         execute_process(
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
