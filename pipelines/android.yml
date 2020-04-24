@@ -7,7 +7,7 @@ trigger:
 - master
 
 pool:
-  vmImage: 'macos-latest'
+  vmImage: 'windows-latest'
 
 steps:
 - task: Gradle@2
