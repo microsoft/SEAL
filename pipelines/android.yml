@@ -46,3 +46,16 @@ steps:
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'compileReleaseSources'
+
+- task: CopyFiles@2
+  displayName: Copy files to staging directory
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)\lib'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish build artifacts
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'android-drop'
