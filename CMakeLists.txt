@@ -127,6 +127,7 @@ include(CMakePushCheckState)
 include(CMakeDependentOption)
 include(CheckIncludeFiles)
 include(CheckCXXSourceCompiles)
+include(CheckCXXSourceRuns)
 include(CheckTypeSize)
 
 ##################################
