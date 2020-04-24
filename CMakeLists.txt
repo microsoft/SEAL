@@ -126,7 +126,7 @@ list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
 include(CMakePushCheckState)
 include(CMakeDependentOption)
 include(CheckIncludeFiles)
-include(CheckCXXSourceRuns)
+include(CheckCXXSourceCompiles)
 include(CheckTypeSize)
 
 ##################################
