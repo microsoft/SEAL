@@ -22,6 +22,12 @@ steps:
           artifactName: 'macos-drop'
           downloadPath: '$(Build.ArtifactStagingDirectory)'
 
+    - task: DownloadBuildArtifacts@0
+      inputs:
+          downloadType: 'single'
+          artifactName: 'android-drop'
+          downloadPath: '$(Build.ArtifactStagingDirectory)'
+
     - task: CopyFiles@2
       displayName: 'Copy Targets File to: $(Build.ArtifactStagingDirectory)'
       inputs:
@@ -50,13 +56,20 @@ steps:
           Contents: '*'
           TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
 
+    - task: CopyFiles@2
+      displayName: 'Copy Android Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+          SourceFolder: '$(Build.ArtifactStagingDirectory)\android-drop\lib\'
+          Contents: '**'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
+
     - task: NuGetCommand@2
       displayName: 'Build Nuget Package'
       inputs:
           command: 'pack'
           packagesToPack: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\*.nuspec'
           packDestination: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\Release'
-          buildProperties: 'Configuration=Release;LINUX_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.so*;MACOS_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc*.dylib'
+          buildProperties: 'Configuration=Release;LINUX_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.so*;MACOS_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc*.dylib;ANDROIDARM64_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\arm64-v8a\libsealc.so;ANDROIDX64_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\x86_64\libsealc.so'
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'

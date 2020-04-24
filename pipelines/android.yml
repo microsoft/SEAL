@@ -1,14 +1,3 @@
-# Android
-# Build your Android project with Gradle.
-# Add steps that test, sign, and distribute the APK, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/android
-
-trigger:
-- master
-
-pool:
-  vmImage: 'windows-latest'
-
 steps:
 - task: CMake@1
   displayName: Verify CMake version
@@ -58,4 +47,4 @@ steps:
   displayName: Publish build artifacts
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'android-drop'
+    ArtifactName: ${{ parameters.artifactName }}
