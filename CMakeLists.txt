@@ -97,10 +97,19 @@ if(NOT MSVC AND SEAL_DEBUG)
   enable_cxx_compiler_flag_if_supported("-pedantic")
 endif()
 
+# Path for outupt
+if(ANDROID_ABI)
+    # Android compiles several targets at the same time. Need to specify
+    # separate directories for separate ABIs.
+    set(OUTLIB_PATH "lib/${ANDROID_ABI}")
+else()
+    set(OUTLIB_PATH "lib")
+endif()
+
 # Required files and directories
 include(GNUInstallDirs)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/${OUTLIB_PATH})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/${OUTLIB_PATH})
 set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
 set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
@@ -117,7 +126,7 @@ list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
 include(CMakePushCheckState)
 include(CMakeDependentOption)
 include(CheckIncludeFiles)
-include(CheckCXXSourceRuns)
+include(CheckCXXSourceCompiles)
 include(CheckTypeSize)
 
 ##################################
@@ -182,6 +191,21 @@ endmacro()
 # External dependencies #
 #########################
 
+function(create_cache_entries dir_name)
+    set(cce_file_name ${dir_name}/cache_init.txt)
+    file(WRITE  "${cce_file_name}" "set(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\" CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_CXX_COMPILER \"${CMAKE_CXX_COMPILER}\" CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_TOOLCHAIN_FILE \"${CMAKE_TOOLCHAIN_FILE}\" CACHE FILEPATH \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(ANDROID_ABI ${ANDROID_ABI} CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(ANDROID_NDK \"${ANDROID_NDK}\" CACHE FILEPATH \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(ANDROID_PLATFORM ${ANDROID_PLATFORM} CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_ANDROID_ARCH_ABI ${CMAKE_ANDROID_ARCH_ABI} CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_ANDROID_NDK \"${CMAKE_ANDROID_NDK}\" CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_MAKE_PROGRAM \"${CMAKE_MAKE_PROGRAM}\" CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} CACHE STRING \"\" FORCE)\n")
+    file(APPEND "${cce_file_name}" "set(CMAKE_SYSTEM_VERSION ${CMAKE_SYSTEM_VERSION} CACHE STRING \"\" FORCE)\n")
+endfunction()
+
 set(THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
 
 # [option] SEAL_USE_MSGSL
@@ -191,11 +215,25 @@ option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
 # Download and configure
 if(SEAL_USE_MSGSL AND NOT MSVC)
     message(STATUS "Setting up MSGSL ...")
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+    if(NOT CMAKE_TOOLCHAIN_FILE)
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+            OUTPUT_QUIET
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+    else()
+        create_cache_entries(${THIRDPARTY_DIR}/msgsl)
+        if(EXISTS ${THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
+            # Force regenerating make files. When cross compiling we might be
+            # compiling more than one platform at a time.
+            file(REMOVE ${THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
+        endif()
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
+            OUTPUT_QUIET
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+    endif()
     if(result)
         message(WARNING "Failed to download MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
     endif()
@@ -237,11 +275,26 @@ endif()
 # Download and configure
 if(SEAL_USE_ZLIB AND NOT MSVC)
     message(STATUS "Setting up ZLIB ...")
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+
+    if(NOT CMAKE_TOOLCHAIN_FILE)
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+            OUTPUT_QUIET
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+    else()
+        create_cache_entries(${THIRDPARTY_DIR}/zlib)
+        if(EXISTS ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+            # Force regenerating make files. When cross compiling we might be
+            # compiling more than one platform at a time.
+            file(REMOVE ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+        endif()
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
+            OUTPUT_QUIET
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+    endif()
     if(result)
         message(WARNING "Failed to download ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
     endif()
@@ -274,9 +327,11 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
     add_subdirectory(
         ${THIRDPARTY_DIR}/zlib/src
         EXCLUDE_FROM_ALL)
+    list(APPEND SEAL_ZLIB_INCLUDE_DIRS ${THIRDPARTY_DIR}/zlib/src)
+    list(APPEND SEAL_ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${THIRDPARTY_DIR}/zlib/src)
-    set(zlibstatic_LIBRARY_PATH ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/libz.a)
+        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
+    set(zlibstatic_LIBRARY_PATH ${THIRDPARTY_DIR}/zlib/src/libz.a)
 endif()
 
 # Google Test
@@ -344,7 +399,7 @@ if(SEAL_USE_STD_FOR_EACH_N)
 
     if(NOT MSVC)
         set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
-        check_cxx_source_runs("
+        check_cxx_source_compiles("
             #include <algorithm>
             int main() {
                 int a[1]{ 0 };
@@ -558,18 +613,30 @@ endif()
 # The following are executed post build
 
 # In UNIX-like platforms copy Microsoft GSL include files into native/src
-if(SEAL_USE_MSGSL AND NOT MSVC)
+if(SEAL_USE_MSGSL AND NOT MSVC AND NOT CMAKE_HOST_WIN32)
     add_custom_command(TARGET seal POST_BUILD
         COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
 endif()
 
 # In UNIX-like platforms combine manually seal and zlibstatic into a single archive; not pretty, but works
 if(SEAL_USE_ZLIB AND NOT MSVC)
+    if(CMAKE_HOST_WIN32)
+        get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
+        file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
+        set(DEL_CMD "del")
+        set(DEL_CMD_OPTS "")
+    else()
+        set(AR_CMD_PATH "ar")
+        set(DEL_CMD "rm")
+        set(DEL_CMD_OPTS "-rf")
+    endif()
+    file(COPY "${zlibstatic_LIBRARY_PATH}" DESTINATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     add_custom_command(TARGET seal POST_BUILD
-        COMMAND ar x $<TARGET_FILE:seal>
-        COMMAND ar x ${zlibstatic_LIBRARY_PATH}
-        COMMAND ar rcs $<TARGET_FILE:seal> *.o
-        COMMAND rm -f *.o
+        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:seal>
+        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE_DIR:seal>/libz.a
+        COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:seal> *.o
+        COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
         WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
 endif()
 
@@ -597,7 +664,13 @@ if(SEAL_BUILD_SEAL_C)
     set_soversion(sealc)
     set_language(sealc)
     set_include_directories(sealc)
+
+    if(SEAL_USE_MSGSL AND NOT MSVC)
+        target_include_directories(sealc PUBLIC $<BUILD_INTERFACE:${MSGSL_INCLUDE_DIR}>)
+    endif()
+
     target_link_libraries(sealc PUBLIC seal)
+
     install_target(sealc SEALTargets)
 endif()
 
