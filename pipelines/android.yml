@@ -10,7 +10,13 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
+- task: CmdLine@2
+  displayName: Update NDK
+  inputs:
+    script: '$ANDROID_HOME/tools/bin/sdkmanager --install ndk;21.0.6113669'
+
 - task: Gradle@2
+  displayName: Compile Android Native Libraries
   inputs:
     workingDirectory: '$(Build.SourcesDirectory)\android'
     gradleWrapperFile: '$(Build.SourcesDirectory)\android\gradlew'
