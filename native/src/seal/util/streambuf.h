@@ -123,7 +123,7 @@ namespace seal
                 if (which & std::ios_base::out)
                 {
                     setp(pbase(), epptr());
-                    pbump(static_cast<int>(pos));
+                    safe_pbump(static_cast<std::streamsize>(pos));
                 }
                 return pos;
             }
