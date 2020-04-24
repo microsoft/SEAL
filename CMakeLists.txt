@@ -614,7 +614,7 @@ endif()
 # The following are executed post build
 
 # In UNIX-like platforms copy Microsoft GSL include files into native/src
-if(SEAL_USE_MSGSL AND NOT MSVC AND NOT CMAKE_HOST_WIN32)
+if(SEAL_USE_MSGSL AND NOT MSVC AND NOT CMAKE_HOST_WIN32 AND NOT EXISTS ${SEAL_INCLUDES_BUILD_DIR}/gsl)
     add_custom_command(TARGET seal POST_BUILD
         COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
 endif()
