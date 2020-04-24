@@ -12,23 +12,23 @@ Users of previous versions of the library should look at the [list of changes](C
 - [Microsoft SEAL](#microsoft-seal)
   - [Contents](#contents)
   - [Introduction](#introduction)
-    - [Core Concepts](#core-concepts)
+    <!-- - [Core Concepts](#core-concepts)
     - [Homomorphic Encryption](#homomorphic-encryption)
-    - [Microsoft SEAL](#microsoft-seal-1)
+    - [Microsoft SEAL](#microsoft-seal-1) -->
   - [Building Microsoft SEAL](#building-microsoft-seal)
     - [Optional Dependencies](#optional-dependencies)
-      - [Microsoft GSL](#microsoft-gsl)
-      - [ZLIB](#zlib)
+      <!-- - [Microsoft GSL](#microsoft-gsl)
+      - [ZLIB](#zlib) -->
     - [Windows](#windows)
-      - [Platform](#platform)
+      <!-- - [Platform](#platform)
       - [Building Microsoft SEAL](#building-microsoft-seal-1)
       - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl)
       - [[Optional] ZLIB](#optional-zlib)
       - [Building Examples](#building-examples)
-      - [Building Unit Tests](#building-unit-tests)
+      - [Building Unit Tests](#building-unit-tests) -->
     - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
-      - [Building Microsoft SEAL](#building-microsoft-seal-2)
+      <!-- - [Building Microsoft SEAL](#building-microsoft-seal-2)
       - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl-1)
       - [[Optional] ZLIB](#optional-zlib-1)
@@ -36,33 +36,33 @@ Users of previous versions of the library should look at the [list of changes](C
       - [Building Examples](#building-examples-1)
       - [Building Unit Tests](#building-unit-tests-1)
       - [Installing Microsoft SEAL](#installing-microsoft-seal)
-      - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
+      - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake) -->
     - [Android](#android)
   - [Microsoft SEAL for .NET](#microsoft-seal-for-net)
     - [From NuGet package](#from-nuget-package)
     - [Windows](#windows-1)
-      - [Native Library](#native-library)
+      <!-- - [Native Library](#native-library)
       - [.NET Library](#net-library)
       - [.NET Examples](#net-examples)
       - [.NET Unit Tests](#net-unit-tests)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
-      - [Building Your Own NuGet Package](#building-your-own-nuget-package)
+      - [Building Your Own NuGet Package](#building-your-own-nuget-package) -->
     - [Linux and macOS](#linux-and-macos)
-      - [Native Library](#native-library-1)
+      <!-- - [Native Library](#native-library-1)
       - [.NET Library](#net-library-1)
       - [.NET Examples](#net-examples-1)
       - [.NET Unit Tests](#net-unit-tests-1)
-      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
+      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1) -->
     - [Android](#android-1)
   - [Getting Started](#getting-started)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
-    - [Version 3.5](#version-35)
+    <!-- - [Version 3.5](#version-35)
     - [Version 3.4](#version-34)
     - [Version 3.3](#version-33)
     - [Version 3.2](#version-32)
     - [Version 3.1](#version-31)
-    - [Version 3.0](#version-30)
+    - [Version 3.0](#version-30) -->
 
 ## Introduction
 
@@ -314,7 +314,7 @@ cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
 ### Android
-Microsoft SEAL can be compiled for Android. Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android. This project is meant only to generate native libraries that can then be called through the .Net library described in the following sections, it does not contain any wrapper that can be used from the Java language.
+Microsoft SEAL can be compiled for Android. Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android. This project is meant only to generate native libraries that can then be called through the .NET library described in the following sections. Specifically, it does not contain any wrappers that can be used from the Java language.
 
 
 ## Microsoft SEAL for .NET
@@ -406,7 +406,7 @@ To build the .NET Standard library, do the following:
 dotnet build dotnet/src --configuration <Debug|Release>
 ```
 
-This will result in a `SEALNet.dll` assembly to be created in `lib/dotnet/$(Configuration)/netstandard2.1`.
+This will result in a `SEALNet.dll` assembly to be created in `lib/dotnet/$(Configuration)/netstandard2.0`.
 This assembly is the one you will want to reference in your own projects.
 The optional `dotnet` parameter `--configuration <Debug|Release>` can be used to build either a `Debug` or `Release` version of the assembly.
 
@@ -442,7 +442,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
 ### Android
-You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .Net Standard wrapper library. However, the easiest and recommended way to use SEAL in Android is to use the multiplatform NuGet package you can find in [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). You can add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using SEAL and .Net. The native shared library and the .Net wrapper compile only for 64 bits, so only `arm64-v8a` and `x86_64` Android ABIs are supported.
+You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library. However, the easiest and recommended way to use Microsoft SEAL in Android is through the multiplatform NuGet package you can find at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using Microsoft SEAL and .NET. The native shared library and the .NET wrapper compile only for 64 bits, so only `arm64-v8a` and `x86_64` Android ABIs are supported.
 
 ## Getting Started
 
@@ -458,8 +458,8 @@ The code examples are available (and identical) in C++ and C#, and are divided i
 |`3_levels.cpp`       |`3_Levels.cs`       |Introduces the concept of levels; prerequisite for using the CKKS scheme    |
 |`4_ckks_basics.cpp`  |`4_CKKS_Basics.cs`  |Encrypted real number arithmetic using the CKKS scheme                      |
 |`5_rotation.cpp`     |`5_Rotation.cs`     |Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes|
-|`6_serialization.cpp`|`6_Serialization.cs`|Serializing data objects in Microsoft SEAL                                  |
-|`7_performance.cpp`  |`7_Performance.cs`  |Performance tests for Microsoft SEAL                                        |
+|`6_serialization.cpp`|`6_Serialization.cs`|Serializing objects in Microsoft SEAL                                       |
+|`7_performance.cpp`  |`7_Performance.cs`  |Performance tests                                                           |
 
 It is recommeded to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
