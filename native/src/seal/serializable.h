@@ -145,7 +145,7 @@ namespace seal
         }
 
     private:
-        Serializable(T &&obj) : obj_(obj)
+        Serializable(T &&obj) : obj_(std::move(obj))
         {}
 
         T obj_;
