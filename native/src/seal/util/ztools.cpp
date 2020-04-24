@@ -8,7 +8,9 @@
 #include "seal/serialization.h"
 #include "seal/util/pointer.h"
 #include "seal/util/ztools.h"
+#include <cmath>
 #include <cstddef>
+#include <limits>
 #include <unordered_map>
 #include <zlib.h>
 
@@ -22,6 +24,18 @@ namespace seal
         {
             namespace
             {
+                constexpr size_t inflate_buffer_size = 256 * 1024;
+
+                constexpr double deflate_buffer_expansion_factor = 1.3;
+
+                // The output size in a single deflate round cannot exceed 4 GB so we need to invert the deflateBound
+                // inequality to find an upper bound for the input size.
+                constexpr size_t process_bytes_out_max = static_cast<size_t>(numeric_limits<uInt>::max());
+
+                // If input size is at most process_bytes_in_max, we can complete the deflate algorithm in a single call
+                // to deflate (deflateBound(process_bytes_in_max) is at most 4 GB).
+                constexpr size_t process_bytes_in_max = process_bytes_out_max - (process_bytes_out_max >> 10) - 17;
+
                 class PointerStorage
                 {
                 public:
@@ -84,9 +98,9 @@ namespace seal
                 }
             } // namespace
 
-            size_t deflate_size_bound(size_t in_size) noexcept
+            size_t deflate_size_bound(size_t in_size)
             {
-                return util::add_safe(in_size, in_size >> 12, in_size >> 14, in_size >> 25, std::size_t(13));
+                return util::add_safe(in_size, in_size >> 12, in_size >> 14, in_size >> 25, std::size_t(17));
             }
 
             int deflate_array(const IntArray<SEAL_BYTE> &in, IntArray<SEAL_BYTE> &out, MemoryPoolHandle pool)
@@ -96,9 +110,15 @@ namespace seal
                     throw invalid_argument("pool is uninitialized");
                 }
 
-                streamoff in_size = safe_cast<streamoff>(in.size());
+                // We need size_t to be at least as large as uInt
+                static_assert(numeric_limits<uInt>::max() <= numeric_limits<size_t>::max(), "");
+
+                size_t in_size = in.size();
                 int result, flush;
                 int level = Z_DEFAULT_COMPRESSION;
+
+                int pending_bits;
+                unsigned pending_bytes;
 
                 z_stream zstream;
                 zstream.data_type = Z_BINARY;
@@ -115,27 +135,67 @@ namespace seal
                     return result;
                 }
 
-                flush = Z_FINISH;
-                size_t out_size = safe_cast<size_t>(deflateBound(&zstream, safe_cast<uLong>(in_size)));
+                // Set the output buffer size fo the deflate size bound; for small input buffers this will guarantee
+                // deflate to immediately return Z_STREAM_END
+                size_t out_size = deflate_size_bound(in_size);
                 out.resize(out_size);
 
-                zstream.avail_in = safe_cast<uInt>(in_size);
+                // How much data was finally produced
+                size_t final_out_size = 0;
+
+                // Set the input and output pointers; deflate moves these automatically
                 zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<SEAL_BYTE *>(in.cbegin()));
-                zstream.avail_out = safe_cast<uInt>(out_size);
                 zstream.next_out = reinterpret_cast<unsigned char *>(out.begin());
 
-                result = deflate(&zstream, flush);
-                if (result != Z_STREAM_END)
+                do
                 {
-                    deflateEnd(&zstream);
-                    return result;
-                }
+                    size_t process_bytes_in = min<size_t>(in_size, process_bytes_in_max);
+                    zstream.avail_in = static_cast<uInt>(process_bytes_in);
 
-                // Update out_size to true value
-                out_size -= safe_cast<size_t>(zstream.avail_out);
+                    // Number of bytes left after this round; if we are at the end set flush accordingly
+                    in_size -= process_bytes_in;
+                    flush = in_size ? Z_NO_FLUSH : Z_FINISH;
+
+                    do
+                    {
+                        // If out_size is zero, then we need to reallocate and increase the size
+                        if (!out_size)
+                        {
+                            out_size = safe_cast<size_t>(
+                                ceil(safe_cast<double>(out.size()) * deflate_buffer_expansion_factor));
+                            out.resize(out_size);
+
+                            // Set the next_out pointer correctly to the new allocation and shift by the number of bytes
+                            // already written
+                            zstream.next_out = reinterpret_cast<unsigned char *>(out.begin()) + final_out_size;
+                            out_size -= final_out_size;
+                        }
+
+                        size_t process_bytes_out = min<size_t>(out_size, process_bytes_out_max);
+                        zstream.avail_out = static_cast<uInt>(process_bytes_out);
+
+                        result = deflate(&zstream, flush);
+#ifdef SEAL_DEBUG
+                        // Intermediate rounds should return Z_OK and last should return Z_STREAM_END
+                        if (result != Z_OK && result != Z_STREAM_END)
+                        {
+                            // Something went wrong so finish up here
+                            deflateEnd(&zstream);
+                            return result;
+                        }
+#endif
+                        // Update out_size
+                        process_bytes_out -= static_cast<size_t>(zstream.avail_out);
+                        out_size -= process_bytes_out;
+                        final_out_size += process_bytes_out;
+
+                        // Is there pending output in the internal buffers? If so, we need to call deflate again
+                        deflatePending(&zstream, &pending_bytes, &pending_bits);
+                    } while (!zstream.avail_out && (pending_bits || pending_bytes));
+                } while (in_size);
 
                 // Now resize out to the right size
-                out.resize(out_size);
+                out.resize(final_out_size);
 
                 deflateEnd(&zstream);
                 return Z_OK;
@@ -156,8 +216,8 @@ namespace seal
                 int result;
                 size_t have;
 
-                auto in(allocate<unsigned char>(buf_size, pool));
-                auto out(allocate<unsigned char>(buf_size, pool));
+                auto in(allocate<unsigned char>(inflate_buffer_size, pool));
+                auto out(allocate<unsigned char>(inflate_buffer_size, pool));
 
                 z_stream zstream;
                 zstream.data_type = Z_BINARY;
@@ -181,7 +241,7 @@ namespace seal
                 {
                     if (!in_stream.read(
                             reinterpret_cast<char *>(in.get()),
-                            min(static_cast<streamoff>(buf_size), in_stream_end_pos - in_stream.tellg())))
+                            min(static_cast<streamoff>(inflate_buffer_size), in_stream_end_pos - in_stream.tellg())))
                     {
                         inflateEnd(&zstream);
                         in_stream.exceptions(in_stream_except_mask);
@@ -196,7 +256,7 @@ namespace seal
 
                     do
                     {
-                        zstream.avail_out = buf_size;
+                        zstream.avail_out = inflate_buffer_size;
                         zstream.next_out = out.get();
                         result = inflate(&zstream, Z_NO_FLUSH);
 
@@ -216,7 +276,7 @@ namespace seal
                             return result;
                         }
 
-                        have = buf_size - static_cast<size_t>(zstream.avail_out);
+                        have = inflate_buffer_size - static_cast<size_t>(zstream.avail_out);
 
                         if (!out_stream.write(reinterpret_cast<const char *>(out.get()), static_cast<streamsize>(have)))
                         {
@@ -248,7 +308,7 @@ namespace seal
 
                 // Populate the header
                 header.compr_mode = compr_mode_type::deflate;
-                header.size = safe_cast<uint32_t>(add_safe(sizeof(Serialization::SEALHeader), out_array.size()));
+                header.size = static_cast<uint64_t>(add_safe(sizeof(Serialization::SEALHeader), out_array.size()));
 
                 auto old_except_mask = out_stream.exceptions();
                 try

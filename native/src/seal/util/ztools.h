@@ -15,8 +15,6 @@ namespace seal
     {
         namespace ztools
         {
-            constexpr std::size_t buf_size = 16384;
-
             /**
             Compresses data in the given buffer, completes the given SEALHeader
             by writing in the size of the output and setting the compression mode
@@ -40,7 +38,7 @@ namespace seal
             int inflate_stream(
                 std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
+            SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size);
         } // namespace ztools
     }     // namespace util
 } // namespace seal
