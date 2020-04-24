@@ -69,7 +69,7 @@ namespace sealtest
         {
             // Serialize to stream
             Serialization::SEALHeader header, loaded_header;
-            header.compr_mode = compr_mode_type::none;
+            header.compr_mode = Serialization::compr_mode_default;
             header.size = 256;
 
             stringstream stream;
@@ -80,14 +80,14 @@ namespace sealtest
             ASSERT_EQ(Serialization::seal_header_size, loaded_header.header_size);
             ASSERT_EQ(SEAL_VERSION_MAJOR, loaded_header.version_major);
             ASSERT_EQ(SEAL_VERSION_MINOR, loaded_header.version_minor);
-            ASSERT_EQ(compr_mode_type::none, loaded_header.compr_mode);
+            ASSERT_EQ(Serialization::compr_mode_default, loaded_header.compr_mode);
             ASSERT_EQ(0x00, loaded_header.reserved);
             ASSERT_EQ(256, loaded_header.size);
         }
         {
             // Serialize to buffer
             Serialization::SEALHeader header, loaded_header;
-            header.compr_mode = compr_mode_type::none;
+            header.compr_mode = Serialization::compr_mode_default;
             header.size = 256;
 
             vector<SEAL_BYTE> buffer(16);
@@ -98,7 +98,7 @@ namespace sealtest
             ASSERT_EQ(Serialization::seal_header_size, loaded_header.header_size);
             ASSERT_EQ(SEAL_VERSION_MAJOR, loaded_header.version_major);
             ASSERT_EQ(SEAL_VERSION_MINOR, loaded_header.version_minor);
-            ASSERT_EQ(compr_mode_type::none, loaded_header.compr_mode);
+            ASSERT_EQ(Serialization::compr_mode_default, loaded_header.compr_mode);
             ASSERT_EQ(0x00, loaded_header.reserved);
             ASSERT_EQ(256, loaded_header.size);
         }
@@ -107,7 +107,7 @@ namespace sealtest
     TEST(SerializationTest, SEALHeaderUpgrade)
     {
         legacy_headers::SEALHeader_3_4 header_3_4;
-        header_3_4.compr_mode = compr_mode_type::deflate;
+        header_3_4.compr_mode = Serialization::compr_mode_default;
         header_3_4.size = 0xF3F3;
 
         {
@@ -146,7 +146,7 @@ namespace sealtest
 #ifdef SEAL_USE_ZLIB
         test_struct st3;
         out_size = Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::none), stream,
+            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::deflate), stream,
             compr_mode_type::deflate);
         in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), stream);
         ASSERT_EQ(out_size, in_size);
@@ -166,10 +166,10 @@ namespace sealtest
 
         stringstream ss;
         auto test_out_size = Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::none), ss, compr_mode_type::none);
+            bind(&test_struct::save_members, &st, _1), st.save_size(Serialization::compr_mode_default), ss, Serialization::compr_mode_default);
         auto out_size = Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::none), buffer, arr_size,
-            compr_mode_type::none);
+            bind(&test_struct::save_members, &st, _1), st.save_size(Serialization::compr_mode_default), buffer, arr_size,
+            Serialization::compr_mode_default);
         ASSERT_EQ(test_out_size, out_size);
         for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
         {
@@ -188,10 +188,10 @@ namespace sealtest
         test_struct st3;
         ss.seekp(0);
         test_out_size = Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::none), ss,
+            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::deflate), ss,
             compr_mode_type::deflate);
         out_size = Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::none), buffer, arr_size,
+            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::deflate), buffer, arr_size,
             compr_mode_type::deflate);
         ASSERT_EQ(test_out_size, out_size);
         for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)

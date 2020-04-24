@@ -39,7 +39,7 @@ namespace SEALNetTest
             Serialization.SEALHeader loaded = new Serialization.SEALHeader();
             using (MemoryStream mem = new MemoryStream())
             {
-                header.ComprMode = ComprModeType.Deflate;
+                header.ComprMode = Serialization.ComprModeDefault;
                 header.Size = 256;
                 Assert.IsTrue(Serialization.IsValidHeader(header));
 
