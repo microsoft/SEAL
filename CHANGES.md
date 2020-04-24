@@ -4,7 +4,7 @@
 
 ### New Features
 
-- Microsoft SEAL officially supports Android (Xamarin.Android).
+- Microsoft SEAL officially supports Android (Xamarin.Android) on ARM64.
 - Microsoft SEAL is a CMake project:
   - Targets available are now: `SEAL::seal` (static library), `SEAL::seal_shared` (shared library), `SEAL::sealc` (C export library).
   - ZLIB is downloaded and compiled by CMake and included into Microsoft SEAL's static or shared target object.
@@ -30,31 +30,49 @@ RNS bases are now represented by the new `util::RNSBase` class.
 
 ### API Changes
 
+The following changes are explained in C++ syntax and are introduced to .NET wrappers similarly:
+
 - New generic class `Serializable` wraps `Ciphertext`, `RelinKeys`, and `GaloisKeys` objects to provide a more flexible approach to the functionality provided in release 3.4 by `KeyGenerator::[relin|galois]_keys_save` and `Encryptor::encrypt_[zero_]symmetric_save` functions.
 Specifically, these functions have been removed and replaced with overloads of `KeyGenerator::[relin|galois]_keys` and `Encryptor::encrypt_[zero_]symmetric` that return `Serializable` objects.
+The `KeyGenerator::[relin|galois]_keys` methods in release 3.4 are renamed to `KeyGenerator::[relin|galois]_keys_local`.
 The `Serializable` objects cannot be used directly by Microsoft SEAL, and are instead intended to be serialized, which activates the compression functionalities introduced earlier in release 3.4.
-- Version numbers are retrievable in .NET through `SEALVersion` class.
+- `SmallModulus` class is renamed to `Modulus`, and is relocated to [native/src/seal/modulus.h](native/src/seal/modulus.h).
+- `*coeff_mod_count*` methods are renamed to `*coeff_modulus_size*`, which applies to many classes.
+- `parameter_error_name` and `parameter_error_message` methods are added to `EncryptionParameterQualifiers` and `SEALContext` classes to interpret the reason why an `EncryptionParameter` object is invalid.
+- Serialization has a new `SEAL::Header` structure with `LegacyHeaders` namespace to backward support version 3.4.
+
+The following changes are specific to C++:
+
 - New bounds in [native/src/seal/util/defines.h](native/src/seal/util/defines.h):
+  - `SEAL_POLY_MOD_DEGREE_MAX` is increased to 131072.
+  - `SEAL_COEFF_MOD_COUNT_MAX` is increased to 64.
   - `SEAL_MOD_BIT_COUNT_MAX` and `SEAL_MOD_BIT_COUNT_MIN` are added and set to 61 and 2, respectively.
   - `SEAL_INTERNAL_MOD_BIT_COUNT` is added and set to 61.
-  - `SEAL_COEFF_MOD_COUNT_MAX` is increased to 64.
-  - `SEAL_POLY_MOD_DEGREE_MAX` is increased to 131072.
 - `EncryptionParameterQualifiers` now has an error code `parameter_error` that interprets the reason why an `EncryptionParameter` object is invalid.
-  - `bool parameters_set()` is added to replace the previous `bool parameters_set` member.
-  - `string parameter_error_name()` is added to retrieve error code name.
-  - `string parameter_error_message()` is added to retrieve a comprehensive error message.
-- `SmallModulus` class is renamed to `Modulus`, and is relocated to [native/src/seal/modulus.h](native/src/seal/modulus.h).
+- `bool parameters_set()` is added to replace the previous `bool parameters_set` member.
+
+The following changes are specific to .NET:
+
+- Version numbers are retrievable in .NET through `SEALVersion` class.
 
 ### Other Changes
 
 - Releases are now listed on [releases page](https://github.com/microsoft/SEAL/releases).
-- The native library can serialize (save and load) arbitrarily large objects with or without ZLIB compression.
+- The native library can serialize (save and load) objects larger than 4 GB.
+Compression requires twice the memory needed without compression, e.g. 16 GB memory is needed to compress and serialize a 4 GB object.
 In the .NET library, objects are limited to 2 GB, and loading an object larger than 2 GB will throw an exception.
+[(Issue 142)](https://github.com/microsoft/SEAL/issues/142)
+- Larger-than-suggested parameters are supported for expert users.
+To enable that, please adjust `SEAL_POLY_MOD_DEGREE_MAX` and `SEAL_COEFF_MOD_COUNT_MAX` in [native/src/seal/util/defines.h](native/src/seal/util/defines.h).
+[(Issue 150)](https://github.com/microsoft/SEAL/issues/150)
+[(Issue 84)](https://github.com/microsoft/SEAL/issues/84)
+- Serialization now clearly indicates an insufficient buffer size error.
 - Unsupported compression mode now throws `std::invalid_argument` (native) or `ArgumentException` (.NET).
 - There is now a `.clang-format` for automated formatting of C++ (`.cpp` and `.h`) files.
 Run `bash tools/scripts/clang-format-all.sh` for easy formatting.
 This is compatible with clang-format-9 and above.
 Support for C# is not yet ideal.
+[(Issue 93)](https://github.com/microsoft/SEAL/issues/93)
 - The C export library in [native/src/seal/c](native/src/seal/c) can be used to build wrappers for languages including but not limited to .NET.
 - The .NET wrapper library targets .NET Standard 2.0, but the .NET example and test projects use C# 8.0 and require .NET Core 3.x. Therefore, Visual Studio 2017 is no longer supported for building the .NET example and test projects.
 - Fixed issue when compiling in FreeBSD.
@@ -113,39 +131,32 @@ Removed files:
 
 ## Version 3.4.5
 
-- Fixed a concurrency issue in SEALNet: the `unordered_map` storing `SEALContext` pointers was
-not locked appropriately on construction and destruction of new `SEALContext` objects.
+- Fixed a concurrency issue in SEALNet: the `unordered_map` storing `SEALContext` pointers was not locked appropriately on construction and destruction of new `SEALContext` objects.
 - Fixed a few typos in examples ([PR 71](https://github.com/microsoft/SEAL/pull/71)).
 - Added include guard to config.h.in.
 
 ## Version 3.4.4
 
 - Fixed issues with `SEALNet.targets` file and `SEALNet.nuspec.in`.
-- Updated `README.md` with information about existing multi-platform
-[NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
+- Updated `README.md` with information about existing multi-platform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
 
 ## Version 3.4.3
 
-- Fixed bug in .NET serialization code where an incorrect number of bytes was written when using
-ZLIB compression.
-- Fixed an issue with .NET functions `Encryptor.EncryptSymmetric...`, where asymmetric encryption
-was done instead of symmetric encryption.
-- Prevented `KeyGenerator::galois_keys` and `KeyGenerator::relin_keys` from being called when the
-encryption parameters do not support keyswitching.
-- Fixed a bug in `Decryptor::invariant_noise_budget` where the computed noise budget was
-`log(plain_modulus)` bits smaller than it was supposed to be.
+- Fixed bug in .NET serialization code where an incorrect number of bytes was written when using ZLIB compression.
+- Fixed an issue with .NET functions `Encryptor.EncryptSymmetric...`, where asymmetric encryption was done instead of symmetric encryption.
+- Prevented `KeyGenerator::galois_keys` and `KeyGenerator::relin_keys` from being called when the encryption parameters do not support keyswitching.
+- Fixed a bug in `Decryptor::invariant_noise_budget` where the computed noise budget was `log(plain_modulus)` bits smaller than it was supposed to be.
 - Removed support for Microsoft GSL `gsl::multi_span`, as it was recently deprecated in GSL.
 
 ## Version 3.4.2
 
 - Fixed bug reported in [Issue 66](https://github.com/microsoft/SEAL/issues/66) on GitHub.
-- CMake does version matching now (correctly) only on major and minor version, not patch version,
-so writing `find_package(SEAL 3.4)` works correctly and selects the newest version `3.4.x` it can
-find.
+- CMake does version matching now (correctly) only on major and minor version, not patch version, so writing `find_package(SEAL 3.4)` works correctly and selects the newest version `3.4.x` it can find.
 
 ## Version 3.4.1
 
-This patch fixes a few issues with ZLIB support on Windows. Specifically,
+This patch fixes a few issues with ZLIB support on Windows.
+Specifically,
 
 - Fixed a mistake in `native/src/CMakeConfig.cmd` where the CMake library search path
 suffix was incorrect.
