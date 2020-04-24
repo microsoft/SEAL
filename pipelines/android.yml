@@ -24,16 +24,16 @@ steps:
       # Download Ninja
       $ToolsDirectory = Join-Path -Path $Env:BUILD_SOURCESDIRECTORY -ChildPath tools
       $NinjaZipFile = Join-Path $ToolsDirectory -ChildPath ninja.zip
+      $NinjaExeFile = Join-Path $ToolsDirectory -ChildPath ninja.exe
       
       Invoke-WebRequest -Uri "https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-win.zip" -OutFile $NinjaZipFile
       Expand-Archive -Path $NinjaZipFile -DestinationPath $ToolsDirectory
-      Copy-Item -Path $NinjaZipFile -Destination "c:\Program Files\CMake\bin"
+      Copy-Item -Path $NinjaExeFile -Destination "c:\Program Files\CMake\bin"
 
 - task: CmdLine@2
   displayName: Update NDK
   inputs:
     script: |
-      dir "c:\program files\CMake\bin"
       echo Android home: %ANDROID_HOME%
       "%ANDROID_HOME%/tools/bin/sdkmanager.bat" --install ndk;21.0.6113669
 
