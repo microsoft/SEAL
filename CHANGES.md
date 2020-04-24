@@ -6,8 +6,9 @@
 
 - New generic class `Serializable` wraps `Ciphertext`, `RelinKeys`, and `GaloisKeys` objects to provide a more flexible approach to the functionality provided in release 3.4 by `KeyGenerator::[relin|galois]_keys_save` and `Encryptor::encrypt_[zero_]symmetric_save` functions. Specifically, these functions have been removed and replaced with overloads of `KeyGenerator::[relin|galois]_keys` and `Encryptor::encrypt_[zero_]symmetric` that return `Serializable` objects. The `Serializable` objects cannot be used directly by Microsoft SEAL, and are instead intended to be serialized, which activates the compression functionalities introduced earlier in release 3.4.
 - Added examples for serialization.
-- Native library can serialize (save and load) objects larger than 2 GB. In .Net library, objects are limited to 2 GB, and loading an object larger than 2 GB will throw an exception.
-- `Serilization::SEALHeader` also keeps library version numbers (major and minor). Version numbers are retrivable in .Net through `SEALVersion` class.
+- The native library can serialize (save and load) arbitrarily large objects. In the .NET library, objects are limited to 2 GB, and loading an object larger than 2 GB will throw an exception.
+- `Serilization::SEALHeader` layout has been changed. SEAL 3.4 objects can still be loaded by SEAL 3.5, and the headers are automatically converted to SEAL 3.5 format.
+- Version numbers are retrievable in .NET through `SEALVersion` class.
 - New bounds in [native/src/seal/util/defines.h](native/src/seal/util/defines.h):
   - `SEAL_MOD_BIT_COUNT_MAX` and `SEAL_MOD_BIT_COUNT_MIN` are added and set to 61 and 2, respectively.
   - `SEAL_INTERNAL_MOD_BIT_COUNT` is added and set to 61.
@@ -21,24 +22,27 @@
 
 ### File Changes
 
-New files:
-
-- [native/src/seal/serializable.h](native/src/seal/serializable.h)
-- [native/src/seal/c/version.h](native/src/seal/c/version.h)
-- [native/src/seal/c/version.cpp](native/src/seal/c/version.cpp)
-- [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
-- [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
-- [dotnet/src/Serializable.cs](dotnet/src/Serializable.cs)
-- [dotnet/src/Version.cs](dotnet/src/Version.cs)
-- [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
-- [dotnet/tests/SerializationTests.cs](dotnet/tests/SerializationTests.cs)
-
 Renamed files and directories:
 
 - [native/src/seal/c](native/src/seal/c) was previously `dotnet/native/sealnet`.
 - [native/src/seal/util/ntt.h](native/src/seal/util/ntt.h) was previously `native/src/seal/util/ntt.h`.
 - [native/src/seal/util/ntt.cpp](native/src/seal/util/ntt.cpp) was previously `native/src/seal/util/ntt.cpp`.
 - [native/tests/seal/util/ntt.cpp](native/tests/seal/util/ntt.cpp) was previously `native/tests/seal/util/ntt.cpp`.
+
+New files:
+
+- [native/src/seal/serializable.h](native/src/seal/serializable.h)
+- [native/src/seal/c/version.h](native/src/seal/c/version.h)
+- [native/src/seal/c/version.cpp](native/src/seal/c/version.cpp)
+- [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h)
+- [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
+- [native/src/seal/util/streambuf.cpp](native/src/seal/util/streambuf.cpp)
+- [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
+- [native/tests/seal/util/iterator.cpp](native/tests/seal/util/iterator.cpp)
+- [dotnet/src/Serializable.cs](dotnet/src/Serializable.cs)
+- [dotnet/src/Version.cs](dotnet/src/Version.cs)
+- [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
+- [dotnet/tests/SerializationTests.cs](dotnet/tests/SerializationTests.cs)
 
 Removed files:
 
@@ -52,7 +56,8 @@ Removed files:
 
 ### Other changes
 
-- Microsoft SEAL now compiles also in FreeBSD ([PR 113](https://github.com/microsoft/SEAL/pull/113)).
+- Microsoft SEAL officially supports Android (Xamarin.Android).
+- Fixed issue when compiling in FreeBSD ([PR 113](https://github.com/microsoft/SEAL/pull/113)).
 - In serialization, unsupported compression mode now throws `std::invalid_argument` (native) or `ArgumentException` (.NET).
 - Examples for serialization have been added.
 - ZLIB is now downloaded and compiled by default by CMake, and included into a static/dynamic target object (can be disabled).
@@ -62,7 +67,18 @@ Removed files:
 - The C export library in [native/src/seal/c](native/src/seal/c) can be used to build wrappers for languages including but not limited to .NET.
 - Changed the CMake file structure. Targets available are now: `SEAL::seal` (static library), `SEAL::seal_shared` (shared library), `SEAL::sealc` (C export library).
 - There is now a `.clang-format` for automated formatting of C++ (`.cpp` and `.h`) files. A bash script is added. Run `bash tools/scripts/clang-format-all.sh` for easy formatting. This is compatible with clang-format-9 and above. Support for C# is not yet ideal.
-- For the .NET projects we are switching to using C# 8.0 and hence require .NET Core 3.x (.NET Standard 2.1). Therefore, Visual Studio 2017 is no longer supported for building the .NET projects, but only for the C++ projects.
+- The .NET wrapper library targets .NET Standard 2.0, but the .NET example and test projects use C# 8.0 and require .NET Core 3.x. Therefore, Visual Studio 2017 is no longer supported for building the .NET example and test projects.
+
+### For library developers and contributors
+
+We have created a set of C++ iterators (see [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h)) that easily allows looping over polynomials in a ciphertexts, RNS components of a polynomial, and coefficients of an RNS componets.
+There are also a few other iterators that can come in handy.
+Currently [native/src/seal/evaluator.cpp](native/src/seal/evaluator.cpp) fully utilizes these, and in the future the rest of the library will as well.
+The iterators are primarily intended to be used with `std::for_each_n` and can both simplify existing code and help with code correctness.
+
+We have also completely rewritten the RNS tools that were previously in the `util::BaseConverter` class.
+This functionality is now split between two classes: `util::BaseConverter` whose sole purpose is to perform the `FastBConv` computation of [[BEHZ2016]](https://eprint.iacr.org/2016/510), and `util::RNSTool` that handles almost everything else.
+RNS bases are now represented by the new `util::RNSBase` class.
 
 ## Version 3.4.5
 
