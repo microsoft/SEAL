@@ -442,7 +442,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
 ### Android
-You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .Net Standard wrapper library. However, the easiest and recommended way to use SEAL in Android is to use the multiplatform NuGet package you can find in [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). You can add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using SEAL and .Net.
+You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .Net Standard wrapper library. However, the easiest and recommended way to use SEAL in Android is to use the multiplatform NuGet package you can find in [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). You can add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using SEAL and .Net. The native shared library and the .Net wrapper compile only for 64 bits, so only `arm64-v8a` and `x86_64` Android ABIs are supported.
 
 ## Getting Started
 
