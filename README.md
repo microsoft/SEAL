@@ -21,25 +21,25 @@ Users of previous versions of the library should look at the [list of changes](C
       - [ZLIB](#zlib)
     - [Windows](#windows)
       - [Platform](#platform)
-      - [Building Microsoft SEAL](#building-microsoft-seal)
+      - [Building Microsoft SEAL](#building-microsoft-seal-1)
       - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl)
       - [[Optional] ZLIB](#optional-zlib)
       - [Building Examples](#building-examples)
       - [Building Unit Tests](#building-unit-tests)
-    - [Linux, macOS, and FreeBSD](#linux,-macos,-and-freebsd)
-      - [Building Microsoft SEAL](#building-microsoft-seal-1)
+    - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
+      - [Building Microsoft SEAL](#building-microsoft-seal-2)
       - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl-1)
       - [[Optional] ZLIB](#optional-zlib-1)
       - [[Optional] Shared Library](#optional-shared-library)
       - [Building Examples](#building-examples-1)
       - [Building Unit Tests](#building-unit-tests-1)
-      - [Installing Microsoft SEAL](#installing-microsoft-seal-1)
+      - [Installing Microsoft SEAL](#installing-microsoft-seal)
       - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
     - [Android](#android)
   - [Microsoft SEAL for .NET](#microsoft-seal-for-net)
-    - [Installing from NuGet package](#from-nuget-package)
+    - [From NuGet package](#from-nuget-package)
     - [Windows](#windows-1)
       - [Native Library](#native-library)
       - [.NET Library](#net-library)
@@ -47,7 +47,7 @@ Users of previous versions of the library should look at the [list of changes](C
       - [.NET Unit Tests](#net-unit-tests)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
       - [Building Your Own NuGet Package](#building-your-own-nuget-package)
-    - [Linux and macOS](#linux-and-macos-1)
+    - [Linux and macOS](#linux-and-macos)
       - [Native Library](#native-library-1)
       - [.NET Library](#net-library-1)
       - [.NET Examples](#net-examples-1)
@@ -478,7 +478,7 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.5)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
-        month = may,
+        month = apr,
         year = 2020,
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
@@ -504,7 +504,7 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.3)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
-        month = june,
+        month = jun,
         year = 2019,
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
