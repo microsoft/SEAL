@@ -166,10 +166,11 @@ namespace sealtest
 
         stringstream ss;
         auto test_out_size = Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(Serialization::compr_mode_default), ss, Serialization::compr_mode_default);
-        auto out_size = Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(Serialization::compr_mode_default), buffer, arr_size,
+            bind(&test_struct::save_members, &st, _1), st.save_size(Serialization::compr_mode_default), ss,
             Serialization::compr_mode_default);
+        auto out_size = Serialization::Save(
+            bind(&test_struct::save_members, &st, _1), st.save_size(Serialization::compr_mode_default), buffer,
+            arr_size, Serialization::compr_mode_default);
         ASSERT_EQ(test_out_size, out_size);
         for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
         {

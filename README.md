@@ -15,7 +15,7 @@ Users of previous versions of the library should look at the [list of changes](C
     - [Core Concepts](#core-concepts)
     - [Homomorphic Encryption](#homomorphic-encryption)
     - [Microsoft SEAL](#microsoft-seal-1)
-  - [Installing Microsoft SEAL](#installing-microsoft-seal)
+  - [Building Microsoft SEAL](#building-microsoft-seal)
     - [Optional Dependencies](#optional-dependencies)
       - [Microsoft GSL](#microsoft-gsl)
       - [ZLIB](#zlib)
@@ -27,7 +27,7 @@ Users of previous versions of the library should look at the [list of changes](C
       - [[Optional] ZLIB](#optional-zlib)
       - [Building Examples](#building-examples)
       - [Building Unit Tests](#building-unit-tests)
-    - [Linux and macOS](#linux-and-macos)
+    - [Linux, macOS, and FreeBSD](#linux,-macos,-and-freebsd)
       - [Building Microsoft SEAL](#building-microsoft-seal-1)
       - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl-1)
@@ -37,8 +37,9 @@ Users of previous versions of the library should look at the [list of changes](C
       - [Building Unit Tests](#building-unit-tests-1)
       - [Installing Microsoft SEAL](#installing-microsoft-seal-1)
       - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
-    - [From NuGet package](#from-nuget-package)
-  - [Building Microsoft SEAL for .NET](#building-microsoft-seal-for-net)
+    - [Android](#android)
+  - [Microsoft SEAL for .NET](#microsoft-seal-for-net)
+    - [Installing from NuGet package](#from-nuget-package)
     - [Windows](#windows-1)
       - [Native Library](#native-library)
       - [.NET Library](#net-library)
@@ -52,6 +53,7 @@ Users of previous versions of the library should look at the [list of changes](C
       - [.NET Examples](#net-examples-1)
       - [.NET Unit Tests](#net-unit-tests-1)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
+    - [Android](#android-1)
   - [Getting Started](#getting-started)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
@@ -109,7 +111,7 @@ The CKKS scheme allows additions and multiplications on encrypted real or comple
 In applications such as summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances of encrypted locations CKKS is going to be by far the best choice.
 For applications where exact values are necessary, the BFV scheme is the only choice.
 
-## Installing Microsoft SEAL
+## Building Microsoft SEAL
 
 ### Optional Dependencies
 
@@ -117,7 +119,7 @@ Microsoft SEAL has no required dependencies, but certain optional features can b
 
 #### Microsoft GSL
 
-Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provide safe (bounds-checked) array access to memory.
+Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provides safe (bounds-checked) array access to memory.
 For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder` and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`, which can in some cases have a significant performance benefit.
 
 #### ZLIB
@@ -180,7 +182,7 @@ This results in an executable `sealexamples.exe` to be created in `bin\$(Platfor
 The unit tests require the Google Test framework to be installed.
 The appropriate NuGet package is already listed in `native\tests\packages.config`, so once you attempt to build the SEALTest project `native\tests\SEALTest.vcxproj` from `SEAL.sln` Visual Studio will automatically download and install it for you.
 
-### Linux and macOS
+### Linux, macOS, and FreeBSD
 
 Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
 A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed.
@@ -311,14 +313,16 @@ cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
+### Android
+
+## Microsoft SEAL for .NET
+
+Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL for use in .NET development.
+
 ### From NuGet package
 
 For .NET developers the easiest way of installing Microsoft SEAL is by using the multi-platform NuGet package available at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
 Simply add this package into your .NET project as a dependency and you are ready to go.
-
-## Building Microsoft SEAL for .NET
-
-Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL for use in .NET development.
 
 ### Windows
 
@@ -434,6 +438,8 @@ To use Microsoft SEAL for .NET in your own application you need to:
 1. add a reference in your project to `SEALNet.dll`;
 1. ensure the native shared library is available for your application when run.
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
+
+### Android
 
 ## Getting Started
 
