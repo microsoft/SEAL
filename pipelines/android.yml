@@ -13,7 +13,7 @@ steps:
 - task: Gradle@2
   inputs:
     workingDirectory: '$(Build.SourcesDirectory)\android'
-    gradleWrapperFile: '$(Build.SourcesDirectory)\gradlew'
+    gradleWrapperFile: '$(Build.SourcesDirectory)\android\gradlew'
     gradleOptions: ''
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
