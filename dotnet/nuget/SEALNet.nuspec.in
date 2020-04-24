@@ -18,7 +18,7 @@
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>c# crypto cryptography homomorphic encryption</tags>
     <dependencies>
-      <group targetFramework=".NETStandard2.1" />
+      <group targetFramework=".NETStandard2.0" />
     </dependencies>
   </metadata>
   <files>
@@ -28,7 +28,9 @@
     <file src="@SEAL_MACOS_SEAL_C_PATH@" target="runtimes/macos-x64" />
     <file src="$LINUX_SEAL_C$" target="runtimes/linux-x64" />
     <file src="$MACOS_SEAL_C$" target="runtimes/macos-x64" />
-    <file src="../../lib/dotnet/$Configuration$/netstandard2.1/SEALNet.dll" target="lib/netstandard2.1/" />
+    <file src="$ANDROIDARM64_SEAL_C$" target="runtimes/android-arm64" />
+    <file src="$ANDROIDX64_SEAL_C$" target="runtimes/android-x64" />
+    <file src="../../lib/dotnet/$Configuration$/netstandard2.0/SEALNet.dll" target="lib/netstandard2.0/" />
     <file src="../../LICENSE" target="LICENSE" />
   </files>
 </package>

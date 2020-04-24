@@ -18,7 +18,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns Microsoft SEAL's version number string.
         /// </summary>
-        static public string Version => new string($"{SEALVersion.Major}.{SEALVersion.Minor}.{SEALVersion.Patch}");
+        static public string Version => $"{SEALVersion.Major}.{SEALVersion.Minor}.{SEALVersion.Patch}";
 
         ///
         /// <summary>

@@ -1,0 +1,48 @@
+# Android
+# Build your Android project with Gradle.
+# Add steps that test, sign, and distribute the APK, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/android
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: CMake@1
+  displayName: Verify CMake version
+  inputs:
+    workingDirectory: '$(Build.SourcesDirectory)'
+    cmakeArgs: '--version'
+
+- task: PowerShell@2
+  displayName: Download Ninja
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Download Ninja
+      $ToolsDirectory = Join-Path -Path $Env:BUILD_SOURCESDIRECTORY -ChildPath tools
+      $NinjaZipFile = Join-Path $ToolsDirectory -ChildPath ninja.zip
+      
+      Invoke-WebRequest -Uri "https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-win.zip" -OutFile $NinjaZipFile
+      Expand-Archive -Path $NinjaZipFile -DestinationPath $ToolsDirectory
+      Copy-Item -Path $NinjaZipFile -Destination "c:\Program Files\CMake\bin"
+
+- task: CmdLine@2
+  displayName: Update NDK
+  inputs:
+    script: |
+      dir "c:\program files\CMake\bin"
+      echo Android home: %ANDROID_HOME%
+      "%ANDROID_HOME%/tools/bin/sdkmanager.bat" --install ndk;21.0.6113669
+
+- task: Gradle@2
+  displayName: Compile Android Native Libraries
+  inputs:
+    workingDirectory: '$(Build.SourcesDirectory)\android'
+    gradleWrapperFile: '$(Build.SourcesDirectory)\android\gradlew'
+    gradleOptions: ''
+    publishJUnitResults: false
+    testResultsFiles: '**/TEST-*.xml'
+    tasks: 'compileReleaseSources'
