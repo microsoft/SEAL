@@ -12,7 +12,7 @@ pool:
 steps:
 - task: Gradle@2
   inputs:
-    workingDirectory: 'android'
+    workingDirectory: '$(Build.SourcesDirectory)\android'
     gradleWrapperFile: 'gradlew'
     gradleOptions: ''
     publishJUnitResults: false
