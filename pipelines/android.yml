@@ -15,7 +15,7 @@ steps:
   inputs:
     script: |
       echo Android home: %ANDROID_HOME%
-      %ANDROID_HOME%/tools/bin/sdkmanager --install ndk;21.0.6113669
+      "%ANDROID_HOME%/tools/bin/sdkmanager.bat" --install ndk;21.0.6113669
 
 - task: Gradle@2
   displayName: Compile Android Native Libraries
