@@ -27,7 +27,7 @@ namespace seal
                 {
                     throw std::invalid_argument("size is too large");
                 }
-                buf_.resize(static_cast<std::size_t>(size_ + 1));
+                buf_.resize(static_cast<std::size_t>(size_ + 1), false);
                 setp(buf_.begin(), buf_.begin() + size_);
                 setg(buf_.begin(), buf_.begin(), buf_.begin() + size_);
             }
@@ -181,7 +181,7 @@ namespace seal
                 std::streamsize old_goff = std::distance(eback(), gptr());
 
                 // Copy entire buffer to new location and reserve extra byte
-                buf_.resize(safe_cast<std::size_t>(add_safe<std::streamsize>(size_, std::streamsize(1))));
+                buf_.resize(safe_cast<std::size_t>(add_safe<std::streamsize>(size_, std::streamsize(1))), false);
 
                 // Set the get and put pointers appropriately
                 setp(buf_.begin(), buf_.begin() + size_);

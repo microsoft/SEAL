@@ -138,7 +138,7 @@ namespace seal
                 // Set the output buffer size fo the deflate size bound; for small input buffers this will guarantee
                 // deflate to immediately return Z_STREAM_END
                 size_t out_size = deflate_size_bound(in_size);
-                out.resize(out_size);
+                out.resize(out_size, false);
 
                 // How much data was finally produced
                 size_t final_out_size = 0;
@@ -163,7 +163,7 @@ namespace seal
                         {
                             out_size = safe_cast<size_t>(
                                 ceil(safe_cast<double>(out.size()) * deflate_buffer_expansion_factor));
-                            out.resize(out_size);
+                            out.resize(out_size, false);
 
                             // Set the next_out pointer correctly to the new allocation and shift by the number of bytes
                             // already written
