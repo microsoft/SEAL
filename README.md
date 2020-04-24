@@ -162,15 +162,13 @@ Please note that `Debug` mode should not be used except for debugging Microsoft 
 
 By default Microsoft GSL is downloaded as part of Microsoft SEAL library.
 Microsoft GSL's header files are copied to `native/src/GSL` to be portable with Microsoft SEAL at the time of installation.
-~~You can disable the dependency on Microsoft GSL by replacing `#define SEAL_USE_MSGSL` with `#undef SEAL_USE_MSGSL` in [native\src\util\config.h](native\src\util\config.h).~~
-TODO:
+You can disable the dependency on Microsoft GSL by commenting out `#cmakedefine SEAL_USE_MSGSL` in [native\src\util\config.h.in](native\src\util\config.h.in).
 
 #### [Optional] ZLIB
 
 By default ZLIB is downloaded and compiled as part of Microsoft SEAL library.
 ZLIB's static archive is included in Microsoft SEAL's static or shared target object.
-~~You can disable the dependency on ZLIB by replacing `#define SEAL_USE_ZLIB` with `#undef SEAL_USE_ZLIB` in [native\src\util\config.h](native\src\util\config.h).~~
-TODO:
+You can disable the dependency on ZLIB by commenting out `#cmakedefine SEAL_USE_ZLIB` in [native\src\util\config.h.in](native\src\util\config.h.in).
 
 #### Building Examples
 
