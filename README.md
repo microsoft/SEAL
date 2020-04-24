@@ -334,7 +334,7 @@ This library is meant to be used only by the .NET library, not by end users, and
 #### .NET Library
 
 Once you have built the shared native library (see above), build the SEALNet project `dotnet\src\SEALNet.csproj` from `SEAL.sln`.
-Building SEALNet results in the assembly `SEALNet.dll` to be created in `lib\dotnet\$(Configuration)\netstandard2.1`.
+Building SEALNet results in the assembly `SEALNet.dll` to be created in `lib\dotnet\$(Configuration)\netstandard2.0`.
 This is the assembly you can reference in your application.
 
 #### .NET Examples
