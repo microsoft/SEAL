@@ -314,6 +314,8 @@ cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
 ### Android
+Microsoft SEAL can be compiled for Android. Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android. This project is meant only to generate native libraries that can then be called through the .Net library described in the following sections, it does not contain any wrapper that can be used from the Java language.
+
 
 ## Microsoft SEAL for .NET
 
@@ -440,6 +442,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
 ### Android
+You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .Net Standard wrapper library. However, the easiest and recommended way to use SEAL in Android is to use the multiplatform NuGet package you can find in [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). You can add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using SEAL and .Net.
 
 ## Getting Started
 
