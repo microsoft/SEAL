@@ -33,3 +33,7 @@ stages:
       parameters:
         debug: true
         name: macOS
+    - template: jobs.yml
+      parameters:
+        debug: true
+        name: Android

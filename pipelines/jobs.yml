@@ -59,10 +59,24 @@ jobs:
         ${{ if eq(parameters.debug, 'false') }}:
           configuration: 'Release'
 
+- ${{ if eq(parameters.name, 'Android') }}:
+  - job: ${{ parameters.name }}
+    displayName: ${{ parameters.name }}
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - template: android.yml
+      parameters:
+        artifactName: android-drop
+        ${{ if eq(parameters.debug, 'true') }}:
+          configuration: 'Debug'
+        ${{ if eq(parameters.debug, 'false') }}:
+          configuration: 'Release'
+
 - ${{ if eq(parameters.name, 'Nuget') }}:
   - job: ${{ parameters.name }}
     displayName: ${{ parameters.name }}
-    dependsOn: [Windows, Linux, macOs]
+    dependsOn: [Windows, Linux, macOs, Android]
     pool:
       vmImage: 'windows-latest'
     steps:

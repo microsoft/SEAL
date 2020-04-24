@@ -21,4 +21,8 @@ stages:
     - template: jobs.yml
       parameters:
         debug: false
+        name: Android
+    - template: jobs.yml
+      parameters:
+        debug: false
         name: Nuget
