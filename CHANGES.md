@@ -24,35 +24,48 @@
 
 Renamed files and directories:
 
-- [native/src/seal/c](native/src/seal/c) was previously `dotnet/native/sealnet`.
-- [native/src/seal/util/ntt.h](native/src/seal/util/ntt.h) was previously `native/src/seal/util/ntt.h`.
-- [native/src/seal/util/ntt.cpp](native/src/seal/util/ntt.cpp) was previously `native/src/seal/util/ntt.cpp`.
-- [native/tests/seal/util/ntt.cpp](native/tests/seal/util/ntt.cpp) was previously `native/tests/seal/util/ntt.cpp`.
+- [dotnet/examples/7_Performance.cs](dotnet/examples/7_Performance.cs) was previously `dotnet/examples/6_Performance.cs`
+- [native/examples/7_performance.cpp](native/examples/7_performance.cpp) was previously `native/examples/6_performance.cpp`
+- [native/src/seal/c/](native/src/seal/c/) was previously `dotnet/native/sealnet`.
+- [native/src/seal/util/ntt.h](native/src/seal/util/ntt.h) was previously `native/src/seal/util/smallntt.h`.
+- [native/src/seal/util/ntt.cpp](native/src/seal/util/ntt.cpp) was previously `native/src/seal/util/smallntt.cpp`.
+- [native/tests/seal/util/ntt.cpp](native/tests/seal/util/ntt.cpp) was previously `native/tests/seal/util/smallntt.cpp`.
 
 New files:
 
-- [native/src/seal/serializable.h](native/src/seal/serializable.h)
-- [native/src/seal/c/version.h](native/src/seal/c/version.h)
-- [native/src/seal/c/version.cpp](native/src/seal/c/version.cpp)
-- [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h)
-- [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
-- [native/src/seal/util/streambuf.cpp](native/src/seal/util/streambuf.cpp)
-- [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
-- [native/tests/seal/util/iterator.cpp](native/tests/seal/util/iterator.cpp)
+- [android/](android/)
+- [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
 - [dotnet/src/Serializable.cs](dotnet/src/Serializable.cs)
 - [dotnet/src/Version.cs](dotnet/src/Version.cs)
-- [dotnet/examples/6_Serialization.cs](dotnet/examples/6_Serialization.cs)
 - [dotnet/tests/SerializationTests.cs](dotnet/tests/SerializationTests.cs)
+- [native/examples/6_serialization.cpp](native/examples/6_serialization.cpp)
+- [native/src/seal/c/version.h](native/src/seal/c/version.h)
+- [native/src/seal/c/version.cpp](native/src/seal/c/version.cpp)
+- `native/src/seal/util/galois.h`(native/src/seal/util/galois.h)
+- `native/src/seal/util/galois.cpp`(native/src/seal/util/galois.cpp)
+- `native/src/seal/util/hash.cpp`(native/src/seal/util/hash.cpp)
+- [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h)
+- `native/src/seal/util/rns.h`(native/src/seal/util/rns.h)
+- `native/src/seal/util/rns.cpp`(native/src/seal/util/rns.cpp)
+- [native/src/seal/util/streambuf.h](native/src/seal/util/streambuf.h)
+- [native/src/seal/util/streambuf.cpp](native/src/seal/util/streambuf.cpp)
+- [native/src/seal/serializable.h](native/src/seal/serializable.h)
+- [native/tests/seal/util/iterator.cpp](native/tests/seal/util/iterator.cpp)
+- [native/tests/seal/util/galois.cpp](native/tests/seal/util/galois.cpp)
+- [native/tests/seal/util/rns.cpp](native/tests/seal/util/rns.cpp)
 
 Removed files:
 
+- `dotnet/src/SmallModulus.cs` is merged to [dotnet/src/ModulusTests.cs](dotnet/src/Modulus.cs).
+- `dotnet/tests/SmallModulusTests.cs` is merged to [dotnet/tests/ModulusTests.cs](dotnet/tests/ModulusTests.cs).
+- `native/src/seal/util/baseconverter.h`
+- `native/src/seal/util/baseconverter.cpp`
 - `native/src/seal/smallmodulus.h` is merged to [native/src/seal/modulus.h](native/src/seal/modulus.h).
 - `native/src/seal/smallmodulus.cpp` is merged to [native/src/seal/modulus.cpp](native/src/seal/modulus.cpp).
 - `native/src/seal/c/smallmodulus.h` is merged to [native/src/seal/c/modulus.h](native/src/seal/c/modulus.h).
 - `native/src/seal/c/smallmodulus.cpp` is merged to [native/src/seal/c/modulus.cpp](native/src/seal/c/modulus.cpp).
 - `native/tests/seal/smallmodulus.cpp` is merged to [native/tests/seal/modulus.cpp](native/tests/seal/modulus.cpp).
-- `dotnet/src/SmallModulusTests.cs` is merged to [dotnet/src/ModulusTests.cs](dotnet/src/ModulusTests.cs).
-- `dotnet/tests/SmallModulusTests.cs` is merged to [dotnet/tests/ModulusTests.cs](dotnet/tests/ModulusTests.cs).
+- `native/tests/seal/util/baseconverter.cpp`
 
 ### Other changes
 
