@@ -10,10 +10,17 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
+- task: CMake@1
+  displayName: Verify CMake version
+  inputs:
+    workingDirectory: '$(Build.SourcesDirectory)'
+    cmakeArgs: '--version'
+
 - task: CmdLine@2
   displayName: Update NDK
   inputs:
     script: |
+      dir "c:\program files\CMake\bin"
       echo Android home: %ANDROID_HOME%
       "%ANDROID_HOME%/tools/bin/sdkmanager.bat" --install ndk;21.0.6113669
 
