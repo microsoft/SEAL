@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
 apply plugin: 'com.android.application'
 
 android {
@@ -18,9 +21,7 @@ android {
             }
         }
         ndk {
-//            abiFilters 'x86'
             abiFilters 'x86_64'
-//            abiFilters 'armeabi-v7a'
             abiFilters 'arm64-v8a'
         }
     }

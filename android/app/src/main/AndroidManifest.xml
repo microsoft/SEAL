@@ -1,3 +1,6 @@
+<!-- Copyright (c) Microsoft Corporation. All rights reserved.
+     Licensed under the MIT license. -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.microsoft.seal">
 
