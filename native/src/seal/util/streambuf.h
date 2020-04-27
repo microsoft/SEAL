@@ -48,6 +48,16 @@ namespace seal
                 return reinterpret_cast<SEAL_BYTE *>(buf_.begin());
             }
 
+            SEAL_NODISCARD std::size_t size() noexcept
+            {
+                return buf_.size();
+            }
+
+            SEAL_NODISCARD std::size_t capacity() noexcept
+            {
+                return buf_.capacity();
+            }
+
         private:
             void safe_gbump(std::streamsize count)
             {

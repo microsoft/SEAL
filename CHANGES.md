@@ -61,7 +61,7 @@ The following changes are specific to .NET:
 
 - Releases are now listed on [releases page](https://github.com/microsoft/SEAL/releases).
 - The native library can serialize (save and load) objects larger than 4 GB.
-Compression requires twice the memory needed without compression, e.g. 16 GB memory is needed to compress and serialize a 4 GB object.
+Please be aware that compressed serialization requires an additional temporary buffer roughly the size of the object to be allocated, and the streambuffer for the output stream may consume some non-trivial amount of memory as well.
 In the .NET library, objects are limited to 2 GB, and loading an object larger than 2 GB will throw an exception.
 [(Issue 142)](https://github.com/microsoft/SEAL/issues/142)
 - Larger-than-suggested parameters are supported for expert users.

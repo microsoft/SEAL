@@ -10,6 +10,7 @@
 #include "seal/util/ztools.h"
 #include <cmath>
 #include <cstddef>
+#include <cstring>
 #include <limits>
 #include <unordered_map>
 #include <zlib.h>
@@ -24,7 +25,8 @@ namespace seal
         {
             namespace
             {
-                constexpr size_t inflate_buffer_size = 256 * 1024;
+                // Size for an internal buffer allocated for inflate and deflate
+                constexpr size_t buffer_size = 256 * 1024;
 
                 constexpr double deflate_buffer_expansion_factor = 1.3;
 
@@ -196,6 +198,180 @@ namespace seal
                 return Z_OK;
             }
 
+            int deflate_array_inplace(IntArray<SEAL_BYTE> &in, MemoryPoolHandle pool)
+            {
+                if (!pool)
+                {
+                    throw invalid_argument("pool is uninitialized");
+                }
+
+                // We need size_t to be at least as large as uInt
+                static_assert(numeric_limits<uInt>::max() <= numeric_limits<size_t>::max(), "");
+
+                int result, flush;
+                int level = Z_DEFAULT_COMPRESSION;
+
+                int pending_bits;
+                unsigned pending_bytes;
+
+                z_stream zstream;
+                zstream.data_type = Z_BINARY;
+
+                PointerStorage ptr_storage(pool);
+                zstream.zalloc = alloc_impl;
+                zstream.zfree = free_impl;
+                zstream.opaque = reinterpret_cast<voidpf>(&ptr_storage);
+
+                result = deflateInit(&zstream, level);
+                if (result != Z_OK)
+                {
+                    deflateEnd(&zstream);
+                    return result;
+                }
+
+                // How much data was finally produced
+                size_t bytes_written_to_in = 0;
+                size_t bytes_read_from_in = 0;
+
+                // Allocate a temporary buffer for output
+                auto temp_out = IntArray<SEAL_BYTE>(buffer_size, pool);
+
+                // Where we are writing output now; start writing to the temporary buffer
+                SEAL_BYTE *out_head = temp_out.begin();
+
+                // How much of input do we have left to process
+                size_t in_size = in.size();
+
+                // Size of the current output buffer
+                size_t out_size = buffer_size;
+
+                // Are we overwriting in at this time?
+                bool out_is_in = false;
+
+                // Set the input and output pointers for the initial block
+                zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<SEAL_BYTE *>(in.cbegin()));
+                zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
+
+                do
+                {
+                    // The number of bytes we can read at a time is capped by process_bytes_in_max
+                    size_t process_bytes_in = min<size_t>(in_size, process_bytes_in_max);
+                    zstream.avail_in = static_cast<uInt>(process_bytes_in);
+
+                    // Number of bytes left after this round; if we are at the end set flush accordingly
+                    in_size -= process_bytes_in;
+                    flush = in_size ? Z_NO_FLUSH : Z_FINISH;
+
+                    // Loop while we have input left
+                    do
+                    {
+                        // First ensure we have output space
+                        while (!out_size)
+                        {
+                            // We are out of output buffer
+                            if (!out_is_in)
+                            {
+                                // If we have been writing to the temporary buffer, then see if we can copy to in
+                                size_t temp_out_size = temp_out.size();
+                                if (bytes_read_from_in >= bytes_written_to_in + temp_out_size)
+                                {
+                                    // All is good; we can copy over the buffer to in
+                                    out_head = in.begin() + bytes_written_to_in;
+                                    memcpy(out_head, temp_out.cbegin(), temp_out_size);
+                                    out_head += temp_out_size;
+                                    bytes_written_to_in += temp_out_size;
+
+                                    // For next writes, try to write to in
+                                    out_is_in = true;
+
+                                    // Reset out_size
+                                    out_size = bytes_read_from_in - bytes_written_to_in;
+
+                                    // Reset temp_out to have size buffer_size
+                                    temp_out.resize(buffer_size, false);
+                                }
+                                else
+                                {
+                                    // We don't have enough room to copy to in; instead, resize temp_out and continue
+                                    // using it, hoping that the situation will change
+                                    out_size = temp_out_size + buffer_size;
+                                    temp_out.resize(out_size, false);
+                                    out_size = buffer_size;
+                                    out_head = temp_out.begin() + temp_out_size;
+                                }
+                            }
+                            else
+                            {
+                                // We are writing to in but are out of space; switch to temp_out for the moment
+                                out_is_in = false;
+
+                                // Set size and pointer
+                                out_size = temp_out.size();
+                                out_head = temp_out.begin();
+                            }
+                        }
+
+                        // Set the stream output
+                        zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
+
+                        // Cap the out size to process_bytes_out_max
+                        size_t process_bytes_out = min<size_t>(out_size, process_bytes_out_max);
+                        zstream.avail_out = static_cast<uInt>(process_bytes_out);
+
+                        result = deflate(&zstream, flush);
+#ifdef SEAL_DEBUG
+                        // Intermediate rounds should return Z_OK and last should return Z_STREAM_END
+                        if (result != Z_OK && result != Z_STREAM_END)
+                        {
+                            // Something went wrong so finish up here
+                            deflateEnd(&zstream);
+                            return result;
+                        }
+#endif
+                        // True number of bytes written
+                        process_bytes_out =
+                            static_cast<size_t>(reinterpret_cast<SEAL_BYTE *>(zstream.next_out) - out_head);
+                        out_size -= process_bytes_out;
+                        out_head += process_bytes_out;
+
+                        // Number of bytes read
+                        bytes_read_from_in += process_bytes_in - zstream.avail_in;
+
+                        if (out_is_in)
+                        {
+                            // Update number of bytes written to in
+                            bytes_written_to_in += process_bytes_out;
+                        }
+
+                        // Is there pending output in the internal buffers? If so, we need to call deflate again
+                        deflatePending(&zstream, &pending_bytes, &pending_bits);
+                    } while ((flush == Z_FINISH && result == Z_OK) ||
+                             (!zstream.avail_out && (pending_bits || pending_bytes)));
+                } while (in_size);
+
+                if (!out_is_in)
+                {
+                    // We are done but the last writes were to temp_out
+                    size_t bytes_in_temp_out = temp_out.size() - out_size;
+
+                    // Resize in to fit the remaining data
+                    in.resize(bytes_written_to_in + bytes_in_temp_out);
+
+                    // Copy over the buffer to in
+                    out_head = in.begin() + bytes_written_to_in;
+                    memcpy(out_head, temp_out.cbegin(), bytes_in_temp_out);
+                    bytes_written_to_in += bytes_in_temp_out;
+                }
+                else
+                {
+                    // Just resize in to the right size
+                    in.resize(bytes_written_to_in);
+                }
+
+                deflateEnd(&zstream);
+                return Z_OK;
+            }
+
             int inflate_stream(istream &in_stream, streamoff in_size, ostream &out_stream, MemoryPoolHandle pool)
             {
                 // Clear the exception masks; this function returns an error code
@@ -211,8 +387,8 @@ namespace seal
                 int result;
                 size_t have;
 
-                auto in(allocate<unsigned char>(inflate_buffer_size, pool));
-                auto out(allocate<unsigned char>(inflate_buffer_size, pool));
+                auto in(allocate<unsigned char>(buffer_size, pool));
+                auto out(allocate<unsigned char>(buffer_size, pool));
 
                 z_stream zstream;
                 zstream.data_type = Z_BINARY;
@@ -236,7 +412,7 @@ namespace seal
                 {
                     if (!in_stream.read(
                             reinterpret_cast<char *>(in.get()),
-                            min(static_cast<streamoff>(inflate_buffer_size), in_stream_end_pos - in_stream.tellg())))
+                            min(static_cast<streamoff>(buffer_size), in_stream_end_pos - in_stream.tellg())))
                     {
                         inflateEnd(&zstream);
                         in_stream.exceptions(in_stream_except_mask);
@@ -251,7 +427,7 @@ namespace seal
 
                     do
                     {
-                        zstream.avail_out = inflate_buffer_size;
+                        zstream.avail_out = buffer_size;
                         zstream.next_out = out.get();
                         result = inflate(&zstream, Z_NO_FLUSH);
 
@@ -271,7 +447,7 @@ namespace seal
                             return result;
                         }
 
-                        have = inflate_buffer_size - static_cast<size_t>(zstream.avail_out);
+                        have = buffer_size - static_cast<size_t>(zstream.avail_out);
 
                         if (!out_stream.write(reinterpret_cast<const char *>(out.get()), static_cast<streamsize>(have)))
                         {
@@ -290,12 +466,11 @@ namespace seal
             }
 
             void write_header_deflate_buffer(
-                const IntArray<SEAL_BYTE> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
+                IntArray<SEAL_BYTE> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
             {
                 Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 
-                IntArray<SEAL_BYTE> out_array(pool);
-                auto ret = deflate_array(in, out_array, move(pool));
+                auto ret = deflate_array_inplace(in, move(pool));
                 if (Z_OK != ret)
                 {
                     throw logic_error("deflate failed");
@@ -303,7 +478,7 @@ namespace seal
 
                 // Populate the header
                 header.compr_mode = compr_mode_type::deflate;
-                header.size = static_cast<uint64_t>(add_safe(sizeof(Serialization::SEALHeader), out_array.size()));
+                header.size = static_cast<uint64_t>(add_safe(sizeof(Serialization::SEALHeader), in.size()));
 
                 auto old_except_mask = out_stream.exceptions();
                 try
@@ -313,8 +488,7 @@ namespace seal
 
                     // Write the header and the data
                     out_stream.write(reinterpret_cast<const char *>(&header), sizeof(Serialization::SEALHeader));
-                    out_stream.write(
-                        reinterpret_cast<const char *>(out_array.cbegin()), safe_cast<streamsize>(out_array.size()));
+                    out_stream.write(reinterpret_cast<const char *>(in.cbegin()), safe_cast<streamsize>(in.size()));
                 }
                 catch (...)
                 {

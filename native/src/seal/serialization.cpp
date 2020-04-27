@@ -265,7 +265,8 @@ namespace seal
                 // First save_members to a temporary byte stream; set the size
                 // of the temporary stream to be right from the start to avoid
                 // extra reallocs.
-                SafeByteBuffer safe_buffer(raw_size - static_cast<streamoff>(sizeof(SEALHeader)));
+                SafeByteBuffer safe_buffer(
+                    ztools::deflate_size_bound(raw_size - static_cast<streamoff>(sizeof(SEALHeader))));
                 iostream temp_stream(&safe_buffer);
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
                 save_members(temp_stream);
@@ -274,8 +275,8 @@ namespace seal
 
                 // Create temporary aliasing IntArray to wrap safe_buffer
                 IntArray<SEAL_BYTE> safe_buffer_array(
-                    Pointer<SEAL_BYTE>::Aliasing(safe_buffer.data()), static_cast<size_t>(temp_stream.tellp()), false,
-                    safe_pool);
+                    Pointer<SEAL_BYTE>::Aliasing(safe_buffer.data()), safe_buffer.size(),
+                    static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
 
                 // After compression, write_header_deflate_buffer will write the
                 // final size to the given header and write the header to stream,

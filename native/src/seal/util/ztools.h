@@ -31,9 +31,11 @@ namespace seal
             @throws std::logic_error if compression failed
             */
             void write_header_deflate_buffer(
-                const IntArray<SEAL_BYTE> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
+                IntArray<SEAL_BYTE> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
             int deflate_array(const IntArray<SEAL_BYTE> &in, IntArray<SEAL_BYTE> &out, MemoryPoolHandle pool);
+
+            int deflate_array_inplace(IntArray<SEAL_BYTE> &in, MemoryPoolHandle pool);
 
             int inflate_stream(
                 std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);
