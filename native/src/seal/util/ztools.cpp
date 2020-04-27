@@ -98,11 +98,6 @@ namespace seal
                 }
             } // namespace
 
-            size_t deflate_size_bound(size_t in_size)
-            {
-                return util::add_safe(in_size, in_size >> 12, in_size >> 14, in_size >> 25, std::size_t(17));
-            }
-
             int deflate_array(const IntArray<SEAL_BYTE> &in, IntArray<SEAL_BYTE> &out, MemoryPoolHandle pool)
             {
                 if (!pool)
@@ -135,7 +130,7 @@ namespace seal
                     return result;
                 }
 
-                // Set the output buffer size fo the deflate size bound; for small input buffers this will guarantee
+                // Set the output buffer size to the deflate size bound; for small input buffers this will guarantee
                 // deflate to immediately return Z_STREAM_END
                 size_t out_size = deflate_size_bound(in_size);
                 out.resize(out_size, false);

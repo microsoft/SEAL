@@ -26,7 +26,8 @@ namespace seal
     {
         namespace ztools
         {
-            SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size);
+            template <typename SizeT>
+            SEAL_NODISCARD SizeT deflate_size_bound(SizeT in_size);
         } // namespace ztools
     }     // namespace util
 
