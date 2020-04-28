@@ -41,7 +41,7 @@ steps:
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)\lib'
     Contents: '**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\lib'
 
 - task: PublishBuildArtifacts@1
   displayName: Publish build artifacts
