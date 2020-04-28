@@ -76,7 +76,7 @@ jobs:
 - ${{ if eq(parameters.name, 'Nuget') }}:
   - job: ${{ parameters.name }}
     displayName: ${{ parameters.name }}
-    dependsOn: [Windows, Linux, macOs, Android]
+    dependsOn: [Windows, Linux, macOS, Android]
     pool:
       vmImage: 'windows-latest'
     steps:
