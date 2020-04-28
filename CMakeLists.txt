@@ -130,6 +130,12 @@ include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckTypeSize)
 
+# We clean up native/src/gsl directory which is no longer used in version >= 3.5.0
+if(EXISTS ${SEAL_INCLUDES_BUILD_DIR}/gsl)
+    message(STATUS "Removing ${SEAL_INCLUDES_BUILD_DIR}/gsl; this is no longer used by Microsoft SEAL >= 3.5.0")
+    file(REMOVE_RECURSE ${SEAL_INCLUDES_BUILD_DIR}/gsl)
+endif()
+
 ##################################
 # Macros for configuring targets #
 ##################################
@@ -577,7 +583,7 @@ set_language(seal_obj)
 set_include_directories(seal_obj)
 
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    target_link_libraries(seal_obj PUBLIC GSL)
+    target_link_libraries(seal_obj PRIVATE GSL)
 endif()
 
 if(SEAL_USE_ZLIB AND NOT MSVC)
@@ -593,6 +599,11 @@ set_include_directories(seal)
 link_threads(seal)
 install_target(seal SEALTargets)
 
+# Conditionally add MSGSL include directory to build interface
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${MSGSL_INCLUDE_DIR}>)
+endif()
+
 # Conditionally build the shared library
 if(BUILD_SHARED_LIBS)
     add_library(seal_shared SHARED $<TARGET_OBJECTS:seal_obj>)
@@ -603,20 +614,17 @@ if(BUILD_SHARED_LIBS)
     set_include_directories(seal_shared)
     link_threads(seal_shared)
 
+    # Conditionally add MSGSL include directory to build interface
+    if(SEAL_USE_MSGSL AND NOT MSVC)
+        target_include_directories(seal_shared PUBLIC $<BUILD_INTERFACE:${MSGSL_INCLUDE_DIR}>)
+    endif()
+
     if(SEAL_USE_ZLIB AND NOT MSVC)
         # In the shared build we link zlibstatic into the shared library
         target_link_libraries(seal_shared PRIVATE zlibstatic)
     endif()
 
     install_target(seal_shared SEALTargets)
-endif()
-
-# The following are executed post build
-
-# In UNIX-like platforms copy Microsoft GSL include files into native/src
-if(SEAL_USE_MSGSL AND NOT MSVC AND NOT CMAKE_HOST_WIN32 AND NOT EXISTS ${SEAL_INCLUDES_BUILD_DIR}/gsl)
-    add_custom_command(TARGET seal POST_BUILD
-        COMMAND cp -r ${MSGSL_INCLUDE_DIR}/gsl ${SEAL_INCLUDES_BUILD_DIR})
 endif()
 
 # In UNIX-like platforms combine manually seal and zlibstatic into a single archive; not pretty, but works
@@ -665,10 +673,6 @@ if(SEAL_BUILD_SEAL_C)
     set_soversion(sealc)
     set_language(sealc)
     set_include_directories(sealc)
-
-    if(SEAL_USE_MSGSL AND NOT MSVC)
-        target_include_directories(sealc PUBLIC $<BUILD_INTERFACE:${MSGSL_INCLUDE_DIR}>)
-    endif()
 
     target_link_libraries(sealc PUBLIC seal)
 
