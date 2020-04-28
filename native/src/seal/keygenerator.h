@@ -51,8 +51,8 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] secret_key A previously generated secret key
         @throws std::invalid_argument if encryption parameters are not valid
-        @throws std::invalid_argument if secret_key or public_key is not valid
-        for encryption parameters
+        @throws std::invalid_argument if secret_key is not valid for encryption
+        parameters
         */
         KeyGenerator(std::shared_ptr<SEALContext> context, const SecretKey &secret_key);
 
