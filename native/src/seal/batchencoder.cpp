@@ -224,7 +224,7 @@ namespace seal
 
         // First write the values to destination coefficients. Read
         // in top row, then bottom row.
-        using index_type = decltype(values_matrix)::index_type;
+        using index_type = decltype(values_matrix)::size_type;
         for (size_t i = 0; i < values_matrix_size; i++)
         {
             *(destination.data() + matrix_reps_index_map_[i]) = values_matrix[static_cast<index_type>(i)];
@@ -267,7 +267,7 @@ namespace seal
 
         // First write the values to destination coefficients. Read
         // in top row, then bottom row.
-        using index_type = decltype(values_matrix)::index_type;
+        using index_type = decltype(values_matrix)::size_type;
         for (size_t i = 0; i < values_matrix_size; i++)
         {
             *(destination.data() + matrix_reps_index_map_[i]) =
@@ -436,7 +436,7 @@ namespace seal
 
         auto &context_data = *context_->first_context_data();
 
-        using index_type = decltype(destination)::index_type;
+        using index_type = decltype(destination)::size_type;
         if (unsigned_gt(destination.size(), numeric_limits<int>::max()) || unsigned_neq(destination.size(), slots_))
         {
             throw invalid_argument("destination has incorrect size");
@@ -479,7 +479,7 @@ namespace seal
         auto &context_data = *context_->first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
-        using index_type = decltype(destination)::index_type;
+        using index_type = decltype(destination)::size_type;
         if (unsigned_gt(destination.size(), numeric_limits<int>::max()) || unsigned_neq(destination.size(), slots_))
         {
             throw invalid_argument("destination has incorrect size");
