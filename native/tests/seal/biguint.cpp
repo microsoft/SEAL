@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/biguint.h"
 #include "seal/util/defines.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(BigUnsignedInt, EmptyBigUInt)
     {
@@ -330,8 +330,8 @@ namespace SEALTest
             BigUInt p2("456");
             BigUInt p3;
 
-            p1.operator =(p2);
-            p3.operator =(p1);
+            p1.operator=(p2);
+            p3.operator=(p1);
             ASSERT_TRUE(p1 == p2);
             ASSERT_TRUE(p3 == p1);
         }
@@ -341,8 +341,8 @@ namespace SEALTest
             BigUInt p3;
             BigUInt p4(p2);
 
-            p1.operator =(move(p2));
-            p3.operator =(move(p1));
+            p1.operator=(move(p2));
+            p3.operator=(move(p1));
             ASSERT_TRUE(p3 == p4);
             ASSERT_TRUE(p1 == p2);
             ASSERT_TRUE(p3 == p1);
@@ -354,8 +354,8 @@ namespace SEALTest
             BigUInt p2(64, &p2_anchor);
             BigUInt p3;
 
-            p1.operator =(p2);
-            p3.operator =(p1);
+            p1.operator=(p2);
+            p3.operator=(p1);
             ASSERT_TRUE(p1 == p2);
             ASSERT_TRUE(p3 == p1);
         }
@@ -367,12 +367,12 @@ namespace SEALTest
             BigUInt p3;
             BigUInt p4(p2);
 
-            p1.operator =(move(p2));
-            p3.operator =(move(p1));
+            p1.operator=(move(p2));
+            p3.operator=(move(p1));
             ASSERT_TRUE(p3 == p4);
             ASSERT_TRUE(p2 == 456);
             ASSERT_TRUE(p1 == 456);
             ASSERT_TRUE(p3 == 456);
         }
     }
-}
+} // namespace sealtest

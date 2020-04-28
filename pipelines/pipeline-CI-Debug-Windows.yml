@@ -1,0 +1,27 @@
+# This defines a pipeline to build on Windows in Debug mode.
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+  paths:
+    exclude:
+    - 'tools/*'
+    - LICENSE
+    - NOTICE
+    - CHANGES.md
+    - CODE_OF_CONDUCT.md
+    - CONTRIBUTING.md
+    - ISSUES.md
+    - README.md
+    - SECURITY.md
+
+stages:
+  - stage: build
+    displayName: Build
+    jobs:
+    - template: jobs.yml
+      parameters:
+        debug: true
+        name: Windows

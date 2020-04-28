@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
-#include <stdexcept>
-#include <array>
-#include <iterator>
-#include <algorithm>
-#include <memory>
-#include <mutex>
-#include "seal/util/defines.h"
-#include "seal/util/common.h"
 #include "seal/intarray.h"
 #include "seal/memorymanager.h"
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <memory>
+#include <mutex>
+#include <stdexcept>
 
 namespace seal
 {
@@ -42,24 +42,18 @@ namespace seal
 
         @param[in] seed The seed for the random number generator
         */
-        UniformRandomGenerator(random_seed_type seed) :
-            seed_([&seed]() {
-                // Create a new seed allocation
-                IntArray<std::uint64_t> new_seed(
-                    seed.size(),
-                    MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+        UniformRandomGenerator(random_seed_type seed)
+            : seed_([&seed]() {
+                  // Create a new seed allocation
+                  IntArray<std::uint64_t> new_seed(seed.size(), MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
 
-                // Assign the given seed and return
-                std::copy(seed.cbegin(), seed.cend(), new_seed.begin());
-                return new_seed;
-            }()),
-            buffer_(buffer_size_,
-                MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)),
-            buffer_begin_(buffer_.begin()),
-            buffer_end_(buffer_.end()),
-            buffer_head_(buffer_.end())
-        {
-        }
+                  // Assign the given seed and return
+                  std::copy(seed.cbegin(), seed.cend(), new_seed.begin());
+                  return new_seed;
+              }()),
+              buffer_(buffer_size_, MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)),
+              buffer_begin_(buffer_.begin()), buffer_end_(buffer_.end()), buffer_head_(buffer_.end())
+        {}
 
         SEAL_NODISCARD inline random_seed_type seed() const noexcept
         {
@@ -79,7 +73,7 @@ namespace seal
         SEAL_NODISCARD inline std::uint32_t generate()
         {
             std::uint32_t result;
-            generate(sizeof(result), reinterpret_cast<SEAL_BYTE*>(&result));
+            generate(sizeof(result), reinterpret_cast<SEAL_BYTE *>(&result));
             return result;
         }
 
@@ -138,10 +132,8 @@ namespace seal
         randomly for each UniformRandomGenerator instance created by the factory
         instance, which is desirable in most normal use-cases.
         */
-        UniformRandomGeneratorFactory() :
-            use_random_seed_(true)
-        {
-        }
+        UniformRandomGeneratorFactory() : use_random_seed_(true)
+        {}
 
         /**
         Creates a new UniformRandomGeneratorFactory and sets the default seed to
@@ -154,23 +146,19 @@ namespace seal
         @param[in] default_seed The default value for a seed to be used by all
         created instances of UniformRandomGenerator
         */
-        UniformRandomGeneratorFactory(random_seed_type default_seed) :
-            default_seed_(default_seed),
-            use_random_seed_(false)
-        {
-        }
+        UniformRandomGeneratorFactory(random_seed_type default_seed)
+            : default_seed_(default_seed), use_random_seed_(false)
+        {}
 
         /**
         Creates a new uniform random number generator.
         */
-        SEAL_NODISCARD auto create()
-            -> std::shared_ptr<UniformRandomGenerator>
+        SEAL_NODISCARD auto create() -> std::shared_ptr<UniformRandomGenerator>
         {
-            return use_random_seed_ ?
-                create_impl({
-                    random_uint64(), random_uint64(), random_uint64(), random_uint64(),
-                    random_uint64(), random_uint64(), random_uint64(), random_uint64()}) :
-                create_impl(default_seed_);
+            return use_random_seed_
+                       ? create_impl({ random_uint64(), random_uint64(), random_uint64(), random_uint64(),
+                                       random_uint64(), random_uint64(), random_uint64(), random_uint64() })
+                       : create_impl(default_seed_);
         }
 
         /**
@@ -179,8 +167,7 @@ namespace seal
 
         @param[in] seed The seed to be used for the created random number generator
         */
-        SEAL_NODISCARD auto create(random_seed_type seed)
-            -> std::shared_ptr<UniformRandomGenerator>
+        SEAL_NODISCARD auto create(random_seed_type seed) -> std::shared_ptr<UniformRandomGenerator>
         {
             return create_impl(seed);
         }
@@ -194,12 +181,10 @@ namespace seal
         Returns the default random number generator factory. This instance should
         not be destroyed.
         */
-        static auto DefaultFactory()
-            -> const std::shared_ptr<UniformRandomGeneratorFactory>;
+        static auto DefaultFactory() -> const std::shared_ptr<UniformRandomGeneratorFactory>;
 
     protected:
-        SEAL_NODISCARD virtual auto create_impl(random_seed_type seed)
-            -> std::shared_ptr<UniformRandomGenerator> = 0;
+        SEAL_NODISCARD virtual auto create_impl(random_seed_type seed) -> std::shared_ptr<UniformRandomGenerator> = 0;
 
     private:
         random_seed_type default_seed_ = {};
@@ -220,8 +205,7 @@ namespace seal
         @param[in] seed The seed for the random number generator
         */
         BlakePRNG(random_seed_type seed) : UniformRandomGenerator(seed)
-        {
-        }
+        {}
 
         /**
         Destroys the random number generator.
@@ -244,8 +228,7 @@ namespace seal
         most normal use-cases.
         */
         BlakePRNGFactory() : UniformRandomGeneratorFactory()
-        {
-        }
+        {}
 
         /**
         Creates a new BlakePRNGFactory and sets the default seed to the given value.
@@ -258,10 +241,8 @@ namespace seal
         @param[in] default_seed The default value for a seed to be used by all
         created instances of BlakePRNG
         */
-        BlakePRNGFactory(random_seed_type default_seed) :
-            UniformRandomGeneratorFactory(default_seed)
-        {
-        }
+        BlakePRNGFactory(random_seed_type default_seed) : UniformRandomGeneratorFactory(default_seed)
+        {}
 
         /**
         Destroys the random number generator factory.
@@ -277,4 +258,4 @@ namespace seal
 
     private:
     };
-}
+} // namespace seal

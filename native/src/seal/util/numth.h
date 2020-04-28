@@ -3,15 +3,17 @@
 
 #pragma once
 
-#include "seal/util/defines.h"
-#include "seal/smallmodulus.h"
+#include "seal/memorymanager.h"
+#include "seal/modulus.h"
 #include "seal/util/common.h"
-#include <stdexcept>
-#include <cstdint>
+#include "seal/util/defines.h"
+#include "seal/util/pointer.h"
 #include <cmath>
-#include <vector>
+#include <cstddef>
+#include <cstdint>
+#include <stdexcept>
 #include <tuple>
-#include <algorithm>
+#include <vector>
 
 namespace seal
 {
@@ -19,28 +21,27 @@ namespace seal
     {
         SEAL_NODISCARD inline std::vector<int> naf(int value)
         {
-          std::vector<int> res;
+            std::vector<int> res;
 
-          // Record the sign of the original value and compute abs
-          bool sign = value < 0;
-          value = std::abs(value);
+            // Record the sign of the original value and compute abs
+            bool sign = value < 0;
+            value = std::abs(value);
 
-          // Transform to non-adjacent form (NAF)
-          for (int i = 0; value; i++)
-          {
-            int zi = (value % 2) ? 2 - (value % 4) : 0;
-            value = (value - zi) / 2;
-            if (zi)
+            // Transform to non-adjacent form (NAF)
+            for (int i = 0; value; i++)
             {
-              res.push_back((sign ? -zi : zi) * (1 << i));
+                int zi = (value % 2) ? 2 - (value % 4) : 0;
+                value = (value - zi) / 2;
+                if (zi)
+                {
+                    res.push_back((sign ? -zi : zi) * (1 << i));
+                }
             }
-          }
 
-          return res;
+            return res;
         }
 
-        SEAL_NODISCARD inline std::uint64_t gcd(
-            std::uint64_t x, std::uint64_t y)
+        SEAL_NODISCARD inline std::uint64_t gcd(std::uint64_t x, std::uint64_t y)
         {
 #ifdef SEAL_DEBUG
             if (x == 0)
@@ -114,64 +115,43 @@ namespace seal
             return std::make_tuple(x, prev_a, prev_b);
         }
 
-        inline bool try_mod_inverse(std::uint64_t value,
-            std::uint64_t modulus, std::uint64_t &result)
+        SEAL_NODISCARD inline bool are_coprime(std::uint64_t x, std::uint64_t y) noexcept
         {
-#ifdef SEAL_DEBUG
-            if (modulus <= 1)
-            {
-                throw std::invalid_argument("modulus must be at least 2");
-            }
-#endif
-            if (value == 0)
-            {
-                return false;
-            }
-            auto gcd_tuple = xgcd(value, modulus);
-            if (std::get<0>(gcd_tuple) != 1)
-            {
-                return false;
-            }
-            else if (std::get<1>(gcd_tuple) < 0)
-            {
-                result = static_cast<std::uint64_t>(std::get<1>(gcd_tuple)) + modulus;
-                return true;
-            }
-            else
-            {
-                result = static_cast<std::uint64_t>(std::get<1>(gcd_tuple));
-                return true;
-            }
+            return !(gcd(x, y) > 1);
         }
 
         SEAL_NODISCARD std::vector<std::uint64_t> multiplicative_orders(
-            std::vector<std::uint64_t> conjugate_classes,
-            std::uint64_t modulus);
+            std::vector<std::uint64_t> conjugate_classes, std::uint64_t modulus);
 
         SEAL_NODISCARD std::vector<std::uint64_t> conjugate_classes(
             std::uint64_t modulus, std::uint64_t subgroup_generator);
 
-        void babystep_giantstep(std::uint64_t modulus,
-            std::vector<std::uint64_t> &baby_steps,
-            std::vector<std::uint64_t> &giant_steps);
+        void babystep_giantstep(
+            std::uint64_t modulus, std::vector<std::uint64_t> &baby_steps, std::vector<std::uint64_t> &giant_steps);
 
         SEAL_NODISCARD auto decompose_babystep_giantstep(
-            std::uint64_t modulus,
-            std::uint64_t input,
-            const std::vector<std::uint64_t> &baby_steps,
-            const std::vector<std::uint64_t> &giant_steps)
-            -> std::pair<std::size_t, std::size_t>;
+            std::uint64_t modulus, std::uint64_t input, const std::vector<std::uint64_t> &baby_steps,
+            const std::vector<std::uint64_t> &giant_steps) -> std::pair<std::size_t, std::size_t>;
 
-        SEAL_NODISCARD bool is_prime(
-            const SmallModulus &modulus, std::size_t num_rounds = 40);
+        SEAL_NODISCARD bool is_prime(const Modulus &modulus, std::size_t num_rounds = 40);
 
-        SEAL_NODISCARD std::vector<SmallModulus> get_primes(
-            std::size_t ntt_size, int bit_size, std::size_t count);
+        SEAL_NODISCARD std::vector<Modulus> get_primes(std::size_t ntt_size, int bit_size, std::size_t count);
 
-        SEAL_NODISCARD inline SmallModulus get_prime(
-            std::size_t ntt_size, int bit_size)
+        SEAL_NODISCARD inline Modulus get_prime(std::size_t ntt_size, int bit_size)
         {
             return get_primes(ntt_size, bit_size, 1)[0];
         }
-    }
-}
+
+        bool try_invert_uint_mod(std::uint64_t value, std::uint64_t modulus, std::uint64_t &result);
+
+        bool is_primitive_root(std::uint64_t root, std::uint64_t degree, const Modulus &prime_modulus);
+
+        // Try to find a primitive degree-th root of unity modulo small prime
+        // modulus, where degree must be a power of two.
+        bool try_primitive_root(std::uint64_t degree, const Modulus &prime_modulus, std::uint64_t &destination);
+
+        // Try to find the smallest (as integer) primitive degree-th root of
+        // unity modulo small prime modulus, where degree must be a power of two.
+        bool try_minimal_primitive_root(std::uint64_t degree, const Modulus &prime_modulus, std::uint64_t &destination);
+    } // namespace util
+} // namespace seal

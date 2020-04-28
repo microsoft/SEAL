@@ -3,21 +3,22 @@
 
 #pragma once
 
+#include "seal/seal.h"
+#include <algorithm>
+#include <chrono>
 #include <cstddef>
-#include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <random>
-#include <thread>
-#include <mutex>
-#include <memory>
+#include <iostream>
 #include <limits>
-#include <algorithm>
+#include <memory>
+#include <mutex>
 #include <numeric>
-#include "seal/seal.h"
+#include <random>
+#include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
 
 void example_bfv_basics();
 
@@ -28,6 +29,8 @@ void example_levels();
 void example_ckks_basics();
 
 void example_rotation();
+
+void example_serialization();
 
 void example_performance_test();
 
@@ -41,13 +44,9 @@ inline void print_example_banner(std::string title)
         std::size_t title_length = title.length();
         std::size_t banner_length = title_length + 2 * 10;
         std::string banner_top = "+" + std::string(banner_length - 2, '-') + "+";
-        std::string banner_middle =
-            "|" + std::string(9, ' ') + title + std::string(9, ' ') + "|";
+        std::string banner_middle = "|" + std::string(9, ' ') + title + std::string(9, ' ') + "|";
 
-        std::cout << std::endl
-            << banner_top << std::endl
-            << banner_middle << std::endl
-            << banner_top << std::endl;
+        std::cout << std::endl << banner_top << std::endl << banner_middle << std::endl << banner_top << std::endl;
     }
 }
 
@@ -81,8 +80,7 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     std::cout << "/" << std::endl;
     std::cout << "| Encryption parameters :" << std::endl;
     std::cout << "|   scheme: " << scheme_name << std::endl;
-    std::cout << "|   poly_modulus_degree: " <<
-        context_data.parms().poly_modulus_degree() << std::endl;
+    std::cout << "|   poly_modulus_degree: " << context_data.parms().poly_modulus_degree() << std::endl;
 
     /*
     Print the size of the true (product) coefficient modulus.
@@ -90,8 +88,8 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     std::cout << "|   coeff_modulus size: ";
     std::cout << context_data.total_coeff_modulus_bit_count() << " (";
     auto coeff_modulus = context_data.parms().coeff_modulus();
-    std::size_t coeff_mod_count = coeff_modulus.size();
-    for (std::size_t i = 0; i < coeff_mod_count - 1; i++)
+    std::size_t coeff_modulus_size = coeff_modulus.size();
+    for (std::size_t i = 0; i < coeff_modulus_size - 1; i++)
     {
         std::cout << coeff_modulus[i].bit_count() << " + ";
     }
@@ -103,8 +101,7 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     */
     if (context_data.parms().scheme() == seal::scheme_type::BFV)
     {
-        std::cout << "|   plain_modulus: " << context_data.
-            parms().plain_modulus().value() << std::endl;
+        std::cout << "|   plain_modulus: " << context_data.parms().plain_modulus().value() << std::endl;
     }
 
     std::cout << "\\" << std::endl;
@@ -113,7 +110,7 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
 /*
 Helper function: Prints the `parms_id' to std::ostream.
 */
-inline std::ostream &operator <<(std::ostream &stream, seal::parms_id_type parms_id)
+inline std::ostream &operator<<(std::ostream &stream, seal::parms_id_type parms_id)
 {
     /*
     Save the formatting information for std::cout.
@@ -121,11 +118,8 @@ inline std::ostream &operator <<(std::ostream &stream, seal::parms_id_type parms
     std::ios old_fmt(nullptr);
     old_fmt.copyfmt(std::cout);
 
-    stream << std::hex << std::setfill('0')
-        << std::setw(16) << parms_id[0] << " "
-        << std::setw(16) << parms_id[1] << " "
-        << std::setw(16) << parms_id[2] << " "
-        << std::setw(16) << parms_id[3] << " ";
+    stream << std::hex << std::setfill('0') << std::setw(16) << parms_id[0] << " " << std::setw(16) << parms_id[1]
+           << " " << std::setw(16) << parms_id[2] << " " << std::setw(16) << parms_id[3] << " ";
 
     /*
     Restore the old std::cout formatting.
@@ -138,7 +132,7 @@ inline std::ostream &operator <<(std::ostream &stream, seal::parms_id_type parms
 /*
 Helper function: Prints a vector of floating-point values.
 */
-template<typename T>
+template <typename T>
 inline void print_vector(std::vector<T> vec, std::size_t print_size = 4, int prec = 3)
 {
     /*
@@ -151,7 +145,7 @@ inline void print_vector(std::vector<T> vec, std::size_t print_size = 4, int pre
 
     std::cout << std::fixed << std::setprecision(prec);
     std::cout << std::endl;
-    if(slot_count <= 2 * print_size)
+    if (slot_count <= 2 * print_size)
     {
         std::cout << "    [";
         for (std::size_t i = 0; i < slot_count; i++)
@@ -167,7 +161,7 @@ inline void print_vector(std::vector<T> vec, std::size_t print_size = 4, int pre
         {
             std::cout << " " << vec[i] << ",";
         }
-        if(vec.size() > 2 * print_size)
+        if (vec.size() > 2 * print_size)
         {
             std::cout << " ...,";
         }
@@ -184,11 +178,10 @@ inline void print_vector(std::vector<T> vec, std::size_t print_size = 4, int pre
     std::cout.copyfmt(old_fmt);
 }
 
-
 /*
 Helper function: Prints a matrix of values.
 */
-template<typename T>
+template <typename T>
 inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
 {
     /*
@@ -206,8 +199,7 @@ inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
     std::cout << std::setw(3) << " ...,";
     for (std::size_t i = row_size - print_size; i < row_size; i++)
     {
-        std::cout << std::setw(3) << matrix[i]
-            << ((i != row_size - 1) ? "," : " ]\n");
+        std::cout << std::setw(3) << matrix[i] << ((i != row_size - 1) ? "," : " ]\n");
     }
     std::cout << "    [";
     for (std::size_t i = row_size; i < row_size + print_size; i++)
@@ -217,11 +209,10 @@ inline void print_matrix(std::vector<T> matrix, std::size_t row_size)
     std::cout << std::setw(3) << " ...,";
     for (std::size_t i = 2 * row_size - print_size; i < 2 * row_size; i++)
     {
-        std::cout << std::setw(3) << matrix[i]
-            << ((i != 2 * row_size - 1) ? "," : " ]\n");
+        std::cout << std::setw(3) << matrix[i] << ((i != 2 * row_size - 1) ? "," : " ]\n");
     }
     std::cout << std::endl;
-};
+}
 
 /*
 Helper function: Print line number.

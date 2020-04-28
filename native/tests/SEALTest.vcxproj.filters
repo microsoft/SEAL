@@ -95,6 +95,9 @@
     <ClCompile Include="seal\ciphertext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="seal\util\galois.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
     <ClCompile Include="seal\util\hash.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -110,13 +113,13 @@
     <ClCompile Include="seal\util\uintarithsmallmod.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="seal\util\smallntt.cpp">
+    <ClCompile Include="seal\util\ntt.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\plaintext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\smallmodulus.cpp">
+    <ClCompile Include="seal\modulus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\galoiskeys.cpp">
@@ -134,17 +137,17 @@
     <ClCompile Include="seal\testrunner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\modulus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="seal\serialization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="seal\util\rns.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\iterator.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt">
-      <Filter>Other</Filter>
-    </Text>
     <Text Include="seal\CMakeLists.txt">
       <Filter>Other\seal</Filter>
     </Text>

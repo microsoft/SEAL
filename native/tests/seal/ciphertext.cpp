@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/ciphertext.h"
 #include "seal/context.h"
-#include "seal/keygenerator.h"
 #include "seal/encryptor.h"
+#include "seal/keygenerator.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(CiphertextTest, CiphertextBasics)
     {
@@ -73,7 +73,7 @@ namespace SEALTest
         ASSERT_FALSE(ctxt.is_ntt_form());
 
         Ciphertext ctxt2{ ctxt };
-        ASSERT_EQ(ctxt.coeff_mod_count(), ctxt2.coeff_mod_count());
+        ASSERT_EQ(ctxt.coeff_modulus_size(), ctxt2.coeff_modulus_size());
         ASSERT_EQ(ctxt.is_ntt_form(), ctxt2.is_ntt_form());
         ASSERT_EQ(ctxt.poly_modulus_degree(), ctxt2.poly_modulus_degree());
         ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
@@ -82,7 +82,7 @@ namespace SEALTest
 
         Ciphertext ctxt3;
         ctxt3 = ctxt;
-        ASSERT_EQ(ctxt.coeff_mod_count(), ctxt3.coeff_mod_count());
+        ASSERT_EQ(ctxt.coeff_modulus_size(), ctxt3.coeff_modulus_size());
         ASSERT_EQ(ctxt.poly_modulus_degree(), ctxt3.poly_modulus_degree());
         ASSERT_EQ(ctxt.is_ntt_form(), ctxt3.is_ntt_form());
         ASSERT_TRUE(ctxt.parms_id() == ctxt3.parms_id());
@@ -120,8 +120,8 @@ namespace SEALTest
         ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ASSERT_FALSE(ctxt2.is_ntt_form());
-        ASSERT_TRUE(is_equal_uint_uint(ctxt.data(), ctxt2.data(),
-            parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
+        ASSERT_TRUE(is_equal_uint_uint(
+            ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
         ASSERT_TRUE(ctxt.data() != ctxt2.data());
     }
-}
+} // namespace sealtest

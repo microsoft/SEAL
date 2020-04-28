@@ -3,15 +3,16 @@
 
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <numeric>
-#include "seal/util/defines.h"
 #include "seal/ciphertext.h"
-#include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
 #include "seal/kswitchkeys.h"
+#include "seal/memorymanager.h"
 #include "seal/util/common.h"
+#include "seal/util/defines.h"
+#include "seal/util/galois.h"
+#include <iostream>
+#include <numeric>
+#include <vector>
 
 namespace seal
 {
@@ -19,20 +20,21 @@ namespace seal
     Class to store Galois keys.
 
     @par Slot Rotations
-    Galois keys are used together with batching (BatchEncoder). If the polynomial modulus
-    is a polynomial of degree N, in batching the idea is to view a plaintext polynomial as
-    a 2-by-(N/2) matrix of integers modulo plaintext modulus. Normal homomorphic computations
-    operate on such encrypted matrices element (slot) wise. However, special rotation
-    operations allow us to also rotate the matrix rows cyclically in either direction, and
-    rotate the columns (swap the rows). These operations require the Galois keys.
+    Galois keys are certain types of public keys that are needed to perform encrypted
+    vector rotation operations on batched ciphertexts. Batched ciphertexts encrypt
+    a 2-by-(N/2) matrix of modular integers in the BFV scheme, or an N/2-dimensional
+    vector of complex numbers in the CKKS scheme, where N denotes the degree of the
+    polynomial modulus. In the BFV scheme Galois keys can enable both cyclic rotations
+    of the encrypted matrix rows, as well as row swaps (column rotations). In the CKKS
+    scheme Galois keys can enable cyclic vector rotations, as well as a complex
+    conjugation operation.
+
 
     @par Thread Safety
     In general, reading from GaloisKeys is thread-safe as long as no other thread is
     concurrently mutating it. This is due to the underlying data structure storing the
     Galois keys not being thread-safe.
 
-    @see SecretKey for the class that stores the secret key.
-    @see PublicKey for the class that stores the public key.
     @see RelinKeys for the class that stores the relinearization keys.
     @see KeyGenerator for the class that generates the Galois keys.
     */
@@ -47,15 +49,9 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if galois_elt is not valid
         */
-        SEAL_NODISCARD inline static std::size_t get_index(
-            std::uint64_t galois_elt)
+        SEAL_NODISCARD inline static std::size_t get_index(std::uint32_t galois_elt)
         {
-            // Verify parameters
-            if (!(galois_elt & 1))
-            {
-                throw std::invalid_argument("galois_elt is not valid");
-            }
-            return util::safe_cast<std::size_t>((galois_elt - 1) >> 1);
+            return util::GaloisTool::GetIndexFromElt(galois_elt);
         }
 
         /**
@@ -64,7 +60,7 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if galois_elt is not valid
         */
-        SEAL_NODISCARD inline bool has_key(std::uint64_t galois_elt) const
+        SEAL_NODISCARD inline bool has_key(std::uint32_t galois_elt) const
         {
             std::size_t index = get_index(galois_elt);
             return data().size() > index && !data()[index].empty();
@@ -77,9 +73,9 @@ namespace seal
         @param[in] galois_elt The Galois element
         @throws std::invalid_argument if the key corresponding to galois_elt does not exist
         */
-        SEAL_NODISCARD inline const auto &key(std::uint64_t galois_elt) const
+        SEAL_NODISCARD inline const auto &key(std::uint32_t galois_elt) const
         {
             return KSwitchKeys::data(get_index(galois_elt));
         }
     };
-}
+} // namespace seal

@@ -72,7 +72,7 @@ namespace SEALNetExamples
             However, advanced users will probably prefer more efficient approaches,
             such as the BatchEncoder or the CKKSEncoder.
             */
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             ulong polyModulusDegree = 4096;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
@@ -83,42 +83,42 @@ namespace SEALNetExamples
             exceed this value at any point during our computation; otherwise the result
             will be incorrect.
             */
-            parms.PlainModulus = new SmallModulus(512);
-            SEALContext context = new SEALContext(parms);
+            parms.PlainModulus = new Modulus(512);
+            using SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
             Console.WriteLine();
 
-            KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey publicKey = keygen.PublicKey;
-            SecretKey secretKey = keygen.SecretKey;
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Evaluator evaluator = new Evaluator(context);
-            Decryptor decryptor = new Decryptor(context, secretKey);
+            using KeyGenerator keygen = new KeyGenerator(context);
+            using PublicKey publicKey = keygen.PublicKey;
+            using SecretKey secretKey = keygen.SecretKey;
+            using Encryptor encryptor = new Encryptor(context, publicKey);
+            using Evaluator evaluator = new Evaluator(context);
+            using Decryptor decryptor = new Decryptor(context, secretKey);
 
             /*
             We create an IntegerEncoder.
             */
-            IntegerEncoder encoder = new IntegerEncoder(context);
+            using IntegerEncoder encoder = new IntegerEncoder(context);
 
             /*
             First, we encode two integers as plaintext polynomials. Note that encoding
             is not encryption: at this point nothing is encrypted.
             */
             int value1 = 5;
-            Plaintext plain1 = encoder.Encode(value1);
+            using Plaintext plain1 = encoder.Encode(value1);
             Utilities.PrintLine();
             Console.WriteLine($"Encode {value1} as polynomial {plain1} (plain1),");
 
             int value2 = -7;
-            Plaintext plain2 = encoder.Encode(value2);
+            using Plaintext plain2 = encoder.Encode(value2);
             Console.WriteLine(new string(' ', 13)
                 + $"Encode {value2} as polynomial {plain2} (plain2),");
 
             /*
             Now we can encrypt the plaintext polynomials.
             */
-            Ciphertext encrypted1 = new Ciphertext();
-            Ciphertext encrypted2 = new Ciphertext();
+            using Ciphertext encrypted1 = new Ciphertext();
+            using Ciphertext encrypted2 = new Ciphertext();
             Utilities.PrintLine();
             Console.WriteLine("Encrypt plain1 to encrypted1 and plain2 to encrypted2.");
             encryptor.Encrypt(plain1, encrypted1);
@@ -132,7 +132,7 @@ namespace SEALNetExamples
             As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2.
             */
             encryptor.Encrypt(plain2, encrypted2);
-            Ciphertext encryptedResult = new Ciphertext();
+            using Ciphertext encryptedResult = new Ciphertext();
             Utilities.PrintLine();
             Console.WriteLine("Compute encrypted_result = (-encrypted1 + encrypted2) * encrypted2.");
             evaluator.Negate(encrypted1, encryptedResult);
@@ -141,7 +141,7 @@ namespace SEALNetExamples
             Console.WriteLine("    + Noise budget in encryptedResult: {0} bits",
                 decryptor.InvariantNoiseBudget(encryptedResult));
 
-            Plaintext plainResult = new Plaintext();
+            using Plaintext plainResult = new Plaintext();
             Utilities.PrintLine();
             Console.WriteLine("Decrypt encrypted_result to plain_result.");
             decryptor.Decrypt(encryptedResult, plainResult);
@@ -177,7 +177,7 @@ namespace SEALNetExamples
             with BFV, and when used properly will result in implementations outperforming
             anything done with the IntegerEncoder.
             */
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             ulong polyModulusDegree = 8192;
             parms.PolyModulusDegree = polyModulusDegree;
             parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
@@ -190,7 +190,7 @@ namespace SEALNetExamples
             */
             parms.PlainModulus = PlainModulus.Batching(polyModulusDegree, 20);
 
-            SEALContext context = new SEALContext(parms);
+            using SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
             Console.WriteLine();
 
@@ -198,21 +198,21 @@ namespace SEALNetExamples
             We can verify that batching is indeed enabled by looking at the encryption
             parameter qualifiers created by SEALContext.
             */
-            var qualifiers = context.FirstContextData.Qualifiers;
+            using var qualifiers = context.FirstContextData.Qualifiers;
             Console.WriteLine($"Batching enabled: {qualifiers.UsingBatching}");
 
-            KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey publicKey = keygen.PublicKey;
-            SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys();
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Evaluator evaluator = new Evaluator(context);
-            Decryptor decryptor = new Decryptor(context, secretKey);
+            using KeyGenerator keygen = new KeyGenerator(context);
+            using PublicKey publicKey = keygen.PublicKey;
+            using SecretKey secretKey = keygen.SecretKey;
+            using RelinKeys relinKeys = keygen.RelinKeysLocal();
+            using Encryptor encryptor = new Encryptor(context, publicKey);
+            using Evaluator evaluator = new Evaluator(context);
+            using Decryptor decryptor = new Decryptor(context, secretKey);
 
             /*
             Batching is done through an instance of the BatchEncoder class.
             */
-            BatchEncoder batchEncoder = new BatchEncoder(context);
+            using BatchEncoder batchEncoder = new BatchEncoder(context);
 
             /*
             The total number of batching `slots' equals the PolyModulusDegree, N, and
@@ -247,7 +247,7 @@ namespace SEALNetExamples
             /*
             First we use BatchEncoder to encode the matrix into a plaintext polynomial.
             */
-            Plaintext plainMatrix = new Plaintext();
+            using Plaintext plainMatrix = new Plaintext();
             Utilities.PrintLine();
             Console.WriteLine("Encode plaintext matrix:");
             batchEncoder.Encode(podMatrix, plainMatrix);
@@ -264,7 +264,7 @@ namespace SEALNetExamples
             /*
             Next we encrypt the encoded plaintext.
             */
-            Ciphertext encryptedMatrix = new Ciphertext();
+            using Ciphertext encryptedMatrix = new Ciphertext();
             Utilities.PrintLine();
             Console.WriteLine("Encrypt plainMatrix to encryptedMatrix.");
             encryptor.Encrypt(plainMatrix, encryptedMatrix);
@@ -286,7 +286,7 @@ namespace SEALNetExamples
             {
                 podMatrix2[i] = (i % 2) + 1;
             }
-            Plaintext plainMatrix2 = new Plaintext();
+            using Plaintext plainMatrix2 = new Plaintext();
             batchEncoder.Encode(podMatrix2, plainMatrix2);
             Console.WriteLine();
             Console.WriteLine("Second input plaintext matrix:");
@@ -311,7 +311,7 @@ namespace SEALNetExamples
             /*
             We decrypt and decompose the plaintext to recover the result as a matrix.
             */
-            Plaintext plainResult = new Plaintext();
+            using Plaintext plainResult = new Plaintext();
             Utilities.PrintLine();
             Console.WriteLine("Decrypt and decode result.");
             decryptor.Decrypt(encryptedMatrix, plainResult);
@@ -349,7 +349,7 @@ namespace SEALNetExamples
                     `CKKS_Basics.cs'. In this example we use CoeffModulus.Create to
                     generate 5 40-bit prime numbers.
             */
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
+            using EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
 
             ulong polyModulusDegree = 8192;
             parms.PolyModulusDegree = polyModulusDegree;
@@ -359,24 +359,24 @@ namespace SEALNetExamples
             /*
             We create the SEALContext as usual and print the parameters.
             */
-            SEALContext context = new SEALContext(parms);
+            using SEALContext context = new SEALContext(parms);
             Utilities.PrintParameters(context);
             Console.WriteLine();
 
             /*
             Keys are created the same way as for the BFV scheme.
             */
-            KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey publicKey = keygen.PublicKey;
-            SecretKey secretKey = keygen.SecretKey;
-            RelinKeys relinKeys = keygen.RelinKeys();
+            using KeyGenerator keygen = new KeyGenerator(context);
+            using PublicKey publicKey = keygen.PublicKey;
+            using SecretKey secretKey = keygen.SecretKey;
+            using RelinKeys relinKeys = keygen.RelinKeysLocal();
 
             /*
             We also set up an Encryptor, Evaluator, and Decryptor as usual.
             */
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Evaluator evaluator = new Evaluator(context);
-            Decryptor decryptor = new Decryptor(context, secretKey);
+            using Encryptor encryptor = new Encryptor(context, publicKey);
+            using Evaluator evaluator = new Evaluator(context);
+            using Decryptor decryptor = new Decryptor(context, secretKey);
 
             /*
             To create CKKS plaintexts we need a special encoder: there is no other way
@@ -386,7 +386,7 @@ namespace SEALNetExamples
             looks a lot like what BatchEncoder does for the BFV scheme, but the theory
             behind it is completely different.
             */
-            CKKSEncoder encoder = new CKKSEncoder(context);
+            using CKKSEncoder encoder = new CKKSEncoder(context);
 
             /*
             In CKKS the number of slots is PolyModulusDegree / 2 and each slot encodes
@@ -419,7 +419,7 @@ namespace SEALNetExamples
             we have little to worry about in this regard. For this simple example a 30-bit
             scale is more than enough.
             */
-            Plaintext plain = new Plaintext();
+            using Plaintext plain = new Plaintext();
             double scale = Math.Pow(2.0, 30);
             Utilities.PrintLine();
             Console.WriteLine("Encode input vector.");
@@ -436,7 +436,7 @@ namespace SEALNetExamples
             /*
             The vector is encrypted the same was as in BFV.
             */
-            Ciphertext encrypted = new Ciphertext();
+            using Ciphertext encrypted = new Ciphertext();
             Utilities.PrintLine();
             Console.WriteLine("Encrypt input vector, square, and relinearize.");
             encryptor.Encrypt(plain, encrypted);

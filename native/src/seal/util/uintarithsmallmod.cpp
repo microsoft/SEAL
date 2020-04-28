@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/uintcore.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
+#include <numeric>
 #include <random>
+#include <tuple>
 
 using namespace std;
 
@@ -13,118 +15,7 @@ namespace seal
 {
     namespace util
     {
-        bool is_primitive_root(uint64_t root, uint64_t degree,
-            const SmallModulus &modulus)
-        {
-#ifdef SEAL_DEBUG
-            if (modulus.bit_count() < 2)
-            {
-                throw invalid_argument("modulus");
-            }
-            if (root >= modulus.value())
-            {
-                throw out_of_range("operand");
-            }
-            if (get_power_of_two(degree) < 1)
-            {
-                throw invalid_argument("degree must be a power of two and at least two");
-            }
-#endif
-            if (root == 0)
-            {
-                return false;
-            }
-
-            // We check if root is a degree-th root of unity in integers modulo
-            // modulus, where degree is a power of two.
-            // It suffices to check that root^(degree/2) is -1 modulo modulus.
-            return exponentiate_uint_mod(
-                root, degree >> 1, modulus) == (modulus.value() - 1);
-        }
-
-        bool try_primitive_root(uint64_t degree, const SmallModulus &modulus,
-            uint64_t &destination)
-        {
-#ifdef SEAL_DEBUG
-            if (modulus.bit_count() < 2)
-            {
-                throw invalid_argument("modulus");
-            }
-            if (get_power_of_two(degree) < 1)
-            {
-                throw invalid_argument("degree must be a power of two and at least two");
-            }
-#endif
-            // We need to divide modulus-1 by degree to get the size of the
-            // quotient group
-            uint64_t size_entire_group = modulus.value() - 1;
-
-            // Compute size of quotient group
-            uint64_t size_quotient_group = size_entire_group / degree;
-
-            // size_entire_group must be divisible by degree, or otherwise the
-            // primitive root does not exist in integers modulo modulus
-            if (size_entire_group - size_quotient_group * degree != 0)
-            {
-                return false;
-            }
-
-            // For randomness
-            random_device rd;
-
-            int attempt_counter = 0;
-            int attempt_counter_max = 100;
-            do
-            {
-                attempt_counter++;
-
-                // Set destination to be a random number modulo modulus
-                destination = (static_cast<uint64_t>(rd()) << 32) |
-                    static_cast<uint64_t>(rd());
-                destination %= modulus.value();
-
-                // Raise the random number to power the size of the quotient
-                // to get rid of irrelevant part
-                destination = exponentiate_uint_mod(
-                    destination, size_quotient_group, modulus);
-            } while (!is_primitive_root(destination, degree, modulus) &&
-                (attempt_counter < attempt_counter_max));
-
-            return is_primitive_root(destination, degree, modulus);
-        }
-
-        bool try_minimal_primitive_root(uint64_t degree,
-            const SmallModulus &modulus, uint64_t &destination)
-        {
-            uint64_t root;
-            if (!try_primitive_root(degree, modulus, root))
-            {
-                return false;
-            }
-            uint64_t generator_sq = multiply_uint_uint_mod(root, root, modulus);
-            uint64_t current_generator = root;
-
-            // destination is going to always contain the smallest generator found
-            for (size_t i = 0; i < degree; i++)
-            {
-                // If our current generator is strictly smaller than destination,
-                // update
-                if (current_generator < root)
-                {
-                    root = current_generator;
-                }
-
-                // Then move on to the next generator
-                current_generator = multiply_uint_uint_mod(
-                    current_generator, generator_sq, modulus);
-            }
-
-            destination = root;
-            return true;
-        }
-
-        uint64_t exponentiate_uint_mod(uint64_t operand, uint64_t exponent,
-            const SmallModulus &modulus)
+        uint64_t exponentiate_uint_mod(uint64_t operand, uint64_t exponent, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if (modulus.is_zero())
@@ -172,9 +63,8 @@ namespace seal
             return intermediate;
         }
 
-        void divide_uint_uint_mod_inplace(uint64_t *numerator,
-            const SmallModulus &modulus, size_t uint64_count,
-            uint64_t *quotient, MemoryPool &pool)
+        void divide_uint_uint_mod_inplace(
+            uint64_t *numerator, const Modulus &modulus, size_t uint64_count, uint64_t *quotient, MemoryPool &pool)
         {
             // Handle base cases
             if (uint64_count == 2)
@@ -182,7 +72,7 @@ namespace seal
                 divide_uint128_uint64_inplace(numerator, modulus.value(), quotient);
                 return;
             }
-            else if(uint64_count == 1)
+            else if (uint64_count == 1)
             {
                 *numerator = *numerator % modulus.value();
                 *quotient = *numerator / modulus.value();
@@ -194,7 +84,7 @@ namespace seal
                 // x = numerator = x1 * 2^128 + x2.
                 // 2^128 = A*value + B.
 
-                auto x1_alloc(allocate_uint(uint64_count - 2 , pool));
+                auto x1_alloc(allocate_uint(uint64_count - 2, pool));
                 uint64_t *x1 = x1_alloc.get();
                 uint64_t x2[2];
                 auto quot_alloc(allocate_uint(uint64_count, pool));
@@ -204,10 +94,8 @@ namespace seal
                 set_uint_uint(numerator + 2, uint64_count - 2, x1);
                 set_uint_uint(numerator, 2, x2); // x2 = (num) % 2^128.
 
-                multiply_uint_uint(x1, uint64_count - 2, &modulus.const_ratio()[0], 2,
-                    uint64_count, quot); // x1*A.
-                multiply_uint_uint64(x1, uint64_count - 2, modulus.const_ratio()[2],
-                    uint64_count - 1, rem); // x1*B
+                multiply_uint_uint(x1, uint64_count - 2, &modulus.const_ratio()[0], 2, uint64_count, quot);  // x1*A.
+                multiply_uint_uint64(x1, uint64_count - 2, modulus.const_ratio()[2], uint64_count - 1, rem); // x1*B
                 add_uint_uint(rem, uint64_count - 1, x2, 2, 0, uint64_count, rem); // x1*B + x2;
 
                 size_t remainder_uint64_count = get_significant_uint64_count_uint(rem, uint64_count);
@@ -219,48 +107,69 @@ namespace seal
             }
         }
 
-        uint64_t galois_elt_from_step(int step, size_t coeff_count)
+        uint64_t dot_product_mod(
+            const uint64_t *operand1, const uint64_t *operand2, size_t count, const Modulus &modulus)
         {
-            uint32_t n = safe_cast<uint32_t>(coeff_count);
-            uint32_t m32 = mul_safe(n, uint32_t(2));
-            uint64_t m = static_cast<uint64_t>(m32);
-
-            if (step == 0)
+            static_assert(SEAL_MULTIPLY_ACCUMULATE_MOD_MAX >= 16, "SEAL_MULTIPLY_ACCUMULATE_MOD_MAX");
+            unsigned long long accumulator[2]{ 0, 0 };
+            switch (count)
             {
-                return m - 1;
-            }
-            else
-            {
-                // Extract sign of steps. When steps is positive, the rotation
-                // is to the left; when steps is negative, it is to the right.
-                bool sign = step < 0;
-                uint32_t pos_step = safe_cast<uint32_t>(abs(step));
-
-                if (pos_step >= (n >> 1))
-                {
-                    throw invalid_argument("step count too large");
-                }
-
-                pos_step &= m32 - 1;
-                if (sign)
-                {
-                    step = safe_cast<int>(n >> 1) - safe_cast<int>(pos_step);
-                }
-                else
-                {
-                    step = safe_cast<int>(pos_step);
-                }
-
-                // Construct Galois element for row rotation
-                uint64_t gen = 3;
-                uint64_t galois_elt = 1;
-                while(step--)
-                {
-                    galois_elt *= gen;
-                    galois_elt &= m - 1;
-                }
-                return galois_elt;
-            }
+            case 0:
+                return 0;
+            case 1:
+                multiply_accumulate_uint64<1>(operand1, operand2, accumulator);
+                break;
+            case 2:
+                multiply_accumulate_uint64<2>(operand1, operand2, accumulator);
+                break;
+            case 3:
+                multiply_accumulate_uint64<3>(operand1, operand2, accumulator);
+                break;
+            case 4:
+                multiply_accumulate_uint64<4>(operand1, operand2, accumulator);
+                break;
+            case 5:
+                multiply_accumulate_uint64<5>(operand1, operand2, accumulator);
+                break;
+            case 6:
+                multiply_accumulate_uint64<6>(operand1, operand2, accumulator);
+                break;
+            case 7:
+                multiply_accumulate_uint64<7>(operand1, operand2, accumulator);
+                break;
+            case 8:
+                multiply_accumulate_uint64<8>(operand1, operand2, accumulator);
+                break;
+            case 9:
+                multiply_accumulate_uint64<9>(operand1, operand2, accumulator);
+                break;
+            case 10:
+                multiply_accumulate_uint64<10>(operand1, operand2, accumulator);
+                break;
+            case 11:
+                multiply_accumulate_uint64<11>(operand1, operand2, accumulator);
+                break;
+            case 12:
+                multiply_accumulate_uint64<12>(operand1, operand2, accumulator);
+                break;
+            case 13:
+                multiply_accumulate_uint64<13>(operand1, operand2, accumulator);
+                break;
+            case 14:
+                multiply_accumulate_uint64<14>(operand1, operand2, accumulator);
+                break;
+            case 15:
+                multiply_accumulate_uint64<15>(operand1, operand2, accumulator);
+                break;
+            case 16:
+            largest_case:
+                multiply_accumulate_uint64<16>(operand1, operand2, accumulator);
+                break;
+            default:
+                accumulator[0] = dot_product_mod(operand1 + 16, operand2 + 16, count - 16, modulus);
+                goto largest_case;
+            };
+            return barrett_reduce_128(accumulator, modulus);
         }
-    }
-}
+    } // namespace util
+} // namespace seal

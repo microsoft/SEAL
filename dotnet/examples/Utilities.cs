@@ -70,8 +70,8 @@ namespace SEALNetExamples
             */
             Console.Write("|   CoeffModulus size: {0} (",
                 contextData.TotalCoeffModulusBitCount);
-            List<SmallModulus> coeffModulus =
-                (List<SmallModulus>)contextData.Parms.CoeffModulus;
+            List<Modulus> coeffModulus =
+                (List<Modulus>)contextData.Parms.CoeffModulus;
             for (int i = 0; i < coeffModulus.Count - 1; i++)
             {
                 Console.Write($"{coeffModulus[i].BitCount} + ");

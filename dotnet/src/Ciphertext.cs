@@ -41,14 +41,24 @@ namespace Microsoft.Research.SEAL
     /// </para>
     /// </remarks>
     /// <seealso cref="Plaintext">See Plaintext for the class that stores plaintexts.</seealso>
-    public class Ciphertext : NativeObject
+    public class Ciphertext :
+        NativeObject,
+        ISerializableObject,
+        ISettable<Ciphertext>
     {
+        /// <summary>
+        /// Constructs an empty ciphertext allocating no memory.
+        /// </summary>
+        public Ciphertext() : this(pool: null)
+        {
+        }
+
         /// <summary>
         /// Constructs an empty ciphertext allocating no memory.
         /// </summary>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="System.ArgumentException">if pool is uninitialized</exception>
-        public Ciphertext(MemoryPoolHandle pool = null)
+        public Ciphertext(MemoryPoolHandle pool)
         {
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.Ciphertext_Create1(poolPtr, out IntPtr ptr);
@@ -328,7 +338,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Copies a given ciphertext to the current one.
         /// </summary>
-        ///
         /// <param name="assign">The ciphertext to copy from</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
         public void Set(Ciphertext assign)
@@ -415,11 +424,11 @@ namespace Microsoft.Research.SEAL
         /// associated encryption parameters. This directly affects the
         /// allocation size of the ciphertext.
         /// </summary>
-        public ulong CoeffModCount
+        public ulong CoeffModulusSize
         {
             get
             {
-                NativeMethods.Ciphertext_CoeffModCount(NativePtr, out ulong coeffModCount);
+                NativeMethods.Ciphertext_CoeffModulusSize(NativePtr, out ulong coeffModCount);
                 return coeffModCount;
             }
         }
@@ -490,10 +499,15 @@ namespace Microsoft.Research.SEAL
         /// supported</exception>
         /// <exception cref="InvalidOperationException">if the size does not fit in
         /// the return type</exception>
-        public long SaveSize(ComprModeType comprMode)
+        public long SaveSize(ComprModeType? comprMode = null)
         {
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new ArgumentException("Unsupported compression mode");
+
+            ComprModeType comprModeValue = comprMode.Value;
             NativeMethods.Ciphertext_SaveSize(
-                NativePtr, (byte)comprMode, out long outBytes);
+                NativePtr, (byte)comprModeValue, out long outBytes);
             return outBytes;
         }
 
@@ -506,16 +520,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="comprMode">The desired compression mode</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support writing</exception>
+        /// support writing, or if compression mode is not supported</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         /// <exception cref="InvalidOperationException">if the data to be saved
-        /// is invalid, if compression mode is not supported, or if compression
-        /// failed</exception>
+        /// is invalid, or if compression failed</exception>
         public long Save(Stream stream, ComprModeType? comprMode = null)
         {
             comprMode = comprMode ?? Serialization.ComprModeDefault;
             if (!Serialization.IsSupportedComprMode(comprMode.Value))
-                throw new InvalidOperationException("Unsupported compression mode");
+                throw new ArgumentException("Unsupported compression mode");
 
             ComprModeType comprModeValue = comprMode.Value;
             return Serialization.Save(
@@ -544,8 +557,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid
-        /// or if the loaded compression mode is not supported</exception>
+        /// <exception cref="InvalidOperationException">if the data cannot be loaded
+        /// by this version of Microsoft SEAL, if the loaded data is invalid, or if the
+        /// loaded compression mode is not supported</exception>
         public long UnsafeLoad(SEALContext context, Stream stream)
         {
             if (null == context)
@@ -575,8 +589,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid
-        /// or if the loaded compression mode is not supported</exception>
+        /// <exception cref="InvalidOperationException">if the data cannot be loaded
+        /// by this version of Microsoft SEAL, if the loaded data is invalid, or if the
+        /// loaded compression mode is not supported</exception>
         public long Load(SEALContext context, Stream stream)
         {
             if (null == context)

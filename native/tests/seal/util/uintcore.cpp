@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/uintcore.h"
 #include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(UIntCore, AllocateUInt)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
@@ -720,7 +720,7 @@ namespace SEALTest
 
         TEST(UIntCore, DuplicateUIntIfNeeded)
         {
-            //MemoryPool &pool = *global_variables::global_memory_pool;
+            // MemoryPool &pool = *global_variables::global_memory_pool;
             MemoryPoolST pool;
             auto ptr(allocate_uint(2, pool));
             ptr[0] = 0xF0F0F0F0F0;
@@ -791,5 +791,5 @@ namespace SEALTest
             ASSERT_EQ(0xF0F0F00ULL, hamming_weight_split(0xF0F0F0000F0F0F00ULL));
             ASSERT_EQ(0xA0A0A0A0ULL, hamming_weight_split(0xA0A0A0A0A0A0A0A0ULL));
         }
-   }
-}
+    } // namespace util
+} // namespace sealtest

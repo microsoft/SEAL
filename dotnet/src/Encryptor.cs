@@ -3,16 +3,21 @@
 
 using Microsoft.Research.SEAL.Tools;
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Research.SEAL
 {
     /// <summary>
-    /// Encrypts Plaintext objects into Ciphertext objects. Constructing an Encryptor requires
-    /// a SEALContext with valid encryption parameters, and the public key.
+    /// Encrypts Plaintext objects into Ciphertext objects.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// Encrypts Plaintext objects into Ciphertext objects. Constructing an Encryptor
+    /// requires a SEALContext with valid encryption parameters, the public key and/or
+    /// the secret key. If an Encrytor is given a secret key, it supports symmetric-key
+    /// encryption. If an Encryptor is given a public key, it supports asymmetric-key
+    /// encryption.
+    /// </para>
     /// <para>
     /// Overloads
     /// For the encrypt function we provide two overloads concerning the memory pool used in
@@ -121,11 +126,16 @@ namespace Microsoft.Research.SEAL
         /// Encrypts a plaintext with the public key and stores the result in destination.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a plaintext with the public key and stores the result in destination.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to:
         /// 1) in BFV, the highest (data) level in the modulus switching chain,
         /// 2) in CKKS, the encryption parameters of the plaintext.
         /// Dynamic memory allocations in the process are allocated from the memory
         /// pool pointed to by the given MemoryPoolHandle.
+        /// </para>
         /// </remarks>
         /// <param name="plain">The plaintext to encrypt</param>
         /// <param name="destination">The ciphertext to overwrite with the encrypted
@@ -159,9 +169,15 @@ namespace Microsoft.Research.SEAL
         /// destination.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the public key and stores the result in
+        /// destination.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to
-        /// the given parms_id. Dynamic memory allocations in the process are allocated
+        /// the given ParmsId. Dynamic memory allocations in the process are allocated
         /// from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </para>
         /// </remarks>
         /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
         /// <param name="destination">The ciphertext to overwrite with the encrypted
@@ -192,10 +208,16 @@ namespace Microsoft.Research.SEAL
         /// destination.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the public key and stores the result in
+        /// destination.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to the
         /// highest (data) level in the modulus switching chain. Dynamic memory allocations
         /// in the process are allocated from the memory pool pointed to by the given
         /// MemoryPoolHandle.
+        /// </para>
         /// </remarks>
         /// <param name="destination">The ciphertext to overwrite with the encrypted
         /// plaintext</param>
@@ -216,11 +238,16 @@ namespace Microsoft.Research.SEAL
         /// Encrypts a plaintext with the secret key and stores the result in destination.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a plaintext with the secret key and stores the result in destination.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to:
         /// 1) in BFV, the highest (data) level in the modulus switching chain,
         /// 2) in CKKS, the encryption parameters of the plaintext.
         /// Dynamic memory allocations in the process are allocated from the memory
         /// pool pointed to by the given MemoryPoolHandle.
+        /// </para>
         /// </remarks>
         /// <param name="plain">The plaintext to encrypt</param>
         /// <param name="destination">The ciphertext to overwrite with the encrypted
@@ -252,9 +279,15 @@ namespace Microsoft.Research.SEAL
         /// destination.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the secret key and stores the result in
+        /// destination.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to the given
-        /// parms_id. Dynamic memory allocations in the process are allocated from the
+        /// ParmsId. Dynamic memory allocations in the process are allocated from the
         /// memory pool pointed to by the given MemoryPoolHandle.
+        /// </para>
         /// </remarks>
         /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
         /// <param name="destination">The ciphertext to overwrite with the encrypted
@@ -285,10 +318,16 @@ namespace Microsoft.Research.SEAL
         /// destination.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the secret key and stores the result in
+        /// destination.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to the
         /// highest (data) level in the modulus switching chain. Dynamic memory allocations
         /// in the process are allocated from the memory pool pointed to by the given
         /// MemoryPoolHandle.
+        /// </para>
         /// </remarks>
         /// <param name="destination">The ciphertext to overwrite with the encrypted
         /// plaintext</param>
@@ -309,161 +348,129 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encrypts a plaintext with the secret key and stores the result in
-        /// destination.
+        /// Encrypts a plaintext with the secret key and returns the ciphertext as
+        /// a serializable object.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a plaintext with the secret key and returns the ciphertext as
+        /// a serializable object.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to:
         /// 1) in BFV, the highest (data) level in the modulus switching chain,
         /// 2) in CKKS, the encryption parameters of the plaintext.
         /// Dynamic memory allocations in the process are allocated from the memory
         /// pool pointed to by the given MemoryPoolHandle.
-        ///
-        /// Half of the polynomials in relinearization keys are randomly generated
-        /// and are replaced with the seed used to compress output size. The output
-        /// is in binary format and not human-readable. The output stream must have
-        /// the "binary" flag set.
+        /// </para>
+        /// <para>
+        /// Half of the ciphertext data is pseudo-randomly generated from a seed to
+        /// reduce the object size. The resulting serializable object cannot be used
+        /// directly and is meant to be serialized for the size reduction to have an
+        /// impact.
+        /// </para>
         /// </remarks>
         /// <param name="plain">The plaintext to encrypt</param>
-        /// <param name="stream">The stream to save the Ciphertext to</param>
-        /// <param name="comprMode">The desired compression mode</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if plain or stream is null</exception>
+        /// <exception cref="ArgumentNullException">if plain is null</exception>
         /// <exception cref="InvalidOperationException">if a secret key is not set</exception>
-        /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support writing</exception>
-        /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if compression mode is not
-        /// supported, or if compression failed</exception>
         /// <exception cref="ArgumentException">if plain is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if plain is not in default NTT
         /// form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public long EncryptSymmetricSave(
-            Plaintext plain, Stream stream,
-            ComprModeType? comprMode = null,
+        public Serializable<Ciphertext> EncryptSymmetric(
+            Plaintext plain,
             MemoryPoolHandle pool = null)
         {
             if (null == plain)
                 throw new ArgumentNullException(nameof(plain));
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            comprMode = comprMode ?? Serialization.ComprModeDefault;
-            if (!Serialization.IsSupportedComprMode(comprMode.Value))
-                throw new InvalidOperationException("Unsupported compression mode");
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(pool))
-            {
-                NativeMethods.Encryptor_EncryptSymmetric(
-                    NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
-                return destination.Save(stream, comprMode);
-            }
+            Ciphertext destination = new Ciphertext();
+            NativeMethods.Encryptor_EncryptSymmetric(
+                NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
+            return new Serializable<Ciphertext>(destination);
         }
 
         /// <summary>
-        /// Encrypts a zero plaintext with the secret key and stores the result in
-        /// destination.
+        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
+        /// as a serializable object.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
+        /// as a serializable object.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to
-        /// the given parms_id. Dynamic memory allocations in the process are allocated
+        /// the given ParmsId. Dynamic memory allocations in the process are allocated
         /// from the memory pool pointed to by the given MemoryPoolHandle.
-        ///
-        /// Half of the polynomials in relinearization keys are randomly generated
-        /// and are replaced with the seed used to compress output size. The output
-        /// is in binary format and not human-readable. The output stream must have
-        /// the "binary" flag set.
+        /// </para>
+        /// <para>
+        /// Half of the ciphertext data is pseudo-randomly generated from a seed to
+        /// reduce the object size. The resulting serializable object cannot be used
+        /// directly and is meant to be serialized for the size reduction to have an
+        /// impact.
+        /// </para>
         /// </remarks>
         /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
-        /// <param name="stream">The stream to save the Ciphertext to</param>
-        /// <param name="comprMode">The desired compression mode</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory
         /// pool</param>
-        /// <exception cref="ArgumentNullException">if parmsId or stream is
-        /// null</exception>
+        /// <exception cref="ArgumentNullException">if parmsId is null</exception>
         /// <exception cref="InvalidOperationException">if a secret key is not
         /// set</exception>
-        /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support writing</exception>
-        /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if compression mode is not
-        /// supported, or if compression failed</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the
         /// encryption parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public long EncryptZeroSymmetricSave(
-            ParmsId parmsId, Stream stream,
-            ComprModeType? comprMode = null,
+        public Serializable<Ciphertext> EncryptZeroSymmetric(
+            ParmsId parmsId,
             MemoryPoolHandle pool = null)
         {
             if (null == parmsId)
                 throw new ArgumentNullException(nameof(parmsId));
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            comprMode = comprMode ?? Serialization.ComprModeDefault;
-            if (!Serialization.IsSupportedComprMode(comprMode.Value))
-                throw new InvalidOperationException("Unsupported compression mode");
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(pool))
-            {
-                NativeMethods.Encryptor_EncryptZeroSymmetric1(
-                    NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
-                return destination.Save(stream, comprMode);
-            }
+            Ciphertext destination = new Ciphertext();
+            NativeMethods.Encryptor_EncryptZeroSymmetric1(
+                NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
+            return new Serializable<Ciphertext>(destination);
         }
 
         /// <summary>
-        /// Encrypts a zero plaintext with the secret key and stores the result in
-        /// destination.
+        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
+        /// as a serializable object.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
+        /// as a serializable object.
+        /// </para>
+        /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to the
         /// highest (data) level in the modulus switching chain. Dynamic memory
         /// allocations in the process are allocated from the memory pool pointed to
         /// by the given MemoryPoolHandle.
-        ///
-        /// Half of the polynomials in relinearization keys are randomly generated
-        /// and are replaced with the seed used to compress output size. The output
-        /// is in binary format and not human-readable. The output stream must have
-        /// the "binary" flag set.
+        /// </para>
+        /// <para>
+        /// Half of the ciphertext data is pseudo-randomly generated from a seed to
+        /// reduce the object size. The resulting serializable object cannot be used
+        /// directly and is meant to be serialized for the size reduction to have an
+        /// impact.
+        /// </para>
         /// </remarks>
-        /// <param name="stream">The stream to save the Ciphertext to</param>
-        /// <param name="comprMode">The desired compression mode</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory
         /// pool</param>
-        /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="InvalidOperationException">if a secret key is not
         /// set</exception>
-        /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support writing</exception>
-        /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if compression mode is not
-        /// supported, or if compression failed</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public long EncryptZeroSymmetricSave(
-            Stream stream, ComprModeType? comprMode = null,
-            MemoryPoolHandle pool = null)
+        public Serializable<Ciphertext> EncryptZeroSymmetric(MemoryPoolHandle pool = null)
         {
-            if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
-
-            comprMode = comprMode ?? Serialization.ComprModeDefault;
-            if (!Serialization.IsSupportedComprMode(comprMode.Value))
-                throw new InvalidOperationException("Unsupported compression mode");
-
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            using (Ciphertext destination = new Ciphertext(pool))
-            {
-                NativeMethods.Encryptor_EncryptZeroSymmetric2(
-                    NativePtr, true, destination.NativePtr, poolHandle);
-
-                return destination.Save(stream, comprMode);
-            }
+            Ciphertext destination = new Ciphertext();
+            NativeMethods.Encryptor_EncryptZeroSymmetric2(
+                NativePtr, true, destination.NativePtr, poolHandle);
+            return new Serializable<Ciphertext>(destination);
         }
 
         /// <summary>

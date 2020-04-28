@@ -308,12 +308,12 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Get a copy of the plaintext modulus.
         /// </summary>
-        public SmallModulus PlainModulus
+        public Modulus PlainModulus
         {
             get
             {
                 NativeMethods.IntegerEncoder_PlainModulus(NativePtr, out IntPtr sm);
-                SmallModulus result = new SmallModulus(sm);
+                Modulus result = new Modulus(sm);
                 return result;
             }
         }

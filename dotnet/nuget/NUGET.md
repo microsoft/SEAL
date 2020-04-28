@@ -7,7 +7,7 @@ the NuGet package is only supported in Windows.
 You will need to:
 1. Compile binaries
     1. `native\src\SEAL.vcxproj`
-    2. `dotnet\native\SEALNetNative.vcxproj`
+    2. `native\src\SEAL_C.vcxproj`
     3. `dotnet\src\SEALNet.csproj`
 3. [Download the NuGet command line tool](https://dist.nuget.org/win-x86-commandline/latest/nuget.exe)
 4. Run the command below to create NuGet package

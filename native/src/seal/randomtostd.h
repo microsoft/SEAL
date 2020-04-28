@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include "seal/randomgen.h"
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <stdexcept>
-#include <limits>
-#include "seal/randomgen.h"
 
 namespace seal
 {
@@ -29,8 +29,7 @@ namespace seal
         @param[in] generator A backing UniformRandomGenerator instance
         @throws std::invalid_argument if generator is null
         */
-        RandomToStandardAdapter(
-            std::shared_ptr<UniformRandomGenerator> generator) : generator_(generator)
+        RandomToStandardAdapter(std::shared_ptr<UniformRandomGenerator> generator) : generator_(generator)
         {
             if (!generator_)
             {
@@ -73,4 +72,4 @@ namespace seal
     private:
         std::shared_ptr<UniformRandomGenerator> generator_;
     };
-}
+} // namespace seal

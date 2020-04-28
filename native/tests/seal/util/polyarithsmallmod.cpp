@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/util/uintcore.h"
-#include "seal/util/polycore.h"
 #include "seal/util/polyarithsmallmod.h"
-#include <cstdint>
+#include "seal/util/polycore.h"
+#include "seal/util/uintcore.h"
 #include <cstddef>
+#include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(PolyArithSmallMod, SmallModuloPolyCoeffs)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
@@ -24,7 +24,7 @@ namespace SEALTest
             poly[0] = 2;
             poly[1] = 15;
             poly[2] = 77;
-            SmallModulus mod(15);
+            Modulus mod(15);
             modulo_poly_coeffs(poly.get(), 3, mod, poly.get());
             ASSERT_EQ(2ULL, poly[0]);
             ASSERT_EQ(0ULL, poly[1]);
@@ -38,7 +38,7 @@ namespace SEALTest
             poly[0] = 2;
             poly[1] = 3;
             poly[2] = 4;
-            SmallModulus mod(15);
+            Modulus mod(15);
             negate_poly_coeffmod(poly.get(), 3, mod, poly.get());
             ASSERT_EQ(static_cast<uint64_t>(13), poly[0]);
             ASSERT_EQ(static_cast<uint64_t>(12), poly[1]);
@@ -65,7 +65,7 @@ namespace SEALTest
             poly2[0] = 1;
             poly2[1] = 2;
             poly2[2] = 4;
-            SmallModulus mod(5);
+            Modulus mod(5);
             add_poly_poly_coeffmod(poly1.get(), poly2.get(), 3, mod, poly1.get());
             ASSERT_EQ(2ULL, poly1[0]);
             ASSERT_EQ(0ULL, poly1[1]);
@@ -83,7 +83,7 @@ namespace SEALTest
             poly2[0] = 2;
             poly2[1] = 3;
             poly2[2] = 4;
-            SmallModulus mod(5);
+            Modulus mod(5);
             sub_poly_poly_coeffmod(poly1.get(), poly2.get(), 3, mod, poly1.get());
             ASSERT_EQ(2ULL, poly1[0]);
             ASSERT_EQ(0ULL, poly1[1]);
@@ -98,7 +98,7 @@ namespace SEALTest
             poly[1] = 3;
             poly[2] = 4;
             uint64_t scalar = 3;
-            SmallModulus mod(5);
+            Modulus mod(5);
             multiply_poly_scalar_coeffmod(poly.get(), 3, scalar, mod, poly.get());
             ASSERT_EQ(3ULL, poly[0]);
             ASSERT_EQ(4ULL, poly[1]);
@@ -115,7 +115,7 @@ namespace SEALTest
             poly1[3] = 2;
             uint64_t mono_coeff = 3;
             auto result(allocate_zero_poly(4, 1, pool));
-            SmallModulus mod(5);
+            Modulus mod(5);
 
             size_t mono_exponent = 0;
             negacyclic_multiply_poly_mono_coeffmod(poly1.get(), 1, mono_coeff, mono_exponent, mod, result.get(), pool);
@@ -179,7 +179,7 @@ namespace SEALTest
             poly2[0] = 2;
             poly2[1] = 3;
             poly2[2] = 4;
-            SmallModulus mod(5);
+            Modulus mod(5);
             multiply_poly_poly_coeffmod(poly1.get(), 3, poly2.get(), 3, mod, 5, result.get());
             ASSERT_EQ(2ULL, result[0]);
             ASSERT_EQ(2ULL, result[1]);
@@ -204,7 +204,7 @@ namespace SEALTest
             auto poly2(allocate_zero_poly(5, 1, pool));
             auto result(allocate_zero_poly(5, 1, pool));
             auto quotient(allocate_zero_poly(5, 1, pool));
-            SmallModulus mod(5);
+            Modulus mod(5);
 
             poly1[0] = 2;
             poly1[1] = 2;
@@ -252,7 +252,7 @@ namespace SEALTest
             auto poly1(allocate_zero_poly(3, 1, pool));
             auto poly2(allocate_zero_poly(3, 1, pool));
             auto result(allocate_zero_poly(3, 1, pool));
-            SmallModulus mod(13);
+            Modulus mod(13);
 
             poly1[0] = 1;
             poly1[1] = 1;
@@ -297,7 +297,7 @@ namespace SEALTest
             auto poly(allocate_zero_poly(4, 1, pool));
             auto polymod(allocate_zero_poly(4, 1, pool));
             auto result(allocate_zero_poly(4, 1, pool));
-            SmallModulus mod(5);
+            Modulus mod(5);
 
             polymod[0] = 4;
             polymod[1] = 3;
@@ -327,7 +327,7 @@ namespace SEALTest
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly(allocate_zero_poly(4, 1, pool));
-            SmallModulus mod(10);
+            Modulus mod(10);
 
             poly[0] = 0;
             poly[1] = 1;
@@ -348,7 +348,7 @@ namespace SEALTest
             auto poly(allocate_zero_poly(4, 1, pool));
             auto result(allocate_zero_poly(4, 1, pool));
 
-            SmallModulus mod(10);
+            Modulus mod(10);
             size_t coeff_count = 4;
 
             negacyclic_shift_poly_coeffmod(poly.get(), coeff_count, 0, mod, result.get());
@@ -409,5 +409,5 @@ namespace SEALTest
             ASSERT_EQ(6ULL, result[2]);
             ASSERT_EQ(3ULL, result[3]);
         }
-   }
-}
+    } // namespace util
+} // namespace sealtest

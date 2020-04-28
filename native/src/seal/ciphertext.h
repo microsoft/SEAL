@@ -3,22 +3,23 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <stdexcept>
-#include <string>
-#include <iostream>
-#include <algorithm>
-#include <memory>
-#include <functional>
 #include "seal/context.h"
+#include "seal/intarray.h"
 #include "seal/memorymanager.h"
 #include "seal/randomgen.h"
-#include "seal/intarray.h"
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/ztools.h"
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <memory>
+#include <stdexcept>
+#include <string>
 
 namespace seal
 {
@@ -63,10 +64,8 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        Ciphertext(MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(std::move(pool))
-        {
-        }
+        Ciphertext(MemoryPoolHandle pool = MemoryManager::GetPool()) : data_(std::move(pool))
+        {}
 
         /**
         Constructs an empty ciphertext with capacity 2. In addition to the
@@ -79,9 +78,8 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Ciphertext(std::shared_ptr<SEALContext> context,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(std::move(pool))
+        explicit Ciphertext(std::shared_ptr<SEALContext> context, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : data_(std::move(pool))
         {
             // Allocate memory but don't resize
             reserve(std::move(context), 2);
@@ -102,10 +100,10 @@ namespace seal
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Ciphertext(std::shared_ptr<SEALContext> context,
-            parms_id_type parms_id,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(std::move(pool))
+        explicit Ciphertext(
+            std::shared_ptr<SEALContext> context, parms_id_type parms_id,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+            : data_(std::move(pool))
         {
             // Allocate memory but don't resize
             reserve(std::move(context), parms_id, 2);
@@ -128,10 +126,10 @@ namespace seal
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Ciphertext(std::shared_ptr<SEALContext> context,
-            parms_id_type parms_id, std::size_t size_capacity,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            data_(std::move(pool))
+        explicit Ciphertext(
+            std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size_capacity,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+            : data_(std::move(pool))
         {
             // Allocate memory but don't resize
             reserve(std::move(context), parms_id, size_capacity);
@@ -158,8 +156,7 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        Ciphertext(const Ciphertext &copy, MemoryPoolHandle pool) :
-            Ciphertext(std::move(pool))
+        Ciphertext(const Ciphertext &copy, MemoryPoolHandle pool) : Ciphertext(std::move(pool))
         {
             *this = copy;
         }
@@ -180,8 +177,7 @@ namespace seal
         parameters
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
-        void reserve(std::shared_ptr<SEALContext> context,
-            parms_id_type parms_id, std::size_t size_capacity);
+        void reserve(std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size_capacity);
 
         /**
         Allocates enough memory to accommodate the backing array of a ciphertext
@@ -195,8 +191,7 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
-        inline void reserve(std::shared_ptr<SEALContext> context,
-            std::size_t size_capacity)
+        inline void reserve(std::shared_ptr<SEALContext> context, std::size_t size_capacity)
         {
             // Verify parameters
             if (!context)
@@ -219,10 +214,9 @@ namespace seal
         */
         inline void reserve(std::size_t size_capacity)
         {
-            // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid
-            // or coeff_mod_count_ is zero (in which case no memory is allocated).
-            reserve_internal(size_capacity, poly_modulus_degree_,
-                coeff_mod_count_);
+            // Note: poly_modulus_degree_ and coeff_modulus_size_ are either valid
+            // or coeff_modulus_size_ is zero (in which case no memory is allocated).
+            reserve_internal(size_capacity, poly_modulus_degree_, coeff_modulus_size_);
         }
 
         /**
@@ -245,8 +239,7 @@ namespace seal
         parameters
         @throws std::invalid_argument if size is less than 2 or too large
         */
-        void resize(std::shared_ptr<SEALContext> context,
-            parms_id_type parms_id, std::size_t size);
+        void resize(std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size);
 
         /**
         Resizes the ciphertext to given size, reallocating if the capacity
@@ -265,8 +258,7 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if size is less than 2 or too large
         */
-        inline void resize(std::shared_ptr<SEALContext> context,
-            std::size_t size)
+        inline void resize(std::shared_ptr<SEALContext> context, std::size_t size)
         {
             // Verify parameters
             if (!context)
@@ -292,9 +284,9 @@ namespace seal
         */
         inline void resize(std::size_t size)
         {
-            // Note: poly_modulus_degree_ and coeff_mod_count_ are either valid
-            // or coeff_mod_count_ is zero (in which case no memory is allocated).
-            resize_internal(size, poly_modulus_degree_, coeff_mod_count_);
+            // Note: poly_modulus_degree_ and coeff_modulus_size_ are either valid
+            // or coeff_modulus_size_ is zero (in which case no memory is allocated).
+            resize_internal(size, poly_modulus_degree_, coeff_modulus_size_);
         }
 
         /**
@@ -308,7 +300,7 @@ namespace seal
             is_ntt_form_ = false;
             size_ = 0;
             poly_modulus_degree_ = 0;
-            coeff_mod_count_ = 0;
+            coeff_modulus_size_ = 0;
             scale_ = 1.0;
             data_.release();
         }
@@ -318,14 +310,14 @@ namespace seal
 
         @param[in] assign The ciphertext to copy from
         */
-        Ciphertext &operator =(const Ciphertext &assign);
+        Ciphertext &operator=(const Ciphertext &assign);
 
         /**
         Moves a given ciphertext to the current one.
 
         @param[in] assign The ciphertext to move from
         */
-        Ciphertext &operator =(Ciphertext &&assign) = default;
+        Ciphertext &operator=(Ciphertext &&assign) = default;
 
         /**
         Returns a reference to the backing IntArray object.
@@ -362,11 +354,9 @@ namespace seal
         @throws std::out_of_range if poly_index is less than 0 or bigger
         than the size of the ciphertext
         */
-        SEAL_NODISCARD inline ct_coeff_type *data(
-            std::size_t poly_index)
+        SEAL_NODISCARD inline ct_coeff_type *data(std::size_t poly_index)
         {
-            auto poly_uint64_count = util::mul_safe(
-                poly_modulus_degree_, coeff_mod_count_);
+            auto poly_uint64_count = util::mul_safe(poly_modulus_degree_, coeff_modulus_size_);
             if (poly_uint64_count == 0)
             {
                 return nullptr;
@@ -375,8 +365,7 @@ namespace seal
             {
                 throw std::out_of_range("poly_index must be within [0, size)");
             }
-            return data_.begin() + util::safe_cast<std::size_t>(
-                util::mul_safe(poly_index, poly_uint64_count));
+            return data_.begin() + util::safe_cast<std::size_t>(util::mul_safe(poly_index, poly_uint64_count));
         }
 
         /**
@@ -389,11 +378,9 @@ namespace seal
         @param[in] poly_index The index of the polynomial in the ciphertext
         @throws std::out_of_range if poly_index is out of range
         */
-        SEAL_NODISCARD inline const ct_coeff_type *data(
-            std::size_t poly_index) const
+        SEAL_NODISCARD inline const ct_coeff_type *data(std::size_t poly_index) const
         {
-            auto poly_uint64_count = util::mul_safe(
-                poly_modulus_degree_, coeff_mod_count_);
+            auto poly_uint64_count = util::mul_safe(poly_modulus_degree_, coeff_modulus_size_);
             if (poly_uint64_count == 0)
             {
                 return nullptr;
@@ -402,8 +389,7 @@ namespace seal
             {
                 throw std::out_of_range("poly_index must be within [0, size)");
             }
-            return data_.cbegin() + util::safe_cast<std::size_t>(
-                util::mul_safe(poly_index, poly_uint64_count));
+            return data_.cbegin() + util::safe_cast<std::size_t>(util::mul_safe(poly_index, poly_uint64_count));
         }
 
         /**
@@ -416,8 +402,7 @@ namespace seal
         @param[in] coeff_index The index of the coefficient
         @throws std::out_of_range if coeff_index is out of range
         */
-        SEAL_NODISCARD inline ct_coeff_type &operator [](
-            std::size_t coeff_index)
+        SEAL_NODISCARD inline ct_coeff_type &operator[](std::size_t coeff_index)
         {
             return data_.at(coeff_index);
         }
@@ -432,8 +417,7 @@ namespace seal
         @param[in] coeff_index The index of the coefficient
         @throws std::out_of_range if coeff_index is out of range
         */
-        SEAL_NODISCARD inline const ct_coeff_type &operator [](
-            std::size_t coeff_index) const
+        SEAL_NODISCARD inline const ct_coeff_type &operator[](std::size_t coeff_index) const
         {
             return data_.at(coeff_index);
         }
@@ -443,9 +427,9 @@ namespace seal
         associated encryption parameters. This directly affects the
         allocation size of the ciphertext.
         */
-        SEAL_NODISCARD inline std::size_t coeff_mod_count() const noexcept
+        SEAL_NODISCARD inline std::size_t coeff_modulus_size() const noexcept
         {
-            return coeff_mod_count_;
+            return coeff_modulus_size_;
         }
 
         /**
@@ -473,9 +457,8 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t size_capacity() const noexcept
         {
-            std::size_t poly_uint64_count = poly_modulus_degree_ * coeff_mod_count_;
-            return poly_uint64_count ?
-                data_.capacity() / poly_uint64_count : std::size_t(0);
+            std::size_t poly_uint64_count = poly_modulus_degree_ * coeff_modulus_size_;
+            return poly_uint64_count ? data_.capacity() / poly_uint64_count : std::size_t(0);
         }
 
         /**
@@ -487,8 +470,8 @@ namespace seal
         */
         SEAL_NODISCARD inline bool is_transparent() const
         {
-            return (!data_.size() ||
-                (size_ < SEAL_CIPHERTEXT_SIZE_MIN) ||
+            return (
+                !data_.size() || (size_ < SEAL_CIPHERTEXT_SIZE_MIN) ||
                 std::all_of(data(1), data_.cend(), util::is_zero<ct_coeff_type>));
         }
 
@@ -500,7 +483,7 @@ namespace seal
         @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the size does not fit in the return type
         */
-        SEAL_NODISCARD std::streamoff save_size(compr_mode_type compr_mode) const;
+        SEAL_NODISCARD std::streamoff save_size(compr_mode_type compr_mode = Serialization::compr_mode_default) const;
 
         /**
         Saves the ciphertext to an output stream. The output is in binary format
@@ -508,19 +491,17 @@ namespace seal
 
         @param[out] stream The stream to save the ciphertext to
         @param[in] compr_mode The desired compression mode
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        @throws std::invalid_argument if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Ciphertext::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                stream, compr_mode);
+                std::bind(&Ciphertext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -533,18 +514,14 @@ namespace seal
         @param[in] stream The stream to load the ciphertext from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&Ciphertext::load_members, this, std::move(context), _1),
-                stream);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, std::move(context), _1), stream);
         }
 
         /**
@@ -555,13 +532,11 @@ namespace seal
         @param[in] stream The stream to load the ciphertext from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             Ciphertext new_data(pool());
             auto in_size = new_data.unsafe_load(context, stream);
@@ -581,21 +556,18 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        contain a SEALHeader, or if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Ciphertext::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                out, size, compr_mode);
+                std::bind(&Ciphertext::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                compr_mode);
         }
 
         /**
@@ -611,18 +583,14 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&Ciphertext::load_members, this, std::move(context), _1),
-                in, size);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, std::move(context), _1), in, size);
         }
 
         /**
@@ -637,13 +605,11 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             Ciphertext new_data(pool());
             auto in_size = new_data.unsafe_load(context, in, size);
@@ -724,15 +690,12 @@ namespace seal
         struct CiphertextPrivateHelper;
 
     private:
-        void reserve_internal(std::size_t size_capacity,
-            std::size_t poly_modulus_degree, std::size_t coeff_mod_count);
+        void reserve_internal(
+            std::size_t size_capacity, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size);
 
-        void resize_internal(std::size_t size, std::size_t poly_modulus_degree,
-            std::size_t coeff_mod_count);
+        void resize_internal(std::size_t size, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size);
 
-        void expand_seed(
-            std::shared_ptr<SEALContext> context,
-            const random_seed_type &seed);
+        void expand_seed(std::shared_ptr<SEALContext> context, const random_seed_type &seed);
 
         void save_members(std::ostream &stream) const;
 
@@ -740,8 +703,7 @@ namespace seal
 
         inline bool has_seed_marker() const noexcept
         {
-            return data_.size() && (size_ == 2) ?
-                (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
+            return data_.size() && (size_ == 2) ? (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
         }
 
         parms_id_type parms_id_ = parms_id_zero;
@@ -752,10 +714,10 @@ namespace seal
 
         std::size_t poly_modulus_degree_ = 0;
 
-        std::size_t coeff_mod_count_ = 0;
+        std::size_t coeff_modulus_size_ = 0;
 
         double scale_ = 1.0;
 
         IntArray<ct_coeff_type> data_;
     };
-}
+} // namespace seal

@@ -5,15 +5,15 @@
     <Authors>Microsoft Research</Authors>
     <Company>Microsoft Corporation</Company>
     <Description>.NET wrapper library for Microsoft SEAL</Description>
-    <Copyright>Microsoft Corporation 2019</Copyright>
+    <Copyright>Microsoft Corporation 2020</Copyright>
     <SignAssembly Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</SignAssembly>
     <AssemblyOriginatorKeyFile Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">SEALNetCert.snk</AssemblyOriginatorKeyFile>
     <DelaySign Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
-    <DocumentationFile>../lib/$(Configuration)/SEALNet.xml</DocumentationFile>
+    <DocumentationFile>$(ProjectDir)../../lib/dotnet/$(Configuration)/SEALNet.xml</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>../lib/$(Configuration)</OutputPath>
+    <OutputPath>$(ProjectDir)../../lib/dotnet/$(Configuration)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants />

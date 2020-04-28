@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/secretkey.h"
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
+#include "seal/secretkey.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(SecretKeyTest, SaveLoadSecretKey)
     {
@@ -54,4 +54,4 @@ namespace SEALTest
             ASSERT_TRUE(sk.parms_id() == sk2.parms_id());
         }
     }
-}
+} // namespace sealtest

@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/intencoder.h"
 #include "seal/context.h"
-#include <cstdint>
+#include "seal/intencoder.h"
 #include <cstddef>
+#include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(Encoder, IntEncodeDecodeBigUInt)
     {
-        SmallModulus modulus(0xFFFFFFFFFFFFFFF);
+        Modulus modulus(0xFFFFFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
         auto context = SEALContext::Create(parms);
@@ -92,7 +92,7 @@ namespace SEALTest
 
     TEST(Encoder, IntEncodeDecodeUInt64)
     {
-        SmallModulus modulus(0xFFFFFFFFFFFFFFF);
+        Modulus modulus(0xFFFFFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
         auto context = SEALContext::Create(parms);
@@ -161,7 +161,7 @@ namespace SEALTest
 
     TEST(Encoder, IntEncodeDecodeUInt32)
     {
-        SmallModulus modulus(0xFFFFFFFFFFFFFFF);
+        Modulus modulus(0xFFFFFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
         auto context = SEALContext::Create(parms);
@@ -230,7 +230,7 @@ namespace SEALTest
 
     TEST(Encoder, IntEncodeDecodeInt64)
     {
-        SmallModulus modulus(0x7FFFFFFFFFFFF);
+        Modulus modulus(0x7FFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
         auto context = SEALContext::Create(parms);
@@ -329,12 +329,14 @@ namespace SEALTest
         poly11[3] = 0x8000; // -32767
         poly11[4] = 0x7FFF; // 32767
         poly11[5] = 0x7FFE; // 32766
-        ASSERT_EQ(static_cast<uint64_t>(1 + -1 * 2 + -2 * 4 + -32767 * 8 + 32767 * 16 + 32766 * 32), static_cast<uint64_t>(encoder2.decode_int64(poly11)));
+        ASSERT_EQ(
+            static_cast<uint64_t>(1 + -1 * 2 + -2 * 4 + -32767 * 8 + 32767 * 16 + 32766 * 32),
+            static_cast<uint64_t>(encoder2.decode_int64(poly11)));
     }
 
     TEST(Encoder, IntEncodeDecodeInt32)
     {
-        SmallModulus modulus(0x7FFFFFFFFFFFFF);
+        Modulus modulus(0x7FFFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
         auto context = SEALContext::Create(parms);
@@ -433,6 +435,8 @@ namespace SEALTest
         poly11[3] = 0x8000; // -32767
         poly11[4] = 0x7FFF; // 32767
         poly11[5] = 0x7FFE; // 32766
-        ASSERT_EQ(static_cast<int32_t>(1 + -1 * 2 + -2 * 4 + -32767 * 8 + 32767 * 16 + 32766 * 32), encoder2.decode_int32(poly11));
+        ASSERT_EQ(
+            static_cast<int32_t>(1 + -1 * 2 + -2 * 4 + -32767 * 8 + 32767 * 16 + 32766 * 32),
+            encoder2.decode_int32(poly11));
     }
-}
+} // namespace sealtest

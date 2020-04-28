@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/util/uintcore.h"
 #include "seal/util/polyarith.h"
+#include "seal/util/uintcore.h"
 #include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 using namespace seal;
 
-namespace SEALTest
+namespace sealtest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(PolyArith, RightShiftPolyCoeffs)
         {
             right_shift_poly_coeffs(nullptr, 0, 0, 0, nullptr);
@@ -501,5 +501,5 @@ namespace SEALTest
             ASSERT_EQ(poly2[10], 32ULL);
             ASSERT_EQ(poly2[11], 0ULL);
         }
-   }
-}
+    } // namespace util
+} // namespace sealtest

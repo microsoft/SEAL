@@ -1,20 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/encryptionparams.h"
 #include "seal/modulus.h"
 #include "seal/util/numth.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(EncryptionParametersTest, EncryptionParametersSet)
     {
-        auto encryption_parameters_test = [](scheme_type scheme)
-        {
+        auto encryption_parameters_test = [](scheme_type scheme) {
             EncryptionParameters parms(scheme);
             parms.set_coeff_modulus({ 2, 3 });
             if (scheme == scheme_type::BFV)
@@ -146,4 +145,4 @@ namespace SEALTest
         ASSERT_TRUE(parms.poly_modulus_degree() == parms2.poly_modulus_degree());
         ASSERT_TRUE(parms == parms2);
     }
-}
+} // namespace sealtest

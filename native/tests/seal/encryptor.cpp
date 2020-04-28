@@ -1,28 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/context.h"
-#include "seal/encryptor.h"
-#include "seal/decryptor.h"
-#include "seal/keygenerator.h"
 #include "seal/batchencoder.h"
 #include "seal/ckks.h"
+#include "seal/context.h"
+#include "seal/decryptor.h"
+#include "seal/encryptor.h"
 #include "seal/intencoder.h"
+#include "seal/keygenerator.h"
 #include "seal/modulus.h"
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <ctime>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(EncryptorTest, BFVEncryptDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_plain_modulus(plain_modulus);
         {
             parms.set_poly_modulus_degree(64);
@@ -205,7 +205,7 @@ namespace SEALTest
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
-            encryptor.encrypt_symmetric_save(encoder.encode(314159265), stream);
+            encryptor.encrypt_symmetric(encoder.encode(314159265)).save(stream);
             encrypted.load(context, stream);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
@@ -216,7 +216,7 @@ namespace SEALTest
     TEST(EncryptorTest, BFVEncryptZeroDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_plain_modulus(plain_modulus);
         parms.set_poly_modulus_degree(64);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40 }));
@@ -263,7 +263,7 @@ namespace SEALTest
         }
         {
             stringstream stream;
-            encryptor.encrypt_zero_symmetric_save(stream);
+            encryptor.encrypt_zero_symmetric().save(stream);
             ct.load(context, stream);
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
@@ -271,7 +271,7 @@ namespace SEALTest
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
-            encryptor.encrypt_zero_symmetric_save(next_parms, stream);
+            encryptor.encrypt_zero_symmetric(next_parms).save(stream);
             ct.load(context, stream);
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
@@ -359,7 +359,7 @@ namespace SEALTest
         }
         {
             stringstream stream;
-            encryptor.encrypt_zero_symmetric_save(stream);
+            encryptor.encrypt_zero_symmetric().save(stream);
             ct.load(context, stream);
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
@@ -373,7 +373,7 @@ namespace SEALTest
                 ASSERT_NEAR(val.imag(), 0.0, 0.01);
             }
 
-            encryptor.encrypt_zero_symmetric_save(next_parms, stream);
+            encryptor.encrypt_zero_symmetric(next_parms).save(stream);
             ct.load(context, stream);
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
@@ -395,7 +395,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //input consists of ones
+            // input consists of ones
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 40, 40, 40, 40 }));
@@ -418,7 +418,7 @@ namespace SEALTest
             encoder.encode(input, context->first_parms_id(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
-            //check correctness of encryption
+            // check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -431,7 +431,7 @@ namespace SEALTest
             }
         }
         {
-            //input consists of zeros
+            // input consists of zeros
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 40, 40, 40, 40 }));
@@ -454,7 +454,7 @@ namespace SEALTest
             encoder.encode(input, context->first_parms_id(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
-            //check correctness of encryption
+            // check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -500,7 +500,7 @@ namespace SEALTest
                 encoder.encode(input, context->first_parms_id(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -547,7 +547,7 @@ namespace SEALTest
                 encoder.encode(input, context->first_parms_id(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -643,7 +643,7 @@ namespace SEALTest
             }
 
             encoder.encode(input, second_parms_id, delta, plain);
-            encryptor.encrypt_symmetric_save(plain, stream);
+            encryptor.encrypt_symmetric(plain).save(stream);
             encrypted.load(context, stream);
             // Check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == second_parms_id);
@@ -656,4 +656,4 @@ namespace SEALTest
             }
         }
     }
-}
+} // namespace sealtest

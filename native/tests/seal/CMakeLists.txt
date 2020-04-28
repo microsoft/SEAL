@@ -24,7 +24,7 @@ target_sources(sealtest
         ${CMAKE_CURRENT_LIST_DIR}/relinkeys.cpp
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.cpp
         ${CMAKE_CURRENT_LIST_DIR}/serialization.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/testrunner.cpp
 )
 
 add_subdirectory(util)

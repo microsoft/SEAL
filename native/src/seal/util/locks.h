@@ -44,22 +44,22 @@ namespace seal
         private:
             ReaderWriterLocker(const ReaderWriterLocker &copy) = delete;
 
-            ReaderWriterLocker &operator =(const ReaderWriterLocker &assign) = delete;
+            ReaderWriterLocker &operator=(const ReaderWriterLocker &assign) = delete;
 
             std::shared_mutex rw_lock_mutex_{};
         };
-    }
-}
+    } // namespace util
+} // namespace seal
 #else
 #include <atomic>
+#include <utility>
 
 namespace seal
 {
     namespace util
     {
         struct try_to_lock_t
-        {
-        };
+        {};
 
         constexpr try_to_lock_t try_to_lock{};
 
@@ -69,8 +69,7 @@ namespace seal
         {
         public:
             ReaderLock() noexcept : locker_(nullptr)
-            {
-            }
+            {}
 
             ReaderLock(ReaderLock &&move) noexcept : locker_(move.locker_)
             {
@@ -82,8 +81,7 @@ namespace seal
                 acquire(locker);
             }
 
-            ReaderLock(ReaderWriterLocker &locker, try_to_lock_t) noexcept :
-                locker_(nullptr)
+            ReaderLock(ReaderWriterLocker &locker, try_to_lock_t) noexcept : locker_(nullptr)
             {
                 try_acquire(locker);
             }
@@ -105,7 +103,7 @@ namespace seal
                 std::swap(locker_, lock.locker_);
             }
 
-            inline ReaderLock &operator =(ReaderLock &&lock) noexcept
+            inline ReaderLock &operator=(ReaderLock &&lock) noexcept
             {
                 swap_with(lock);
                 lock.unlock();
@@ -124,8 +122,7 @@ namespace seal
         {
         public:
             WriterLock() noexcept : locker_(nullptr)
-            {
-            }
+            {}
 
             WriterLock(WriterLock &&move) noexcept : locker_(move.locker_)
             {
@@ -137,8 +134,7 @@ namespace seal
                 acquire(locker);
             }
 
-            WriterLock(ReaderWriterLocker &locker, try_to_lock_t) noexcept :
-                locker_(nullptr)
+            WriterLock(ReaderWriterLocker &locker, try_to_lock_t) noexcept : locker_(nullptr)
             {
                 try_acquire(locker);
             }
@@ -160,7 +156,7 @@ namespace seal
                 std::swap(locker_, lock.locker_);
             }
 
-            inline WriterLock &operator =(WriterLock &&lock) noexcept
+            inline WriterLock &operator=(WriterLock &&lock) noexcept
             {
                 swap_with(lock);
                 lock.unlock();
@@ -183,8 +179,7 @@ namespace seal
 
         public:
             ReaderWriterLocker() noexcept : reader_locks_(0), writer_locked_(false)
-            {
-            }
+            {}
 
             SEAL_NODISCARD inline ReaderLock acquire_read() noexcept
             {
@@ -209,7 +204,7 @@ namespace seal
         private:
             ReaderWriterLocker(const ReaderWriterLocker &copy) = delete;
 
-            ReaderWriterLocker &operator =(const ReaderWriterLocker &assign) = delete;
+            ReaderWriterLocker &operator=(const ReaderWriterLocker &assign) = delete;
 
             std::atomic<int> reader_locks_;
 
@@ -236,13 +231,13 @@ namespace seal
                 if (locker.writer_locked_.load(std::memory_order_acquire))
                 {
                     unlock();
-                    while (locker.writer_locked_.load(std::memory_order_acquire));
+                    while (locker.writer_locked_.load(std::memory_order_acquire))
+                        ;
                 }
             } while (locker_ == nullptr);
         }
 
-        SEAL_NODISCARD inline bool ReaderLock::try_acquire(
-            ReaderWriterLocker &locker) noexcept
+        SEAL_NODISCARD inline bool ReaderLock::try_acquire(ReaderWriterLocker &locker) noexcept
         {
             unlock();
             locker.reader_locks_.fetch_add(1, std::memory_order_acquire);
@@ -259,22 +254,20 @@ namespace seal
         {
             unlock();
             bool expected = false;
-            while (!locker.writer_locked_.compare_exchange_strong(
-                expected, true, std::memory_order_acquire))
+            while (!locker.writer_locked_.compare_exchange_strong(expected, true, std::memory_order_acquire))
             {
                 expected = false;
             }
             locker_ = &locker;
-            while (locker.reader_locks_.load(std::memory_order_acquire) != 0);
+            while (locker.reader_locks_.load(std::memory_order_acquire) != 0)
+                ;
         }
 
-        SEAL_NODISCARD inline bool WriterLock::try_acquire(
-            ReaderWriterLocker &locker) noexcept
+        SEAL_NODISCARD inline bool WriterLock::try_acquire(ReaderWriterLocker &locker) noexcept
         {
             unlock();
             bool expected = false;
-            if (!locker.writer_locked_.compare_exchange_strong(
-                expected, true, std::memory_order_acquire))
+            if (!locker.writer_locked_.compare_exchange_strong(expected, true, std::memory_order_acquire))
             {
                 return false;
             }
@@ -296,6 +289,6 @@ namespace seal
             locker_->writer_locked_.store(false, std::memory_order_release);
             locker_ = nullptr;
         }
-    }
-}
+    } // namespace util
+} // namespace seal
 #endif

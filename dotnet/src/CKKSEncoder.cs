@@ -372,18 +372,15 @@ namespace Microsoft.Research.SEAL
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             ulong destCount = 0;
 
-            // Find out what is the actual result size
-            NativeMethods.CKKSEncoder_DecodeDouble(NativePtr, plain.NativePtr, ref destCount, null, poolPtr);
+            // Allocate a big enough array to hold the result
+            double[] destArray = new double[SlotCount];
+            NativeMethods.CKKSEncoder_DecodeDouble(NativePtr, plain.NativePtr, ref destCount, destArray, poolPtr);
 
-            // Now get the result
-            double[] destarray = new double[destCount];
-            NativeMethods.CKKSEncoder_DecodeDouble(NativePtr, plain.NativePtr, ref destCount, destarray, poolPtr);
-
-            // Transfer result to actual destination
+            // Transfer result to actual destination; only destArray many slots were filled
             destination.Clear();
-            foreach (double value in destarray)
+            for (ulong i = 0; i < destCount; i++)
             {
-                destination.Add(value);
+                destination.Add(destArray[i]);
             }
         }
 
@@ -412,18 +409,15 @@ namespace Microsoft.Research.SEAL
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             ulong destCount = 0;
 
-            // Find out what is the actual result size
-            NativeMethods.CKKSEncoder_DecodeComplex(NativePtr, plain.NativePtr, ref destCount, null, poolPtr);
-
-            // Now get the result
-            double[] destarray = new double[destCount * 2];
-            NativeMethods.CKKSEncoder_DecodeComplex(NativePtr, plain.NativePtr, ref destCount, destarray, poolPtr);
+            // Allocate a big enough array to hold the result
+            double[] destArray = new double[SlotCount * 2];
+            NativeMethods.CKKSEncoder_DecodeComplex(NativePtr, plain.NativePtr, ref destCount, destArray, poolPtr);
 
             // Transfer result to actual destination
             destination.Clear();
             for (ulong i = 0; i < destCount; i++)
             {
-                destination.Add(new Complex(destarray[i * 2], destarray[i * 2 + 1]));
+                destination.Add(new Complex(destArray[i * 2], destArray[i * 2 + 1]));
             }
         }
 

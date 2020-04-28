@@ -12,14 +12,15 @@ namespace Microsoft.Research.SEAL
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Slot Rotations
-    /// Galois keys are used together with batching (<see cref="BatchEncoder"/>). If the
-    /// polynomial modulus is a polynomial of degree N, in batching the idea is to view
-    /// a plaintext polynomial as a 2-by-(N/2) matrix of integers modulo plaintext modulus.
-    /// Normal homomorphic computations operate on such encrypted matrices element (slot)
-    /// wise. However, special rotation operations allow us to also rotate the matrix rows
-    /// cyclically in either direction, and rotate the columns (swap the rows). These
-    /// operations require the Galois keys.
+    /// Slot rotations
+    /// Galois keys are certain types of public keys that are needed to perform encrypted
+    /// vector rotation operations on batched ciphertexts. Batched ciphertexts encrypt
+    /// a 2-by-(N/2) matrix of modular integers in the BFV scheme, or an N/2-dimensional
+    /// vector of complex numbers in the CKKS scheme, where N denotes the degree of the
+    /// polynomial modulus. In the BFV scheme Galois keys can enable both cyclic rotations
+    /// of the encrypted matrix rows, as well as row swaps (column rotations). In the CKKS
+    /// scheme Galois keys can enable cyclic vector rotations, as well as a complex
+    /// conjugation operation.
     /// </para>
     /// <para>
     /// Thread Safety
@@ -28,12 +29,24 @@ namespace Microsoft.Research.SEAL
     /// the Galois keys not being thread-safe.
     /// </para>
     /// </remarks>
-    public class GaloisKeys : KSwitchKeys
+    public class GaloisKeys :
+        KSwitchKeys,
+        ISettable<GaloisKeys>
     {
         /// <summary>
         /// Creates an empty set of Galois keys.
         /// </summary>
         public GaloisKeys() : base()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new GaloisKeys instance by copying a given instance.
+        /// </summary>
+        /// <param name="copy">The GaloisKeys to copy from</param>
+        /// <exception cref="ArgumentNullException">if copy is null</exception>
+        public GaloisKeys(GaloisKeys copy)
+            : base(copy)
         {
         }
 
@@ -49,13 +62,14 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a new GaloisKeys instance by copying a given instance.
+        /// Copies a given GaloisKeys instance to the current one.
         /// </summary>
-        /// <param name="copy">The GaloisKeys to copy from</param>
-        /// <exception cref="ArgumentNullException">if copy is null</exception>
-        public GaloisKeys(GaloisKeys copy)
-            : base(copy)
+        ///
+        /// <param name="assign">The GaloisKeys to copy from</param>
+        /// <exception cref="ArgumentNullException">if assign is null</exception>
+        public void Set(GaloisKeys assign)
         {
+            base.Set(assign);
         }
 
         /// <summary>
@@ -65,7 +79,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="galoisElt">The Galois element</param>
         /// <exception cref="ArgumentException">if Galois element is not valid</exception>
-        public static ulong GetIndex(ulong galoisElt)
+        public static ulong GetIndex(uint galoisElt)
         {
             NativeMethods.GaloisKeys_GetIndex(galoisElt, out ulong index);
             return index;
@@ -77,7 +91,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="galoisElt">The Galois element</param>
         /// <exception cref="ArgumentException">if Galois element is not valid</exception>
-        public bool HasKey(ulong galoisElt)
+        public bool HasKey(uint galoisElt)
         {
             ulong index = GetIndex(galoisElt);
             return (ulong)Data.LongCount() > index &&
@@ -94,7 +108,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElt">The Galois element</param>
         /// <exception cref="ArgumentException">if the key corresponding to galoisElt
         /// does not exist</exception>
-        public IEnumerable<PublicKey> Key(ulong galoisElt)
+        public IEnumerable<PublicKey> Key(uint galoisElt)
         {
             return Data.ElementAt(checked((int)GetIndex(galoisElt)));
         }

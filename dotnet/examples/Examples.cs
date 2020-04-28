@@ -10,6 +10,7 @@ namespace SEALNetExamples
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Microsoft SEAL version: " + SEALVersion.Version);
             while (true)
             {
                 Console.WriteLine("+---------------------------------------------------------+");
@@ -23,7 +24,8 @@ namespace SEALNetExamples
                 Console.WriteLine("| 3. Levels                  | 3_Levels.cs                |");
                 Console.WriteLine("| 4. CKKS Basics             | 4_CKKS_Basics.cs           |");
                 Console.WriteLine("| 5. Rotation                | 5_Rotation.cs              |");
-                Console.WriteLine("| 6. Performance Test        | 6_Performance.cs           |");
+                Console.WriteLine("| 6. Serialization           | 6_Serialization.cs         |");
+                Console.WriteLine("| 7. Performance Test        | 7_Performance.cs           |");
                 Console.WriteLine("+----------------------------+----------------------------+");
 
                 /*
@@ -39,10 +41,10 @@ namespace SEALNetExamples
                 do
                 {
                     Console.WriteLine();
-                    Console.Write("> Run example (1 ~ 6) or exit (0): ");
+                    Console.Write("> Run example (1 ~ 7) or exit (0): ");
                     key = Console.ReadKey();
                     Console.WriteLine();
-                } while (key.KeyChar < '0' || key.KeyChar > '6');
+                } while (key.KeyChar < '0' || key.KeyChar > '7');
                 switch (key.Key)
                 {
                     case ConsoleKey.D1:
@@ -66,6 +68,10 @@ namespace SEALNetExamples
                         break;
 
                     case ConsoleKey.D6:
+                        ExampleSerialization();
+                        break;
+
+                    case ConsoleKey.D7:
                         ExamplePerformanceTest();
                         break;
 
@@ -73,12 +79,12 @@ namespace SEALNetExamples
                         return;
 
                     default:
-                        Console.WriteLine("  [Beep~~] Invalid option: type 0 ~ 6");
+                        Console.WriteLine("  [Beep~~] Invalid option: type 0 ~ 7");
                         break;
                 }
 
                 /*
-                Force a garbage collection after each example to accurately show memory pool use.
+                We may want to force a garbage collection after each example to accurately show memory pool use.
                 */
                 GC.Collect();
             }

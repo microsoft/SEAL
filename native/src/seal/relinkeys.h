@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <limits>
-#include "seal/util/defines.h"
 #include "seal/ciphertext.h"
-#include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
 #include "seal/kswitchkeys.h"
+#include "seal/memorymanager.h"
+#include "seal/util/defines.h"
+#include <iostream>
+#include <limits>
+#include <vector>
 
 namespace seal
 {
@@ -44,8 +44,6 @@ namespace seal
     is concurrently mutating it. This is due to the underlying data structure
     storing the relinearization keys not being thread-safe.
 
-    @see SecretKey for the class that stores the secret key.
-    @see PublicKey for the class that stores the public key.
     @see GaloisKeys for the class that stores the Galois keys.
     @see KeyGenerator for the class that generates the relinearization keys.
     */
@@ -60,8 +58,7 @@ namespace seal
         @param[in] key_power The power of the secret key
         @throws std::invalid_argument if key_power is less than 2
         */
-        SEAL_NODISCARD inline static std::size_t get_index(
-            std::size_t key_power)
+        SEAL_NODISCARD inline static std::size_t get_index(std::size_t key_power)
         {
             if (key_power < 2)
             {
@@ -95,4 +92,4 @@ namespace seal
             return KSwitchKeys::data(get_index(key_power));
         }
     };
-}
+} // namespace seal

@@ -1,0 +1,42 @@
+steps:
+- task: CMake@1
+  displayName: 'CMake SEAL'
+  inputs:
+    workingDirectory: '$(Build.SourcesDirectory)'
+    cmakeArgs: '-DCMAKE_BUILD_TYPE=${{ parameters.configuration }} -DSEAL_BUILD_TESTS=ON -DSEAL_BUILD_SEAL_C=ON -DSEAL_BUILD_EXAMPLES=ON .'
+
+- script: |
+      cd $BUILD_SOURCESDIRECTORY
+      make
+  displayName: 'Build SEAL'
+
+- script: |
+      cd $BUILD_SOURCESDIRECTORY
+      ./bin/sealtest
+  displayName: 'Run unit tests'
+
+- task: UseDotNet@2
+  displayName: 'Get .NET Core 3.1 SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '3.1.x'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Run dotnet unit tests'
+  inputs:
+    command: test
+    projects: '**/SEALNetTest.csproj'
+    arguments: '--configuration ${{ parameters.configuration }} --verbosity detailed'
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+  inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/lib'
+      Contents: 'libsealc.*'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/lib'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: ${{ parameters.artifactName }}

@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <limits>
-#include "seal/publickey.h"
-#include "seal/memorymanager.h"
 #include "seal/encryptionparams.h"
+#include "seal/memorymanager.h"
+#include "seal/publickey.h"
 #include "seal/valcheck.h"
+#include <iostream>
+#include <limits>
+#include <vector>
 
 namespace seal
 {
@@ -64,14 +64,14 @@ namespace seal
 
         @param[in] assign The KSwitchKeys to copy from
         */
-        KSwitchKeys &operator =(const KSwitchKeys &assign);
+        KSwitchKeys &operator=(const KSwitchKeys &assign);
 
         /**
         Moves a given KSwitchKeys instance to the current one.
 
         @param[in] assign The KSwitchKeys to move from
         */
-        KSwitchKeys &operator =(KSwitchKeys &&assign) = default;
+        KSwitchKeys &operator=(KSwitchKeys &&assign) = default;
 
         /**
         Returns the current number of keyswitching keys. Only keys that are
@@ -79,11 +79,9 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t size() const noexcept
         {
-            return std::accumulate(keys_.cbegin(), keys_.cend(), std::size_t(0),
-                [](std::size_t res, auto &next_key)
-                {
-                    return res + (next_key.empty() ? 0 : 1);
-                });
+            return std::accumulate(keys_.cbegin(), keys_.cend(), std::size_t(0), [](std::size_t res, auto &next_key) {
+                return res + (next_key.empty() ? 0 : 1);
+            });
         }
 
         /**
@@ -161,17 +159,15 @@ namespace seal
         @throws std::logic_error if the size does not fit in the return type
         */
         SEAL_NODISCARD inline std::streamoff save_size(
-            compr_mode_type compr_mode) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            std::size_t total_key_size =
-                util::mul_safe(keys_.size(), sizeof(std::uint64_t)); // keys_dim2
+            std::size_t total_key_size = util::mul_safe(keys_.size(), sizeof(std::uint64_t)); // keys_dim2
             for (auto &key_dim1 : keys_)
             {
                 for (auto &key_dim2 : key_dim1)
                 {
-                    total_key_size = util::add_safe(total_key_size,
-                        util::safe_cast<std::size_t>(
-                            key_dim2.save_size(compr_mode_type::none)));
+                    total_key_size = util::add_safe(
+                        total_key_size, util::safe_cast<std::size_t>(key_dim2.save_size(compr_mode_type::none)));
                 }
             }
 
@@ -182,10 +178,7 @@ namespace seal
                     total_key_size),
                 compr_mode);
 
-            return util::safe_cast<std::streamoff>(util::add_safe(
-                sizeof(Serialization::SEALHeader),
-                members_size
-            ));
+            return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
         }
 
         /**
@@ -195,19 +188,17 @@ namespace seal
 
         @param[out] stream The stream to save the KSwitchKeys to
         @param[in] compr_mode The desired compression mode
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        @throws std::invalid_argument if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&KSwitchKeys::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                stream, compr_mode);
+                std::bind(&KSwitchKeys::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -220,18 +211,14 @@ namespace seal
         @param[in] stream The stream to load the KSwitchKeys from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&KSwitchKeys::load_members, this, std::move(context), _1),
-                stream);
+            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, std::move(context), _1), stream);
         }
 
         /**
@@ -242,13 +229,11 @@ namespace seal
         @param[in] stream The stream to load the KSwitchKeys from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
@@ -269,21 +254,18 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        contain a SEALHeader, or if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&KSwitchKeys::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                out, size, compr_mode);
+                std::bind(&KSwitchKeys::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                compr_mode);
         }
 
         /**
@@ -299,18 +281,14 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&KSwitchKeys::load_members, this, std::move(context), _1),
-                in, size);
+            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, std::move(context), _1), in, size);
         }
 
         /**
@@ -325,13 +303,11 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
@@ -366,4 +342,4 @@ namespace seal
         */
         std::vector<std::vector<PublicKey>> keys_{};
     };
-}
+} // namespace seal

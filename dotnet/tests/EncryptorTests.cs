@@ -108,7 +108,7 @@ namespace SEALNetTest
                 {
                     Encryptor encryptor = new Encryptor(context, secretKey);
 
-                    encryptor.EncryptZeroSymmetricSave(stream);
+                    encryptor.EncryptZeroSymmetric().Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
                     Assert.IsFalse(cipher.IsNTTForm);
@@ -121,7 +121,7 @@ namespace SEALNetTest
                 {
                     Encryptor encryptor = new Encryptor(context, secretKey);
 
-                    encryptor.EncryptZeroSymmetricSave(nextParms, stream);
+                    encryptor.EncryptZeroSymmetric(nextParms).Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
                     Assert.IsFalse(cipher.IsNTTForm);
@@ -218,7 +218,7 @@ namespace SEALNetTest
                 {
                     Encryptor encryptor = new Encryptor(context, secretKey);
 
-                    encryptor.EncryptZeroSymmetricSave(stream);
+                    encryptor.EncryptZeroSymmetric().Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
                     Assert.IsTrue(cipher.IsNTTForm);
@@ -238,7 +238,7 @@ namespace SEALNetTest
                 {
                     Encryptor encryptor = new Encryptor(context, secretKey);
 
-                    encryptor.EncryptZeroSymmetricSave(nextParms, stream);
+                    encryptor.EncryptZeroSymmetric(nextParms).Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
                     Assert.IsTrue(cipher.IsNTTForm);
@@ -288,15 +288,14 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentException>(() => encryptor.EncryptZero(cipher, pool_invalid));
             Utilities.AssertThrows<ArgumentException>(() => encryptor.EncryptZero(parmsId_invalid, cipher));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.EncryptSymmetric(plain, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.EncryptSymmetric(plain, destination: null));
             Utilities.AssertThrows<ArgumentNullException>(() => encryptor.EncryptSymmetric(null, cipher));
             Utilities.AssertThrows<ArgumentException>(() => encryptor.EncryptSymmetric(plain, cipher, pool_invalid));
             Utilities.AssertThrows<ArgumentException>(() => encryptor.EncryptZeroSymmetric(cipher, pool_invalid));
             Utilities.AssertThrows<ArgumentException>(() => encryptor.EncryptZeroSymmetric(parmsId_invalid, cipher));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.EncryptSymmetricSave(plain, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.EncryptZeroSymmetricSave(null));
-            Utilities.AssertThrows<ArgumentException>(() => encryptor.EncryptZeroSymmetricSave(parmsId_invalid, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.EncryptSymmetric(plain).Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.EncryptZeroSymmetric().Save(null));
         }
     }
 }

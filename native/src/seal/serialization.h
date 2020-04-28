@@ -3,10 +3,11 @@
 
 #pragma once
 
-#include <iostream>
-#include <cstdint>
-#include <functional>
 #include "seal/util/defines.h"
+#include <cstdint>
+#include <cstring>
+#include <functional>
+#include <iostream>
 
 namespace seal
 {
@@ -50,26 +51,36 @@ namespace seal
         static constexpr std::uint16_t seal_magic = 0xA15E;
 
         /**
-        Struct to contain header information for serialization. The size of the
-        header is 16 bytes and it consists of the following fields:
+        The size in bytes of the SEALHeader.
+        */
+        static constexpr std::uint8_t seal_header_size = 0x10;
+
+        /**
+        Struct to contain metadata for serialization comprising the following fields:
 
         1. a magic number identifying this is a SEALHeader struct (2 bytes)
-        2. 0x00 (1 byte)
-        3. a compr_mode_type indicating whether data after the header is compressed (1 byte)
-        4. the size in bytes of the entire serialized object, including the header (4 bytes)
-        5. reserved for future use (8 bytes)
+        2. size in bytes of the SEALHeader struct (1 byte)
+        3. Microsoft SEAL's major version number (1 byte)
+        4. Microsoft SEAL's minor version number (1 byte)
+        5. a compr_mode_type indicating whether data after the header is compressed (1 byte)
+        6. reserved for future use and data alignment (2 bytes)
+        7. the size in bytes of the entire serialized object, including the header (8 bytes)
         */
         struct SEALHeader
         {
             std::uint16_t magic = seal_magic;
 
-            std::uint8_t zero_byte = 0x00;
+            std::uint8_t header_size = seal_header_size;
+
+            std::uint8_t version_major = static_cast<std::uint8_t>(SEAL_VERSION_MAJOR);
+
+            std::uint8_t version_minor = static_cast<std::uint8_t>(SEAL_VERSION_MINOR);
 
             compr_mode_type compr_mode = compr_mode_type::none;
 
-            std::uint32_t size = 0;
+            std::uint16_t reserved = 0;
 
-            std::uint64_t reserved = 0;
+            std::uint64_t size = 0;
         };
 
         /**
@@ -77,15 +88,14 @@ namespace seal
 
         @param[in] compr_mode The compression mode to validate
         */
-        SEAL_NODISCARD static bool IsSupportedComprMode(
-            std::uint8_t compr_mode) noexcept
+        SEAL_NODISCARD static bool IsSupportedComprMode(std::uint8_t compr_mode) noexcept
         {
             switch (compr_mode)
             {
-            case static_cast<std::uint8_t>(compr_mode_type::none) :
+            case static_cast<std::uint8_t>(compr_mode_type::none):
                 /* fall through */
 #ifdef SEAL_USE_ZLIB
-            case static_cast<std::uint8_t>(compr_mode_type::deflate) :
+            case static_cast<std::uint8_t>(compr_mode_type::deflate):
 #endif
                 return true;
             }
@@ -93,12 +103,11 @@ namespace seal
         }
 
         /**
-        Returns true if the given byte corresponds to a supported compression mode.
+        Returns true if the given value corresponds to a supported compression mode.
 
         @param[in] compr_mode The compression mode to validate
         */
-        SEAL_NODISCARD static inline bool IsSupportedComprMode(
-            compr_mode_type compr_mode) noexcept
+        SEAL_NODISCARD static inline bool IsSupportedComprMode(compr_mode_type compr_mode) noexcept
         {
             return IsSupportedComprMode(static_cast<uint8_t>(compr_mode));
         }
@@ -112,22 +121,34 @@ namespace seal
         @param[in] in_size The compression mode
         @throws std::invalid_argument if the compression mode is not supported
         */
-        SEAL_NODISCARD static std::size_t ComprSizeEstimate(
-            std::size_t in_size, compr_mode_type compr_mode);
+        SEAL_NODISCARD static std::size_t ComprSizeEstimate(std::size_t in_size, compr_mode_type compr_mode);
 
         /**
-        Returns true if the given SEALHeader is valid.
+        Returns true if the SEALHeader has a version number compatible with this version of Microsoft SEAL.
 
         @param[in] header The SEALHeader
         */
-        SEAL_NODISCARD static bool IsValidHeader(
-            const SEALHeader &header) noexcept
+        SEAL_NODISCARD static bool IsCompatibleVersion(const SEALHeader &header) noexcept
+        {
+            return (header.version_major == SEAL_VERSION_MAJOR && header.version_minor == SEAL_VERSION_MINOR);
+        }
+
+        /**
+        Returns true if the given SEALHeader is valid for this version of Microsoft SEAL.
+
+        @param[in] header The SEALHeader
+        */
+        SEAL_NODISCARD static bool IsValidHeader(const SEALHeader &header) noexcept
         {
             if (header.magic != seal_magic)
             {
                 return false;
             }
-            if (header.zero_byte != 0x00)
+            if (header.header_size != seal_header_size)
+            {
+                return false;
+            }
+            if (!IsCompatibleVersion(header))
             {
                 return false;
             }
@@ -146,18 +167,44 @@ namespace seal
         @param[out] stream The stream to save the SEALHeader to
         @throws std::runtime_error if I/O operations failed
         */
-        static void SaveHeader(const SEALHeader &header, std::ostream &stream);
+        static std::streamoff SaveHeader(const SEALHeader &header, std::ostream &stream);
 
         /**
         Loads a SEALHeader from a given stream.
 
         @param[in] stream The stream to load the SEALHeader from
         @param[in] header The SEALHeader to populate with the loaded data
+        @param[in] try_upgrade_if_invalid If the loaded SEALHeader is invalid,
+        attempt to identify its format and upgrade to the current SEALHeader version
         @throws std::runtime_error if I/O operations failed
-        @throws std::logic_error if the loaded data is not a valid SEALHeader or
-        if the loaded compression mode is not supported
         */
-        static void LoadHeader(std::istream &stream, SEALHeader &header);
+        static std::streamoff LoadHeader(std::istream &stream, SEALHeader &header, bool try_upgrade_if_invalid = true);
+
+        /**
+        Saves a SEALHeader to a given memory location. The output is in binary
+        format and is not human-readable.
+
+        @param[out] out The memory location to write the SEALHeader to
+        @param[in] size The number of bytes available in the given memory location
+        @throws std::invalid_argument if out is null or if size is too small to
+        contain a SEALHeader
+        @throws std::runtime_error if I/O operations failed
+        */
+        static std::streamoff SaveHeader(const SEALHeader &header, SEAL_BYTE *out, std::size_t size);
+
+        /**
+        Loads a SEALHeader from a given memory location.
+
+        @param[in] in The memory location to load the SEALHeader from
+        @param[in] size The number of bytes available in the given memory location
+        @param[in] try_upgrade_if_invalid If the loaded SEALHeader is invalid,
+        attempt to identify its format and upgrade to the current SEALHeader version
+        @throws std::invalid_argument if in is null or if size is too small to
+        contain a SEALHeader
+        @throws std::runtime_error if I/O operations failed
+        */
+        static std::streamoff LoadHeader(
+            const SEAL_BYTE *in, std::size_t size, SEALHeader &header, bool try_upgrade_if_invalid = true);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -182,9 +229,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members,
-            std::streamoff raw_size,
-            std::ostream &stream,
+            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, std::ostream &stream,
             compr_mode_type compr_mode);
 
         /**
@@ -198,13 +243,11 @@ namespace seal
         argument, possibly reading some number of bytes from it
         @param[in] stream The stream to read from
         @throws std::invalid_argument if load_members is invalid
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members,
-            std::istream &stream);
+        static std::streamoff Load(std::function<void(std::istream &stream)> load_members, std::istream &stream);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -231,11 +274,8 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members,
-            std::streamoff raw_size,
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode);
+            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, SEAL_BYTE *out,
+            std::size_t size, compr_mode_type compr_mode);
 
         /**
         Deserializes data from a memory location that was serialized by Save.
@@ -250,16 +290,46 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @throws std::invalid_argument if load_members is invalid, if in is null,
         or if size is too small to contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members,
-            const SEAL_BYTE *in,
-            std::size_t size);
+            std::function<void(std::istream &stream)> load_members, const SEAL_BYTE *in, std::size_t size);
 
     private:
         Serialization() = delete;
     };
-}
+
+    namespace legacy_headers
+    {
+        /**
+        Struct to enable compatibility with Microsoft SEAL 3.4 headers.
+        */
+        struct SEALHeader_3_4
+        {
+            std::uint16_t magic = Serialization::seal_magic;
+
+            std::uint8_t zero_byte = 0x00;
+
+            compr_mode_type compr_mode = compr_mode_type::none;
+
+            std::uint32_t size = 0;
+
+            std::uint64_t reserved = 0;
+
+            SEALHeader_3_4 &operator=(const Serialization::SEALHeader assign)
+            {
+                std::memcpy(this, &assign, sizeof(Serialization::SEALHeader));
+                return *this;
+            }
+
+            SEALHeader_3_4() = default;
+
+            SEALHeader_3_4(const Serialization::SEALHeader &copy)
+            {
+                operator=(copy);
+            }
+        };
+    } // namespace legacy_headers
+} // namespace seal

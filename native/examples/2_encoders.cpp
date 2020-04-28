@@ -104,13 +104,11 @@ void example_integer_encoder()
     int value1 = 5;
     Plaintext plain1 = encoder.encode(value1);
     print_line(__LINE__);
-    cout << "Encode " << value1 << " as polynomial " << plain1.to_string()
-        << " (plain1)," << endl;
+    cout << "Encode " << value1 << " as polynomial " << plain1.to_string() << " (plain1)," << endl;
 
     int value2 = -7;
     Plaintext plain2 = encoder.encode(value2);
-    cout << string(13, ' ') << "encode " << value2 << " as polynomial " << plain2.to_string()
-        << " (plain2)." << endl;
+    cout << string(13, ' ') << "encode " << value2 << " as polynomial " << plain2.to_string() << " (plain2)." << endl;
 
     /*
     Now we can encrypt the plaintext polynomials.
@@ -120,10 +118,8 @@ void example_integer_encoder()
     cout << "Encrypt plain1 to encrypted1 and plain2 to encrypted2." << endl;
     encryptor.encrypt(plain1, encrypted1);
     encryptor.encrypt(plain2, encrypted2);
-    cout << "    + Noise budget in encrypted1: "
-        << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
-    cout << "    + Noise budget in encrypted2: "
-        << decryptor.invariant_noise_budget(encrypted2) << " bits" << endl;
+    cout << "    + Noise budget in encrypted1: " << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
+    cout << "    + Noise budget in encrypted2: " << decryptor.invariant_noise_budget(encrypted2) << " bits" << endl;
 
     /*
     As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2.
@@ -135,8 +131,8 @@ void example_integer_encoder()
     evaluator.negate(encrypted1, encrypted_result);
     evaluator.add_inplace(encrypted_result, encrypted2);
     evaluator.multiply_inplace(encrypted_result, encrypted2);
-    cout << "    + Noise budget in encrypted_result: "
-        << decryptor.invariant_noise_budget(encrypted_result) << " bits" << endl;
+    cout << "    + Noise budget in encrypted_result: " << decryptor.invariant_noise_budget(encrypted_result) << " bits"
+         << endl;
     Plaintext plain_result;
     print_line(__LINE__);
     cout << "Decrypt encrypted_result to plain_result." << endl;
@@ -200,7 +196,7 @@ void example_batch_encoder()
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
-    RelinKeys relin_keys = keygen.relin_keys();
+    RelinKeys relin_keys = keygen.relin_keys_local();
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
@@ -264,8 +260,8 @@ void example_batch_encoder()
     print_line(__LINE__);
     cout << "Encrypt plain_matrix to encrypted_matrix." << endl;
     encryptor.encrypt(plain_matrix, encrypted_matrix);
-    cout << "    + Noise budget in encrypted_matrix: "
-        << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << "    + Noise budget in encrypted_matrix: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits"
+         << endl;
 
     /*
     Operating on the ciphertext results in homomorphic operations being performed
@@ -301,8 +297,7 @@ void example_batch_encoder()
     /*
     How much noise budget do we have left?
     */
-    cout << "    + Noise budget in result: "
-        << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << "    + Noise budget in result: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
 
     /*
     We decrypt and decompose the plaintext to recover the result as a matrix.
@@ -349,8 +344,7 @@ void example_ckks_encoder()
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Create(
-        poly_modulus_degree, { 40, 40, 40, 40, 40 }));
+    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 40, 40, 40, 40, 40 }));
 
     /*
     We create the SEALContext as usual and print the parameters.
@@ -365,7 +359,7 @@ void example_ckks_encoder()
     KeyGenerator keygen(context);
     auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys();
+    auto relin_keys = keygen.relin_keys_local();
 
     /*
     We also set up an Encryptor, Evaluator, and Decryptor as usual.
@@ -450,8 +444,8 @@ void example_ckks_encoder()
     We notice that the scale in the result has increased. In fact, it is now the
     square of the original scale: 2^60.
     */
-    cout << "    + Scale in squared input: " << encrypted.scale()
-        << " (" << log2(encrypted.scale()) << " bits)" << endl;
+    cout << "    + Scale in squared input: " << encrypted.scale() << " (" << log2(encrypted.scale()) << " bits)"
+         << endl;
 
     print_line(__LINE__);
     cout << "Decrypt and decode." << endl;

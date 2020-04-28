@@ -20,13 +20,13 @@ namespace SEALNetTest
             Assert.IsNotNull(cipher);
             Assert.AreEqual(0ul, cipher.Size);
             Assert.AreEqual(0ul, cipher.PolyModulusDegree);
-            Assert.AreEqual(0ul, cipher.CoeffModCount);
+            Assert.AreEqual(0ul, cipher.CoeffModulusSize);
 
             // After disposing object, accessing any field should fail.
             cipher.Dispose();
             Utilities.AssertThrows<ObjectDisposedException>(() => cipher.Size);
             Utilities.AssertThrows<ObjectDisposedException>(() => cipher.PolyModulusDegree);
-            Utilities.AssertThrows<ObjectDisposedException>(() => cipher.CoeffModCount);
+            Utilities.AssertThrows<ObjectDisposedException>(() => cipher.CoeffModulusSize);
             Utilities.AssertThrows<ObjectDisposedException>(() => cipher.IsTransparent);
             Utilities.AssertThrows<ObjectDisposedException>(() => cipher.IsNTTForm);
         }

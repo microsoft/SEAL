@@ -15,7 +15,6 @@ namespace Microsoft.Research.SEAL.Tools
         /// </summary>
         protected virtual void DisposeManagedResources()
         {
-            // Derived classes will override this behavior.
         }
 
         /// <summary>

@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include <vector>
-#include <limits>
-#include "seal/util/defines.h"
-#include "seal/util/common.h"
-#include "seal/util/uintcore.h"
-#include "seal/util/uintarithsmallmod.h"
-#include "seal/plaintext.h"
 #include "seal/context.h"
-#ifdef SEAL_USE_MSGSL_SPAN
+#include "seal/plaintext.h"
+#include "seal/util/common.h"
+#include "seal/util/defines.h"
+#include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
+#include <limits>
+#include <vector>
+#ifdef SEAL_USE_MSGSL
 #include <gsl/span>
 #endif
 
@@ -101,7 +101,7 @@ namespace seal
         @throws std::invalid_argument if values is too large
         */
         void encode(const std::vector<std::int64_t> &values, Plaintext &destination);
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
         of integers modulo the plaintext modulus into a plaintext element, and stores
@@ -172,7 +172,8 @@ namespace seal
         @throws std::invalid_argument if plain is in NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        void decode(const Plaintext &plain, std::vector<std::uint64_t> &destination,
+        void decode(
+            const Plaintext &plain, std::vector<std::uint64_t> &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 
         /**
@@ -190,28 +191,10 @@ namespace seal
         @throws std::invalid_argument if plain is in NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        void decode(const Plaintext &plain, std::vector<std::int64_t> &destination,
+        void decode(
+            const Plaintext &plain, std::vector<std::int64_t> &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
-#ifdef SEAL_USE_MSGSL_SPAN
-        /**
-        Inverse of encode. This function "unbatches" a given plaintext into a matrix
-        of integers modulo the plaintext modulus, and stores the result in the destination
-        parameter. The input plaintext must have degress less than the polynomial modulus,
-        and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
-        for the encryption parameters. Dynamic memory allocations in the process are
-        allocated from the memory pool pointed to by the given MemoryPoolHandle.
-
-        @param[in] plain The plaintext polynomial to unbatch
-        @param[out] destination The matrix to be overwritten with the values in the slots
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is in NTT form
-        @throws std::invalid_argument if destination has incorrect size
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        void decode(const Plaintext &plain, gsl::span<std::uint64_t> destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
-
+#ifdef SEAL_USE_MSGSL
         /**
         Inverse of encode. This function "unbatches" a given plaintext into a matrix
         of integers modulo the plaintext modulus, and stores the result in the destination
@@ -228,7 +211,28 @@ namespace seal
         @throws std::invalid_argument if destination has incorrect size
         @throws std::invalid_argument if pool is uninitialized
         */
-        void decode(const Plaintext &plain, gsl::span<std::int64_t> destination,
+        void decode(
+            const Plaintext &plain, gsl::span<std::uint64_t> destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool());
+
+        /**
+        Inverse of encode. This function "unbatches" a given plaintext into a matrix
+        of integers modulo the plaintext modulus, and stores the result in the destination
+        parameter. The input plaintext must have degress less than the polynomial modulus,
+        and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
+        for the encryption parameters. Dynamic memory allocations in the process are
+        allocated from the memory pool pointed to by the given MemoryPoolHandle.
+
+        @param[in] plain The plaintext polynomial to unbatch
+        @param[out] destination The matrix to be overwritten with the values in the slots
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is in NTT form
+        @throws std::invalid_argument if destination has incorrect size
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        void decode(
+            const Plaintext &plain, gsl::span<std::int64_t> destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 #endif
         /**
@@ -260,12 +264,11 @@ namespace seal
 
         BatchEncoder(BatchEncoder &&source) = delete;
 
-        BatchEncoder &operator =(const BatchEncoder &assign) = delete;
+        BatchEncoder &operator=(const BatchEncoder &assign) = delete;
 
-        BatchEncoder &operator =(BatchEncoder &&assign) = delete;
+        BatchEncoder &operator=(BatchEncoder &&assign) = delete;
 
-        void populate_roots_of_unity_vector(
-            const SEALContext::ContextData &context_data);
+        void populate_roots_of_unity_vector(const SEALContext::ContextData &context_data);
 
         void populate_matrix_reps_index_map();
 
@@ -281,4 +284,4 @@ namespace seal
 
         util::Pointer<std::size_t> matrix_reps_index_map_;
     };
-}
+} // namespace seal

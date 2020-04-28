@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/uintcore.h"
-#include "seal/util/uintarith.h"
 #include "seal/util/common.h"
+#include "seal/util/uintarith.h"
+#include "seal/util/uintcore.h"
 #include <algorithm>
-#include <functional>
 #include <array>
 
 using namespace std;
@@ -14,10 +13,9 @@ namespace seal
 {
     namespace util
     {
-        void multiply_uint_uint(const uint64_t *operand1,
-            size_t operand1_uint64_count, const uint64_t *operand2,
-            size_t operand2_uint64_count, size_t result_uint64_count,
-            uint64_t *result)
+        void multiply_uint_uint(
+            const uint64_t *operand1, size_t operand1_uint64_count, const uint64_t *operand2,
+            size_t operand2_uint64_count, size_t result_uint64_count, uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && operand1_uint64_count > 0)
@@ -55,22 +53,18 @@ namespace seal
             }
 
             // In some cases these improve performance.
-            operand1_uint64_count = get_significant_uint64_count_uint(
-                operand1, operand1_uint64_count);
-            operand2_uint64_count = get_significant_uint64_count_uint(
-                operand2, operand2_uint64_count);
+            operand1_uint64_count = get_significant_uint64_count_uint(operand1, operand1_uint64_count);
+            operand2_uint64_count = get_significant_uint64_count_uint(operand2, operand2_uint64_count);
 
             // More fast cases
             if (operand1_uint64_count == 1)
             {
-                multiply_uint_uint64(operand2, operand2_uint64_count,
-                    *operand1, result_uint64_count, result);
+                multiply_uint_uint64(operand2, operand2_uint64_count, *operand1, result_uint64_count, result);
                 return;
             }
             if (operand2_uint64_count == 1)
             {
-                multiply_uint_uint64(operand1, operand1_uint64_count,
-                    *operand2, result_uint64_count, result);
+                multiply_uint_uint64(operand1, operand1_uint64_count, *operand2, result_uint64_count, result);
                 return;
             }
 
@@ -78,17 +72,14 @@ namespace seal
             set_zero_uint(result_uint64_count, result);
 
             // Multiply operand1 and operand2.
-            size_t operand1_index_max = min(operand1_uint64_count,
-                result_uint64_count);
-            for (size_t operand1_index = 0;
-                operand1_index < operand1_index_max; operand1_index++)
+            size_t operand1_index_max = min(operand1_uint64_count, result_uint64_count);
+            for (size_t operand1_index = 0; operand1_index < operand1_index_max; operand1_index++)
             {
                 const uint64_t *inner_operand2 = operand2;
                 uint64_t *inner_result = result++;
                 uint64_t carry = 0;
                 size_t operand2_index = 0;
-                size_t operand2_index_max = min(operand2_uint64_count,
-                    result_uint64_count - operand1_index);
+                size_t operand2_index_max = min(operand2_uint64_count, result_uint64_count - operand1_index);
                 for (; operand2_index < operand2_index_max; operand2_index++)
                 {
                     // Perform 64-bit multiplication of operand1 and operand2
@@ -110,9 +101,9 @@ namespace seal
             }
         }
 
-        void multiply_uint_uint64(const uint64_t *operand1,
-            size_t operand1_uint64_count, uint64_t operand2,
-            size_t result_uint64_count, uint64_t *result)
+        void multiply_uint_uint64(
+            const uint64_t *operand1, size_t operand1_uint64_count, uint64_t operand2, size_t result_uint64_count,
+            uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && operand1_uint64_count > 0)
@@ -146,7 +137,7 @@ namespace seal
             }
 
             // More fast cases
-            //if (result_uint64_count == 2 && operand1_uint64_count > 1)
+            // if (result_uint64_count == 2 && operand1_uint64_count > 1)
             //{
             //    unsigned long long temp_result;
             //    multiply_uint64(*operand1, operand2, &temp_result);
@@ -160,10 +151,8 @@ namespace seal
 
             // Multiply operand1 and operand2.
             unsigned long long carry = 0;
-            size_t operand1_index_max = min(operand1_uint64_count,
-                result_uint64_count);
-            for (size_t operand1_index = 0;
-                operand1_index < operand1_index_max; operand1_index++)
+            size_t operand1_index_max = min(operand1_uint64_count, result_uint64_count);
+            for (size_t operand1_index = 0; operand1_index < operand1_index_max; operand1_index++)
             {
                 unsigned long long temp_result[2];
                 multiply_uint64(*operand1++, operand2, temp_result);
@@ -179,9 +168,8 @@ namespace seal
             }
         }
 
-        void divide_uint_uint_inplace(uint64_t *numerator,
-            const uint64_t *denominator, size_t uint64_count,
-            uint64_t *quotient, MemoryPool &pool)
+        void divide_uint_uint_inplace(
+            uint64_t *numerator, const uint64_t *denominator, size_t uint64_count, uint64_t *quotient, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (!numerator && uint64_count > 0)
@@ -214,10 +202,8 @@ namespace seal
             set_zero_uint(uint64_count, quotient);
 
             // Determine significant bits in numerator and denominator.
-            int numerator_bits =
-                get_significant_bit_count_uint(numerator, uint64_count);
-            int denominator_bits =
-                get_significant_bit_count_uint(denominator, uint64_count);
+            int numerator_bits = get_significant_bit_count_uint(numerator, uint64_count);
+            int denominator_bits = get_significant_bit_count_uint(denominator, uint64_count);
 
             // If numerator has fewer bits than denominator, then done.
             if (numerator_bits < denominator_bits)
@@ -226,8 +212,7 @@ namespace seal
             }
 
             // Only perform computation up to last non-zero uint64s.
-            uint64_count = safe_cast<size_t>(
-                divide_round_up(numerator_bits, bits_per_uint64));
+            uint64_count = safe_cast<size_t>(divide_round_up(numerator_bits, bits_per_uint64));
 
             // Handle fast case.
             if (uint64_count == 1)
@@ -247,8 +232,7 @@ namespace seal
 
             // Shift denominator to bring MSB in alignment with MSB of numerator.
             int denominator_shift = numerator_bits - denominator_bits;
-            left_shift_uint(denominator, denominator_shift, uint64_count,
-                shifted_denominator);
+            left_shift_uint(denominator, denominator_shift, uint64_count, shifted_denominator);
             denominator_bits += denominator_shift;
 
             // Perform bit-wise division algorithm.
@@ -259,8 +243,7 @@ namespace seal
 
                 // Even though MSB of numerator and denominator are aligned,
                 // still possible numerator < shifted_denominator.
-                if (sub_uint_uint(numerator, shifted_denominator,
-                    uint64_count, difference))
+                if (sub_uint_uint(numerator, shifted_denominator, uint64_count, difference))
                 {
                     // numerator < shifted_denominator and MSBs are aligned,
                     // so current quotient bit is zero and next one is definitely one.
@@ -320,8 +303,7 @@ namespace seal
             }
         }
 
-        void divide_uint128_uint64_inplace_generic(uint64_t *numerator,
-            uint64_t denominator, uint64_t *quotient)
+        void divide_uint128_uint64_inplace_generic(uint64_t *numerator, uint64_t denominator, uint64_t *quotient)
         {
 #ifdef SEAL_DEBUG
             if (!numerator)
@@ -341,7 +323,7 @@ namespace seal
                 throw invalid_argument("quotient cannot point to same value as numerator");
             }
 #endif
-            // We expect 129-bit input
+            // We expect 128-bit input
             constexpr size_t uint64_count = 2;
 
             // Clear quotient. Set it to zero.
@@ -436,8 +418,7 @@ namespace seal
             }
         }
 
-        void divide_uint192_uint64_inplace(uint64_t *numerator,
-            uint64_t denominator, uint64_t *quotient)
+        void divide_uint192_uint64_inplace(uint64_t *numerator, uint64_t denominator, uint64_t *quotient)
         {
 #ifdef SEAL_DEBUG
             if (!numerator)
@@ -476,8 +457,7 @@ namespace seal
             }
 
             // Only perform computation up to last non-zero uint64s.
-            uint64_count = safe_cast<size_t>(
-                divide_round_up(numerator_bits, bits_per_uint64));
+            uint64_count = safe_cast<size_t>(divide_round_up(numerator_bits, bits_per_uint64));
 
             // Handle fast case.
             if (uint64_count == 1)
@@ -497,8 +477,7 @@ namespace seal
             // Shift denominator to bring MSB in alignment with MSB of numerator.
             int denominator_shift = numerator_bits - denominator_bits;
 
-            left_shift_uint192(shifted_denominator.data(), denominator_shift,
-                shifted_denominator.data());
+            left_shift_uint192(shifted_denominator.data(), denominator_shift, shifted_denominator.data());
             denominator_bits += denominator_shift;
 
             // Perform bit-wise division algorithm.
@@ -509,8 +488,7 @@ namespace seal
 
                 // Even though MSB of numerator and denominator are aligned,
                 // still possible numerator < shifted_denominator.
-                if (sub_uint_uint(numerator, shifted_denominator.data(),
-                    uint64_count, difference.data()))
+                if (sub_uint_uint(numerator, shifted_denominator.data(), uint64_count, difference.data()))
                 {
                     // numerator < shifted_denominator and MSBs are aligned,
                     // so current quotient bit is zero and next one is definitely one.
@@ -568,10 +546,9 @@ namespace seal
             }
         }
 
-        void exponentiate_uint(const uint64_t *operand,
-            size_t operand_uint64_count, const uint64_t *exponent,
-            size_t exponent_uint64_count, size_t result_uint64_count,
-            uint64_t *result, MemoryPool &pool)
+        void exponentiate_uint(
+            const uint64_t *operand, size_t operand_uint64_count, const uint64_t *exponent,
+            size_t exponent_uint64_count, size_t result_uint64_count, uint64_t *result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (!operand)
@@ -616,8 +593,7 @@ namespace seal
             set_uint_uint(exponent, exponent_uint64_count, exponent_copy.get());
 
             // Perform binary exponentiation.
-            auto big_alloc(allocate_uint(
-                result_uint64_count + result_uint64_count + result_uint64_count, pool));
+            auto big_alloc(allocate_uint(result_uint64_count + result_uint64_count + result_uint64_count, pool));
 
             uint64_t *powerptr = big_alloc.get();
             uint64_t *productptr = powerptr + result_uint64_count;
@@ -631,18 +607,15 @@ namespace seal
             {
                 if ((*exponent_copy.get() % 2) == 1)
                 {
-                    multiply_truncate_uint_uint(powerptr, intermediateptr,
-                        result_uint64_count, productptr);
+                    multiply_truncate_uint_uint(powerptr, intermediateptr, result_uint64_count, productptr);
                     swap(productptr, intermediateptr);
                 }
-                right_shift_uint(exponent_copy.get(), 1, exponent_uint64_count,
-                    exponent_copy.get());
+                right_shift_uint(exponent_copy.get(), 1, exponent_uint64_count, exponent_copy.get());
                 if (is_zero_uint(exponent_copy.get(), exponent_uint64_count))
                 {
                     break;
                 }
-                multiply_truncate_uint_uint(powerptr, powerptr, result_uint64_count,
-                    productptr);
+                multiply_truncate_uint_uint(powerptr, powerptr, result_uint64_count, productptr);
                 swap(productptr, powerptr);
             }
             set_uint_uint(intermediateptr, result_uint64_count, result);
@@ -721,5 +694,5 @@ namespace seal
 
             return intermediate;
         }
-    }
-}
+    } // namespace util
+} // namespace seal

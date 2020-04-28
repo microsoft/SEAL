@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <random>
 #include "seal/util/numth.h"
-#include "seal/util/uintcore.h"
 #include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
+#include <random>
 
 using namespace std;
 
@@ -12,15 +12,14 @@ namespace seal
 {
     namespace util
     {
-        vector<uint64_t> conjugate_classes(uint64_t modulus,
-            uint64_t subgroup_generator)
+        vector<uint64_t> conjugate_classes(uint64_t modulus, uint64_t subgroup_generator)
         {
-            if (!product_fits_in(modulus, subgroup_generator) ||
-                !fits_in<size_t>(modulus))
+#ifdef SEAL_DEBUG
+            if (!product_fits_in(modulus, subgroup_generator) || !fits_in<size_t>(modulus))
             {
                 throw invalid_argument("inputs too large");
             }
-
+#endif
             vector<uint64_t> classes{};
             for (uint64_t i = 0; i < modulus; i++)
             {
@@ -42,8 +41,7 @@ namespace seal
                 if (classes[static_cast<size_t>(i)] < i)
                 {
                     // i is not a pivot, updated its pivot
-                    classes[static_cast<size_t>(i)] =
-                        classes[static_cast<size_t>(classes[static_cast<size_t>(i)])];
+                    classes[static_cast<size_t>(i)] = classes[static_cast<size_t>(classes[static_cast<size_t>(i)])];
                     continue;
                 }
                 // If i is a pivot, update other pivots to point to it
@@ -60,15 +58,43 @@ namespace seal
             return classes;
         }
 
-        vector<uint64_t> multiplicative_orders(
-            vector<uint64_t> conjugate_classes, uint64_t modulus)
+        bool try_invert_uint_mod(uint64_t value, uint64_t modulus, uint64_t &result)
         {
-            if (!product_fits_in(modulus, modulus) ||
-                !fits_in<size_t>(modulus))
+#ifdef SEAL_DEBUG
+            if (modulus <= 1)
+            {
+                throw invalid_argument("modulus must be at least 2");
+            }
+#endif
+            if (value == 0)
+            {
+                return false;
+            }
+            auto gcd_tuple = xgcd(value, modulus);
+            if (get<0>(gcd_tuple) != 1)
+            {
+                return false;
+            }
+            else if (get<1>(gcd_tuple) < 0)
+            {
+                result = static_cast<uint64_t>(get<1>(gcd_tuple)) + modulus;
+                return true;
+            }
+            else
+            {
+                result = static_cast<uint64_t>(get<1>(gcd_tuple));
+                return true;
+            }
+        }
+
+        vector<uint64_t> multiplicative_orders(vector<uint64_t> conjugate_classes, uint64_t modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (!product_fits_in(modulus, modulus) || !fits_in<size_t>(modulus))
             {
                 throw invalid_argument("inputs too large");
             }
-
+#endif
             vector<uint64_t> orders{};
             orders.push_back(0);
             orders.push_back(1);
@@ -77,14 +103,12 @@ namespace seal
             {
                 if (conjugate_classes[static_cast<size_t>(i)] <= 1)
                 {
-                    orders.push_back(
-                        conjugate_classes[static_cast<size_t>(i)]);
+                    orders.push_back(conjugate_classes[static_cast<size_t>(i)]);
                     continue;
                 }
                 if (conjugate_classes[static_cast<size_t>(i)] < i)
                 {
-                    orders.push_back(orders[static_cast<size_t>(
-                        conjugate_classes[static_cast<size_t>(i)])]);
+                    orders.push_back(orders[static_cast<size_t>(conjugate_classes[static_cast<size_t>(i)])]);
                     continue;
                 }
                 uint64_t j = (i * i) % modulus;
@@ -99,8 +123,7 @@ namespace seal
             return orders;
         }
 
-        void babystep_giantstep(uint64_t modulus,
-            vector<uint64_t> &baby_steps, vector<uint64_t> &giant_steps)
+        void babystep_giantstep(uint64_t modulus, vector<uint64_t> &baby_steps, vector<uint64_t> &giant_steps)
         {
             int exponent = get_power_of_two(modulus);
             if (exponent < 0)
@@ -136,9 +159,7 @@ namespace seal
         }
 
         pair<size_t, size_t> decompose_babystep_giantstep(
-            uint64_t modulus, uint64_t input,
-            const vector<uint64_t> &baby_steps,
-            const vector<uint64_t> &giant_steps)
+            uint64_t modulus, uint64_t input, const vector<uint64_t> &baby_steps, const vector<uint64_t> &giant_steps)
         {
             for (size_t i = 0; i < giant_steps.size(); i++)
             {
@@ -155,7 +176,7 @@ namespace seal
             throw logic_error("failed to decompose input");
         }
 
-        bool is_prime(const SmallModulus &modulus, size_t num_rounds)
+        bool is_prime(const Modulus &modulus, size_t num_rounds)
         {
             uint64_t value = modulus.value();
             // First check the simplest cases.
@@ -253,22 +274,23 @@ namespace seal
             return true;
         }
 
-        vector<SmallModulus> get_primes(size_t ntt_size, int bit_size, size_t count)
+        vector<Modulus> get_primes(size_t ntt_size, int bit_size, size_t count)
         {
+#ifdef SEAL_DEBUG
             if (!count)
             {
                 throw invalid_argument("count must be positive");
             }
-            if (!ntt_size)
+            if (get_power_of_two(ntt_size) < 0)
             {
-                throw invalid_argument("ntt_size must be positive");
+                throw invalid_argument("ntt_size must be a power of two");
             }
             if (bit_size >= 63 || bit_size <= 1)
             {
                 throw invalid_argument("bit_size is invalid");
             }
-
-            vector<SmallModulus> destination;
+#endif
+            vector<Modulus> destination;
             uint64_t factor = mul_safe(uint64_t(2), safe_cast<uint64_t>(ntt_size));
 
             // Start with 2^bit_size - 2 * ntt_size + 1
@@ -277,7 +299,7 @@ namespace seal
             {
                 value = sub_safe(value, factor) + 1;
             }
-            catch (const out_of_range &)
+            catch (const logic_error &)
             {
                 throw logic_error("failed to find enough qualifying primes");
             }
@@ -285,7 +307,7 @@ namespace seal
             uint64_t lower_bound = uint64_t(0x1) << (bit_size - 1);
             while (count > 0 && value > lower_bound)
             {
-                SmallModulus new_mod(value);
+                Modulus new_mod(value);
                 if (new_mod.is_prime())
                 {
                     destination.emplace_back(move(new_mod));
@@ -299,5 +321,106 @@ namespace seal
             }
             return destination;
         }
-    }
-}
+
+        bool is_primitive_root(uint64_t root, uint64_t degree, const Modulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (modulus.bit_count() < 2)
+            {
+                throw invalid_argument("modulus");
+            }
+            if (root >= modulus.value())
+            {
+                throw out_of_range("operand");
+            }
+            if (get_power_of_two(degree) < 1)
+            {
+                throw invalid_argument("degree must be a power of two and at least two");
+            }
+#endif
+            if (root == 0)
+            {
+                return false;
+            }
+
+            // We check if root is a degree-th root of unity in integers modulo modulus,
+            // where degree is a power of two. It suffices to check that root^(degree/2)
+            // is -1 modulo modulus.
+            return exponentiate_uint_mod(root, degree >> 1, modulus) == (modulus.value() - 1);
+        }
+
+        bool try_primitive_root(uint64_t degree, const Modulus &modulus, uint64_t &destination)
+        {
+#ifdef SEAL_DEBUG
+            if (modulus.bit_count() < 2)
+            {
+                throw invalid_argument("modulus");
+            }
+            if (get_power_of_two(degree) < 1)
+            {
+                throw invalid_argument("degree must be a power of two and at least two");
+            }
+#endif
+            // We need to divide modulus-1 by degree to get the size of the quotient group
+            uint64_t size_entire_group = modulus.value() - 1;
+
+            // Compute size of quotient group
+            uint64_t size_quotient_group = size_entire_group / degree;
+
+            // size_entire_group must be divisible by degree, or otherwise the primitive root does not
+            // exist in integers modulo modulus
+            if (size_entire_group - size_quotient_group * degree != 0)
+            {
+                return false;
+            }
+
+            // For randomness
+            random_device rd;
+
+            int attempt_counter = 0;
+            int attempt_counter_max = 100;
+            do
+            {
+                attempt_counter++;
+
+                // Set destination to be a random number modulo modulus
+                destination = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
+                destination %= modulus.value();
+
+                // Raise the random number to power the size of the quotient
+                // to get rid of irrelevant part
+                destination = exponentiate_uint_mod(destination, size_quotient_group, modulus);
+            } while (!is_primitive_root(destination, degree, modulus) && (attempt_counter < attempt_counter_max));
+
+            return is_primitive_root(destination, degree, modulus);
+        }
+
+        bool try_minimal_primitive_root(uint64_t degree, const Modulus &modulus, uint64_t &destination)
+        {
+            uint64_t root;
+            if (!try_primitive_root(degree, modulus, root))
+            {
+                return false;
+            }
+            uint64_t generator_sq = multiply_uint_uint_mod(root, root, modulus);
+            uint64_t current_generator = root;
+
+            // destination is going to always contain the smallest generator found
+            for (size_t i = 0; i < degree; i++)
+            {
+                // If our current generator is strictly smaller than destination,
+                // update
+                if (current_generator < root)
+                {
+                    root = current_generator;
+                }
+
+                // Then move on to the next generator
+                current_generator = multiply_uint_uint_mod(current_generator, generator_sq, modulus);
+            }
+
+            destination = root;
+            return true;
+        }
+    } // namespace util
+} // namespace seal

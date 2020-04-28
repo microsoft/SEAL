@@ -1,27 +1,27 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/ckks.h"
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
-#include <vector>
 #include <ctime>
+#include <vector>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(CKKSEncoderTest, CKKSEncoderEncodeVectorDecodeTest)
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            uint32_t slots = 32;
-            parms.set_poly_modulus_degree(2 * slots);
-            parms.set_coeff_modulus(CoeffModulus::Create(2 * slots, { 40, 40, 40, 40 }));
+            size_t slots = 32;
+            parms.set_poly_modulus_degree(slots << 1);
+            parms.set_coeff_modulus(CoeffModulus::Create(slots << 1, { 40, 40, 40, 40 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
             std::vector<std::complex<double>> values(slots);
@@ -46,9 +46,9 @@ namespace SEALTest
             }
         }
         {
-            uint32_t slots = 32;
-            parms.set_poly_modulus_degree(2 * slots);
-            parms.set_coeff_modulus(CoeffModulus::Create(2 * slots, { 60, 60, 60, 60 }));
+            size_t slots = 32;
+            parms.set_poly_modulus_degree(slots << 1);
+            parms.set_coeff_modulus(CoeffModulus::Create(slots << 1, { 60, 60, 60, 60 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
             std::vector<std::complex<double>> values(slots);
@@ -76,9 +76,9 @@ namespace SEALTest
             }
         }
         {
-            uint32_t slots = 64;
-            parms.set_poly_modulus_degree(2 * slots);
-            parms.set_coeff_modulus(CoeffModulus::Create(2 * slots, { 60, 60, 60 }));
+            size_t slots = 64;
+            parms.set_poly_modulus_degree(slots << 1);
+            parms.set_coeff_modulus(CoeffModulus::Create(slots << 1, { 60, 60, 60 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
             std::vector<std::complex<double>> values(slots);
@@ -106,9 +106,9 @@ namespace SEALTest
             }
         }
         {
-            uint32_t slots = 64;
-            parms.set_poly_modulus_degree(2 * slots);
-            parms.set_coeff_modulus(CoeffModulus::Create(2 * slots, { 30, 30, 30, 30, 30 }));
+            size_t slots = 64;
+            parms.set_poly_modulus_degree(slots << 1);
+            parms.set_coeff_modulus(CoeffModulus::Create(slots << 1, { 30, 30, 30, 30, 30 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
             std::vector<std::complex<double>> values(slots);
@@ -136,7 +136,7 @@ namespace SEALTest
             }
         }
         {
-            uint32_t slots = 32;
+            size_t slots = 32;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30, 30 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
@@ -167,12 +167,10 @@ namespace SEALTest
         }
         {
             // Many primes
-            uint32_t slots = 32;
+            size_t slots = 32;
             parms.set_poly_modulus_degree(128);
-            parms.set_coeff_modulus(CoeffModulus::Create(128, {
-                30, 30, 30, 30, 30, 30,
-                30, 30, 30, 30, 30, 30,
-                30, 30, 30, 30, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(
+                128, { 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
             std::vector<std::complex<double>> values(slots);
@@ -200,9 +198,9 @@ namespace SEALTest
             }
         }
         {
-            uint32_t slots = 64;
-            parms.set_poly_modulus_degree(2 * slots);
-            parms.set_coeff_modulus(CoeffModulus::Create(2 * slots, { 40, 40, 40, 40, 40 }));
+            size_t slots = 64;
+            parms.set_poly_modulus_degree(slots << 1);
+            parms.set_coeff_modulus(CoeffModulus::Create(slots << 1, { 40, 40, 40, 40, 40 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
 
             std::vector<std::complex<double>> values(slots);
@@ -252,7 +250,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            uint32_t slots = 16;
+            size_t slots = 16;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40, 40 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
@@ -278,9 +276,9 @@ namespace SEALTest
             }
         }
         {
-            uint32_t slots = 32;
-            parms.set_poly_modulus_degree(slots * 2);
-            parms.set_coeff_modulus(CoeffModulus::Create(slots * 2, { 40, 40, 40, 40 }));
+            size_t slots = 32;
+            parms.set_poly_modulus_degree(slots << 1);
+            parms.set_coeff_modulus(CoeffModulus::Create(slots << 1, { 40, 40, 40, 40 }));
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             CKKSEncoder encoder(context);
 
@@ -343,4 +341,4 @@ namespace SEALTest
             }
         }
     }
-}
+} // namespace sealtest

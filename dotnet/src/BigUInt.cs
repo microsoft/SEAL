@@ -409,10 +409,15 @@ namespace Microsoft.Research.SEAL
         /// supported</exception>
         /// <exception cref="InvalidOperationException">if the size does not fit in
         /// the return type</exception>
-        public long SaveSize(ComprModeType comprMode)
+        public long SaveSize(ComprModeType? comprMode = null)
         {
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new ArgumentException("Unsupported compression mode");
+
+            ComprModeType comprModeValue = comprMode.Value;
             NativeMethods.BigUInt_SaveSize(
-                NativePtr, (byte)comprMode, out long outBytes);
+                NativePtr, (byte)comprModeValue, out long outBytes);
             return outBytes;
         }
 
@@ -426,16 +431,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="comprMode">The desired compression mode</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support writing</exception>
+        /// support writing, or if compression mode is not supported</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         /// <exception cref="InvalidOperationException">if the data to be saved
-        /// is invalid, if compression mode is not supported, or if compression
-        /// failed</exception>
+        /// is invalid, or if compression failed</exception>
         public long Save(Stream stream, ComprModeType? comprMode = null)
         {
             comprMode = comprMode ?? Serialization.ComprModeDefault;
             if (!Serialization.IsSupportedComprMode(comprMode.Value))
-                throw new InvalidOperationException("Unsupported compression mode");
+                throw new ArgumentException("Unsupported compression mode");
 
             ComprModeType comprModeValue = comprMode.Value;
             return Serialization.Save(
@@ -455,9 +459,10 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid,
-        /// if the loaded compression mode is not supported, or if the loaded BigUInt
-        /// is too large for an aliased BigUInt</exception>
+        /// <exception cref="InvalidOperationException">if the data cannot be loaded
+        /// by this version of Microsoft SEAL, if the loaded data is invalid, if the
+        /// loaded compression mode is not supported, or if the loaded BigUInt is too
+        /// large for an aliased BigUInt</exception>
         public long Load(Stream stream)
         {
             return Serialization.Load(
@@ -506,14 +511,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public string ToDecimalString()
         {
-            ulong length = 0;
-
-            // Get string length
-            NativeMethods.BigUInt_ToDecimalString(NativePtr, null, ref length);
-
-            // Now get the string
+            NativeMethods.BigUInt_ToDecimalString(NativePtr, null, length: out ulong length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.BigUInt_ToDecimalString(NativePtr, buffer, ref length);
+            NativeMethods.BigUInt_ToDecimalString(NativePtr, buffer, out length);
             return buffer.ToString();
         }
 
@@ -1315,15 +1315,9 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public override string ToString()
         {
-            ulong length = 0;
-
-            // Get string length
-            NativeMethods.BigUInt_ToString(NativePtr, outstr: null, length: ref length);
-
-            // Now get the string
+            NativeMethods.BigUInt_ToString(NativePtr, null, length: out ulong length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.BigUInt_ToString(NativePtr, buffer, ref length);
-
+            NativeMethods.BigUInt_ToString(NativePtr, buffer, out length);
             return buffer.ToString();
         }
 

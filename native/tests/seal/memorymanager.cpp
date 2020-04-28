@@ -1,24 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/util/pointer.h"
-#include "seal/memorymanager.h"
 #include "seal/intarray.h"
+#include "seal/memorymanager.h"
+#include "seal/util/pointer.h"
 #include "seal/util/uintcore.h"
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(MemoryPoolHandleTest, MemoryPoolHandleConstructAssign)
     {
         MemoryPoolHandle pool;
         ASSERT_FALSE(pool);
         pool = MemoryPoolHandle::Global();
-        ASSERT_TRUE(&static_cast<MemoryPool&>(pool) == global_variables::global_memory_pool.get());
+        ASSERT_TRUE(&static_cast<MemoryPool &>(pool) == global_variables::global_memory_pool.get());
         pool = MemoryPoolHandle::New();
         ASSERT_FALSE(&pool.operator seal::util::MemoryPool &() == global_variables::global_memory_pool.get());
         MemoryPoolHandle pool2 = MemoryPoolHandle::New();
@@ -67,4 +67,4 @@ namespace SEALTest
         }
         ASSERT_EQ(1L, pool.use_count());
     }
-}
+} // namespace sealtest

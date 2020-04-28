@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/uintcore.h"
+#include "seal/util/common.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
-#include "seal/util/common.h"
+#include "seal/util/uintcore.h"
 
 using namespace std;
 
@@ -12,9 +12,8 @@ namespace seal
 {
     namespace util
     {
-        bool try_invert_uint_mod(const uint64_t *operand,
-            const uint64_t *modulus, size_t uint64_count,
-            uint64_t *result, MemoryPool &pool)
+        bool try_invert_uint_mod(
+            const uint64_t *operand, const uint64_t *modulus, size_t uint64_count, uint64_t *result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (!operand)
@@ -91,13 +90,11 @@ namespace seal
                 // NOTE: Numerator is > denominator.
 
                 // Only perform computation up to last non-zero uint64s.
-                size_t division_uint64_count = static_cast<size_t>(
-                    divide_round_up(numerator_bits, bits_per_uint64));
+                size_t division_uint64_count = static_cast<size_t>(divide_round_up(numerator_bits, bits_per_uint64));
 
                 // Shift denominator to bring MSB in alignment with MSB of numerator.
                 int denominator_shift = numerator_bits - denominator_bits;
-                left_shift_uint(denominator, denominator_shift,
-                    division_uint64_count, denominator);
+                left_shift_uint(denominator, denominator_shift, division_uint64_count, denominator);
                 denominator_bits += denominator_shift;
 
                 // Clear quotient.
@@ -111,8 +108,7 @@ namespace seal
 
                     // Even though MSB of numerator and denominator are aligned,
                     // still possible numerator < denominator.
-                    if (sub_uint_uint(numerator, denominator,
-                        division_uint64_count, difference))
+                    if (sub_uint_uint(numerator, denominator, division_uint64_count, difference))
                     {
                         // numerator < denominator and MSBs are aligned, so current
                         // quotient bit is zero and next one is definitely one.
@@ -137,8 +133,7 @@ namespace seal
 
                     // Determine amount to shift numerator to bring MSB in alignment
                     // with denominator.
-                    numerator_bits =
-                        get_significant_bit_count_uint(difference, division_uint64_count);
+                    numerator_bits = get_significant_bit_count_uint(difference, division_uint64_count);
                     int numerator_shift = denominator_bits - numerator_bits;
                     if (numerator_shift > remaining_shifts)
                     {
@@ -150,8 +145,7 @@ namespace seal
                     // Shift and update numerator.
                     if (numerator_bits > 0)
                     {
-                        left_shift_uint(difference, numerator_shift,
-                            division_uint64_count, numerator);
+                        left_shift_uint(difference, numerator_shift, division_uint64_count, numerator);
                         numerator_bits += numerator_shift;
                     }
                     else
@@ -162,14 +156,12 @@ namespace seal
 
                     // Adjust quotient and remaining shifts as a result of
                     // shifting numerator.
-                    left_shift_uint(quotient, numerator_shift,
-                        division_uint64_count, quotient);
+                    left_shift_uint(quotient, numerator_shift, division_uint64_count, quotient);
                     remaining_shifts -= numerator_shift;
                 }
 
                 // Correct for shifting of denominator.
-                right_shift_uint(denominator, denominator_shift,
-                    division_uint64_count, denominator);
+                right_shift_uint(denominator, denominator_shift, division_uint64_count, denominator);
                 denominator_bits -= denominator_shift;
 
                 // We are done if remainder (which is stored in numerator) is zero.
@@ -179,14 +171,12 @@ namespace seal
                 }
 
                 // Correct for shifting of denominator.
-                right_shift_uint(numerator, denominator_shift,
-                    division_uint64_count, numerator);
+                right_shift_uint(numerator, denominator_shift, division_uint64_count, numerator);
                 numerator_bits -= denominator_shift;
 
                 // Integrate quotient with invert coefficients.
                 // Calculate: invert_prior + -quotient * invert_curr
-                multiply_truncate_uint_uint(quotient, invert_curr,
-                    uint64_count, invert_next);
+                multiply_truncate_uint_uint(quotient, invert_curr, uint64_count, invert_next);
                 invert_next_positive = !invert_curr_positive;
                 if (invert_prior_positive == invert_next_positive)
                 {
@@ -199,8 +189,7 @@ namespace seal
                 {
                     // If both sides of add have opposite sign, then subtract
                     // and check for overflow.
-                    uint64_t borrow = sub_uint_uint(invert_prior, invert_next,
-                        uint64_count, invert_next);
+                    uint64_t borrow = sub_uint_uint(invert_prior, invert_next, uint64_count, invert_next);
                     if (borrow == 0)
                     {
                         // No borrow means |invert_prior| >= |invert_next|,
@@ -244,5 +233,5 @@ namespace seal
             set_uint_uint(invert_curr, uint64_count, result);
             return true;
         }
-    }
-}
+    } // namespace util
+} // namespace seal

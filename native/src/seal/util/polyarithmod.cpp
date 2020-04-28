@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/uintcore.h"
-#include "seal/util/uintarith.h"
-#include "seal/util/uintarithmod.h"
-#include "seal/util/polycore.h"
 #include "seal/util/polyarith.h"
 #include "seal/util/polyarithmod.h"
+#include "seal/util/polycore.h"
+#include "seal/util/uintarith.h"
+#include "seal/util/uintarithmod.h"
+#include "seal/util/uintcore.h"
 
 using namespace std;
 
@@ -14,9 +14,9 @@ namespace seal
 {
     namespace util
     {
-        void poly_infty_norm_coeffmod(const uint64_t *poly, size_t coeff_count,
-            size_t coeff_uint64_count, const uint64_t *modulus, uint64_t *result,
-            MemoryPool &pool)
+        void poly_infty_norm_coeffmod(
+            const uint64_t *poly, size_t coeff_count, size_t coeff_uint64_count, const uint64_t *modulus,
+            uint64_t *result, MemoryPool &pool)
         {
             // Construct negative threshold (first negative modulus value) to compute
             // absolute values of coeffs.
@@ -32,8 +32,7 @@ namespace seal
             auto coeff_abs_value(allocate_uint(coeff_uint64_count, pool));
             for (size_t i = 0; i < coeff_count; i++, poly += coeff_uint64_count)
             {
-                if (is_greater_than_or_equal_uint_uint(
-                    poly, modulus_neg_threshold.get(), coeff_uint64_count))
+                if (is_greater_than_or_equal_uint_uint(poly, modulus_neg_threshold.get(), coeff_uint64_count))
                 {
                     sub_uint_uint(modulus, poly, coeff_uint64_count, coeff_abs_value.get());
                 }
@@ -41,12 +40,11 @@ namespace seal
                 {
                     set_uint_uint(poly, coeff_uint64_count, coeff_abs_value.get());
                 }
-                if (is_greater_than_uint_uint(coeff_abs_value.get(), result,
-                    coeff_uint64_count))
+                if (is_greater_than_uint_uint(coeff_abs_value.get(), result, coeff_uint64_count))
                 {
                     set_uint_uint(coeff_abs_value.get(), coeff_uint64_count, result);
                 }
             }
         }
-    }
-}
+    } // namespace util
+} // namespace seal

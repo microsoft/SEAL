@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/common.h"
-#include "seal/util/uintcore.h"
-#include "seal/util/polycore.h"
 #include "seal/util/mempool.h"
+#include "seal/util/polycore.h"
+#include "seal/util/uintcore.h"
 #include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(UInt64ToString, NibbleToUpperHexTest)
         {
             ASSERT_EQ('0', nibble_to_upper_hex(0));
@@ -135,7 +135,6 @@ namespace SEALTest
             ASSERT_EQ(correct, poly_to_hex_string(number, 4, 1));
             ASSERT_EQ(correct, poly_to_hex_string(number, 2, 2));
             ASSERT_EQ(correct, poly_to_hex_string(number, 1, 4));
-            ASSERT_EQ(correct, poly_to_hex_string(nullptr, 0, 0));
 
             number[0] = 1;
             correct = "1";
@@ -177,5 +176,5 @@ namespace SEALTest
             correct = "BABABABABABABABAx^3 + F0FF0F0FF0F0FF0Fx^2 + F0F0F0F0F0F0F0F0x^1 + F00000000000000F";
             ASSERT_EQ(correct, poly_to_hex_string(number, 4, 1));
         }
-   }
-}
+    } // namespace util
+} // namespace sealtest

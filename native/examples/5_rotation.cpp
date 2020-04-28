@@ -29,7 +29,7 @@ void example_rotation_bfv()
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
-    RelinKeys relin_keys = keygen.relin_keys();
+    RelinKeys relin_keys = keygen.relin_keys_local();
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
@@ -62,15 +62,15 @@ void example_rotation_bfv()
     batch_encoder.encode(pod_matrix, plain_matrix);
     Ciphertext encrypted_matrix;
     encryptor.encrypt(plain_matrix, encrypted_matrix);
-    cout << "    + Noise budget in fresh encryption: "
-        << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << "    + Noise budget in fresh encryption: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits"
+         << endl;
     cout << endl;
 
     /*
     Rotations require yet another type of special key called `Galois keys'. These
     are easily obtained from the KeyGenerator.
     */
-    GaloisKeys gal_keys = keygen.galois_keys();
+    GaloisKeys gal_keys = keygen.galois_keys_local();
 
     /*
     Now rotate both matrix rows 3 steps to the left, decrypt, decode, and print.
@@ -79,8 +79,8 @@ void example_rotation_bfv()
     cout << "Rotate rows 3 steps left." << endl;
     evaluator.rotate_rows_inplace(encrypted_matrix, 3, gal_keys);
     Plaintext plain_result;
-    cout << "    + Noise budget after rotation: "
-        << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << "    + Noise budget after rotation: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits"
+         << endl;
     cout << "    + Decrypt and decode ...... Correct." << endl;
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
@@ -92,8 +92,8 @@ void example_rotation_bfv()
     print_line(__LINE__);
     cout << "Rotate columns." << endl;
     evaluator.rotate_columns_inplace(encrypted_matrix, gal_keys);
-    cout << "    + Noise budget after rotation: "
-        << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << "    + Noise budget after rotation: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits"
+         << endl;
     cout << "    + Decrypt and decode ...... Correct." << endl;
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
@@ -105,8 +105,8 @@ void example_rotation_bfv()
     print_line(__LINE__);
     cout << "Rotate rows 4 steps right." << endl;
     evaluator.rotate_rows_inplace(encrypted_matrix, -4, gal_keys);
-    cout << "    + Noise budget after rotation: "
-        << decryptor.invariant_noise_budget(encrypted_matrix) << " bits" << endl;
+    cout << "    + Noise budget after rotation: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits"
+         << endl;
     cout << "    + Decrypt and decode ...... Correct." << endl;
     decryptor.decrypt(encrypted_matrix, plain_result);
     batch_encoder.decode(plain_result, pod_matrix);
@@ -132,8 +132,7 @@ void example_rotation_ckks()
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Create(
-        poly_modulus_degree, { 40, 40, 40, 40, 40 }));
+    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 40, 40, 40, 40, 40 }));
 
     auto context = SEALContext::Create(parms);
     print_parameters(context);
@@ -142,8 +141,8 @@ void example_rotation_ckks()
     KeyGenerator keygen(context);
     PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
-    RelinKeys relin_keys = keygen.relin_keys();
-    GaloisKeys gal_keys = keygen.galois_keys();
+    RelinKeys relin_keys = keygen.relin_keys_local();
+    GaloisKeys gal_keys = keygen.galois_keys_local();
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);

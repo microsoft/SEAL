@@ -53,12 +53,10 @@ namespace SEALNetTest
             EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
                 PolyModulusDegree = 128,
-                PlainModulus = new SmallModulus(1 << 6),
+                PlainModulus = new Modulus(1 << 6),
                 CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
             };
-            SEALContext context = new SEALContext(parms,
-                expandModChain: true,
-                secLevel: SecLevelType.None);
+            SEALContext context = new SEALContext(parms, expandModChain: true, secLevel: SecLevelType.None);
 
             SEALContext.ContextData data = context.KeyContextData;
             Assert.IsNotNull(data);
@@ -100,6 +98,16 @@ namespace SEALNetTest
             Assert.AreEqual(0ul, data3.ChainIndex);
             Assert.AreEqual(1ul, data3.PrevContextData.ChainIndex);
             Assert.IsNull(data3.NextContextData);
+
+            parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 127,
+                PlainModulus = new Modulus(1 << 6),
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
+            };
+            context = new SEALContext(parms, expandModChain: true, secLevel: SecLevelType.None);
+            Assert.AreEqual(context.ParameterErrorName(), "invalid_poly_modulus_degree_non_power_of_two");
+            Assert.AreEqual(context.ParameterErrorMessage(), "poly_modulus_degree is not a power of two");
         }
 
         [TestMethod]
@@ -150,7 +158,7 @@ namespace SEALNetTest
             {
                 PolyModulusDegree = 4096,
                 CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree: 4096),
-                PlainModulus = new SmallModulus(1 << 20)
+                PlainModulus = new Modulus(1 << 20)
             };
 
             SEALContext context1 = new SEALContext(parms,

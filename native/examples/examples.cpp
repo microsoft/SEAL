@@ -8,9 +8,7 @@ using namespace seal;
 
 int main()
 {
-#ifdef SEAL_VERSION
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
-#endif
     while (true)
     {
         cout << "+---------------------------------------------------------+" << endl;
@@ -24,7 +22,8 @@ int main()
         cout << "| 3. Levels                  | 3_levels.cpp               |" << endl;
         cout << "| 4. CKKS Basics             | 4_ckks_basics.cpp          |" << endl;
         cout << "| 5. Rotation                | 5_rotation.cpp             |" << endl;
-        cout << "| 6. Performance Test        | 6_performance.cpp          |" << endl;
+        cout << "| 6. Serialization           | 6_serialization.cpp        |" << endl;
+        cout << "| 7. Performance Test        | 7_performance.cpp          |" << endl;
         cout << "+----------------------------+----------------------------+" << endl;
 
         /*
@@ -41,12 +40,12 @@ int main()
         bool invalid = true;
         do
         {
-            cout << endl << "> Run example (1 ~ 6) or exit (0): ";
+            cout << endl << "> Run example (1 ~ 7) or exit (0): ";
             if (!(cin >> selection))
             {
                 invalid = false;
             }
-            else if (selection < 0 || selection > 6)
+            else if (selection < 0 || selection > 7)
             {
                 invalid = false;
             }
@@ -56,7 +55,7 @@ int main()
             }
             if (!invalid)
             {
-                cout << "  [Beep~~] Invalid option: type 0 ~ 6" << endl;
+                cout << "  [Beep~~] Invalid option: type 0 ~ 7" << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
@@ -85,6 +84,10 @@ int main()
             break;
 
         case 6:
+            example_serialization();
+            break;
+
+        case 7:
             example_performance_test();
             break;
 

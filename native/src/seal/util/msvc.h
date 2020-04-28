@@ -48,13 +48,15 @@
 
 #ifdef SEAL_USE__UMUL128
 #pragma intrinsic(_umul128)
-#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) {                       \
-    _umul128(operand1, operand2, hw64);                                             \
-}
+#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) \
+    {                                                       \
+        _umul128(operand1, operand2, hw64);                 \
+    }
 
-#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128) {                       \
-    result128[0] = _umul128(operand1, operand2, result128 + 1);                     \
-}
+#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)         \
+    {                                                               \
+        result128[0] = _umul128(operand1, operand2, result128 + 1); \
+    }
 #endif
 
 #ifdef SEAL_USE__BITSCANREVERSE64
@@ -64,14 +66,12 @@
 
 #ifdef SEAL_USE__ADDCARRY_U64
 #pragma intrinsic(_addcarry_u64)
-#define SEAL_ADD_CARRY_UINT64(operand1, operand2, carry, result) _addcarry_u64(     \
-    carry, operand1, operand2, result)
+#define SEAL_ADD_CARRY_UINT64(operand1, operand2, carry, result) _addcarry_u64(carry, operand1, operand2, result)
 #endif
 
 #ifdef SEAL_USE__SUBBORROW_U64
 #pragma intrinsic(_subborrow_u64)
-#define SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result) _subborrow_u64(  \
-    borrow, operand1, operand2, result)
+#define SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result) _subborrow_u64(borrow, operand1, operand2, result)
 #endif
 
 #endif

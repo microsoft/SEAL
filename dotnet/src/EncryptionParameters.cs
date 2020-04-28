@@ -170,7 +170,7 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// When setting:
         ///     Sets the coefficient modulus parameter. The coefficient modulus consists of a list
-        ///     of distinct prime numbers, and is represented by a list of <see cref="SmallModulus" />
+        ///     of distinct prime numbers, and is represented by a list of <see cref="Modulus" />
         ///     objects. The coefficient modulus directly affects the size of ciphertext elements,
         ///     the amount of computation that the scheme can perform (bigger is better), and the
         ///     security level (bigger is worse). In Microsoft SEAL each of the prime numbers in
@@ -179,7 +179,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <exception cref="ArgumentNullException">if the value being set is null</exception>
         /// <exception cref="ArgumentException">if the value being set is invalid</exception>
-        public IEnumerable<SmallModulus> CoeffModulus
+        public IEnumerable<Modulus> CoeffModulus
         {
             get
             {
@@ -189,10 +189,10 @@ namespace Microsoft.Research.SEAL
                 IntPtr[] coeffArray = new IntPtr[length];
                 NativeMethods.EncParams_GetCoeffModulus(NativePtr, ref length, coeffArray);
 
-                List<SmallModulus> result = new List<SmallModulus>(checked((int)length));
+                List<Modulus> result = new List<Modulus>(checked((int)length));
                 foreach(IntPtr sm in coeffArray)
                 {
-                    result.Add(new SmallModulus(sm));
+                    result.Add(new Modulus(sm));
                 }
 
                 return result;
@@ -215,7 +215,7 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// When setting:
         ///     Sets the plaintext modulus parameter. The plaintext modulus is an integer modulus
-        ///     represented by the <see cref="SmallModulus" /> class. The plaintext modulus determines
+        ///     represented by the <see cref="Modulus" /> class. The plaintext modulus determines
         ///     the largest coefficient that plaintext polynomials can represent. It also affects the
         ///     amount of computation that the scheme can perform (bigger is worse). In Microsoft SEAL
         ///     the plaintext modulus can be at most 60 bits long, but can otherwise be any integer.
@@ -224,12 +224,12 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <exception cref="ArgumentNullException">if the value being set is null</exception>
         /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
-        public SmallModulus PlainModulus
+        public Modulus PlainModulus
         {
             get
             {
                 NativeMethods.EncParams_GetPlainModulus(NativePtr, out IntPtr ptr);
-                SmallModulus sm = new SmallModulus(ptr, owned: false);
+                Modulus sm = new Modulus(ptr, owned: false);
                 return sm;
             }
             set
@@ -243,8 +243,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <remarks>
         /// Sets the plaintext modulus parameter. The plaintext modulus is an integer modulus
-        /// represented by the <see cref="SmallModulus" /> class. This method instead takes
-        /// a ulong and automatically creates the SmallModulus object. The plaintext modulus
+        /// represented by the <see cref="Modulus" /> class. This method instead takes
+        /// a ulong and automatically creates the Modulus object. The plaintext modulus
         /// determines the largest coefficient that plaintext polynomials can represent. It also
         /// affects the amount of computation that the scheme can perform (bigger is worse). In
         /// Microsoft SEAL the plaintext modulus can be at most 60 bits long, but can otherwise
@@ -279,10 +279,15 @@ namespace Microsoft.Research.SEAL
         /// supported</exception>
         /// <exception cref="InvalidOperationException">if the size does not fit in
         /// the return type</exception>
-        public long SaveSize(ComprModeType comprMode)
+        public long SaveSize(ComprModeType? comprMode = null)
         {
+            comprMode = comprMode ?? Serialization.ComprModeDefault;
+            if (!Serialization.IsSupportedComprMode(comprMode.Value))
+                throw new ArgumentException("Unsupported compression mode");
+
+            ComprModeType comprModeValue = comprMode.Value;
             NativeMethods.EncParams_SaveSize(
-                NativePtr, (byte)comprMode, out long outBytes);
+                NativePtr, (byte)comprModeValue, out long outBytes);
             return outBytes;
         }
 
@@ -295,16 +300,15 @@ namespace Microsoft.Research.SEAL
         /// <param name="comprMode">The desired compression mode</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
-        /// support writing</exception>
+        /// support writing, or if compression mode is not supported</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
         /// <exception cref="InvalidOperationException">if the data to be saved
-        /// is invalid, if compression mode is not supported, or if compression
-        /// failed</exception>
+        /// is invalid, or if compression failed</exception>
         public long Save(Stream stream, ComprModeType? comprMode = null)
         {
             comprMode = comprMode ?? Serialization.ComprModeDefault;
             if (!Serialization.IsSupportedComprMode(comprMode.Value))
-                throw new InvalidOperationException("Unsupported compression mode");
+                throw new ArgumentException("Unsupported compression mode");
 
             ComprModeType comprModeValue = comprMode.Value;
             return Serialization.Save(
@@ -325,8 +329,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
-        /// <exception cref="InvalidOperationException">if the loaded data is invalid
-        /// or if the loaded compression mode is not supported</exception>
+        /// <exception cref="InvalidOperationException">if the data cannot be loaded
+        /// by this version of Microsoft SEAL, if the loaded data is invalid, or if the
+        /// loaded compression mode is not supported</exception>
         public long Load(Stream stream)
         {
             return Serialization.Load(

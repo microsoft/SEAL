@@ -1,30 +1,30 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
-#include "seal/context.h"
-#include "seal/encryptor.h"
-#include "seal/decryptor.h"
-#include "seal/evaluator.h"
-#include "seal/keygenerator.h"
 #include "seal/batchencoder.h"
 #include "seal/ckks.h"
+#include "seal/context.h"
+#include "seal/decryptor.h"
+#include "seal/encryptor.h"
+#include "seal/evaluator.h"
 #include "seal/intencoder.h"
+#include "seal/keygenerator.h"
 #include "seal/modulus.h"
-#include <cstdint>
 #include <cstddef>
-#include <string>
+#include <cstdint>
 #include <ctime>
+#include <string>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(EvaluatorTest, BFVEncryptNegateDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -78,7 +78,7 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptAddDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -158,7 +158,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //adding two zero vectors
+            // adding two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
@@ -182,7 +182,7 @@ namespace SEALTest
             encryptor.encrypt(plain, encrypted);
             evaluator.add_inplace(encrypted, encrypted);
 
-            //check correctness of encryption
+            // check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -196,7 +196,7 @@ namespace SEALTest
             }
         }
         {
-            //adding two random vectors 100 times
+            // adding two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -241,7 +241,7 @@ namespace SEALTest
                 encryptor.encrypt(plain2, encrypted2);
                 evaluator.add_inplace(encrypted1, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -254,10 +254,9 @@ namespace SEALTest
                     ASSERT_TRUE(tmp < 0.5);
                 }
             }
-
         }
         {
-            //adding two random vectors 100 times
+            // adding two random vectors 100 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -302,7 +301,7 @@ namespace SEALTest
                 encryptor.encrypt(plain2, encrypted2);
                 evaluator.add_inplace(encrypted1, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -315,14 +314,13 @@ namespace SEALTest
                     ASSERT_TRUE(tmp < 0.5);
                 }
             }
-
         }
     }
     TEST(EvaluatorTest, CKKSEncryptAddPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //adding two zero vectors
+            // adding two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
@@ -347,7 +345,7 @@ namespace SEALTest
             encryptor.encrypt(plain, encrypted);
             evaluator.add_plain_inplace(encrypted, plain);
 
-            //check correctness of encryption
+            // check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -361,7 +359,7 @@ namespace SEALTest
             }
         }
         {
-            //adding two random vectors 50 times
+            // adding two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -404,7 +402,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.add_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -417,10 +415,9 @@ namespace SEALTest
                     ASSERT_TRUE(tmp < 0.5);
                 }
             }
-
         }
         {
-            //adding two random vectors 50 times
+            // adding two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -450,7 +447,7 @@ namespace SEALTest
 
             for (int expCount = 0; expCount < 50; expCount++)
             {
-                input2 = static_cast<double>(rand() % (data_bound*data_bound))/data_bound;
+                input2 = static_cast<double>(rand() % (data_bound * data_bound)) / data_bound;
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -463,7 +460,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.add_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -476,10 +473,9 @@ namespace SEALTest
                     ASSERT_TRUE(tmp < 0.5);
                 }
             }
-
         }
         {
-            //adding two random vectors 50 times
+            // adding two random vectors 50 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -509,7 +505,7 @@ namespace SEALTest
 
             for (int expCount = 0; expCount < 50; expCount++)
             {
-                input2 = static_cast<double>(rand() % (data_bound*data_bound)) / data_bound;
+                input2 = static_cast<double>(rand() % (data_bound * data_bound)) / data_bound;
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -522,7 +518,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.add_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -535,7 +531,6 @@ namespace SEALTest
                     ASSERT_TRUE(tmp < 0.5);
                 }
             }
-
         }
     }
 
@@ -543,7 +538,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //adding two zero vectors
+            // adding two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
@@ -568,7 +563,7 @@ namespace SEALTest
             encryptor.encrypt(plain, encrypted);
             evaluator.add_plain_inplace(encrypted, plain);
 
-            //check correctness of encryption
+            // check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -582,7 +577,7 @@ namespace SEALTest
             }
         }
         {
-            //adding two random vectors 100 times
+            // adding two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -625,7 +620,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.sub_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -638,10 +633,9 @@ namespace SEALTest
                     ASSERT_TRUE(tmp < 0.5);
                 }
             }
-
         }
         {
-            //adding two random vectors 100 times
+            // adding two random vectors 100 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -684,7 +678,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.sub_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -697,14 +691,13 @@ namespace SEALTest
                     ASSERT_TRUE(tmp < 0.5);
                 }
             }
-
         }
     }
 
     TEST(EvaluatorTest, BFVEncryptSubDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -764,7 +757,7 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptAddPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -819,7 +812,7 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptSubPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -874,7 +867,7 @@ namespace SEALTest
     {
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 6);
+            Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -940,7 +933,7 @@ namespace SEALTest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus((1ULL << 20) - 1);
+            Modulus plain_modulus((1ULL << 20) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 60, 60 }));
@@ -970,7 +963,7 @@ namespace SEALTest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus((1ULL << 40) - 1);
+            Modulus plain_modulus((1ULL << 40) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 60, 60 }));
@@ -1004,7 +997,7 @@ namespace SEALTest
     {
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 6);
+            Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -1070,7 +1063,7 @@ namespace SEALTest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus((1ULL << 60) - 1);
+            Modulus plain_modulus((1ULL << 60) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60, 60 }));
@@ -1136,7 +1129,7 @@ namespace SEALTest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 6);
+            Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -1202,7 +1195,7 @@ namespace SEALTest
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
-            SmallModulus plain_modulus(1 << 8);
+            Modulus plain_modulus(1 << 8);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -1230,14 +1223,14 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVRelinearize)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40 }));
 
         auto context = SEALContext::Create(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
-        RelinKeys rlk = keygen.relin_keys();
+        RelinKeys rlk = keygen.relin_keys_local();
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
@@ -1303,7 +1296,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //multiplying two zero vectors
+            // multiplying two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30 }));
@@ -1328,7 +1321,7 @@ namespace SEALTest
             encryptor.encrypt(plain, encrypted);
             evaluator.multiply_inplace(encrypted, encrypted);
 
-            //check correctness of encryption
+            // check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -1340,7 +1333,7 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors
+            // multiplying two random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -1383,7 +1376,7 @@ namespace SEALTest
                 encryptor.encrypt(plain2, encrypted2);
                 evaluator.multiply_inplace(encrypted1, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -1398,7 +1391,7 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors
+            // multiplying two random vectors
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -1441,7 +1434,7 @@ namespace SEALTest
                 encryptor.encrypt(plain2, encrypted2);
                 evaluator.multiply_inplace(encrypted1, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -1461,7 +1454,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //multiplying two random vectors by an integer
+            // multiplying two random vectors by an integer
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 40 }));
@@ -1503,7 +1496,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.multiply_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -1518,7 +1511,7 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors by an integer
+            // multiplying two random vectors by an integer
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
@@ -1560,7 +1553,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.multiply_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -1575,7 +1568,7 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors by a double
+            // multiplying two random vectors by a double
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -1603,8 +1596,7 @@ namespace SEALTest
 
             for (int iExp = 0; iExp < 50; iExp++)
             {
-                input2 = static_cast<double>(rand() % (data_bound*data_bound))
-                    /static_cast<double>(data_bound);
+                input2 = static_cast<double>(rand() % (data_bound * data_bound)) / static_cast<double>(data_bound);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -1618,7 +1610,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.multiply_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -1633,7 +1625,7 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors by a double
+            // multiplying two random vectors by a double
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -1661,8 +1653,7 @@ namespace SEALTest
 
             for (int iExp = 0; iExp < 50; iExp++)
             {
-                input2 = static_cast<double>(rand() % (data_bound*data_bound))
-                    / static_cast<double>(data_bound);
+                input2 = static_cast<double>(rand() % (data_bound * data_bound)) / static_cast<double>(data_bound);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -1676,7 +1667,7 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.multiply_plain_inplace(encrypted1, plain2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -1696,7 +1687,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //multiplying two random vectors 50 times
+            // multiplying two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -1708,7 +1699,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1740,9 +1731,9 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
@@ -1759,7 +1750,7 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors 50 times
+            // multiplying two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 30, 30, 30 }));
@@ -1771,7 +1762,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1803,9 +1794,9 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
@@ -1822,7 +1813,7 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors 50 times
+            // multiplying two random vectors 50 times
             size_t slot_size = 2;
             parms.set_poly_modulus_degree(8);
             parms.set_coeff_modulus(CoeffModulus::Create(8, { 60, 30, 30, 30 }));
@@ -1834,7 +1825,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1866,13 +1857,13 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
-                //evaluator.relinearize_inplace(encrypted1, rlk);
+                // evaluator.relinearize_inplace(encrypted1, rlk);
 
                 decryptor.decrypt(encrypted1, plainRes);
                 encoder.decode(plainRes, output);
@@ -1890,7 +1881,7 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //squaring two random vectors 100 times
+            // squaring two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -1902,7 +1893,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -1928,10 +1919,10 @@ namespace SEALTest
 
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
-                //evaluator.square_inplace(encrypted);
+                // evaluator.square_inplace(encrypted);
                 evaluator.multiply_inplace(encrypted, encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
 
@@ -1946,7 +1937,7 @@ namespace SEALTest
             }
         }
         {
-            //squaring two random vectors 100 times
+            // squaring two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 30, 30, 30 }));
@@ -1958,7 +1949,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -1984,10 +1975,10 @@ namespace SEALTest
 
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
-                //evaluator.square_inplace(encrypted);
+                // evaluator.square_inplace(encrypted);
                 evaluator.multiply_inplace(encrypted, encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
 
@@ -2002,7 +1993,7 @@ namespace SEALTest
             }
         }
         {
-            //squaring two random vectors 100 times
+            // squaring two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 30, 30, 30 }));
@@ -2014,7 +2005,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2040,10 +2031,10 @@ namespace SEALTest
 
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
-                //evaluator.square_inplace(encrypted);
+                // evaluator.square_inplace(encrypted);
                 evaluator.multiply_inplace(encrypted, encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
 
@@ -2063,22 +2054,20 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //multiplying two random vectors 100 times
+            // multiplying two random vectors 100 times
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2,
-                { 30, 30, 30, 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2110,16 +2099,16 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -2133,21 +2122,20 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors 100 times
+            // multiplying two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2179,16 +2167,16 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -2202,7 +2190,7 @@ namespace SEALTest
             }
         }
         {
-            //multiplying two random vectors 100 times
+            // multiplying two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 60, 60, 60, 60, 60 }));
@@ -2214,7 +2202,7 @@ namespace SEALTest
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2246,9 +2234,9 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
@@ -2257,11 +2245,10 @@ namespace SEALTest
                 evaluator.relinearize_inplace(encrypted1, rlk);
 
                 // Scale down by two levels
-                auto target_parms = context->first_context_data()
-                    ->next_context_data()->next_context_data()->parms_id();
+                auto target_parms = context->first_context_data()->next_context_data()->next_context_data()->parms_id();
                 evaluator.rescale_to_inplace(encrypted1, target_parms);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted1.parms_id() == target_parms);
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -2294,9 +2281,9 @@ namespace SEALTest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
@@ -2304,14 +2291,13 @@ namespace SEALTest
                 evaluator.multiply_inplace(encrypted1, encrypted2);
 
                 // Scale down by two levels
-                auto target_parms = context->first_context_data()
-                    ->next_context_data()->next_context_data()->parms_id();
+                auto target_parms = context->first_context_data()->next_context_data()->next_context_data()->parms_id();
                 evaluator.rescale_to_inplace(encrypted1, target_parms);
 
                 // Relinearize now
                 evaluator.relinearize_inplace(encrypted1, rlk);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted1.parms_id() == target_parms);
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -2330,21 +2316,20 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //squaring two random vectors 100 times
+            // squaring two random vectors 100 times
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 50, 50, 50 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2369,14 +2354,14 @@ namespace SEALTest
 
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 evaluator.square_inplace(encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
                 evaluator.rescale_to_next_inplace(encrypted);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2390,21 +2375,20 @@ namespace SEALTest
             }
         }
         {
-            //squaring two random vectors 100 times
+            // squaring two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 50, 50, 50 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2429,14 +2413,14 @@ namespace SEALTest
 
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 evaluator.square_inplace(encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
                 evaluator.rescale_to_next_inplace(encrypted);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2454,15 +2438,13 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //modulo switching without rescaling for random vectors
+            // modulo switching without rescaling for random vectors
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Create(
-                slot_size * 2, { 60, 60, 60, 60, 60 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60, 60, 60 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -2492,12 +2474,12 @@ namespace SEALTest
 
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2511,15 +2493,13 @@ namespace SEALTest
             }
         }
         {
-            //modulo switching without rescaling for random vectors
+            // modulo switching without rescaling for random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
-            parms.set_coeff_modulus(CoeffModulus::Create(
-                slot_size * 2, { 40, 40, 40, 40, 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 40, 40, 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -2549,12 +2529,12 @@ namespace SEALTest
 
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2568,14 +2548,13 @@ namespace SEALTest
             }
         }
         {
-            //modulo switching without rescaling for random vectors
+            // modulo switching without rescaling for random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40, 40 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -2605,12 +2584,12 @@ namespace SEALTest
 
                 encryptor.encrypt(plain, encrypted);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                //check correctness of modulo switching
+                // check correctness of modulo switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2628,21 +2607,20 @@ namespace SEALTest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            //multiplication and addition without rescaling for random vectors
+            // multiplication and addition without rescaling for random vectors
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 50, 50, 50 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2678,30 +2656,30 @@ namespace SEALTest
                 encryptor.encrypt(plain2, encrypted2);
                 encryptor.encrypt(plain3, encrypted3);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted3.parms_id() == context->first_parms_id());
 
-                //enc1*enc2
+                // enc1*enc2
                 evaluator.multiply_inplace(encrypted1, encrypted2);
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                //check correctness of modulo switching with rescaling
+                // check correctness of modulo switching with rescaling
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
-                //move enc3 to the level of enc1 * enc2
+                // move enc3 to the level of enc1 * enc2
                 evaluator.rescale_to_inplace(encrypted3, next_parms_id);
 
-                //enc1*enc2 + enc3
+                // enc1*enc2 + enc3
                 evaluator.add_inplace(encrypted1, encrypted3);
 
-                //decryption
+                // decryption
                 decryptor.decrypt(encrypted1, plainRes);
-                //decoding
+                // decoding
                 encoder.decode(plainRes, output);
 
                 for (size_t i = 0; i < slot_size; i++)
@@ -2712,21 +2690,20 @@ namespace SEALTest
             }
         }
         {
-            //multiplication and addition without rescaling for random vectors
+            // multiplication and addition without rescaling for random vectors
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 50, 50, 50 }));
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
-            auto next_parms_id = context->first_context_data()->
-                next_context_data()->parms_id();
+            auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
             Encryptor encryptor(context, keygen.public_key());
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys();
+            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2762,30 +2739,30 @@ namespace SEALTest
                 encryptor.encrypt(plain2, encrypted2);
                 encryptor.encrypt(plain3, encrypted3);
 
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context->first_parms_id());
-                //check correctness of encryption
+                // check correctness of encryption
                 ASSERT_TRUE(encrypted3.parms_id() == context->first_parms_id());
 
-                //enc1*enc2
+                // enc1*enc2
                 evaluator.multiply_inplace(encrypted1, encrypted2);
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                //check correctness of modulo switching with rescaling
+                // check correctness of modulo switching with rescaling
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
-                //move enc3 to the level of enc1 * enc2
+                // move enc3 to the level of enc1 * enc2
                 evaluator.rescale_to_inplace(encrypted3, next_parms_id);
 
-                //enc1*enc2 + enc3
+                // enc1*enc2 + enc3
                 evaluator.add_inplace(encrypted1, encrypted3);
 
-                //decryption
+                // decryption
                 decryptor.decrypt(encrypted1, plainRes);
-                //decoding
+                // decoding
                 encoder.decode(plainRes, output);
 
                 for (size_t i = 0; i < slot_size; i++)
@@ -2807,7 +2784,7 @@ namespace SEALTest
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys();
+            GaloisKeys glk = keygen.galois_keys_local();
 
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
@@ -2818,12 +2795,8 @@ namespace SEALTest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<std::complex<double>> input{
-                std::complex<double>(1, 1),
-                std::complex<double>(2, 2),
-                std::complex<double>(3, 3),
-                std::complex<double>(4, 4)
-            };
+            vector<std::complex<double>> input{ std::complex<double>(1, 1), std::complex<double>(2, 2),
+                                                std::complex<double>(3, 3), std::complex<double>(4, 4) };
             input.resize(slot_size);
 
             vector<std::complex<double>> output(slot_size, 0);
@@ -2882,7 +2855,7 @@ namespace SEALTest
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys();
+            GaloisKeys glk = keygen.galois_keys_local();
 
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
@@ -2893,12 +2866,8 @@ namespace SEALTest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<std::complex<double>> input{
-                std::complex<double>(1, 1),
-                std::complex<double>(2, 2),
-                std::complex<double>(3, 3),
-                std::complex<double>(4, 4)
-            };
+            vector<std::complex<double>> input{ std::complex<double>(1, 1), std::complex<double>(2, 2),
+                                                std::complex<double>(3, 3), std::complex<double>(4, 4) };
             input.resize(slot_size);
 
             vector<std::complex<double>> output(slot_size, 0);
@@ -2963,7 +2932,7 @@ namespace SEALTest
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys();
+            GaloisKeys glk = keygen.galois_keys_local();
 
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
@@ -2974,12 +2943,8 @@ namespace SEALTest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<std::complex<double>> input{
-                std::complex<double>(1, 1),
-                std::complex<double>(2, 2),
-                std::complex<double>(3, 3),
-                std::complex<double>(4, 4)
-            };
+            vector<std::complex<double>> input{ std::complex<double>(1, 1), std::complex<double>(2, 2),
+                                                std::complex<double>(3, 3), std::complex<double>(4, 4) };
             input.resize(slot_size);
 
             vector<std::complex<double>> output(slot_size, 0);
@@ -3042,7 +3007,7 @@ namespace SEALTest
 
             auto context = SEALContext::Create(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys();
+            GaloisKeys glk = keygen.galois_keys_local();
 
             Encryptor encryptor(context, keygen.public_key());
             Evaluator evaluator(context);
@@ -3053,12 +3018,8 @@ namespace SEALTest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<std::complex<double>> input{
-                std::complex<double>(1, 1),
-                std::complex<double>(2, 2),
-                std::complex<double>(3, 3),
-                std::complex<double>(4, 4)
-            };
+            vector<std::complex<double>> input{ std::complex<double>(1, 1), std::complex<double>(2, 2),
+                                                std::complex<double>(3, 3), std::complex<double>(4, 4) };
             input.resize(slot_size);
 
             vector<std::complex<double>> output(slot_size, 0);
@@ -3119,7 +3080,7 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptSquareDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 8);
+        Modulus plain_modulus(1 << 8);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -3181,7 +3142,7 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptMultiplyManyDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -3193,7 +3154,7 @@ namespace SEALTest
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
-        RelinKeys rlk = keygen.relin_keys();
+        RelinKeys rlk = keygen.relin_keys_local();
 
         Ciphertext encrypted1, encrypted2, encrypted3, encrypted4, product;
         Plaintext plain;
@@ -3201,74 +3162,74 @@ namespace SEALTest
         encryptor.encrypt(encoder.encode(6), encrypted2);
         encryptor.encrypt(encoder.encode(7), encrypted3);
         vector<Ciphertext> encrypteds{ encrypted1, encrypted2, encrypted3 };
-            evaluator.multiply_many(encrypteds, rlk, product);
-            ASSERT_EQ(3, encrypteds.size());
-            decryptor.decrypt(product, plain);
-            ASSERT_EQ(static_cast<uint64_t>(210), encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
-            ASSERT_TRUE(product.parms_id() == context->first_parms_id());
+        evaluator.multiply_many(encrypteds, rlk, product);
+        ASSERT_EQ(3, encrypteds.size());
+        decryptor.decrypt(product, plain);
+        ASSERT_EQ(static_cast<uint64_t>(210), encoder.decode_uint64(plain));
+        ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
+        ASSERT_TRUE(product.parms_id() == context->first_parms_id());
 
-            encryptor.encrypt(encoder.encode(-9), encrypted1);
-            encryptor.encrypt(encoder.encode(-17), encrypted2);
-            encrypteds = { encrypted1, encrypted2 };
-            evaluator.multiply_many(encrypteds, rlk, product);
-            ASSERT_EQ(2, encrypteds.size());
-            decryptor.decrypt(product, plain);
-            ASSERT_EQ(static_cast<uint64_t>(153), encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
-            ASSERT_TRUE(product.parms_id() == context->first_parms_id());
+        encryptor.encrypt(encoder.encode(-9), encrypted1);
+        encryptor.encrypt(encoder.encode(-17), encrypted2);
+        encrypteds = { encrypted1, encrypted2 };
+        evaluator.multiply_many(encrypteds, rlk, product);
+        ASSERT_EQ(2, encrypteds.size());
+        decryptor.decrypt(product, plain);
+        ASSERT_EQ(static_cast<uint64_t>(153), encoder.decode_uint64(plain));
+        ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
+        ASSERT_TRUE(product.parms_id() == context->first_parms_id());
 
-            encryptor.encrypt(encoder.encode(2), encrypted1);
-            encryptor.encrypt(encoder.encode(-31), encrypted2);
-            encryptor.encrypt(encoder.encode(7), encrypted3);
-            encrypteds = { encrypted1, encrypted2, encrypted3 };
-            evaluator.multiply_many(encrypteds, rlk, product);
-            ASSERT_EQ(3, encrypteds.size());
-            decryptor.decrypt(product, plain);
-            ASSERT_TRUE(static_cast<int64_t>(-434) == encoder.decode_int64(plain));
-            ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
-            ASSERT_TRUE(product.parms_id() == context->first_parms_id());
+        encryptor.encrypt(encoder.encode(2), encrypted1);
+        encryptor.encrypt(encoder.encode(-31), encrypted2);
+        encryptor.encrypt(encoder.encode(7), encrypted3);
+        encrypteds = { encrypted1, encrypted2, encrypted3 };
+        evaluator.multiply_many(encrypteds, rlk, product);
+        ASSERT_EQ(3, encrypteds.size());
+        decryptor.decrypt(product, plain);
+        ASSERT_TRUE(static_cast<int64_t>(-434) == encoder.decode_int64(plain));
+        ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
+        ASSERT_TRUE(product.parms_id() == context->first_parms_id());
 
-            encryptor.encrypt(encoder.encode(1), encrypted1);
-            encryptor.encrypt(encoder.encode(-1), encrypted2);
-            encryptor.encrypt(encoder.encode(1), encrypted3);
-            encryptor.encrypt(encoder.encode(-1), encrypted4);
-            encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
-            evaluator.multiply_many(encrypteds, rlk, product);
-            ASSERT_EQ(4, encrypteds.size());
-            decryptor.decrypt(product, plain);
-            ASSERT_EQ(static_cast<uint64_t>(1), encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted4.parms_id() == product.parms_id());
-            ASSERT_TRUE(product.parms_id() == context->first_parms_id());
+        encryptor.encrypt(encoder.encode(1), encrypted1);
+        encryptor.encrypt(encoder.encode(-1), encrypted2);
+        encryptor.encrypt(encoder.encode(1), encrypted3);
+        encryptor.encrypt(encoder.encode(-1), encrypted4);
+        encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
+        evaluator.multiply_many(encrypteds, rlk, product);
+        ASSERT_EQ(4, encrypteds.size());
+        decryptor.decrypt(product, plain);
+        ASSERT_EQ(static_cast<uint64_t>(1), encoder.decode_uint64(plain));
+        ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted4.parms_id() == product.parms_id());
+        ASSERT_TRUE(product.parms_id() == context->first_parms_id());
 
-            encryptor.encrypt(encoder.encode(98765), encrypted1);
-            encryptor.encrypt(encoder.encode(0), encrypted2);
-            encryptor.encrypt(encoder.encode(12345), encrypted3);
-            encryptor.encrypt(encoder.encode(34567), encrypted4);
-            encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
-            evaluator.multiply_many(encrypteds, rlk, product);
-            ASSERT_EQ(4, encrypteds.size());
-            decryptor.decrypt(product, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
-            ASSERT_TRUE(encrypted4.parms_id() == product.parms_id());
-            ASSERT_TRUE(product.parms_id() == context->first_parms_id());
+        encryptor.encrypt(encoder.encode(98765), encrypted1);
+        encryptor.encrypt(encoder.encode(0), encrypted2);
+        encryptor.encrypt(encoder.encode(12345), encrypted3);
+        encryptor.encrypt(encoder.encode(34567), encrypted4);
+        encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
+        evaluator.multiply_many(encrypteds, rlk, product);
+        ASSERT_EQ(4, encrypteds.size());
+        decryptor.decrypt(product, plain);
+        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+        ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
+        ASSERT_TRUE(encrypted4.parms_id() == product.parms_id());
+        ASSERT_TRUE(product.parms_id() == context->first_parms_id());
     }
 
     TEST(EvaluatorTest, BFVEncryptExponentiateDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -3280,7 +3241,7 @@ namespace SEALTest
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
-        RelinKeys rlk = keygen.relin_keys();
+        RelinKeys rlk = keygen.relin_keys_local();
 
         Ciphertext encrypted;
         Plaintext plain;
@@ -3312,7 +3273,7 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptAddManyDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -3341,7 +3302,10 @@ namespace SEALTest
 
         encryptor.encrypt(encoder.encode(-9), encrypted1);
         encryptor.encrypt(encoder.encode(-17), encrypted2);
-        encrypteds = { encrypted1, encrypted2, };
+        encrypteds = {
+            encrypted1,
+            encrypted2,
+        };
         evaluator.add_many(encrypteds, sum);
         decryptor.decrypt(sum, plain);
         ASSERT_TRUE(static_cast<int64_t>(-26) == encoder.decode_int64(plain));
@@ -3393,7 +3357,7 @@ namespace SEALTest
     TEST(EvaluatorTest, TransformPlainToNTT)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -3412,8 +3376,7 @@ namespace SEALTest
         plain.release();
         plain = "0";
         ASSERT_FALSE(plain.is_ntt_form());
-        auto next_parms_id = context->first_context_data()->
-            next_context_data()->parms_id();
+        auto next_parms_id = context->first_context_data()->next_context_data()->parms_id();
         evaluator.transform_to_ntt_inplace(plain, next_parms_id);
         ASSERT_TRUE(plain.is_zero());
         ASSERT_TRUE(plain.is_ntt_form());
@@ -3466,7 +3429,7 @@ namespace SEALTest
     TEST(EvaluatorTest, TransformEncryptedToFromNTT)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -3508,7 +3471,7 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptMultiplyPlainNTTDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -3568,21 +3531,23 @@ namespace SEALTest
         evaluator.multiply_plain_inplace(encrypted, plain_multiplier);
         evaluator.transform_from_ntt_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_TRUE(plain.to_string() == "Fx^30 + Ex^29 + Dx^28 + Cx^27 + Bx^26 + Ax^25 + 1x^24 + 2x^23 + 3x^22 + 4x^21 + 5x^20");
+        ASSERT_TRUE(
+            plain.to_string() ==
+            "Fx^30 + Ex^29 + Dx^28 + Cx^27 + Bx^26 + Ax^25 + 1x^24 + 2x^23 + 3x^22 + 4x^21 + 5x^20");
         ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
     }
 
     TEST(EvaluatorTest, BFVEncryptApplyGaloisDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(257);
+        Modulus plain_modulus(257);
         parms.set_poly_modulus_degree(8);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
-        GaloisKeys glk = keygen.galois_keys(vector<uint64_t>{ 1, 3, 5, 15 });
+        GaloisKeys glk = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 15 });
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
@@ -3653,14 +3618,14 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptRotateMatrixDecrypt)
     {
         EncryptionParameters parms(scheme_type::BFV);
-        SmallModulus plain_modulus(257);
+        Modulus plain_modulus(257);
         parms.set_poly_modulus_degree(8);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
 
         auto context = SEALContext::Create(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
-        GaloisKeys glk = keygen.galois_keys();
+        GaloisKeys glk = keygen.galois_keys_local();
 
         Encryptor encryptor(context, keygen.public_key());
         Evaluator evaluator(context);
@@ -3668,10 +3633,7 @@ namespace SEALTest
         BatchEncoder batch_encoder(context);
 
         Plaintext plain;
-        vector<uint64_t> plain_vec{
-            1, 2, 3, 4,
-            5, 6, 7, 8
-        };
+        vector<uint64_t> plain_vec{ 1, 2, 3, 4, 5, 6, 7, 8 };
         batch_encoder.encode(plain_vec, plain);
         Ciphertext encrypted;
         encryptor.encrypt(plain, encrypted);
@@ -3679,47 +3641,32 @@ namespace SEALTest
         evaluator.rotate_columns_inplace(encrypted, glk);
         decryptor.decrypt(encrypted, plain);
         batch_encoder.decode(plain, plain_vec);
-        ASSERT_TRUE((plain_vec == vector<uint64_t>{
-            5, 6, 7, 8,
-            1, 2, 3, 4
-        }));
+        ASSERT_TRUE((plain_vec == vector<uint64_t>{ 5, 6, 7, 8, 1, 2, 3, 4 }));
 
         evaluator.rotate_rows_inplace(encrypted, -1, glk);
         decryptor.decrypt(encrypted, plain);
         batch_encoder.decode(plain, plain_vec);
-        ASSERT_TRUE((plain_vec == vector<uint64_t>{
-            8, 5, 6, 7,
-            4, 1, 2, 3
-        }));
+        ASSERT_TRUE((plain_vec == vector<uint64_t>{ 8, 5, 6, 7, 4, 1, 2, 3 }));
 
         evaluator.rotate_rows_inplace(encrypted, 2, glk);
         decryptor.decrypt(encrypted, plain);
         batch_encoder.decode(plain, plain_vec);
-        ASSERT_TRUE((plain_vec == vector<uint64_t>{
-            6, 7, 8, 5,
-            2, 3, 4, 1
-        }));
+        ASSERT_TRUE((plain_vec == vector<uint64_t>{ 6, 7, 8, 5, 2, 3, 4, 1 }));
 
         evaluator.rotate_columns_inplace(encrypted, glk);
         decryptor.decrypt(encrypted, plain);
         batch_encoder.decode(plain, plain_vec);
-        ASSERT_TRUE((plain_vec == vector<uint64_t>{
-            2, 3, 4, 1,
-            6, 7, 8, 5
-        }));
+        ASSERT_TRUE((plain_vec == vector<uint64_t>{ 2, 3, 4, 1, 6, 7, 8, 5 }));
 
         evaluator.rotate_rows_inplace(encrypted, 0, glk);
         decryptor.decrypt(encrypted, plain);
         batch_encoder.decode(plain, plain_vec);
-        ASSERT_TRUE((plain_vec == vector<uint64_t>{
-            2, 3, 4, 1,
-            6, 7, 8, 5
-        }));
+        ASSERT_TRUE((plain_vec == vector<uint64_t>{ 2, 3, 4, 1, 6, 7, 8, 5 }));
     }
     TEST(EvaluatorTest, BFVEncryptModSwitchToNextDecrypt)
     {
         // the common parameters: the plaintext and the polynomial moduli
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
 
         // the parameters and the context of the higher level
         EncryptionParameters parms(scheme_type::BFV);
@@ -3743,15 +3690,13 @@ namespace SEALTest
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_next(encrypted, encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "0");
 
         evaluator.mod_switch_to_next_inplace(encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "0");
 
@@ -3760,15 +3705,13 @@ namespace SEALTest
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_next(encrypted, encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1");
 
         evaluator.mod_switch_to_next_inplace(encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1");
 
@@ -3777,15 +3720,13 @@ namespace SEALTest
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_next(encrypted, encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1x^127");
 
         evaluator.mod_switch_to_next_inplace(encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1x^127");
 
@@ -3794,15 +3735,13 @@ namespace SEALTest
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_next(encrypted, encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
 
         evaluator.mod_switch_to_next_inplace(encryptedRes);
         decryptor.decrypt(encryptedRes, plain);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
     }
@@ -3810,7 +3749,7 @@ namespace SEALTest
     TEST(EvaluatorTest, BFVEncryptModSwitchToDecrypt)
     {
         // the common parameters: the plaintext and the polynomial moduli
-        SmallModulus plain_modulus(1 << 6);
+        Modulus plain_modulus(1 << 6);
 
         // the parameters and the context of the higher level
         EncryptionParameters parms(scheme_type::BFV);
@@ -3836,16 +3775,14 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "0");
 
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "0");
 
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
@@ -3854,9 +3791,7 @@ namespace SEALTest
 
         parms_id = context->first_parms_id();
         encryptor.encrypt(plain, encrypted);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->next_context_data()->parms_id();
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
@@ -3870,16 +3805,14 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1");
 
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1");
 
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
@@ -3888,9 +3821,7 @@ namespace SEALTest
 
         parms_id = context->first_parms_id();
         encryptor.encrypt(plain, encrypted);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->next_context_data()->parms_id();
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
@@ -3904,16 +3835,14 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1x^127");
 
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "1x^127");
 
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
@@ -3922,9 +3851,7 @@ namespace SEALTest
 
         parms_id = context->first_parms_id();
         encryptor.encrypt(plain, encrypted);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->next_context_data()->parms_id();
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
@@ -3938,16 +3865,14 @@ namespace SEALTest
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
 
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
 
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->parms_id();
         encryptor.encrypt(plain, encrypted);
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
@@ -3956,12 +3881,10 @@ namespace SEALTest
 
         parms_id = context->first_parms_id();
         encryptor.encrypt(plain, encrypted);
-        parms_id = context->get_context_data(parms_id)->
-            next_context_data()->
-            next_context_data()->parms_id();
+        parms_id = context->get_context_data(parms_id)->next_context_data()->next_context_data()->parms_id();
         evaluator.mod_switch_to_inplace(encrypted, parms_id);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(encrypted.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
     }
-}
+} // namespace sealtest

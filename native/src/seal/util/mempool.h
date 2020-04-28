@@ -3,42 +3,39 @@
 
 #pragma once
 
-#include <cstdint>
-#include <cstring>
-#include <vector>
-#include <stdexcept>
-#include <memory>
-#include <limits>
-#include <atomic>
-#include <type_traits>
-#include <new>
-#include <algorithm>
+#include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/globals.h"
-#include "seal/util/common.h"
 #include "seal/util/locks.h"
+#include <algorithm>
+#include <atomic>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <memory>
+#include <new>
+#include <stdexcept>
+#include <type_traits>
+#include <vector>
 
 namespace seal
 {
     namespace util
     {
-        template<typename T = void,
-            typename = std::enable_if_t<std::is_standard_layout<T>::value>>
+        template <typename T = void, typename = std::enable_if_t<std::is_standard_layout<T>::value>>
         class ConstPointer;
 
-        template<>
+        template <>
         class ConstPointer<SEAL_BYTE>;
 
-        template<typename T = void,
-            typename = std::enable_if_t<std::is_standard_layout<T>::value>>
+        template <typename T = void, typename = std::enable_if_t<std::is_standard_layout<T>::value>>
         class Pointer;
 
         class MemoryPoolItem
         {
         public:
             MemoryPoolItem(SEAL_BYTE *data) noexcept : data_(data)
-            {
-            }
+            {}
 
             SEAL_NODISCARD inline SEAL_BYTE *data() noexcept
             {
@@ -50,7 +47,7 @@ namespace seal
                 return data_;
             }
 
-            SEAL_NODISCARD inline MemoryPoolItem* &next() noexcept
+            SEAL_NODISCARD inline MemoryPoolItem *&next() noexcept
             {
                 return next_;
             }
@@ -63,7 +60,7 @@ namespace seal
         private:
             MemoryPoolItem(const MemoryPoolItem &copy) = delete;
 
-            MemoryPoolItem &operator =(const MemoryPoolItem &assign) = delete;
+            MemoryPoolItem &operator=(const MemoryPoolItem &assign) = delete;
 
             SEAL_BYTE *data_ = nullptr;
 
@@ -75,10 +72,8 @@ namespace seal
         public:
             struct allocation
             {
-                allocation() :
-                    size(0), data_ptr(nullptr), free(0), head_ptr(nullptr)
-                {
-                }
+                allocation() : size(0), data_ptr(nullptr), free(0), head_ptr(nullptr)
+                {}
 
                 // Size of the allocation (number of items it can hold)
                 std::size_t size;
@@ -112,8 +107,7 @@ namespace seal
         {
         public:
             // Creates a new MemoryPoolHeadMT with allocation for one single item.
-            MemoryPoolHeadMT(std::size_t item_byte_count,
-                bool clear_on_destruction = false);
+            MemoryPoolHeadMT(std::size_t item_byte_count, bool clear_on_destruction = false);
 
             ~MemoryPoolHeadMT() noexcept override;
 
@@ -134,8 +128,7 @@ namespace seal
             inline void add(MemoryPoolItem *new_first) noexcept override
             {
                 bool expected = false;
-                while (!locked_.compare_exchange_strong(
-                    expected, true, std::memory_order_acquire))
+                while (!locked_.compare_exchange_strong(expected, true, std::memory_order_acquire))
                 {
                     expected = false;
                 }
@@ -148,7 +141,7 @@ namespace seal
         private:
             MemoryPoolHeadMT(const MemoryPoolHeadMT &copy) = delete;
 
-            MemoryPoolHeadMT &operator =(const MemoryPoolHeadMT &assign) = delete;
+            MemoryPoolHeadMT &operator=(const MemoryPoolHeadMT &assign) = delete;
 
             const bool clear_on_destruction_;
 
@@ -160,15 +153,14 @@ namespace seal
 
             std::vector<allocation> allocs_;
 
-            MemoryPoolItem* volatile first_item_;
+            MemoryPoolItem *volatile first_item_;
         };
 
         class MemoryPoolHeadST : public MemoryPoolHead
         {
         public:
             // Creates a new MemoryPoolHeadST with allocation for one single item.
-            MemoryPoolHeadST(std::size_t item_byte_count,
-                bool clear_on_destruction = false);
+            MemoryPoolHeadST(std::size_t item_byte_count, bool clear_on_destruction = false);
 
             ~MemoryPoolHeadST() noexcept override;
 
@@ -195,7 +187,7 @@ namespace seal
         private:
             MemoryPoolHeadST(const MemoryPoolHeadST &copy) = delete;
 
-            MemoryPoolHeadST &operator =(const MemoryPoolHeadST &assign) = delete;
+            MemoryPoolHeadST &operator=(const MemoryPoolHeadST &assign) = delete;
 
             const bool clear_on_destruction_;
 
@@ -217,8 +209,7 @@ namespace seal
             static const std::size_t max_single_alloc_byte_count;
 
             // Number of different size allocations allowed by a single memory pool
-            static constexpr std::size_t max_pool_head_count =
-                std::numeric_limits<std::size_t>::max();
+            static constexpr std::size_t max_pool_head_count = std::numeric_limits<std::size_t>::max();
 
             // Largest allowed size of batch allocation
             static const std::size_t max_batch_alloc_byte_count;
@@ -237,15 +228,11 @@ namespace seal
         class MemoryPoolMT : public MemoryPool
         {
         public:
-            MemoryPoolMT(bool clear_on_destruction = false) :
-                clear_on_destruction_(clear_on_destruction)
-            {
-            };
+            MemoryPoolMT(bool clear_on_destruction = false) : clear_on_destruction_(clear_on_destruction){};
 
             ~MemoryPoolMT() noexcept override;
 
-            SEAL_NODISCARD Pointer<SEAL_BYTE> get_for_byte_count(
-                std::size_t byte_count) override;
+            SEAL_NODISCARD Pointer<SEAL_BYTE> get_for_byte_count(std::size_t byte_count) override;
 
             SEAL_NODISCARD inline std::size_t pool_count() const override
             {
@@ -258,27 +245,23 @@ namespace seal
         protected:
             MemoryPoolMT(const MemoryPoolMT &copy) = delete;
 
-            MemoryPoolMT &operator =(const MemoryPoolMT &assign) = delete;
+            MemoryPoolMT &operator=(const MemoryPoolMT &assign) = delete;
 
             const bool clear_on_destruction_;
 
             mutable ReaderWriterLocker pools_locker_;
 
-            std::vector<MemoryPoolHead*> pools_;
+            std::vector<MemoryPoolHead *> pools_;
         };
 
         class MemoryPoolST : public MemoryPool
         {
         public:
-            MemoryPoolST(bool clear_on_destruction = false) :
-                clear_on_destruction_(clear_on_destruction)
-            {
-            };
+            MemoryPoolST(bool clear_on_destruction = false) : clear_on_destruction_(clear_on_destruction){};
 
             ~MemoryPoolST() noexcept override;
 
-            SEAL_NODISCARD Pointer<SEAL_BYTE> get_for_byte_count(
-                std::size_t byte_count) override;
+            SEAL_NODISCARD Pointer<SEAL_BYTE> get_for_byte_count(std::size_t byte_count) override;
 
             SEAL_NODISCARD inline std::size_t pool_count() const override
             {
@@ -290,11 +273,11 @@ namespace seal
         protected:
             MemoryPoolST(const MemoryPoolST &copy) = delete;
 
-            MemoryPoolST &operator =(const MemoryPoolST &assign) = delete;
+            MemoryPoolST &operator=(const MemoryPoolST &assign) = delete;
 
             const bool clear_on_destruction_;
 
-            std::vector<MemoryPoolHead*> pools_;
+            std::vector<MemoryPoolHead *> pools_;
         };
-    }
-}
+    } // namespace util
+} // namespace seal

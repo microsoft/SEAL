@@ -53,6 +53,27 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void ParameterErrorTest()
+        {
+            SEALContext context = GlobalContext.BFVContext;
+            EncryptionParameterQualifiers qualifiers = context.FirstContextData.Qualifiers;
+
+            Assert.AreEqual(qualifiers.ParametersErrorName(), "success");
+            Assert.AreEqual(qualifiers.ParametersErrorMessage(), "valid");
+
+            EncryptionParameters encParam = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 127,
+                PlainModulus = new Modulus(1 << 6),
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
+            };
+            context = new SEALContext(encParam, expandModChain: true, secLevel: SecLevelType.None);
+            qualifiers = context.FirstContextData.Qualifiers;
+            Assert.AreEqual(qualifiers.ParametersErrorName(), "invalid_poly_modulus_degree_non_power_of_two");
+            Assert.AreEqual(qualifiers.ParametersErrorMessage(), "poly_modulus_degree is not a power of two");
+        }
+
+        [TestMethod]
         public void ExceptionsTest()
         {
             EncryptionParameterQualifiers epq1 = GlobalContext.BFVContext.FirstContextData.Qualifiers;

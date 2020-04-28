@@ -1,32 +1,32 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-target_sources(seal
-    PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/context.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/decryptor.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/intencoder.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/encryptor.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/evaluator.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/keygenerator.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/memorymanager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/modulus.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/plaintext.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/randomgen.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/serialization.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/valcheck.cpp
+# Source files in this directory
+target_sources(seal_obj PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/context.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/decryptor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/intencoder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/encryptor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/evaluator.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/keygenerator.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/memorymanager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/modulus.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/plaintext.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/randomgen.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/serialization.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/valcheck.cpp
 
-        # Emscripten
-        ${CMAKE_CURRENT_LIST_DIR}/bindings.cpp
+    # Emscripten
+    ${CMAKE_CURRENT_LIST_DIR}/bindings.cpp
 )
 
+# Add header files for installation
 install(
     FILES
         ${CMAKE_CURRENT_LIST_DIR}/batchencoder.h
@@ -45,7 +45,6 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator.h
         ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.h
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager.h
-        ${CMAKE_CURRENT_LIST_DIR}/modulus.h
         ${CMAKE_CURRENT_LIST_DIR}/plaintext.h
         ${CMAKE_CURRENT_LIST_DIR}/publickey.h
         ${CMAKE_CURRENT_LIST_DIR}/randomgen.h
@@ -53,8 +52,8 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/relinkeys.h
         ${CMAKE_CURRENT_LIST_DIR}/seal.h
         ${CMAKE_CURRENT_LIST_DIR}/secretkey.h
+        ${CMAKE_CURRENT_LIST_DIR}/serializable.h
         ${CMAKE_CURRENT_LIST_DIR}/serialization.h
-        ${CMAKE_CURRENT_LIST_DIR}/smallmodulus.h
         ${CMAKE_CURRENT_LIST_DIR}/valcheck.h
 
         # Emscripten

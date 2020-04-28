@@ -3,17 +3,17 @@
 
 #pragma once
 
-#include <type_traits>
-#include <algorithm>
-#include <limits>
-#include <iostream>
-#include <cstring>
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
-#include "seal/util/pointer.h"
-#include "seal/util/defines.h"
 #include "seal/util/common.h"
-#ifdef SEAL_USE_MSGSL_SPAN
+#include "seal/util/defines.h"
+#include "seal/util/pointer.h"
+#include <algorithm>
+#include <cstring>
+#include <iostream>
+#include <limits>
+#include <type_traits>
+#ifdef SEAL_USE_MSGSL
 #include <gsl/span>
 #endif
 
@@ -22,10 +22,14 @@ namespace seal
     class Ciphertext;
 
     // Forward-declaring the deflate_size_bound function
-    namespace util::ztools
+    namespace util
     {
-        SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
-    }
+        namespace ztools
+        {
+            template <typename SizeT>
+            SEAL_NODISCARD SizeT deflate_size_bound(SizeT in_size);
+        } // namespace ztools
+    }     // namespace util
 
     /**
     A resizable container for storing an array of arithmetic data types or
@@ -44,9 +48,10 @@ namespace seal
     In general, reading from IntArray is thread-safe as long as no other thread
     is concurrently mutating it.
     */
-    template<typename T_,
-        typename = std::enable_if_t<std::is_arithmetic<T_>::value ||
-            std::is_same<typename std::decay<T_>::type, SEAL_BYTE>::value>>
+    template <
+        typename T_,
+        typename = std::enable_if_t<
+            std::is_arithmetic<T_>::value || std::is_same<typename std::decay<T_>::type, SEAL_BYTE>::value>>
     class IntArray
     {
         friend class Ciphertext;
@@ -60,8 +65,7 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        IntArray(MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            pool_(std::move(pool))
+        IntArray(MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
         {
             if (!pool_)
             {
@@ -76,9 +80,7 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(std::size_t size,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            pool_(std::move(pool))
+        explicit IntArray(std::size_t size, MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
         {
             if (!pool_)
             {
@@ -98,9 +100,8 @@ namespace seal
         @throws std::invalid_argument if capacity is less than size
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(std::size_t capacity, std::size_t size,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            pool_(std::move(pool))
+        explicit IntArray(std::size_t capacity, std::size_t size, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : pool_(std::move(pool))
         {
             if (!pool_)
             {
@@ -134,11 +135,10 @@ namespace seal
         @throws std::invalid_argument if capacity is less than size
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(util::Pointer<T> &&ptr,
-            std::size_t capacity, std::size_t size, bool fill_zero,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            pool_(std::move(pool)),
-            capacity_(capacity)
+        explicit IntArray(
+            util::Pointer<T> &&ptr, std::size_t capacity, std::size_t size, bool fill_zero,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+            : pool_(std::move(pool)), capacity_(capacity)
         {
             if (!ptr && capacity)
             {
@@ -176,22 +176,19 @@ namespace seal
         @throws std::invalid_argument if ptr is null and size is positive
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(util::Pointer<T> &&ptr, std::size_t size, bool fill_zero,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) :
-            IntArray(std::move(ptr), size, size, fill_zero, std::move(pool))
-        {
-        }
+        explicit IntArray(
+            util::Pointer<T> &&ptr, std::size_t size, bool fill_zero, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : IntArray(std::move(ptr), size, size, fill_zero, std::move(pool))
+        {}
 
         /**
         Constructs a new IntArray by copying a given one.
 
         @param[in] copy The IntArray to copy from
         */
-        IntArray(const IntArray<T> &copy) :
-            pool_(MemoryManager::GetPool()),
-            capacity_(copy.size_),
-            size_(copy.size_),
-            data_(util::allocate<T>(copy.size_, pool_))
+        IntArray(const IntArray<T> &copy)
+            : pool_(MemoryManager::GetPool()), capacity_(copy.size_), size_(copy.size_),
+              data_(util::allocate<T>(copy.size_, pool_))
         {
             // Copy over value
             std::copy_n(copy.cbegin(), copy.size_, begin());
@@ -202,13 +199,10 @@ namespace seal
 
         @param[in] source The IntArray to move from
         */
-        IntArray(IntArray<T> &&source) noexcept :
-            pool_(std::move(source.pool_)),
-            capacity_(source.capacity_),
-            size_(source.size_),
-            data_(std::move(source.data_))
-        {
-        }
+        IntArray(IntArray<T> &&source) noexcept
+            : pool_(std::move(source.pool_)), capacity_(source.capacity_), size_(source.size_),
+              data_(std::move(source.data_))
+        {}
 
         /**
         Destroys the IntArray.
@@ -249,14 +243,13 @@ namespace seal
         {
             return size_ ? cbegin() + size_ : cbegin();
         }
-#ifdef SEAL_USE_MSGSL_SPAN
+#ifdef SEAL_USE_MSGSL
         /**
         Returns a span pointing to the beginning of the IntArray.
         */
         SEAL_NODISCARD inline gsl::span<T> span()
         {
-            return gsl::span<T>(
-                begin(), static_cast<std::ptrdiff_t>(size_));
+            return gsl::span<T>(begin(), static_cast<std::ptrdiff_t>(size_));
         }
 
         /**
@@ -264,8 +257,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<const T> span() const
         {
-            return gsl::span<const T>(
-                cbegin(), static_cast<std::ptrdiff_t>(size_));
+            return gsl::span<const T>(cbegin(), static_cast<std::ptrdiff_t>(size_));
         }
 #endif
         /**
@@ -308,7 +300,7 @@ namespace seal
 
         @param[in] index The index of the array element
         */
-        SEAL_NODISCARD inline const T &operator [](std::size_t index) const
+        SEAL_NODISCARD inline const T &operator[](std::size_t index) const
         {
             return data_[index];
         }
@@ -319,7 +311,7 @@ namespace seal
 
         @param[in] index The index of the array element
         */
-        SEAL_NODISCARD inline T &operator [](std::size_t index)
+        SEAL_NODISCARD inline T &operator[](std::size_t index)
         {
             return data_[index];
         }
@@ -459,7 +451,7 @@ namespace seal
 
         @param[in] assign The IntArray to copy from
         */
-        inline IntArray<T> &operator =(const IntArray<T> &assign)
+        inline IntArray<T> &operator=(const IntArray<T> &assign)
         {
             // Check for self-assignment
             if (this == &assign)
@@ -481,7 +473,7 @@ namespace seal
 
         @param[in] assign The IntArray to move from
         */
-        IntArray<T> &operator =(IntArray<T> &&assign) noexcept
+        IntArray<T> &operator=(IntArray<T> &&assign) noexcept
         {
             capacity_ = assign.capacity_;
             size_ = assign.size_;
@@ -500,18 +492,15 @@ namespace seal
         @throws std::logic_error if the size does not fit in the return type
         */
         SEAL_NODISCARD inline std::streamoff save_size(
-            compr_mode_type compr_mode) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
-                    sizeof(std::uint64_t), // size_
+                    sizeof(std::uint64_t),             // size_
                     util::mul_safe(size_, sizeof(T))), // data_
                 compr_mode);
 
-            return util::safe_cast<std::streamoff>(util::add_safe(
-                sizeof(Serialization::SEALHeader),
-                members_size
-            ));
+            return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
         }
 
         /**
@@ -520,19 +509,17 @@ namespace seal
 
         @param[out] stream The stream to save the IntArray to
         @param[in] compr_mode The desired compression mode
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        @throws std::invalid_argument if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&IntArray<T_>::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                stream, compr_mode);
+                std::bind(&IntArray<T_>::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -543,42 +530,39 @@ namespace seal
 
         @param[in] stream The stream to load the IntArray from
         @param[in] in_size_bound A bound on the size of the loaded IntArray
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
+        or if the loaded size exceeds in_size_bound
         @throws std::logic_error if the loaded data is invalid, if the loaded size
         exceeds in_size_bound, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::istream &stream, std::size_t in_size_bound = 0)
+        inline std::streamoff load(std::istream &stream, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound),
-                stream);
+            return Serialization::Load(std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound), stream);
         }
 
         /**
         Saves the IntArray to a given memory location. The output is in binary
         format and not human-readable.
 
-        @param[out] out The memory location to write the SmallModulus to
+        @param[out] out The memory location to write the Modulus to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        contain a SEALHeader, or if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&IntArray<T_>::save_members, this, _1),
-                save_size(compr_mode_type::none),
-                out, size, compr_mode);
+                std::bind(&IntArray<T_>::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                compr_mode);
         }
 
         /**
@@ -588,22 +572,20 @@ namespace seal
         metadata exceeds the provided value. The check is omitted if in_size_bound
         is zero.
 
-        @param[in] in The memory location to load the SmallModulus from
+        @param[in] in The memory location to load the Modulus from
         @param[in] size The number of bytes available in the given memory location
         @param[in] in_size_bound A bound on the size of the loaded IntArray
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid, if the loaded size
-        exceeds in_size_bound, or if decompression failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
+        or if the loaded size exceeds in_size_bound
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            const SEAL_BYTE *in, std::size_t size, std::size_t in_size_bound = 0)
+        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
-            return Serialization::Load(
-                std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound),
-                in, size);
+            return Serialization::Load(std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound), in, size);
         }
 
     private:
@@ -616,10 +598,11 @@ namespace seal
                 stream.exceptions(std::ios_base::badbit | std::ios_base::failbit);
 
                 std::uint64_t size64 = size_;
-                stream.write(reinterpret_cast<const char*>(&size64), sizeof(std::uint64_t));
+                stream.write(reinterpret_cast<const char *>(&size64), sizeof(std::uint64_t));
                 if (size_)
                 {
-                    stream.write(reinterpret_cast<const char*>(cbegin()),
+                    stream.write(
+                        reinterpret_cast<const char *>(cbegin()),
                         util::safe_cast<std::streamsize>(util::mul_safe(size_, sizeof(T))));
                 }
             }
@@ -645,7 +628,7 @@ namespace seal
                 stream.exceptions(std::ios_base::badbit | std::ios_base::failbit);
 
                 std::uint64_t size64 = 0;
-                stream.read(reinterpret_cast<char*>(&size64), sizeof(std::uint64_t));
+                stream.read(reinterpret_cast<char *>(&size64), sizeof(std::uint64_t));
 
                 // Check (optionally) that the size in the metadata does not exceed
                 // in_size_bound
@@ -661,7 +644,8 @@ namespace seal
                 // Read data
                 if (size_)
                 {
-                    stream.read(reinterpret_cast<char*>(begin()),
+                    stream.read(
+                        reinterpret_cast<char *>(begin()),
                         util::safe_cast<std::streamsize>(util::mul_safe(size_, sizeof(T))));
                 }
             }
@@ -686,4 +670,4 @@ namespace seal
 
         util::Pointer<T> data_;
     };
-}
+} // namespace seal

@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/hash.h"
 #include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     namespace util
     {
@@ -18,7 +18,7 @@ namespace SEALTest
             {
                 HashFunction::hash(&value, 1, destination);
             }
-        }
+        } // namespace
 
         TEST(HashTest, Hash)
         {
@@ -45,5 +45,5 @@ namespace SEALTest
             HashFunction::hash(input, 2, hash2);
             ASSERT_TRUE(hash1 != hash2);
         }
-    }
-}
+    } // namespace util
+} // namespace sealtest

@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <iostream>
-#include <ios>
-#include "seal/util/defines.h"
 #include "seal/intarray.h"
 #include "seal/memorymanager.h"
+#include "seal/util/defines.h"
+#include <ios>
+#include <iostream>
 
 namespace seal
 {
@@ -15,8 +15,6 @@ namespace seal
     {
         namespace ztools
         {
-            constexpr std::size_t buf_size = 16384;
-
             /**
             Compresses data in the given buffer, completes the given SEALHeader
             by writing in the size of the output and setting the compression mode
@@ -33,21 +31,20 @@ namespace seal
             @throws std::logic_error if compression failed
             */
             void write_header_deflate_buffer(
-                const IntArray<SEAL_BYTE> &in,
-                void *header_ptr,
-                std::ostream &out_stream,
-                MemoryPoolHandle pool);
+                IntArray<SEAL_BYTE> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            int deflate_array(
-                const IntArray<SEAL_BYTE> &in,
-                IntArray<SEAL_BYTE> &out,
-                MemoryPoolHandle pool);
+            int deflate_array(const IntArray<SEAL_BYTE> &in, IntArray<SEAL_BYTE> &out, MemoryPoolHandle pool);
 
-            int inflate_stream(std::istream &in_stream,
-                std::streamoff in_size, std::ostream &out_stream,
-                MemoryPoolHandle pool);
+            int deflate_array_inplace(IntArray<SEAL_BYTE> &in, MemoryPoolHandle pool);
 
-            SEAL_NODISCARD std::size_t deflate_size_bound(std::size_t in_size) noexcept;
-        }
-    }
-}
+            int inflate_stream(
+                std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);
+
+            template <typename SizeT>
+            SEAL_NODISCARD SizeT deflate_size_bound(SizeT in_size)
+            {
+                return util::add_safe<SizeT>(in_size, in_size >> 12, in_size >> 14, in_size >> 25, SizeT(17));
+            }
+        } // namespace ztools
+    }     // namespace util
+} // namespace seal

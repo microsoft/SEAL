@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <iostream>
-#include <memory>
 #include "seal/ciphertext.h"
 #include "seal/context.h"
 #include "seal/valcheck.h"
+#include <iostream>
+#include <memory>
 
 namespace seal
 {
@@ -54,14 +54,14 @@ namespace seal
 
         @param[in] assign The PublicKey to copy from
         */
-        PublicKey &operator =(const PublicKey &assign) = default;
+        PublicKey &operator=(const PublicKey &assign) = default;
 
         /**
         Moves an old PublicKey to the current one.
 
         @param[in] assign The PublicKey to move from
         */
-        PublicKey &operator =(PublicKey &&assign) = default;
+        PublicKey &operator=(PublicKey &&assign) = default;
 
         /**
         Returns a reference to the underlying data.
@@ -88,7 +88,7 @@ namespace seal
         @throws std::logic_error if the size does not fit in the return type
         */
         SEAL_NODISCARD inline std::streamoff save_size(
-            compr_mode_type compr_mode) const
+            compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return pk_.save_size(compr_mode);
         }
@@ -99,13 +99,13 @@ namespace seal
 
         @param[out] stream The stream to save the PublicKey to
         @param[in] compr_mode The desired compression mode
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        @throws std::invalid_argument if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            std::ostream &stream,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return pk_.save(stream, compr_mode);
         }
@@ -120,13 +120,11 @@ namespace seal
         @param[in] stream The stream to load the PublicKey from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             Ciphertext new_pk(pk_.pool());
             auto in_size = new_pk.unsafe_load(std::move(context), stream);
@@ -142,13 +140,11 @@ namespace seal
         @param[in] stream The stream to load the PublicKey from
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            std::istream &stream)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(context, stream);
@@ -168,15 +164,13 @@ namespace seal
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if out is null or if size is too small to
-        contain a SEALHeader
-        @throws std::logic_error if the data to be saved is invalid, if compression
-        mode is not supported, or if compression failed
+        contain a SEALHeader, or if the compression mode is not supported
+        @throws std::logic_error if the data to be saved is invalid, or if
+        compression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out,
-            std::size_t size,
-            compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return pk_.save(out, size, compr_mode);
         }
@@ -194,13 +188,11 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             Ciphertext new_pk(pk_.pool());
             auto in_size = new_pk.unsafe_load(std::move(context), in, size);
@@ -220,13 +212,11 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
-        @throws std::logic_error if the loaded data is invalid or if decompression
-        failed
+        @throws std::logic_error if the data cannot be loaded by this version of
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(
-            std::shared_ptr<SEALContext> context,
-            const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(context, in, size);
@@ -275,11 +265,9 @@ namespace seal
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        PublicKey(MemoryPoolHandle pool) :
-            pk_(std::move(pool))
-        {
-        }
+        PublicKey(MemoryPoolHandle pool) : pk_(std::move(pool))
+        {}
 
         Ciphertext pk_;
     };
-}
+} // namespace seal

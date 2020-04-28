@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-using Microsoft.Research.SEAL.Tools;
 using System;
+using System.Text;
+using Microsoft.Research.SEAL.Tools;
 
 namespace Microsoft.Research.SEAL
 {
@@ -58,6 +59,31 @@ namespace Microsoft.Research.SEAL
                 NativeMethods.EPQ_ParametersSet(NativePtr, out bool result);
                 return result;
             }
+        }
+
+        /// <summary>
+        /// If the encryption parameters are set in a way that is considered valid by SEAL, return "success".
+        /// If the encryption parameters are set but not validated yet, return "none".
+        /// Otherwise, return a brief reason.
+        /// </summary>
+        public string ParametersErrorName()
+        {
+            NativeMethods.EPQ_ParameterErrorName(NativePtr, null, out ulong length);
+            StringBuilder buffer = new StringBuilder(checked((int)length));
+            NativeMethods.EPQ_ParameterErrorName(NativePtr, buffer, out length);
+            return buffer.ToString();
+        }
+
+        /// <summary>
+        /// If the encryption parameters are set in a way that is considered valid by SEAL, return "valid".
+        /// Otherwise, return a comprehensive reason.
+        /// </summary>
+        public string ParametersErrorMessage()
+        {
+            NativeMethods.EPQ_ParameterErrorMessage(NativePtr, null, out ulong length);
+            StringBuilder buffer = new StringBuilder(checked((int)length));
+            NativeMethods.EPQ_ParameterErrorMessage(NativePtr, buffer, out length);
+            return buffer.ToString();
         }
 
         /// <summary>

@@ -3,13 +3,13 @@
 
 #pragma once
 
+#include "seal/util/defines.h"
+#include "seal/util/globals.h"
+#include "seal/util/mempool.h"
 #include <memory>
 #include <stdexcept>
-#include <utility>
 #include <unordered_map>
-#include "seal/util/defines.h"
-#include "seal/util/mempool.h"
-#include "seal/util/globals.h"
+#include <utility>
 
 /*
 For .NET Framework wrapper support (C++/CLI) we need to
@@ -18,8 +18,8 @@ For .NET Framework wrapper support (C++/CLI) we need to
     (2) disable thread-safe memory pools.
 */
 #ifndef _M_CEE
-#include <thread>
 #include <mutex>
+#include <thread>
 #endif
 
 namespace seal
@@ -79,10 +79,8 @@ namespace seal
         /**
         Creates a MemoryPoolHandle pointing to a given MemoryPool object.
         */
-        MemoryPoolHandle(std::shared_ptr<util::MemoryPool> pool) noexcept :
-            pool_(std::move(pool))
-        {
-        }
+        MemoryPoolHandle(std::shared_ptr<util::MemoryPool> pool) noexcept : pool_(std::move(pool))
+        {}
 
         /**
         Creates a copy of a given MemoryPoolHandle. As a result, the created
@@ -94,7 +92,7 @@ namespace seal
         */
         MemoryPoolHandle(const MemoryPoolHandle &copy) noexcept
         {
-            operator =(copy);
+            operator=(copy);
         }
 
         /**
@@ -106,7 +104,7 @@ namespace seal
         */
         MemoryPoolHandle(MemoryPoolHandle &&source) noexcept
         {
-            operator =(std::move(source));
+            operator=(std::move(source));
         }
 
         /**
@@ -117,7 +115,7 @@ namespace seal
         @param[in] assign The MemoryPoolHandle instance to assign to the current
         instance
         */
-        inline MemoryPoolHandle &operator =(const MemoryPoolHandle &assign) noexcept
+        inline MemoryPoolHandle &operator=(const MemoryPoolHandle &assign) noexcept
         {
             pool_ = assign.pool_;
             return *this;
@@ -130,7 +128,7 @@ namespace seal
         @param[in] assign The MemoryPoolHandle instance to assign to the current
         instance
         */
-        inline MemoryPoolHandle &operator =(MemoryPoolHandle &&assign) noexcept
+        inline MemoryPoolHandle &operator=(MemoryPoolHandle &&assign) noexcept
         {
             pool_ = std::move(assign.pool_);
             return *this;
@@ -159,11 +157,9 @@ namespace seal
         should be cleared when destroyed. This can be important when memory pools
         are used to store private data.
         */
-        SEAL_NODISCARD inline static MemoryPoolHandle New(
-            bool clear_on_destruction = false)
+        SEAL_NODISCARD inline static MemoryPoolHandle New(bool clear_on_destruction = false)
         {
-            return MemoryPoolHandle(
-                std::make_shared<util::MemoryPoolMT>(clear_on_destruction));
+            return MemoryPoolHandle(std::make_shared<util::MemoryPoolMT>(clear_on_destruction));
         }
 
         /**
@@ -215,7 +211,7 @@ namespace seal
         /**
         Returns whether the MemoryPoolHandle is initialized.
         */
-        SEAL_NODISCARD inline operator bool () const noexcept
+        SEAL_NODISCARD inline explicit operator bool() const noexcept
         {
             return pool_.operator bool();
         }
@@ -224,7 +220,7 @@ namespace seal
         Compares MemoryPoolHandles. This function returns whether the current
         MemoryPoolHandle points to the same memory pool as a given MemoryPoolHandle.
         */
-        inline bool operator ==(const MemoryPoolHandle &compare) noexcept
+        inline bool operator==(const MemoryPoolHandle &compare) noexcept
         {
             return pool_ == compare.pool_;
         }
@@ -234,7 +230,7 @@ namespace seal
         MemoryPoolHandle points to a different memory pool than a given
         MemoryPoolHandle.
         */
-        inline bool operator !=(const MemoryPoolHandle &compare) noexcept
+        inline bool operator!=(const MemoryPoolHandle &compare) noexcept
         {
             return pool_ != compare.pool_;
         }
@@ -278,8 +274,7 @@ namespace seal
         Destroys the MMProf.
         */
         virtual ~MMProf() noexcept
-        {
-        }
+        {}
 
         /**
         Returns a MemoryPoolHandle pointing to a pool selected by internal logic
@@ -307,15 +302,13 @@ namespace seal
         Destroys the MMProfGlobal.
         */
         virtual ~MMProfGlobal() noexcept override
-        {
-        }
+        {}
 
         /**
         Returns a MemoryPoolHandle pointing to the global memory pool. The
         mm_prof_opt_t input parameter has no effect.
         */
-        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(
-            mm_prof_opt_t) override
+        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(mm_prof_opt_t) override
         {
             return MemoryPoolHandle::Global();
         }
@@ -340,15 +333,13 @@ namespace seal
         Destroys the MMProfNew.
         */
         virtual ~MMProfNew() noexcept override
-        {
-        }
+        {}
 
         /**
         Returns a MemoryPoolHandle pointing to a new thread-safe memory pool. The
         mm_prof_opt_t input parameter has no effect.
         */
-        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(
-            mm_prof_opt_t) override
+        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(mm_prof_opt_t) override
         {
             return MemoryPoolHandle::New();
         }
@@ -382,15 +373,13 @@ namespace seal
         Destroys the MMProfFixed.
         */
         virtual ~MMProfFixed() noexcept override
-        {
-        }
+        {}
 
         /**
         Returns a MemoryPoolHandle pointing to the stored memory pool. The
         mm_prof_opt_t input parameter has no effect.
         */
-        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(
-            mm_prof_opt_t) override
+        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(mm_prof_opt_t) override
         {
             return pool_;
         }
@@ -420,15 +409,13 @@ namespace seal
         Destroys the MMProfThreadLocal.
         */
         virtual ~MMProfThreadLocal() noexcept override
-        {
-        }
+        {}
 
         /**
         Returns a MemoryPoolHandle pointing to the thread-local memory pool. The
         mm_prof_opt_t input parameter has no effect.
         */
-        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(
-            mm_prof_opt_t) override
+        SEAL_NODISCARD inline virtual MemoryPoolHandle get_pool(mm_prof_opt_t) override
         {
             return MemoryPoolHandle::ThreadLocal();
         }
@@ -456,8 +443,7 @@ namespace seal
         @param[in] mm_prof Pointer to a new memory manager profile
         @throws std::invalid_argument if mm_prof is nullptr
         */
-        static inline std::unique_ptr<MMProf>
-            SwitchProfile(MMProf* &&mm_prof) noexcept
+        static inline std::unique_ptr<MMProf> SwitchProfile(MMProf *&&mm_prof) noexcept
         {
 #ifndef _M_CEE
             std::lock_guard<std::mutex> switching_lock(switch_mutex_);
@@ -472,8 +458,7 @@ namespace seal
         @param[in] mm_prof Pointer to a new memory manager profile
         @throws std::invalid_argument if mm_prof is nullptr
         */
-        static inline std::unique_ptr<MMProf> SwitchProfile(
-            std::unique_ptr<MMProf> &&mm_prof) noexcept
+        static inline std::unique_ptr<MMProf> SwitchProfile(std::unique_ptr<MMProf> &&mm_prof) noexcept
         {
 #ifndef _M_CEE
             std::lock_guard<std::mutex> switch_lock(switch_mutex_);
@@ -497,9 +482,8 @@ namespace seal
         @param[in] prof_opt A mm_prof_opt_t parameter used to provide additional
         instructions to the memory manager profile for internal logic.
         */
-        template<typename... Args>
-        SEAL_NODISCARD static inline MemoryPoolHandle GetPool(
-            mm_prof_opt_t prof_opt, Args &&...args)
+        template <typename... Args>
+        SEAL_NODISCARD static inline MemoryPoolHandle GetPool(mm_prof_opt_t prof_opt, Args &&... args)
         {
             switch (prof_opt)
             {
@@ -507,21 +491,21 @@ namespace seal
                 return MemoryPoolHandle::Global();
 
             case mm_prof_opt::FORCE_NEW:
-                    return MemoryPoolHandle::New(std::forward<Args>(args)...);
+                return MemoryPoolHandle::New(std::forward<Args>(args)...);
 #ifndef _M_CEE
             case mm_prof_opt::FORCE_THREAD_LOCAL:
-                    return MemoryPoolHandle::ThreadLocal();
+                return MemoryPoolHandle::ThreadLocal();
 #endif
             default:
 #ifdef SEAL_DEBUG
+            {
+                auto pool = mm_prof_->get_pool(prof_opt);
+                if (!pool)
                 {
-                    auto pool = mm_prof_->get_pool(prof_opt);
-                    if (!pool)
-                    {
-                        throw std::logic_error("cannot return uninitialized pool");
-                    }
-                    return pool;
+                    throw std::logic_error("cannot return uninitialized pool");
                 }
+                return pool;
+            }
 #endif
                 return mm_prof_->get_pool(prof_opt);
             }
@@ -533,9 +517,7 @@ namespace seal
         }
 
     private:
-        SEAL_NODISCARD static inline std::unique_ptr<MMProf>
-            SwitchProfileThreadUnsafe(
-                MMProf* &&mm_prof)
+        SEAL_NODISCARD static inline std::unique_ptr<MMProf> SwitchProfileThreadUnsafe(MMProf *&&mm_prof)
         {
             if (!mm_prof)
             {
@@ -546,9 +528,8 @@ namespace seal
             return ret_mm_prof;
         }
 
-        SEAL_NODISCARD static inline std::unique_ptr<MMProf>
-            SwitchProfileThreadUnsafe(
-                std::unique_ptr<MMProf> &&mm_prof)
+        SEAL_NODISCARD static inline std::unique_ptr<MMProf> SwitchProfileThreadUnsafe(
+            std::unique_ptr<MMProf> &&mm_prof)
         {
             if (!mm_prof)
             {
@@ -586,9 +567,8 @@ namespace seal
         @param[in] start_locked Bool indicating whether the lock should be
         immediately obtained (true by default)
         */
-        MMProfGuard(std::unique_ptr<MMProf> &&mm_prof,
-            bool start_locked = true) noexcept :
-            mm_switch_lock_(MemoryManager::switch_mutex_, std::defer_lock)
+        MMProfGuard(std::unique_ptr<MMProf> &&mm_prof, bool start_locked = true) noexcept
+            : mm_switch_lock_(MemoryManager::switch_mutex_, std::defer_lock)
         {
             if (start_locked)
             {
@@ -611,9 +591,8 @@ namespace seal
         @param[in] start_locked Bool indicating whether the lock should be
         immediately obtained (true by default)
         */
-        MMProfGuard(MMProf* &&mm_prof,
-            bool start_locked = true) noexcept :
-            mm_switch_lock_(MemoryManager::switch_mutex_, std::defer_lock)
+        MMProfGuard(MMProf *&&mm_prof, bool start_locked = true) noexcept
+            : mm_switch_lock_(MemoryManager::switch_mutex_, std::defer_lock)
         {
             if (start_locked)
             {
@@ -643,8 +622,7 @@ namespace seal
             {
                 return false;
             }
-            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(
-                std::move(old_prof_));
+            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(std::move(old_prof_));
             return true;
         }
 
@@ -659,15 +637,14 @@ namespace seal
 #ifdef _MSC_VER
         _Acquires_lock_(mm_switch_lock_)
 #endif
-        inline void lock()
+            inline void lock()
         {
             if (mm_switch_lock_.owns_lock())
             {
                 throw std::runtime_error("lock is already owned");
             }
             mm_switch_lock_.lock();
-            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(
-                std::move(old_prof_));
+            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(std::move(old_prof_));
         }
 
         /**
@@ -680,8 +657,7 @@ namespace seal
         @param[in] mm_prof Pointer to a new memory manager profile
         @throws std::runtime_error if the lock is already owned
         */
-        inline bool try_lock(
-            std::unique_ptr<MMProf> &&mm_prof)
+        inline bool try_lock(std::unique_ptr<MMProf> &&mm_prof)
         {
             if (mm_switch_lock_.owns_lock())
             {
@@ -691,8 +667,7 @@ namespace seal
             {
                 return false;
             }
-            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(
-                std::move(mm_prof));
+            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(std::move(mm_prof));
             return true;
         }
 
@@ -708,16 +683,14 @@ namespace seal
 #ifdef _MSC_VER
         _Acquires_lock_(mm_switch_lock_)
 #endif
-        inline void lock(
-            std::unique_ptr<MMProf> &&mm_prof)
+            inline void lock(std::unique_ptr<MMProf> &&mm_prof)
         {
             if (mm_switch_lock_.owns_lock())
             {
                 throw std::runtime_error("lock is already owned");
             }
             mm_switch_lock_.lock();
-            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(
-                std::move(mm_prof));
+            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(std::move(mm_prof));
         }
 
         /**
@@ -730,7 +703,7 @@ namespace seal
         @param[in] mm_prof Pointer to a new memory manager profile
         @throws std::runtime_error if the lock is already owned
         */
-        inline bool try_lock(MMProf* &&mm_prof)
+        inline bool try_lock(MMProf *&&mm_prof)
         {
             if (mm_switch_lock_.owns_lock())
             {
@@ -740,8 +713,7 @@ namespace seal
             {
                 return false;
             }
-            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(
-                std::move(mm_prof));
+            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(std::move(mm_prof));
             return true;
         }
 
@@ -757,15 +729,14 @@ namespace seal
 #ifdef _MSC_VER
         _Acquires_lock_(mm_switch_lock_)
 #endif
-        inline void lock(MMProf* &&mm_prof)
+            inline void lock(MMProf *&&mm_prof)
         {
             if (mm_switch_lock_.owns_lock())
             {
                 throw std::runtime_error("lock is already owned");
             }
             mm_switch_lock_.lock();
-            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(
-                std::move(mm_prof));
+            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(std::move(mm_prof));
         }
 
         /**
@@ -777,14 +748,13 @@ namespace seal
 #ifdef _MSC_VER
         _Releases_lock_(mm_switch_lock_)
 #endif
-        inline void unlock()
+            inline void unlock()
         {
             if (!mm_switch_lock_.owns_lock())
             {
                 throw std::runtime_error("lock is not owned");
             }
-            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(
-                std::move(old_prof_));
+            old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(std::move(old_prof_));
             mm_switch_lock_.unlock();
         }
 
@@ -797,8 +767,7 @@ namespace seal
         {
             if (mm_switch_lock_.owns_lock())
             {
-                old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(
-                    std::move(old_prof_));
+                old_prof_ = MemoryManager::SwitchProfileThreadUnsafe(std::move(old_prof_));
                 mm_switch_lock_.unlock();
             }
         }
@@ -818,4 +787,4 @@ namespace seal
         std::unique_lock<std::mutex> mm_switch_lock_;
     };
 #endif
-}
+} // namespace seal

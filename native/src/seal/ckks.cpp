@@ -1,20 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <stdexcept>
-#include <random>
-#include <limits>
-#include <cinttypes>
 #include "seal/ckks.h"
-#include "seal/util/croots.h"
+#include <cinttypes>
+#include <limits>
+#include <random>
+#include <stdexcept>
 
 using namespace std;
 using namespace seal::util;
 
 namespace seal
 {
-    CKKSEncoder::CKKSEncoder(shared_ptr<SEALContext> context) :
-        context_(context)
+    CKKSEncoder::CKKSEncoder(shared_ptr<SEALContext> context) : context_(context)
     {
         // Verify parameters
         if (!context_)
@@ -49,28 +47,38 @@ namespace seal
             uint64_t index2 = (m - pos - 1) >> 1;
 
             // Set the bit-reversed locations
-            matrix_reps_index_map_[i] =
-                safe_cast<size_t>(reverse_bits(index1, logn));
-            matrix_reps_index_map_[slots_ | i] =
-                safe_cast<size_t>(reverse_bits(index2, logn));
+            matrix_reps_index_map_[i] = safe_cast<size_t>(reverse_bits(index1, logn));
+            matrix_reps_index_map_[slots_ | i] = safe_cast<size_t>(reverse_bits(index2, logn));
 
             // Next primitive root
             pos *= gen;
             pos &= (m - 1);
         }
 
+        // we need 0~(n-1)-th powers of the primitive 2n-th root, m = 2n
         roots_ = allocate<complex<double>>(coeff_count, pool_);
         inv_roots_ = allocate<complex<double>>(coeff_count, pool_);
-        for (size_t i = 0; i < coeff_count; i++)
+        // 0~(n-1)-th powers of the primitive 2n-th root have 4-fold symmetry
+        if (m >= 8)
         {
-            roots_[i] = ComplexRoots::get_root(
-                reverse_bits(i, logn), static_cast<size_t>(m));
-            inv_roots_[i] = conj(roots_[i]);
+            complex_roots_ = make_shared<util::ComplexRoots>(util::ComplexRoots(static_cast<size_t>(m), pool_));
+            for (size_t i = 0; i < coeff_count; i++)
+            {
+                roots_[i] = complex_roots_->get_root(static_cast<size_t>(reverse_bits(i, logn)));
+                inv_roots_[i] = conj(roots_[i]);
+            }
+        }
+        else if (m == 4)
+        {
+            roots_[0] = { 0, 1 };
+            roots_[1] = { 0, -1 };
+            inv_roots_[0] = conj(roots_[0]);
+            inv_roots_[1] = conj(roots_[1]);
         }
     }
 
-    void CKKSEncoder::encode_internal(double value, parms_id_type parms_id,
-        double scale, Plaintext &destination, MemoryPoolHandle pool)
+    void CKKSEncoder::encode_internal(
+        double value, parms_id_type parms_id, double scale, Plaintext &destination, MemoryPoolHandle pool)
     {
         // Verify parameters.
         auto context_data_ptr = context_->get_context_data(parms_id);
@@ -86,18 +94,17 @@ namespace seal
         auto &context_data = *context_data_ptr;
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t coeff_count = parms.poly_modulus_degree();
 
         // Quick sanity check
-        if (!product_fits_in(coeff_mod_count, coeff_count))
+        if (!product_fits_in(coeff_modulus_size, coeff_count))
         {
             throw logic_error("invalid parameters");
         }
 
         // Check that scale is positive and not too large
-        if (scale <= 0 || (static_cast<int>(log2(scale)) >=
-            context_data.total_coeff_modulus_bit_count()))
+        if (scale <= 0 || (static_cast<int>(log2(scale)) >= context_data.total_coeff_modulus_bit_count()))
         {
             throw invalid_argument("scale out of bounds");
         }
@@ -117,7 +124,7 @@ namespace seal
         // Need to first set parms_id to zero, otherwise resize
         // will throw an exception.
         destination.parms_id() = parms_id_zero;
-        destination.resize(coeff_count * coeff_mod_count);
+        destination.resize(coeff_count * coeff_modulus_size);
 
         double coeffd = round(value);
         bool is_negative = signbit(coeffd);
@@ -130,42 +137,41 @@ namespace seal
 
             if (is_negative)
             {
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count,
-                        negate_uint_mod(coeffu % coeff_modulus[j].value(),
-                            coeff_modulus[j]));
+                    fill_n(
+                        destination.data() + (j * coeff_count), coeff_count,
+                        negate_uint_mod(coeffu % coeff_modulus[j].value(), coeff_modulus[j]));
                 }
             }
             else
             {
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count,
-                        coeffu % coeff_modulus[j].value());
+                    fill_n(destination.data() + (j * coeff_count), coeff_count, coeffu % coeff_modulus[j].value());
                 }
             }
         }
         else if (coeff_bit_count <= 128)
         {
-            uint64_t coeffu[2]{
-                static_cast<uint64_t>(fmod(coeffd, two_pow_64)),
-                static_cast<uint64_t>(coeffd / two_pow_64) };
+            uint64_t coeffu[2]{ static_cast<uint64_t>(fmod(coeffd, two_pow_64)),
+                                static_cast<uint64_t>(coeffd / two_pow_64) };
 
             if (is_negative)
             {
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count,
-                        negate_uint_mod(barrett_reduce_128(
-                            coeffu, coeff_modulus[j]), coeff_modulus[j]));
+                    fill_n(
+                        destination.data() + (j * coeff_count), coeff_count,
+                        negate_uint_mod(barrett_reduce_128(coeffu, coeff_modulus[j]), coeff_modulus[j]));
                 }
             }
             else
             {
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count,
+                    fill_n(
+                        destination.data() + (j * coeff_count), coeff_count,
                         barrett_reduce_128(coeffu, coeff_modulus[j]));
                 }
             }
@@ -173,11 +179,10 @@ namespace seal
         else
         {
             // Slow case
-            auto coeffu(allocate_uint(coeff_mod_count, pool));
-            auto decomp_coeffu(allocate_uint(coeff_mod_count, pool));
+            auto coeffu(allocate_uint(coeff_modulus_size, pool));
 
             // We are at this point guaranteed to fit in the allocated space
-            set_zero_uint(coeff_mod_count, coeffu.get());
+            set_zero_uint(coeff_modulus_size, coeffu.get());
             auto coeffu_ptr = coeffu.get();
             while (coeffd >= 1)
             {
@@ -186,23 +191,23 @@ namespace seal
             }
 
             // Next decompose this coefficient
-            decompose_single_coeff(context_data, coeffu.get(), decomp_coeffu.get(), pool);
+            context_data.rns_tool()->base_q()->decompose(coeffu.get(), pool);
 
             // Finally replace the sign if necessary
             if (is_negative)
             {
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count,
-                        negate_uint_mod(decomp_coeffu[j], coeff_modulus[j]));
+                    fill_n(
+                        destination.data() + (j * coeff_count), coeff_count,
+                        negate_uint_mod(coeffu[j], coeff_modulus[j]));
                 }
             }
             else
             {
-                for (size_t j = 0; j < coeff_mod_count; j++)
+                for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count,
-                        decomp_coeffu[j]);
+                    fill_n(destination.data() + (j * coeff_count), coeff_count, coeffu[j]);
                 }
             }
         }
@@ -211,8 +216,7 @@ namespace seal
         destination.scale() = scale;
     }
 
-    void CKKSEncoder::encode_internal(int64_t value, parms_id_type parms_id,
-        Plaintext &destination)
+    void CKKSEncoder::encode_internal(int64_t value, parms_id_type parms_id, Plaintext &destination)
     {
         // Verify parameters.
         auto context_data_ptr = context_->get_context_data(parms_id);
@@ -224,17 +228,16 @@ namespace seal
         auto &context_data = *context_data_ptr;
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_mod_count = coeff_modulus.size();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t coeff_count = parms.poly_modulus_degree();
 
         // Quick sanity check
-        if (!product_fits_in(coeff_mod_count, coeff_count))
+        if (!product_fits_in(coeff_modulus_size, coeff_count))
         {
             throw logic_error("invalid parameters");
         }
 
-        int coeff_bit_count = get_significant_bit_count(
-            static_cast<uint64_t>(llabs(value))) + 2;
+        int coeff_bit_count = get_significant_bit_count(static_cast<uint64_t>(llabs(value))) + 2;
         if (coeff_bit_count >= context_data.total_coeff_modulus_bit_count())
         {
             throw invalid_argument("encoded value is too large");
@@ -244,11 +247,11 @@ namespace seal
         // Need to first set parms_id to zero, otherwise resize
         // will throw an exception.
         destination.parms_id() = parms_id_zero;
-        destination.resize(coeff_count * coeff_mod_count);
+        destination.resize(coeff_count * coeff_modulus_size);
 
         if (value < 0)
         {
-            for (size_t j = 0; j < coeff_mod_count; j++)
+            for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 uint64_t tmp = static_cast<uint64_t>(value);
                 tmp += coeff_modulus[j].value();
@@ -258,7 +261,7 @@ namespace seal
         }
         else
         {
-            for (size_t j = 0; j < coeff_mod_count; j++)
+            for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 uint64_t tmp = static_cast<uint64_t>(value);
                 tmp %= coeff_modulus[j].value();
@@ -269,4 +272,4 @@ namespace seal
         destination.parms_id() = parms_id;
         destination.scale() = 1.0;
     }
-}
+} // namespace seal

@@ -4,8 +4,13 @@
 #pragma once
 
 // Debugging help
-#define SEAL_ASSERT(condition) { if(!(condition)){ std::cerr << "ASSERT FAILED: "   \
-    << #condition << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; } }
+#define SEAL_ASSERT(condition)                                                                                         \
+    {                                                                                                                  \
+        if (!(condition))                                                                                              \
+        {                                                                                                              \
+            std::cerr << "ASSERT FAILED: " << #condition << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; \
+        }                                                                                                              \
+    }
 
 // String expansion
 #define _SEAL_STRINGIZE(x) #x
@@ -20,25 +25,57 @@ static_assert(sizeof(int) == 4, "Require sizeof(int) == 4");
 // Check that unsigned long long is 64 bits
 static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long long) == 8");
 
+// Bounds for bit-length of all coefficient moduli
+#define SEAL_MOD_BIT_COUNT_MAX 61
+#define SEAL_MOD_BIT_COUNT_MIN 2
+
+// Bit-length of internally used coefficient moduli, e.g., auxiliary base in BFV
+#define SEAL_INTERNAL_MOD_BIT_COUNT 61
+
 // Bounds for bit-length of user-defined coefficient moduli
 #define SEAL_USER_MOD_BIT_COUNT_MAX 60
 #define SEAL_USER_MOD_BIT_COUNT_MIN 2
 
-// Bounds for number of coefficient moduli
-#define SEAL_COEFF_MOD_COUNT_MAX 62
+// Bounds for bit-length of the plaintext modulus
+#define SEAL_PLAIN_MOD_BIT_COUNT_MAX SEAL_USER_MOD_BIT_COUNT_MAX
+#define SEAL_PLAIN_MOD_BIT_COUNT_MIN SEAL_USER_MOD_BIT_COUNT_MIN
+
+// Bounds for number of coefficient moduli (no hard requirement)
+#define SEAL_COEFF_MOD_COUNT_MAX 64
 #define SEAL_COEFF_MOD_COUNT_MIN 1
 
-// Bounds for polynomial modulus degree
-#define SEAL_POLY_MOD_DEGREE_MAX 32768
+// Bounds for polynomial modulus degree (no hard requirement)
+#define SEAL_POLY_MOD_DEGREE_MAX 131072
 #define SEAL_POLY_MOD_DEGREE_MIN 2
 
-// Bounds for the plaintext modulus
-#define SEAL_PLAIN_MOD_MIN SEAL_USER_MOD_BIT_COUNT_MIN
-#define SEAL_PLAIN_MOD_MAX SEAL_USER_MOD_BIT_COUNT_MAX
-
-// Upper bound on the size of a ciphertext
-#define SEAL_CIPHERTEXT_SIZE_MIN 2
+// Upper bound on the size of a ciphertext (no hard requirement)
 #define SEAL_CIPHERTEXT_SIZE_MAX 16
+#define SEAL_CIPHERTEXT_SIZE_MIN 2
+
+// How many pairs of modular integers can we multiply and accumulate in a 128-bit data type
+#if SEAL_MOD_BIT_COUNT_MAX > 32
+#define SEAL_MULTIPLY_ACCUMULATE_MOD_MAX (1 << (128 - (SEAL_MOD_BIT_COUNT_MAX << 1)))
+#define SEAL_MULTIPLY_ACCUMULATE_INTERNAL_MOD_MAX (1 << (128 - (SEAL_INTERNAL_MOD_BIT_COUNT_MAX << 1)))
+#define SEAL_MULTIPLY_ACCUMULATE_USER_MOD_MAX (1 << (128 - (SEAL_USER_MOD_BIT_COUNT_MAX << 1)))
+#else
+#define SEAL_MULTIPLY_ACCUMULATE_MOD_MAX SIZE_MAX
+#define SEAL_MULTIPLY_ACCUMULATE_INTERNAL_MOD_MAX SIZE_MAX
+#define SEAL_MULTIPLY_ACCUMULATE_USER_MOD_MAX SIZE_MAX
+#endif
+
+// Detect system
+#define SEAL_SYSTEM_OTHER 1
+#define SEAL_SYSTEM_WINDOWS 2
+#define SEAL_SYSTEM_UNIX_LIKE 3
+
+#if defined(_WIN32)
+#define SEAL_SYSTEM SEAL_SYSTEM_WINDOWS
+#elif defined(__linux__) || defined(__FreeBSD__) || (defined(__APPLE__) || defined(EMSCRIPTEN) && defined(__MACH__))
+#define SEAL_SYSTEM SEAL_SYSTEM_UNIX_LIKE
+#else
+#define SEAL_SYSTEM SEAL_SYSTEM_OTHER
+#error "Unsupported system"
+#endif
 
 // Detect compiler
 #define SEAL_COMPILER_MSVC 1
@@ -81,7 +118,9 @@ namespace seal
 #else
 namespace seal
 {
-    enum class SEAL_BYTE : unsigned char {};
+    enum class SEAL_BYTE : unsigned char
+    {
+    };
 }
 #endif
 
@@ -115,27 +154,37 @@ namespace seal
 #endif
 
 #ifndef SEAL_SUB_BORROW_UINT64
-#define SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result) sub_uint64_generic(operand1, operand2, borrow, result)
+#define SEAL_SUB_BORROW_UINT64(operand1, operand2, borrow, result) \
+    sub_uint64_generic(operand1, operand2, borrow, result)
 #endif
 
 #ifndef SEAL_MULTIPLY_UINT64
-#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128) {                      \
-    multiply_uint64_generic(operand1, operand2, result128);                        \
-}
+#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)     \
+    {                                                           \
+        multiply_uint64_generic(operand1, operand2, result128); \
+    }
 #endif
 
 #ifndef SEAL_DIVIDE_UINT128_UINT64
-#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result) {               \
-    divide_uint128_uint64_inplace_generic(numerator, denominator, result);         \
-}
+#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result)             \
+    {                                                                          \
+        divide_uint128_uint64_inplace_generic(numerator, denominator, result); \
+    }
 #endif
 
 #ifndef SEAL_MULTIPLY_UINT64_HW64
-#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) {                      \
-    multiply_uint64_hw64_generic(operand1, operand2, hw64);                        \
-}
+#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64)     \
+    {                                                           \
+        multiply_uint64_hw64_generic(operand1, operand2, hw64); \
+    }
 #endif
 
 #ifndef SEAL_MSB_INDEX_UINT64
 #define SEAL_MSB_INDEX_UINT64(result, value) get_msb_index_generic(result, value)
 #endif
+
+// Check whether an object is of expected type; this requires the type_traits header to be included
+#define SEAL_ASSERT_TYPE(obj, expected, message)      \
+    static_assert(                                    \
+        std::is_same<decltype(obj), expected>::value, \
+        "In " __FILE__ ":" SEAL_STRINGIZE(__LINE__) " expected " SEAL_STRINGIZE(expected) " (message: " message ")");

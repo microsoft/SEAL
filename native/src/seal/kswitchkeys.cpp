@@ -10,7 +10,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    KSwitchKeys &KSwitchKeys::operator =(const KSwitchKeys &assign)
+    KSwitchKeys &KSwitchKeys::operator=(const KSwitchKeys &assign)
     {
         // Check for self-assignment
         if (this == &assign)
@@ -51,18 +51,17 @@ namespace seal
             uint64_t keys_dim1 = static_cast<uint64_t>(keys_.size());
 
             // Save the parms_id
-            stream.write(reinterpret_cast<const char*>(&parms_id_),
-                sizeof(parms_id_type));
+            stream.write(reinterpret_cast<const char *>(&parms_id_), sizeof(parms_id_type));
 
             // Save the size of keys_
-            stream.write(reinterpret_cast<const char*>(&keys_dim1), sizeof(uint64_t));
+            stream.write(reinterpret_cast<const char *>(&keys_dim1), sizeof(uint64_t));
 
             // Now loop again over keys_dim1
             for (size_t index = 0; index < keys_dim1; index++)
             {
                 // Save second dimension of keys_
                 uint64_t keys_dim2 = static_cast<uint64_t>(keys_[index].size());
-                stream.write(reinterpret_cast<const char*>(&keys_dim2), sizeof(uint64_t));
+                stream.write(reinterpret_cast<const char *>(&keys_dim2), sizeof(uint64_t));
 
                 // Loop over keys_dim2 and save all (or none)
                 for (size_t j = 0; j < keys_dim2; j++)
@@ -107,12 +106,11 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             // Read the parms_id
-            stream.read(reinterpret_cast<char*>(&parms_id_),
-                sizeof(parms_id_type));
+            stream.read(reinterpret_cast<char *>(&parms_id_), sizeof(parms_id_type));
 
             // Read in the size of keys_
             uint64_t keys_dim1 = 0;
-            stream.read(reinterpret_cast<char*>(&keys_dim1), sizeof(uint64_t));
+            stream.read(reinterpret_cast<char *>(&keys_dim1), sizeof(uint64_t));
 
             // Reserve first for dimension of keys_
             new_keys.reserve(safe_cast<size_t>(keys_dim1));
@@ -122,7 +120,7 @@ namespace seal
             {
                 // Read the size of the second dimension
                 uint64_t keys_dim2 = 0;
-                stream.read(reinterpret_cast<char*>(&keys_dim2), sizeof(uint64_t));
+                stream.read(reinterpret_cast<char *>(&keys_dim2), sizeof(uint64_t));
 
                 // Don't resize; only reserve
                 new_keys.emplace_back();
@@ -149,4 +147,4 @@ namespace seal
 
         swap(keys_, new_keys);
     }
-}
+} // namespace seal

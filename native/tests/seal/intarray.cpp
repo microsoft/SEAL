@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/intarray.h"
 #include "seal/memorymanager.h"
 #include <sstream>
+#include "gtest/gtest.h"
 
 using namespace seal;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
     TEST(IntArrayTest, IntArrayBasics)
     {
@@ -182,14 +182,14 @@ namespace SEALTest
     {
         IntArray<char> arr(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
         IntArray<char> arr2(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
-        ASSERT_NE(&static_cast<util::MemoryPool&>(arr.pool()), &static_cast<util::MemoryPool&>(arr2.pool()));
+        ASSERT_NE(&static_cast<util::MemoryPool &>(arr.pool()), &static_cast<util::MemoryPool &>(arr2.pool()));
 
         arr = arr2;
-        util::MemoryPool *addr = &static_cast<util::MemoryPool&>(arr.pool());
-        ASSERT_EQ(&static_cast<util::MemoryPool&>(arr.pool()), addr);
+        util::MemoryPool *addr = &static_cast<util::MemoryPool &>(arr.pool());
+        ASSERT_EQ(&static_cast<util::MemoryPool &>(arr.pool()), addr);
 
-        addr = &static_cast<util::MemoryPool&>(arr2.pool());
+        addr = &static_cast<util::MemoryPool &>(arr2.pool());
         arr = move(arr2);
-        ASSERT_EQ(&static_cast<util::MemoryPool&>(arr.pool()), addr);
+        ASSERT_EQ(&static_cast<util::MemoryPool &>(arr.pool()), addr);
     }
-}
+} // namespace sealtest

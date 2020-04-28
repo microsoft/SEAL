@@ -3,17 +3,17 @@
 
 #pragma once
 
-#include <cstdint>
 #include "seal/util/pointer.h"
 #include "seal/util/polycore.h"
 #include "seal/util/uintarithmod.h"
+#include <cstdint>
 
 namespace seal
 {
     namespace util
     {
-        inline void negate_poly_coeffmod(const std::uint64_t *poly,
-            std::size_t coeff_count, const std::uint64_t *coeff_modulus,
+        inline void negate_poly_coeffmod(
+            const std::uint64_t *poly, std::size_t coeff_count, const std::uint64_t *coeff_modulus,
             std::size_t coeff_uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -42,10 +42,9 @@ namespace seal
             }
         }
 
-        inline void add_poly_poly_coeffmod(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t coeff_count,
-            const std::uint64_t *coeff_modulus, std::size_t coeff_uint64_count,
-            std::uint64_t *result)
+        inline void add_poly_poly_coeffmod(
+            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
+            const std::uint64_t *coeff_modulus, std::size_t coeff_uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (operand1 == nullptr && coeff_count > 0)
@@ -71,18 +70,16 @@ namespace seal
 #endif
             for (std::size_t i = 0; i < coeff_count; i++)
             {
-                add_uint_uint_mod(operand1, operand2, coeff_modulus,
-                    coeff_uint64_count, result);
+                add_uint_uint_mod(operand1, operand2, coeff_modulus, coeff_uint64_count, result);
                 operand1 += coeff_uint64_count;
                 operand2 += coeff_uint64_count;
                 result += coeff_uint64_count;
             }
         }
 
-        inline void sub_poly_poly_coeffmod(const std::uint64_t *operand1,
-            const std::uint64_t *operand2, std::size_t coeff_count,
-            const std::uint64_t *coeff_modulus, std::size_t coeff_uint64_count,
-            std::uint64_t *result)
+        inline void sub_poly_poly_coeffmod(
+            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
+            const std::uint64_t *coeff_modulus, std::size_t coeff_uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (operand1 == nullptr && coeff_count > 0)
@@ -108,16 +105,15 @@ namespace seal
 #endif
             for (std::size_t i = 0; i < coeff_count; i++)
             {
-                sub_uint_uint_mod(operand1, operand2, coeff_modulus,
-                    coeff_uint64_count, result);
+                sub_uint_uint_mod(operand1, operand2, coeff_modulus, coeff_uint64_count, result);
                 operand1 += coeff_uint64_count;
                 operand2 += coeff_uint64_count;
                 result += coeff_uint64_count;
             }
         }
 
-        void poly_infty_norm_coeffmod(const std::uint64_t *poly,
-            std::size_t coeff_count, std::size_t coeff_uint64_count,
+        void poly_infty_norm_coeffmod(
+            const std::uint64_t *poly, std::size_t coeff_count, std::size_t coeff_uint64_count,
             const std::uint64_t *modulus, std::uint64_t *result, MemoryPool &pool);
-    }
-}
+    } // namespace util
+} // namespace seal

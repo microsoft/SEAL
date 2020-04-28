@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "gtest/gtest.h"
 #include "seal/util/uintarith.h"
 #include <cstdint>
+#include "gtest/gtest.h"
 
 using namespace seal::util;
 using namespace std;
 
-namespace SEALTest
+namespace sealtest
 {
-   namespace util
-   {
+    namespace util
+    {
         TEST(UIntArith, AddUInt64Generic)
         {
             unsigned long long result;
@@ -42,10 +42,10 @@ namespace SEALTest
         }
 
 #if SEAL_COMPILER == SEAL_COMPILER_MSVC
-#pragma optimize ("", off)
+#pragma optimize("", off)
 #elif SEAL_COMPILER == SEAL_COMPILER_GCC
 #pragma GCC push_options
-#pragma GCC optimize ("O0")
+#pragma GCC optimize("O0")
 #elif SEAL_COMPILER == SEAL_COMPILER_CLANG
 #pragma clang optimize off
 #endif
@@ -80,7 +80,7 @@ namespace SEALTest
         }
 
 #if SEAL_COMPILER == SEAL_COMPILER_MSVC
-#pragma optimize ("", on)
+#pragma optimize("", on)
 #elif SEAL_COMPILER == SEAL_COMPILER_GCC
 #pragma GCC pop_options
 #elif SEAL_COMPILER == SEAL_COMPILER_CLANG
@@ -143,6 +143,41 @@ namespace SEALTest
             ASSERT_EQ(0xE01E01E01E01E01FULL, result);
             ASSERT_FALSE(sub_uint64(0xF00F00F00F00F00FULL, 0x0FF0FF0FF0FF0FF0ULL, 1, &result));
             ASSERT_EQ(0xE01E01E01E01E01EULL, result);
+        }
+
+        TEST(UIntArith, AddUInt128)
+        {
+            auto set_uint128 = [](uint64_t *destination, uint64_t val0, uint64_t val1) {
+                destination[0] = val0;
+                destination[1] = val1;
+            };
+
+            auto assert_uint128_eq = [](unsigned long long *test, unsigned long long expect0,
+                                        unsigned long long expect1) {
+                ASSERT_EQ(expect0, test[0]);
+                ASSERT_EQ(expect1, test[1]);
+            };
+
+            uint64_t operand1[2]{ 0, 0 };
+            uint64_t operand2[2]{ 0, 0 };
+            unsigned long long result[2]{ 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL };
+            ASSERT_FALSE(add_uint128(operand1, operand2, result));
+            ASSERT_EQ(0, result[0] | result[1]);
+
+            set_uint128(operand1, 1, 1);
+            set_uint128(operand2, 1, 1);
+            ASSERT_FALSE(add_uint128(operand1, operand2, result));
+            assert_uint128_eq(result, 2, 2);
+
+            set_uint128(operand1, 0xFFFFFFFFFFFFFFFFULL, 0);
+            set_uint128(operand2, 1, 0);
+            ASSERT_FALSE(add_uint128(operand1, operand2, result));
+            assert_uint128_eq(result, 0, 1);
+
+            set_uint128(operand1, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL);
+            set_uint128(operand2, 1, 0);
+            ASSERT_TRUE(add_uint128(operand1, operand2, result));
+            assert_uint128_eq(result, 0, 0);
         }
 
         TEST(UIntArith, AddUIntUInt)
@@ -1180,6 +1215,104 @@ namespace SEALTest
             ASSERT_EQ(334670460471ULL, result);
         }
 
+        TEST(UIntArith, MultiplyManyUInt64)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+
+            vector<uint64_t> in = { 0 };
+            vector<uint64_t> out = { 0 };
+            vector<uint64_t> expected = { 0 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 1 };
+            out = { 0 };
+            expected = { 1 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 0, 0, 0 };
+            out = { 0, 0, 0 };
+            expected = { 0, 0, 0 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64(in.data(), 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64(in.data(), 3, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 1, 1, 1 };
+            out = { 0, 0, 0 };
+            expected = { 1, 0, 0 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64(in.data(), 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64(in.data(), 3, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 10, 20, 40 };
+            out = { 0, 0, 0 };
+            expected = { 10, 0, 0 };
+            multiply_many_uint64(in.data(), 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 200, 0, 0 };
+            multiply_many_uint64(in.data(), 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 8000, 0, 0 };
+            multiply_many_uint64(in.data(), 3, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 0xF0F0F0F0F0F0F0, 0xBABABABABABABA, 0xCECECECECECECE };
+            out = { 0, 0, 0 };
+            expected = { 0xade881380d001140, 0xd4d54d49088bd2dd, 0x8df9832af0 };
+            multiply_many_uint64(in.data(), 3, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+        }
+
+        TEST(UIntArith, MultiplyManyUInt64Except)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+
+            vector<uint64_t> in = { 0, 0, 0 };
+            vector<uint64_t> out = { 0, 0, 0 };
+            vector<uint64_t> expected = { 0, 0, 0 };
+            multiply_many_uint64_except(in.data(), 2, 0, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64_except(in.data(), 2, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64_except(in.data(), 3, 0, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64_except(in.data(), 3, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            multiply_many_uint64_except(in.data(), 3, 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 2, 3, 5 };
+            out = { 0, 0, 0 };
+            expected = { 3, 0, 0 };
+            multiply_many_uint64_except(in.data(), 2, 0, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 2, 0, 0 };
+            multiply_many_uint64_except(in.data(), 2, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 15, 0, 0 };
+            multiply_many_uint64_except(in.data(), 3, 0, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 10, 0, 0 };
+            multiply_many_uint64_except(in.data(), 3, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+            expected = { 6, 0, 0 };
+            multiply_many_uint64_except(in.data(), 3, 2, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+
+            in = { 0xF0F0F0F0F0F0F0, 0xBABABABABABABA, 0xCECECECECECECE };
+            out = { 0, 0, 0 };
+            expected = { 0x0c6a88a6c4e30120, 0xc2a486684a2c, 0x0 };
+            multiply_many_uint64_except(in.data(), 3, 1, out.data(), pool);
+            ASSERT_TRUE(expected == out);
+        }
+
         TEST(UIntArith, MultiplyUIntUInt)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
@@ -1650,5 +1783,5 @@ namespace SEALTest
             ASSERT_EQ(0ULL, exponentiate_uint64(0x10ULL, 16ULL));
             ASSERT_EQ(12389286314587456613ULL, exponentiate_uint64(123456789ULL, 13ULL));
         }
-   }
-}
+    } // namespace util
+} // namespace sealtest
