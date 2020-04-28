@@ -141,7 +141,15 @@ y_combinator<std::decay_t<F>> make_y_combinator(F&& f) {
     return {std::forward<F>(f)};
 }
 
-EMSCRIPTEN_BINDINGS(bindings) {
+/*
+ * Dummy main so the linker will not perform DCE
+ */
+int main()
+{
+	return 0;
+}
+
+EMSCRIPTEN_BINDINGS(SEAL) {
     emscripten::function("getException", &get_exception);
     emscripten::function("jsArrayUint8FromVec", select_overload<val(const std::vector<uint8_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayInt32FromVec", select_overload<val(const std::vector<int32_t> &)>(&jsArrayFromVec));
