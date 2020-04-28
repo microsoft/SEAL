@@ -430,6 +430,10 @@ if(SEAL_USE_INTRIN)
         set(SEAL_INTRIN_HEADER "x86intrin.h")
     endif()
 
+    if(EMSCRIPTEN)
+        set(SEAL_INTRIN_HEADER "wasm_simd128.h")
+    endif()
+
     check_include_file_cxx(${SEAL_INTRIN_HEADER} HAVE_INTRIN_HEADER)
     if(NOT HAVE_INTRIN_HEADER)
         set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
@@ -632,6 +636,11 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
         set(DEL_CMD "rm")
         set(DEL_CMD_OPTS "-rf")
     endif()
+
+    if(EMSCRIPTEN)
+        set(AR_CMD_PATH "emar")
+    endif()
+
     file(COPY "${zlibstatic_LIBRARY_PATH}" DESTINATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     add_custom_command(TARGET seal POST_BUILD
         COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:seal>

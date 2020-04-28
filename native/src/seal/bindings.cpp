@@ -81,8 +81,8 @@ std::string printContext(shared_ptr<SEALContext> context) {
     oss << "|   coeff_modulus size: ";
     oss << context_data.total_coeff_modulus_bit_count() << " (";
     auto coeff_modulus = context_data.parms().coeff_modulus();
-    std::size_t coeff_mod_count = coeff_modulus.size();
-    for (std::size_t i = 0; i < coeff_mod_count - 1; i++) {
+    std::size_t coeff_modulus_size = coeff_modulus.size();
+    for (std::size_t i = 0; i < coeff_modulus_size - 1; i++) {
         oss << coeff_modulus[i].bit_count() << " + ";
     }
     oss << coeff_modulus.back().bit_count();
@@ -172,9 +172,9 @@ EMSCRIPTEN_BINDINGS(bindings) {
     register_vector<double>("std::vector<double>");
     register_vector<std::complex<double>> ("std::vector<std::complex<double>>");
 
-    class_<std::vector<SmallModulus>> ("std::vector<SmallModulus>")
+    class_<std::vector<Modulus>> ("std::vector<Modulus>")
         .constructor<>()
-        .function("values", optional_override([](std::vector<SmallModulus> &self) {
+        .function("values", optional_override([](std::vector<Modulus> &self) {
             std::ostringstream str;
             std::string separator;
             for (auto x: self) {
@@ -231,26 +231,26 @@ EMSCRIPTEN_BINDINGS(bindings) {
                 typed_memory_view(l, bit_sizes.data())
             };
             memoryView.call<void>("set", v);
-            std::vector<SmallModulus>coeffModulus = CoeffModulus::Create(poly_modulus_degree, bit_sizes);
+            std::vector<Modulus>coeffModulus = CoeffModulus::Create(poly_modulus_degree, bit_sizes);
             return coeffModulus;
         }));
     class_<PlainModulus>("PlainModulus")
-        .class_function("Batching", select_overload<SmallModulus(std::size_t, int)>(&PlainModulus::Batching))
-        .class_function("BatchingVector", select_overload<std::vector<SmallModulus>(std::size_t, std::vector<int>)>(&PlainModulus::Batching));
+        .class_function("Batching", select_overload<Modulus(std::size_t, int)>(&PlainModulus::Batching))
+        .class_function("BatchingVector", select_overload<std::vector<Modulus>(std::size_t, std::vector<int>)>(&PlainModulus::Batching));
 
-    class_<SmallModulus>("SmallModulus")
+    class_<Modulus>("Modulus")
         .constructor<>()
-        .constructor<SmallModulus &&>() // Move via constructor overload
-        .function("isZero", optional_override([](SmallModulus &self) {
+        .constructor<Modulus &&>() // Move via constructor overload
+        .function("isZero", optional_override([](Modulus &self) {
             return self.is_zero();
         }))
-        .function("isPrime", optional_override([](SmallModulus &self) {
+        .function("isPrime", optional_override([](Modulus &self) {
             return self.is_prime();
         }))
-        .function("bitCount", optional_override([](SmallModulus &self) {
+        .function("bitCount", optional_override([](Modulus &self) {
             return self.bit_count();
         }))
-        .function("saveToString", optional_override([](SmallModulus &self,
+        .function("saveToString", optional_override([](Modulus &self,
             compr_mode_type compr_mode) {
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
@@ -258,7 +258,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::string encoded = b64encode(contents);
             return encoded;
         }))
-        .function("saveToArray", optional_override([](SmallModulus &self,
+        .function("saveToArray", optional_override([](Modulus &self,
             compr_mode_type compr_mode) {
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
@@ -266,13 +266,13 @@ EMSCRIPTEN_BINDINGS(bindings) {
             std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
             return strVector;
         }))
-        .function("loadFromString", optional_override([](SmallModulus &self,
+        .function("loadFromString", optional_override([](Modulus &self,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(is);
         }))
-        .function("loadFromArray", optional_override([](SmallModulus &self,
+        .function("loadFromArray", optional_override([](Modulus &self,
             const val &v) {
             // Get the size of the TypedArray input
             const size_t length = v["length"].as<unsigned>();
@@ -291,14 +291,14 @@ EMSCRIPTEN_BINDINGS(bindings) {
             // Load from the stringstream
             self.load(ss);
         }))
-        .function("setValue", optional_override([](SmallModulus &self,
+        .function("setValue", optional_override([](Modulus &self,
             const std::string &v) {
             std::uint64_t value;
             std::istringstream is(v);
             is >> value;
             self = std::move(value);
         }))
-        .function("value", optional_override([](SmallModulus &self) {
+        .function("value", optional_override([](Modulus &self) {
             uint64_t value = self.value();
             std::ostringstream oss;
             oss << value;
@@ -310,7 +310,7 @@ EMSCRIPTEN_BINDINGS(bindings) {
         .constructor<scheme_type>()
         .function("setPolyModulusDegree", &EncryptionParameters::set_poly_modulus_degree)
         .function("setCoeffModulus", &EncryptionParameters::set_coeff_modulus)
-        .function("setPlainModulus", select_overload<void(const SmallModulus &)>(&EncryptionParameters::set_plain_modulus))
+        .function("setPlainModulus", select_overload<void(const Modulus &)>(&EncryptionParameters::set_plain_modulus))
         .function("scheme", optional_override([](EncryptionParameters &self) {
             return self.scheme();
         }))
@@ -366,7 +366,9 @@ EMSCRIPTEN_BINDINGS(bindings) {
         }));
 
     class_<EncryptionParameterQualifiers>("EncryptionParameterQualifiers")
-        .property("parametersSet", &EncryptionParameterQualifiers::parameters_set)
+        .function("parametersSet", optional_override([](EncryptionParameterQualifiers &self) {
+            return self.parameters_set();
+        }))
         .property("usingFFT", &EncryptionParameterQualifiers::using_fft)
         .property("usingNTT", &EncryptionParameterQualifiers::using_ntt)
         .property("usingBatching", &EncryptionParameterQualifiers::using_batching)
@@ -680,17 +682,67 @@ EMSCRIPTEN_BINDINGS(bindings) {
                 self = std::move(assign);
             }));
 
+    class_<Serializable<RelinKeys>>("Serializable<RelinKeys>")
+        .function("save",  optional_override([](Serializable<RelinKeys> &self, compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string contents = buffer.str();
+            std::string encoded = b64encode(contents);
+            return encoded;
+        }));
+    class_<Serializable<GaloisKeys>>("Serializable<GaloisKeys>")
+        .function("save",  optional_override([](Serializable<GaloisKeys> &self, compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string contents = buffer.str();
+            std::string encoded = b64encode(contents);
+            return encoded;
+        }));
+    class_<Serializable<Ciphertext>>("Serializable<Ciphertext>")
+        .function("save",  optional_override([](Serializable<Ciphertext> &self, compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string contents = buffer.str();
+            std::string encoded = b64encode(contents);
+            return encoded;
+        }));
+
     class_<KeyGenerator>("KeyGenerator")
-        .constructor<std::shared_ptr<SEALContext>> ()
+        .constructor<std::shared_ptr<SEALContext>>()
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
-        .constructor<std::shared_ptr<SEALContext>, const SecretKey &, const PublicKey &>()
         .function("getPublicKey", &KeyGenerator::public_key)
         .function("getSecretKey", &KeyGenerator::secret_key)
-        .function("genRelinKeys", select_overload<RelinKeys()>(&KeyGenerator::relin_keys))
-        .function("genGaloisKeysAll", select_overload<GaloisKeys()>(&KeyGenerator::galois_keys))
-        .function("genGaloisKeys", optional_override([](KeyGenerator &self, const val &v) {
+        .function("genRelinKeysLocal", &KeyGenerator::relin_keys_local)
+        .function("genRelinKeys", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::relin_keys))
+        .function("genGaloisKeysLocal", optional_override([](KeyGenerator &self, const val &v = val::array()) {
                 // Get the size of the TypedArray input
                 const size_t length = v["length"].as<unsigned>();
+
+                // If empty, generate all steps.
+                if (length == 0) {
+                    return self.galois_keys_local();
+                }
+
+                // Create a temporary vector to store the TypedArray values
+                std::vector<std::int32_t> temp;
+                // Resize to the number of elements in the TypedArray
+                temp.resize(length);
+                // Construct a memory view on the temp vector
+                const val memoryView { typed_memory_view(length, temp.data()) };
+                // Set the data in the vector from the JS side.
+                memoryView.call<void>("set", v);
+
+                return self.galois_keys_local(temp);
+            }))
+        .function("genGaloisKeys", optional_override([](KeyGenerator &self, const val &v = val::array()) {
+                // Get the size of the TypedArray input
+                const size_t length = v["length"].as<unsigned>();
+
+                // If empty, generate all steps.
+                if (length == 0) {
+                    return self.galois_keys();
+                }
+
                 // Create a temporary vector to store the TypedArray values
                 std::vector<std::int32_t> temp;
                 // Resize to the number of elements in the TypedArray
@@ -701,31 +753,6 @@ EMSCRIPTEN_BINDINGS(bindings) {
                 memoryView.call<void>("set", v);
 
                 return self.galois_keys(temp);
-            }))
-        .function("galoisKeysSaveAll", optional_override([](KeyGenerator &self, compr_mode_type compr_mode) {
-                std::ostringstream buffer;
-                self.galois_keys_save(buffer, compr_mode);
-                std::string contents = buffer.str();
-                std::string encoded = b64encode(contents);
-                return encoded;
-            }))
-        .function("galoisKeysSave", optional_override([](KeyGenerator &self, const val &v, compr_mode_type compr_mode) {
-                // Get the size of the TypedArray input
-                const size_t length = v["length"].as<unsigned>();
-                // Create a temporary vector to store the TypedArray values
-                std::vector<std::int32_t> temp;
-                // Resize to the number of elements in the TypedArray
-                temp.resize(length);
-                // Construct a memory view on the temp vector
-                const val memoryView { typed_memory_view(length, temp.data()) };
-                // Set the data in the vector from the JS side.
-                memoryView.call<void>("set", v);
-
-                std::ostringstream buffer;
-                self.galois_keys_save(temp, buffer, compr_mode);
-                std::string contents = buffer.str();
-                std::string encoded = b64encode(contents);
-                return encoded;
             }));
     class_<PublicKey>("PublicKey")
         .constructor<>()
@@ -994,8 +1021,8 @@ EMSCRIPTEN_BINDINGS(bindings) {
         .function("release", optional_override([](Ciphertext &self) {
              return self.release();
          }))
-        .function("coeffModCount", optional_override([](Ciphertext &self) {
-            return self.coeff_mod_count();
+        .function("coeffModulusSize", optional_override([](Ciphertext &self) {
+            return self.coeff_modulus_size();
         }))
         .function("polyModulusDegree", optional_override([](Ciphertext &self) {
             return self.poly_modulus_degree();
@@ -1196,12 +1223,12 @@ EMSCRIPTEN_BINDINGS(bindings) {
 
     class_<Encryptor>("Encryptor")
         .constructor<std::shared_ptr<SEALContext>, const PublicKey &>()
-        // embind caveat, have to use this overload as the constructor for symmetric encryption
         .constructor<std::shared_ptr<SEALContext>, const PublicKey &, const SecretKey &>()
         .function("setPublicKey", &Encryptor::set_public_key)
         .function("setSecretKey", &Encryptor::set_secret_key)
-        .function("encrypt", &Encryptor::encrypt)
-        .function("encryptSymmetric", &Encryptor::encrypt_symmetric);
+        .function("encrypt", &Encryptor::encrypt);
+        // TODO: Finish implementing symmetric encryption
+        // .function("encryptSymmetric", &Encryptor::encrypt_symmetric);
 
     class_<Decryptor>("Decryptor")
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
