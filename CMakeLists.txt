@@ -762,30 +762,38 @@ endif()
 # dynamic library paths need to be specified explicitly in the NuGet
 # command. See dotnet/nuget/SEALNet.nuspec.in.
 
-set(SEAL_WINDOWS_SEAL_C_PATH_ ${SEAL_SOURCE_DIR}/lib/x64/$Configuration$/sealc.dll)
-set(SEAL_LINUX_SEAL_C_PATH_ ${SEAL_SOURCE_DIR}/lib/libsealc.so.${SEAL_VERSION})
-set(SEAL_MACOS_SEAL_C_PATH_ ${SEAL_SOURCE_DIR}/lib/libsealc.${SEAL_VERSION}.dylib)
-
+# First create the multi-platform NuSpec file so disable all platform-specific
+# library paths
 unset(SEAL_WINDOWS_SEAL_C_PATH)
 unset(SEAL_LINUX_SEAL_C_PATH)
 unset(SEAL_MACOS_SEAL_C_PATH)
 
-# Supporting local building of NuGet package
-if(NOT SEAL_MULTIPLATFORM_NUGET_BUILD)
-    if(MSVC)
-        set(SEAL_WINDOWS_SEAL_C_PATH ${SEAL_WINDOWS_SEAL_C_PATH_})
-    elseif(UNIX)
-        set(SEAL_LINUX_SEAL_C_PATH ${SEAL_LINUX_SEAL_C_PATH_})
-    elseif(APPLE)
-        set(SEAL_MACOS_SEAL_C_PATH ${SEAL_MACOS_SEAL_C_PATH_})
-    endif()
-endif()
-
-# Create SEALNet.nuspec from SEALNet.nuspec.in
+# Create SEALNet-multi.nuspec for a multi-platform NuGet package 
 configure_file(
     ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec.in
-    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec
+    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
+
+set(SEAL_WINDOWS_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/x64/$Configuration$/sealc.dll)
+set(SEAL_LINUX_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/libsealc.so)
+set(SEAL_MACOS_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/libsealc.dylib)
+
+# Supporting local building of NuGet package
+if(MSVC)
+    set(NUGET_SEAL_C_PATH ${SEAL_WINDOWS_SEAL_C_PATH})
+elseif(UNIX)
+    set(NUGET_SEAL_C_PATH ${SEAL_LINUX_SEAL_C_PATH})
+elseif(APPLE)
+    set(NUGET_SEAL_C_PATH ${SEAL_MACOS_SEAL_C_PATH})
+endif()
+
+if(NUGET_SEAL_C_PATH)
+    # Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
+    configure_file(
+        ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec.in
+        ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec
+        @ONLY)
+endif()
 
 # Create SEALNet.targets from SEALNet.targets.in
 configure_file(

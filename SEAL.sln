@@ -88,7 +88,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		pipelines\pipeline-CI-Debug-macOS.yml = pipelines\pipeline-CI-Debug-macOS.yml
 		pipelines\pipeline-CI-Debug-Windows.yml = pipelines\pipeline-CI-Debug-Windows.yml
 		pipelines\pipeline-CI-Release-All.yml = pipelines\pipeline-CI-Release-All.yml
-		pipelines\pipeline-Nuget.yml = pipelines\pipeline-Nuget.yml
+		pipelines\pipeline-NuGet.yml = pipelines\pipeline-NuGet.yml
 		pipelines\pipeline-PR-Debug-All.yml = pipelines\pipeline-PR-Debug-All.yml
 		pipelines\windows.yml = pipelines\windows.yml
 	EndProjectSection

@@ -1,4 +1,4 @@
-# This defines a pipeline to pack into Nuget.
+# This defines a pipeline to pack into NuGet.
 
 trigger: none
 
