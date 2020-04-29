@@ -2,6 +2,12 @@
 
 ## Version 3.5.0
 
+### Hotfix - 4/29/2020
+
+- Switched to using Microsoft GSL v3.0.1 and fixed minor GSL related issues in `CMakeLists.txt`.
+- Fixed some typos in `README.md`.
+- Fixes bugs in ADO pipelines files.
+
 ### New Features
 
 - Microsoft SEAL officially supports Android (Xamarin.Android) on ARM64.

@@ -15,11 +15,9 @@ jobs:
       parameters:
         nuget_version: '5.4.0'
         ${{ if eq(parameters.debug, 'true') }}:
-          configuration: 'debug'
-          path: 'Debug'
+          configuration: 'Debug'
         ${{ if eq(parameters.debug, 'false') }}:
-          configuration: 'release'
-          path: 'Release'
+          configuration: 'Release'
 
 - ${{ if eq(parameters.name, 'Linux') }}:
   - job: ${{ parameters.name }}
