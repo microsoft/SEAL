@@ -89,7 +89,7 @@ steps:
   displayName: 'Copy NuSpec File to: $(Build.ArtifactStagingDirectory)'
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)\dotnet\nuget\'
-    Contents: 'SEALNet.nuspec'
+    Contents: 'SEALNet-multi.nuspec'
     TargetFolder: '$(Build.ArtifactStagingDirectory)\dotnet\nuget\'
 
 - task: CopyFiles@2

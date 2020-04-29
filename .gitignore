@@ -31,6 +31,7 @@ thirdparty/googletest/*
 !thirdparty/googletest/CMakeLists.txt
 dotnet/nuget/nuget.exe
 dotnet/nuget/SEALNet.nuspec
+dotnet/nuget/SEALNet-multi.nuspec
 dotnet/nuget/SEALNet.targets
 
 ## Ignore Visual Studio temporary files, build results, and
