@@ -758,8 +758,9 @@ endif()
 #######################################
 
 # Set the sealc dynamic library file names to be included in creating
-# the NuGet package. When building a multi-platform package, all three
-# paths should be included.
+# the NuGet package. When building a multi-platform NuGet package, the
+# dynamic library paths need to be specified explicitly in the NuGet
+# command. See dotnet/nuget/SEALNet.nuspec.in.
 
 set(SEAL_WINDOWS_SEAL_C_PATH_ ${SEAL_SOURCE_DIR}/lib/x64/$Configuration$/sealc.dll)
 set(SEAL_LINUX_SEAL_C_PATH_ ${SEAL_SOURCE_DIR}/lib/libsealc.so.${SEAL_VERSION})
@@ -769,11 +770,8 @@ unset(SEAL_WINDOWS_SEAL_C_PATH)
 unset(SEAL_LINUX_SEAL_C_PATH)
 unset(SEAL_MACOS_SEAL_C_PATH)
 
-if(SEAL_MULTIPLATFORM_NUGET_BUILD)
-    set(SEAL_WINDOWS_SEAL_C_PATH ${SEAL_WINDOWS_SEAL_C_PATH_})
-    set(SEAL_LINUX_SEAL_C_PATH ${SEAL_LINUX_SEAL_C_PATH_})
-    set(SEAL_MACOS_SEAL_C_PATH ${SEAL_MACOS_SEAL_C_PATH_})
-else()
+# Supporting local building of NuGet package
+if(NOT SEAL_MULTIPLATFORM_NUGET_BUILD)
     if(MSVC)
         set(SEAL_WINDOWS_SEAL_C_PATH ${SEAL_WINDOWS_SEAL_C_PATH_})
     elseif(UNIX)
