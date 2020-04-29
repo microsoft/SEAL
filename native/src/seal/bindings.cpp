@@ -691,28 +691,49 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             }));
 
     class_<Serializable<RelinKeys>>("Serializable<RelinKeys>")
-        .function("save",  optional_override([](Serializable<RelinKeys> &self, compr_mode_type compr_mode) {
+        .function("saveToString",  optional_override([](Serializable<RelinKeys> &self, compr_mode_type compr_mode) {
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             std::string encoded = b64encode(contents);
             return encoded;
+        }))        
+        .function("saveToArray",  optional_override([](Serializable<RelinKeys> &self, compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
         }));
     class_<Serializable<GaloisKeys>>("Serializable<GaloisKeys>")
-        .function("save",  optional_override([](Serializable<GaloisKeys> &self, compr_mode_type compr_mode) {
+        .function("saveToString",  optional_override([](Serializable<GaloisKeys> &self, compr_mode_type compr_mode) {
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             std::string encoded = b64encode(contents);
             return encoded;
+        }))
+        .function("saveToArray",  optional_override([](Serializable<GaloisKeys> &self, compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
         }));
     class_<Serializable<Ciphertext>>("Serializable<Ciphertext>")
-        .function("save",  optional_override([](Serializable<Ciphertext> &self, compr_mode_type compr_mode) {
+        .function("saveToString",  optional_override([](Serializable<Ciphertext> &self, compr_mode_type compr_mode) {
             std::ostringstream buffer;
             self.save(buffer, compr_mode);
             std::string contents = buffer.str();
             std::string encoded = b64encode(contents);
             return encoded;
+        }))
+        .function("saveToArray",  optional_override([](Serializable<Ciphertext> &self, compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
         }));
 
     class_<KeyGenerator>("KeyGenerator")
@@ -722,7 +743,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .function("getSecretKey", &KeyGenerator::secret_key)
         .function("genRelinKeysLocal", &KeyGenerator::relin_keys_local)
         .function("genRelinKeys", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::relin_keys))
-        .function("genGaloisKeysLocal", optional_override([](KeyGenerator &self, const val &v = val::array()) {
+        .function("genGaloisKeysLocal", optional_override([](KeyGenerator &self, const val &v) {
                 // Get the size of the TypedArray input
                 const size_t length = v["length"].as<unsigned>();
 
@@ -742,7 +763,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
 
                 return self.galois_keys_local(temp);
             }))
-        .function("genGaloisKeys", optional_override([](KeyGenerator &self, const val &v = val::array()) {
+        .function("genGaloisKeys", optional_override([](KeyGenerator &self, const val &v) {
                 // Get the size of the TypedArray input
                 const size_t length = v["length"].as<unsigned>();
 
