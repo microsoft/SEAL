@@ -30,6 +30,18 @@ steps:
     packageType: 'sdk'
     version: '3.1.x'
 
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: PowerShell@2
+    displayName: 'Download Strong Name certificate'
+    inputs:
+      targetType: 'inline'
+      script: |
+          # Get signing certificate
+          $CertOutFile = Join-Path -Path $env:BUILD_SOURCESDIRECTORY -ChildPath dotnet\src\SEALNetCert.snk
+          if (Test-Path env:SEALNetSigningCertificate) {
+              Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
+          }
+
 - task: VSBuild@1
   displayName: 'Build solution SEAL'
   inputs:
@@ -66,18 +78,6 @@ steps:
     searchPattern: '**\bin\**\*.pdb'
     PublishSymbols: false
   continueOnError: true
-
-- ${{ if eq(parameters.configuration, 'Release') }}:
-  - task: PowerShell@2
-    displayName: 'Download Strong Name certificate'
-    inputs:
-      targetType: 'inline'
-      script: |
-          # Get signing certificate
-          $CertOutFile = Join-Path -Path $env:BUILD_SOURCESDIRECTORY -ChildPath dotnet\src\SEALNetCert.snk
-          if (Test-Path env:SEALNetSigningCertificate) {
-              Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
-          }
 
 - ${{ if eq(parameters.configuration, 'Release') }}:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
