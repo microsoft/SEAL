@@ -768,9 +768,9 @@ unset(SEAL_WINDOWS_SEAL_C_PATH)
 unset(SEAL_LINUX_SEAL_C_PATH)
 unset(SEAL_MACOS_SEAL_C_PATH)
 
-# Create SEALNet-multi.nuspec for a multi-platform NuGet package 
+# Create SEALNet-multi.nuspec for a multi-platform NuGet package
 configure_file(
-    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec.in
+    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet-multi.nuspec.in
     ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
 
