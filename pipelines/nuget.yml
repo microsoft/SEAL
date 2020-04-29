@@ -64,7 +64,7 @@ steps:
           TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
 
     - task: NuGetCommand@2
-      displayName: 'Build Nuget Package'
+      displayName: 'Build NuGet Package'
       inputs:
           command: 'pack'
           packagesToPack: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\*.nuspec'

@@ -73,7 +73,7 @@ jobs:
         ${{ if eq(parameters.debug, 'false') }}:
           configuration: 'Release'
 
-- ${{ if eq(parameters.name, 'Nuget') }}:
+- ${{ if eq(parameters.name, 'NuGet') }}:
   - job: ${{ parameters.name }}
     displayName: ${{ parameters.name }}
     dependsOn: [Windows, Linux, macOS, Android]
@@ -83,5 +83,3 @@ jobs:
     - template: nuget.yml
       parameters:
         nuget_version: '5.4.0'
-        configuration: 'release'
-        path: 'Release'

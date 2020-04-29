@@ -25,4 +25,4 @@ stages:
     - template: jobs.yml
       parameters:
         debug: false
-        name: Nuget
+        name: NuGet
