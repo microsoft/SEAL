@@ -1255,9 +1255,9 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .constructor<std::shared_ptr<SEALContext>, const PublicKey &, const SecretKey &>()
         .function("setPublicKey", &Encryptor::set_public_key)
         .function("setSecretKey", &Encryptor::set_secret_key)
-        .function("encrypt", &Encryptor::encrypt);
-        // TODO: Finish implementing symmetric encryption
-        // .function("encryptSymmetric", &Encryptor::encrypt_symmetric);
+        .function("encrypt", &Encryptor::encrypt)
+        .function("encryptSymmetricSerializable", select_overload<Serializable<Ciphertext>(const Plaintext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_symmetric))
+        .function("encryptSymmetric", select_overload<void(const Plaintext &, Ciphertext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_symmetric));
 
     class_<Decryptor>("Decryptor")
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
