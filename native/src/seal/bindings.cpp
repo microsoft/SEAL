@@ -741,9 +741,9 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
         .function("getPublicKey", &KeyGenerator::public_key)
         .function("getSecretKey", &KeyGenerator::secret_key)
-        .function("genRelinKeysLocal", &KeyGenerator::relin_keys_local)
-        .function("genRelinKeys", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::relin_keys))
-        .function("genGaloisKeysLocal", optional_override([](KeyGenerator &self, const val &v) {
+        .function("relinKeysLocal", &KeyGenerator::relin_keys_local)
+        .function("relinKeys", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::relin_keys))
+        .function("galoisKeysLocal", optional_override([](KeyGenerator &self, const val &v) {
                 // Get the size of the TypedArray input
                 const size_t length = v["length"].as<unsigned>();
 
@@ -763,7 +763,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
 
                 return self.galois_keys_local(temp);
             }))
-        .function("genGaloisKeys", optional_override([](KeyGenerator &self, const val &v) {
+        .function("galoisKeys", optional_override([](KeyGenerator &self, const val &v) {
                 // Get the size of the TypedArray input
                 const size_t length = v["length"].as<unsigned>();
 
