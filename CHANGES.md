@@ -2,6 +2,10 @@
 
 ## Version 3.5.0
 
+### Hotfix - 4/30/2020
+
+- Fixed a critical bug [(Issue 166)](https://github.com/microsoft/SEAL/issues/166) in `Evaluator::multiply_plain_inplace`. Thanks s0l0ist!
+
 ### Hotfix - 4/29/2020
 
 - Switched to using Microsoft GSL v3.0.1 and fixed minor GSL related issues in `CMakeLists.txt`.

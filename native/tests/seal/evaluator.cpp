@@ -991,6 +991,76 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0x5B05B058), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
         }
+        {
+            EncryptionParameters parms(scheme_type::BFV);
+            Modulus plain_modulus(PlainModulus::Batching(64, 20));
+            parms.set_poly_modulus_degree(64);
+            parms.set_plain_modulus(plain_modulus);
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30, 30 }));
+
+            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            KeyGenerator keygen(context);
+
+            BatchEncoder batch_encoder(context);
+            Encryptor encryptor(context, keygen.public_key());
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
+
+            Ciphertext encrypted;
+            Plaintext plain;
+            vector<int64_t> result;
+
+            batch_encoder.encode(vector<int64_t>(batch_encoder.slot_count(), 7), plain);
+            encryptor.encrypt(plain, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            decryptor.decrypt(encrypted, plain);
+            batch_encoder.decode(plain, result);
+            ASSERT_TRUE(vector<int64_t>(batch_encoder.slot_count(), 49) == result);
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+
+            batch_encoder.encode(vector<int64_t>(batch_encoder.slot_count(), -7), plain);
+            encryptor.encrypt(plain, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            decryptor.decrypt(encrypted, plain);
+            batch_encoder.decode(plain, result);
+            ASSERT_TRUE(vector<int64_t>(batch_encoder.slot_count(), 49) == result);
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+        }
+        {
+            EncryptionParameters parms(scheme_type::BFV);
+            Modulus plain_modulus(PlainModulus::Batching(64, 40));
+            parms.set_poly_modulus_degree(64);
+            parms.set_plain_modulus(plain_modulus);
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30, 30 }));
+
+            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            KeyGenerator keygen(context);
+
+            BatchEncoder batch_encoder(context);
+            Encryptor encryptor(context, keygen.public_key());
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
+
+            Ciphertext encrypted;
+            Plaintext plain;
+            vector<int64_t> result;
+
+            batch_encoder.encode(vector<int64_t>(batch_encoder.slot_count(), 7), plain);
+            encryptor.encrypt(plain, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            decryptor.decrypt(encrypted, plain);
+            batch_encoder.decode(plain, result);
+            ASSERT_TRUE(vector<int64_t>(batch_encoder.slot_count(), 49) == result);
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+
+            batch_encoder.encode(vector<int64_t>(batch_encoder.slot_count(), -7), plain);
+            encryptor.encrypt(plain, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            decryptor.decrypt(encrypted, plain);
+            batch_encoder.decode(plain, result);
+            ASSERT_TRUE(vector<int64_t>(batch_encoder.slot_count(), 49) == result);
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+        }
     }
 
     TEST(EvaluatorTest, BFVEncryptMultiplyDecrypt)
