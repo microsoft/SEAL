@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(MSGSL_DOWNLOAD VERSION 2.1.0)
+project(MSGSL_DOWNLOAD VERSION 3.0.1)
 
 if(EXISTS cache_init.txt)
     set(MSGSL_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DGSL_TEST=OFF -C../cache_init.txt)

@@ -15,11 +15,9 @@ jobs:
       parameters:
         nuget_version: '5.4.0'
         ${{ if eq(parameters.debug, 'true') }}:
-          configuration: 'debug'
-          path: 'Debug'
+          configuration: 'Debug'
         ${{ if eq(parameters.debug, 'false') }}:
-          configuration: 'release'
-          path: 'Release'
+          configuration: 'Release'
 
 - ${{ if eq(parameters.name, 'Linux') }}:
   - job: ${{ parameters.name }}
@@ -30,13 +28,13 @@ jobs:
     - script: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
-        sudo apt-get install gcc-7 g++-7
-        sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-7 50
-        sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-7 50
-        gcc-7 --version
-        g++-7 --version
-        which gcc-7
-        which g++-7
+        sudo apt-get install clang-9
+        sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-9 50
+        sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-9 50
+        clang-9 --version
+        clang++-9 --version
+        which clang-9
+        which clang++-9
     - template: nix.yml
       parameters:
         artifactName: linux-drop
@@ -73,15 +71,13 @@ jobs:
         ${{ if eq(parameters.debug, 'false') }}:
           configuration: 'Release'
 
-- ${{ if eq(parameters.name, 'Nuget') }}:
+- ${{ if eq(parameters.name, 'NuGet') }}:
   - job: ${{ parameters.name }}
     displayName: ${{ parameters.name }}
-    dependsOn: [Windows, Linux, macOs, Android]
+    dependsOn: [Windows, Linux, macOS, Android]
     pool:
       vmImage: 'windows-latest'
     steps:
     - template: nuget.yml
       parameters:
         nuget_version: '5.4.0'
-        configuration: 'release'
-        path: 'Release'
