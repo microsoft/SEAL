@@ -24,22 +24,30 @@ steps:
     outputFormat: sarif
     debugMode: false
 
-- task: PowerShell@2
-  displayName: 'Download Strong Name certificate'
-  inputs:
-    targetType: 'inline'
-    script: |
-        # Get signing certificate
-        $CertOutFile = Join-Path -Path $env:BUILD_SOURCESDIRECTORY -ChildPath dotnet\src\SEALNetCert.snk
-        if (Test-Path env:SEALNetSigningCertificate) {
-            Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
-        }
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: UseDotNet@2
+    displayName: 'Get .NET Core 2.0 SDK'
+    inputs:
+      packageType: 'sdk'
+      version: '2.0.x'
 
 - task: UseDotNet@2
   displayName: 'Get .NET Core 3.1 SDK'
   inputs:
     packageType: 'sdk'
     version: '3.1.x'
+
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: PowerShell@2
+    displayName: 'Download Strong Name certificate'
+    inputs:
+      targetType: 'inline'
+      script: |
+          # Get signing certificate
+          $CertOutFile = Join-Path -Path $env:BUILD_SOURCESDIRECTORY -ChildPath dotnet\src\SEALNetCert.snk
+          if (Test-Path env:SEALNetSigningCertificate) {
+              Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
+          }
 
 - task: VSBuild@1
   displayName: 'Build solution SEAL'
@@ -78,6 +86,96 @@ steps:
     PublishSymbols: false
   continueOnError: true
 
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'ESRP Add Strong Name'
+    inputs:
+      ConnectedServiceName: 'ESRP CodeSigning'
+      FolderPath: lib/dotnet/${{ parameters.configuration }}/netstandard2.0
+      Pattern: '*.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+              "KeyCode" : "CP-235845-SN",
+              "OperationCode" : "StrongNameSign",
+              "Parameters" : {},
+              "ToolName" : "sign",
+              "ToolVersion" : "1.0"
+          },
+          {
+              "KeyCode" : "CP-235845-SN",
+              "OperationCode" : "StrongNameVerify",
+              "Parameters" : {},
+              "ToolName" : "sign",
+              "ToolVersion" : "1.0"
+          }
+        ]
+
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'ESRP CodeSigning .NET Standard 2.0'
+    inputs:
+      ConnectedServiceName: 'ESRP CodeSigning'
+      FolderPath: lib/dotnet/${{ parameters.configuration }}/netstandard2.0
+      Pattern: '*.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+              "KeyCode": "CP-230012",
+              "OperationCode": "SigntoolSign",
+              "Parameters": {
+                  "OpusName": "Microsoft.Research.SEAL",
+                  "OpusInfo": "https://github.com/microsoft/SEAL",
+                  "FileDigest": "/fd \"SHA256\"",
+                  "PageHash": "/PH",
+                  "TimeStamp": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+              },
+              "ToolName": "sign",
+              "ToolVersion": "1.0"
+          },
+          {
+              "KeyCode": "CP-230012",
+              "OperationCode": "SigntoolVerify",
+              "Parameters": {},
+              "ToolName": "sign",
+              "ToolVersion": "1.0"
+          }
+        ]
+
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'ESRP CodeSigning native'
+    inputs:
+      ConnectedServiceName: 'ESRP CodeSigning'
+      FolderPath: lib/x64/${{ parameters.configuration }}
+      Pattern: '*.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+              "KeyCode": "CP-230012",
+              "OperationCode": "SigntoolSign",
+              "Parameters": {
+                  "OpusName": "Microsoft.Research.SEAL",
+                  "OpusInfo": "https://github.com/microsoft/SEAL",
+                  "FileDigest": "/fd \"SHA256\"",
+                  "PageHash": "/PH",
+                  "TimeStamp": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+              },
+              "ToolName": "sign",
+              "ToolVersion": "1.0"
+          },
+          {
+              "KeyCode": "CP-230012",
+              "OperationCode": "SigntoolVerify",
+              "Parameters": {},
+              "ToolName": "sign",
+              "ToolVersion": "1.0"
+          }
+        ]
+
 - task: CopyFiles@2
   displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
   inputs:
@@ -86,10 +184,10 @@ steps:
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
 - task: CopyFiles@2
-  displayName: 'Copy Nuspec File to: $(Build.ArtifactStagingDirectory)'
+  displayName: 'Copy NuSpec File to: $(Build.ArtifactStagingDirectory)'
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)\dotnet\nuget\'
-    Contents: 'SEALNet.nuspec'
+    Contents: 'SEALNet-multi.nuspec'
     TargetFolder: '$(Build.ArtifactStagingDirectory)\dotnet\nuget\'
 
 - task: CopyFiles@2
@@ -103,7 +201,7 @@ steps:
   displayName: 'Run BinSkim'
   inputs:
     InputType: Basic
-    AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\native\bin\x64\${{ parameters.path }}\*.exe'
+    AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\native\bin\x64\${{ parameters.configuration }}\*.exe'
     AnalyzeSymPath: '**\bin\**\*.pdb'
   enabled: false
 

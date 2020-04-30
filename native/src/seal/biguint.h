@@ -248,7 +248,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<std::uint64_t> data_span()
         {
-            return gsl::span<std::uint64_t>(value_.get(), static_cast<std::ptrdiff_t>(uint64_count()));
+            return gsl::span<std::uint64_t>(value_.get(), uint64_count());
         }
 
         /**
@@ -260,7 +260,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<const std::uint64_t> data_span() const
         {
-            return gsl::span<const std::uint64_t>(value_.get(), static_cast<std::ptrdiff_t>(uint64_count()));
+            return gsl::span<const std::uint64_t>(value_.get(), uint64_count());
         }
 #endif
         /**

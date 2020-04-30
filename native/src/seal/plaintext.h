@@ -352,7 +352,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<pt_coeff_type> data_span()
         {
-            return gsl::span<pt_coeff_type>(data_.begin(), static_cast<std::ptrdiff_t>(coeff_count_));
+            return gsl::span<pt_coeff_type>(data_.begin(), coeff_count_);
         }
 
         /**
@@ -360,7 +360,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<const pt_coeff_type> data_span() const
         {
-            return gsl::span<const pt_coeff_type>(data_.cbegin(), static_cast<std::ptrdiff_t>(coeff_count_));
+            return gsl::span<const pt_coeff_type>(data_.cbegin(), coeff_count_);
         }
 #endif
         /**

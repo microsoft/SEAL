@@ -5,7 +5,7 @@ Microsoft SEAL is written in modern standard C++ and is easy to compile and run 
 For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
 This document pertains to Microsoft SEAL version 3.5.
-Users of previous versions of the library should look at the [list of changes](Changes.md).
+Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
 ## Contents
 
@@ -163,14 +163,14 @@ Please note that `Debug` mode should not be used except for debugging Microsoft 
 #### [Optional] Microsoft GSL
 
 By default Microsoft GSL is downloaded as part of Microsoft SEAL library.
-Microsoft GSL's header files are copied to `native/src/GSL` to be portable with Microsoft SEAL at the time of installation.
-You can disable the dependency on Microsoft GSL by commenting out `#cmakedefine SEAL_USE_MSGSL` in [native\src\util\config.h.in](native\src\util\config.h.in).
+Microsoft GSL's header files are copied to `native\src\GSL` to be portable with Microsoft SEAL at the time of installation.
+You can disable the dependency on Microsoft GSL by commenting out `#cmakedefine SEAL_USE_MSGSL` in [native\src\seal\util\config.h.in](native\src\seal\util\config.h.in).
 
 #### [Optional] ZLIB
 
 By default ZLIB is downloaded and compiled as part of Microsoft SEAL library.
 ZLIB's static archive is included in Microsoft SEAL's static or shared target object.
-You can disable the dependency on ZLIB by commenting out `#cmakedefine SEAL_USE_ZLIB` in [native\src\util\config.h.in](native\src\util\config.h.in).
+You can disable the dependency on ZLIB by commenting out `#cmakedefine SEAL_USE_ZLIB` in [native\src\seal\util\config.h.in](native\src\seal\util\config.h.in).
 
 #### Building Examples
 

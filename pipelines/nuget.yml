@@ -64,12 +64,37 @@ steps:
           TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
 
     - task: NuGetCommand@2
-      displayName: 'Build Nuget Package'
+      displayName: 'Build NuGet Package'
       inputs:
           command: 'pack'
-          packagesToPack: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\*.nuspec'
+          packagesToPack: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\SEALNet-multi.nuspec'
           packDestination: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\Release'
-          buildProperties: 'Configuration=Release;LINUX_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.so*;MACOS_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc*.dylib;ANDROIDARM64_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\arm64-v8a\libsealc.so;ANDROIDX64_SEAL_C=$(Build.ArtifactStagingDirectory)\windows-drop\lib\x86_64\libsealc.so'
+          buildProperties: 'Configuration=Release;NUGET_WINDOWS_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\x64\Release\sealc.dll;NUGET_LINUX_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.so;NUGET_MACOS_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.dylib;NUGET_ANDROIDARM64_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\arm64-v8a\libsealc.so;NUGET_ANDROIDX64_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\x86_64\libsealc.so'
+
+    - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+      displayName: 'ESRP CodeSigning NuGet package'
+      inputs:
+        ConnectedServiceName: 'ESRP CodeSigning'
+        FolderPath: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\Release'
+        Pattern: '*.nupkg'
+        signConfigType: inlineSignParams
+        inlineOperation: |
+            [
+              {
+                "keyCode": "CP-401405",
+                "operationSetCode": "NuGetSign",
+                "parameters": [ ],
+                "toolName": "sign",
+                "toolVersion": "1.0"
+              },
+              {
+                "keyCode": "CP-401405",
+                "operationSetCode": "NuGetVerify",
+                "parameters": [ ],
+                "toolName": "sign",
+                "toolVersion": "1.0"
+              }
+            ]
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'
