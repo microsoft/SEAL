@@ -1,5 +1,9 @@
 # List of Changes
 
+## Version 3.5.1
+
+Changed version to 3.5.1. The two hotfixes below are included.
+
 ## Version 3.5.0
 
 ### Hotfix - 4/30/2020
