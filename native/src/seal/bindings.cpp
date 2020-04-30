@@ -739,8 +739,8 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     class_<KeyGenerator>("KeyGenerator")
         .constructor<std::shared_ptr<SEALContext>>()
         .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
-        .function("getPublicKey", &KeyGenerator::public_key)
-        .function("getSecretKey", &KeyGenerator::secret_key)
+        .function("publicKey", &KeyGenerator::public_key)
+        .function("secretKey", &KeyGenerator::secret_key)
         .function("relinKeysLocal", &KeyGenerator::relin_keys_local)
         .function("relinKeys", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::relin_keys))
         .function("galoisKeysLocal", optional_override([](KeyGenerator &self, const val &v) {
