@@ -22,6 +22,7 @@ namespace seal
     namespace util
     {
         /**
+        @par PolyIter, RNSIter, and CoeffIter
         In this file we define a set of custom iterator classes ("SEAL iterators") that are used throughout Microsoft
         SEAL for easier iteration over ciphertext polynomials, their RNS components, and the coefficients in the RNS
         components. All SEAL iterators satisfy the C++ LegacyBidirectionalIterator requirements. Please note that they
@@ -71,10 +72,12 @@ namespace seal
                                                                                   | PtrT |  Unusual dereference to PtrT
                                                                                   +------+
 
+        @par ReverseIter
         In addition to the types above, we define a ReverseIter<SEALIter> that reverses the direction of iteration.
         However, ReverseIter<SEALIter> dereferences to the same type as SEALIter: for example, dereferencing
         ReverseIter<RNSIter> results in CoeffIter, not ReverseIter<CoeffIter>.
 
+        @par IterTuple
         An extremely useful template class is the (variadic) IterTuple<...> that allows multiple SEAL iterators to be
         zipped together. An IterTuple is itself a SEAL iterator and nested IterTuple types are used commonly in the
         library. Dereferencing an IterTuple always yields another valid IterTuple, with each component dereferenced
@@ -122,6 +125,7 @@ namespace seal
         dereference get<1>(J) in the innermost lambda function to access the value (NTTTables). This is because
         get<1>(J) is const NTTTables *, as was discussed above.
 
+        @par Coding conventions
         There are two important coding conventions in the above code snippet that are to be observed:
 
             1. Always explicitly write the class template arguments. This is important for C++14 compatibility, and can
@@ -131,6 +135,7 @@ namespace seal
                be used in SEAL in any other context.
             3. Always pass SEAL iterators by value to the lambda function.
 
+        @par SEAL_ASSERT_TYPE
         It is not unusual to have multiple nested for_each_n calls operating on multiple/nested IterTuple objects.
         It can become very difficult to keep track of what exactly the different iterators are pointing to, and what
         their types are (the above convention of using I, J, K, ... does not reveal the type). Hence we sometimes
@@ -152,10 +157,33 @@ namespace seal
         code easier to follow and less error-prone. The code will fail to compile if the type of the object in the first
         parameter does not match the type in the second parameter of the macro.
 
-        In the future we hope to use the parallel version of std::for_each_n, introduced in C++17. For this to work,
-        be mindful of how you use heap allocations in the lambda functions. Specifically, in heavy lambda functions it
-        is probably a good idea to call seal::util::allocate inside the lambda function for any allocations needed,
-        rather than using allocations captured from outside the lambda function.
+        @par Note on allocations
+        In the future we hope to use the parallel version of std::for_each_n, introduced in C++17. For this to
+        work, be mindful of how you use heap allocations in the lambda functions. Specifically, in heavy lambda
+        functions it is probably a good idea to call seal::util::allocate inside the lambda function for any allocations
+        needed, rather than using allocations captured from outside the lambda function.
+
+        @par Setting up iterators to temporary allocations
+        In many cases one may want to allocate a temporary buffer and create an iterator pointing to it. However, care
+        must be taken to use the correct size parameters now both for the allocation, as well as for setting up the
+        iterator. For this reason, we provide a few helpful macros that set up the Pointer and only expose the iterator
+        to the function. For example, instead of writing the following error-prone code:
+
+        auto temp_alloc(allocate_poly_array(count, poly_modulus_degree, coeff_modulus_size, pool));
+        PolyIter temp(temp_alloc.get(), poly_modulus_degree, coeff_modulus_size);
+
+        one can simply write:
+
+        SEAL_ALLOCATE_GET_POLY_ITER(temp, count, poly_modulus_degree, coeff_modulus_size, pool);
+
+        However, the latter does not expose the name of the allocation itself. There are similar macros for allocating
+        buffers and setting up RNSIter and CoeffIter objects as well, and all these macros have versions that set the
+        allocated memory to zero, e.g. SEAL_ALLOCATE_ZERO_GET_POLY_ITER.
+
+        @par Typedefs for common PtrIter types
+        It is very common to use the types PtrIter<const Modulus *> and PtrIter<const NTTTables *> in IterTuples. To
+        simplify the notation, we have set up typedefs for these: ModulusIter and NTTTablesIter. There are no non-const
+        versions of these typedefs, since in almost all cases only read access is needed.
         */
 #ifndef SEAL_USE_STD_FOR_EACH_N
         // C++14 does not have for_each_n so we define a custom version here.
