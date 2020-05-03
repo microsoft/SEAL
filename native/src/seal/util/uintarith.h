@@ -146,7 +146,7 @@ namespace seal
         }
 
         inline unsigned char add_uint(
-            const std::uint64_t *operand1, std::uint64_t operand2, std::size_t uint64_count, std::uint64_t *result)
+            const std::uint64_t *operand1, std::size_t uint64_count, std::uint64_t operand2, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!uint64_count)
@@ -266,7 +266,7 @@ namespace seal
         }
 
         inline unsigned char sub_uint(
-            const std::uint64_t *operand1, std::uint64_t operand2, std::size_t uint64_count, std::uint64_t *result)
+            const std::uint64_t *operand1, std::size_t uint64_count, std::uint64_t operand2, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!uint64_count)
@@ -312,7 +312,7 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
-            return add_uint(operand, 1, uint64_count, result);
+            return add_uint(operand, uint64_count, 1, result);
         }
 
         inline unsigned char decrement_uint(
@@ -328,7 +328,7 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
-            return sub_uint(operand, 1, uint64_count, result);
+            return sub_uint(operand, uint64_count, 1, result);
         }
 
         inline void negate_uint(const std::uint64_t *operand, std::size_t uint64_count, std::uint64_t *result)

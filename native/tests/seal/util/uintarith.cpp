@@ -368,25 +368,25 @@ namespace sealtest
 
             ptr[0] = 0ULL;
             ptr[1] = 0ULL;
-            ASSERT_FALSE(add_uint(ptr.get(), 0ULL, 2, ptr2.get()));
+            ASSERT_FALSE(add_uint(ptr.get(), 2, 0ULL, ptr2.get()));
             ASSERT_EQ(0ULL, ptr2[0]);
             ASSERT_EQ(0ULL, ptr2[1]);
 
             ptr[0] = 0xFFFFFFFF00000000ULL;
             ptr[1] = 0ULL;
-            ASSERT_FALSE(add_uint(ptr.get(), 0xFFFFFFFFULL, 2, ptr2.get()));
+            ASSERT_FALSE(add_uint(ptr.get(), 2, 0xFFFFFFFFULL, ptr2.get()));
             ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, ptr2[0]);
             ASSERT_EQ(0ULL, ptr2[1]);
 
             ptr[0] = 0xFFFFFFFF00000000ULL;
             ptr[1] = 0xFFFFFFFF00000000ULL;
-            ASSERT_FALSE(add_uint(ptr.get(), 0x100000000ULL, 2, ptr2.get()));
+            ASSERT_FALSE(add_uint(ptr.get(), 2, 0x100000000ULL, ptr2.get()));
             ASSERT_EQ(0ULL, ptr2[0]);
             ASSERT_EQ(0xFFFFFFFF00000001ULL, ptr2[1]);
 
             ptr[0] = 0xFFFFFFFFFFFFFFFFULL;
             ptr[1] = 0xFFFFFFFFFFFFFFFFULL;
-            ASSERT_TRUE(add_uint(ptr.get(), 1ULL, 2, ptr2.get()));
+            ASSERT_TRUE(add_uint(ptr.get(), 2, 1ULL, ptr2.get()));
             ASSERT_EQ(0ULL, ptr2[0]);
             ASSERT_EQ(0ULL, ptr2[1]);
         }
@@ -399,37 +399,37 @@ namespace sealtest
 
             ptr[0] = 0ULL;
             ptr[1] = 0ULL;
-            ASSERT_FALSE(sub_uint(ptr.get(), 0ULL, 2, ptr2.get()));
+            ASSERT_FALSE(sub_uint(ptr.get(), 2, 0ULL, ptr2.get()));
             ASSERT_EQ(0ULL, ptr2[0]);
             ASSERT_EQ(0ULL, ptr2[1]);
 
             ptr[0] = 0ULL;
             ptr[1] = 0ULL;
-            ASSERT_TRUE(sub_uint(ptr.get(), 1ULL, 2, ptr2.get()));
+            ASSERT_TRUE(sub_uint(ptr.get(), 2, 1ULL, ptr2.get()));
             ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, ptr2[0]);
             ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, ptr2[1]);
 
             ptr[0] = 1ULL;
             ptr[1] = 0ULL;
-            ASSERT_TRUE(sub_uint(ptr.get(), 2ULL, 2, ptr2.get()));
+            ASSERT_TRUE(sub_uint(ptr.get(), 2, 2ULL, ptr2.get()));
             ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, ptr2[0]);
             ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, ptr2[1]);
 
             ptr[0] = 0xFFFFFFFF00000000ULL;
             ptr[1] = 0ULL;
-            ASSERT_FALSE(sub_uint(ptr.get(), 0xFFFFFFFFULL, 2, ptr2.get()));
+            ASSERT_FALSE(sub_uint(ptr.get(), 2, 0xFFFFFFFFULL, ptr2.get()));
             ASSERT_EQ(0xFFFFFFFE00000001ULL, ptr2[0]);
             ASSERT_EQ(0ULL, ptr2[1]);
 
             ptr[0] = 0xFFFFFFFF00000000ULL;
             ptr[1] = 0xFFFFFFFF00000000ULL;
-            ASSERT_FALSE(sub_uint(ptr.get(), 0x100000000ULL, 2, ptr2.get()));
+            ASSERT_FALSE(sub_uint(ptr.get(), 2, 0x100000000ULL, ptr2.get()));
             ASSERT_EQ(0xFFFFFFFE00000000ULL, ptr2[0]);
             ASSERT_EQ(0xFFFFFFFF00000000ULL, ptr2[1]);
 
             ptr[0] = 0xFFFFFFFFFFFFFFFFULL;
             ptr[1] = 0xFFFFFFFFFFFFFFFFULL;
-            ASSERT_FALSE(sub_uint(ptr.get(), 1ULL, 2, ptr2.get()));
+            ASSERT_FALSE(sub_uint(ptr.get(), 2, 1ULL, ptr2.get()));
             ASSERT_EQ(0xFFFFFFFFFFFFFFFEULL, ptr2[0]);
             ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, ptr2[1]);
         }

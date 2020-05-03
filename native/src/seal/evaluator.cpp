@@ -1685,7 +1685,7 @@ namespace seal
                     // the monomial to ensure it is smaller than coeff_modulus and then do an RNS multiplication. Note
                     // that in this case plain_upper_half_increment contains a multi-precision integer, so after the
                     // addition we decompose the multi-precision integer into RNS components, and then multiply.
-                    add_uint(plain_upper_half_increment, plain[mono_exponent], coeff_modulus_size, temp);
+                    add_uint(plain_upper_half_increment, coeff_modulus_size, plain[mono_exponent], temp);
                     context_data.rns_tool()->base_q()->decompose(temp, pool);
                     for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
                         for_each_n(
