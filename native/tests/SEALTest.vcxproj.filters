@@ -156,8 +156,6 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <Filter>Other</Filter>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
