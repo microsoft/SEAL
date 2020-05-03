@@ -141,10 +141,10 @@ namespace seal
         // Add ciphertexts
         for_each_n(IterTuple<PolyIter, ConstPolyIter>(encrypted1, encrypted2), min_count, [&](auto I) {
             for_each_n(IterTuple<decltype(I), ModulusIter>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
-                SEAL_ASSERT_TYPE(get<0>(get<0>(J)), CoeffIter, "encrypted1");
-                SEAL_ASSERT_TYPE(get<1>(get<0>(J)), ConstCoeffIter, "encrypted2");
+                SEAL_ASSERT_TYPE((get<0, 0>(J)), CoeffIter, "encrypted1");
+                SEAL_ASSERT_TYPE((get<0, 1>(J)), ConstCoeffIter, "encrypted2");
                 SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "modulus");
-                add_poly_coeffmod(get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                add_poly_coeffmod(get<0, 0>(J), get<0, 1>(J), coeff_count, *get<1>(J), get<0, 0>(J));
             });
         });
 
@@ -236,7 +236,7 @@ namespace seal
         // Subtract polynomials
         for_each_n(IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter), min_count, [&](auto I) {
             for_each_n(IterTuple<decltype(I), ModulusIter>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
-                sub_poly_coeffmod(get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                sub_poly_coeffmod(get<0, 0>(J), get<0, 1>(J), coeff_count, *get<1>(J), get<0, 0>(J));
             });
         });
 
@@ -251,7 +251,7 @@ namespace seal
                 IterTuple<PolyIter, ConstPolyIter>(encrypted1_iter, encrypted2_iter), encrypted2_size - min_count,
                 [&](auto I) {
                     for_each_n(IterTuple<decltype(I), ModulusIter>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
-                        negate_poly_coeffmod(get<1>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                        negate_poly_coeffmod(get<0, 1>(J), coeff_count, *get<1>(J), get<0, 0>(J));
                     });
                 });
         }
