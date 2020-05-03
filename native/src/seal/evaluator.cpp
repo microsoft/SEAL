@@ -475,7 +475,7 @@ namespace seal
                             base_size, [&](auto J) {
                                 auto temp(allocate_uint(coeff_count, pool));
                                 dyadic_product_coeffmod(
-                                    get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), temp.get());
+                                    get<0, 0>(J), get<0, 1>(J), coeff_count, *get<1>(J), temp.get());
                                 add_poly_coeffmod(temp.get(), get<2>(J), coeff_count, *get<1>(J), get<2>(J));
                             });
                     });
@@ -609,7 +609,7 @@ namespace seal
                         coeff_modulus_size, [&](auto J) {
                             auto prod(allocate_uint(coeff_count, pool));
                             dyadic_product_coeffmod(
-                                get<0>(get<0>(J)), get<1>(get<0>(J)), coeff_count, *get<1>(J), prod.get());
+                                get<0, 0>(J), get<0, 1>(J), coeff_count, *get<1>(J), prod.get());
                             add_poly_coeffmod(prod.get(), get<2>(J), coeff_count, *get<1>(J), get<2>(J));
                         });
                 });
@@ -2460,8 +2460,8 @@ namespace seal
                 IterTuple<decltype(I), ModulusIter, NTTTablesIter, PtrIter<const uint64_t *>>(
                     I, key_modulus, key_ntt_tables, modswitch_factors),
                 decomp_modulus_size, [&](auto J) {
-                    SEAL_ASSERT_TYPE(get<0>(get<0>(J)), CoeffIter, "encrypted");
-                    SEAL_ASSERT_TYPE(get<1>(get<0>(J)), CoeffIter, "t_poly_prod");
+                    SEAL_ASSERT_TYPE((get<0, 0>(J)), CoeffIter, "encrypted");
+                    SEAL_ASSERT_TYPE((get<0, 1>(J)), CoeffIter, "t_poly_prod");
                     SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "key_modulus");
                     SEAL_ASSERT_TYPE(get<2>(J), const NTTTables *, "key_ntt_tables");
                     SEAL_ASSERT_TYPE(get<3>(J), const uint64_t *, "modswitch_factors");
@@ -2480,16 +2480,16 @@ namespace seal
                     }
                     else if (scheme == scheme_type::BFV)
                     {
-                        inverse_ntt_negacyclic_harvey(get<1>(get<0>(J)), *get<2>(J));
+                        inverse_ntt_negacyclic_harvey(get<0, 1>(J), *get<2>(J));
                     }
 
                     // ((ct mod qi) - (ct mod qk)) mod qi
-                    sub_poly_coeffmod(get<1>(get<0>(J)), t_ntt, coeff_count, *get<1>(J), get<1>(get<0>(J)));
+                    sub_poly_coeffmod(get<0, 1>(J), t_ntt, coeff_count, *get<1>(J), get<0, 1>(J));
                     // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                     multiply_poly_scalar_coeffmod(
-                        get<1>(get<0>(J)), coeff_count, *get<3>(J), *get<1>(J), get<1>(get<0>(J)));
+                        get<0, 1>(J), coeff_count, *get<3>(J), *get<1>(J), get<0, 1>(J));
                     add_poly_coeffmod(
-                        get<1>(get<0>(J)), get<0>(get<0>(J)), coeff_count, *get<1>(J), get<0>(get<0>(J)));
+                        get<0,1>(J), get<0, 0>(J), coeff_count, *get<1>(J), get<0, 0>(J));
                 });
         });
     }

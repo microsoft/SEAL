@@ -125,6 +125,25 @@ namespace seal
         dereference get<1>(J) in the innermost lambda function to access the value (NTTTables). This is because
         get<1>(J) is const NTTTables *, as was discussed above.
 
+        @par Nested IterTuples
+        Sometimes we have to use multiple nested iterator tuples. In this case accessing the nested iterators can be
+        tedious with nested get<...> calls. Consider the following code:
+
+        IterTuple<PolyIter, PolyIter> I(encrypted1, encrypted2);
+        IterTuple<decltype(I), PolyIter> J(I, destination);
+        auto encrypted1_iter = get<0>(get<0>(J));
+        auto encrypted2_iter = get<1>(get<0>(J));
+
+        An easier way is to use another form of get<...> that accepts multiple indices and accesses the structure in a
+        nested manner. For example, in the above we could also write:
+
+        auto encrypted1_iter = get<0, 0>(J));
+        auto encrypted2_iter = get<0, 1>(J));
+
+        Note that the innermost tuple index appears first in the list, i.e. the order is reversed from what appears in
+        a nested get<...> call. The reason for this reversal is that, when deducing what the iterators are, one first
+        examines at the innermost scope, and last the outermost scope, corresponding now to the order of the indices.
+
         @par Coding conventions
         There are two important coding conventions in the above code snippet that are to be observed:
 
@@ -156,6 +175,13 @@ namespace seal
         describes what object is iterated over. We use this convention in particularly complex functions to make the
         code easier to follow and less error-prone. The code will fail to compile if the type of the object in the first
         parameter does not match the type in the second parameter of the macro.
+
+        There is one caveat one should be aware of. When calling SEAL_ASSERT_TYPE with a multi-index get<...>(I), an
+        extra set of parentheses must be used around the object for the macro arguments to work properly:
+
+        IterTuple<PolyIter, PolyIter> I(encrypted1, encrypted2);
+        IterTuple<decltype(I), PolyIter> J(I, destination);
+        SEAL_ASSERT_TYPE((get<0, 0>(J)), PolyIter, "encrypted1");
 
         @par Note on allocations
         In the future we hope to use the parallel version of std::for_each_n, introduced in C++17. For this to
@@ -1755,12 +1781,25 @@ namespace seal
                     return it.first();
                 }
             };
+
+            template <std::size_t N, typename... SEALIters>
+            auto get(const IterTuple<SEALIters...> &it)
+            {
+                static_assert(N < sizeof...(SEALIters), "IterTuple index out of range");
+                return iterator_tuple_internal::GetHelperStruct<N>::apply(it);
+            }
         } // namespace iterator_tuple_internal
+
+        template <std::size_t N, std::size_t... Rest, typename... SEALIters, typename = std::enable_if_t<sizeof...(Rest)>>
+        auto get(const IterTuple<SEALIters...> &it)
+        {
+            return get<Rest...>(iterator_tuple_internal::get<N>(it));
+        }
 
         template <std::size_t N, typename... SEALIters>
         auto get(const IterTuple<SEALIters...> &it)
         {
-            return iterator_tuple_internal::GetHelperStruct<N>::apply(it);
+            return iterator_tuple_internal::get<N>(it);
         }
 
         // Typedefs for some commonly used iterators
