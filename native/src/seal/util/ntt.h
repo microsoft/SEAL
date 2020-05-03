@@ -27,10 +27,10 @@ namespace seal
                 scaled_root_powers_ = allocate_uint(coeff_count_, pool_);
                 scaled_inv_root_powers_ = allocate_uint(coeff_count_, pool_);
 
-                set_uint_uint(copy.root_powers_.get(), coeff_count_, root_powers_.get());
-                set_uint_uint(copy.inv_root_powers_.get(), coeff_count_, inv_root_powers_.get());
-                set_uint_uint(copy.scaled_root_powers_.get(), coeff_count_, scaled_root_powers_.get());
-                set_uint_uint(copy.scaled_inv_root_powers_.get(), coeff_count_, scaled_inv_root_powers_.get());
+                set_uint(copy.root_powers_.get(), coeff_count_, root_powers_.get());
+                set_uint(copy.inv_root_powers_.get(), coeff_count_, inv_root_powers_.get());
+                set_uint(copy.scaled_root_powers_.get(), coeff_count_, scaled_root_powers_.get());
+                set_uint(copy.scaled_inv_root_powers_.get(), coeff_count_, scaled_inv_root_powers_.get());
             }
 
             NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool = MemoryManager::GetPool());

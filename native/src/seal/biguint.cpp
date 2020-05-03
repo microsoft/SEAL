@@ -133,7 +133,7 @@ namespace seal
         // Copy over old value.
         if (new_uint64_count > 0)
         {
-            set_uint_uint(value_.get(), old_uint64_count, new_uint64_count, new_value.get());
+            set_uint(value_.get(), old_uint64_count, new_uint64_count, new_value.get());
             filter_highbits_uint(new_value.get(), new_uint64_count, bit_count);
         }
 
@@ -165,7 +165,7 @@ namespace seal
         size_t assign_uint64_count = safe_cast<size_t>(divide_round_up(assign_sig_bit_count, bits_per_uint64));
         if (uint64_count() > 0)
         {
-            set_uint_uint(assign.value_.get(), assign_uint64_count, uint64_count(), value_.get());
+            set_uint(assign.value_.get(), assign_uint64_count, uint64_count(), value_.get());
         }
         return *this;
     }
@@ -208,12 +208,12 @@ namespace seal
         {
             BigUInt operand2resized(result_bits);
             operand2resized = operand2;
-            divide_uint_uint(
+            divide_uint(
                 value_.get(), operand2resized.data(), result_uint64_count, result.data(), remainder.data(), pool_);
         }
         else
         {
-            divide_uint_uint(
+            divide_uint(
                 value_.get(), operand2.data(), result_uint64_count, result.data(), remainder.data(), pool_);
         }
         return result;
@@ -235,11 +235,11 @@ namespace seal
         {
             BigUInt operand2resized(result_bits);
             operand2resized = operand2;
-            divide_uint_uint_inplace(remainder.data(), operand2resized.data(), uint64_count, quotient.data(), pool_);
+            divide_uint_inplace(remainder.data(), operand2resized.data(), uint64_count, quotient.data(), pool_);
         }
         else
         {
-            divide_uint_uint_inplace(remainder.data(), operand2.data(), uint64_count, quotient.data(), pool_);
+            divide_uint_inplace(remainder.data(), operand2.data(), uint64_count, quotient.data(), pool_);
         }
         return quotient;
     }

@@ -193,7 +193,7 @@ namespace seal
                     {
                         ntt_negacyclic_harvey(u.get() + i * coeff_count, small_ntt_tables[i]);
                     }
-                    add_poly_poly_coeffmod(
+                    add_poly_coeffmod(
                         u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
                         destination.data(j) + i * coeff_count);
                 }
@@ -276,7 +276,7 @@ namespace seal
                 {
                     inverse_ntt_negacyclic_harvey(c0 + i * coeff_count, small_ntt_tables[i]);
                 }
-                add_poly_poly_coeffmod(
+                add_poly_coeffmod(
                     noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
                     c0 + i * coeff_count);
                 negate_poly_coeffmod(c0 + i * coeff_count, coeff_count, coeff_modulus[i], c0 + i * coeff_count);

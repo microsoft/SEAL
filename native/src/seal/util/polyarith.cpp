@@ -14,7 +14,7 @@ namespace seal
 {
     namespace util
     {
-        void multiply_poly_poly(
+        void multiply_poly(
             const uint64_t *operand1, size_t operand1_coeff_count, size_t operand1_coeff_uint64_count,
             const uint64_t *operand2, size_t operand2_coeff_count, size_t operand2_coeff_uint64_count,
             size_t result_coeff_count, size_t result_coeff_uint64_count, uint64_t *result, MemoryPool &pool)
@@ -63,11 +63,11 @@ namespace seal
 
                     const uint64_t *operand2_coeff =
                         get_poly_coeff(operand2, operand2_index, operand2_coeff_uint64_count);
-                    multiply_uint_uint(
+                    multiply_uint(
                         operand1_coeff, operand1_coeff_uint64_count, operand2_coeff, operand2_coeff_uint64_count,
                         result_coeff_uint64_count, intermediate.get());
                     uint64_t *result_coeff = get_poly_coeff(result, product_coeff_index, result_coeff_uint64_count);
-                    add_uint_uint(result_coeff, intermediate.get(), result_coeff_uint64_count, result_coeff);
+                    add_uint(result_coeff, intermediate.get(), result_coeff_uint64_count, result_coeff);
                 }
             }
         }
@@ -123,17 +123,17 @@ namespace seal
 
             while (poly_to_eval_coeff_count--)
             {
-                multiply_poly_poly(
+                multiply_poly(
                     intermediateptr, result_coeff_count, result_coeff_uint64_count, value, value_coeff_count,
                     value_coeff_uint64_count, result_coeff_count, result_coeff_uint64_count, productptr, pool);
                 const uint64_t *curr_coeff =
                     get_poly_coeff(poly_to_eval, poly_to_eval_coeff_count, poly_to_eval_coeff_uint64_count);
-                add_uint_uint(
+                add_uint(
                     productptr, result_coeff_uint64_count, curr_coeff, poly_to_eval_coeff_uint64_count, false,
                     result_coeff_uint64_count, productptr);
                 swap(productptr, intermediateptr);
             }
-            set_poly_poly(intermediateptr, result_coeff_count, result_coeff_uint64_count, result);
+            set_poly(intermediateptr, result_coeff_count, result_coeff_uint64_count, result);
         }
 
         void exponentiate_poly(
@@ -184,7 +184,7 @@ namespace seal
             }
             if (is_equal_uint(exponent, exponent_uint64_count, 1))
             {
-                set_poly_poly(
+                set_poly(
                     poly, poly_coeff_count, poly_coeff_uint64_count, result_coeff_count, result_coeff_uint64_count,
                     result);
                 return;
@@ -192,7 +192,7 @@ namespace seal
 
             // Need to make a copy of exponent
             auto exponent_copy(allocate_uint(exponent_uint64_count, pool));
-            set_uint_uint(exponent, exponent_uint64_count, exponent_copy.get());
+            set_uint(exponent, exponent_uint64_count, exponent_copy.get());
 
             // Perform binary exponentiation.
             auto big_alloc(allocate_uint(
@@ -204,7 +204,7 @@ namespace seal
             uint64_t *productptr = get_poly_coeff(powerptr, result_coeff_count, result_coeff_uint64_count);
             uint64_t *intermediateptr = get_poly_coeff(productptr, result_coeff_count, result_coeff_uint64_count);
 
-            set_poly_poly(
+            set_poly(
                 poly, poly_coeff_count, poly_coeff_uint64_count, result_coeff_count, result_coeff_uint64_count,
                 powerptr);
             set_zero_poly(result_coeff_count, result_coeff_uint64_count, intermediateptr);
@@ -215,7 +215,7 @@ namespace seal
             {
                 if ((*exponent_copy.get() % 2) == 1)
                 {
-                    multiply_poly_poly(
+                    multiply_poly(
                         powerptr, result_coeff_count, result_coeff_uint64_count, intermediateptr, result_coeff_count,
                         result_coeff_uint64_count, result_coeff_count, result_coeff_uint64_count, productptr, pool);
                     swap(productptr, intermediateptr);
@@ -225,12 +225,12 @@ namespace seal
                 {
                     break;
                 }
-                multiply_poly_poly(
+                multiply_poly(
                     powerptr, result_coeff_count, result_coeff_uint64_count, powerptr, result_coeff_count,
                     result_coeff_uint64_count, result_coeff_count, result_coeff_uint64_count, productptr, pool);
                 swap(productptr, powerptr);
             }
-            set_poly_poly(intermediateptr, result_coeff_count, result_coeff_uint64_count, result);
+            set_poly(intermediateptr, result_coeff_count, result_coeff_uint64_count, result);
         }
     } // namespace util
 } // namespace seal

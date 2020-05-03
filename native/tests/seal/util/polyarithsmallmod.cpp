@@ -54,7 +54,7 @@ namespace sealtest
             ASSERT_EQ(0xFFFFFFFFFFFFFBULL, poly[2]);
         }
 
-        TEST(PolyArithSmallMod, AddPolyPolyCoeffSmallMod)
+        TEST(PolyArithSmallMod, AddPolyCoeffSmallMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(3, 1, pool));
@@ -66,13 +66,13 @@ namespace sealtest
             poly2[1] = 2;
             poly2[2] = 4;
             Modulus mod(5);
-            add_poly_poly_coeffmod(poly1.get(), poly2.get(), 3, mod, poly1.get());
+            add_poly_coeffmod(poly1.get(), poly2.get(), 3, mod, poly1.get());
             ASSERT_EQ(2ULL, poly1[0]);
             ASSERT_EQ(0ULL, poly1[1]);
             ASSERT_EQ(3ULL, poly1[2]);
         }
 
-        TEST(PolyArithSmallMod, SubPolyPolyCoeffSmallMod)
+        TEST(PolyArithSmallMod, SubPolyCoeffSmallMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(3, 1, pool));
@@ -84,7 +84,7 @@ namespace sealtest
             poly2[1] = 3;
             poly2[2] = 4;
             Modulus mod(5);
-            sub_poly_poly_coeffmod(poly1.get(), poly2.get(), 3, mod, poly1.get());
+            sub_poly_coeffmod(poly1.get(), poly2.get(), 3, mod, poly1.get());
             ASSERT_EQ(2ULL, poly1[0]);
             ASSERT_EQ(0ULL, poly1[1]);
             ASSERT_EQ(3ULL, poly1[2]);
@@ -167,7 +167,7 @@ namespace sealtest
             ASSERT_EQ(2ULL, result[3]);
         }
 
-        TEST(PolyArithSmallMod, MultiplyPolyPolyCoeffSmallMod)
+        TEST(PolyArithSmallMod, MultiplyPolyCoeffSmallMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(3, 1, pool));
@@ -180,7 +180,7 @@ namespace sealtest
             poly2[1] = 3;
             poly2[2] = 4;
             Modulus mod(5);
-            multiply_poly_poly_coeffmod(poly1.get(), 3, poly2.get(), 3, mod, 5, result.get());
+            multiply_poly_coeffmod(poly1.get(), 3, poly2.get(), 3, mod, 5, result.get());
             ASSERT_EQ(2ULL, result[0]);
             ASSERT_EQ(2ULL, result[1]);
             ASSERT_EQ(1ULL, result[2]);
@@ -189,7 +189,7 @@ namespace sealtest
 
             poly2[0] = 2;
             poly2[1] = 3;
-            multiply_poly_poly_coeffmod(poly1.get(), 3, poly2.get(), 2, mod, 5, result.get());
+            multiply_poly_coeffmod(poly1.get(), 3, poly2.get(), 2, mod, 5, result.get());
             ASSERT_EQ(2ULL, result[0]);
             ASSERT_EQ(2ULL, result[1]);
             ASSERT_EQ(2ULL, result[2]);
@@ -197,7 +197,7 @@ namespace sealtest
             ASSERT_EQ(0ULL, result[4]);
         }
 
-        TEST(PolyArithSmallMod, DividePolyPolyCoeffSmallMod)
+        TEST(PolyArithSmallMod, DividePolyCoeffSmallMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(5, 1, pool));
@@ -212,7 +212,7 @@ namespace sealtest
             poly2[1] = 3;
             poly2[2] = 4;
 
-            divide_poly_poly_coeffmod_inplace(poly1.get(), poly2.get(), 5, mod, result.get());
+            divide_poly_coeffmod_inplace(poly1.get(), poly2.get(), 5, mod, result.get());
             ASSERT_EQ(2ULL, poly1[0]);
             ASSERT_EQ(2ULL, poly1[1]);
             ASSERT_EQ(0ULL, poly1[2]);
@@ -233,7 +233,7 @@ namespace sealtest
             poly2[1] = 3;
             poly2[2] = 2;
 
-            divide_poly_poly_coeffmod(poly1.get(), poly2.get(), 5, mod, quotient.get(), result.get());
+            divide_poly_coeffmod(poly1.get(), poly2.get(), 5, mod, quotient.get(), result.get());
             ASSERT_EQ(0ULL, result[0]);
             ASSERT_EQ(0ULL, result[1]);
             ASSERT_EQ(0ULL, result[2]);

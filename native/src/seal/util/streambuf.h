@@ -61,7 +61,7 @@ namespace seal
         private:
             void safe_gbump(std::streamsize count)
             {
-                std::streamsize int_max = static_cast<std::streamsize>(std::numeric_limits<int>::max());
+                constexpr std::streamsize int_max = static_cast<std::streamsize>(std::numeric_limits<int>::max());
                 while (count > int_max)
                 {
                     gbump(std::numeric_limits<int>::max());
@@ -74,7 +74,7 @@ namespace seal
 
             void safe_pbump(std::streamsize count)
             {
-                std::streamsize int_max = static_cast<std::streamsize>(std::numeric_limits<int>::max());
+                constexpr std::streamsize int_max = static_cast<std::streamsize>(std::numeric_limits<int>::max());
                 while (count > int_max)
                 {
                     pbump(std::numeric_limits<int>::max());

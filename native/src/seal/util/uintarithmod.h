@@ -32,7 +32,7 @@ namespace seal
             {
                 throw std::invalid_argument("result");
             }
-            if (is_greater_than_or_equal_uint_uint(operand, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand, modulus, uint64_count))
             {
                 throw std::invalid_argument("operand");
             }
@@ -42,9 +42,9 @@ namespace seal
             }
 #endif
             unsigned char carry = increment_uint(operand, uint64_count, result);
-            if (carry || is_greater_than_or_equal_uint_uint(result, modulus, uint64_count))
+            if (carry || is_greater_than_or_equal_uint(result, modulus, uint64_count))
             {
-                sub_uint_uint(result, modulus, uint64_count, result);
+                sub_uint(result, modulus, uint64_count, result);
             }
         }
 
@@ -68,7 +68,7 @@ namespace seal
             {
                 throw std::invalid_argument("result");
             }
-            if (is_greater_than_or_equal_uint_uint(operand, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand, modulus, uint64_count))
             {
                 throw std::invalid_argument("operand");
             }
@@ -79,7 +79,7 @@ namespace seal
 #endif
             if (decrement_uint(operand, uint64_count, result))
             {
-                add_uint_uint(result, modulus, uint64_count, result);
+                add_uint(result, modulus, uint64_count, result);
             }
         }
 
@@ -103,7 +103,7 @@ namespace seal
             {
                 throw std::invalid_argument("result");
             }
-            if (is_greater_than_or_equal_uint_uint(operand, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand, modulus, uint64_count))
             {
                 throw std::invalid_argument("operand");
             }
@@ -116,7 +116,7 @@ namespace seal
             else
             {
                 // Otherwise, we know operand > 0 and < modulus so subtract modulus - operand.
-                sub_uint_uint(modulus, operand, uint64_count, result);
+                sub_uint(modulus, operand, uint64_count, result);
             }
         }
 
@@ -144,14 +144,14 @@ namespace seal
             {
                 throw std::invalid_argument("modulus");
             }
-            if (is_greater_than_or_equal_uint_uint(operand, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand, modulus, uint64_count))
             {
                 throw std::invalid_argument("operand");
             }
 #endif
             if (*operand & 1)
             {
-                unsigned char carry = add_uint_uint(operand, modulus, uint64_count, result);
+                unsigned char carry = add_uint(operand, modulus, uint64_count, result);
                 right_shift_uint(result, 1, uint64_count, result);
                 if (carry)
                 {
@@ -189,11 +189,11 @@ namespace seal
             {
                 throw std::invalid_argument("result");
             }
-            if (is_greater_than_or_equal_uint_uint(operand1, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand1, modulus, uint64_count))
             {
                 throw std::invalid_argument("operand1");
             }
-            if (is_greater_than_or_equal_uint_uint(operand2, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand2, modulus, uint64_count))
             {
                 throw std::invalid_argument("operand2");
             }
@@ -202,10 +202,10 @@ namespace seal
                 throw std::invalid_argument("result cannot point to the same value as modulus");
             }
 #endif
-            unsigned char carry = add_uint_uint(operand1, operand2, uint64_count, result);
-            if (carry || is_greater_than_or_equal_uint_uint(result, modulus, uint64_count))
+            unsigned char carry = add_uint(operand1, operand2, uint64_count, result);
+            if (carry || is_greater_than_or_equal_uint(result, modulus, uint64_count))
             {
-                sub_uint_uint(result, modulus, uint64_count, result);
+                sub_uint(result, modulus, uint64_count, result);
             }
         }
 
@@ -234,11 +234,11 @@ namespace seal
             {
                 throw std::invalid_argument("result");
             }
-            if (is_greater_than_or_equal_uint_uint(operand1, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand1, modulus, uint64_count))
             {
                 throw std::invalid_argument("operand1");
             }
-            if (is_greater_than_or_equal_uint_uint(operand2, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand2, modulus, uint64_count))
             {
                 throw std::invalid_argument("operand2");
             }
@@ -247,9 +247,9 @@ namespace seal
                 throw std::invalid_argument("result cannot point to the same value as modulus");
             }
 #endif
-            if (sub_uint_uint(operand1, operand2, uint64_count, result))
+            if (sub_uint(operand1, operand2, uint64_count, result))
             {
-                add_uint_uint(result, modulus, uint64_count, result);
+                add_uint(result, modulus, uint64_count, result);
             }
         }
 

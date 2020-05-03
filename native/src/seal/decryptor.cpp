@@ -44,7 +44,7 @@ namespace seal
         // Set the secret_key_array to have size 1 (first power of secret)
         // and copy over data
         secret_key_array_ = allocate_poly(coeff_count, coeff_modulus_size, pool_);
-        set_poly_poly(secret_key.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
+        set_poly(secret_key.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
         secret_key_array_size_ = 1;
     }
 
@@ -187,10 +187,10 @@ namespace seal
 
         // Need to extend the array
         // Compute powers of secret key until max_power
-        auto new_secret_key_array(allocate_poly(mul_safe(new_size, coeff_count), coeff_modulus_size, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_size, new_secret_key_array.get());
+        auto new_secret_key_array(allocate_poly_array(new_size, coeff_count, coeff_modulus_size, pool_));
+        set_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_size, new_secret_key_array.get());
 
-        set_poly_poly(
+        set_poly(
             secret_key_array_.get(), mul_safe(old_size, coeff_count), coeff_modulus_size, new_secret_key_array.get());
 
         uint64_t *prev_poly_ptr = new_secret_key_array.get() + mul_safe(old_size - 1, key_rns_poly_uint64_count);
@@ -263,7 +263,7 @@ namespace seal
             set_zero_uint(coeff_count, destination_ptr);
             for (size_t j = 0; j < encrypted_size - 1; j++)
             {
-                set_uint_uint(encrypted_ptr, coeff_count, copy_operand1.get());
+                set_uint(encrypted_ptr, coeff_count, copy_operand1.get());
                 if (!is_ntt_form)
                 {
                     ntt_negacyclic_harvey_lazy(copy_operand1.get(), small_ntt_tables[i]);
@@ -272,7 +272,7 @@ namespace seal
                 dyadic_product_coeffmod(
                     copy_operand1.get(), secret_key_ptr, coeff_count, coeff_modulus[i], copy_operand1.get());
                 // add c_{j+1} * s^{j+1} to destination
-                add_poly_poly_coeffmod(
+                add_poly_coeffmod(
                     destination_ptr, copy_operand1.get(), coeff_count, coeff_modulus[i], destination_ptr);
                 encrypted_ptr += rns_poly_uint64_count;
                 secret_key_ptr += key_rns_poly_uint64_count;
@@ -282,7 +282,7 @@ namespace seal
                 inverse_ntt_negacyclic_harvey(destination_ptr, small_ntt_tables[i]);
             }
             // add c_0 into destination
-            add_poly_poly_coeffmod(
+            add_poly_coeffmod(
                 destination_ptr, encrypted.data() + (i * coeff_count), coeff_count, coeff_modulus[i], destination_ptr);
         }
     }

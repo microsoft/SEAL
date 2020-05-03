@@ -32,7 +32,7 @@ namespace seal
             {
                 throw invalid_argument("result");
             }
-            if (is_greater_than_or_equal_uint_uint(operand, modulus, uint64_count))
+            if (is_greater_than_or_equal_uint(operand, modulus, uint64_count))
             {
                 throw logic_error("operand");
             }
@@ -56,10 +56,10 @@ namespace seal
             // Construct a mutable copy of operand and modulus, with numerator being modulus
             // and operand being denominator. Notice that numerator > denominator.
             uint64_t *numerator = alloc_anchor.get();
-            set_uint_uint(modulus, uint64_count, numerator);
+            set_uint(modulus, uint64_count, numerator);
 
             uint64_t *denominator = numerator + uint64_count;
-            set_uint_uint(operand, uint64_count, denominator);
+            set_uint(operand, uint64_count, denominator);
 
             // Create space to store difference.
             uint64_t *difference = denominator + uint64_count;
@@ -108,7 +108,7 @@ namespace seal
 
                     // Even though MSB of numerator and denominator are aligned,
                     // still possible numerator < denominator.
-                    if (sub_uint_uint(numerator, denominator, division_uint64_count, difference))
+                    if (sub_uint(numerator, denominator, division_uint64_count, difference))
                     {
                         // numerator < denominator and MSBs are aligned, so current
                         // quotient bit is zero and next one is definitely one.
@@ -120,7 +120,7 @@ namespace seal
 
                         // Effectively shift numerator left by 1 by instead adding
                         // numerator to difference (to prevent overflow in numerator).
-                        add_uint_uint(difference, numerator, division_uint64_count, difference);
+                        add_uint(difference, numerator, division_uint64_count, difference);
 
                         // Adjust quotient and remaining shifts as a result of shifting numerator.
                         left_shift_uint(quotient, 1, division_uint64_count, quotient);
@@ -176,20 +176,20 @@ namespace seal
 
                 // Integrate quotient with invert coefficients.
                 // Calculate: invert_prior + -quotient * invert_curr
-                multiply_truncate_uint_uint(quotient, invert_curr, uint64_count, invert_next);
+                multiply_truncate_uint(quotient, invert_curr, uint64_count, invert_next);
                 invert_next_positive = !invert_curr_positive;
                 if (invert_prior_positive == invert_next_positive)
                 {
                     // If both sides of add have same sign, then simple add and
                     // do not need to worry about overflow due to known limits
                     // on the coefficients proved in the euclidean algorithm.
-                    add_uint_uint(invert_prior, invert_next, uint64_count, invert_next);
+                    add_uint(invert_prior, invert_next, uint64_count, invert_next);
                 }
                 else
                 {
                     // If both sides of add have opposite sign, then subtract
                     // and check for overflow.
-                    uint64_t borrow = sub_uint_uint(invert_prior, invert_next, uint64_count, invert_next);
+                    uint64_t borrow = sub_uint(invert_prior, invert_next, uint64_count, invert_next);
                     if (borrow == 0)
                     {
                         // No borrow means |invert_prior| >= |invert_next|,
@@ -225,12 +225,12 @@ namespace seal
             // Correct coefficient if negative by modulo.
             if (!invert_curr_positive && !is_zero_uint(invert_curr, uint64_count))
             {
-                sub_uint_uint(modulus, invert_curr, uint64_count, invert_curr);
+                sub_uint(modulus, invert_curr, uint64_count, invert_curr);
                 invert_curr_positive = true;
             }
 
             // Set result.
-            set_uint_uint(invert_curr, uint64_count, result);
+            set_uint(invert_curr, uint64_count, result);
             return true;
         }
     } // namespace util

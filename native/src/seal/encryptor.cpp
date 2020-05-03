@@ -163,7 +163,7 @@ namespace seal
                     {
                         rns_tool->divide_and_round_q_last_inplace(temp.data(j), pool);
                     }
-                    util::set_poly_poly(temp.data(j), coeff_count, coeff_modulus_size, destination.data(j));
+                    util::set_poly(temp.data(j), coeff_count, coeff_modulus_size, destination.data(j));
                 }
                 destination.is_ntt_form() = is_ntt_form;
                 destination.scale() = temp.scale();
@@ -244,7 +244,7 @@ namespace seal
             // The plaintext gets added into the c_0 term of ciphertext (c_0,c_1).
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
-                util::add_poly_poly_coeffmod(
+                util::add_poly_coeffmod(
                     destination.data() + (i * coeff_count), plain.data() + (i * coeff_count), coeff_count,
                     coeff_modulus[i], destination.data() + (i * coeff_count));
             }

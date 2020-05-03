@@ -79,11 +79,11 @@ namespace seal
             uint64_t *quotientptr = quotient.get();
             uint64_t *baseptr = base.get();
             set_uint(10, uint64_count, baseptr);
-            set_uint_uint(value, uint64_count, remainderptr);
+            set_uint(value, uint64_count, remainderptr);
             string output;
             while (!is_zero_uint(remainderptr, uint64_count))
             {
-                divide_uint_uint_inplace(remainderptr, baseptr, uint64_count, quotientptr, pool);
+                divide_uint_inplace(remainderptr, baseptr, uint64_count, quotientptr, pool);
                 char digit = static_cast<char>(remainderptr[0] + static_cast<uint64_t>('0'));
                 output += digit;
                 swap(remainderptr, quotientptr);

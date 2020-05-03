@@ -669,7 +669,7 @@ namespace seal
 
             // Create mutable copy of input
             auto plain_copy(util::allocate_uint(rns_poly_uint64_count, pool));
-            util::set_uint_uint(plain.data(), rns_poly_uint64_count, plain_copy.get());
+            util::set_uint(plain.data(), rns_poly_uint64_count, plain_copy.get());
 
             // Transform each polynomial from NTT domain
             for (std::size_t i = 0; i < coeff_modulus_size; i++)
@@ -686,7 +686,7 @@ namespace seal
             for (std::size_t i = 0; i < coeff_count; i++)
             {
                 res[i] = 0.0;
-                if (util::is_greater_than_or_equal_uint_uint(
+                if (util::is_greater_than_or_equal_uint(
                         plain_copy.get() + (i * coeff_modulus_size), upper_half_threshold, coeff_modulus_size))
                 {
                     double scaled_two_pow_64 = inv_scale;

@@ -13,7 +13,7 @@ namespace seal
 {
     namespace util
     {
-        void multiply_uint_uint(
+        void multiply_uint(
             const uint64_t *operand1, size_t operand1_uint64_count, const uint64_t *operand2,
             size_t operand2_uint64_count, size_t result_uint64_count, uint64_t *result)
         {
@@ -59,12 +59,12 @@ namespace seal
             // More fast cases
             if (operand1_uint64_count == 1)
             {
-                multiply_uint_uint64(operand2, operand2_uint64_count, *operand1, result_uint64_count, result);
+                multiply_uint(operand2, operand2_uint64_count, *operand1, result_uint64_count, result);
                 return;
             }
             if (operand2_uint64_count == 1)
             {
-                multiply_uint_uint64(operand1, operand1_uint64_count, *operand2, result_uint64_count, result);
+                multiply_uint(operand1, operand1_uint64_count, *operand2, result_uint64_count, result);
                 return;
             }
 
@@ -101,7 +101,7 @@ namespace seal
             }
         }
 
-        void multiply_uint_uint64(
+        void multiply_uint(
             const uint64_t *operand1, size_t operand1_uint64_count, uint64_t operand2, size_t result_uint64_count,
             uint64_t *result)
         {
@@ -168,7 +168,7 @@ namespace seal
             }
         }
 
-        void divide_uint_uint_inplace(
+        void divide_uint_inplace(
             uint64_t *numerator, const uint64_t *denominator, size_t uint64_count, uint64_t *quotient, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
@@ -243,7 +243,7 @@ namespace seal
 
                 // Even though MSB of numerator and denominator are aligned,
                 // still possible numerator < shifted_denominator.
-                if (sub_uint_uint(numerator, shifted_denominator, uint64_count, difference))
+                if (sub_uint(numerator, shifted_denominator, uint64_count, difference))
                 {
                     // numerator < shifted_denominator and MSBs are aligned,
                     // so current quotient bit is zero and next one is definitely one.
@@ -255,7 +255,7 @@ namespace seal
 
                     // Effectively shift numerator left by 1 by instead adding
                     // numerator to difference (to prevent overflow in numerator).
-                    add_uint_uint(difference, numerator, uint64_count, difference);
+                    add_uint(difference, numerator, uint64_count, difference);
 
                     // Adjust quotient and remaining shifts as a result of
                     // shifting numerator.
@@ -360,7 +360,7 @@ namespace seal
 
                 // Even though MSB of numerator and denominator are aligned,
                 // still possible numerator < shifted_denominator.
-                if (sub_uint_uint(numerator, shifted_denominator, uint64_count, difference))
+                if (sub_uint(numerator, shifted_denominator, uint64_count, difference))
                 {
                     // numerator < shifted_denominator and MSBs are aligned,
                     // so current quotient bit is zero and next one is definitely one.
@@ -372,7 +372,7 @@ namespace seal
 
                     // Effectively shift numerator left by 1 by instead adding
                     // numerator to difference (to prevent overflow in numerator).
-                    add_uint_uint(difference, numerator, uint64_count, difference);
+                    add_uint(difference, numerator, uint64_count, difference);
 
                     // Adjust quotient and remaining shifts as a result of shifting numerator.
                     quotient[1] = (quotient[1] << 1) | (quotient[0] >> (bits_per_uint64 - 1));
@@ -418,7 +418,7 @@ namespace seal
             }
         }
 
-        void divide_uint192_uint64_inplace(uint64_t *numerator, uint64_t denominator, uint64_t *quotient)
+        void divide_uint192_inplace(uint64_t *numerator, uint64_t denominator, uint64_t *quotient)
         {
 #ifdef SEAL_DEBUG
             if (!numerator)
@@ -488,7 +488,7 @@ namespace seal
 
                 // Even though MSB of numerator and denominator are aligned,
                 // still possible numerator < shifted_denominator.
-                if (sub_uint_uint(numerator, shifted_denominator.data(), uint64_count, difference.data()))
+                if (sub_uint(numerator, shifted_denominator.data(), uint64_count, difference.data()))
                 {
                     // numerator < shifted_denominator and MSBs are aligned,
                     // so current quotient bit is zero and next one is definitely one.
@@ -500,7 +500,7 @@ namespace seal
 
                     // Effectively shift numerator left by 1 by instead adding
                     // numerator to difference (to prevent overflow in numerator).
-                    add_uint_uint(difference.data(), numerator, uint64_count, difference.data());
+                    add_uint(difference.data(), numerator, uint64_count, difference.data());
 
                     // Adjust quotient and remaining shifts as a result of shifting numerator.
                     left_shift_uint192(quotient, 1, quotient);
@@ -584,13 +584,13 @@ namespace seal
             }
             if (is_equal_uint(exponent, exponent_uint64_count, 1))
             {
-                set_uint_uint(operand, operand_uint64_count, result_uint64_count, result);
+                set_uint(operand, operand_uint64_count, result_uint64_count, result);
                 return;
             }
 
             // Need to make a copy of exponent
             auto exponent_copy(allocate_uint(exponent_uint64_count, pool));
-            set_uint_uint(exponent, exponent_uint64_count, exponent_copy.get());
+            set_uint(exponent, exponent_uint64_count, exponent_copy.get());
 
             // Perform binary exponentiation.
             auto big_alloc(allocate_uint(result_uint64_count + result_uint64_count + result_uint64_count, pool));
@@ -599,7 +599,7 @@ namespace seal
             uint64_t *productptr = powerptr + result_uint64_count;
             uint64_t *intermediateptr = productptr + result_uint64_count;
 
-            set_uint_uint(operand, operand_uint64_count, result_uint64_count, powerptr);
+            set_uint(operand, operand_uint64_count, result_uint64_count, powerptr);
             set_uint(1, result_uint64_count, intermediateptr);
 
             // Initially: power = operand and intermediate = 1, product is not initialized.
@@ -607,7 +607,7 @@ namespace seal
             {
                 if ((*exponent_copy.get() % 2) == 1)
                 {
-                    multiply_truncate_uint_uint(powerptr, intermediateptr, result_uint64_count, productptr);
+                    multiply_truncate_uint(powerptr, intermediateptr, result_uint64_count, productptr);
                     swap(productptr, intermediateptr);
                 }
                 right_shift_uint(exponent_copy.get(), 1, exponent_uint64_count, exponent_copy.get());
@@ -615,13 +615,13 @@ namespace seal
                 {
                     break;
                 }
-                multiply_truncate_uint_uint(powerptr, powerptr, result_uint64_count, productptr);
+                multiply_truncate_uint(powerptr, powerptr, result_uint64_count, productptr);
                 swap(productptr, powerptr);
             }
-            set_uint_uint(intermediateptr, result_uint64_count, result);
+            set_uint(intermediateptr, result_uint64_count, result);
         }
 
-        uint64_t exponentiate_uint64_safe(uint64_t operand, uint64_t exponent)
+        uint64_t exponentiate_uint_safe(uint64_t operand, uint64_t exponent)
         {
             // Fast cases
             if (exponent == 0)
@@ -658,7 +658,7 @@ namespace seal
             return intermediate;
         }
 
-        uint64_t exponentiate_uint64(uint64_t operand, uint64_t exponent)
+        uint64_t exponentiate_uint(uint64_t operand, uint64_t exponent)
         {
             // Fast cases
             if (exponent == 0)

@@ -128,6 +128,30 @@ namespace seal
             return allocate_zero_uint(util::mul_safe(coeff_count, coeff_uint64_count), pool);
         }
 
+        SEAL_NODISCARD inline auto allocate_poly_array(
+            std::size_t poly_count, std::size_t coeff_count, std::size_t coeff_uint64_count, MemoryPool &pool)
+        {
+            return allocate_uint(util::mul_safe(poly_count, coeff_count, coeff_uint64_count), pool);
+        }
+
+        inline void set_zero_poly_array(
+            std::size_t poly_count, std::size_t coeff_count, std::size_t coeff_uint64_count, std::uint64_t *result)
+        {
+#ifdef SEAL_DEBUG
+            if (!result && poly_count && coeff_count && coeff_uint64_count)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            set_zero_uint(util::mul_safe(poly_count, coeff_count, coeff_uint64_count), result);
+        }
+
+        SEAL_NODISCARD inline auto allocate_zero_poly_array(
+            std::size_t poly_count, std::size_t coeff_count, std::size_t coeff_uint64_count, MemoryPool &pool)
+        {
+            return allocate_zero_uint(util::mul_safe(poly_count, coeff_count, coeff_uint64_count), pool);
+        }
+
         SEAL_NODISCARD inline std::uint64_t *get_poly_coeff(
             std::uint64_t *poly, std::size_t coeff_index, std::size_t coeff_uint64_count)
         {
@@ -152,7 +176,7 @@ namespace seal
             return poly + util::mul_safe(coeff_index, coeff_uint64_count);
         }
 
-        inline void set_poly_poly(
+        inline void set_poly(
             const std::uint64_t *poly, std::size_t coeff_count, std::size_t coeff_uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
@@ -165,7 +189,23 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
-            set_uint_uint(poly, util::mul_safe(coeff_count, coeff_uint64_count), result);
+            set_uint(poly, util::mul_safe(coeff_count, coeff_uint64_count), result);
+        }
+
+        inline void set_poly_array(
+            const std::uint64_t *poly, std::size_t poly_count, std::size_t coeff_count, std::size_t coeff_uint64_count, std::uint64_t *result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && poly_count && coeff_count && coeff_uint64_count)
+            {
+                throw std::invalid_argument("poly");
+            }
+            if (!result && poly_count && coeff_count && coeff_uint64_count)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            set_uint(poly, util::mul_safe(poly_count, coeff_count, coeff_uint64_count), result);
         }
 
         SEAL_NODISCARD inline bool is_zero_poly(
@@ -180,7 +220,7 @@ namespace seal
             return is_zero_uint(poly, util::mul_safe(coeff_count, coeff_uint64_count));
         }
 
-        SEAL_NODISCARD inline bool is_equal_poly_poly(
+        SEAL_NODISCARD inline bool is_equal_poly(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
             std::size_t coeff_uint64_count)
         {
@@ -194,10 +234,10 @@ namespace seal
                 throw std::invalid_argument("operand2");
             }
 #endif
-            return is_equal_uint_uint(operand1, operand2, util::mul_safe(coeff_count, coeff_uint64_count));
+            return is_equal_uint(operand1, operand2, util::mul_safe(coeff_count, coeff_uint64_count));
         }
 
-        inline void set_poly_poly(
+        inline void set_poly(
             const std::uint64_t *poly, std::size_t poly_coeff_count, std::size_t poly_coeff_uint64_count,
             std::size_t result_coeff_count, std::size_t result_coeff_uint64_count, std::uint64_t *result)
         {
@@ -220,7 +260,7 @@ namespace seal
             for (std::size_t i = 0; i < min_coeff_count;
                  i++, poly += poly_coeff_uint64_count, result += result_coeff_uint64_count)
             {
-                set_uint_uint(poly, poly_coeff_uint64_count, result_coeff_uint64_count, result);
+                set_uint(poly, poly_coeff_uint64_count, result_coeff_uint64_count, result);
             }
             set_zero_uint(util::mul_safe(result_coeff_count - min_coeff_count, result_coeff_uint64_count), result);
         }
@@ -294,7 +334,7 @@ namespace seal
                 return ConstPointer<std::uint64_t>::Aliasing(poly);
             }
             auto allocation(allocate_poly(new_coeff_count, new_coeff_uint64_count, pool));
-            set_poly_poly(
+            set_poly(
                 poly, coeff_count, coeff_uint64_count, new_coeff_count, new_coeff_uint64_count, allocation.get());
             return ConstPointer<std::uint64_t>(std::move(allocation));
         }
@@ -327,7 +367,7 @@ namespace seal
             }
             for (; coeff_count--; poly += coeff_uint64_count)
             {
-                if (compare_uint_uint(poly, coeff_uint64_count, compare, compare_uint64_count) >= 0)
+                if (compare_uint(poly, coeff_uint64_count, compare, compare_uint64_count) >= 0)
                 {
                     return false;
                 }

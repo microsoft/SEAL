@@ -32,7 +32,7 @@ namespace seal
 
         +-------------------+
         |    Pointer & Size |  Construct  +-----------------+
-        | or Ciphertext     +------------>+ (Const)PolyIter |  Iterates over RNS polynomials in a ciphertext
+        | or Ciphertext     |------------>| (Const)PolyIter |  Iterates over RNS polynomials in a ciphertext
         +-------------------+             +-----------------+  (coeff_modulus_size-many RNS components)
                                                    |
                                                    |
@@ -41,7 +41,7 @@ namespace seal
                                                    |
                                                    v
            +----------------+  Construct   +----------------+
-           | Pointer & Size +------------->+ (Const)RNSIter |  Iterates over RNS components in an RNS polynomial
+           | Pointer & Size |------------->| (Const)RNSIter |  Iterates over RNS components in an RNS polynomial
            +----------------+              +----------------+  (poly_modulus_degree-many coefficients)
                                                    |
                                                    |
@@ -50,7 +50,7 @@ namespace seal
                                                    |
                                                    v
           +----------------+  Construct  +------------------+
-          | Pointer & Size +------------>+ (Const)CoeffIter |  Iterates over coefficients (std::uint64_t) in a single
+          | Pointer & Size |------------>| (Const)CoeffIter |  Iterates over coefficients (std::uint64_t) in a single
           +----------------+             +------------------+  RNS polynomial component
                                                    |
                                                    |
@@ -59,11 +59,11 @@ namespace seal
                                                    |
                                                    v
                                        +------------------------+  Construct  +---------------+
-                                       | (const) std::uint64_t* +------------>+ PtrIter<PtrT> |  Simple wrapper
+                                       | (const) std::uint64_t* |------------>| PtrIter<PtrT> |  Simple wrapper
                                        +------------------------+             +---------------+  for raw pointers
                                                                                 ^     |
                             +---------+  Construct                              |     |
-                            | MyType* +-----------------------------------------+     | Dereference
+                            | MyType* |-----------------------------------------+     | Dereference
                             +---------+                                               |
                                                                                       |
                                                                                       v
@@ -113,11 +113,11 @@ namespace seal
 
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const Modulus *>>(I, coeff_modulus), coeff_modulus_size,
+                IterTuple<RNSIter, ModulusIter>(I, coeff_modulus), coeff_modulus_size,
                 [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J)); });
         });
 
-        Here coeff_modulus is a std::vector<Modulus>, and PtrIter<const Modulus *> was constructed directly
+        Here coeff_modulus is a std::vector<Modulus>, and ModulusIter was constructed directly
         from it. PtrIter provides a similar constructor from a seal::util::Pointer type. Note also how we had to
         dereference get<1>(J) in the innermost lambda function to access the value (NTTTables). This is because
         get<1>(J) is const NTTTables *, as was discussed above.
@@ -140,7 +140,7 @@ namespace seal
         for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
             SEAL_ASSERT_TYPE(I, RNSIter, "encrypted");
             for_each_n(
-                IterTuple<RNSIter, PtrIter<const Modulus *>>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
+                IterTuple<RNSIter, ModulusIter>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
                     SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
                     SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "coeff_modulus");
                     negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J));
@@ -665,7 +665,7 @@ namespace seal
             using value_type = ConstCoeffIter;
             using pointer = void;
             using reference = const value_type &;
-            using iterator_category = std::bidirectional_iterator_tag;
+            using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
             ConstRNSIter() : coeff_it_(nullptr), step_size_(0)
@@ -1734,5 +1734,10 @@ namespace seal
         {
             return iterator_tuple_internal::GetHelperStruct<N>::apply(it);
         }
+
+        // Typedefs for some commonly used iterators
+        using ModulusIter = PtrIter<const Modulus *>;
+
+        using NTTTablesIter = PtrIter<const NTTTables *>;
     } // namespace util
 } // namespace seal

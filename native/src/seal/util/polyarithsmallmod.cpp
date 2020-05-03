@@ -36,7 +36,7 @@ namespace seal
             // Explicit inline
             // for (int i = 0; i < coeff_count; i++)
             //{
-            //    *result++ = multiply_uint_uint_mod(*poly++, scalar, modulus);
+            //    *result++ = multiply_uint_mod(*poly++, scalar, modulus);
             //}
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
@@ -69,7 +69,7 @@ namespace seal
             }
         }
 
-        void multiply_poly_poly_coeffmod(
+        void multiply_poly_coeffmod(
             const uint64_t *operand1, size_t operand1_coeff_count, const uint64_t *operand2,
             size_t operand2_coeff_count, const Modulus &modulus, size_t result_coeff_count, uint64_t *result)
         {
@@ -135,7 +135,7 @@ namespace seal
             }
         }
 
-        void multiply_poly_poly_coeffmod(
+        void multiply_poly_coeffmod(
             const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, const Modulus &modulus,
             uint64_t *result)
         {
@@ -193,7 +193,7 @@ namespace seal
             }
         }
 
-        void divide_poly_poly_coeffmod_inplace(
+        void divide_poly_coeffmod_inplace(
             uint64_t *numerator, const uint64_t *denominator, size_t coeff_count, const Modulus &modulus,
             uint64_t *quotient)
         {
@@ -272,7 +272,7 @@ namespace seal
                     // coefficient of denominator (which when subtracted will zero
                     // out the topmost denominator coefficient).
                     uint64_t &quotient_coeff = quotient[denominator_shift];
-                    temp_quotient = multiply_uint_uint_mod(monic_denominator_scalar, leading_numerator_coeff, modulus);
+                    temp_quotient = multiply_uint_mod(monic_denominator_scalar, leading_numerator_coeff, modulus);
                     quotient_coeff = temp_quotient;
 
                     // Subtract numerator and quotient*denominator (shifted by denominator_shift).
@@ -281,11 +281,11 @@ namespace seal
                     {
                         // Multiply denominator's coefficient by quotient.
                         uint64_t denominator_coeff = denominator[denominator_coeff_index];
-                        subtrahend = multiply_uint_uint_mod(temp_quotient, denominator_coeff, modulus);
+                        subtrahend = multiply_uint_mod(temp_quotient, denominator_coeff, modulus);
 
                         // Subtract numerator with resulting product, appropriately shifted by denominator shift.
                         uint64_t &numerator_coeff = numerator[denominator_coeff_index + denominator_shift];
-                        numerator_coeff = sub_uint_uint_mod(numerator_coeff, subtrahend, modulus);
+                        numerator_coeff = sub_uint64_mod(numerator_coeff, subtrahend, modulus);
                     }
                 }
 
@@ -323,7 +323,7 @@ namespace seal
             // Explicit inline
             // for (int i = 0; i < coeff_count; i++)
             //{
-            //    *result++ = multiply_uint_uint_mod(*operand1++, *operand2++, modulus);
+            //    *result++ = multiply_uint_mod(*operand1++, *operand2++, modulus);
             //}
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
@@ -429,10 +429,10 @@ namespace seal
             // and operand being denominator. Notice that degree(numerator) >= degree(denominator).
             auto numerator_anchor(allocate_uint(coeff_count, pool));
             uint64_t *numerator = numerator_anchor.get();
-            set_uint_uint(poly_modulus, coeff_count, numerator);
+            set_uint(poly_modulus, coeff_count, numerator);
             auto denominator_anchor(allocate_uint(coeff_count, pool));
             uint64_t *denominator = denominator_anchor.get();
-            set_uint_uint(operand, coeff_count, denominator);
+            set_uint(operand, coeff_count, denominator);
 
             // Determine most significant coefficients of each.
             size_t numerator_coeffs = get_significant_coeff_count_poly(numerator, coeff_count, size_t(1));
@@ -494,7 +494,7 @@ namespace seal
                         // out the topmost denominator coefficient).
                         uint64_t &quotient_coeff = quotient[denominator_shift];
                         temp_quotient =
-                            multiply_uint_uint_mod(monic_denominator_scalar, leading_numerator_coeff, modulus);
+                            multiply_uint_mod(monic_denominator_scalar, leading_numerator_coeff, modulus);
                         quotient_coeff = temp_quotient;
 
                         // Subtract numerator and quotient*denominator (shifted by denominator_shift).
@@ -503,12 +503,12 @@ namespace seal
                         {
                             // Multiply denominator's coefficient by quotient.
                             uint64_t denominator_coeff = denominator[denominator_coeff_index];
-                            subtrahend = multiply_uint_uint_mod(temp_quotient, denominator_coeff, modulus);
+                            subtrahend = multiply_uint_mod(temp_quotient, denominator_coeff, modulus);
 
                             // Subtract numerator with resulting product, appropriately shifted by
                             // denominator shift.
                             uint64_t &numerator_coeff = numerator[denominator_coeff_index + denominator_shift];
-                            numerator_coeff = sub_uint_uint_mod(numerator_coeff, subtrahend, modulus);
+                            numerator_coeff = sub_uint64_mod(numerator_coeff, subtrahend, modulus);
                         }
                     }
 
@@ -528,8 +528,8 @@ namespace seal
 
                 // Integrate quotient with invert coefficients.
                 // Calculate: invert_next = invert_prior + -quotient * invert_curr
-                multiply_truncate_poly_poly_coeffmod(quotient.get(), invert_curr, coeff_count, modulus, invert_next);
-                sub_poly_poly_coeffmod(invert_prior, invert_next, coeff_count, modulus, invert_next);
+                multiply_truncate_poly_coeffmod(quotient.get(), invert_curr, coeff_count, modulus, invert_next);
+                sub_poly_coeffmod(invert_prior, invert_next, coeff_count, modulus, invert_next);
 
                 // Swap prior and curr, and then curr and next.
                 swap(invert_prior, invert_curr);
@@ -590,7 +590,7 @@ namespace seal
             // Nothing to do
             if (shift == 0)
             {
-                set_uint_uint(operand, coeff_count, result);
+                set_uint(operand, coeff_count, result);
                 return;
             }
 

@@ -172,7 +172,7 @@ namespace sealtest
             ASSERT_EQ(0x8000000000000000ULL, value[1]);
         }
 
-        TEST(UIntArithMod, AddUIntUIntMod)
+        TEST(UIntArithMod, AddUIntMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto value1(allocate_uint(2, pool));
@@ -229,7 +229,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), value1[1]);
         }
 
-        TEST(UIntArithMod, SubUIntUIntMod)
+        TEST(UIntArithMod, SubUIntMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto value1(allocate_uint(2, pool));

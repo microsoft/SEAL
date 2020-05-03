@@ -98,7 +98,7 @@ namespace seal
 
         // Set the secret_key_array to have size 1 (first power of secret)
         secret_key_array_ = allocate_poly(coeff_count, coeff_modulus_size, pool_);
-        set_poly_poly(secret_key_.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
+        set_poly(secret_key_.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
         secret_key_array_size_ = 1;
 
         // Secret key has been generated
@@ -300,8 +300,8 @@ namespace seal
 
         // Need to extend the array
         // Compute powers of secret key until max_power
-        auto new_secret_key_array(allocate_poly(new_size * coeff_count, coeff_modulus_size, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_size, new_secret_key_array.get());
+        auto new_secret_key_array(allocate_poly_array(new_size, coeff_count, coeff_modulus_size, pool_));
+        set_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_size, new_secret_key_array.get());
 
         size_t poly_ptr_increment = coeff_count * coeff_modulus_size;
         uint64_t *prev_poly_ptr = new_secret_key_array.get() + (old_size - 1) * poly_ptr_increment;
@@ -372,7 +372,7 @@ namespace seal
                 secret_key_, context_, key_context_data.parms_id(), true, save_seed, destination[j].data());
             factor = key_modulus.back().value() % key_modulus[j].value();
             multiply_poly_scalar_coeffmod(new_key + j * coeff_count, coeff_count, factor, key_modulus[j], temp.get());
-            add_poly_poly_coeffmod(
+            add_poly_coeffmod(
                 destination[j].data().data() + j * coeff_count, temp.get(), coeff_count, key_modulus[j],
                 destination[j].data().data() + j * coeff_count);
         }

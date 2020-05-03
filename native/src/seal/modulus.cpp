@@ -89,7 +89,7 @@ namespace seal
             uint64_t quotient[3]{ 0, 0, 0 };
 
             // Use a special method to avoid using memory pool
-            divide_uint192_uint64_inplace(numerator, value_, quotient);
+            divide_uint192_inplace(numerator, value_, quotient);
 
             const_ratio_[0] = quotient[0];
             const_ratio_[1] = quotient[1];

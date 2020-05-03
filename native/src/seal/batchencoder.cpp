@@ -57,12 +57,12 @@ namespace seal
         uint64_t root = context_data.plain_ntt_tables()->get_root();
         auto &modulus = context_data.parms().plain_modulus();
 
-        uint64_t generator_sq = multiply_uint_uint_mod(root, root, modulus);
+        uint64_t generator_sq = multiply_uint_mod(root, root, modulus);
         roots_of_unity_[0] = root;
 
         for (size_t i = 1; i < slots_; i++)
         {
-            roots_of_unity_[i] = multiply_uint_uint_mod(roots_of_unity_[i - 1], generator_sq, modulus);
+            roots_of_unity_[i] = multiply_uint_mod(roots_of_unity_[i - 1], generator_sq, modulus);
         }
     }
 
@@ -314,7 +314,7 @@ namespace seal
         // temporary space.
         size_t input_plain_coeff_count = min(plain.coeff_count(), slots_);
         auto temp(allocate_uint(input_plain_coeff_count, pool));
-        set_uint_uint(plain.data(), input_plain_coeff_count, temp.get());
+        set_uint(plain.data(), input_plain_coeff_count, temp.get());
 
         // Set plain to full slot count size.
         plain.resize(slots_);
@@ -362,7 +362,7 @@ namespace seal
         auto temp_dest(allocate_uint(slots_, pool));
 
         // Make a copy of poly
-        set_uint_uint(plain.data(), plain_coeff_count, temp_dest.get());
+        set_uint(plain.data(), plain_coeff_count, temp_dest.get());
         set_zero_uint(slots_ - plain_coeff_count, temp_dest.get() + plain_coeff_count);
 
         // Transform destination using negacyclic NTT.
@@ -402,7 +402,7 @@ namespace seal
         auto temp_dest(allocate_uint(slots_, pool));
 
         // Make a copy of poly
-        set_uint_uint(plain.data(), plain_coeff_count, temp_dest.get());
+        set_uint(plain.data(), plain_coeff_count, temp_dest.get());
         set_zero_uint(slots_ - plain_coeff_count, temp_dest.get() + plain_coeff_count);
 
         // Transform destination using negacyclic NTT.
@@ -448,7 +448,7 @@ namespace seal
         auto temp_dest(allocate_uint(slots_, pool));
 
         // Make a copy of poly
-        set_uint_uint(plain.data(), plain_coeff_count, temp_dest.get());
+        set_uint(plain.data(), plain_coeff_count, temp_dest.get());
         set_zero_uint(slots_ - plain_coeff_count, temp_dest.get() + plain_coeff_count);
 
         // Transform destination using negacyclic NTT.
@@ -491,7 +491,7 @@ namespace seal
         auto temp_dest(allocate_uint(slots_, pool));
 
         // Make a copy of poly
-        set_uint_uint(plain.data(), plain_coeff_count, temp_dest.get());
+        set_uint(plain.data(), plain_coeff_count, temp_dest.get());
         set_zero_uint(slots_ - plain_coeff_count, temp_dest.get() + plain_coeff_count);
 
         // Transform destination using negacyclic NTT.
@@ -533,7 +533,7 @@ namespace seal
         auto temp(allocate_uint(slots_, pool));
 
         // Make a copy of poly
-        set_uint_uint(plain.data(), plain_coeff_count, temp.get());
+        set_uint(plain.data(), plain_coeff_count, temp.get());
         set_zero_uint(slots_ - plain_coeff_count, temp.get() + plain_coeff_count);
 
         // Transform destination using negacyclic NTT.

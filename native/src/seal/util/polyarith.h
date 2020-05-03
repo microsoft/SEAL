@@ -53,7 +53,7 @@ namespace seal
             }
         }
 
-        inline void add_poly_poly(
+        inline void add_poly(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
             std::size_t coeff_uint64_count, std::uint64_t *result)
         {
@@ -73,14 +73,14 @@ namespace seal
 #endif
             while (coeff_count--)
             {
-                add_uint_uint(operand1, operand2, coeff_uint64_count, result);
+                add_uint(operand1, operand2, coeff_uint64_count, result);
                 operand1 += coeff_uint64_count;
                 operand2 += coeff_uint64_count;
                 result += coeff_uint64_count;
             }
         }
 
-        inline void sub_poly_poly(
+        inline void sub_poly(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
             std::size_t coeff_uint64_count, std::uint64_t *result)
         {
@@ -100,14 +100,14 @@ namespace seal
 #endif
             while (coeff_count--)
             {
-                sub_uint_uint(operand1, operand2, coeff_uint64_count, result);
+                sub_uint(operand1, operand2, coeff_uint64_count, result);
                 operand1 += coeff_uint64_count;
                 operand2 += coeff_uint64_count;
                 result += coeff_uint64_count;
             }
         }
 
-        void multiply_poly_poly(
+        void multiply_poly(
             const std::uint64_t *operand1, std::size_t operand1_coeff_count, std::size_t operand1_coeff_uint64_count,
             const std::uint64_t *operand2, std::size_t operand2_coeff_count, std::size_t operand2_coeff_uint64_count,
             std::size_t result_coeff_count, std::size_t result_coeff_uint64_count, std::uint64_t *result,
@@ -119,9 +119,9 @@ namespace seal
             set_zero_uint(coeff_uint64_count, result);
             while (coeff_count--)
             {
-                if (is_greater_than_uint_uint(poly, result, coeff_uint64_count))
+                if (is_greater_than_uint(poly, result, coeff_uint64_count))
                 {
-                    set_uint_uint(poly, coeff_uint64_count, result);
+                    set_uint(poly, coeff_uint64_count, result);
                 }
 
                 poly += coeff_uint64_count;

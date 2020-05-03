@@ -49,7 +49,7 @@ namespace seal
             {
                 if (exponent & 1)
                 {
-                    product = multiply_uint_uint_mod(power, intermediate, modulus);
+                    product = multiply_uint_mod(power, intermediate, modulus);
                     swap(product, intermediate);
                 }
                 exponent >>= 1;
@@ -57,19 +57,19 @@ namespace seal
                 {
                     break;
                 }
-                product = multiply_uint_uint_mod(power, power, modulus);
+                product = multiply_uint_mod(power, power, modulus);
                 swap(product, power);
             }
             return intermediate;
         }
 
-        void divide_uint_uint_mod_inplace(
+        void divide_uint_mod_inplace(
             uint64_t *numerator, const Modulus &modulus, size_t uint64_count, uint64_t *quotient, MemoryPool &pool)
         {
             // Handle base cases
             if (uint64_count == 2)
             {
-                divide_uint128_uint64_inplace(numerator, modulus.value(), quotient);
+                divide_uint128_inplace(numerator, modulus.value(), quotient);
                 return;
             }
             else if (uint64_count == 1)
@@ -91,16 +91,16 @@ namespace seal
                 uint64_t *quot = quot_alloc.get();
                 auto rem_alloc(allocate_uint(uint64_count, pool));
                 uint64_t *rem = rem_alloc.get();
-                set_uint_uint(numerator + 2, uint64_count - 2, x1);
-                set_uint_uint(numerator, 2, x2); // x2 = (num) % 2^128.
+                set_uint(numerator + 2, uint64_count - 2, x1);
+                set_uint(numerator, 2, x2); // x2 = (num) % 2^128.
 
-                multiply_uint_uint(x1, uint64_count - 2, &modulus.const_ratio()[0], 2, uint64_count, quot);  // x1*A.
-                multiply_uint_uint64(x1, uint64_count - 2, modulus.const_ratio()[2], uint64_count - 1, rem); // x1*B
-                add_uint_uint(rem, uint64_count - 1, x2, 2, 0, uint64_count, rem); // x1*B + x2;
+                multiply_uint(x1, uint64_count - 2, &modulus.const_ratio()[0], 2, uint64_count, quot);  // x1*A.
+                multiply_uint(x1, uint64_count - 2, modulus.const_ratio()[2], uint64_count - 1, rem); // x1*B
+                add_uint(rem, uint64_count - 1, x2, 2, 0, uint64_count, rem); // x1*B + x2;
 
                 size_t remainder_uint64_count = get_significant_uint64_count_uint(rem, uint64_count);
-                divide_uint_uint_mod_inplace(rem, modulus, remainder_uint64_count, quotient, pool);
-                add_uint_uint(quotient, quot, uint64_count, quotient);
+                divide_uint_mod_inplace(rem, modulus, remainder_uint64_count, quotient, pool);
+                add_uint(quotient, quot, uint64_count, quotient);
                 *numerator = rem[0];
 
                 return;
