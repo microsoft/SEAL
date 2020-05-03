@@ -205,12 +205,9 @@ namespace sealtest
             ASSERT_EQ(0ULL, multiply_uint_mod(0, 1, mod));
             ASSERT_EQ(0ULL, multiply_uint_mod(1, 0, mod));
             ASSERT_EQ(1ULL, multiply_uint_mod(1, 1, mod));
-            ASSERT_EQ(
-                576460752302899200ULL, multiply_uint_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
-            ASSERT_EQ(
-                576460752302899200ULL, multiply_uint_mod(1152921504605798401ULL, 1152921504605798400ULL, mod));
-            ASSERT_EQ(
-                1729382256908697601ULL, multiply_uint_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(576460752302899200ULL, multiply_uint_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(576460752302899200ULL, multiply_uint_mod(1152921504605798401ULL, 1152921504605798400ULL, mod));
+            ASSERT_EQ(1729382256908697601ULL, multiply_uint_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
             ASSERT_EQ(1ULL, multiply_uint_mod(2305843009211596800ULL, 2305843009211596800ULL, mod));
         }
 

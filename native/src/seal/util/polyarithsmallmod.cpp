@@ -493,8 +493,7 @@ namespace seal
                         // coefficient of denominator (which when subtracted will zero
                         // out the topmost denominator coefficient).
                         uint64_t &quotient_coeff = quotient[denominator_shift];
-                        temp_quotient =
-                            multiply_uint_mod(monic_denominator_scalar, leading_numerator_coeff, modulus);
+                        temp_quotient = multiply_uint_mod(monic_denominator_scalar, leading_numerator_coeff, modulus);
                         quotient_coeff = temp_quotient;
 
                         // Subtract numerator and quotient*denominator (shifted by denominator_shift).

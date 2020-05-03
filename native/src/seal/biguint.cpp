@@ -213,8 +213,7 @@ namespace seal
         }
         else
         {
-            divide_uint(
-                value_.get(), operand2.data(), result_uint64_count, result.data(), remainder.data(), pool_);
+            divide_uint(value_.get(), operand2.data(), result_uint64_count, result.data(), remainder.data(), pool_);
         }
         return result;
     }

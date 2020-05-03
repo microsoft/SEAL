@@ -94,9 +94,9 @@ namespace seal
                 set_uint(numerator + 2, uint64_count - 2, x1);
                 set_uint(numerator, 2, x2); // x2 = (num) % 2^128.
 
-                multiply_uint(x1, uint64_count - 2, &modulus.const_ratio()[0], 2, uint64_count, quot);  // x1*A.
-                multiply_uint(x1, uint64_count - 2, modulus.const_ratio()[2], uint64_count - 1, rem); // x1*B
-                add_uint(rem, uint64_count - 1, x2, 2, 0, uint64_count, rem); // x1*B + x2;
+                multiply_uint(x1, uint64_count - 2, &modulus.const_ratio()[0], 2, uint64_count, quot); // x1*A.
+                multiply_uint(x1, uint64_count - 2, modulus.const_ratio()[2], uint64_count - 1, rem);  // x1*B
+                add_uint(rem, uint64_count - 1, x2, 2, 0, uint64_count, rem);                          // x1*B + x2;
 
                 size_t remainder_uint64_count = get_significant_uint64_count_uint(rem, uint64_count);
                 divide_uint_mod_inplace(rem, modulus, remainder_uint64_count, quotient, pool);

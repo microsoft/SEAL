@@ -193,7 +193,8 @@ namespace seal
         }
 
         inline void set_poly_array(
-            const std::uint64_t *poly, std::size_t poly_count, std::size_t coeff_count, std::size_t coeff_uint64_count, std::uint64_t *result)
+            const std::uint64_t *poly, std::size_t poly_count, std::size_t coeff_count, std::size_t coeff_uint64_count,
+            std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!poly && poly_count && coeff_count && coeff_uint64_count)
@@ -334,8 +335,7 @@ namespace seal
                 return ConstPointer<std::uint64_t>::Aliasing(poly);
             }
             auto allocation(allocate_poly(new_coeff_count, new_coeff_uint64_count, pool));
-            set_poly(
-                poly, coeff_count, coeff_uint64_count, new_coeff_count, new_coeff_uint64_count, allocation.get());
+            set_poly(poly, coeff_count, coeff_uint64_count, new_coeff_count, new_coeff_uint64_count, allocation.get());
             return ConstPointer<std::uint64_t>(std::move(allocation));
         }
 

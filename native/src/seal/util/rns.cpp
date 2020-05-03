@@ -392,8 +392,7 @@ namespace seal
                 {
                     uint64_t temp_prod =
                         multiply_uint_mod(temp_value[i], inv_punctured_prod_mod_base_array_[i], base_[i]);
-                    multiply_uint(
-                        punctured_prod_array_.get() + (i * size_), size_, temp_prod, size_, temp_mpi.get());
+                    multiply_uint(punctured_prod_array_.get() + (i * size_), size_, temp_prod, size_, temp_mpi.get());
                     add_uint_uint_mod(temp_mpi.get(), value, base_prod_.get(), size_, value);
                 }
             }
@@ -1094,8 +1093,7 @@ namespace seal
                 // No correction needed
                 else
                 {
-                    destination[i] =
-                        sub_uint64_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
+                    destination[i] = sub_uint64_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
                 }
 
                 // If this coefficient was non-zero, multiply by t^(-1)

@@ -1790,7 +1790,8 @@ namespace seal
             }
         } // namespace iterator_tuple_internal
 
-        template <std::size_t N, std::size_t... Rest, typename... SEALIters, typename = std::enable_if_t<sizeof...(Rest)>>
+        template <
+            std::size_t N, std::size_t... Rest, typename... SEALIters, typename = std::enable_if_t<sizeof...(Rest)>>
         auto get(const IterTuple<SEALIters...> &it)
         {
             return get<Rest...>(iterator_tuple_internal::get<N>(it));

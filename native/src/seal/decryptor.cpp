@@ -272,8 +272,7 @@ namespace seal
                 dyadic_product_coeffmod(
                     copy_operand1.get(), secret_key_ptr, coeff_count, coeff_modulus[i], copy_operand1.get());
                 // add c_{j+1} * s^{j+1} to destination
-                add_poly_coeffmod(
-                    destination_ptr, copy_operand1.get(), coeff_count, coeff_modulus[i], destination_ptr);
+                add_poly_coeffmod(destination_ptr, copy_operand1.get(), coeff_count, coeff_modulus[i], destination_ptr);
                 encrypted_ptr += rns_poly_uint64_count;
                 secret_key_ptr += key_rns_poly_uint64_count;
             }

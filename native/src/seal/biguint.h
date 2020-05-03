@@ -905,8 +905,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator<(const BigUInt &compare) const
         {
-            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) <
-                   0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) < 0;
         }
 
         /**
@@ -930,8 +929,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator>(const BigUInt &compare) const
         {
-            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) >
-                   0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) > 0;
         }
 
         /**
@@ -955,8 +953,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator<=(const BigUInt &compare) const
         {
-            return util::compare_uint(
-                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) <= 0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) <= 0;
         }
 
         /**
@@ -980,8 +977,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator>=(const BigUInt &compare) const
         {
-            return util::compare_uint(
-                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) >= 0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) >= 0;
         }
 
         /**
@@ -1005,8 +1001,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator==(const BigUInt &compare) const
         {
-            return util::compare_uint(
-                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) == 0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) == 0;
         }
 
         /**
