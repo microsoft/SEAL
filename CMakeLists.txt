@@ -194,6 +194,27 @@ macro(install_target target export)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endmacro()
 
+# Manually combine archives, using ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} to keep temporary files.
+macro(combine_archives target dependency)
+    if(CMAKE_HOST_WIN32)
+        get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
+        file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
+        set(DEL_CMD "del")
+        set(DEL_CMD_OPTS "")
+    else()
+        set(AR_CMD_PATH "ar")
+        set(DEL_CMD "rm")
+        set(DEL_CMD_OPTS "-rf")
+    endif()
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${target}>
+        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${dependency}>
+        COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:${target}> *.o
+        COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
+        WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+endmacro()
+
 #########################
 # External dependencies #
 #########################
@@ -282,7 +303,6 @@ endif()
 # Download and configure
 if(SEAL_USE_ZLIB AND NOT MSVC)
     message(STATUS "Setting up ZLIB ...")
-
     if(NOT CMAKE_TOOLCHAIN_FILE)
         execute_process(
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -338,7 +358,6 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
     list(APPEND SEAL_ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
-    set(zlibstatic_LIBRARY_PATH ${THIRDPARTY_DIR}/zlib/src/libz.a)
 endif()
 
 # Google Test
@@ -629,24 +648,7 @@ endif()
 
 # In UNIX-like platforms combine manually seal and zlibstatic into a single archive; not pretty, but works
 if(SEAL_USE_ZLIB AND NOT MSVC)
-    if(CMAKE_HOST_WIN32)
-        get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
-        set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
-        file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
-        set(DEL_CMD "del")
-        set(DEL_CMD_OPTS "")
-    else()
-        set(AR_CMD_PATH "ar")
-        set(DEL_CMD "rm")
-        set(DEL_CMD_OPTS "-rf")
-    endif()
-    file(COPY "${zlibstatic_LIBRARY_PATH}" DESTINATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
-    add_custom_command(TARGET seal POST_BUILD
-        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:seal>
-        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE_DIR:seal>/libz.a
-        COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:seal> *.o
-        COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
-        WORKING_DIRECTORY $<TARGET_FILE_DIR:seal>)
+    combine_archives(seal zlibstatic)
 endif()
 
 #########################

@@ -11,10 +11,9 @@ else()
     set(TEMP_BINARY_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 endif()
 
+set(ZLIB_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DSKIP_INSTALL_ALL=ON -Wno-dev)
 if(EXISTS cache_init.txt)
-    set(ZLIB_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DSKIP_INSTALL_ALL=ON -Wno-dev -C../cache_init.txt)
-else()
-    set(ZLIB_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DSKIP_INSTALL_ALL=ON -Wno-dev)
+    set(ZLIB_CMAKE_ARGS "${ZLIB_CMAKE_ARGS} -C../cache_init.txt")
 endif()
 
 include(ExternalProject)
@@ -28,6 +27,8 @@ ExternalProject_Add(EP_ZLIB
     GIT_TAG             v${PROJECT_VERSION}
     GIT_CONFIG          advice.detachedHead=false
     CMAKE_ARGS          ${ZLIB_CMAKE_ARGS}
+    CONFIGURE_COMMAND   ""
+    BUILD_COMMAND       ""
     INSTALL_COMMAND     ""
     TEST_COMMAND        ""
 )
