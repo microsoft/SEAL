@@ -274,7 +274,7 @@ make
 ```
 
 This downloads and compiles the [GoogleTest](https://github.com/google/googletest) framework as a part of Microsoft SEAL.
-The `sealtest` executable is located `native/bin/`.
+The `sealtest` executable is located in `native/bin/`.
 All unit tests should pass successfully.
 
 #### Installing Microsoft SEAL
@@ -351,9 +351,9 @@ The project takes care of copying the native SEAL_C library to the output direct
 
 #### .NET Unit Tests
 
-Build the SEALNet Test project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`.
+Build the SEALNetTest project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`.
 This results in the assembly `SEALNetTest.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp3.1`.
-The project takes care of copying the native SEALNetNative library to the output directory.
+The project takes care of copying the native SEAL_C library to the output directory.
 
 #### Using Microsoft SEAL for .NET in Your Own Application
 
@@ -377,7 +377,8 @@ You can follow these [instructions for installing in Linux](https://dotnet.micro
 
 #### Native Library
 
-If you only intend to run the examples and unit tests provided with Microsoft SEAL, you do not need to install the native shared library, you only need to compile it.
+If you only intend to run the examples and unit tests provided with Microsoft SEAL, you do not need to install the native shared library.
+You only need to compile it.
 The SEALNetExamples and SEALNetTest projects take care of copying the native shared library to the appropriate assembly output directory.
 
 Microsoft SEAL by default does not build SEAL_C.
