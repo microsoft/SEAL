@@ -83,6 +83,8 @@ namespace seal
     {
         friend class SEALContext;
 
+        friend struct std::hash<EncryptionParameters>;
+
     public:
         /**
         Creates an empty set of encryption parameters.
@@ -517,6 +519,16 @@ namespace std
             result = 31 * result + parms_id[2];
             result = 31 * result + parms_id[3];
             return static_cast<std::size_t>(result);
+        }
+    };
+
+    template <>
+    struct hash<seal::EncryptionParameters>
+    {
+        std::size_t operator()(const seal::EncryptionParameters parms) const
+        {
+            hash<seal::parms_id_type> parms_id_hash;
+            return parms_id_hash(parms.parms_id_);
         }
     };
 } // namespace std
