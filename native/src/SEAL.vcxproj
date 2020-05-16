@@ -224,7 +224,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform);$(SolutionDir)/thirdparty/zlib/src;$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -247,7 +247,7 @@
     </PreBuildEvent>
     <Lib>
       <AdditionalDependencies>Bcrypt.lib;zlibstaticd.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -256,7 +256,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/src;$(SolutionDir)/thirdparty/zlib/build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -278,7 +278,7 @@
     </PreBuildEvent>
     <Lib>
       <AdditionalDependencies>Bcrypt.lib;zlibstaticd.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -289,7 +289,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/src;$(SolutionDir)/thirdparty/zlib/build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -313,7 +313,7 @@
     </PreBuildEvent>
     <Lib>
       <AdditionalDependencies>Bcrypt.lib;zlibstatic.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -324,7 +324,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/thirdparty/zlib/src;$(SolutionDir)/thirdparty/zlib/build/$(Platform);$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -347,7 +347,7 @@
     </PreBuildEvent>
     <Lib>
       <AdditionalDependencies>Bcrypt.lib;zlibstatic.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>

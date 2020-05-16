@@ -27,8 +27,6 @@ ExternalProject_Add(EP_ZLIB
     GIT_TAG             v${PROJECT_VERSION}
     GIT_CONFIG          advice.detachedHead=false
     CMAKE_ARGS          ${ZLIB_CMAKE_ARGS}
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
     INSTALL_COMMAND     ""
     TEST_COMMAND        ""
 )

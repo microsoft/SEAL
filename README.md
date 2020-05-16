@@ -182,14 +182,6 @@ This results in an executable `sealexamples.exe` to be created in `bin\$(Platfor
 The unit tests require the Google Test framework to be installed.
 The appropriate NuGet package is already listed in `native\tests\packages.config`, so once you attempt to build the SEALTest project `native\tests\SEALTest.vcxproj` from `SEAL.sln` Visual Studio will automatically download and install it for you.
 
-#### Building with MSBuild
-
-We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and all commands presented below are assumed to be executed in the directory `SEAL`.
-The solution can be easily built for a specific configuration and platform with MSBuild: `msbuild SEAL.sln /p:configuration=Release /p:platform=x64`.
-When buildinga a standalone project, an extra `SolutionDir` argument must be set to the directory of `SEAL.sln` so that include directories are set properly.
-For example, `msbuild .\native\src\SEAL.vcxproj /p:configuration=Release /p:platform=x64 /p:SolutionDir=.\` will only build Microsoft SEAL's C++ library in Release mode for x64 platform.
-The value `.\` should be the directory of `SEAL.sln` relative to the current working directory.
-
 ### Linux, macOS, and FreeBSD
 
 Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
