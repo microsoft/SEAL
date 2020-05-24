@@ -564,5 +564,15 @@ namespace seal
         {
             return value == T{ 0 };
         }
+
+        template <typename ForwardIt, typename Size, typename Func>
+        ForwardIt seal_for_each_n(ForwardIt first, Size size, Func func)
+        {
+            for (; size--; (void)++first)
+            {
+                func(*first);
+            }
+            return first;
+        }
     } // namespace util
 } // namespace seal

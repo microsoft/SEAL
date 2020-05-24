@@ -8,6 +8,7 @@
 #include "seal/util/pointer.h"
 #include "seal/util/polycore.h"
 #include "seal/util/uintarithsmallmod.h"
+#include "seal/util/iterator.h"
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
@@ -17,14 +18,14 @@ namespace seal
     namespace util
     {
         inline void modulo_poly_coeffs(
-            const std::uint64_t *poly, std::size_t coeff_count, const Modulus &modulus, std::uint64_t *result)
+            ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (poly == nullptr && coeff_count > 0)
+            if (!poly && coeff_count > 0)
             {
                 throw std::invalid_argument("poly");
             }
-            if (result == nullptr && coeff_count > 0)
+            if (!result && coeff_count > 0)
             {
                 throw std::invalid_argument("result");
             }
@@ -33,21 +34,29 @@ namespace seal
                 throw std::invalid_argument("modulus");
             }
 #endif
-            std::transform(poly, poly + coeff_count, result, [&](auto coeff) {
+            std::transform(*poly, *poly + coeff_count, *result, [&](auto coeff) {
                 uint64_t temp[2]{ coeff, 0 };
                 return barrett_reduce_128(temp, modulus);
             });
         }
 
+        inline void modulo_poly_coeffs(
+            ConstRNSIter poly, std::size_t coeff_modulus_size, ModulusIter modulus, RNSIter result)
+        {
+            SEAL_ITERATE(iter_tuple(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+                modulo_poly_coeffs(get<0>(I), poly.poly_modulus_degree(), *get<1>(I), get<2>(I)); 
+            });
+        }
+
         inline void modulo_poly_coeffs_63(
-            const std::uint64_t *poly, std::size_t coeff_count, const Modulus &modulus, std::uint64_t *result)
+            ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (poly == nullptr && coeff_count > 0)
+            if (!poly && coeff_count > 0)
             {
                 throw std::invalid_argument("poly");
             }
-            if (result == nullptr && coeff_count > 0)
+            if (!result && coeff_count > 0)
             {
                 throw std::invalid_argument("result");
             }
@@ -60,14 +69,22 @@ namespace seal
             // but requires that the input coefficients are at most 63 bits, unlike
             // modulo_poly_coeffs that allows also 64-bit coefficients.
             std::transform(
-                poly, poly + coeff_count, result, [&](auto coeff) { return barrett_reduce_63(coeff, modulus); });
+                *poly, *poly + coeff_count, *result, [&](auto coeff) { return barrett_reduce_63(coeff, modulus); });
+        }
+
+        inline void modulo_poly_coeffs_63(
+            ConstRNSIter poly, std::size_t coeff_modulus_size, ModulusIter modulus, RNSIter result)
+        {
+            SEAL_ITERATE(iter_tuple(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+                modulo_poly_coeffs_63(get<0>(I), poly.poly_modulus_degree(), *get<1>(I), get<2>(I)); 
+            });
         }
 
         inline void negate_poly_coeffmod(
-            const std::uint64_t *poly, std::size_t coeff_count, const Modulus &modulus, std::uint64_t *result)
+            ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (poly == nullptr && coeff_count > 0)
+            if (!poly && coeff_count > 0)
             {
                 throw std::invalid_argument("poly");
             }
@@ -75,37 +92,43 @@ namespace seal
             {
                 throw std::invalid_argument("modulus");
             }
-            if (result == nullptr && coeff_count > 0)
+            if (!result && coeff_count > 0)
             {
                 throw std::invalid_argument("result");
             }
 #endif
             const uint64_t modulus_value = modulus.value();
-            for (; coeff_count--; poly++, result++)
-            {
-                // Explicit inline
-                //*result = negate_uint_mod(*poly, modulus);
+            SEAL_ITERATE(iter_tuple(poly, result), coeff_count, [&](auto I) {
+                auto coeff = *get<0>(I);
 #ifdef SEAL_DEBUG
-                if (*poly >= modulus_value)
+                if (coeff >= modulus_value)
                 {
                     throw std::out_of_range("poly");
                 }
 #endif
-                std::int64_t non_zero = (*poly != 0);
-                *result = (modulus_value - *poly) & static_cast<std::uint64_t>(-non_zero);
-            }
+                std::int64_t non_zero = (coeff != 0);
+                *get<1>(I) = (modulus_value - coeff) & static_cast<std::uint64_t>(-non_zero);
+            });
+        }
+
+        inline void negate_poly_coeffmod(
+            ConstRNSIter poly, std::size_t coeff_modulus_size, ModulusIter modulus, RNSIter result)
+        {
+            SEAL_ITERATE(iter_tuple(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+                negate_poly_coeffmod(get<0>(I), poly.poly_modulus_degree(), *get<1>(I), get<2>(I)); 
+            });
         }
 
         inline void add_poly_coeffmod(
-            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
-            const Modulus &modulus, std::uint64_t *result)
+            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count,
+            const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (operand1 == nullptr && coeff_count > 0)
+            if (!operand1 && coeff_count > 0)
             {
                 throw std::invalid_argument("operand1");
             }
-            if (operand2 == nullptr && coeff_count > 0)
+            if (!operand2 && coeff_count > 0)
             {
                 throw std::invalid_argument("operand2");
             }
@@ -113,30 +136,35 @@ namespace seal
             {
                 throw std::invalid_argument("modulus");
             }
-            if (result == nullptr && coeff_count > 0)
+            if (!result && coeff_count > 0)
             {
                 throw std::invalid_argument("result");
             }
 #endif
             const uint64_t modulus_value = modulus.value();
-            for (; coeff_count--; result++, operand1++, operand2++)
-            {
-                // Explicit inline
-                // result[i] = add_uint64_mod(operand1[i], operand2[i], modulus);
+            SEAL_ITERATE(iter_tuple(operand1, operand2, result), coeff_count, [&](auto I) {
 #ifdef SEAL_DEBUG
-                if (*operand1 >= modulus_value)
+                if (*get<0>(I) >= modulus_value)
                 {
                     throw std::invalid_argument("operand1");
                 }
-                if (*operand2 >= modulus_value)
+                if (*get<1>(I) >= modulus_value)
                 {
                     throw std::invalid_argument("operand2");
                 }
 #endif
-                std::uint64_t sum = *operand1 + *operand2;
-                *result = sum - (modulus_value &
+                std::uint64_t sum = *get<0>(I) + *get<1>(I);
+                *get<2>(I) = sum - (modulus_value &
                                  static_cast<std::uint64_t>(-static_cast<std::int64_t>(sum >= modulus_value)));
-            }
+            });
+        }
+
+        inline void add_poly_coeffmod(
+            ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ModulusIter modulus, RNSIter result)
+        {
+            SEAL_ITERATE(iter_tuple(operand1, operand2, modulus, result), coeff_modulus_size, [&](auto I) {
+                add_poly_coeffmod(get<0>(I), get<1>(I), operand1.poly_modulus_degree(), *get<2>(I), get<3>(I)); 
+            });
         }
 
         inline void sub_poly_coeffmod(

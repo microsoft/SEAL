@@ -149,6 +149,13 @@ namespace seal
 #define SEAL_NODISCARD
 #endif
 
+// C++14 does not have std::for_each_n so we use a custom implementation
+#ifndef SEAL_USE_STD_FOR_EACH_N
+#define SEAL_ITERATE seal::util::seal_for_each_n
+#else
+#define SEAL_ITERATE std::for_each_n 
+#endif
+
 // Which random number generator factory to use by default
 #define SEAL_DEFAULT_RNG_FACTORY BlakePRNGFactory()
 

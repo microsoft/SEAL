@@ -211,21 +211,9 @@ namespace seal
         simplify the notation, we have set up typedefs for these: ModulusIter and NTTTablesIter. There are no non-const
         versions of these typedefs, since in almost all cases only read access is needed.
         */
-#ifndef SEAL_USE_STD_FOR_EACH_N
-        // C++14 does not have for_each_n so we define a custom version here.
-        template <typename ForwardIt, typename Size, typename Func>
-        ForwardIt for_each_n(ForwardIt first, Size size, Func func)
-        {
-            for (; size--; (void)++first)
-            {
-                func(*first);
-            }
-            return first;
-        }
-#endif
-        // Base class for all SEAL iterators
         class SEALIterBase
-        {};
+        {
+        };
 
         template <typename PtrT>
         class PtrIter : public SEALIterBase
