@@ -34,7 +34,7 @@ namespace seal
         +-------------------+
         |    Pointer & Size |  Construct  +-----------------+
         | or Ciphertext     |------------>| (Const)PolyIter |  Iterates over RNS polynomials in a ciphertext
-        +-------------------+             +-----------------+  (coeff_modulus_size-many RNS components)
+        +-------------------+             +--------+--------+  (coeff_modulus_size-many RNS components)
                                                    |
                                                    |
                                                    | Dereference
@@ -43,7 +43,7 @@ namespace seal
                                                    v
            +----------------+  Construct   +----------------+
            | Pointer & Size |------------->| (Const)RNSIter |  Iterates over RNS components in an RNS polynomial
-           +----------------+              +----------------+  (poly_modulus_degree-many coefficients)
+           +----------------+              +-------+--------+  (poly_modulus_degree-many coefficients)
                                                    |
                                                    |
                                                    | Dereference
@@ -52,7 +52,7 @@ namespace seal
                                                    v
           +----------------+  Construct  +------------------+
           | Pointer & Size |------------>| (Const)CoeffIter |  Iterates over coefficients (std::uint64_t) in a single
-          +----------------+             +------------------+  RNS polynomial component
+          +----------------+             +---------+--------+  RNS polynomial component
                                                    |
                                                    |
                                                    | Dereference
@@ -61,7 +61,7 @@ namespace seal
                                                    v
                                        +------------------------+  Construct  +---------------+
                                        | (const) std::uint64_t* |------------>| PtrIter<PtrT> |  Simple wrapper
-                                       +------------------------+             +---------------+  for raw pointers
+                                       +------------------------+             +-------+-------+  for raw pointers
                                                                                 ^     |
                             +---------+  Construct                              |     |
                             | MyType* |-----------------------------------------+     | Dereference
@@ -106,7 +106,7 @@ namespace seal
                |                      |                      |
                |                      |                      |
                v                      v                      v
-        +------+------+       +-------+-------+      +-------------------------+
+        +-------------+       +---------------+      +-------------------------+
         |   RNSIter   |       |   CoeffIter   |      | PtrIter<std::uint64_t*> |
         +-------------+       +---------------+      +-------------------------+
 
@@ -223,9 +223,183 @@ namespace seal
             return first;
         }
 #endif
-        class CoeffIter;
+        // Base class for all SEAL iterators
+        class SEALIterBase
+        {};
 
-        class ConstCoeffIter;
+        template <typename PtrT>
+        class PtrIter : public SEALIterBase
+        {
+        public:
+            using self_type = PtrIter<PtrT>;
+
+            // Standard iterator typedefs
+            using value_type = PtrT;
+            using pointer = void;
+            using reference = const value_type &;
+            using iterator_category = std::random_access_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            PtrIter() : ptr_(nullptr)
+            {}
+
+            PtrIter(value_type ptr) : ptr_(ptr)
+            {}
+
+            template <typename S>
+            PtrIter(const PtrIter<S> &copy) : ptr_(*copy)
+            {}
+
+            PtrIter(const std::vector<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr) : PtrIter(arr.data())
+            {}
+
+            PtrIter(const Pointer<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr) : PtrIter(arr.get())
+            {}
+
+            template <typename S>
+            inline self_type &operator=(const PtrIter<S> &assign) noexcept
+            {
+                ptr_ = *assign;
+                return *this;
+            }
+
+            SEAL_NODISCARD inline reference operator*() const noexcept
+            {
+                return ptr_;
+            }
+
+            template <typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
+            {
+                return ptr_ + n;
+            }
+
+            inline self_type &operator++() noexcept
+            {
+                ptr_++;
+                return *this;
+            }
+
+            inline self_type operator++(int) noexcept
+            {
+                self_type result(ptr_);
+                ptr_++;
+                return result;
+            }
+
+            inline self_type &operator--() noexcept
+            {
+                ptr_--;
+                return *this;
+            }
+
+            inline self_type operator--(int) noexcept
+            {
+                self_type result(ptr_);
+                ptr_--;
+                return result;
+            }
+
+            template <typename SizeT>
+            inline self_type &operator+=(SizeT n) noexcept
+            {
+                ptr_ += n;
+                return *this;
+            }
+
+            template <typename SizeT>
+            SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
+            {
+                return ptr_ + n;
+            }
+
+            template <typename SizeT>
+            inline self_type &operator-=(SizeT n) noexcept
+            {
+                ptr_ -= n;
+                return *this;
+            }
+
+            template <typename SizeT>
+            SEAL_NODISCARD inline self_type operator-(SizeT n) const noexcept
+            {
+                return ptr_ - n;
+            }
+
+            SEAL_NODISCARD inline difference_type operator-(const self_type &b) const noexcept
+            {
+                return std::distance(ptr_, b.ptr_);
+            }
+
+            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
+            {
+                return ptr_ == compare.ptr_;
+            }
+
+            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
+            {
+                return !(*this == compare);
+            }
+
+            SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
+            {
+                return ptr_ < compare.ptr_;
+            }
+
+            SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
+            {
+                return ptr_ > compare.ptr_;
+            }
+
+            SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
+            {
+                return !(ptr_ > compare.ptr_);
+            }
+
+            SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
+            {
+                return !(ptr_ < compare.ptr_);
+            }
+
+            SEAL_NODISCARD inline operator value_type *() const noexcept
+            {
+                return ptr_;
+            }
+
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return nullptr != ptr_;
+            }
+
+            SEAL_NODISCARD inline value_type operator->() const noexcept
+            {
+                return **this;
+            }
+
+            SEAL_NODISCARD inline operator value_type() const noexcept
+            {
+                return ptr_;
+            }
+
+        private:
+            value_type ptr_;
+        };
+
+        // Out-of-class definitions
+        template <typename PtrT, typename SizeT>
+        SEAL_NODISCARD inline PtrIter<PtrT> operator+(SizeT n, const PtrIter<PtrT> &it) noexcept
+        {
+            return it + n;
+        }
+
+        using CoeffIter = PtrIter<std::uint64_t *>;
+
+        using ConstCoeffIter = PtrIter<const std::uint64_t *>;
+
+        // Typedefs for some commonly used iterators
+        using ModulusIter = PtrIter<const Modulus *>;
+
+        using NTTTablesIter = PtrIter<const NTTTables *>;
 
         class RNSIter;
 
@@ -235,306 +409,7 @@ namespace seal
 
         class ConstPolyIter;
 
-        class CoeffIter
-        {
-        public:
-            friend class RNSIter;
-            friend class PolyIter;
-
-            using self_type = CoeffIter;
-
-            // Standard iterator typedefs
-            using value_type = std::uint64_t *;
-            using pointer = void;
-            using reference = const value_type &;
-            using iterator_category = std::random_access_iterator_tag;
-            using difference_type = std::ptrdiff_t;
-
-            CoeffIter() : ptr_(nullptr)
-            {}
-
-            CoeffIter(value_type ptr) : ptr_(ptr)
-            {}
-
-            CoeffIter(const self_type &copy) = default;
-
-            self_type &operator=(const self_type &assign) = default;
-
-            CoeffIter(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
-
-            SEAL_NODISCARD inline reference operator*() const noexcept
-            {
-                return ptr_;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
-            {
-                return ptr_ + n;
-            }
-
-            inline self_type &operator++() noexcept
-            {
-                ptr_++;
-                return *this;
-            }
-
-            inline self_type operator++(int) noexcept
-            {
-                self_type result(ptr_);
-                ptr_++;
-                return result;
-            }
-
-            inline self_type &operator--() noexcept
-            {
-                ptr_--;
-                return *this;
-            }
-
-            inline self_type operator--(int) noexcept
-            {
-                self_type result(ptr_);
-                ptr_--;
-                return result;
-            }
-
-            template <typename SizeT>
-            inline self_type &operator+=(SizeT n) noexcept
-            {
-                ptr_ += n;
-                return *this;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
-            {
-                return ptr_ + n;
-            }
-
-            template <typename SizeT>
-            inline self_type &operator-=(SizeT n) noexcept
-            {
-                ptr_ -= n;
-                return *this;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline self_type operator-(SizeT n) const noexcept
-            {
-                return ptr_ - n;
-            }
-
-            SEAL_NODISCARD inline difference_type operator-(const self_type &b) const noexcept
-            {
-                return ptr_ - b.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
-            {
-                return ptr_ == compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
-            {
-                return !(*this == compare);
-            }
-
-            SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
-            {
-                return ptr_ < compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
-            {
-                return ptr_ > compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
-            {
-                return !(ptr_ > compare.ptr_);
-            }
-
-            SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
-            {
-                return !(ptr_ < compare.ptr_);
-            }
-
-            SEAL_NODISCARD inline operator std::uint64_t *() const noexcept
-            {
-                return ptr_;
-            }
-
-            SEAL_NODISCARD explicit inline operator bool() const noexcept
-            {
-                return nullptr != ptr_;
-            }
-
-        private:
-            value_type ptr_;
-        };
-
-        // Out-of-class definitions
-        template <typename SizeT>
-        SEAL_NODISCARD inline CoeffIter operator+(SizeT n, const CoeffIter &it) noexcept
-        {
-            return it + n;
-        }
-
-        class ConstCoeffIter
-        {
-        public:
-            friend class ConstRNSIter;
-            friend class ConstPolyIter;
-
-            using self_type = ConstCoeffIter;
-
-            // Standard iterator typedefs
-            using value_type = const std::uint64_t *;
-            using pointer = void;
-            using reference = const value_type &;
-            using iterator_category = std::random_access_iterator_tag;
-            using difference_type = std::ptrdiff_t;
-
-            ConstCoeffIter() : ptr_(nullptr)
-            {}
-
-            ConstCoeffIter(value_type ptr) : ptr_(ptr)
-            {}
-
-            ConstCoeffIter(const self_type &copy) = default;
-
-            self_type &operator=(const self_type &assign) = default;
-
-            ConstCoeffIter(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
-
-            ConstCoeffIter(const CoeffIter &copy) : ptr_(static_cast<const std::uint64_t *>(copy))
-            {}
-
-            SEAL_NODISCARD inline reference operator*() const noexcept
-            {
-                return ptr_;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
-            {
-                return ptr_ + n;
-            }
-
-            inline self_type &operator++() noexcept
-            {
-                ptr_++;
-                return *this;
-            }
-
-            inline self_type operator++(int) noexcept
-            {
-                self_type result(ptr_);
-                ptr_++;
-                return result;
-            }
-
-            inline self_type &operator--() noexcept
-            {
-                ptr_--;
-                return *this;
-            }
-
-            inline self_type operator--(int) noexcept
-            {
-                self_type result(ptr_);
-                ptr_--;
-                return result;
-            }
-
-            template <typename SizeT>
-            inline self_type &operator+=(SizeT n) noexcept
-            {
-                ptr_ += n;
-                return *this;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
-            {
-                return ptr_ + n;
-            }
-
-            template <typename SizeT>
-            inline self_type &operator-=(SizeT n) noexcept
-            {
-                ptr_ -= n;
-                return *this;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline self_type operator-(SizeT n) const noexcept
-            {
-                return ptr_ - n;
-            }
-
-            SEAL_NODISCARD inline difference_type operator-(const self_type &b) const noexcept
-            {
-                return ptr_ - b.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
-            {
-                return ptr_ == compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
-            {
-                return !(*this == compare);
-            }
-
-            SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
-            {
-                return ptr_ < compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
-            {
-                return ptr_ > compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
-            {
-                return !(ptr_ > compare.ptr_);
-            }
-
-            SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
-            {
-                return !(ptr_ < compare.ptr_);
-            }
-
-            SEAL_NODISCARD inline operator const std::uint64_t *() const noexcept
-            {
-                return ptr_;
-            }
-
-            SEAL_NODISCARD explicit inline operator bool() const noexcept
-            {
-                return nullptr != ptr_;
-            }
-
-        private:
-            value_type ptr_;
-        };
-
-        // Out-of-class definitions
-        template <typename SizeT>
-        SEAL_NODISCARD inline ConstCoeffIter operator+(SizeT n, const ConstCoeffIter &it) noexcept
-        {
-            return it + n;
-        }
-
-        class RNSIter
+        class RNSIter : public SEALIterBase
         {
         public:
             friend class PolyIter;
@@ -708,7 +583,7 @@ namespace seal
             return it + n;
         }
 
-        class ConstRNSIter
+        class ConstRNSIter : public SEALIterBase
         {
         public:
             friend class ConstPolyIter;
@@ -886,7 +761,7 @@ namespace seal
             return it + n;
         }
 
-        class PolyIter
+        class PolyIter : public SEALIterBase
         {
         public:
             using self_type = PolyIter;
@@ -932,27 +807,27 @@ namespace seal
 
             inline self_type &operator++() noexcept
             {
-                rns_it_.coeff_it_.ptr_ += step_size_;
+                rns_it_.coeff_it_ += step_size_;
                 return *this;
             }
 
             inline self_type operator++(int) noexcept
             {
                 self_type result(*this);
-                rns_it_.coeff_it_.ptr_ += step_size_;
+                rns_it_.coeff_it_ += step_size_;
                 return result;
             }
 
             inline self_type &operator--() noexcept
             {
-                rns_it_.coeff_it_.ptr_ -= step_size_;
+                rns_it_.coeff_it_ -= step_size_;
                 return *this;
             }
 
             inline self_type operator--(int) noexcept
             {
                 self_type result(*this);
-                rns_it_.coeff_it_.ptr_ -= step_size_;
+                rns_it_.coeff_it_ -= step_size_;
                 return result;
             }
 
@@ -1073,7 +948,7 @@ namespace seal
             return it + n;
         }
 
-        class ConstPolyIter
+        class ConstPolyIter : public SEALIterBase
         {
         public:
             using self_type = ConstPolyIter;
@@ -1129,27 +1004,27 @@ namespace seal
 
             inline self_type &operator++() noexcept
             {
-                rns_it_.coeff_it_.ptr_ += step_size_;
+                rns_it_.coeff_it_ += step_size_;
                 return *this;
             }
 
             inline self_type operator++(int) noexcept
             {
                 self_type result(*this);
-                rns_it_.coeff_it_.ptr_ += step_size_;
+                rns_it_.coeff_it_ += step_size_;
                 return result;
             }
 
             inline self_type &operator--() noexcept
             {
-                rns_it_.coeff_it_.ptr_ -= step_size_;
+                rns_it_.coeff_it_ -= step_size_;
                 return *this;
             }
 
             inline self_type operator--(int) noexcept
             {
                 self_type result(*this);
-                rns_it_.coeff_it_.ptr_ -= step_size_;
+                rns_it_.coeff_it_ -= step_size_;
                 return result;
             }
 
@@ -1270,167 +1145,14 @@ namespace seal
             return it + n;
         }
 
-        template <typename PtrT>
-        class PtrIter
-        {
-        public:
-            using self_type = PtrIter<PtrT>;
-
-            // Standard iterator typedefs
-            using value_type = PtrT;
-            using pointer = void;
-            using reference = const value_type &;
-            using iterator_category = std::random_access_iterator_tag;
-            using difference_type = std::ptrdiff_t;
-
-            PtrIter() : ptr_(nullptr)
-            {}
-
-            PtrIter(value_type ptr) : ptr_(ptr)
-            {}
-
-            PtrIter(const std::vector<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr) : PtrIter(arr.data())
-            {}
-
-            PtrIter(const Pointer<std::remove_cv_t<std::remove_pointer_t<PtrT>>> &arr) : PtrIter(arr.get())
-            {}
-
-            PtrIter(const self_type &copy) = default;
-
-            self_type &operator=(const self_type &assign) = default;
-
-            PtrIter(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
-
-            SEAL_NODISCARD inline reference operator*() const noexcept
-            {
-                return ptr_;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
-            {
-                return ptr_ + n;
-            }
-
-            inline self_type &operator++() noexcept
-            {
-                ptr_++;
-                return *this;
-            }
-
-            inline self_type operator++(int) noexcept
-            {
-                self_type result(ptr_);
-                ptr_++;
-                return result;
-            }
-
-            inline self_type &operator--() noexcept
-            {
-                ptr_--;
-                return *this;
-            }
-
-            inline self_type operator--(int) noexcept
-            {
-                self_type result(ptr_);
-                ptr_--;
-                return result;
-            }
-
-            template <typename SizeT>
-            inline self_type &operator+=(SizeT n) noexcept
-            {
-                ptr_ += n;
-                return *this;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
-            {
-                return ptr_ + n;
-            }
-
-            template <typename SizeT>
-            inline self_type &operator-=(SizeT n) noexcept
-            {
-                ptr_ -= n;
-                return *this;
-            }
-
-            template <typename SizeT>
-            SEAL_NODISCARD inline self_type operator-(SizeT n) const noexcept
-            {
-                return ptr_ - n;
-            }
-
-            SEAL_NODISCARD inline difference_type operator-(const self_type &b) const noexcept
-            {
-                return std::distance(ptr_, b.ptr_);
-            }
-
-            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
-            {
-                return ptr_ == compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
-            {
-                return !(*this == compare);
-            }
-
-            SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
-            {
-                return ptr_ < compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
-            {
-                return ptr_ > compare.ptr_;
-            }
-
-            SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
-            {
-                return !(ptr_ > compare.ptr_);
-            }
-
-            SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
-            {
-                return !(ptr_ < compare.ptr_);
-            }
-
-            SEAL_NODISCARD inline operator value_type *() const noexcept
-            {
-                return ptr_;
-            }
-
-            SEAL_NODISCARD explicit inline operator bool() const noexcept
-            {
-                return nullptr != ptr_;
-            }
-
-            SEAL_NODISCARD inline value_type operator->() const noexcept
-            {
-                return **this;
-            }
-
-        private:
-            value_type ptr_;
-        };
-
-        // Out-of-class definitions
-        template <typename PtrT, typename SizeT>
-        SEAL_NODISCARD inline PtrIter<PtrT> operator+(SizeT n, const PtrIter<PtrT> &it) noexcept
-        {
-            return it + n;
-        }
-
         template <typename SEALIter>
         class ReverseIter : public SEALIter
         {
         public:
+            static_assert(
+                std::is_base_of<SEALIterBase, SEALIter>::value,
+                "Template parameter must derive from seal::util::SEALIterBase");
+
             using self_type = ReverseIter<SEALIter>;
 
             // Standard iterator typedefs
@@ -1574,9 +1296,13 @@ namespace seal
         class IterTuple;
 
         template <typename SEALIter, typename... Rest>
-        class IterTuple<SEALIter, Rest...>
+        class IterTuple<SEALIter, Rest...> : public SEALIterBase
         {
         public:
+            static_assert(
+                std::is_base_of<SEALIterBase, SEALIter>::value || std::is_pointer<SEALIter>::value,
+                "Template parameter must derive from seal::util::SEALIterBase or be a raw pointer");
+
             using self_type = IterTuple<SEALIter, Rest...>;
 
             // Standard iterator typedefs
@@ -1675,9 +1401,13 @@ namespace seal
         };
 
         template <typename SEALIter>
-        class IterTuple<SEALIter>
+        class IterTuple<SEALIter> : public SEALIterBase
         {
         public:
+            static_assert(
+                std::is_base_of<SEALIterBase, SEALIter>::value || std::is_pointer<SEALIter>::value,
+                "Template parameter must derive from seal::util::SEALIterBase or be a raw pointer");
+
             using self_type = IterTuple<SEALIter>;
 
             // Standard iterator typedefs
@@ -1788,7 +1518,107 @@ namespace seal
                 static_assert(N < sizeof...(SEALIters), "IterTuple index out of range");
                 return iterator_tuple_internal::GetHelperStruct<N>::apply(it);
             }
+
+            template <typename... SEALIters>
+            struct extend_iter_tuple;
+
+            template <typename SEALIter, typename... Rest>
+            struct extend_iter_tuple<SEALIter, IterTuple<Rest...>>
+            {
+                using type = IterTuple<SEALIter, Rest...>;
+            };
+
+            template <typename SEALIter1, typename SEALIter2>
+            struct extend_iter_tuple<SEALIter1, SEALIter2>
+            {
+                using type = IterTuple<SEALIter1, SEALIter2>;
+            };
+
+            template <typename Enable, typename... Ts>
+            struct iter_type;
+
+            template <typename T, typename... Rest>
+            struct iter_type<
+                std::void_t<typename iter_type<void, T>::type, typename iter_type<void, Rest...>::type>, T, Rest...>
+            {
+                using type = typename extend_iter_tuple<
+                    typename iter_type<void, T>::type, typename iter_type<void, Rest...>::type>::type;
+            };
+
+            template <typename T>
+            struct iter_type<
+                std::enable_if_t<std::is_base_of<SEALIterBase, std::decay_t<T>>::value && !std::is_pointer<T>::value>,
+                T>
+            {
+                using type = std::decay_t<T>;
+            };
+
+            template <>
+            struct iter_type<void, Ciphertext &>
+            {
+                using type = PolyIter;
+            };
+
+            template <>
+            struct iter_type<void, const Ciphertext &>
+            {
+                using type = ConstPolyIter;
+            };
+
+            template <typename T>
+            struct iter_type<void, const T *>
+            {
+                using type = PtrIter<const T *>;
+            };
+
+            template <typename T>
+            struct iter_type<void, T *>
+            {
+                using type = PtrIter<T *>;
+            };
+
+            template <typename T>
+            struct iter_type<void, const T *&>
+            {
+                using type = PtrIter<const T *>;
+            };
+
+            template <typename T>
+            struct iter_type<void, T *&>
+            {
+                using type = PtrIter<T *>;
+            };
+
+            template <typename T>
+            struct iter_type<void, std::vector<T> &>
+            {
+                using type = PtrIter<T *>;
+            };
+
+            template <typename T>
+            struct iter_type<void, const std::vector<T> &>
+            {
+                using type = PtrIter<const T *>;
+            };
+
+            template <typename T>
+            struct iter_type<void, Pointer<T> &>
+            {
+                using type = PtrIter<T *>;
+            };
+
+            template <typename T>
+            struct iter_type<void, ConstPointer<T> &>
+            {
+                using type = PtrIter<const T *>;
+            };
         } // namespace iterator_tuple_internal
+
+        template <typename... Ts>
+        auto iter_tuple(Ts &&... ts) -> typename iterator_tuple_internal::iter_type<void, Ts...>::type
+        {
+            return { std::forward<Ts>(ts)... };
+        }
 
         template <
             std::size_t N, std::size_t... Rest, typename... SEALIters, typename = std::enable_if_t<sizeof...(Rest)>>
@@ -1802,10 +1632,5 @@ namespace seal
         {
             return iterator_tuple_internal::get<N>(it);
         }
-
-        // Typedefs for some commonly used iterators
-        using ModulusIter = PtrIter<const Modulus *>;
-
-        using NTTTablesIter = PtrIter<const NTTTables *>;
     } // namespace util
 } // namespace seal

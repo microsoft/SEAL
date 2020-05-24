@@ -17,8 +17,8 @@
 #define SEAL_STRINGIZE(x) _SEAL_STRINGIZE(x)
 
 // Join
-#define _SEAL_MACRO_JOIN(x, y) x##y
-#define SEAL_MACRO_JOIN(x, y) _SEAL_MACRO_JOIN(x, y)
+#define _SEAL_JOIN(M, N) M##N
+#define SEAL_JOIN(M, N) _SEAL_JOIN(M, N)
 
 // Check that double is 64 bits
 static_assert(sizeof(double) == 8, "Require sizeof(double) == 8");
@@ -196,42 +196,41 @@ namespace seal
 // This macro can be used to allocate temporary buffer and create a PolyIter object pointing to it. This is convenient
 // when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the iterator.
 #define SEAL_ALLOCATE_GET_POLY_ITER(name, poly_count, poly_modulus_degree, coeff_modulus_size, pool) \
-    auto SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__)(                                               \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(                                                     \
         util::allocate_poly_array(poly_count, poly_modulus_degree, coeff_modulus_size, pool));       \
-    util::PolyIter name(SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree, coeff_modulus_size);
+    util::PolyIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree, coeff_modulus_size);
 
 // This macro can be used to allocate temporary buffer (set to zero) and create a PolyIter object pointing to it. This
 // is convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through
 // the iterator.
 #define SEAL_ALLOCATE_ZERO_GET_POLY_ITER(name, poly_count, poly_modulus_degree, coeff_modulus_size, pool) \
-    auto SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__)(                                                    \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(                                                          \
         util::allocate_zero_poly_array(poly_count, poly_modulus_degree, coeff_modulus_size, pool));       \
-    util::PolyIter name(SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree, coeff_modulus_size);
+    util::PolyIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree, coeff_modulus_size);
 
 // This macro can be used to allocate temporary buffer and create a RNSIter object pointing to it. This is convenient
 // when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the iterator.
-#define SEAL_ALLOCATE_GET_RNS_ITER(name, poly_modulus_degree, coeff_modulus_size, pool) \
-    auto SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__)(                                  \
-        util::allocate_poly(poly_modulus_degree, coeff_modulus_size, pool));            \
-    util::RNSIter name(SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree);
+#define SEAL_ALLOCATE_GET_RNS_ITER(name, poly_modulus_degree, coeff_modulus_size, pool)                              \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(util::allocate_poly(poly_modulus_degree, coeff_modulus_size, pool)); \
+    util::RNSIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree);
 
 // This macro can be used to allocate temporary buffer (set to zero) and create a RNSIter object pointing to it. This
 // is convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through
 // the iterator.
 #define SEAL_ALLOCATE_ZERO_GET_RNS_ITER(name, poly_modulus_degree, coeff_modulus_size, pool) \
-    auto SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__)(                                       \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(                                             \
         util::allocate_zero_poly(poly_modulus_degree, coeff_modulus_size, pool));            \
-    util::RNSIter name(SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree);
+    util::RNSIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree);
 
 // This macro can be used to allocate temporary buffer and create a CoeffIter object pointing to it. This is convenient
 // when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the iterator.
-#define SEAL_ALLOCATE_GET_COEFF_ITER(name, poly_modulus_degree, pool)                                  \
-    auto SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__)(util::allocate_uint(poly_modulus_degree, pool)); \
-    util::CoeffIter name(SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__).get());
+#define SEAL_ALLOCATE_GET_COEFF_ITER(name, poly_modulus_degree, pool)                            \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(util::allocate_uint(poly_modulus_degree, pool)); \
+    util::CoeffIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get());
 
 // This macro can be used to allocate temporary buffer (set to zero) and create a CoeffIter object pointing to it. This
 // is convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through
 // the iterator.
-#define SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(name, poly_modulus_degree, coeff_modulus_size, pool)              \
-    auto SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__)(util::allocate_zero_uint(poly_modulus_degree, pool)); \
-    util::CoeffIter name(SEAL_MACRO_JOIN(_seal_temp_alloc_, __LINE__).get());
+#define SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(name, poly_modulus_degree, coeff_modulus_size, pool)        \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(util::allocate_zero_uint(poly_modulus_degree, pool)); \
+    util::CoeffIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get());
