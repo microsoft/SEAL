@@ -15,7 +15,7 @@ namespace seal
         // ensure symbol is created.
         constexpr uint32_t GaloisTool::generator_;
 
-        void GaloisTool::generate_table_ntt(uint32_t galois_elt, Pointer<uint32_t> &result)
+        void GaloisTool::generate_table_ntt(uint32_t galois_elt, Pointer<uint32_t> &result) const
         {
 #ifdef SEAL_DEBUG
             if (!(galois_elt & 1) || (galois_elt >= 2 * (uint64_t(1) << coeff_count_power_)))
@@ -142,14 +142,14 @@ namespace seal
         }
 
         void GaloisTool::apply_galois(
-            const uint64_t *operand, uint32_t galois_elt, const Modulus &modulus, uint64_t *result) const
+            ConstCoeffIter operand, uint32_t galois_elt, const Modulus &modulus, CoeffIter result) const
         {
 #ifdef SEAL_DEBUG
-            if (operand == nullptr)
+            if (!operand)
             {
                 throw std::invalid_argument("operand");
             }
-            if (result == nullptr)
+            if (!result)
             {
                 throw std::invalid_argument("result");
             }
@@ -168,12 +168,12 @@ namespace seal
             }
 #endif
             const uint64_t modulus_value = modulus.value();
-            uint64_t coeff_count_minus_one = (uint64_t(1) << coeff_count_power_) - 1;
-            for (uint64_t i = 0; i <= coeff_count_minus_one; i++)
+            const uint64_t coeff_count_minus_one = coeff_count_ - 1;
+            uint64_t index_raw = 0;
+            for (uint64_t i = 0; i <= coeff_count_minus_one; i++, ++operand, index_raw += galois_elt)
             {
-                uint64_t index_raw = i * galois_elt;
                 uint64_t index = index_raw & coeff_count_minus_one;
-                uint64_t result_value = *operand++;
+                uint64_t result_value = **operand;
                 if ((index_raw >> coeff_count_power_) & 1)
                 {
                     // Explicit inline
@@ -181,18 +181,18 @@ namespace seal
                     int64_t non_zero = (result_value != 0);
                     result_value = (modulus_value - result_value) & static_cast<uint64_t>(-non_zero);
                 }
-                result[index] = result_value;
+                *result[index] = result_value;
             }
         }
 
-        void GaloisTool::apply_galois_ntt(const uint64_t *operand, uint32_t galois_elt, uint64_t *result)
+        void GaloisTool::apply_galois_ntt(ConstCoeffIter operand, uint32_t galois_elt, CoeffIter result) const
         {
 #ifdef SEAL_DEBUG
-            if (operand == nullptr)
+            if (!operand)
             {
                 throw std::invalid_argument("operand");
             }
-            if (result == nullptr)
+            if (!result)
             {
                 throw std::invalid_argument("result");
             }
@@ -207,13 +207,10 @@ namespace seal
             }
 #endif
             generate_table_ntt(galois_elt, permutation_tables_[GetIndexFromElt(galois_elt)]);
+            auto table = make_iter(permutation_tables_[GetIndexFromElt(galois_elt)]);
 
-            auto &table = permutation_tables_[GetIndexFromElt(galois_elt)];
             // Perform permutation.
-            for (size_t i = 0; i < coeff_count_; i++)
-            {
-                result[i] = operand[table[i]];
-            }
+            SEAL_ITERATE(make_iter(table, result), coeff_count_, [&](auto I) { *get<1>(I) = *operand[*get<0>(I)]; });
         }
     } // namespace util
 } // namespace seal

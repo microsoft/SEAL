@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/modulus.h"
-#include "seal/util/defines.h"
 #include "seal/util/ntt.h"
 #include "seal/util/polyarith.h"
 #include "seal/util/uintarith.h"
@@ -225,8 +223,14 @@ namespace seal
 
         For details, see Michael Naehrig and Patrick Longa.
         */
-        void ntt_negacyclic_harvey_lazy(uint64_t *operand, const NTTTables &tables)
+        void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw invalid_argument("operand");
+            }
+#endif
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus << 1;
 
@@ -312,8 +316,14 @@ namespace seal
         }
 
         // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig).
-        void inverse_ntt_negacyclic_harvey_lazy(uint64_t *operand, const NTTTables &tables)
+        void inverse_ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw invalid_argument("operand");
+            }
+#endif
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus << 1;
 

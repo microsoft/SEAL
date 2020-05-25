@@ -443,7 +443,7 @@ namespace seal
                 throw std::invalid_argument("scale out of bounds");
             }
 
-            auto small_ntt_tables = context_data.small_ntt_tables();
+            auto ntt_tables = context_data.small_ntt_tables();
 
             // values_size is guaranteed to be no bigger than slots_
             std::size_t n = util::mul_safe(slots_, std::size_t(2));
@@ -609,7 +609,7 @@ namespace seal
             // Transform to NTT domain
             for (std::size_t i = 0; i < coeff_modulus_size; i++)
             {
-                util::ntt_negacyclic_harvey(destination.data(i * coeff_count), small_ntt_tables[i]);
+                util::ntt_negacyclic_harvey(destination.data(i * coeff_count), ntt_tables[i]);
             }
 
             destination.parms_id() = parms_id;
@@ -646,7 +646,7 @@ namespace seal
             std::size_t coeff_count = parms.poly_modulus_degree();
             std::size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_modulus_size);
 
-            auto small_ntt_tables = context_data.small_ntt_tables();
+            auto ntt_tables = context_data.small_ntt_tables();
 
             // Check that scale is positive and not too large
             if (plain.scale() <= 0 ||
@@ -674,7 +674,7 @@ namespace seal
             // Transform each polynomial from NTT domain
             for (std::size_t i = 0; i < coeff_modulus_size; i++)
             {
-                util::inverse_ntt_negacyclic_harvey(plain_copy.get() + (i * coeff_count), small_ntt_tables[i]);
+                util::inverse_ntt_negacyclic_harvey(plain_copy.get() + (i * coeff_count), ntt_tables[i]);
             }
 
             // CRT-compose the polynomial

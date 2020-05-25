@@ -243,7 +243,7 @@ namespace seal
         size_t encrypted_size = encrypted.size();
         auto is_ntt_form = encrypted.is_ntt_form();
 
-        auto small_ntt_tables = context_data.small_ntt_tables();
+        auto ntt_tables = context_data.small_ntt_tables();
 
         // Make sure we have enough secret key powers computed
         compute_secret_key_array(encrypted_size - 1);
@@ -266,7 +266,7 @@ namespace seal
                 set_uint(encrypted_ptr, coeff_count, copy_operand1.get());
                 if (!is_ntt_form)
                 {
-                    ntt_negacyclic_harvey_lazy(copy_operand1.get(), small_ntt_tables[i]);
+                    ntt_negacyclic_harvey_lazy(copy_operand1.get(), ntt_tables[i]);
                 }
                 // compute c_{j+1} * s^{j+1}
                 dyadic_product_coeffmod(
@@ -278,7 +278,7 @@ namespace seal
             }
             if (!is_ntt_form)
             {
-                inverse_ntt_negacyclic_harvey(destination_ptr, small_ntt_tables[i]);
+                inverse_ntt_negacyclic_harvey(destination_ptr, ntt_tables[i]);
             }
             // add c_0 into destination
             add_poly_coeffmod(

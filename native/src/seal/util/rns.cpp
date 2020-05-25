@@ -612,7 +612,7 @@ namespace seal
             {
                 CreateNTTTables(
                     coeff_count_power, vector<Modulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_size),
-                    base_Bsk_small_ntt_tables_, pool_);
+                    base_Bsk_ntt_tables_, pool_);
             }
             catch (const logic_error &)
             {

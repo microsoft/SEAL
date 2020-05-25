@@ -776,26 +776,24 @@ configure_file(
     ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
 
-set(SEAL_WINDOWS_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/x64/$Configuration$/sealc.dll)
-set(SEAL_LINUX_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/libsealc.so)
-set(SEAL_MACOS_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/libsealc.dylib)
+set(SEAL_WINDOWS_SEAL_C_PATH "")
+set(SEAL_LINUX_SEAL_C_PATH "")
+set(SEAL_MACOS_SEAL_C_PATH "")
 
 # Supporting local building of NuGet package
 if(MSVC)
-    set(NUGET_SEAL_C_PATH ${SEAL_WINDOWS_SEAL_C_PATH})
+    set(SEAL_WINDOWS_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/x64/$Configuration$/sealc.dll)
 elseif(UNIX)
-    set(NUGET_SEAL_C_PATH ${SEAL_LINUX_SEAL_C_PATH})
+    set(SEAL_LINUX_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/libsealc.so)
 elseif(APPLE)
-    set(NUGET_SEAL_C_PATH ${SEAL_MACOS_SEAL_C_PATH})
+    set(SEAL_MACOS_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/libsealc.dylib)
 endif()
 
-if(NUGET_SEAL_C_PATH)
-    # Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
-    configure_file(
-        ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec.in
-        ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec
-        @ONLY)
-endif()
+# Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
+configure_file(
+    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec.in
+    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec
+    @ONLY)
 
 # Create SEALNet.targets from SEALNet.targets.in
 configure_file(

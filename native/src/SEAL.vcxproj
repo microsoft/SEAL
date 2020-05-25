@@ -106,6 +106,7 @@
     <ClCompile Include="seal\util\galois.cpp" />
     <ClCompile Include="seal\util\globals.cpp" />
     <ClCompile Include="seal\util\hash.cpp" />
+    <ClCompile Include="seal\util\iterator.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
     <ClCompile Include="seal\util\polyarith.cpp" />
