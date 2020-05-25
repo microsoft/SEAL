@@ -161,13 +161,34 @@ namespace seal
         inline void ntt_negacyclic_harvey_lazy(RNSIter operand, std::size_t coeff_modulus_size, NTTTablesIter tables)
         {
 #ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
             if (!tables)
             {
                 throw std::invalid_argument("tables");
             }
 #endif
-            SEAL_ITERATE(iter_tuple(operand, tables), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(make_iter(operand, tables), coeff_modulus_size, [&](auto I) {
                 ntt_negacyclic_harvey_lazy(get<0>(I), *get<1>(I));
+            });
+        }
+
+        inline void ntt_negacyclic_harvey_lazy(PolyIter operand, std::size_t size, NTTTablesIter tables)
+        {
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
+            if (!tables)
+            {
+                throw std::invalid_argument("tables");
+            }
+#endif
+            SEAL_ITERATE(operand, size, [&](auto I) {
+                ntt_negacyclic_harvey_lazy(I, operand.coeff_modulus_size(), tables);
             });
         }
 
@@ -197,13 +218,34 @@ namespace seal
         inline void ntt_negacyclic_harvey(RNSIter operand, std::size_t coeff_modulus_size, NTTTablesIter tables)
         {
 #ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
             if (!tables)
             {
                 throw std::invalid_argument("tables");
             }
 #endif
-            SEAL_ITERATE(iter_tuple(operand, tables), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(make_iter(operand, tables), coeff_modulus_size, [&](auto I) {
                 ntt_negacyclic_harvey(get<0>(I), *get<1>(I));
+            });
+        }
+
+        inline void ntt_negacyclic_harvey(PolyIter operand, std::size_t size, NTTTablesIter tables)
+        {
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
+            if (!tables)
+            {
+                throw std::invalid_argument("tables");
+            }
+#endif
+            SEAL_ITERATE(operand, size, [&](auto I) {
+                ntt_negacyclic_harvey(I, operand.coeff_modulus_size(), tables);
             });
         }
 
@@ -212,13 +254,34 @@ namespace seal
         inline void inverse_ntt_negacyclic_harvey_lazy(RNSIter operand, std::size_t coeff_modulus_size, NTTTablesIter tables)
         {
 #ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
             if (!tables)
             {
                 throw std::invalid_argument("tables");
             }
 #endif
-            SEAL_ITERATE(iter_tuple(operand, tables), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(make_iter(operand, tables), coeff_modulus_size, [&](auto I) {
                 inverse_ntt_negacyclic_harvey_lazy(get<0>(I), *get<1>(I));
+            });
+        }
+
+        inline void inverse_ntt_negacyclic_harvey_lazy(PolyIter operand, std::size_t size, NTTTablesIter tables)
+        {
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
+            if (!tables)
+            {
+                throw std::invalid_argument("tables");
+            }
+#endif
+            SEAL_ITERATE(operand, size, [&](auto I) {
+                inverse_ntt_negacyclic_harvey_lazy(I, operand.coeff_modulus_size(), tables);
             });
         }
 
@@ -244,13 +307,34 @@ namespace seal
             RNSIter operand, std::size_t coeff_modulus_size, NTTTablesIter tables)
         {
 #ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
             if (!tables)
             {
                 throw std::invalid_argument("tables");
             }
 #endif
-            SEAL_ITERATE(iter_tuple(operand, tables), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(make_iter(operand, tables), coeff_modulus_size, [&](auto I) {
                 inverse_ntt_negacyclic_harvey(get<0>(I), *get<1>(I));
+            });
+        }
+
+        inline void inverse_ntt_negacyclic_harvey(PolyIter operand, std::size_t size, NTTTablesIter tables)
+        {
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw std::invalid_argument("operand");
+            }
+            if (!tables)
+            {
+                throw std::invalid_argument("tables");
+            }
+#endif
+            SEAL_ITERATE(operand, size, [&](auto I) {
+                inverse_ntt_negacyclic_harvey(I, operand.coeff_modulus_size(), tables);
             });
         }
     } // namespace util

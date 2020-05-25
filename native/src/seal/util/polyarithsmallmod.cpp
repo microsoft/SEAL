@@ -32,7 +32,7 @@ namespace seal
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
-            SEAL_ITERATE(iter_tuple(poly, result), coeff_count, [&](auto I) {
+            SEAL_ITERATE(make_iter(poly, result), coeff_count, [&](auto I) {
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
                 multiply_uint64(*get<0>(I), scalar, z);
 
@@ -314,7 +314,7 @@ namespace seal
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
-            SEAL_ITERATE(iter_tuple(operand1, operand2, result), coeff_count, [&](auto I) {
+            SEAL_ITERATE(make_iter(operand1, operand2, result), coeff_count, [&](auto I) {
                 // Reduces z using base 2^64 Barrett reduction
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
                 multiply_uint64(*get<0>(I), *get<1>(I), z);

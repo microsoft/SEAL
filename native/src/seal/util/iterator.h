@@ -1305,6 +1305,12 @@ namespace seal
             return it + n;
         }
 
+        template <typename SEALIter>
+        auto reverse_iter(SEALIter &&it) -> ReverseIter<typename std::decay_t<SEALIter>>
+        {
+            return std::forward<SEALIter>(it);
+        }
+
         template <typename... SEALIters>
         class IterTuple;
 
@@ -1628,7 +1634,7 @@ namespace seal
         } // namespace iterator_tuple_internal
 
         template <typename... Ts>
-        auto iter_tuple(Ts &&... ts) -> typename iterator_tuple_internal::iter_type<void, Ts...>::type
+        auto make_iter(Ts &&... ts) -> typename iterator_tuple_internal::iter_type<void, Ts...>::type
         {
             return { std::forward<Ts>(ts)... };
         }
