@@ -3,8 +3,11 @@
 
 #pragma once
 
+#include "seal/util/defines.h"
 #include "seal/memorymanager.h"
 #include "seal/util/pointer.h"
+#include "seal/util/iterator.h"
+#include "seal/modulus.h"
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -27,10 +30,92 @@ namespace seal
             }
 
             void apply_galois(
-                const std::uint64_t *operand, std::uint32_t galois_elt, const Modulus &modulus,
-                std::uint64_t *result) const;
+                ConstCoeffIter operand, std::uint32_t galois_elt, const Modulus &modulus,
+                CoeffIter result) const;
 
-            void apply_galois_ntt(const std::uint64_t *operand, std::uint32_t galois_elt, std::uint64_t *result);
+            inline void apply_galois(
+                ConstRNSIter operand, std::size_t coeff_modulus_size, std::uint32_t galois_elt, ModulusIter modulus,
+                RNSIter result) const
+            {
+#ifdef SEAL_DEBUG
+                if ((!operand && coeff_modulus_size > 0) || (operand.poly_modulus_degree() != coeff_count_))
+                {
+                    throw std::invalid_argument("operand");
+                }
+                if ((!result && coeff_modulus_size > 0) || (result.poly_modulus_degree() != coeff_count_))
+                {
+                    throw std::invalid_argument("result");
+                }
+#endif
+                SEAL_ITERATE(make_iter(operand, modulus, result), coeff_modulus_size, [&](auto I) {
+                    apply_galois(get<0>(I), galois_elt, *get<1>(I), get<2>(I));
+                });
+            }
+
+            void apply_galois(
+                ConstPolyIter operand, std::size_t size, std::uint32_t galois_elt, ModulusIter modulus,
+                PolyIter result) const
+            {
+#ifdef SEAL_DEBUG
+                if (!operand && size > 0)
+                {
+                    throw std::invalid_argument("operand");
+                }
+                if (!result && size > 0)
+                {
+                    throw std::invalid_argument("result");
+                }
+                if (operand.coeff_modulus_size() != result.coeff_modulus_size())
+                {
+                    throw std::invalid_argument("incompatible iterators");
+                }
+#endif
+                auto coeff_modulus_size = result.coeff_modulus_size();
+                SEAL_ITERATE(make_iter(operand, result), size, [&](auto I) {
+                    apply_galois(get<0>(I), coeff_modulus_size, galois_elt, modulus, get<1>(I));
+                });
+            }
+
+            void apply_galois_ntt(ConstCoeffIter operand, std::uint32_t galois_elt, CoeffIter result) const;
+
+            void apply_galois_ntt(ConstRNSIter operand, std::size_t coeff_modulus_size, std::uint32_t galois_elt, RNSIter result) const
+            {
+#ifdef SEAL_DEBUG
+                if ((!operand && coeff_modulus_size > 0) || (operand.poly_modulus_degree() != coeff_count_))
+                {
+                    throw std::invalid_argument("operand");
+                }
+                if ((!result && coeff_modulus_size > 0) || (result.poly_modulus_degree() != coeff_count_))
+                {
+                    throw std::invalid_argument("result");
+                }
+#endif
+                SEAL_ITERATE(make_iter(operand, result), coeff_modulus_size, [&](auto I) {
+                    apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
+                });
+            }
+
+            void apply_galois_ntt(ConstPolyIter operand, std::size_t size, std::uint32_t galois_elt, PolyIter result) const
+            {
+#ifdef SEAL_DEBUG
+                if (!operand && size > 0)
+                {
+                    throw std::invalid_argument("operand");
+                }
+                if (!result && size > 0)
+                {
+                    throw std::invalid_argument("result");
+                }
+                if (operand.coeff_modulus_size() != result.coeff_modulus_size())
+                {
+                    throw std::invalid_argument("incompatible iterators");
+                }
+#endif
+                auto coeff_modulus_size = result.coeff_modulus_size();
+                SEAL_ITERATE(make_iter(operand, result), size, [&](auto I) {
+                    apply_galois_ntt(get<0>(I), coeff_modulus_size, galois_elt, get<1>(I));
+                });
+            }
 
             /**
             Compute the Galois element corresponding to a given rotation step.
@@ -72,7 +157,7 @@ namespace seal
 
             void initialize(int coeff_count_power);
 
-            void generate_table_ntt(std::uint32_t galois_elt, Pointer<std::uint32_t> &result);
+            void generate_table_ntt(std::uint32_t galois_elt, Pointer<std::uint32_t> &result) const;
 
             MemoryPoolHandle pool_;
 
@@ -82,7 +167,7 @@ namespace seal
 
             static constexpr std::uint32_t generator_ = 3;
 
-            Pointer<Pointer<std::uint32_t>> permutation_tables_;
+            mutable Pointer<Pointer<std::uint32_t>> permutation_tables_;
 
             mutable util::ReaderWriterLocker permutation_tables_locker_;
         };

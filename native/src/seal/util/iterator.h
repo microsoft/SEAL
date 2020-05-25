@@ -214,7 +214,7 @@ namespace seal
         versions of these typedefs, since in almost all cases only read access is needed.
         */
         template <typename ForwardIt, typename Size, typename Func>
-        ForwardIt seal_for_each_n(ForwardIt first, Size size, Func func)
+        inline ForwardIt seal_for_each_n(ForwardIt first, Size size, Func func)
         {
             for (; size--; (void)++first)
             {
@@ -1316,7 +1316,7 @@ namespace seal
         }
 
         template <typename SEALIter>
-        auto reverse_iter(SEALIter &&it) -> ReverseIter<typename std::decay_t<SEALIter>>
+        SEAL_NODISCARD inline auto reverse_iter(SEALIter &&it) -> ReverseIter<typename std::decay_t<SEALIter>>
         {
             return std::forward<SEALIter>(it);
         }
@@ -1644,20 +1644,20 @@ namespace seal
         } // namespace iterator_tuple_internal
 
         template <typename... Ts>
-        auto make_iter(Ts &&... ts) -> typename iterator_tuple_internal::iter_type<void, Ts...>::type
+        SEAL_NODISCARD inline auto make_iter(Ts &&... ts) -> typename iterator_tuple_internal::iter_type<void, Ts...>::type
         {
             return { std::forward<Ts>(ts)... };
         }
 
         template <
             std::size_t N, std::size_t... Rest, typename... SEALIters, typename = std::enable_if_t<sizeof...(Rest)>>
-        auto get(const IterTuple<SEALIters...> &it)
+        SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it)
         {
             return get<Rest...>(iterator_tuple_internal::get<N>(it));
         }
 
         template <std::size_t N, typename... SEALIters>
-        auto get(const IterTuple<SEALIters...> &it)
+        SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it)
         {
             return iterator_tuple_internal::get<N>(it);
         }

@@ -1501,7 +1501,7 @@ namespace seal
 
         auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
         auto plain_upper_half_increment = context_data.plain_upper_half_increment();
-        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
+        auto ntt_tables = context_data.small_ntt_tables();
 
         size_t encrypted_size = encrypted.size();
         size_t plain_coeff_count = plain.coeff_count();
@@ -1596,11 +1596,7 @@ namespace seal
             // primes.
             RNSIter temp_iter(temp.get(), coeff_count);
             SEAL_ITERATE(make_iter(temp_iter, plain_upper_half_increment), coeff_modulus_size, [&](auto I) {
-                SEAL_ASSERT_TYPE(get<0>(I), CoeffIter, "temp");
-                SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "plain_upper_half_increment");
                 SEAL_ITERATE(make_iter(get<0>(I), plain.data()), plain_coeff_count, [&](auto J) {
-                    SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "temp");
-                    SEAL_ASSERT_TYPE(get<1>(J), const uint64_t *, "plain");
                     *get<0>(J) = *get<1>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
                                                                 *get<1>(J) >= plain_upper_half_threshold)));
                 });
@@ -1609,19 +1605,12 @@ namespace seal
 
         // Need to multiply each component in encrypted with temp; first step is to transform to NTT form
         RNSIter temp_iter(temp.get(), coeff_count);
-        ntt_negacyclic_harvey(temp_iter, coeff_modulus_size, coeff_modulus_ntt_tables);
+        ntt_negacyclic_harvey(temp_iter, coeff_modulus_size, ntt_tables);
 
         SEAL_ITERATE(make_iter(encrypted), encrypted_size, [&](auto I) {
-            SEAL_ITERATE(
-                make_iter(I, temp_iter, coeff_modulus, coeff_modulus_ntt_tables), coeff_modulus_size, [&](auto J) {
-                    SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
-                    SEAL_ASSERT_TYPE(get<1>(J), CoeffIter, "temp");
-                    SEAL_ASSERT_TYPE(get<2>(J), const Modulus *, "coeff_modulus");
-                    SEAL_ASSERT_TYPE(get<3>(J), const NTTTables *, "coeff_modulus_ntt_tables");
-
+            SEAL_ITERATE(make_iter(I, temp_iter, coeff_modulus, ntt_tables), coeff_modulus_size, [&](auto J) {
                     // Lazy reduction
                     ntt_negacyclic_harvey_lazy(get<0>(J), *get<3>(J));
-
                     dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J));
                     inverse_ntt_negacyclic_harvey(get<0>(J), *get<3>(J));
                 });
@@ -1755,12 +1744,7 @@ namespace seal
             advance(helper_iter, -safe_cast<ptrdiff_t>(coeff_modulus_size - 1));
 
             SEAL_ITERATE(helper_iter, coeff_modulus_size, [&](auto I) {
-                SEAL_ASSERT_TYPE(get<0>(I), CoeffIter, "reversed plain");
-                SEAL_ASSERT_TYPE(get<1>(I), const uint64_t *, "reversed plain_upper_half_increment");
-
                 SEAL_ITERATE(make_iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
-                    SEAL_ASSERT_TYPE(get<0>(J), uint64_t *, "plain");
-                    SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "reversed plain");
                     *get<1>(J) = *get<0>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
                                                                 *get<0>(J) >= plain_upper_half_threshold)));
                 });
@@ -1924,43 +1908,32 @@ namespace seal
         // Execution order is sensitive, since apply_galois is not inplace!
         if (parms.scheme() == scheme_type::BFV)
         {
-            auto apply_galois_helper = [&](auto in_iter, auto out_iter) {
-                SEAL_ITERATE(make_iter(in_iter, out_iter, coeff_modulus), coeff_modulus_size, [&](auto I) {
-                    galois_tool->apply_galois(get<0>(I), galois_elt, *get<2>(I), get<1>(I));
-                });
-            };
-
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
 
             // First transform encrypted.data(0)
             auto encrypted_iter = make_iter(encrypted);
-            apply_galois_helper(encrypted_iter[0], temp);
+            galois_tool->apply_galois(encrypted_iter[0], coeff_modulus_size, galois_elt, coeff_modulus, temp);
 
             // Copy result to encrypted.data(0)
             set_poly(temp, coeff_count, coeff_modulus_size, encrypted.data(0));
 
             // Next transform encrypted.data(1)
-            apply_galois_helper(encrypted_iter[1], temp);
+            galois_tool->apply_galois(encrypted_iter[1], coeff_modulus_size, galois_elt, coeff_modulus, temp);
+
         }
         else if (parms.scheme() == scheme_type::CKKS)
         {
-            auto apply_galois_helper_ntt = [&](auto in_iter, auto out_iter) {
-                SEAL_ITERATE(make_iter(in_iter, out_iter), coeff_modulus_size, [&](auto I) {
-                    const_cast<GaloisTool *>(galois_tool)->apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
-                });
-            };
-
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
 
             // First transform encrypted.data(0)
             auto encrypted_iter = make_iter(encrypted);
-            apply_galois_helper_ntt(encrypted_iter[0], temp);
+            galois_tool->apply_galois_ntt(encrypted_iter[0], coeff_modulus_size, galois_elt, temp);
 
             // Copy result to encrypted.data(0)
             set_poly(temp, coeff_count, coeff_modulus_size, encrypted.data(0));
 
             // Next transform encrypted.data(1)
-            apply_galois_helper_ntt(encrypted_iter[1], temp);
+            galois_tool->apply_galois_ntt(encrypted_iter[1], coeff_modulus_size, galois_elt, temp);
         }
         else
         {
@@ -2176,16 +2149,9 @@ namespace seal
 
                 // Multiply with keys and modular accumulate products in a lazy fashion
                 SEAL_ITERATE(make_iter(key_vector[i].data(), accumulator_iter), key_component_count, [&](auto I) {
-                    SEAL_ASSERT_TYPE(get<0>(I), ConstRNSIter, "key_vector[i]");
-                    SEAL_ASSERT_TYPE(get<1>(I), RNSIter, "accumulator");
-
                     if (!lazy_reduction_counter)
                     {
                         SEAL_ITERATE(make_iter(t_operand, get<0>(I)[key_index], get<1>(I)), coeff_count, [&](auto J) {
-                            SEAL_ASSERT_TYPE(get<0>(J), const uint64_t *, "t_operand");
-                            SEAL_ASSERT_TYPE(get<1>(J), const uint64_t *, "key_vector[i][key_index]");
-                            SEAL_ASSERT_TYPE(get<2>(J), CoeffIter, "accumulator");
-
                             unsigned long long qword[2]{ 0, 0 };
                             multiply_uint64(*get<0>(J), *get<1>(J), qword);
 
@@ -2219,15 +2185,9 @@ namespace seal
 
             // Final modular reduction
             SEAL_ITERATE(make_iter(accumulator_iter, t_poly_prod_iter), key_component_count, [&](auto I) {
-                SEAL_ASSERT_TYPE(get<0>(I), RNSIter, "accumulator");
-                SEAL_ASSERT_TYPE(get<1>(I), RNSIter, "t_poly_prod");
-
                 if (lazy_reduction_counter == lazy_reduction_summand_bound)
                 {
                     SEAL_ITERATE(make_iter(get<0>(I), *get<1>(I)), coeff_count, [&](auto J) {
-                        SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "accumulator");
-                        SEAL_ASSERT_TYPE(get<1>(J), uint64_t *, "t_poly_prod");
-
                         *get<1>(J) = static_cast<uint64_t>(**get<0>(J));
                     });
                 }
@@ -2245,9 +2205,6 @@ namespace seal
         // Perform modulus switching with scaling
         PolyIter t_poly_prod_iter(t_poly_prod.get(), coeff_count, rns_modulus_size);
         SEAL_ITERATE(make_iter(encrypted, t_poly_prod_iter), key_component_count, [&](auto I) {
-            SEAL_ASSERT_TYPE(get<0>(I), RNSIter, "encrypted");
-            SEAL_ASSERT_TYPE(get<1>(I), RNSIter, "t_poly_prod");
-
             // Lazy reduction; this needs to be then reduced mod qi
             CoeffIter t_last(get<1>(I)[decomp_modulus_size]);
             inverse_ntt_negacyclic_harvey_lazy(t_last, key_ntt_tables[key_modulus_size - 1]);
@@ -2262,8 +2219,8 @@ namespace seal
                 SEAL_ASSERT_TYPE((get<0, 0>(J)), CoeffIter, "encrypted");
                 SEAL_ASSERT_TYPE((get<0, 1>(J)), CoeffIter, "t_poly_prod");
                 SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "key_modulus");
-                SEAL_ASSERT_TYPE(get<2>(J), const NTTTables *, "key_ntt_tables");
-                SEAL_ASSERT_TYPE(get<3>(J), const uint64_t *, "modswitch_factors");
+                SEAL_ASSERT_TYPE(get<2>(J), NTTTables *, "key_ntt_tables");
+                SEAL_ASSERT_TYPE(get<3>(J), uint64_t *, "modswitch_factors");
 
                 SEAL_ALLOCATE_GET_COEFF_ITER(t_ntt, coeff_count, pool);
 
