@@ -153,7 +153,7 @@ namespace seal
 #ifndef SEAL_USE_STD_FOR_EACH_N
 #define SEAL_ITERATE seal::util::seal_for_each_n
 #else
-#define SEAL_ITERATE std::for_each_n 
+#define SEAL_ITERATE std::for_each_n
 #endif
 
 // Which random number generator factory to use by default

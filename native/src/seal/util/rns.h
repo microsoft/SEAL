@@ -230,9 +230,9 @@ namespace seal
                 return inv_q_last_mod_q_.get();
             }
 
-            SEAL_NODISCARD inline auto base_Bsk_small_ntt_tables() const noexcept
+            SEAL_NODISCARD inline auto base_Bsk_ntt_tables() const noexcept
             {
-                return base_Bsk_small_ntt_tables_.get();
+                return base_Bsk_ntt_tables_.get();
             }
 
             SEAL_NODISCARD inline auto base_q() const noexcept
@@ -354,7 +354,7 @@ namespace seal
             Pointer<std::uint64_t> inv_q_last_mod_q_;
 
             // NTTTables for Bsk
-            Pointer<NTTTables> base_Bsk_small_ntt_tables_;
+            Pointer<NTTTables> base_Bsk_ntt_tables_;
 
             Modulus m_tilde_;
 

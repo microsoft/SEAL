@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "seal/ciphertext.h"
-#include "seal/plaintext.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
@@ -19,8 +17,12 @@
 
 namespace seal
 {
+    class Ciphertext;
+
     namespace util
     {
+        class NTTTables;
+
         /**
         @par PolyIter, RNSIter, and CoeffIter
         In this file we define a set of custom iterator classes ("SEAL iterators") that are used throughout Microsoft
@@ -314,39 +316,67 @@ namespace seal
                 return ptr_ - n;
             }
 
-            SEAL_NODISCARD inline difference_type operator-(const self_type &b) const noexcept
+            template <
+                typename S, typename = std::enable_if_t<std::is_same<
+                                typename std::remove_const_t<std::remove_pointer_t<S>>,
+                                typename std::remove_const_t<std::remove_pointer_t<PtrT>>>::value>>
+            SEAL_NODISCARD inline difference_type operator-(const PtrIter<S> &b) const noexcept
             {
-                return std::distance(ptr_, b.ptr_);
+                return std::distance(ptr_, *b);
             }
 
-            SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
+            template <
+                typename S, typename = std::enable_if_t<std::is_same<
+                                std::remove_const_t<std::remove_pointer_t<S>>,
+                                std::remove_const_t<std::remove_pointer_t<PtrT>>>::value>>
+            SEAL_NODISCARD inline bool operator==(const PtrIter<S> &compare) const noexcept
             {
-                return ptr_ == compare.ptr_;
+                return ptr_ == *compare;
             }
 
-            SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
+            template <
+                typename S, typename = std::enable_if_t<std::is_same<
+                                std::remove_const_t<std::remove_pointer_t<S>>,
+                                std::remove_const_t<std::remove_pointer_t<PtrT>>>::value>>
+            SEAL_NODISCARD inline bool operator!=(const PtrIter<S> &compare) const noexcept
             {
                 return !(*this == compare);
             }
 
-            SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
+            template <
+                typename S, typename = std::enable_if_t<std::is_same<
+                                std::remove_const_t<std::remove_pointer_t<S>>,
+                                std::remove_const_t<std::remove_pointer_t<PtrT>>>::value>>
+            SEAL_NODISCARD inline bool operator<(const PtrIter<S> &compare) const noexcept
             {
-                return ptr_ < compare.ptr_;
+                return ptr_ < *compare;
             }
 
-            SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
+            template <
+                typename S, typename = std::enable_if_t<std::is_same<
+                                std::remove_const_t<std::remove_pointer_t<S>>,
+                                std::remove_const_t<std::remove_pointer_t<PtrT>>>::value>>
+            SEAL_NODISCARD inline bool operator>(const PtrIter<S> &compare) const noexcept
             {
-                return ptr_ > compare.ptr_;
+                return ptr_ > *compare;
             }
 
-            SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
+            template <
+                typename S, typename = std::enable_if_t<std::is_same<
+                                std::remove_const_t<std::remove_pointer_t<S>>,
+                                std::remove_const_t<std::remove_pointer_t<PtrT>>>::value>>
+            SEAL_NODISCARD inline bool operator<=(const PtrIter<S> &compare) const noexcept
             {
-                return !(ptr_ > compare.ptr_);
+                return !(ptr_ > *compare);
             }
 
-            SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
+             template <
+                typename S, typename = std::enable_if_t<std::is_same<
+                                std::remove_const_t<std::remove_pointer_t<S>>,
+                                std::remove_const_t<std::remove_pointer_t<PtrT>>>::value>>
+            SEAL_NODISCARD inline bool operator>=(const PtrIter<S> &compare) const noexcept
             {
-                return !(ptr_ < compare.ptr_);
+                return !(ptr_ < *compare);
             }
 
             SEAL_NODISCARD inline operator value_type *() const noexcept
@@ -384,7 +414,6 @@ namespace seal
 
         using ConstCoeffIter = PtrIter<const std::uint64_t *>;
 
-        // Typedefs for some commonly used iterators
         using ModulusIter = PtrIter<const Modulus *>;
 
         using NTTTablesIter = PtrIter<const NTTTables *>;
@@ -769,8 +798,7 @@ namespace seal
                   step_size_(mul_safe(poly_modulus_degree, coeff_modulus_size_))
             {}
 
-            PolyIter(Ciphertext &ct) : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_size())
-            {}
+            PolyIter(Ciphertext &ct);
 
             PolyIter(const self_type &copy) = default;
 
@@ -956,12 +984,9 @@ namespace seal
                   step_size_(mul_safe(poly_modulus_degree, coeff_modulus_size_))
             {}
 
-            ConstPolyIter(const Ciphertext &ct)
-                : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_size())
-            {}
+            ConstPolyIter(const Ciphertext &ct);
 
-            ConstPolyIter(Ciphertext &ct) : self_type(ct.data(), ct.poly_modulus_degree(), ct.coeff_modulus_size())
-            {}
+            ConstPolyIter(Ciphertext &ct);
 
             ConstPolyIter(const self_type &copy) = default;
 

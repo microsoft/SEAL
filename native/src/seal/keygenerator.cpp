@@ -85,11 +85,11 @@ namespace seal
             uint64_t *secret_key = secret_key_.data().data();
             sample_poly_ternary(random, parms, secret_key);
 
-            auto small_ntt_tables = context_data.small_ntt_tables();
+            auto ntt_tables = context_data.small_ntt_tables();
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 // Transform the secret s into NTT representation.
-                ntt_negacyclic_harvey(secret_key + (i * coeff_count), small_ntt_tables[i]);
+                ntt_negacyclic_harvey(secret_key + (i * coeff_count), ntt_tables[i]);
             }
 
             // Set the parms_id for secret key

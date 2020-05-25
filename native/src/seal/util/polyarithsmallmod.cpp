@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/common.h"
-#include "seal/util/defines.h"
 #include "seal/util/polyarith.h"
 #include "seal/util/polyarithsmallmod.h"
-#include "seal/util/polycore.h"
 #include "seal/util/uintarith.h"
-#include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
 
 using namespace std;
@@ -17,14 +13,14 @@ namespace seal
     namespace util
     {
         void multiply_poly_scalar_coeffmod(
-            const uint64_t *poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, uint64_t *result)
+            ConstCoeffIter poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (poly == nullptr && coeff_count > 0)
+            if (!poly && coeff_count > 0)
             {
                 throw invalid_argument("poly");
             }
-            if (result == nullptr && coeff_count > 0)
+            if (!result && coeff_count > 0)
             {
                 throw invalid_argument("result");
             }
@@ -33,18 +29,12 @@ namespace seal
                 throw invalid_argument("modulus");
             }
 #endif
-            // Explicit inline
-            // for (int i = 0; i < coeff_count; i++)
-            //{
-            //    *result++ = multiply_uint_mod(*poly++, scalar, modulus);
-            //}
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
-            for (; coeff_count--; poly++, result++)
-            {
+            SEAL_ITERATE(iter_tuple(poly, result), coeff_count, [&](auto I) {
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
-                multiply_uint64(*poly, scalar, z);
+                multiply_uint64(*get<0>(I), scalar, z);
 
                 // Reduces z using base 2^64 Barrett reduction
 
@@ -65,28 +55,28 @@ namespace seal
                 tmp3 = z[0] - tmp1 * modulus_value;
 
                 // Claim: One more subtraction is enough
-                *result = tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
-            }
+                *get<1>(I) = tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+            });
         }
 
         void multiply_poly_coeffmod(
-            const uint64_t *operand1, size_t operand1_coeff_count, const uint64_t *operand2,
-            size_t operand2_coeff_count, const Modulus &modulus, size_t result_coeff_count, uint64_t *result)
+            ConstCoeffIter operand1, size_t operand1_coeff_count, ConstCoeffIter operand2,
+            size_t operand2_coeff_count, const Modulus &modulus, size_t result_coeff_count, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (operand1 == nullptr && operand1_coeff_count > 0)
+            if (!operand1 && operand1_coeff_count > 0)
             {
                 throw invalid_argument("operand1");
             }
-            if (operand2 == nullptr && operand2_coeff_count > 0)
+            if (!operand2 && operand2_coeff_count > 0)
             {
                 throw invalid_argument("operand2");
             }
-            if (result == nullptr && result_coeff_count > 0)
+            if (!result && result_coeff_count > 0)
             {
                 throw invalid_argument("result");
             }
-            if (result != nullptr && (operand1 == result || operand2 == result))
+            if (!result && (operand1 == result || operand2 == result))
             {
                 throw invalid_argument("result cannot point to the same value as operand1, operand2, or modulus");
             }
@@ -106,11 +96,12 @@ namespace seal
             operand2_coeff_count = get_significant_coeff_count_poly(operand2, operand2_coeff_count, 1);
             for (size_t operand1_index = 0; operand1_index < operand1_coeff_count; operand1_index++)
             {
-                if (operand1[operand1_index] == 0)
+                if (*operand1[operand1_index] == 0)
                 {
                     // If coefficient is 0, then move on to next coefficient.
                     continue;
                 }
+
                 // Do expensive add
                 for (size_t operand2_index = 0; operand2_index < operand2_coeff_count; operand2_index++)
                 {
@@ -120,7 +111,7 @@ namespace seal
                         break;
                     }
 
-                    if (operand2[operand2_index] == 0)
+                    if (*operand2[operand2_index] == 0)
                     {
                         // If coefficient is 0, then move on to next coefficient.
                         continue;
@@ -128,31 +119,31 @@ namespace seal
 
                     // Lazy reduction
                     unsigned long long temp[2];
-                    multiply_uint64(operand1[operand1_index], operand2[operand2_index], temp);
-                    temp[1] += add_uint64(temp[0], result[product_coeff_index], 0, temp);
-                    result[product_coeff_index] = barrett_reduce_128(temp, modulus);
+                    multiply_uint64(*operand1[operand1_index], *operand2[operand2_index], temp);
+                    temp[1] += add_uint64(temp[0], *result[product_coeff_index], 0, temp);
+                    *result[product_coeff_index] = barrett_reduce_128(temp, modulus);
                 }
             }
         }
 
         void multiply_poly_coeffmod(
-            const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, const Modulus &modulus,
-            uint64_t *result)
+            ConstCoeffIter operand1, ConstCoeffIter operand2, size_t coeff_count, const Modulus &modulus,
+            CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (operand1 == nullptr && coeff_count > 0)
+            if (!operand1 && coeff_count > 0)
             {
                 throw invalid_argument("operand1");
             }
-            if (operand2 == nullptr && coeff_count > 0)
+            if (!operand2 && coeff_count > 0)
             {
                 throw invalid_argument("operand2");
             }
-            if (result == nullptr && coeff_count > 0)
+            if (!result && coeff_count > 0)
             {
                 throw invalid_argument("result");
             }
-            if (result != nullptr && (operand1 == result || operand2 == result))
+            if (result && (operand1 == result || operand2 == result))
             {
                 throw invalid_argument("result cannot point to the same value as operand1, operand2, or modulus");
             }
@@ -176,7 +167,7 @@ namespace seal
                 // Lastly, do more expensive add if other cases don't handle it.
                 for (size_t operand2_index = 0; operand2_index < coeff_count; operand2_index++)
                 {
-                    uint64_t operand2_coeff = operand2[operand2_index];
+                    uint64_t operand2_coeff = *operand2[operand2_index];
                     if (operand2_coeff == 0)
                     {
                         // If coefficient is 0, then move on to next coefficient.
@@ -185,32 +176,32 @@ namespace seal
 
                     // Lazy reduction
                     unsigned long long temp[2];
-                    multiply_uint64(operand1[operand1_index], operand2_coeff, temp);
-                    temp[1] += add_uint64(temp[0], result[operand1_index + operand2_index], 0, temp);
+                    multiply_uint64(*operand1[operand1_index], operand2_coeff, temp);
+                    temp[1] += add_uint64(temp[0], *result[operand1_index + operand2_index], 0, temp);
 
-                    result[operand1_index + operand2_index] = barrett_reduce_128(temp, modulus);
+                    *result[operand1_index + operand2_index] = barrett_reduce_128(temp, modulus);
                 }
             }
         }
 
         void divide_poly_coeffmod_inplace(
-            uint64_t *numerator, const uint64_t *denominator, size_t coeff_count, const Modulus &modulus,
-            uint64_t *quotient)
+            CoeffIter numerator, ConstCoeffIter denominator, size_t coeff_count, const Modulus &modulus,
+            CoeffIter quotient)
         {
 #ifdef SEAL_DEBUG
-            if (numerator == nullptr)
+            if (!numerator)
             {
                 throw invalid_argument("numerator");
             }
-            if (denominator == nullptr)
+            if (!denominator)
             {
                 throw invalid_argument("denominator");
             }
-            if (is_zero_poly(denominator, coeff_count, modulus.uint64_count()))
+            if (is_zero_uint(denominator, coeff_count))
             {
                 throw invalid_argument("denominator");
             }
-            if (quotient == nullptr)
+            if (!quotient)
             {
                 throw invalid_argument("quotient");
             }
@@ -249,7 +240,7 @@ namespace seal
             uint64_t subtrahend;
 
             // Determine scalar necessary to make denominator monic.
-            uint64_t leading_denominator_coeff = denominator[denominator_coeffs - 1];
+            uint64_t leading_denominator_coeff = *denominator[denominator_coeffs - 1];
             if (!try_invert_uint_mod(leading_denominator_coeff, modulus, monic_denominator_scalar))
             {
                 throw invalid_argument("modulus is not coprime with leading denominator coefficient");
@@ -259,7 +250,7 @@ namespace seal
             while (numerator_coeffs >= denominator_coeffs)
             {
                 // Determine leading numerator coefficient.
-                uint64_t leading_numerator_coeff = numerator[numerator_coeffs - 1];
+                uint64_t leading_numerator_coeff = *numerator[numerator_coeffs - 1];
 
                 // If leading numerator coefficient is not zero, then need to make zero by subtraction.
                 if (leading_numerator_coeff)
@@ -271,7 +262,7 @@ namespace seal
                     // denominator's leading coefficient one multiplied by leading
                     // coefficient of denominator (which when subtracted will zero
                     // out the topmost denominator coefficient).
-                    uint64_t &quotient_coeff = quotient[denominator_shift];
+                    uint64_t &quotient_coeff = *quotient[denominator_shift];
                     temp_quotient = multiply_uint_mod(monic_denominator_scalar, leading_numerator_coeff, modulus);
                     quotient_coeff = temp_quotient;
 
@@ -280,11 +271,11 @@ namespace seal
                          denominator_coeff_index++)
                     {
                         // Multiply denominator's coefficient by quotient.
-                        uint64_t denominator_coeff = denominator[denominator_coeff_index];
+                        uint64_t denominator_coeff = *denominator[denominator_coeff_index];
                         subtrahend = multiply_uint_mod(temp_quotient, denominator_coeff, modulus);
 
                         // Subtract numerator with resulting product, appropriately shifted by denominator shift.
-                        uint64_t &numerator_coeff = numerator[denominator_coeff_index + denominator_shift];
+                        uint64_t &numerator_coeff = *numerator[denominator_coeff_index + denominator_shift];
                         numerator_coeff = sub_uint64_mod(numerator_coeff, subtrahend, modulus);
                     }
                 }
@@ -295,19 +286,19 @@ namespace seal
         }
 
         void dyadic_product_coeffmod(
-            const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, const Modulus &modulus,
-            uint64_t *result)
+            ConstCoeffIter operand1, ConstCoeffIter operand2, size_t coeff_count, const Modulus &modulus,
+            CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (operand1 == nullptr)
+            if (!operand1)
             {
                 throw invalid_argument("operand1");
             }
-            if (operand2 == nullptr)
+            if (!operand2)
             {
                 throw invalid_argument("operand2");
             }
-            if (result == nullptr)
+            if (!result)
             {
                 throw invalid_argument("result");
             }
@@ -320,19 +311,13 @@ namespace seal
                 throw invalid_argument("modulus");
             }
 #endif
-            // Explicit inline
-            // for (int i = 0; i < coeff_count; i++)
-            //{
-            //    *result++ = multiply_uint_mod(*operand1++, *operand2++, modulus);
-            //}
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
-            for (; coeff_count--; operand1++, operand2++, result++)
-            {
+            SEAL_ITERATE(iter_tuple(operand1, operand2, result), coeff_count, [&](auto I) {
                 // Reduces z using base 2^64 Barrett reduction
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
-                multiply_uint64(*operand1, *operand2, z);
+                multiply_uint64(*get<0>(I), *get<1>(I), z);
 
                 // Multiply input and const_ratio
                 // Round 1
@@ -351,14 +336,14 @@ namespace seal
                 tmp3 = z[0] - tmp1 * modulus_value;
 
                 // Claim: One more subtraction is enough
-                *result = tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
-            }
+                *get<2>(I) = tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+            });
         }
 
-        uint64_t poly_infty_norm_coeffmod(const uint64_t *operand, size_t coeff_count, const Modulus &modulus)
+        uint64_t poly_infty_norm_coeffmod(ConstCoeffIter operand, size_t coeff_count, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
-            if (operand == nullptr && coeff_count > 0)
+            if (!operand && coeff_count > 0)
             {
                 throw invalid_argument("operand");
             }
@@ -373,9 +358,8 @@ namespace seal
             // Mod out the poly coefficients and choose a symmetric representative from
             // [-modulus,modulus). Keep track of the max.
             uint64_t result = 0;
-            for (size_t coeff_index = 0; coeff_index < coeff_count; coeff_index++)
-            {
-                uint64_t poly_coeff = operand[coeff_index] % modulus.value();
+            SEAL_ITERATE(operand, coeff_count, [&](auto I) {
+                uint64_t poly_coeff = *I % modulus.value();
                 if (poly_coeff >= modulus_neg_threshold)
                 {
                     poly_coeff = modulus.value() - poly_coeff;
@@ -384,20 +368,21 @@ namespace seal
                 {
                     result = poly_coeff;
                 }
-            }
+            });
+
             return result;
         }
 
         bool try_invert_poly_coeffmod(
-            const uint64_t *operand, const uint64_t *poly_modulus, size_t coeff_count, const Modulus &modulus,
-            uint64_t *result, MemoryPool &pool)
+            ConstCoeffIter operand, ConstCoeffIter poly_modulus, size_t coeff_count, const Modulus &modulus,
+            CoeffIter result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
-            if (operand == nullptr)
+            if (!operand)
             {
                 throw invalid_argument("operand");
             }
-            if (poly_modulus == nullptr)
+            if (!poly_modulus)
             {
                 throw invalid_argument("poly_modulus");
             }
@@ -405,7 +390,7 @@ namespace seal
             {
                 throw invalid_argument("coeff_count");
             }
-            if (result == nullptr)
+            if (!result)
             {
                 throw invalid_argument("result");
             }
@@ -558,20 +543,20 @@ namespace seal
         }
 
         void negacyclic_shift_poly_coeffmod(
-            const uint64_t *operand, size_t coeff_count, size_t shift, const Modulus &modulus, uint64_t *result)
+            ConstCoeffIter poly, size_t coeff_count, size_t shift, const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
-            if (operand == nullptr)
+            if (!poly)
             {
-                throw invalid_argument("operand");
+                throw invalid_argument("poly");
             }
-            if (result == nullptr)
+            if (!result)
             {
                 throw invalid_argument("result");
             }
-            if (operand == result)
+            if (poly == result)
             {
-                throw invalid_argument("result cannot point to the same value as operand");
+                throw invalid_argument("result cannot point to the same value as poly");
             }
             if (modulus.is_zero())
             {
@@ -589,22 +574,22 @@ namespace seal
             // Nothing to do
             if (shift == 0)
             {
-                set_uint(operand, coeff_count, result);
+                set_uint(poly, coeff_count, result);
                 return;
             }
 
             uint64_t index_raw = shift;
             uint64_t coeff_count_mod_mask = static_cast<uint64_t>(coeff_count) - 1;
-            for (size_t i = 0; i < coeff_count; i++, operand++, index_raw++)
+            for (size_t i = 0; i < coeff_count; i++, poly++, index_raw++)
             {
                 uint64_t index = index_raw & coeff_count_mod_mask;
-                if (!(index_raw & static_cast<uint64_t>(coeff_count)) || !*operand)
+                if (!(index_raw & static_cast<uint64_t>(coeff_count)) || !**poly)
                 {
-                    result[index] = *operand;
+                    *result[index] = **poly;
                 }
                 else
                 {
-                    result[index] = modulus.value() - *operand;
+                    *result[index] = modulus.value() - **poly;
                 }
             }
         }
