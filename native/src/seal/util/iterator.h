@@ -213,6 +213,16 @@ namespace seal
         simplify the notation, we have set up typedefs for these: ModulusIter and NTTTablesIter. There are no non-const
         versions of these typedefs, since in almost all cases only read access is needed.
         */
+        template <typename ForwardIt, typename Size, typename Func>
+        ForwardIt seal_for_each_n(ForwardIt first, Size size, Func func)
+        {
+            for (; size--; (void)++first)
+            {
+                func(*first);
+            }
+            return first;
+        }
+
         class SEALIterBase
         {
         };
