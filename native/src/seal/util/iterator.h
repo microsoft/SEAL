@@ -27,9 +27,9 @@ namespace seal
         @par PolyIter, RNSIter, and CoeffIter
         In this file we define a set of custom iterator classes ("SEAL iterators") that are used throughout Microsoft
         SEAL for easier iteration over ciphertext polynomials, their RNS components, and the coefficients in the RNS
-        components. All SEAL iterators satisfy the C++ LegacyBidirectionalIterator requirements. Please note that they
-        are *not* random access iterators. The SEAL iterators are very helpful when used with std::for_each_n in C++17.
-        For C++14 compilers we have defined our own implementation of for_each_n below.
+        components. All SEAL iterators satisfy the C++ LegacyRandomAccessIterator requirements. SEAL iterators can be
+        used with the SEAL_ITERATE macro, which expands to std::for_each_n in C++17 and to seal::util::seal_for_each_n
+        in C++14. All SEAL iterators derive from SEALIterBase.
 
         The SEAL iterator classes behave as illustrated by the following diagram:
 
@@ -112,20 +112,10 @@ namespace seal
         |   RNSIter   |       |   CoeffIter   |      | PtrIter<std::uint64_t*> |
         +-------------+       +---------------+      +-------------------------+
 
-        As an example, the following snippet from Evaluator::negate_inplace iterates over the polynomials in an input
-        ciphertext, and for each polynomial iterates over the RNS components, and for each RNS component negates the
-        polynomial coefficients modulo a Modulus element corresponding to the RNS component:
-
-        for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
-            for_each_n(
-                IterTuple<RNSIter, ModulusIter>(I, coeff_modulus), coeff_modulus_size,
-                [&](auto J) { negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J)); });
-        });
-
-        Here coeff_modulus is a std::vector<Modulus>, and ModulusIter was constructed directly
-        from it. PtrIter provides a similar constructor from a seal::util::Pointer type. Note also how we had to
-        dereference get<1>(J) in the innermost lambda function to access the value (NTTTables). This is because
-        get<1>(J) is const NTTTables *, as was discussed above.
+        @par Typedefs for common PtrIter types
+        It is very common to use the types PtrIter<Modulus *> and PtrIter<NTTTables *>. To simplify the
+        notation, we have set up typedefs for these: ModulusIter and NTTTablesIter. There are also constant versions
+        ConstModulusIter and ConstNTTTablesIter.
 
         @par Nested IterTuples
         Sometimes we have to use multiple nested iterator tuples. In this case accessing the nested iterators can be
@@ -146,50 +136,73 @@ namespace seal
         a nested get<...> call. The reason for this reversal is that, when deducing what the iterators are, one first
         examines at the innermost scope, and last the outermost scope, corresponding now to the order of the indices.
 
-        @par Coding conventions
-        There are two important coding conventions in the above code snippet that are to be observed:
+        @par Creating SEAL iterators
+        Iterators are easiest to create using the variadic templated make_iter function that, when given one or more
+        arguments that can naturally be converted to SEAL iterators, outputs an appropriate iterator, or iterator tuple.
+        Consider again the code snippet above, and how confusing the template parameters can become to write. Instead,
+        we can simply write:
 
-            1. Always explicitly write the class template arguments. This is important for C++14 compatibility, and can
-               help avoid confusing bugs resulting from mistakes in iterator types in nested for_each_n calls.
-            2. Use I, J, K, ... for the lambda function parameters representing SEAL iterators. This is compact and
-               makes it very clear that the objects in question are SEAL iterators since such variable names should not
-               be used in SEAL in any other context.
-            3. Always pass SEAL iterators by value to the lambda function.
+        auto I = make_iter(encrypted1, encrypted2);
+        auto J = make_iter(I, destination);
+        auto encrypted1_iter = get<0, 0>(J));
+        auto encrypted2_iter = get<0, 1>(J));
 
-        @par SEAL_ASSERT_TYPE
-        It is not unusual to have multiple nested for_each_n calls operating on multiple/nested IterTuple objects.
-        It can become very difficult to keep track of what exactly the different iterators are pointing to, and what
-        their types are (the above convention of using I, J, K, ... does not reveal the type). Hence we sometimes
-        annotate the code and check that the types match what we expect them to be using the SEAL_ASSERT_TYPE macro.
-        For example, the above code snippet would be annotated as follows:
+        @par SEAL_ITERATE
+        SEAL iterators are made to be used with the SEAL_ITERATE macro to iterate over a certain number of steps, and
+        for each step call a given lambda function. In C++17 SEAL_ITERATE expands to std::for_each_n, and in C++14 it
+        expands to seal::util::seal_for_each_n -- a custom implementation. For example, the following snippet appears
+        in Evaluator::bfv_multiply:
 
-        for_each_n(PolyIter(encrypted), encrypted_size, [&](auto I) {
-            SEAL_ASSERT_TYPE(I, RNSIter, "encrypted");
-            for_each_n(
-                IterTuple<RNSIter, ModulusIter>(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
-                    SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
-                    SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "coeff_modulus");
-                    negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J));
-                });
+        SEAL_ITERATE(
+            make_iter(encrypted1, encrypted1_q, encrypted1_Bsk),
+            encrypted1_size,
+            behz_extend_base_convert_to_ntt);
+
+        Here an IterTuple<PolyIter, PolyIter, PolyIter> is created with the make_iter function; the argument types are
+        Ciphertext (encrypted1), PolyIter (encrypted1_q), and PolyIter (encrypted1_Bsk). The iterator is advanced
+        encrypted1_size times, and each time the lambda function behz_extend_base_convert_to_ntt is called with the
+        iterator tuple dereferenced. The lambda function starts as follows:
+
+        auto behz_extend_base_convert_to_ntt = [&](auto I) {
+            set_poly(get<0>(I), coeff_count, base_q_size, get<1>(I));
+            ntt_negacyclic_harvey_lazy(get<1>(I), base_q_size, base_q_ntt_tables);
+            ...
         });
 
-        Note how SEAL_ASSERT_TYPE makes it explicit what type the different iterators are, and includes a string that
-        describes what object is iterated over. We use this convention in particularly complex functions to make the
-        code easier to follow and less error-prone. The code will fail to compile if the type of the object in the first
-        parameter does not match the type in the second parameter of the macro.
+        Here the parameter I is of type IterTuple<RNSIter, RNSIter, RNSIter>. Inside the lambda function we first copy
+        the RNS polynomial from get<0>(I) (encrypted1) to get<1>(I) (encrypted1_q) and transform it to NTT form. We use
+        an overload of ntt_negacyclic_harvey_lazy that takes an RNSIter, size of the RNS base, and ConstNTTTablesIter as
+        arguments and converts each RNS component separately. Looking at seal/util/ntt.h we see that the function
+        ntt_negacyclic_harvey_lazy is again implemented using SEAL_ITERATE. Specifically, it contains the following:
 
-        There is one caveat one should be aware of. When calling SEAL_ASSERT_TYPE with a multi-index get<...>(I), an
-        extra set of parentheses must be used around the object for the macro arguments to work properly:
+        SEAL_ITERATE(make_iter(operand, tables), coeff_modulus_size, [&](auto I) {
+            ntt_negacyclic_harvey_lazy(get<0>(I), *get<1>(I));
+        });
 
-        IterTuple<PolyIter, PolyIter> I(encrypted1, encrypted2);
-        IterTuple<decltype(I), PolyIter> J(I, destination);
-        SEAL_ASSERT_TYPE((get<0, 0>(J)), PolyIter, "encrypted1");
+        Here make_iter outputs an IterTuple<RNSIter, ConstNTTTablesIter>. In this case the lambda function to be called
+        is defined inline. The argument I takes values IterTuple<CoeffIter, const NTTTables *>, and for each step the
+        CoeffIter overload of ntt_negacyclic_harvey_lazy is called, with a reference to a matching NTTTables object.
+
+        @par Iterator overloads of common functions
+        Some functions have overloads that directly take either CoeffIter, RNSIter, or PolyIter inputs, and apply the
+        operation in question to the entire structure as indicated by the iterator. For example, the function
+        seal::util::negate_poly_coeffmod can negate a single RNS component modulo a given Modulus (CoeffIter overload),
+        an entire RNS polynomial modulo an array of matching Modulus elements (RNSIter overload), or an array of RNS
+        polynomials (PolyIter overload).
+
+        @par Coding conventions
+        There are two important coding conventions in the above code snippets that are to be observed:
+
+            1. Use I, J, K, ... for the lambda function parameters representing SEAL iterators. This is compact and
+               makes it very clear that the objects in question are SEAL iterators since such variable names should not
+               be used in SEAL in any other context.
+            2. Always pass SEAL iterators by value to the lambda function.
 
         @par Note on allocations
-        In the future we hope to use the parallel version of std::for_each_n, introduced in C++17. For this to
-        work, be mindful of how you use heap allocations in the lambda functions. Specifically, in heavy lambda
-        functions it is probably a good idea to call seal::util::allocate inside the lambda function for any allocations
-        needed, rather than using allocations captured from outside the lambda function.
+        In the future we hope to use the parallel version of std::for_each_n, introduced in C++17. For this to work, be
+        mindful of how you use heap allocations in the lambda functions. Specifically, in heavy lambda functions it is
+        probably a good idea to call seal::util::allocate inside the lambda function for any allocations needed, rather
+        than using allocations captured from outside the lambda function.
 
         @par Setting up iterators to temporary allocations
         In many cases one may want to allocate a temporary buffer and create an iterator pointing to it. However, care
@@ -200,7 +213,7 @@ namespace seal
         auto temp_alloc(allocate_poly_array(count, poly_modulus_degree, coeff_modulus_size, pool));
         PolyIter temp(temp_alloc.get(), poly_modulus_degree, coeff_modulus_size);
 
-        one can simply write:
+        we can simply write:
 
         SEAL_ALLOCATE_GET_POLY_ITER(temp, count, poly_modulus_degree, coeff_modulus_size, pool);
 
@@ -208,11 +221,40 @@ namespace seal
         buffers and setting up RNSIter and CoeffIter objects as well, and all these macros have versions that set the
         allocated memory to zero, e.g. SEAL_ALLOCATE_ZERO_GET_POLY_ITER.
 
-        @par Typedefs for common PtrIter types
-        It is very common to use the types PtrIter<const Modulus *> and PtrIter<const NTTTables *> in IterTuples. To
-        simplify the notation, we have set up typedefs for these: ModulusIter and NTTTablesIter. There are no non-const
-        versions of these typedefs, since in almost all cases only read access is needed.
+        @par SEAL_ASSERT_TYPE
+        It is not unusual to have multiple nested SEAL_ITERATE calls operating on multiple/nested IterTuple objects. It
+        can become very difficult to keep track of what exactly the different iterators are pointing to, and what their
+        types are (the above convention of using I, J, K, ... does not reveal the type). Hence we sometimes annotate the
+        code and check that the types match what we expect them to be using the SEAL_ASSERT_TYPE macro. For example,
+        consider the following annotated code snippet that negates all RNS polynomials in the Ciphertext encrypted:
+
+        SEAL_ITERATE(PolyIter(encrypted), encrypted_size, [&](auto I) {
+            SEAL_ASSERT_TYPE(I, RNSIter, "encrypted");
+            SEAL_ITERATE(make_iter(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
+                    SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
+                    SEAL_ASSERT_TYPE(get<1>(J), Modulus *, "coeff_modulus");
+                    negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J));
+                });
+        });
+
+        Of course, the above could be done in just one line using the PolyIter overload of negate_poly_coeffmod:
+
+        negate_poly_coeffmod(encrypted, encrypted_size, coeff_modulus, encrypted);
+
+        Nevertheless, note how SEAL_ASSERT_TYPE makes it explicit what type the different iterators are, and includes
+        a string that describes what object is iterated over. We use this convention in particularly complex functions
+        to make the code easier to follow and less error-prone. The code will fail to compile if the type of the object
+        in the first parameter does not match the type in the second parameter of the macro.
+
+        There is one caveat one should be aware of. When calling SEAL_ASSERT_TYPE with a multi-index get<...>(I), an
+        extra set of parentheses must be used around the object for the macro arguments to work properly:
+
+        auto I = make_iter(encrypted1, encrypted2);
+        auto J = make_iter(I, destination);
+        SEAL_ASSERT_TYPE((get<0, 0>(J)), PolyIter, "encrypted1");
         */
+
+        // Our custom implementation of std::for_each_n
         template <typename ForwardIt, typename Size, typename Func>
         inline ForwardIt seal_for_each_n(ForwardIt first, Size size, Func func)
         {
@@ -224,8 +266,7 @@ namespace seal
         }
 
         class SEALIterBase
-        {
-        };
+        {};
 
         template <typename PtrT>
         class PtrIter : public SEALIterBase
@@ -380,7 +421,7 @@ namespace seal
                 return !(ptr_ > *compare);
             }
 
-             template <
+            template <
                 typename S, typename = std::enable_if_t<std::is_same<
                                 std::remove_const_t<std::remove_pointer_t<S>>,
                                 std::remove_const_t<std::remove_pointer_t<PtrT>>>::value>>
@@ -424,9 +465,13 @@ namespace seal
 
         using ConstCoeffIter = PtrIter<const std::uint64_t *>;
 
-        using ModulusIter = PtrIter<const Modulus *>;
+        using ConstModulusIter = PtrIter<const Modulus *>;
 
-        using NTTTablesIter = PtrIter<const NTTTables *>;
+        using ConstNTTTablesIter = PtrIter<const NTTTables *>;
+
+        using ModulusIter = PtrIter<Modulus *>;
+
+        using NTTTablesIter = PtrIter<NTTTables *>;
 
         class RNSIter;
 
@@ -1519,7 +1564,7 @@ namespace seal
             SEALIter first_;
         };
 
-        namespace iterator_tuple_internal
+        namespace iterator_internal
         {
             template <std::size_t N>
             struct GetHelperStruct
@@ -1545,7 +1590,7 @@ namespace seal
             auto get(const IterTuple<SEALIters...> &it)
             {
                 static_assert(N < sizeof...(SEALIters), "IterTuple index out of range");
-                return iterator_tuple_internal::GetHelperStruct<N>::apply(it);
+                return iterator_internal::GetHelperStruct<N>::apply(it);
             }
 
             template <typename... SEALIters>
@@ -1641,10 +1686,10 @@ namespace seal
             {
                 using type = PtrIter<const T *>;
             };
-        } // namespace iterator_tuple_internal
+        } // namespace iterator_internal
 
         template <typename... Ts>
-        SEAL_NODISCARD inline auto make_iter(Ts &&... ts) -> typename iterator_tuple_internal::iter_type<void, Ts...>::type
+        SEAL_NODISCARD inline auto make_iter(Ts &&... ts) -> typename iterator_internal::iter_type<void, Ts...>::type
         {
             return { std::forward<Ts>(ts)... };
         }
@@ -1653,13 +1698,13 @@ namespace seal
             std::size_t N, std::size_t... Rest, typename... SEALIters, typename = std::enable_if_t<sizeof...(Rest)>>
         SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it)
         {
-            return get<Rest...>(iterator_tuple_internal::get<N>(it));
+            return get<Rest...>(iterator_internal::get<N>(it));
         }
 
         template <std::size_t N, typename... SEALIters>
         SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it)
         {
-            return iterator_tuple_internal::get<N>(it);
+            return iterator_internal::get<N>(it);
         }
     } // namespace util
 } // namespace seal

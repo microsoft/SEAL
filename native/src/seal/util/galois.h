@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "seal/util/defines.h"
 #include "seal/memorymanager.h"
-#include "seal/util/pointer.h"
-#include "seal/util/iterator.h"
 #include "seal/modulus.h"
+#include "seal/util/defines.h"
+#include "seal/util/iterator.h"
+#include "seal/util/pointer.h"
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -30,12 +30,11 @@ namespace seal
             }
 
             void apply_galois(
-                ConstCoeffIter operand, std::uint32_t galois_elt, const Modulus &modulus,
-                CoeffIter result) const;
+                ConstCoeffIter operand, std::uint32_t galois_elt, const Modulus &modulus, CoeffIter result) const;
 
             inline void apply_galois(
-                ConstRNSIter operand, std::size_t coeff_modulus_size, std::uint32_t galois_elt, ModulusIter modulus,
-                RNSIter result) const
+                ConstRNSIter operand, std::size_t coeff_modulus_size, std::uint32_t galois_elt,
+                ConstModulusIter modulus, RNSIter result) const
             {
 #ifdef SEAL_DEBUG
                 if ((!operand && coeff_modulus_size > 0) || (operand.poly_modulus_degree() != coeff_count_))
@@ -53,7 +52,7 @@ namespace seal
             }
 
             void apply_galois(
-                ConstPolyIter operand, std::size_t size, std::uint32_t galois_elt, ModulusIter modulus,
+                ConstPolyIter operand, std::size_t size, std::uint32_t galois_elt, ConstModulusIter modulus,
                 PolyIter result) const
             {
 #ifdef SEAL_DEBUG
@@ -78,7 +77,8 @@ namespace seal
 
             void apply_galois_ntt(ConstCoeffIter operand, std::uint32_t galois_elt, CoeffIter result) const;
 
-            void apply_galois_ntt(ConstRNSIter operand, std::size_t coeff_modulus_size, std::uint32_t galois_elt, RNSIter result) const
+            void apply_galois_ntt(
+                ConstRNSIter operand, std::size_t coeff_modulus_size, std::uint32_t galois_elt, RNSIter result) const
             {
 #ifdef SEAL_DEBUG
                 if ((!operand && coeff_modulus_size > 0) || (operand.poly_modulus_degree() != coeff_count_))
@@ -95,7 +95,8 @@ namespace seal
                 });
             }
 
-            void apply_galois_ntt(ConstPolyIter operand, std::size_t size, std::uint32_t galois_elt, PolyIter result) const
+            void apply_galois_ntt(
+                ConstPolyIter operand, std::size_t size, std::uint32_t galois_elt, PolyIter result) const
             {
 #ifdef SEAL_DEBUG
                 if (!operand && size > 0)

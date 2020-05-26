@@ -55,13 +55,14 @@ namespace seal
                 tmp3 = z[0] - tmp1 * modulus_value;
 
                 // Claim: One more subtraction is enough
-                *get<1>(I) = tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+                *get<1>(I) =
+                    tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
             });
         }
 
         void multiply_poly_coeffmod(
-            ConstCoeffIter operand1, size_t operand1_coeff_count, ConstCoeffIter operand2,
-            size_t operand2_coeff_count, const Modulus &modulus, size_t result_coeff_count, CoeffIter result)
+            ConstCoeffIter operand1, size_t operand1_coeff_count, ConstCoeffIter operand2, size_t operand2_coeff_count,
+            const Modulus &modulus, size_t result_coeff_count, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && operand1_coeff_count > 0)
@@ -336,7 +337,8 @@ namespace seal
                 tmp3 = z[0] - tmp1 * modulus_value;
 
                 // Claim: One more subtraction is enough
-                *get<2>(I) = tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+                *get<2>(I) =
+                    tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
             });
         }
 

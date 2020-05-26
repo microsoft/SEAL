@@ -6,10 +6,10 @@
 #include "seal/modulus.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
+#include "seal/util/iterator.h"
 #include "seal/util/pointer.h"
 #include "seal/util/polycore.h"
 #include "seal/util/uintarithsmallmod.h"
-#include "seal/util/iterator.h"
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
@@ -42,7 +42,7 @@ namespace seal
         }
 
         inline void modulo_poly_coeffs(
-            ConstRNSIter poly, std::size_t coeff_modulus_size, ModulusIter modulus, RNSIter result)
+            ConstRNSIter poly, std::size_t coeff_modulus_size, ConstModulusIter modulus, RNSIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_modulus_size > 0)
@@ -69,7 +69,7 @@ namespace seal
         }
 
         inline void modulo_poly_coeffs(
-            ConstPolyIter poly_array, std::size_t size, ModulusIter modulus, PolyIter result)
+            ConstPolyIter poly_array, std::size_t size, ConstModulusIter modulus, PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly_array && size > 0)
@@ -120,7 +120,7 @@ namespace seal
         }
 
         inline void modulo_poly_coeffs_63(
-            ConstRNSIter poly, std::size_t coeff_modulus_size, ModulusIter modulus, RNSIter result)
+            ConstRNSIter poly, std::size_t coeff_modulus_size, ConstModulusIter modulus, RNSIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_modulus_size > 0)
@@ -147,7 +147,7 @@ namespace seal
         }
 
         inline void modulo_poly_coeffs_63(
-            ConstPolyIter poly_array, std::size_t size, ModulusIter modulus, PolyIter result)
+            ConstPolyIter poly_array, std::size_t size, ConstModulusIter modulus, PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly_array && size > 0)
@@ -205,7 +205,7 @@ namespace seal
         }
 
         inline void negate_poly_coeffmod(
-            ConstRNSIter poly, std::size_t coeff_modulus_size, ModulusIter modulus, RNSIter result)
+            ConstRNSIter poly, std::size_t coeff_modulus_size, ConstModulusIter modulus, RNSIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_modulus_size > 0)
@@ -232,7 +232,7 @@ namespace seal
         }
 
         inline void negate_poly_coeffmod(
-            ConstPolyIter poly_array, std::size_t size, ModulusIter modulus, PolyIter result)
+            ConstPolyIter poly_array, std::size_t size, ConstModulusIter modulus, PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly_array && size > 0)
@@ -259,8 +259,8 @@ namespace seal
         }
 
         inline void add_poly_coeffmod(
-            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count,
-            const Modulus &modulus, CoeffIter result)
+            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
+            CoeffIter result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && coeff_count > 0)
@@ -294,12 +294,13 @@ namespace seal
 #endif
                 std::uint64_t sum = *get<0>(I) + *get<1>(I);
                 *get<2>(I) = sum - (modulus_value &
-                                 static_cast<std::uint64_t>(-static_cast<std::int64_t>(sum >= modulus_value)));
+                                    static_cast<std::uint64_t>(-static_cast<std::int64_t>(sum >= modulus_value)));
             });
         }
 
         inline void add_poly_coeffmod(
-            ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ModulusIter modulus, RNSIter result)
+            ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ConstModulusIter modulus,
+            RNSIter result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && coeff_modulus_size > 0)
@@ -331,7 +332,7 @@ namespace seal
         }
 
         inline void add_poly_coeffmod(
-            ConstPolyIter operand1, ConstPolyIter operand2, std::size_t size, ModulusIter modulus, PolyIter result)
+            ConstPolyIter operand1, ConstPolyIter operand2, std::size_t size, ConstModulusIter modulus, PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && size > 0)
@@ -403,7 +404,7 @@ namespace seal
         }
 
         inline void sub_poly_coeffmod(
-            ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ModulusIter modulus,
+            ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ConstModulusIter modulus,
             RNSIter result)
         {
 #ifdef SEAL_DEBUG
@@ -436,7 +437,7 @@ namespace seal
         }
 
         inline void sub_poly_coeffmod(
-            ConstPolyIter operand1, ConstPolyIter operand2, std::size_t size, ModulusIter modulus, PolyIter result)
+            ConstPolyIter operand1, ConstPolyIter operand2, std::size_t size, ConstModulusIter modulus, PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && size > 0)
@@ -472,7 +473,8 @@ namespace seal
             CoeffIter result);
 
         inline void multiply_poly_scalar_coeffmod(
-            ConstRNSIter poly, std::size_t coeff_modulus_size, std::uint64_t scalar, ModulusIter modulus, RNSIter result)
+            ConstRNSIter poly, std::size_t coeff_modulus_size, std::uint64_t scalar, ConstModulusIter modulus,
+            RNSIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_modulus_size > 0)
@@ -499,7 +501,7 @@ namespace seal
         }
 
         inline void multiply_poly_scalar_coeffmod(
-            ConstPolyIter poly_array, std::size_t size, std::uint64_t scalar, ModulusIter modulus, PolyIter result)
+            ConstPolyIter poly_array, std::size_t size, std::uint64_t scalar, ConstModulusIter modulus, PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly_array && size > 0)
@@ -527,16 +529,15 @@ namespace seal
 
         void multiply_poly_coeffmod(
             ConstCoeffIter operand1, std::size_t operand1_coeff_count, ConstCoeffIter operand2,
-            std::size_t operand2_coeff_count, const Modulus &modulus, std::size_t result_coeff_count,
-            CoeffIter result);
+            std::size_t operand2_coeff_count, const Modulus &modulus, std::size_t result_coeff_count, CoeffIter result);
 
         void multiply_poly_coeffmod(
-            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count,
-            const Modulus &modulus, CoeffIter result);
+            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
+            CoeffIter result);
 
         inline void multiply_truncate_poly_coeffmod(
-            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count,
-            const Modulus &modulus, CoeffIter result)
+            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
+            CoeffIter result)
         {
             multiply_poly_coeffmod(operand1, coeff_count, operand2, coeff_count, modulus, coeff_count, result);
         }
@@ -546,19 +547,19 @@ namespace seal
             CoeffIter quotient);
 
         inline void divide_poly_coeffmod(
-            ConstCoeffIter numerator, ConstCoeffIter denominator, std::size_t coeff_count,
-            const Modulus &modulus, CoeffIter quotient, CoeffIter remainder)
+            ConstCoeffIter numerator, ConstCoeffIter denominator, std::size_t coeff_count, const Modulus &modulus,
+            CoeffIter quotient, CoeffIter remainder)
         {
             set_uint(numerator, coeff_count, remainder);
             divide_poly_coeffmod_inplace(remainder, denominator, coeff_count, modulus, quotient);
         }
 
         void dyadic_product_coeffmod(
-            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count,
-            const Modulus &modulus, CoeffIter result);
+            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
+            CoeffIter result);
 
         inline void dyadic_product_coeffmod(
-            ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ModulusIter modulus,
+            ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ConstModulusIter modulus,
             RNSIter result)
         {
 #ifdef SEAL_DEBUG
@@ -591,7 +592,7 @@ namespace seal
         }
 
         inline void dyadic_product_coeffmod(
-            ConstPolyIter operand1, ConstPolyIter operand2, std::size_t size, ModulusIter modulus, PolyIter result)
+            ConstPolyIter operand1, ConstPolyIter operand2, std::size_t size, ConstModulusIter modulus, PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!operand1 && size > 0)
@@ -622,19 +623,18 @@ namespace seal
             });
         }
 
-        std::uint64_t poly_infty_norm_coeffmod(
-            ConstCoeffIter operand, std::size_t coeff_count, const Modulus &modulus);
+        std::uint64_t poly_infty_norm_coeffmod(ConstCoeffIter operand, std::size_t coeff_count, const Modulus &modulus);
 
         bool try_invert_poly_coeffmod(
-            ConstCoeffIter operand, ConstCoeffIter poly_modulus, std::size_t coeff_count,
-            const Modulus &modulus, CoeffIter result, MemoryPool &pool);
+            ConstCoeffIter operand, ConstCoeffIter poly_modulus, std::size_t coeff_count, const Modulus &modulus,
+            CoeffIter result, MemoryPool &pool);
 
         void negacyclic_shift_poly_coeffmod(
-            ConstCoeffIter poly, std::size_t coeff_count, std::size_t shift, const Modulus &modulus,
-            CoeffIter result);
+            ConstCoeffIter poly, std::size_t coeff_count, std::size_t shift, const Modulus &modulus, CoeffIter result);
 
         inline void negacyclic_shift_poly_coeffmod(
-            ConstRNSIter poly, std::size_t coeff_modulus_size, std::size_t shift, ModulusIter modulus, RNSIter result)
+            ConstRNSIter poly, std::size_t coeff_modulus_size, std::size_t shift, ConstModulusIter modulus,
+            RNSIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_modulus_size > 0)
@@ -661,7 +661,7 @@ namespace seal
         }
 
         inline void negacyclic_shift_poly_coeffmod(
-            ConstPolyIter poly_array, std::size_t size, std::size_t shift, ModulusIter modulus, PolyIter result)
+            ConstPolyIter poly_array, std::size_t size, std::size_t shift, ConstModulusIter modulus, PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly_array && size > 0)
@@ -712,7 +712,7 @@ namespace seal
 
         inline void negacyclic_multiply_poly_mono_coeffmod(
             ConstRNSIter poly, std::size_t coeff_modulus_size, std::uint64_t mono_coeff, std::size_t mono_exponent,
-            ModulusIter modulus, RNSIter result, MemoryPool &pool)
+            ConstModulusIter modulus, RNSIter result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_modulus_size > 0)
@@ -740,7 +740,8 @@ namespace seal
         }
 
         inline void negacyclic_multiply_poly_mono_coeffmod(
-            ConstPolyIter poly_array, std::size_t size, std::uint64_t mono_coeff, std::size_t mono_exponent, ModulusIter modulus, PolyIter result, MemoryPool &pool)
+            ConstPolyIter poly_array, std::size_t size, std::uint64_t mono_coeff, std::size_t mono_exponent,
+            ConstModulusIter modulus, PolyIter result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (!poly_array && size > 0)
@@ -762,13 +763,14 @@ namespace seal
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
             SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
-                negacyclic_multiply_poly_mono_coeffmod(get<0>(I), coeff_modulus_size, mono_coeff, mono_exponent, modulus, get<1>(I), pool);
+                negacyclic_multiply_poly_mono_coeffmod(
+                    get<0>(I), coeff_modulus_size, mono_coeff, mono_exponent, modulus, get<1>(I), pool);
             });
         }
 
         inline void negacyclic_multiply_poly_mono_coeffmod(
             ConstRNSIter poly, std::size_t coeff_modulus_size, ConstCoeffIter mono_coeff, std::size_t mono_exponent,
-            ModulusIter modulus, RNSIter result, MemoryPool &pool)
+            ConstModulusIter modulus, RNSIter result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_modulus_size > 0)
@@ -800,7 +802,8 @@ namespace seal
         }
 
         inline void negacyclic_multiply_poly_mono_coeffmod(
-            ConstPolyIter poly_array, std::size_t size, ConstCoeffIter mono_coeff, std::size_t mono_exponent, ModulusIter modulus, PolyIter result, MemoryPool &pool)
+            ConstPolyIter poly_array, std::size_t size, ConstCoeffIter mono_coeff, std::size_t mono_exponent,
+            ConstModulusIter modulus, PolyIter result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (!poly_array && size > 0)
@@ -826,7 +829,8 @@ namespace seal
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
             SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
-                negacyclic_multiply_poly_mono_coeffmod(get<0>(I), coeff_modulus_size, mono_coeff, mono_exponent, modulus, get<1>(I), pool);
+                negacyclic_multiply_poly_mono_coeffmod(
+                    get<0>(I), coeff_modulus_size, mono_coeff, mono_exponent, modulus, get<1>(I), pool);
             });
         }
     } // namespace util
