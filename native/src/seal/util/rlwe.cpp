@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/ciphertext.h"
 #include "seal/randomgen.h"
 #include "seal/randomtostd.h"
-#include "seal/ciphertext.h"
 #include "seal/util/clipnormal.h"
 #include "seal/util/common.h"
 #include "seal/util/globals.h"
