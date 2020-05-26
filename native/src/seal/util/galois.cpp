@@ -207,10 +207,10 @@ namespace seal
             }
 #endif
             generate_table_ntt(galois_elt, permutation_tables_[GetIndexFromElt(galois_elt)]);
-            auto table = make_iter(permutation_tables_[GetIndexFromElt(galois_elt)]);
+            auto table = iter(permutation_tables_[GetIndexFromElt(galois_elt)]);
 
             // Perform permutation.
-            SEAL_ITERATE(make_iter(table, result), coeff_count_, [&](auto I) { *get<1>(I) = *operand[*get<0>(I)]; });
+            SEAL_ITERATE(iter(table, result), coeff_count_, [&](auto I) { *get<1>(I) = *operand[*get<0>(I)]; });
         }
     } // namespace util
 } // namespace seal

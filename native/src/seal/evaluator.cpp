@@ -219,8 +219,7 @@ namespace seal
         if (encrypted1_size < encrypted2_size)
         {
             negate_poly_coeffmod(
-                make_iter(encrypted2) + min_count, encrypted2_size - min_count, coeff_modulus,
-                make_iter(encrypted1) + min_count);
+                iter(encrypted2) + min_count, encrypted2_size - min_count, coeff_modulus, iter(encrypted1) + min_count);
         }
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
@@ -300,12 +299,12 @@ namespace seal
         }
 
         // Set up iterators for bases
-        auto base_q = make_iter(parms.coeff_modulus());
-        auto base_Bsk = make_iter(rns_tool->base_Bsk()->base());
+        auto base_q = iter(parms.coeff_modulus());
+        auto base_Bsk = iter(rns_tool->base_Bsk()->base());
 
         // Set up iterators for NTT tables
-        auto base_q_ntt_tables = make_iter(context_data.small_ntt_tables());
-        auto base_Bsk_ntt_tables = make_iter(rns_tool->base_Bsk_ntt_tables());
+        auto base_q_ntt_tables = iter(context_data.small_ntt_tables());
+        auto base_Bsk_ntt_tables = iter(rns_tool->base_Bsk_ntt_tables());
 
         // Microsoft SEAL uses BEHZ-style RNS multiplication. This process is somewhat complex and consists of the
         // following steps:
@@ -358,15 +357,13 @@ namespace seal
         SEAL_ALLOCATE_GET_POLY_ITER(encrypted1_Bsk, encrypted1_size, coeff_count, base_Bsk_size, pool);
 
         // Perform BEHZ steps (1)-(3) for encrypted1
-        SEAL_ITERATE(
-            make_iter(encrypted1, encrypted1_q, encrypted1_Bsk), encrypted1_size, behz_extend_base_convert_to_ntt);
+        SEAL_ITERATE(iter(encrypted1, encrypted1_q, encrypted1_Bsk), encrypted1_size, behz_extend_base_convert_to_ntt);
 
         // Repeat for encrypted2
         SEAL_ALLOCATE_GET_POLY_ITER(encrypted2_q, encrypted2_size, coeff_count, base_q_size, pool);
         SEAL_ALLOCATE_GET_POLY_ITER(encrypted2_Bsk, encrypted2_size, coeff_count, base_Bsk_size, pool);
 
-        SEAL_ITERATE(
-            make_iter(encrypted2, encrypted2_q, encrypted2_Bsk), encrypted2_size, behz_extend_base_convert_to_ntt);
+        SEAL_ITERATE(iter(encrypted2, encrypted2_q, encrypted2_Bsk), encrypted2_size, behz_extend_base_convert_to_ntt);
 
         // Allocate temporary space for the output of step (4)
         // We allocate space separately for the base q and the base Bsk components
@@ -374,15 +371,14 @@ namespace seal
         SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp_dest_Bsk, dest_size, coeff_count, base_Bsk_size, pool);
 
         // Perform BEHZ step (4): dyadic multiplication on arbitrary size ciphertexts
-        for (size_t secret_power_index = 0; secret_power_index < dest_size; secret_power_index++)
-        {
+        SEAL_ITERATE(iter(size_t(0)), dest_size, [&](auto I) {
             // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
             // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
             // the relevant terms are obtained as follows.
-            size_t curr_encrypted1_last = min(secret_power_index, encrypted1_size - 1);
-            size_t curr_encrypted2_first = min(secret_power_index, encrypted2_size - 1);
-            size_t curr_encrypted1_first = secret_power_index - curr_encrypted2_first;
-            // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
+            size_t curr_encrypted1_last = min<size_t>(I, encrypted1_size - 1);
+            size_t curr_encrypted2_first = min<size_t>(I, encrypted2_size - 1);
+            size_t curr_encrypted1_first = I - curr_encrypted2_first;
+            // size_t curr_encrypted2_last = I - curr_encrypted1_last;
 
             // The total number of dyadic products is now easy to compute
             size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
@@ -405,14 +401,13 @@ namespace seal
                 auto shifted_reversed_in2_iter = reverse_iter(in2_iter + curr_encrypted2_first);
 
                 // Create a shifted iterator for the output
-                auto shifted_out_iter = out_iter + secret_power_index;
+                auto shifted_out_iter = out_iter[I];
 
-                SEAL_ITERATE(make_iter(shifted_in1_iter, shifted_reversed_in2_iter), steps, [&](auto I) {
-                    // Extra care needed here: shifted_out_iter must be dereferenced once to produce an RNSIter.
-                    SEAL_ITERATE(make_iter(I, base_iter, *shifted_out_iter), base_size, [&](auto J) {
+                SEAL_ITERATE(iter(shifted_in1_iter, shifted_reversed_in2_iter), steps, [&](auto J) {
+                    SEAL_ITERATE(iter(J, base_iter, shifted_out_iter), base_size, [&](auto K) {
                         SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count, pool);
-                        dyadic_product_coeffmod(get<0, 0>(J), get<0, 1>(J), coeff_count, *get<1>(J), temp);
-                        add_poly_coeffmod(temp, get<2>(J), coeff_count, *get<1>(J), get<2>(J));
+                        dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, *get<1>(K), temp);
+                        add_poly_coeffmod(temp, get<2>(K), coeff_count, *get<1>(K), get<2>(K));
                     });
                 });
             };
@@ -420,14 +415,14 @@ namespace seal
             // Perform the BEHZ ciphertext product both for base q and base Bsk
             behz_ciphertext_product(encrypted1_q, encrypted2_q, base_q, base_q_size, temp_dest_q);
             behz_ciphertext_product(encrypted1_Bsk, encrypted2_Bsk, base_Bsk, base_Bsk_size, temp_dest_Bsk);
-        }
+        });
 
         // Perform BEHZ step (5): transform data from NTT form
         inverse_ntt_negacyclic_harvey(temp_dest_q, dest_size, base_q_ntt_tables);
         inverse_ntt_negacyclic_harvey(temp_dest_Bsk, dest_size, base_Bsk_ntt_tables);
 
         // Perform BEHZ steps (6)-(8)
-        SEAL_ITERATE(make_iter(temp_dest_q, temp_dest_Bsk, encrypted1), dest_size, [&](auto I) {
+        SEAL_ITERATE(iter(temp_dest_q, temp_dest_Bsk, encrypted1), dest_size, [&](auto I) {
             // Bring together the base q and base Bsk components into a single allocation
             SEAL_ALLOCATE_GET_RNS_ITER(temp_q_Bsk, coeff_count, base_q_size + base_Bsk_size, pool);
 
@@ -481,26 +476,25 @@ namespace seal
         }
 
         // Set up iterator for the base
-        auto coeff_modulus = make_iter(parms.coeff_modulus());
+        auto coeff_modulus = iter(parms.coeff_modulus());
 
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
         // Set up iterators for input ciphertexts
-        auto encrypted1_iter = make_iter(encrypted1);
-        auto encrypted2_iter = make_iter(encrypted2);
+        auto encrypted1_iter = iter(encrypted1);
+        auto encrypted2_iter = iter(encrypted2);
 
         // Allocate temporary space for the result
         SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
 
-        for (size_t secret_power_index = 0; secret_power_index < dest_size; secret_power_index++)
-        {
+        SEAL_ITERATE(iter(size_t(0)), dest_size, [&](auto I) {
             // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
             // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
             // the relevant terms are obtained as follows.
-            size_t curr_encrypted1_last = min(secret_power_index, encrypted1_size - 1);
-            size_t curr_encrypted2_first = min(secret_power_index, encrypted2_size - 1);
-            size_t curr_encrypted1_first = secret_power_index - curr_encrypted2_first;
+            size_t curr_encrypted1_last = min<size_t>(I, encrypted1_size - 1);
+            size_t curr_encrypted2_first = min<size_t>(I, encrypted2_size - 1);
+            size_t curr_encrypted1_first = I - curr_encrypted2_first;
             // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
 
             // The total number of dyadic products is now easy to compute
@@ -512,16 +506,16 @@ namespace seal
             // Create a shifted reverse iterator for the second input
             auto shifted_reversed_encrypted2_iter = reverse_iter(encrypted2_iter + curr_encrypted2_first);
 
-            SEAL_ITERATE(make_iter(shifted_encrypted1_iter, shifted_reversed_encrypted2_iter), steps, [&](auto I) {
+            SEAL_ITERATE(iter(shifted_encrypted1_iter, shifted_reversed_encrypted2_iter), steps, [&](auto J) {
                 // Extra care needed here:
                 // temp_iter must be dereferenced once to produce an appropriate RNSIter
-                SEAL_ITERATE(make_iter(I, coeff_modulus, temp[secret_power_index]), coeff_modulus_size, [&](auto J) {
+                SEAL_ITERATE(iter(J, coeff_modulus, temp[I]), coeff_modulus_size, [&](auto K) {
                     SEAL_ALLOCATE_GET_COEFF_ITER(prod, coeff_count, pool);
-                    dyadic_product_coeffmod(get<0, 0>(J), get<0, 1>(J), coeff_count, *get<1>(J), prod);
-                    add_poly_coeffmod(prod, get<2>(J), coeff_count, *get<1>(J), get<2>(J));
+                    dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, *get<1>(K), prod);
+                    add_poly_coeffmod(prod, get<2>(K), coeff_count, *get<1>(K), get<2>(K));
                 });
             });
-        }
+        });
 
         // Set the final result
         set_poly_array(temp, dest_size, coeff_count, coeff_modulus_size, encrypted1.data());
@@ -597,12 +591,12 @@ namespace seal
         }
 
         // Set up iterators for bases
-        auto base_q = make_iter(parms.coeff_modulus());
-        auto base_Bsk = make_iter(rns_tool->base_Bsk()->base());
+        auto base_q = iter(parms.coeff_modulus());
+        auto base_Bsk = iter(rns_tool->base_Bsk()->base());
 
         // Set up iterators for NTT tables
-        auto base_q_ntt_tables = make_iter(context_data.small_ntt_tables());
-        auto base_Bsk_ntt_tables = make_iter(rns_tool->base_Bsk_ntt_tables());
+        auto base_q_ntt_tables = iter(context_data.small_ntt_tables());
+        auto base_Bsk_ntt_tables = iter(rns_tool->base_Bsk_ntt_tables());
 
         // Microsoft SEAL uses BEHZ-style RNS multiplication. For details, see Evaluator::bfv_multiply. This function
         // uses additionally Karatsuba multiplication to reduce the complexity of squaring a size-2 ciphertext, but the
@@ -646,7 +640,7 @@ namespace seal
         SEAL_ALLOCATE_GET_POLY_ITER(encrypted_Bsk, encrypted_size, coeff_count, base_Bsk_size, pool);
 
         // Perform BEHZ steps (1)-(3)
-        SEAL_ITERATE(make_iter(encrypted, encrypted_q, encrypted_Bsk), encrypted_size, behz_extend_base_convert_to_ntt);
+        SEAL_ITERATE(iter(encrypted, encrypted_q, encrypted_Bsk), encrypted_size, behz_extend_base_convert_to_ntt);
 
         // Allocate temporary space for the output of step (4)
         // We allocate space separately for the base q and the base Bsk components
@@ -684,7 +678,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(temp_dest_Bsk, dest_size, base_Bsk_ntt_tables);
 
         // Perform BEHZ steps (6)-(8)
-        SEAL_ITERATE(make_iter(temp_dest_q, temp_dest_Bsk, encrypted), dest_size, [&](auto I) {
+        SEAL_ITERATE(iter(temp_dest_q, temp_dest_Bsk, encrypted), dest_size, [&](auto I) {
             // Bring together the base q and base Bsk components into a single allocation
             SEAL_ALLOCATE_GET_RNS_ITER(temp_q_Bsk, coeff_count, base_q_size + base_Bsk_size, pool);
 
@@ -744,13 +738,13 @@ namespace seal
         }
 
         // Set up iterator for the base
-        auto coeff_modulus = make_iter(parms.coeff_modulus());
+        auto coeff_modulus = iter(parms.coeff_modulus());
 
         // Prepare destination
         encrypted.resize(context_, context_data.parms_id(), dest_size);
 
         // Set up iterators for input ciphertext
-        auto encrypted_iter = make_iter(encrypted);
+        auto encrypted_iter = iter(encrypted);
 
         // Allocate temporary space for the result
         SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
@@ -808,16 +802,14 @@ namespace seal
         size_t relins_needed = encrypted_size - destination_size;
 
         // Iterator pointing to the last component of encrypted
-        auto encrypted_iter = make_iter(encrypted);
+        auto encrypted_iter = iter(encrypted);
         encrypted_iter += encrypted_size - 1;
 
-        for (size_t i = 0; i < relins_needed; i++)
-        {
+        SEAL_ITERATE(iter(size_t(0)), relins_needed, [&](auto I) {
             switch_key_inplace(
                 encrypted, *encrypted_iter, static_cast<const KSwitchKeys &>(relin_keys),
-                RelinKeys::get_index(encrypted_size - 1), pool);
-            encrypted_size--;
-        }
+                RelinKeys::get_index(encrypted_size - 1 - I), pool);
+        });
 
         // Put the output of final relinearization into destination.
         // Prepare destination only at this point because we are resizing down
@@ -865,13 +857,13 @@ namespace seal
         switch (next_parms.scheme())
         {
         case scheme_type::BFV:
-            SEAL_ITERATE(make_iter(encrypted_copy), encrypted_size, [&](auto I) {
+            SEAL_ITERATE(iter(encrypted_copy), encrypted_size, [&](auto I) {
                 rns_tool->divide_and_round_q_last_inplace(I, pool);
             });
             break;
 
         case scheme_type::CKKS:
-            SEAL_ITERATE(make_iter(encrypted_copy), encrypted_size, [&](auto I) {
+            SEAL_ITERATE(iter(encrypted_copy), encrypted_size, [&](auto I) {
                 rns_tool->divide_and_round_q_last_ntt_inplace(I, context_data.small_ntt_tables(), pool);
             });
             break;
@@ -882,7 +874,7 @@ namespace seal
 
         // Copy result to destination
         destination.resize(context_, next_context_data.parms_id(), encrypted_size);
-        SEAL_ITERATE(make_iter(encrypted_copy, destination), encrypted_size, [&](auto I) {
+        SEAL_ITERATE(iter(encrypted_copy, destination), encrypted_size, [&](auto I) {
             set_poly(get<0>(I), coeff_count, next_coeff_modulus_size, get<1>(I));
         });
 
@@ -928,7 +920,7 @@ namespace seal
         }
 
         auto drop_moduli_and_copy = [&](auto in_iter, auto out_iter) {
-            SEAL_ITERATE(make_iter(in_iter, out_iter), encrypted_size, [&](auto I) {
+            SEAL_ITERATE(iter(in_iter, out_iter), encrypted_size, [&](auto I) {
                 SEAL_ITERATE(I, next_coeff_modulus_size, [&](auto J) { set_uint(get<0>(J), coeff_count, get<1>(J)); });
             });
         };
@@ -1564,7 +1556,7 @@ namespace seal
             // Slight semantic misuse of RNSIter here, but this works well
             RNSIter temp_iter(temp.get(), coeff_modulus_size);
 
-            SEAL_ITERATE(make_iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
+            SEAL_ITERATE(iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
                 auto plain_value = *get<0>(I);
                 if (plain_value >= plain_upper_half_threshold)
                 {
@@ -1585,8 +1577,8 @@ namespace seal
             // Note that in this case plain_upper_half_increment holds its value in RNS form modulo the coeff_modulus
             // primes.
             RNSIter temp_iter(temp.get(), coeff_count);
-            SEAL_ITERATE(make_iter(temp_iter, plain_upper_half_increment), coeff_modulus_size, [&](auto I) {
-                SEAL_ITERATE(make_iter(get<0>(I), plain.data()), plain_coeff_count, [&](auto J) {
+            SEAL_ITERATE(iter(temp_iter, plain_upper_half_increment), coeff_modulus_size, [&](auto I) {
+                SEAL_ITERATE(iter(get<0>(I), plain.data()), plain_coeff_count, [&](auto J) {
                     *get<0>(J) = *get<1>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
                                                                 *get<1>(J) >= plain_upper_half_threshold)));
                 });
@@ -1597,8 +1589,8 @@ namespace seal
         RNSIter temp_iter(temp.get(), coeff_count);
         ntt_negacyclic_harvey(temp_iter, coeff_modulus_size, ntt_tables);
 
-        SEAL_ITERATE(make_iter(encrypted), encrypted_size, [&](auto I) {
-            SEAL_ITERATE(make_iter(I, temp_iter, coeff_modulus, ntt_tables), coeff_modulus_size, [&](auto J) {
+        SEAL_ITERATE(iter(encrypted), encrypted_size, [&](auto I) {
+            SEAL_ITERATE(iter(I, temp_iter, coeff_modulus, ntt_tables), coeff_modulus_size, [&](auto J) {
                 // Lazy reduction
                 ntt_negacyclic_harvey_lazy(get<0>(J), *get<3>(J));
                 dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J));
@@ -1642,7 +1634,7 @@ namespace seal
         }
 
         ConstRNSIter plain_ntt_iter(plain_ntt.data(), coeff_count);
-        SEAL_ITERATE(make_iter(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
+        SEAL_ITERATE(iter(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
             dyadic_product_coeffmod(I, plain_ntt_iter, coeff_modulus_size, coeff_modulus, I);
         });
 
@@ -1703,7 +1695,7 @@ namespace seal
             // Slight semantic misuse of RNSIter here, but this works well
             RNSIter temp_iter(temp.get(), coeff_modulus_size);
 
-            SEAL_ITERATE(make_iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
+            SEAL_ITERATE(iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
                 auto plain_value = *get<0>(I);
                 if (plain_value >= plain_upper_half_threshold)
                 {
@@ -1730,11 +1722,11 @@ namespace seal
 
             // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
             // the plain_upper_half_increment values.
-            auto helper_iter = reverse_iter(make_iter(plain_iter, plain_upper_half_increment));
+            auto helper_iter = reverse_iter(plain_iter, plain_upper_half_increment);
             advance(helper_iter, -safe_cast<ptrdiff_t>(coeff_modulus_size - 1));
 
             SEAL_ITERATE(helper_iter, coeff_modulus_size, [&](auto I) {
-                SEAL_ITERATE(make_iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
+                SEAL_ITERATE(iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
                     *get<1>(J) = *get<0>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
                                                                 *get<0>(J) >= plain_upper_half_threshold)));
                 });
@@ -1901,7 +1893,7 @@ namespace seal
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
 
             // First transform encrypted.data(0)
-            auto encrypted_iter = make_iter(encrypted);
+            auto encrypted_iter = iter(encrypted);
             galois_tool->apply_galois(encrypted_iter[0], coeff_modulus_size, galois_elt, coeff_modulus, temp);
 
             // Copy result to encrypted.data(0)
@@ -1915,7 +1907,7 @@ namespace seal
             // !!! DO NOT CHANGE EXECUTION ORDER!!!
 
             // First transform encrypted.data(0)
-            auto encrypted_iter = make_iter(encrypted);
+            auto encrypted_iter = iter(encrypted);
             galois_tool->apply_galois_ntt(encrypted_iter[0], coeff_modulus_size, galois_elt, temp);
 
             // Copy result to encrypted.data(0)
@@ -2093,9 +2085,8 @@ namespace seal
         // Temporary result
         auto t_poly_prod(allocate_zero_poly_array(key_component_count, coeff_count, rns_modulus_size, pool));
 
-        for (size_t j = 0; j < rns_modulus_size; j++)
-        {
-            size_t key_index = (j == decomp_modulus_size ? key_modulus_size - 1 : j);
+        SEAL_ITERATE(iter(size_t(0)), rns_modulus_size, [&](auto I) {
+            size_t key_index = (I == decomp_modulus_size ? key_modulus_size - 1 : I.value());
 
             // Product of two numbers is up to 60 + 60 = 120 bits, so we can sum up to 256 of them without reduction.
             size_t lazy_reduction_summand_bound = size_t(SEAL_MULTIPLY_ACCUMULATE_USER_MOD_MAX);
@@ -2108,28 +2099,27 @@ namespace seal
             PolyIter accumulator_iter(t_poly_lazy.get(), 2, coeff_count);
 
             // Multiply with keys and perform lazy reduction on product's coefficients
-            for (size_t i = 0; i < decomp_modulus_size; i++)
-            {
+            SEAL_ITERATE(iter(size_t(0)), decomp_modulus_size, [&](auto J) {
                 SEAL_ALLOCATE_GET_COEFF_ITER(t_ntt, coeff_count, pool);
                 ConstCoeffIter t_operand;
 
                 // RNS-NTT form exists in input
-                if ((scheme == scheme_type::CKKS) && (i == j))
+                if ((scheme == scheme_type::CKKS) && (I == J))
                 {
-                    t_operand = target_iter[i];
+                    t_operand = target_iter[J];
                 }
                 // Perform RNS-NTT conversion
                 else
                 {
                     // No need to perform RNS conversion (modular reduction)
-                    if (key_modulus[i].value() <= key_modulus[key_index].value())
+                    if (key_modulus[J] <= key_modulus[key_index])
                     {
-                        set_uint(t_target[i], coeff_count, t_ntt);
+                        set_uint(t_target[J], coeff_count, t_ntt);
                     }
                     // Perform RNS conversion (modular reduction)
                     else
                     {
-                        modulo_poly_coeffs_63(t_target[i], coeff_count, key_modulus[key_index], t_ntt);
+                        modulo_poly_coeffs_63(t_target[J], coeff_count, key_modulus[key_index], t_ntt);
                     }
                     // NTT conversion lazy outputs in [0, 4q)
                     ntt_negacyclic_harvey_lazy(t_ntt, key_ntt_tables[key_index]);
@@ -2137,28 +2127,28 @@ namespace seal
                 }
 
                 // Multiply with keys and modular accumulate products in a lazy fashion
-                SEAL_ITERATE(make_iter(key_vector[i].data(), accumulator_iter), key_component_count, [&](auto I) {
+                SEAL_ITERATE(iter(key_vector[J].data(), accumulator_iter), key_component_count, [&](auto K) {
                     if (!lazy_reduction_counter)
                     {
-                        SEAL_ITERATE(make_iter(t_operand, get<0>(I)[key_index], get<1>(I)), coeff_count, [&](auto J) {
+                        SEAL_ITERATE(iter(t_operand, get<0>(K)[key_index], get<1>(K)), coeff_count, [&](auto L) {
                             unsigned long long qword[2]{ 0, 0 };
-                            multiply_uint64(*get<0>(J), *get<1>(J), qword);
+                            multiply_uint64(*get<0>(L), *get<1>(L), qword);
 
                             // Accumulate product of t_operand and t_key_acc to t_poly_lazy and reduce
-                            add_uint128(qword, *get<2>(J), qword);
-                            *get<2>(J)[0] = barrett_reduce_128(qword, key_modulus[key_index]);
-                            *get<2>(J)[1] = 0;
+                            add_uint128(qword, *get<2>(L), qword);
+                            *get<2>(L)[0] = barrett_reduce_128(qword, key_modulus[key_index]);
+                            *get<2>(L)[1] = 0;
                         });
                     }
                     else
                     {
                         // Same as above but no reduction
-                        SEAL_ITERATE(make_iter(t_operand, get<0>(I)[key_index], get<1>(I)), coeff_count, [&](auto J) {
+                        SEAL_ITERATE(iter(t_operand, get<0>(K)[key_index], get<1>(K)), coeff_count, [&](auto L) {
                             unsigned long long qword[2]{ 0, 0 };
-                            multiply_uint64(*get<0>(J), *get<1>(J), qword);
-                            add_uint128(qword, *get<2>(J), qword);
-                            *get<2>(J)[0] = qword[0];
-                            *get<2>(J)[1] = qword[1];
+                            multiply_uint64(*get<0>(L), *get<1>(L), qword);
+                            add_uint128(qword, *get<2>(L), qword);
+                            *get<2>(L)[0] = qword[0];
+                            *get<2>(L)[1] = qword[1];
                         });
                     }
                 });
@@ -2167,33 +2157,33 @@ namespace seal
                 {
                     lazy_reduction_counter = lazy_reduction_summand_bound;
                 }
-            }
+            });
 
             // PolyIter pointing to the destination t_poly_prod, shifted to the appropriate modulus
-            PolyIter t_poly_prod_iter(t_poly_prod.get() + (j * coeff_count), coeff_count, rns_modulus_size);
+            PolyIter t_poly_prod_iter(t_poly_prod.get() + (I * coeff_count), coeff_count, rns_modulus_size);
 
             // Final modular reduction
-            SEAL_ITERATE(make_iter(accumulator_iter, t_poly_prod_iter), key_component_count, [&](auto I) {
+            SEAL_ITERATE(iter(accumulator_iter, t_poly_prod_iter), key_component_count, [&](auto K) {
                 if (lazy_reduction_counter == lazy_reduction_summand_bound)
                 {
-                    SEAL_ITERATE(make_iter(get<0>(I), *get<1>(I)), coeff_count, [&](auto J) {
-                        *get<1>(J) = static_cast<uint64_t>(**get<0>(J));
+                    SEAL_ITERATE(iter(get<0>(K), *get<1>(K)), coeff_count, [&](auto L) {
+                        *get<1>(L) = static_cast<uint64_t>(**get<0>(L));
                     });
                 }
                 else
                 {
                     // Same as above except need to still do reduction
-                    SEAL_ITERATE(make_iter(get<0>(I), *get<1>(I)), coeff_count, [&](auto J) {
-                        *get<1>(J) = barrett_reduce_128(*get<0>(J), key_modulus[key_index]);
+                    SEAL_ITERATE(iter(get<0>(K), *get<1>(K)), coeff_count, [&](auto L) {
+                        *get<1>(L) = barrett_reduce_128(*get<0>(L), key_modulus[key_index]);
                     });
                 }
             });
-        }
+        });
         // Accumulated products are now stored in t_poly_prod
 
         // Perform modulus switching with scaling
         PolyIter t_poly_prod_iter(t_poly_prod.get(), coeff_count, rns_modulus_size);
-        SEAL_ITERATE(make_iter(encrypted, t_poly_prod_iter), key_component_count, [&](auto I) {
+        SEAL_ITERATE(iter(encrypted, t_poly_prod_iter), key_component_count, [&](auto I) {
             // Lazy reduction; this needs to be then reduced mod qi
             CoeffIter t_last(get<1>(I)[decomp_modulus_size]);
             inverse_ntt_negacyclic_harvey_lazy(t_last, key_ntt_tables[key_modulus_size - 1]);
@@ -2204,37 +2194,36 @@ namespace seal
                 *J = barrett_reduce_63(*J + half, key_modulus[key_modulus_size - 1]);
             });
 
-            SEAL_ITERATE(
-                make_iter(I, key_modulus, key_ntt_tables, modswitch_factors), decomp_modulus_size, [&](auto J) {
-                    SEAL_ASSERT_TYPE((get<0, 0>(J)), CoeffIter, "encrypted");
-                    SEAL_ASSERT_TYPE((get<0, 1>(J)), CoeffIter, "t_poly_prod");
-                    SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "key_modulus");
-                    SEAL_ASSERT_TYPE(get<2>(J), NTTTables *, "key_ntt_tables");
-                    SEAL_ASSERT_TYPE(get<3>(J), uint64_t *, "modswitch_factors");
+            SEAL_ITERATE(iter(I, key_modulus, key_ntt_tables, modswitch_factors), decomp_modulus_size, [&](auto J) {
+                SEAL_ASSERT_TYPE((get<0, 0>(J)), CoeffIter, "encrypted");
+                SEAL_ASSERT_TYPE((get<0, 1>(J)), CoeffIter, "t_poly_prod");
+                SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "key_modulus");
+                SEAL_ASSERT_TYPE(get<2>(J), NTTTables *, "key_ntt_tables");
+                SEAL_ASSERT_TYPE(get<3>(J), uint64_t *, "modswitch_factors");
 
-                    SEAL_ALLOCATE_GET_COEFF_ITER(t_ntt, coeff_count, pool);
+                SEAL_ALLOCATE_GET_COEFF_ITER(t_ntt, coeff_count, pool);
 
-                    // (ct mod 4qk) mod qi
-                    modulo_poly_coeffs_63(t_last, coeff_count, *get<1>(J), t_ntt);
-                    uint64_t fix = barrett_reduce_63(half, *get<1>(J));
+                // (ct mod 4qk) mod qi
+                modulo_poly_coeffs_63(t_last, coeff_count, *get<1>(J), t_ntt);
+                uint64_t fix = barrett_reduce_63(half, *get<1>(J));
 
-                    SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) { *K = sub_uint64_mod(*K, fix, *get<1>(J)); });
+                SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) { *K = sub_uint64_mod(*K, fix, *get<1>(J)); });
 
-                    if (scheme == scheme_type::CKKS)
-                    {
-                        ntt_negacyclic_harvey(t_ntt, *get<2>(J));
-                    }
-                    else if (scheme == scheme_type::BFV)
-                    {
-                        inverse_ntt_negacyclic_harvey(get<0, 1>(J), *get<2>(J));
-                    }
+                if (scheme == scheme_type::CKKS)
+                {
+                    ntt_negacyclic_harvey(t_ntt, *get<2>(J));
+                }
+                else if (scheme == scheme_type::BFV)
+                {
+                    inverse_ntt_negacyclic_harvey(get<0, 1>(J), *get<2>(J));
+                }
 
-                    // ((ct mod qi) - (ct mod qk)) mod qi
-                    sub_poly_coeffmod(get<0, 1>(J), t_ntt, coeff_count, *get<1>(J), get<0, 1>(J));
-                    // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                    multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, *get<3>(J), *get<1>(J), get<0, 1>(J));
-                    add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, *get<1>(J), get<0, 0>(J));
-                });
+                // ((ct mod qi) - (ct mod qk)) mod qi
+                sub_poly_coeffmod(get<0, 1>(J), t_ntt, coeff_count, *get<1>(J), get<0, 1>(J));
+                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
+                multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, *get<3>(J), *get<1>(J), get<0, 1>(J));
+                add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, *get<1>(J), get<0, 0>(J));
+            });
         });
     }
 } // namespace seal

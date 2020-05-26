@@ -63,7 +63,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
                 modulo_poly_coeffs(get<0>(I), poly_modulus_degree, *get<1>(I), get<2>(I));
             });
         }
@@ -90,7 +90,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
                 modulo_poly_coeffs(get<0>(I), coeff_modulus_size, modulus, get<1>(I));
             });
         }
@@ -141,7 +141,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
                 modulo_poly_coeffs_63(get<0>(I), poly_modulus_degree, *get<1>(I), get<2>(I));
             });
         }
@@ -168,7 +168,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
                 modulo_poly_coeffs_63(get<0>(I), coeff_modulus_size, modulus, get<1>(I));
             });
         }
@@ -191,7 +191,7 @@ namespace seal
             }
 #endif
             const uint64_t modulus_value = modulus.value();
-            SEAL_ITERATE(make_iter(poly, result), coeff_count, [&](auto I) {
+            SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 auto coeff = *get<0>(I);
 #ifdef SEAL_DEBUG
                 if (coeff >= modulus_value)
@@ -226,7 +226,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
                 negate_poly_coeffmod(get<0>(I), poly_modulus_degree, *get<1>(I), get<2>(I));
             });
         }
@@ -253,7 +253,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
                 negate_poly_coeffmod(get<0>(I), coeff_modulus_size, modulus, get<1>(I));
             });
         }
@@ -281,7 +281,7 @@ namespace seal
             }
 #endif
             const uint64_t modulus_value = modulus.value();
-            SEAL_ITERATE(make_iter(operand1, operand2, result), coeff_count, [&](auto I) {
+            SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
 #ifdef SEAL_DEBUG
                 if (*get<0>(I) >= modulus_value)
                 {
@@ -326,7 +326,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(operand1, operand2, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(operand1, operand2, modulus, result), coeff_modulus_size, [&](auto I) {
                 add_poly_coeffmod(get<0>(I), get<1>(I), poly_modulus_degree, *get<2>(I), get<3>(I));
             });
         }
@@ -358,7 +358,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(operand1, operand2, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(operand1, operand2, result), size, [&](auto I) {
                 add_poly_coeffmod(get<0>(I), get<1>(I), coeff_modulus_size, modulus, get<2>(I));
             });
         }
@@ -386,7 +386,7 @@ namespace seal
             }
 #endif
             const uint64_t modulus_value = modulus.value();
-            SEAL_ITERATE(make_iter(operand1, operand2, result), coeff_count, [&](auto I) {
+            SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
 #ifdef SEAL_DEBUG
                 if (*get<0>(I) >= modulus_value)
                 {
@@ -431,7 +431,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(operand1, operand2, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(operand1, operand2, modulus, result), coeff_modulus_size, [&](auto I) {
                 sub_poly_coeffmod(get<0>(I), get<1>(I), poly_modulus_degree, *get<2>(I), get<3>(I));
             });
         }
@@ -463,7 +463,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(operand1, operand2, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(operand1, operand2, result), size, [&](auto I) {
                 sub_poly_coeffmod(get<0>(I), get<1>(I), coeff_modulus_size, modulus, get<2>(I));
             });
         }
@@ -495,7 +495,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
                 multiply_poly_scalar_coeffmod(get<0>(I), poly_modulus_degree, scalar, *get<1>(I), get<2>(I));
             });
         }
@@ -522,7 +522,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
                 multiply_poly_scalar_coeffmod(get<0>(I), coeff_modulus_size, scalar, modulus, get<1>(I));
             });
         }
@@ -586,7 +586,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(operand1, operand2, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(operand1, operand2, modulus, result), coeff_modulus_size, [&](auto I) {
                 dyadic_product_coeffmod(get<0>(I), get<1>(I), poly_modulus_degree, *get<2>(I), get<3>(I));
             });
         }
@@ -618,7 +618,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(operand1, operand2, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(operand1, operand2, result), size, [&](auto I) {
                 dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_modulus_size, modulus, get<2>(I));
             });
         }
@@ -655,7 +655,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
                 negacyclic_shift_poly_coeffmod(get<0>(I), poly_modulus_degree, shift, *get<1>(I), get<2>(I));
             });
         }
@@ -682,7 +682,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
                 negacyclic_shift_poly_coeffmod(get<0>(I), coeff_modulus_size, shift, modulus, get<1>(I));
             });
         }
@@ -733,7 +733,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
                 negacyclic_multiply_poly_mono_coeffmod(
                     get<0>(I), poly_modulus_degree, mono_coeff, mono_exponent, *get<1>(I), get<2>(I), pool);
             });
@@ -762,7 +762,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
                 negacyclic_multiply_poly_mono_coeffmod(
                     get<0>(I), coeff_modulus_size, mono_coeff, mono_exponent, modulus, get<1>(I), pool);
             });
@@ -795,7 +795,7 @@ namespace seal
             }
 #endif
             auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(make_iter(poly, mono_coeff, modulus, result), coeff_modulus_size, [&](auto I) {
+            SEAL_ITERATE(iter(poly, mono_coeff, modulus, result), coeff_modulus_size, [&](auto I) {
                 negacyclic_multiply_poly_mono_coeffmod(
                     get<0>(I), poly_modulus_degree, *get<1>(I), mono_exponent, *get<2>(I), get<3>(I), pool);
             });
@@ -828,7 +828,7 @@ namespace seal
             }
 #endif
             auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(make_iter(poly_array, result), size, [&](auto I) {
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
                 negacyclic_multiply_poly_mono_coeffmod(
                     get<0>(I), coeff_modulus_size, mono_coeff, mono_exponent, modulus, get<1>(I), pool);
             });
