@@ -1,5 +1,25 @@
 # List of Changes
 
+## Version 3.5.2
+
+### Bug fixes
+
+- Fixed issue where SEAL.vcxproj could not be compiled with MSBuild outside the solution [(Issue 171)](https://github.com/microsoft/SEAL/issues/171).
+- SEAL 3.5.1 required CMake 3.13 instead of 3.12; this has now been fixed and 3.12 works again [(Issue 167)](https://github.com/microsoft/SEAL/issues/167).
+- Fixed issue in NuSpec file that made local NuGet package generation fail.
+- Fixed issue in NuSpec where XML documentation was not included into the package.
+
+### New features
+
+- Huge improvements to SEAL iterators, including `seal::util::iter` and `seal::util::reverse_iter` functions that can create any type of iterator from appropriate parameters.
+- Added `seal::util::SeqIter<T>` iterator for iterating a sequence of numbers for convenient iteration indexing.
+- Switched functions in `seal/util/polyarithsmallmod.*` to use iterators; this is to reduce the layers of iteration in higher level code.
+- Added macro `SEAL_ITERATE` that should be used instead of `for_each_n`.  
+
+### Other
+
+- Added note in [README.md](README.md) about known performance issues when compiling with GNU G++ compared to Clang++ [(Issue 173)](https://github.com/microsoft/SEAL/issues/173).
+
 ## Version 3.5.1
 
 Changed version to 3.5.1. The two hotfixes below are included.
