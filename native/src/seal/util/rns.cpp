@@ -817,7 +817,7 @@ namespace seal
                 }
                 else
                 {
-                    set_uint_uint(last_ptr, coeff_count_, temp_ptr);
+                    set_uint(last_ptr, coeff_count_, temp_ptr);
                 }
 
                 // lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
