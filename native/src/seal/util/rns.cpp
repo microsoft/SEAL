@@ -811,32 +811,38 @@ namespace seal
             {
                 const uint64_t qi = (*base_q_)[i].value();
                 // (ct mod qk) mod qi
-                if (qi < last_modulus.value()) {
+                if (qi < last_modulus.value())
+                {
                     modulo_poly_coeffs_63(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
-                } else {
+                }
+                else
+                {
                     set_uint_uint(last_ptr, coeff_count_, temp_ptr);
                 }
 
                 // lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
                 const uint64_t neg_half_mod = qi - barrett_reduce_63(half, (*base_q_)[i]);
-                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [neg_half_mod](uint64_t u) { return u + neg_half_mod; });
+                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [neg_half_mod](uint64_t u) {
+                    return u + neg_half_mod;
+                });
 #if SEAL_USER_MOD_BIT_COUNT_MAX <= 60
                 // Since now SEAL use at most 60bit moduli, so 8*qi < 2^63.
                 // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
-                const uint64_t Lqi = qi << 2;
+                const uint64_t qi_lazy = qi << 2;
                 ntt_negacyclic_harvey_lazy(temp_ptr, rns_ntt_tables[i]);
 #else
                 // 2^60 < pi < 2^62, then 4*pi < 2^64, we perfrom one reduction from [0, 4*qi) to [0, 2*qi) after ntt.
-                const uint64_t Lqi = qi << 1;
+                const uint64_t qi_lazy = qi << 1;
                 ntt_negacyclic_harvey_lazy(temp_ptr, rns_ntt_tables[i]);
-                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [Lqi](uint64_t u) {
-                               return u -= (Lqi & static_cast<uint64_t>(-static_cast<int64_t>(u >= Lqi)));
-                               });
+                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [qi_lazy](uint64_t u) {
+                    return u -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(u >= qi_lazy)));
+                });
 #endif
-                // lazy subtraction again, results in [0, 2*Lqi),
-                // The reduction [0, 2*Lqi) -> [0, qi) is done implicitly in multiply_poly_scalar_coeffmod.
-                std::transform(input, input + coeff_count_, temp_ptr, input,
-                               [Lqi](uint64_t u, uint64_t v) { return u + Lqi - v; });
+                // lazy subtraction again, results in [0, 2*qi_lazy),
+                // The reduction [0, 2*qi_lazy) -> [0, qi) is done implicitly in multiply_poly_scalar_coeffmod.
+                std::transform(input, input + coeff_count_, temp_ptr, input, [qi_lazy](uint64_t u, uint64_t v) {
+                    return u + qi_lazy - v;
+                });
 
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                 multiply_poly_scalar_coeffmod(input, coeff_count_, inv_q_last_mod_q_[i], (*base_q_)[i], input);
