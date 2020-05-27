@@ -197,6 +197,8 @@ In macOS you will need CMake with command line tools. For this, you can either
 Below we give instructions for how to configure, build, and install Microsoft SEAL either system-wide (global install), or for a single user (local install).
 A system-wide install requires elevated (root) privileges.
 
+**NOTE:** Microsoft SEAL compiled with Clang++ has much better runtime performance than that compiled with GNU G++.
+
 #### Building Microsoft SEAL
 
 We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and all commands presented below are assumed to be executed in the directory `SEAL`.
@@ -465,8 +467,8 @@ The code examples are available (and identical) in C++ and C#, and are divided i
 It is recommeded to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
 
-**WARNING: It is impossible to use Microsoft SEAL correctly without reading all examples or by simply re-using the code from examples.
-Any developer attempting to do so will inevitably produce code that is *vulnerable*, *malfunctioning*, or *extremely slow*.**
+**WARNING:** It is impossible to use Microsoft SEAL correctly without reading all examples or by simply re-using the code from examples.
+Any developer attempting to do so will inevitably produce code that is ***vulnerable***, ***malfunctioning***, or ***extremely slow***.
 
 ## Contributing
 
