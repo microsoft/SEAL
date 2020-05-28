@@ -7,6 +7,7 @@
 #include "seal/randomtostd.h"
 #include "seal/util/clipnormal.h"
 #include "seal/util/common.h"
+#include "seal/util/iterator.h"
 #include "seal/util/ntt.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rlwe.h"
@@ -19,6 +20,7 @@
 #include <stdexcept>
 
 using namespace std;
+using namespace seal::util;
 
 namespace seal
 {
@@ -42,7 +44,7 @@ namespace seal
         size_t coeff_modulus_size = coeff_modulus.size();
 
         // Quick sanity check
-        if (!util::product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
+        if (!product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -68,7 +70,7 @@ namespace seal
         size_t coeff_modulus_size = coeff_modulus.size();
 
         // Quick sanity check
-        if (!util::product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
+        if (!product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -96,7 +98,7 @@ namespace seal
         size_t coeff_modulus_size = coeff_modulus.size();
 
         // Quick sanity check
-        if (!util::product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
+        if (!product_fits_in(coeff_count, coeff_modulus_size, size_t(2)))
         {
             throw logic_error("invalid parameters");
         }
@@ -152,19 +154,19 @@ namespace seal
                 util::encrypt_zero_asymmetric(public_key_, context_, prev_parms_id, is_ntt_form, temp);
 
                 // Modulus switching
-                for (size_t j = 0; j < 2; j++)
-                {
+                SEAL_ITERATE(iter(temp, destination), temp.size(), [&](auto I) {
                     if (is_ntt_form)
                     {
                         rns_tool->divide_and_round_q_last_ntt_inplace(
-                            temp.data(j), prev_context_data.small_ntt_tables(), pool);
+                            get<0>(I), prev_context_data.small_ntt_tables(), pool);
                     }
                     else
                     {
-                        rns_tool->divide_and_round_q_last_inplace(temp.data(j), pool);
+                        rns_tool->divide_and_round_q_last_inplace(get<0>(I), pool);
                     }
-                    util::set_poly(temp.data(j), coeff_count, coeff_modulus_size, destination.data(j));
-                }
+                    set_poly(get<0>(I), coeff_count, coeff_modulus_size, get<1>(I));
+                });
+
                 destination.is_ntt_form() = is_ntt_form;
                 destination.scale() = temp.scale();
                 destination.parms_id() = parms_id;
@@ -177,8 +179,8 @@ namespace seal
         }
         else
         {
-            util::encrypt_zero_symmetric(secret_key_, context_, parms_id, is_ntt_form, save_seed, destination);
             // Does not require modulus switching
+            util::encrypt_zero_symmetric(secret_key_, context_, parms_id, is_ntt_form, save_seed, destination);
         }
     }
 
@@ -220,7 +222,7 @@ namespace seal
 
             // Multiply plain by scalar coeff_div_plaintext and reposition if in upper-half.
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
-            util::multiply_add_plain_with_scaling_variant(plain, *context_->first_context_data(), destination.data());
+            multiply_add_plain_with_scaling_variant(plain, *context_->first_context_data(), destination.data());
         }
         else if (scheme == scheme_type::CKKS)
         {
@@ -242,12 +244,9 @@ namespace seal
             size_t coeff_count = parms.poly_modulus_degree();
 
             // The plaintext gets added into the c_0 term of ciphertext (c_0,c_1).
-            for (size_t i = 0; i < coeff_modulus_size; i++)
-            {
-                util::add_poly_coeffmod(
-                    destination.data() + (i * coeff_count), plain.data() + (i * coeff_count), coeff_count,
-                    coeff_modulus[i], destination.data() + (i * coeff_count));
-            }
+            ConstRNSIter plain_iter(plain.data(), coeff_count);
+            RNSIter destination_iter = *iter(destination);
+            add_poly_coeffmod(destination_iter, plain_iter, coeff_modulus_size, coeff_modulus, destination_iter);
 
             destination.scale() = plain.scale();
         }
