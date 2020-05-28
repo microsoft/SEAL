@@ -14,11 +14,12 @@
 - Huge improvements to SEAL iterators, including `seal::util::iter` and `seal::util::reverse_iter` functions that can create any type of iterator from appropriate parameters.
 - Added `seal::util::SeqIter<T>` iterator for iterating a sequence of numbers for convenient iteration indexing.
 - Switched functions in `seal/util/polyarithsmallmod.*` to use iterators; this is to reduce the layers of iteration in higher level code.
-- Added macro `SEAL_ITERATE` that should be used instead of `for_each_n`.  
+- Added macro `SEAL_ITERATE` that should be used instead of `for_each_n`.
 
 ### Other
 
 - Added note in [README.md](README.md) about known performance issues when compiling with GNU G++ compared to Clang++ [(Issue 173)](https://github.com/microsoft/SEAL/issues/173).
+- Merged pull requests that improve the performance of keyswitching [(PR #177)](https://github.com/microsoft/SEAL/pull/177) and rescale [(PR #176)](https://github.com/microsoft/SEAL/pull/176) in CKKS.
 
 ## Version 3.5.1
 
