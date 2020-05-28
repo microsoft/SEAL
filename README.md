@@ -115,12 +115,17 @@ For applications where exact values are necessary, the BFV scheme is the only ch
 
 ### Optional Dependencies
 
-Microsoft SEAL has no required dependencies, but certain optional features can be enabled if it is compiled with support for specific third-party libraries.
+Microsoft SEAL has no required dependencies, but certain optional features can be enabled if it is compiled with support for specific third-party libraries such as Microsoft GSL, ZLIB, and Google Test.
+Since SEAL 3.5.0, if enabled, third-party libraries are downloaded, configured, and built as CMake external projects defined in `thirdparty/*/CMakeLists.txt`.
+This workflow is carried out by CMake toolchain or pre-build commands defined in `native/src/SEAL.vcxproj`.
 
 #### Microsoft GSL
 
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provides safe (bounds-checked) array access to memory.
 For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder` and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`, which can in some cases have a significant performance benefit.
+
+**NOTE:** Microsoft SEAL 3.5.0 (or newer) is compatible with Microsoft GSL 3.0.0 (or newer), and does not use existing Microsoft GSL on system.
+Microsoft SEAL 3.4.5 (or older) are compatible with Microsoft GSL 2.1.0 (or older), and uses existing Microsoft GSL on system.
 
 #### ZLIB
 
@@ -445,6 +450,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
 ### Android
+
 You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library. However, the easiest and recommended way to use Microsoft SEAL in Android is through the multiplatform NuGet package you can find at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using Microsoft SEAL and .NET. The native shared library and the .NET wrapper compile only for 64 bits, so only `arm64-v8a` and `x86_64` Android ABIs are supported.
 
 ## Getting Started
