@@ -116,16 +116,16 @@ For applications where exact values are necessary, the BFV scheme is the only ch
 ### Optional Dependencies
 
 Microsoft SEAL has no required dependencies, but certain optional features can be enabled if it is compiled with support for specific third-party libraries such as Microsoft GSL, ZLIB, and Google Test.
-Since SEAL 3.5.0, if enabled, third-party libraries are downloaded, configured, and built as CMake external projects defined in `thirdparty/*/CMakeLists.txt`.
-This workflow is carried out by CMake toolchain or pre-build commands defined in `native/src/SEAL.vcxproj`.
+In SEAL >= 3.5.0 third-party libraries are (if enabled) downloaded, configured, and built as CMake external projects defined in `thirdparty/*/CMakeLists.txt`.
+This workflow is carried out automatically by the CMake toolchain or pre-build commands defined in `native/src/SEAL.vcxproj`, and as such requires no manual steps from the user.
 
 #### Microsoft GSL
 
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provides safe (bounds-checked) array access to memory.
 For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder` and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`, which can in some cases have a significant performance benefit.
 
-**NOTE:** Microsoft SEAL 3.5.0 (or newer) is compatible with Microsoft GSL 3.0.0 (or newer), and does not use existing Microsoft GSL on system.
-Microsoft SEAL 3.4.5 (or older) are compatible with Microsoft GSL 2.1.0 (or older), and uses existing Microsoft GSL on system.
+**NOTE:** Microsoft SEAL >= 3.5.0 is compatible with Microsoft GSL >= 3.0.0, and does not use an existing Microsoft GSL installed on the system.
+Microsoft SEAL < 3.5.0 is compatible with Microsoft GSL < 3.0.0, and can use an existing Microsoft GSL installed on the system.
 
 #### ZLIB
 
