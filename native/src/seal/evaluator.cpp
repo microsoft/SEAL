@@ -2507,11 +2507,12 @@ namespace seal
 
                     // lazy substraction, results in [0, 2*qi).
                     const uint64_t fix = qi - barrett_reduce_63(qk_half, *get<1>(J));
-                    for_each_n(t_ntt_iter, coeff_count, [&](auto K) { *K += fix; });
+                    for_each_n(t_ntt_iter, coeff_count, [fix](auto K) { *K += fix; });
 
                     uint64_t Lqi; // some multiples of qi
                     if (scheme == scheme_type::CKKS)
                     {
+                        // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
                         ntt_negacyclic_harvey_lazy(t_ntt_iter, *get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
                         Lqi = qi << 1;
@@ -2519,7 +2520,6 @@ namespace seal
                         for_each_n(t_ntt_iter, coeff_count, [Lqi](auto K) { *K -= (Lqi & static_cast<uint64_t>(-static_cast<int64_t>(*K >= Lqi))); });
 #else
                         // Since now SEAL use at most 60bit moduli, so 8*qi < 2^63.
-                        // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
                         Lqi = qi << 2;
 #endif
                     }
