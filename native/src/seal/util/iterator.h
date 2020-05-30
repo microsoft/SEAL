@@ -1988,7 +1988,7 @@ namespace seal
             template <typename T, typename... Rest>
             struct iter_type<
                 std::void_t<
-                    std::enable_if_t<sizeof...(Rest)>, typename iter_type<void, T>::type,
+                    std::enable_if_t<(sizeof...(Rest) > 0)>, typename iter_type<void, T>::type,
                     typename iter_type<void, Rest...>::type>,
                 T, Rest...>
             {
