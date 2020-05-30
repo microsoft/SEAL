@@ -42,7 +42,7 @@ namespace seal
             }
         }
 
-        inline void add_poly_poly_coeffmod(
+        inline void add_poly_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
             const std::uint64_t *coeff_modulus, std::size_t coeff_uint64_count, std::uint64_t *result)
         {
@@ -77,7 +77,7 @@ namespace seal
             }
         }
 
-        inline void sub_poly_poly_coeffmod(
+        inline void sub_poly_coeffmod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t coeff_count,
             const std::uint64_t *coeff_modulus, std::size_t coeff_uint64_count, std::uint64_t *result)
         {

@@ -12,6 +12,7 @@
 #include "seal/secretkey.h"
 #include "seal/serializable.h"
 #include "seal/util/defines.h"
+#include "seal/util/iterator.h"
 #include "seal/util/ntt.h"
 #include <memory>
 #include <random>
@@ -280,13 +281,13 @@ namespace seal
         Generates new key switching keys for an array of new keys.
         */
         void generate_kswitch_keys(
-            const std::uint64_t *new_keys, std::size_t num_keys, KSwitchKeys &destination, bool save_seed = false);
+            util::ConstPolyIter new_keys, std::size_t num_keys, KSwitchKeys &destination, bool save_seed = false);
 
         /**
         Generates one key switching key for a new key.
         */
         void generate_one_kswitch_key(
-            const uint64_t *new_key, std::vector<PublicKey> &destination, bool save_seed = false);
+            util::ConstRNSIter new_key, std::vector<PublicKey> &destination, bool save_seed = false);
 
         /**
         Generates and returns the specified number of relinearization keys.

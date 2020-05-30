@@ -631,7 +631,7 @@ namespace seal
         {
             int result_bits = util::add_safe(std::max(significant_bit_count(), operand2.significant_bit_count()), 1);
             BigUInt result(result_bits);
-            util::add_uint_uint(
+            util::add_uint(
                 value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), false, result.uint64_count(),
                 result.data());
             return result;
@@ -662,7 +662,7 @@ namespace seal
         {
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
-            util::sub_uint_uint(
+            util::sub_uint(
                 value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), false, result.uint64_count(),
                 result.data());
             util::filter_highbits_uint(result.data(), result.uint64_count(), result_bits);
@@ -694,7 +694,7 @@ namespace seal
         {
             int result_bits = util::add_safe(significant_bit_count(), operand2.significant_bit_count());
             BigUInt result(result_bits);
-            util::multiply_uint_uint(
+            util::multiply_uint(
                 value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), result.uint64_count(),
                 result.data());
             return result;
@@ -754,16 +754,16 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::xor_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
+                util::xor_uint(result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::xor_uint_uint(result.data(), value_.get(), uint64_count, result.data());
+                util::xor_uint(result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::xor_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
+                util::xor_uint(value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -798,16 +798,16 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::and_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
+                util::and_uint(result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::and_uint_uint(result.data(), value_.get(), uint64_count, result.data());
+                util::and_uint(result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::and_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
+                util::and_uint(value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -842,16 +842,16 @@ namespace seal
             if (uint64_count != this->uint64_count())
             {
                 result = *this;
-                util::or_uint_uint(result.data(), operand2.data(), uint64_count, result.data());
+                util::or_uint(result.data(), operand2.data(), uint64_count, result.data());
             }
             else if (uint64_count != operand2.uint64_count())
             {
                 result = operand2;
-                util::or_uint_uint(result.data(), value_.get(), uint64_count, result.data());
+                util::or_uint(result.data(), value_.get(), uint64_count, result.data());
             }
             else
             {
-                util::or_uint_uint(value_.get(), operand2.data(), uint64_count, result.data());
+                util::or_uint(value_.get(), operand2.data(), uint64_count, result.data());
             }
             return result;
         }
@@ -880,7 +880,7 @@ namespace seal
         */
         SEAL_NODISCARD inline int compareto(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count());
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count());
         }
 
         /**
@@ -905,8 +905,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator<(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) <
-                   0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) < 0;
         }
 
         /**
@@ -930,8 +929,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator>(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) >
-                   0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) > 0;
         }
 
         /**
@@ -955,8 +953,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator<=(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(
-                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) <= 0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) <= 0;
         }
 
         /**
@@ -980,8 +977,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator>=(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(
-                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) >= 0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) >= 0;
         }
 
         /**
@@ -1005,8 +1001,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator==(const BigUInt &compare) const
         {
-            return util::compare_uint_uint(
-                       value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) == 0;
+            return util::compare_uint(value_.get(), uint64_count(), compare.value_.get(), compare.uint64_count()) == 0;
         }
 
         /**
@@ -1111,7 +1106,7 @@ namespace seal
             {
                 resize(result_bits);
             }
-            util::add_uint_uint(
+            util::add_uint(
                 value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), false, uint64_count(),
                 value_.get());
             return *this;
@@ -1152,7 +1147,7 @@ namespace seal
             {
                 resize(result_bits);
             }
-            util::sub_uint_uint(
+            util::sub_uint(
                 value_.get(), uint64_count(), operand2.data(), operand2.uint64_count(), false, uint64_count(),
                 value_.get());
             util::filter_highbits_uint(value_.get(), uint64_count(), result_bits);
@@ -1259,7 +1254,7 @@ namespace seal
             {
                 resize(result_bits);
             }
-            util::xor_uint_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
+            util::xor_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
             return *this;
         }
 
@@ -1299,7 +1294,7 @@ namespace seal
             {
                 resize(result_bits);
             }
-            util::and_uint_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
+            util::and_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
             return *this;
         }
 
@@ -1339,7 +1334,7 @@ namespace seal
             {
                 resize(result_bits);
             }
-            util::or_uint_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
+            util::or_uint(value_.get(), operand2.data(), operand2.uint64_count(), value_.get());
             return *this;
         }
 

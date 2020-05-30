@@ -47,7 +47,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), poly[5]);
         }
 
-        TEST(PolyArithMod, AddPolyPolyCoeffMod)
+        TEST(PolyArithMod, AddPolyCoeffMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(3, 2, pool));
@@ -61,7 +61,7 @@ namespace sealtest
             poly2[4] = 4;
             modulus[0] = 5;
             modulus[1] = 0;
-            add_poly_poly_coeffmod(poly1.get(), poly2.get(), 3, modulus.get(), 2, poly1.get());
+            add_poly_coeffmod(poly1.get(), poly2.get(), 3, modulus.get(), 2, poly1.get());
             ASSERT_EQ(static_cast<uint64_t>(2), poly1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[1]);
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[2]);
@@ -70,7 +70,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[5]);
         }
 
-        TEST(PolyArithMod, SubPolyPolyCoeffMod)
+        TEST(PolyArithMod, SubPolyCoeffMod)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(3, 2, pool));
@@ -84,7 +84,7 @@ namespace sealtest
             poly2[4] = 4;
             modulus[0] = 5;
             modulus[1] = 0;
-            sub_poly_poly_coeffmod(poly1.get(), poly2.get(), 3, modulus.get(), 2, poly1.get());
+            sub_poly_coeffmod(poly1.get(), poly2.get(), 3, modulus.get(), 2, poly1.get());
             ASSERT_EQ(static_cast<uint64_t>(2), poly1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[1]);
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[2]);

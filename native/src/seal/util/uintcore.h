@@ -107,7 +107,7 @@ namespace seal
             }
         }
 
-        inline void set_uint_uint(const std::uint64_t *value, std::size_t uint64_count, std::uint64_t *result)
+        inline void set_uint(const std::uint64_t *value, std::size_t uint64_count, std::uint64_t *result)
         {
 #ifdef SEAL_DEBUG
             if (!value && uint64_count)
@@ -301,7 +301,7 @@ namespace seal
             return nonzero_count;
         }
 
-        inline void set_uint_uint(
+        inline void set_uint(
             const std::uint64_t *value, std::size_t value_uint64_count, std::size_t result_uint64_count,
             std::uint64_t *result)
         {
@@ -466,11 +466,11 @@ namespace seal
             }
 
             auto allocation(allocate<std::uint64_t>(new_uint64_count, pool));
-            set_uint_uint(input, uint64_count, new_uint64_count, allocation.get());
+            set_uint(input, uint64_count, new_uint64_count, allocation.get());
             return ConstPointer<std::uint64_t>(std::move(allocation));
         }
 
-        SEAL_NODISCARD inline int compare_uint_uint(
+        SEAL_NODISCARD inline int compare_uint(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count)
         {
 #ifdef SEAL_DEBUG
@@ -494,7 +494,7 @@ namespace seal
             return result;
         }
 
-        SEAL_NODISCARD inline int compare_uint_uint(
+        SEAL_NODISCARD inline int compare_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count)
         {
@@ -533,82 +533,82 @@ namespace seal
             return result;
         }
 
-        SEAL_NODISCARD inline bool is_greater_than_uint_uint(
+        SEAL_NODISCARD inline bool is_greater_than_uint(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count)
         {
-            return compare_uint_uint(operand1, operand2, uint64_count) > 0;
+            return compare_uint(operand1, operand2, uint64_count) > 0;
         }
 
-        SEAL_NODISCARD inline bool is_greater_than_or_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_greater_than_or_equal_uint(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count)
         {
-            return compare_uint_uint(operand1, operand2, uint64_count) >= 0;
+            return compare_uint(operand1, operand2, uint64_count) >= 0;
         }
 
-        SEAL_NODISCARD inline bool is_less_than_uint_uint(
+        SEAL_NODISCARD inline bool is_less_than_uint(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count)
         {
-            return compare_uint_uint(operand1, operand2, uint64_count) < 0;
+            return compare_uint(operand1, operand2, uint64_count) < 0;
         }
 
-        SEAL_NODISCARD inline bool is_less_than_or_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_less_than_or_equal_uint(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count)
         {
-            return compare_uint_uint(operand1, operand2, uint64_count) <= 0;
+            return compare_uint(operand1, operand2, uint64_count) <= 0;
         }
 
-        SEAL_NODISCARD inline bool is_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_equal_uint(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count)
         {
-            return compare_uint_uint(operand1, operand2, uint64_count) == 0;
+            return compare_uint(operand1, operand2, uint64_count) == 0;
         }
 
-        SEAL_NODISCARD inline bool is_not_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_not_equal_uint(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count)
         {
-            return compare_uint_uint(operand1, operand2, uint64_count) != 0;
+            return compare_uint(operand1, operand2, uint64_count) != 0;
         }
 
-        SEAL_NODISCARD inline bool is_greater_than_uint_uint(
+        SEAL_NODISCARD inline bool is_greater_than_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count)
         {
-            return compare_uint_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) > 0;
+            return compare_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) > 0;
         }
 
-        SEAL_NODISCARD inline bool is_greater_than_or_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_greater_than_or_equal_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count)
         {
-            return compare_uint_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) >= 0;
+            return compare_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) >= 0;
         }
 
-        SEAL_NODISCARD inline bool is_less_than_uint_uint(
+        SEAL_NODISCARD inline bool is_less_than_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count)
         {
-            return compare_uint_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) < 0;
+            return compare_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) < 0;
         }
 
-        SEAL_NODISCARD inline bool is_less_than_or_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_less_than_or_equal_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count)
         {
-            return compare_uint_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) <= 0;
+            return compare_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) <= 0;
         }
 
-        SEAL_NODISCARD inline bool is_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_equal_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count)
         {
-            return compare_uint_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) == 0;
+            return compare_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) == 0;
         }
 
-        SEAL_NODISCARD inline bool is_not_equal_uint_uint(
+        SEAL_NODISCARD inline bool is_not_equal_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count)
         {
-            return compare_uint_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) != 0;
+            return compare_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) != 0;
         }
 
         SEAL_NODISCARD inline std::uint64_t hamming_weight(std::uint64_t value)

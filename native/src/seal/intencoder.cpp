@@ -258,7 +258,7 @@ namespace seal
             if (result_is_negative == coeff_is_negative)
             {
                 // Result and coefficient have same signs so add.
-                if (add_uint_uint64(result, pos_value, result_uint64_count, result))
+                if (add_uint(result, result_uint64_count, pos_value, result))
                 {
                     // Add produced a carry that didn't fit, so resize and put it in.
                     int carry_bit_index = safe_cast<int>(mul_safe(result_uint64_count, bits_per_uint64_sz));
@@ -272,7 +272,7 @@ namespace seal
             else
             {
                 // Result and coefficient have opposite signs so subtract.
-                if (sub_uint_uint64(result, pos_value, result_uint64_count, result))
+                if (sub_uint(result, result_uint64_count, pos_value, result))
                 {
                     // Subtraction produced a borrow so coefficient is larger (in magnitude)
                     // than result, so need to negate result.

@@ -74,32 +74,17 @@ namespace seal
                 return data_ != nullptr;
             }
 
-            SEAL_NODISCARD inline SEAL_BYTE *get() noexcept
+            SEAL_NODISCARD inline SEAL_BYTE *get() const noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline const SEAL_BYTE *get() const noexcept
+            SEAL_NODISCARD inline SEAL_BYTE *operator->() const noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline SEAL_BYTE *operator->() noexcept
-            {
-                return data_;
-            }
-
-            SEAL_NODISCARD inline const SEAL_BYTE *operator->() const noexcept
-            {
-                return data_;
-            }
-
-            SEAL_NODISCARD inline SEAL_BYTE &operator*()
-            {
-                return *data_;
-            }
-
-            SEAL_NODISCARD inline const SEAL_BYTE &operator*() const
+            SEAL_NODISCARD inline SEAL_BYTE &operator*() const
             {
                 return *data_;
             }
@@ -338,32 +323,17 @@ namespace seal
                 return data_ != nullptr;
             }
 
-            SEAL_NODISCARD inline T *get() noexcept
+            SEAL_NODISCARD inline T *get() const noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline const T *get() const noexcept
+            SEAL_NODISCARD inline T *operator->() const noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline T *operator->() noexcept
-            {
-                return data_;
-            }
-
-            SEAL_NODISCARD inline const T *operator->() const noexcept
-            {
-                return data_;
-            }
-
-            SEAL_NODISCARD inline T &operator*()
-            {
-                return *data_;
-            }
-
-            SEAL_NODISCARD inline const T &operator*() const
+            SEAL_NODISCARD inline T &operator*() const
             {
                 return *data_;
             }

@@ -90,7 +90,7 @@ namespace seal
             return operand >> 1;
         }
 
-        SEAL_NODISCARD inline std::uint64_t add_uint_uint_mod(
+        SEAL_NODISCARD inline std::uint64_t add_uint64_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -113,7 +113,7 @@ namespace seal
                                static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand1 >= modulus.value())));
         }
 
-        SEAL_NODISCARD inline std::uint64_t sub_uint_uint_mod(
+        SEAL_NODISCARD inline std::uint64_t sub_uint64_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -206,7 +206,7 @@ namespace seal
                     static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp[0] >= modulus.value())));
         }
 
-        SEAL_NODISCARD inline std::uint64_t multiply_uint_uint_mod(
+        SEAL_NODISCARD inline std::uint64_t multiply_uint_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -297,7 +297,7 @@ namespace seal
         SEAL_NODISCARD std::uint64_t exponentiate_uint_mod(
             std::uint64_t operand, std::uint64_t exponent, const Modulus &modulus);
 
-        void divide_uint_uint_mod_inplace(
+        void divide_uint_mod_inplace(
             std::uint64_t *numerator, const Modulus &modulus, std::size_t uint64_count, std::uint64_t *quotient,
             MemoryPool &pool);
 

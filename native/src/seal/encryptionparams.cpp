@@ -144,7 +144,7 @@ namespace seal
             *param_data_ptr++ = mod.value();
         }
 
-        set_uint_uint(plain_modulus_.data(), plain_modulus_.uint64_count(), param_data_ptr);
+        set_uint(plain_modulus_.data(), plain_modulus_.uint64_count(), param_data_ptr);
         param_data_ptr += plain_modulus_.uint64_count();
 
         HashFunction::hash(param_data.get(), total_uint64_count, parms_id_);

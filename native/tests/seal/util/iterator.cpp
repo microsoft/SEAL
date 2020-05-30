@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/ciphertext.h"
 #include "seal/memorymanager.h"
 #include "seal/util/iterator.h"
 #include <algorithm>
 #include <array>
 #include <cstdint>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 #include "gtest/gtest.h"
 
@@ -18,240 +20,541 @@ namespace sealtest
 {
     namespace util
     {
-        TEST(IteratorTest, CoeffIter)
+        TEST(IteratorTest, IterType)
         {
-            array<uint64_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            CoeffIter ci(arr.data());
-            ConstCoeffIter cci(arr.data());
+            ASSERT_TRUE((std::is_same<decltype(iter(int(0))), SeqIter<int>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(size_t(0))), SeqIter<size_t>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(bool(true))), SeqIter<bool>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(double(0.0))), SeqIter<double>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(char(0))), SeqIter<char>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(uint64_t(0))), SeqIter<uint64_t>>::value));
 
-            for_each(arr.begin(), arr.end(), [ci](auto a) mutable { ASSERT_EQ(a, **ci++); });
-            for_each(arr.begin(), arr.end(), [cci](auto a) mutable { ASSERT_EQ(a, **cci++); });
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<Ciphertext &>())), PolyIter>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<const Ciphertext &>())), ConstPolyIter>::value));
 
-            ASSERT_EQ(arr.data(), static_cast<uint64_t *>(ci));
-            ASSERT_EQ(arr.data(), static_cast<const uint64_t *>(cci));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<int *>())), PtrIter<int *>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<const int *>())), PtrIter<const int *>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<void *>())), PtrIter<void *>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<const void *>())), PtrIter<const void *>>::value));
 
-            auto ci2 = ci++;
-            auto cci2 = cci++;
-            ASSERT_EQ(arr[1], **ci);
-            ASSERT_EQ(arr[1], **cci);
-            ASSERT_EQ(arr[0], **ci2);
-            ASSERT_EQ(arr[0], **cci2);
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<vector<Ciphertext> &>())), PtrIter<Ciphertext *>>::value));
+            ASSERT_TRUE((std::is_same<
+                         decltype(iter(declval<const vector<Ciphertext> &>())), PtrIter<const Ciphertext *>>::value));
 
-            ci2 = ++ci;
-            cci2 = ++cci;
-            ASSERT_EQ(arr[2], **ci);
-            ASSERT_EQ(arr[2], **cci);
-            ASSERT_EQ(arr[2], **ci2);
-            ASSERT_EQ(arr[2], **cci2);
+            ASSERT_TRUE((std::is_same<
+                         decltype(iter(declval<int>(), declval<size_t>(), declval<Ciphertext &>())),
+                         IterTuple<SeqIter<int>, SeqIter<size_t>, PolyIter>>::value));
 
-            ASSERT_TRUE(ci == ci2);
-            ASSERT_TRUE(cci == cci2);
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<PolyIter>())), PolyIter>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<RNSIter>())), RNSIter>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<CoeffIter>())), CoeffIter>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<PtrIter<int *>>())), PtrIter<int *>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<SeqIter<int>>())), SeqIter<int>>::value));
+            ASSERT_TRUE((std::is_same<decltype(iter(declval<ReverseIter<RNSIter>>())), ReverseIter<RNSIter>>::value));
+            ASSERT_TRUE((std::is_same<
+                         decltype(iter(declval<ReverseIter<ReverseIter<RNSIter>>>())),
+                         ReverseIter<ReverseIter<RNSIter>>>::value));
+            ASSERT_TRUE((std::is_same<
+                         decltype(iter(declval<IterTuple<RNSIter, ReverseIter<RNSIter>>>())),
+                         IterTuple<RNSIter, ReverseIter<RNSIter>>>::value));
         }
 
-        TEST(IteratorTest, RNSIter)
+        TEST(IteratorTest, Iterate)
         {
-            array<uint64_t, 12> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-            RNSIter ri(arr.data(), 4);
-            ConstRNSIter cri(arr.data(), 4);
+            int calls, sum;
 
-            {
-                vector<uint64_t> values;
-                for_each_n(ri, arr.size() / ri.poly_modulus_degree(), [&](auto ci) {
-                    for_each_n(ci, ri.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
-                });
-                ASSERT_TRUE(equal(arr.begin(), arr.end(), values.begin()));
-            }
-            {
-                vector<uint64_t> values;
-                for_each_n(cri, arr.size() / cri.poly_modulus_degree(), [&](auto cci) {
-                    for_each_n(cci, cri.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
-                });
-                ASSERT_TRUE(equal(arr.begin(), arr.end(), values.begin()));
-            }
+            calls = 0;
+            SEAL_ITERATE(iter(0), 0, [&](auto I) {
+                calls++;
+                I++;
+            });
+            ASSERT_EQ(0, calls);
 
-            ASSERT_EQ(arr[0], ***ri++);
-            ASSERT_EQ(arr[4], ***ri++);
-            ASSERT_EQ(arr[8], ***ri);
-            ASSERT_EQ(arr[0], ***cri++);
-            ASSERT_EQ(arr[4], ***cri++);
-            ASSERT_EQ(arr[8], ***cri);
+            calls = 0;
+            SEAL_ITERATE(iter(0), 1, [&](auto I) {
+                calls++;
+                I++;
+            });
+            ASSERT_EQ(1, calls);
 
-            ASSERT_EQ(arr.data() + 8, static_cast<uint64_t *>(ri));
-            ASSERT_EQ(arr.data() + 8, static_cast<const uint64_t *>(cri));
+            calls = 0;
+            SEAL_ITERATE(iter(0), 10, [&](auto I) {
+                calls++;
+                I++;
+            });
+            ASSERT_EQ(10, calls);
 
-            ASSERT_EQ(arr[4], ***--ri);
-            ASSERT_EQ(arr[0], ***--ri);
-            ASSERT_EQ(arr[4], ***--cri);
-            ASSERT_EQ(arr[0], ***--cri);
+            sum = 0;
+            SEAL_ITERATE(iter(0), 10, [&](auto I) { sum += I; });
+            ASSERT_EQ(45, sum);
 
-            ASSERT_TRUE(ri == cri);
-            ASSERT_TRUE(ri == arr.data());
+            sum = 0;
+            SEAL_ITERATE(iter(0, reverse_iter(0)), 10, [&](auto I) { sum += get<0>(I).value() + get<1>(I).value(); });
         }
 
-        TEST(IteratorTest, PolyIter)
+        TEST(IteratorTest, SeqIter)
         {
-            array<uint64_t, 12> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-            PolyIter pi(arr.data(), 3, 2);
-            ConstPolyIter cpi(arr.data(), 3, 2);
+            // Construction
+            SeqIter<int> s{};
+            ASSERT_EQ(0, s.value());
+            s = 1;
+            ASSERT_EQ(1, s.value());
+            s = -1;
+            ASSERT_EQ(-1, s.value());
+            SeqIter<size_t> t(5);
+            ASSERT_EQ(5, t.value());
+            t = 0;
+            ASSERT_EQ(0, t.value());
+            SeqIter<bool> b(true);
+            ASSERT_EQ(true, b);
+            b = false;
+            ASSERT_EQ(false, b);
 
-            {
-                vector<uint64_t> values;
-                for_each_n(pi, arr.size() / (pi.poly_modulus_degree() * pi.coeff_modulus_size()), [&](auto ri) {
-                    for_each_n(ri, pi.coeff_modulus_size(), [&](auto ci) {
-                        for_each_n(ci, pi.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
-                    });
-                });
-                ASSERT_TRUE(equal(arr.begin(), arr.end(), values.begin()));
-            }
-            {
-                vector<uint64_t> values;
-                for_each_n(cpi, arr.size() / (cpi.poly_modulus_degree() * cpi.coeff_modulus_size()), [&](auto cri) {
-                    for_each_n(cri, cpi.coeff_modulus_size(), [&](auto cci) {
-                        for_each_n(cci, cpi.poly_modulus_degree(), [&](auto c) { values.push_back(*c); });
-                    });
-                });
-                ASSERT_TRUE(equal(arr.begin(), arr.end(), values.begin()));
-            }
+            // Dereference
+            s = 10;
+            SeqIter<int> u = *s;
+            ASSERT_EQ(10, u.value());
 
-            ASSERT_EQ(arr[0], ****pi++);
-            ASSERT_EQ(arr[6], ****pi++);
-            ASSERT_EQ(arr[0], ****cpi++);
-            ASSERT_EQ(arr[6], ****cpi++);
+            // Array access
+            ASSERT_EQ(10, s[0]);
+            ASSERT_EQ(9, s[-1]);
+            ASSERT_EQ(0, s[-10]);
+            ASSERT_EQ(20, s[10]);
+            ASSERT_EQ(true, b[1]);
 
-            ASSERT_EQ(arr[6], ****--pi);
-            ASSERT_EQ(arr[0], ****--pi);
-            ASSERT_EQ(arr[6], ****--cpi);
-            ASSERT_EQ(arr[0], ****--cpi);
+            // Increment/Decrement
+            u = s--;
+            ASSERT_EQ(10, u);
+            ASSERT_EQ(9, s);
+            u = s++;
+            ASSERT_EQ(9, u);
+            ASSERT_EQ(10, s);
+            u = --s;
+            ASSERT_EQ(9, u);
+            ASSERT_EQ(9, s);
+            u = ++s;
+            ASSERT_EQ(10, u);
+            ASSERT_EQ(10, s);
+            s += 1;
+            ASSERT_EQ(11, s);
+            s -= 1;
+            ASSERT_EQ(10, s);
+            u = s - 1;
+            ASSERT_EQ(10, s);
+            ASSERT_EQ(9, u);
+            u = u + 1;
+            ASSERT_EQ(10, u);
+            s = 1 + u;
+            ASSERT_EQ(11, s);
+            s = -1 + s;
+            ASSERT_EQ(10, s);
 
-            ASSERT_TRUE(pi == cpi);
-            ASSERT_TRUE(pi == arr.data());
+            // Difference
+            ASSERT_EQ(0, u - s);
+            ASSERT_EQ(1, (u + 1) - s);
+
+            // Equality
+            ASSERT_TRUE(u == s);
+            ASSERT_TRUE(u != s + 1);
+            ASSERT_FALSE(u == s + 1);
+
+            // Comparison
+            ASSERT_TRUE(u - 1 < s);
+            ASSERT_FALSE(u < s - 1);
+            ASSERT_TRUE(u > s - 1);
+            ASSERT_FALSE(u - 1 > s);
+            ASSERT_TRUE(u >= s - 1);
+            ASSERT_TRUE(u >= s);
+            ASSERT_FALSE(u - 1 >= s);
+            ASSERT_TRUE(u - 1 <= s);
+            ASSERT_TRUE(u <= s);
+            ASSERT_FALSE(u <= s - 1);
+
+            // Value
+            ASSERT_EQ(10, s.value());
+            ASSERT_EQ(11, (s + 1).value());
         }
 
         TEST(IteratorTest, PtrIter)
         {
-            array<int32_t, 5> int_arr{ 0, 1, 2, 3, 4 };
-            array<char, 5> char_arr{ 'a', 'b', 'c', 'd', 'e' };
+            array<int, 3> arr{ -1, 0, 1 };
+            auto arr_zero = arr.data() + 1;
 
-            PtrIter<int32_t *> int_iter(int_arr.data());
-            PtrIter<char *> char_iter(char_arr.data());
+            // Construction
+            PtrIter<int *> s(arr_zero);
+            ASSERT_EQ(arr_zero, s.ptr());
+            s = arr_zero;
+            ASSERT_EQ(arr_zero, s.ptr());
 
-            {
-                vector<int32_t> values;
-                for_each_n(int_iter, int_arr.size(), [&](auto int_ptr) { values.push_back(*int_ptr); });
-                ASSERT_TRUE(equal(int_arr.begin(), int_arr.end(), values.begin()));
-            }
-            {
-                vector<char> values;
-                for_each_n(char_iter, char_arr.size(), [&](auto char_ptr) { values.push_back(*char_ptr); });
-                ASSERT_TRUE(equal(char_arr.begin(), char_arr.end(), values.begin()));
-            }
+            // Dereference
+            s = arr_zero;
+            PtrIter<int *> u = *s;
+            ASSERT_EQ(arr_zero, u.ptr());
 
-            ASSERT_EQ(*int_iter, int_arr.data());
-            ASSERT_EQ(*char_iter, char_arr.data());
+            // Array access
+            ASSERT_EQ(-1, *s[-1]);
+            ASSERT_EQ(0, *s[0]);
+            ASSERT_EQ(1, *s[1]);
+
+            // Increment/Decrement
+            u = s--;
+            ASSERT_EQ(0, **u);
+            ASSERT_EQ(-1, **s);
+            u = s++;
+            ASSERT_EQ(-1, **u);
+            ASSERT_EQ(0, **s);
+            u = --s;
+            ASSERT_EQ(-1, **u);
+            ASSERT_EQ(-1, **s);
+            u = ++s;
+            ASSERT_EQ(0, **u);
+            ASSERT_EQ(0, **s);
+            s += 1;
+            ASSERT_EQ(1, **s);
+            s -= 1;
+            ASSERT_EQ(0, **s);
+            u = s - 1;
+            ASSERT_EQ(0, **s);
+            ASSERT_EQ(-1, **u);
+            u = u + 1;
+            ASSERT_EQ(0, **u);
+            s = 1 + u;
+            ASSERT_EQ(1, **s);
+            s = -1 + s;
+            ASSERT_EQ(0, **s);
+
+            // Difference
+            ASSERT_EQ(0, u - s);
+            ASSERT_EQ(1, (u + 1) - s);
+
+            // Equality
+            ASSERT_TRUE(u == s);
+            ASSERT_TRUE(u != s + 1);
+            ASSERT_FALSE(u == s + 1);
+
+            // Comparison
+            ASSERT_TRUE(u - 1 < s);
+            ASSERT_FALSE(u < s - 1);
+            ASSERT_TRUE(u > s - 1);
+            ASSERT_FALSE(u - 1 > s);
+            ASSERT_TRUE(u >= s - 1);
+            ASSERT_TRUE(u >= s);
+            ASSERT_FALSE(u - 1 >= s);
+            ASSERT_TRUE(u - 1 <= s);
+            ASSERT_TRUE(u <= s);
+            ASSERT_FALSE(u <= s - 1);
+
+            // Pointer
+            ASSERT_EQ(arr_zero, s.ptr());
+            ASSERT_EQ(arr_zero, static_cast<int *>(s));
         }
 
-        TEST(IteratorTest, ReverseIter)
+        TEST(IteratorTest, RNSIter)
         {
-            array<uint64_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            CoeffIter ci(arr.data());
-            advance(ci, arr.size() - 1);
-            ReverseIter<CoeffIter> rci(ci);
-            ConstCoeffIter cci(arr.data());
-            advance(cci, arr.size() - 1);
-            ReverseIter<ConstCoeffIter> rcci(cci);
+            array<uint64_t, 6> arr{ 0, 1, 2, 3, 4, 5 };
+            auto arr_zero = arr.data();
 
-            for_each(arr.rbegin(), arr.rend(), [rci](auto a) mutable { ASSERT_EQ(a, **rci++); });
-            for_each(arr.rbegin(), arr.rend(), [rcci](auto a) mutable { ASSERT_EQ(a, **rcci++); });
+            // Construction
+            RNSIter s(arr_zero, 3);
+            ASSERT_EQ(3, s.poly_modulus_degree());
+            s = RNSIter(arr_zero, 2);
+            ASSERT_EQ(2, s.poly_modulus_degree());
 
-            ASSERT_EQ(arr.data() + arr.size() - 1, static_cast<uint64_t *>(rci));
-            ASSERT_EQ(arr.data() + arr.size() - 1, static_cast<const uint64_t *>(rcci));
+            // Dereference
+            CoeffIter t = *s;
+            ASSERT_EQ(arr_zero, *t);
 
-            ++rci;
-            ASSERT_EQ(**rci, arr[8]);
-            --rci;
-            ASSERT_EQ(**rci, arr[9]);
-            rci++;
-            ASSERT_EQ(**rci, arr[8]);
-            rci--;
-            ASSERT_EQ(**rci, arr[9]);
+            // Array access
+            ASSERT_EQ(0, **s[0]);
+            ASSERT_EQ(2, **s[1]);
+            ASSERT_EQ(4, **s[2]);
 
-            array<int32_t, 5> int_arr{ 0, 1, 2, 3, 4 };
-            array<char, 5> char_arr{ 'a', 'b', 'c', 'd', 'e' };
+            // Increment/Decrement
+            RNSIter u = s++;
+            ASSERT_EQ(0, ***u);
+            ASSERT_EQ(2, ***s);
+            u = s--;
+            ASSERT_EQ(2, ***u);
+            ASSERT_EQ(0, ***s);
+            u = ++s;
+            ASSERT_EQ(2, ***u);
+            ASSERT_EQ(2, ***s);
+            u = --s;
+            ASSERT_EQ(0, ***u);
+            ASSERT_EQ(0, ***s);
+            s += 1;
+            ASSERT_EQ(2, ***s);
+            s -= 1;
+            ASSERT_EQ(0, ***s);
+            u = s + 1;
+            ASSERT_EQ(0, ***s);
+            ASSERT_EQ(2, ***u);
+            u = u - 1;
+            ASSERT_EQ(0, ***u);
+            s = 2 + u;
+            ASSERT_EQ(4, ***s);
+            s = -1 + s;
+            ASSERT_EQ(2, ***s);
 
-            PtrIter<int32_t *> int_iter(int_arr.data() + int_arr.size() - 1);
-            PtrIter<char *> char_iter(char_arr.data() + char_arr.size() - 1);
+            // Difference
+            u = s;
+            ASSERT_EQ(0, u - s);
+            ASSERT_EQ(1, (u + 1) - s);
 
-            {
-                vector<int32_t> values;
-                for_each_n(ReverseIter<PtrIter<int32_t *>>(int_iter), int_arr.size(), [&](auto int_ptr) {
-                    values.push_back(*int_ptr);
-                });
+            // Equality
+            ASSERT_TRUE(u == s);
+            ASSERT_TRUE(u != s + 1);
+            ASSERT_FALSE(u == s + 1);
 
-                auto values_it = values.begin();
-                for_each(
-                    int_arr.rbegin(), int_arr.rend(), [&values_it](auto a) mutable { ASSERT_EQ(a, *values_it++); });
-            }
-            {
-                vector<char> values;
-                for_each_n(ReverseIter<PtrIter<char *>>(char_iter), char_arr.size(), [&](auto char_ptr) {
-                    values.push_back(*char_ptr);
-                });
+            // Comparison
+            ASSERT_TRUE(u - 1 < s);
+            ASSERT_FALSE(u < s - 1);
+            ASSERT_TRUE(u > s - 1);
+            ASSERT_FALSE(u - 1 > s);
+            ASSERT_TRUE(u >= s - 1);
+            ASSERT_TRUE(u >= s);
+            ASSERT_FALSE(u - 1 >= s);
+            ASSERT_TRUE(u - 1 <= s);
+            ASSERT_TRUE(u <= s);
+            ASSERT_FALSE(u <= s - 1);
+        }
 
-                auto values_it = values.begin();
-                for_each(
-                    char_arr.rbegin(), char_arr.rend(), [&values_it](auto a) mutable { ASSERT_EQ(a, *values_it++); });
-            }
+        TEST(IteratorTest, PolyIter)
+        {
+            array<uint64_t, 18> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+            auto arr_zero = arr.data();
+
+            // Construction
+            PolyIter s(arr_zero, 3, 2);
+            ASSERT_EQ(3, s.poly_modulus_degree());
+            ASSERT_EQ(2, s.coeff_modulus_size());
+            s = PolyIter(arr_zero, 2, 3);
+            ASSERT_EQ(2, s.poly_modulus_degree());
+            ASSERT_EQ(3, s.coeff_modulus_size());
+
+            // Dereference
+            RNSIter t = *s;
+            ASSERT_EQ(arr_zero, **t);
+            ASSERT_EQ(2, t.poly_modulus_degree());
+
+            // Array access
+            ASSERT_EQ(0, ***s[0]);
+            ASSERT_EQ(6, ***s[1]);
+            ASSERT_EQ(12, ***s[2]);
+
+            // Increment/Decrement
+            PolyIter u = s++;
+            ASSERT_EQ(0, ****u);
+            ASSERT_EQ(6, ****s);
+            u = s--;
+            ASSERT_EQ(6, ****u);
+            ASSERT_EQ(0, ****s);
+            u = ++s;
+            ASSERT_EQ(6, ****u);
+            ASSERT_EQ(6, ****s);
+            u = --s;
+            ASSERT_EQ(0, ****u);
+            ASSERT_EQ(0, ****s);
+            s += 1;
+            ASSERT_EQ(6, ****s);
+            s -= 1;
+            ASSERT_EQ(0, ****s);
+            u = s + 1;
+            ASSERT_EQ(0, ****s);
+            ASSERT_EQ(6, ****u);
+            u = u - 1;
+            ASSERT_EQ(0, ****u);
+            s = 2 + u;
+            ASSERT_EQ(12, ****s);
+            s = -1 + s;
+            ASSERT_EQ(6, ****s);
+
+            // Difference
+            u = s;
+            ASSERT_EQ(0, u - s);
+            ASSERT_EQ(1, (u + 1) - s);
+
+            // Equality
+            ASSERT_TRUE(u == s);
+            ASSERT_TRUE(u != s + 1);
+            ASSERT_FALSE(u == s + 1);
+
+            // Comparison
+            ASSERT_TRUE(u - 1 < s);
+            ASSERT_FALSE(u < s - 1);
+            ASSERT_TRUE(u > s - 1);
+            ASSERT_FALSE(u - 1 > s);
+            ASSERT_TRUE(u >= s - 1);
+            ASSERT_TRUE(u >= s);
+            ASSERT_FALSE(u - 1 >= s);
+            ASSERT_TRUE(u - 1 <= s);
+            ASSERT_TRUE(u <= s);
+            ASSERT_FALSE(u <= s - 1);
         }
 
         TEST(IteratorTest, IterTuple)
         {
-            array<uint64_t, 12> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-            CoeffIter ci(arr.data());
-            RNSIter ri(arr.data(), 3);
-            PolyIter pi(arr.data(), 3, 2);
+            // Construction
+            IterTuple<SeqIter<int>, SeqIter<int>> s(0, 1);
+            ASSERT_EQ(0, get<0>(s));
+            ASSERT_EQ(1, get<1>(s));
+            s = IterTuple<SeqIter<int>, SeqIter<int>>(1, 0);
+            ASSERT_EQ(1, get<0>(s));
+            ASSERT_EQ(0, get<1>(s));
 
-            IterTuple<CoeffIter, PolyIter> it1(ci, pi);
-            IterTuple<RNSIter, PolyIter> it2(ri, pi);
+            // Dereference
+            auto t = *s;
+            ASSERT_EQ(1, get<0>(t));
+            ASSERT_EQ(0, get<1>(t));
 
-            ASSERT_EQ(0, *get<0>(*it1));
-            ASSERT_EQ(0, ***get<1>(*it1));
-            ASSERT_EQ(0, **get<0>(*it2));
-            ASSERT_EQ(0, ***get<1>(*it2));
+            // Array access
+            ASSERT_EQ(1, *get<0>(s[0]));
+            ASSERT_EQ(0, *get<1>(s[0]));
+            ASSERT_EQ(0, *get<0>(s[-1]));
+            ASSERT_EQ(-1, *get<1>(s[-1]));
+            ASSERT_EQ(2, *get<0>(s[1]));
+            ASSERT_EQ(1, *get<1>(s[1]));
 
-            ++it1;
-            ++it2;
-            ASSERT_EQ(1, *get<0>(*it1));
-            ASSERT_EQ(6, ***get<1>(*it1));
-            ASSERT_EQ(3, **get<0>(*it2));
-            ASSERT_EQ(6, ***get<1>(*it2));
+            // Increment/Decrement
+            auto u = s++;
+            ASSERT_EQ(1, *get<0>(u));
+            ASSERT_EQ(0, *get<1>(u));
+            ASSERT_EQ(2, *get<0>(s));
+            ASSERT_EQ(1, *get<1>(s));
+            u = s--;
+            ASSERT_EQ(2, *get<0>(u));
+            ASSERT_EQ(1, *get<1>(u));
+            ASSERT_EQ(1, *get<0>(s));
+            ASSERT_EQ(0, *get<1>(s));
+            u = ++s;
+            ASSERT_EQ(2, *get<0>(u));
+            ASSERT_EQ(1, *get<1>(u));
+            ASSERT_EQ(2, *get<0>(s));
+            ASSERT_EQ(1, *get<1>(s));
+            u = --s;
+            ASSERT_EQ(1, *get<0>(u));
+            ASSERT_EQ(0, *get<1>(u));
+            ASSERT_EQ(1, *get<0>(s));
+            ASSERT_EQ(0, *get<1>(s));
+            s += 1;
+            ASSERT_EQ(2, *get<0>(s));
+            ASSERT_EQ(1, *get<1>(s));
+            s -= 1;
+            ASSERT_EQ(1, *get<0>(s));
+            ASSERT_EQ(0, *get<1>(s));
+            u = s + 1;
+            ASSERT_EQ(2, *get<0>(u));
+            ASSERT_EQ(1, *get<1>(u));
+            ASSERT_EQ(1, *get<0>(s));
+            ASSERT_EQ(0, *get<1>(s));
+            u = u - 1;
+            ASSERT_EQ(1, *get<0>(u));
+            ASSERT_EQ(0, *get<1>(u));
+            s = 2 + u;
+            ASSERT_EQ(3, *get<0>(s));
+            ASSERT_EQ(2, *get<1>(s));
+            s = -1 + s;
+            ASSERT_EQ(2, *get<0>(s));
+            ASSERT_EQ(1, *get<1>(s));
 
-            --it1;
-            --it2;
-            ASSERT_EQ(0, *get<0>(*it1));
-            ASSERT_EQ(0, ***get<1>(*it1));
-            ASSERT_EQ(0, **get<0>(*it2));
-            ASSERT_EQ(0, ***get<1>(*it2));
+            // Difference
+            u = s;
+            ASSERT_EQ(0, u - s);
+            ASSERT_EQ(1, (u + 1) - s);
 
-            IterTuple<CoeffIter, RNSIter, PolyIter> it3(ci, ri, pi);
-            ASSERT_EQ(0, *get<0>(*it3));
-            ASSERT_EQ(0, **get<1>(*it3));
-            ASSERT_EQ(0, ***get<2>(*it3));
+            // Equality
+            ASSERT_TRUE(u == s);
+            ASSERT_TRUE(u != s + 1);
+            ASSERT_FALSE(u == s + 1);
 
-            ++it3;
-            ASSERT_EQ(1, *get<0>(*it3));
-            ASSERT_EQ(3, **get<1>(*it3));
-            ASSERT_EQ(6, ***get<2>(*it3));
+            // Comparison
+            ASSERT_TRUE(u - 1 < s);
+            ASSERT_FALSE(u < s - 1);
+            ASSERT_TRUE(u > s - 1);
+            ASSERT_FALSE(u - 1 > s);
+            ASSERT_TRUE(u >= s - 1);
+            ASSERT_TRUE(u >= s);
+            ASSERT_FALSE(u - 1 >= s);
+            ASSERT_TRUE(u - 1 <= s);
+            ASSERT_TRUE(u <= s);
+            ASSERT_FALSE(u <= s - 1);
+        }
 
-            --it3;
-            ASSERT_EQ(0, *get<0>(*it3));
-            ASSERT_EQ(0, **get<1>(*it3));
-            ASSERT_EQ(0, ***get<2>(*it3));
+        TEST(IteratorTest, ReverseIter)
+        {
+            // Construction
+            ReverseIter<SeqIter<int>> s{};
+            ASSERT_EQ(0, s.value());
+            s = reverse_iter(-1);
+            ASSERT_EQ(-1, s.value());
+            s = reverse_iter(1);
+            ASSERT_EQ(1, s.value());
+            ReverseIter<SeqIter<size_t>> t(5);
+            ASSERT_EQ(5, t.value());
+            t = reverse_iter(size_t(0));
+            ASSERT_EQ(0, t.value());
 
-            IterTuple<IterTuple<CoeffIter, RNSIter, PolyIter>, IterTuple<RNSIter, PolyIter>> it4(it3, it2);
-            auto it5 = it4;
-            it5++;
-            it5--;
-            ASSERT_TRUE(it5 == it4);
+            // Dereference
+            s = reverse_iter(10);
+            SeqIter<int> v = *s;
+            ASSERT_EQ(10, v.value());
+
+            // Array access
+            ASSERT_EQ(10, s[0]);
+            ASSERT_EQ(11, s[-1]);
+            ASSERT_EQ(20, s[-10]);
+            ASSERT_EQ(0, s[10]);
+
+            // Increment/Decrement
+            auto u = s--;
+            ASSERT_EQ(10, u);
+            ASSERT_EQ(11, s);
+            u = s++;
+            ASSERT_EQ(11, u);
+            ASSERT_EQ(10, s);
+            u = --s;
+            ASSERT_EQ(11, u);
+            ASSERT_EQ(11, s);
+            u = ++s;
+            ASSERT_EQ(10, u);
+            ASSERT_EQ(10, s);
+            s += 1;
+            ASSERT_EQ(9, s);
+            s -= 1;
+            ASSERT_EQ(10, s);
+            u = s - 1;
+            ASSERT_EQ(10, s);
+            ASSERT_EQ(11, u);
+            u = u + 1;
+            ASSERT_EQ(10, u);
+            s = 1 + u;
+            ASSERT_EQ(9, s);
+            s = -1 + s;
+            ASSERT_EQ(10, s);
+
+            // Difference
+            ASSERT_EQ(0, u - s);
+            ASSERT_EQ(1, (u + 1) - s);
+            ASSERT_EQ(-1, (u - 1) - s);
+            ASSERT_EQ(1, u - (s - 1));
+            ASSERT_EQ(-1, u - (s + 1));
+
+            // Equality
+            ASSERT_TRUE(u == s);
+            ASSERT_TRUE(u != s + 1);
+            ASSERT_FALSE(u == s + 1);
+
+            // Comparison
+            ASSERT_TRUE(u - 1 < s);
+            ASSERT_FALSE(u < s - 1);
+            ASSERT_TRUE(u > s - 1);
+            ASSERT_FALSE(u - 1 > s);
+            ASSERT_TRUE(u >= s - 1);
+            ASSERT_TRUE(u >= s);
+            ASSERT_FALSE(u - 1 >= s);
+            ASSERT_TRUE(u - 1 <= s);
+            ASSERT_TRUE(u <= s);
+            ASSERT_FALSE(u <= s - 1);
         }
     } // namespace util
 } // namespace sealtest

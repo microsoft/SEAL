@@ -115,12 +115,17 @@ For applications where exact values are necessary, the BFV scheme is the only ch
 
 ### Optional Dependencies
 
-Microsoft SEAL has no required dependencies, but certain optional features can be enabled if it is compiled with support for specific third-party libraries.
+Microsoft SEAL has no required dependencies, but certain optional features can be enabled if it is compiled with support for specific third-party libraries such as Microsoft GSL, ZLIB, and Google Test.
+In SEAL >= 3.5.0 third-party libraries are (if enabled) downloaded, configured, and built as CMake external projects defined in `thirdparty/*/CMakeLists.txt`.
+This workflow is carried out automatically by the CMake toolchain or pre-build commands defined in `native/src/SEAL.vcxproj`, and as such requires no manual steps from the user.
 
 #### Microsoft GSL
 
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provides safe (bounds-checked) array access to memory.
 For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder` and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`, which can in some cases have a significant performance benefit.
+
+**NOTE:** Microsoft SEAL >= 3.5.0 is compatible with Microsoft GSL >= 3.0.0, and does not use an existing Microsoft GSL installed on the system.
+Microsoft SEAL < 3.5.0 is compatible with Microsoft GSL < 3.0.0, and can use an existing Microsoft GSL installed on the system.
 
 #### ZLIB
 
@@ -196,6 +201,8 @@ In macOS you will need CMake with command line tools. For this, you can either
 
 Below we give instructions for how to configure, build, and install Microsoft SEAL either system-wide (global install), or for a single user (local install).
 A system-wide install requires elevated (root) privileges.
+
+**NOTE:** Microsoft SEAL compiled with Clang++ has much better runtime performance than that compiled with GNU G++.
 
 #### Building Microsoft SEAL
 
@@ -274,7 +281,7 @@ make
 ```
 
 This downloads and compiles the [GoogleTest](https://github.com/google/googletest) framework as a part of Microsoft SEAL.
-The `sealtest` executable is located `native/bin/`.
+The `sealtest` executable is located in `native/bin/`.
 All unit tests should pass successfully.
 
 #### Installing Microsoft SEAL
@@ -351,9 +358,9 @@ The project takes care of copying the native SEAL_C library to the output direct
 
 #### .NET Unit Tests
 
-Build the SEALNet Test project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`.
+Build the SEALNetTest project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`.
 This results in the assembly `SEALNetTest.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp3.1`.
-The project takes care of copying the native SEALNetNative library to the output directory.
+The project takes care of copying the native SEAL_C library to the output directory.
 
 #### Using Microsoft SEAL for .NET in Your Own Application
 
@@ -377,7 +384,8 @@ You can follow these [instructions for installing in Linux](https://dotnet.micro
 
 #### Native Library
 
-If you only intend to run the examples and unit tests provided with Microsoft SEAL, you do not need to install the native shared library, you only need to compile it.
+If you only intend to run the examples and unit tests provided with Microsoft SEAL, you do not need to install the native shared library.
+You only need to compile it.
 The SEALNetExamples and SEALNetTest projects take care of copying the native shared library to the appropriate assembly output directory.
 
 Microsoft SEAL by default does not build SEAL_C.
@@ -442,6 +450,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
 ### Android
+
 You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library. However, the easiest and recommended way to use Microsoft SEAL in Android is through the multiplatform NuGet package you can find at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using Microsoft SEAL and .NET. The native shared library and the .NET wrapper compile only for 64 bits, so only `arm64-v8a` and `x86_64` Android ABIs are supported.
 
 ## Getting Started
@@ -464,8 +473,8 @@ The code examples are available (and identical) in C++ and C#, and are divided i
 It is recommeded to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
 
-**WARNING: It is impossible to use Microsoft SEAL correctly without reading all examples or by simply re-using the code from examples.
-Any developer attempting to do so will inevitably produce code that is *vulnerable*, *malfunctioning*, or *extremely slow*.**
+**WARNING:** It is impossible to use Microsoft SEAL correctly without reading all examples or by simply re-using the code from examples.
+Any developer attempting to do so will inevitably produce code that is ***vulnerable***, ***malfunctioning***, or ***extremely slow***.
 
 ## Contributing
 

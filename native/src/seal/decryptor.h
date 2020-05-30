@@ -12,6 +12,7 @@
 #include "seal/randomgen.h"
 #include "seal/secretkey.h"
 #include "seal/util/defines.h"
+#include "seal/util/iterator.h"
 #include "seal/util/locks.h"
 #include "seal/util/ntt.h"
 #include "seal/util/rns.h"
@@ -118,7 +119,7 @@ namespace seal
         // Compute c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q.
         // Store result in destination in RNS form.
         // destination has the size of an RNS polynomial.
-        void dot_product_ct_sk_array(const Ciphertext &encrypted, std::uint64_t *destination, MemoryPoolHandle pool);
+        void dot_product_ct_sk_array(const Ciphertext &encrypted, util::RNSIter destination, MemoryPoolHandle pool);
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
