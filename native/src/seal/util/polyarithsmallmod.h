@@ -527,33 +527,6 @@ namespace seal
             });
         }
 
-        void multiply_poly_coeffmod(
-            ConstCoeffIter operand1, std::size_t operand1_coeff_count, ConstCoeffIter operand2,
-            std::size_t operand2_coeff_count, const Modulus &modulus, std::size_t result_coeff_count, CoeffIter result);
-
-        void multiply_poly_coeffmod(
-            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
-            CoeffIter result);
-
-        inline void multiply_truncate_poly_coeffmod(
-            ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
-            CoeffIter result)
-        {
-            multiply_poly_coeffmod(operand1, coeff_count, operand2, coeff_count, modulus, coeff_count, result);
-        }
-
-        void divide_poly_coeffmod_inplace(
-            CoeffIter numerator, ConstCoeffIter denominator, std::size_t coeff_count, const Modulus &modulus,
-            CoeffIter quotient);
-
-        inline void divide_poly_coeffmod(
-            ConstCoeffIter numerator, ConstCoeffIter denominator, std::size_t coeff_count, const Modulus &modulus,
-            CoeffIter quotient, CoeffIter remainder)
-        {
-            set_uint(numerator, coeff_count, remainder);
-            divide_poly_coeffmod_inplace(remainder, denominator, coeff_count, modulus, quotient);
-        }
-
         void dyadic_product_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
             CoeffIter result);
@@ -624,10 +597,6 @@ namespace seal
         }
 
         std::uint64_t poly_infty_norm_coeffmod(ConstCoeffIter operand, std::size_t coeff_count, const Modulus &modulus);
-
-        bool try_invert_poly_coeffmod(
-            ConstCoeffIter operand, ConstCoeffIter poly_modulus, std::size_t coeff_count, const Modulus &modulus,
-            CoeffIter result, MemoryPool &pool);
 
         void negacyclic_shift_poly_coeffmod(
             ConstCoeffIter poly, std::size_t coeff_count, std::size_t shift, const Modulus &modulus, CoeffIter result);
