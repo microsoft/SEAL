@@ -47,7 +47,7 @@ namespace sealtest
                     ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
                     ASSERT_EQ(
                         keys.data()[j][i].data().int_array().size(), test_keys.data()[j][i].data().int_array().size());
-                    ASSERT_TRUE(is_equal_uint_uint(
+                    ASSERT_TRUE(is_equal_uint(
                         keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(),
                         keys.data()[j][i].data().int_array().size()));
                 }
@@ -83,7 +83,7 @@ namespace sealtest
                     ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
                     ASSERT_EQ(
                         keys.data()[j][i].data().int_array().size(), test_keys.data()[j][i].data().int_array().size());
-                    ASSERT_TRUE(is_equal_uint_uint(
+                    ASSERT_TRUE(is_equal_uint(
                         keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(),
                         keys.data()[j][i].data().int_array().size()));
                 }
@@ -119,15 +119,15 @@ namespace sealtest
                         const uint64_t *secret_key_ptr = sk2.data().data() + (i * coeff_count);
                         uint64_t *destination_ptr = destination + (i * coeff_count);
                         util::set_zero_uint(coeff_count, destination_ptr);
-                        util::set_uint_uint(encrypted_ptr, coeff_count, copy_operand1.get());
+                        util::set_uint(encrypted_ptr, coeff_count, copy_operand1.get());
                         // compute c_{j+1} * s^{j+1}
                         util::dyadic_product_coeffmod(
                             copy_operand1.get(), secret_key_ptr, coeff_count, coeff_modulus[i], copy_operand1.get());
                         // add c_{j+1} * s^{j+1} to destination
-                        util::add_poly_poly_coeffmod(
+                        util::add_poly_coeffmod(
                             destination_ptr, copy_operand1.get(), coeff_count, coeff_modulus[i], destination_ptr);
                         // add c_0 into destination
-                        util::add_poly_poly_coeffmod(
+                        util::add_poly_coeffmod(
                             destination_ptr, encrypted.data() + (i * coeff_count), coeff_count, coeff_modulus[i],
                             destination_ptr);
                     }
@@ -137,7 +137,7 @@ namespace sealtest
                 auto error_a = get_error(a_ct, sk1, ctx);
                 auto error_b = get_error(b_ct, sk1, ctx);
                 ASSERT_EQ(error_a.size(), error_b.size());
-                ASSERT_TRUE(is_equal_uint_uint(error_a.cbegin(), error_b.cbegin(), error_a.size()));
+                ASSERT_TRUE(is_equal_uint(error_a.cbegin(), error_b.cbegin(), error_a.size()));
             };
 
             ASSERT_EQ(a.size(), b.size());

@@ -98,9 +98,9 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), ptr[5]);
         }
 
-        TEST(PolyArith, AddPolyPoly)
+        TEST(PolyArith, AddPoly)
         {
-            add_poly_poly(nullptr, nullptr, 0, 0, nullptr);
+            add_poly(nullptr, nullptr, 0, 0, nullptr);
 
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(3, 2, pool));
@@ -118,7 +118,7 @@ namespace sealtest
             poly2[3] = 1;
             poly2[4] = 0xFFFFFFFFFFFFFFFF;
             poly2[5] = 1;
-            add_poly_poly(poly1.get(), poly2.get(), 3, 2, poly1.get());
+            add_poly(poly1.get(), poly2.get(), 3, 2, poly1.get());
             ASSERT_EQ(static_cast<uint64_t>(1), poly1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[1]);
             ASSERT_EQ(static_cast<uint64_t>(2), poly1[2]);
@@ -138,7 +138,7 @@ namespace sealtest
             poly2[3] = 0;
             poly2[4] = 0xFFFFFFFFFFFFFFFF;
             poly2[5] = 0xFFFFFFFFFFFFFFFF;
-            add_poly_poly(poly1.get(), poly2.get(), 3, 2, poly1.get());
+            add_poly(poly1.get(), poly2.get(), 3, 2, poly1.get());
             ASSERT_EQ(static_cast<uint64_t>(7), poly1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[1]);
             ASSERT_EQ(static_cast<uint64_t>(9), poly1[2]);
@@ -147,9 +147,9 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), poly1[5]);
         }
 
-        TEST(PolyArith, SubPolyPoly)
+        TEST(PolyArith, SubPoly)
         {
-            sub_poly_poly(nullptr, nullptr, 0, 0, nullptr);
+            sub_poly(nullptr, nullptr, 0, 0, nullptr);
 
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(3, 2, pool));
@@ -167,7 +167,7 @@ namespace sealtest
             poly2[3] = 1;
             poly2[4] = 0xFFFFFFFFFFFFFFFF;
             poly2[5] = 1;
-            sub_poly_poly(poly1.get(), poly2.get(), 6, 1, poly1.get());
+            sub_poly(poly1.get(), poly2.get(), 6, 1, poly1.get());
             ASSERT_EQ(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), poly1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFE), poly1[1]);
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[2]);
@@ -187,7 +187,7 @@ namespace sealtest
             poly2[3] = 0;
             poly2[4] = 0xFFFFFFFFFFFFFFFE;
             poly2[5] = 0xFFFFFFFFFFFFFFFF;
-            sub_poly_poly(poly1.get(), poly2.get(), 3, 2, poly1.get());
+            sub_poly(poly1.get(), poly2.get(), 3, 2, poly1.get());
             ASSERT_EQ(static_cast<uint64_t>(3), poly1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[1]);
             ASSERT_EQ(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFE), poly1[2]);
@@ -196,7 +196,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0), poly1[5]);
         }
 
-        TEST(PolyArith, MultiplyPolyPoly)
+        TEST(PolyArith, MultiplyPoly)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto poly1(allocate_zero_poly(3, 2, pool));
@@ -208,7 +208,7 @@ namespace sealtest
             poly2[0] = 2;
             poly2[2] = 3;
             poly2[4] = 4;
-            multiply_poly_poly(poly1.get(), 3, 2, poly2.get(), 3, 2, 5, 2, result.get(), pool);
+            multiply_poly(poly1.get(), 3, 2, poly2.get(), 3, 2, 5, 2, result.get(), pool);
             ASSERT_EQ(static_cast<uint64_t>(2), result[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), result[1]);
             ASSERT_EQ(static_cast<uint64_t>(7), result[2]);
@@ -222,7 +222,7 @@ namespace sealtest
 
             poly2[0] = 2;
             poly2[1] = 3;
-            multiply_poly_poly(poly1.get(), 3, 2, poly2.get(), 2, 1, 5, 2, result.get(), pool);
+            multiply_poly(poly1.get(), 3, 2, poly2.get(), 2, 1, 5, 2, result.get(), pool);
             ASSERT_EQ(static_cast<uint64_t>(2), result[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), result[1]);
             ASSERT_EQ(static_cast<uint64_t>(7), result[2]);
@@ -234,7 +234,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0), result[8]);
             ASSERT_EQ(static_cast<uint64_t>(0), result[9]);
 
-            multiply_poly_poly(poly1.get(), 3, 2, poly2.get(), 2, 1, 5, 1, result.get(), pool);
+            multiply_poly(poly1.get(), 3, 2, poly2.get(), 2, 1, 5, 1, result.get(), pool);
             ASSERT_EQ(static_cast<uint64_t>(2), result[0]);
             ASSERT_EQ(static_cast<uint64_t>(7), result[1]);
             ASSERT_EQ(static_cast<uint64_t>(12), result[2]);

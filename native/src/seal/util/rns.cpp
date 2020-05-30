@@ -71,13 +71,13 @@ namespace seal
 
             // Copy over CRT data
             base_prod_ = allocate_uint(size_, pool_);
-            copy_n(copy.base_prod_.get(), size_, base_prod_.get());
+            set_uint(copy.base_prod_.get(), size_, base_prod_.get());
 
             punctured_prod_array_ = allocate_uint(size_ * size_, pool_);
-            copy_n(copy.punctured_prod_array_.get(), size_ * size_, punctured_prod_array_.get());
+            set_uint(copy.punctured_prod_array_.get(), size_ * size_, punctured_prod_array_.get());
 
             inv_punctured_prod_mod_base_array_ = allocate_uint(size_, pool_);
-            copy_n(copy.inv_punctured_prod_mod_base_array_.get(), size_, inv_punctured_prod_mod_base_array_.get());
+            set_uint(copy.inv_punctured_prod_mod_base_array_.get(), size_, inv_punctured_prod_mod_base_array_.get());
         }
 
         bool RNSBase::contains(const Modulus &value) const noexcept
@@ -263,8 +263,8 @@ namespace seal
 
                 // Compute the full product
                 auto temp_mpi(allocate_uint(size_, pool_));
-                multiply_uint_uint64(punctured_prod_array_.get(), size_, base_[0].value(), size_, temp_mpi.get());
-                set_uint_uint(temp_mpi.get(), size_, base_prod_.get());
+                multiply_uint(punctured_prod_array_.get(), size_, base_[0].value(), size_, temp_mpi.get());
+                set_uint(temp_mpi.get(), size_, base_prod_.get());
 
                 // Compute inverses of punctured products mod primes
                 for (size_t i = 0; i < size_; i++)
@@ -304,7 +304,7 @@ namespace seal
             {
                 // Copy the value
                 auto value_copy(allocate_uint(size_, pool));
-                set_uint_uint(value, size_, value_copy.get());
+                set_uint(value, size_, value_copy.get());
 
                 // Temporary space for 128-bit reductions
                 for (size_t i = 0; i < size_; i++)
@@ -346,7 +346,7 @@ namespace seal
                 auto value_copy(allocate_uint(count * size_, pool));
                 for (size_t i = 0; i < count; i++, value += size_)
                 {
-                    set_uint_uint(value, size_, value_copy.get());
+                    set_uint(value, size_, value_copy.get());
 
                     // Temporary space for 128-bit reductions
                     for (size_t j = 0; j < size_; j++)
@@ -381,7 +381,7 @@ namespace seal
             {
                 // Copy the value
                 auto temp_value(allocate_uint(size_, pool));
-                copy_n(value, size_, temp_value.get());
+                set_uint(value, size_, temp_value.get());
 
                 // Clear the result
                 set_zero_uint(size_, value);
@@ -391,9 +391,8 @@ namespace seal
                 for (size_t i = 0; i < size_; i++)
                 {
                     uint64_t temp_prod =
-                        multiply_uint_uint_mod(temp_value[i], inv_punctured_prod_mod_base_array_[i], base_[i]);
-                    multiply_uint_uint64(
-                        punctured_prod_array_.get() + (i * size_), size_, temp_prod, size_, temp_mpi.get());
+                        multiply_uint_mod(temp_value[i], inv_punctured_prod_mod_base_array_[i], base_[i]);
+                    multiply_uint(punctured_prod_array_.get() + (i * size_), size_, temp_prod, size_, temp_mpi.get());
                     add_uint_uint_mod(temp_mpi.get(), value, base_prod_.get(), size_, value);
                 }
             }
@@ -439,9 +438,9 @@ namespace seal
                     // Do CRT compose for each coefficient
                     for (size_t j = 0; j < size_; j++)
                     {
-                        uint64_t temp_prod = multiply_uint_uint_mod(
+                        uint64_t temp_prod = multiply_uint_mod(
                             temp_array[(i * size_) + j], inv_punctured_prod_mod_base_array_[j], base_[j]);
-                        multiply_uint_uint64(
+                        multiply_uint(
                             punctured_prod_array_.get() + (j * size_), size_, temp_prod, size_, temp_mpi.get());
                         add_uint_uint_mod(
                             temp_mpi.get(), value + (i * size_), base_prod_.get(), size_, value + (i * size_));
@@ -458,7 +457,7 @@ namespace seal
             auto temp(allocate_uint(ibase_size, pool));
             for (size_t i = 0; i < ibase_size; i++)
             {
-                temp[i] = multiply_uint_uint_mod(in[i], ibase_.inv_punctured_prod_mod_base_array()[i], ibase_[i]);
+                temp[i] = multiply_uint_mod(in[i], ibase_.inv_punctured_prod_mod_base_array()[i], ibase_[i]);
             }
 
             for (size_t j = 0; j < obase_size; j++)
@@ -473,7 +472,7 @@ namespace seal
             size_t ibase_size = ibase_.size();
             size_t obase_size = obase_.size();
 
-            auto temp(allocate_uint(count * ibase_size, pool));
+            auto temp(allocate_poly(count, ibase_size, pool));
             for (size_t i = 0; i < ibase_size; i++)
             {
                 uint64_t inv_ibase_punctured_prod_mod_ibase_elt = ibase_.inv_punctured_prod_mod_base_array()[i];
@@ -481,7 +480,7 @@ namespace seal
                 uint64_t *temp_ptr = temp.get() + i;
                 for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
                 {
-                    *temp_ptr = multiply_uint_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
+                    *temp_ptr = multiply_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
                 }
             }
 
@@ -613,7 +612,7 @@ namespace seal
             {
                 CreateNTTTables(
                     coeff_count_power, vector<Modulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_size),
-                    base_Bsk_small_ntt_tables_, pool_);
+                    base_Bsk_ntt_tables_, pool_);
             }
             catch (const logic_error &)
             {
@@ -701,7 +700,7 @@ namespace seal
                 for (size_t i = 0; i < base_q_size; i++)
                 {
                     prod_t_gamma_mod_q_[i] =
-                        multiply_uint_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), (*base_q_)[i]);
+                        multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), (*base_q_)[i]);
                 }
 
                 // Compute -prod(q)^(-1) mod {t, gamma}
@@ -762,10 +761,10 @@ namespace seal
                 uint64_t half_mod = barrett_reduce_63(half, (*base_q_)[i]);
                 for (size_t j = 0; j < coeff_count_; j++)
                 {
-                    temp_ptr[j] = sub_uint_uint_mod(temp_ptr[j], half_mod, (*base_q_)[i]);
+                    temp_ptr[j] = sub_uint64_mod(temp_ptr[j], half_mod, (*base_q_)[i]);
                 }
 
-                sub_poly_poly_coeffmod(
+                sub_poly_coeffmod(
                     input + (i * coeff_count_), temp_ptr, coeff_count_, (*base_q_)[i], input + (i * coeff_count_));
 
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
@@ -810,24 +809,44 @@ namespace seal
             uint64_t *temp_ptr = temp.get();
             for (size_t i = 0; i < base_q_size - 1; i++)
             {
+                const uint64_t qi = (*base_q_)[i].value();
                 // (ct mod qk) mod qi
-                modulo_poly_coeffs_63(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
-
-                uint64_t half_mod = barrett_reduce_63(half, (*base_q_)[i]);
-                for (size_t j = 0; j < coeff_count_; j++)
+                if (qi < last_modulus.value())
                 {
-                    temp_ptr[j] = sub_uint_uint_mod(temp_ptr[j], half_mod, (*base_q_)[i]);
+                    modulo_poly_coeffs_63(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
+                }
+                else
+                {
+                    set_uint(last_ptr, coeff_count_, temp_ptr);
                 }
 
-                ntt_negacyclic_harvey(temp_ptr, rns_ntt_tables[i]);
-
-                sub_poly_poly_coeffmod(
-                    input + (i * coeff_count_), temp_ptr, coeff_count_, (*base_q_)[i], input + (i * coeff_count_));
+                // lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
+                const uint64_t neg_half_mod = qi - barrett_reduce_63(half, (*base_q_)[i]);
+                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [neg_half_mod](uint64_t u) {
+                    return u + neg_half_mod;
+                });
+#if SEAL_USER_MOD_BIT_COUNT_MAX <= 60
+                // Since now SEAL use at most 60bit moduli, so 8*qi < 2^63.
+                // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
+                const uint64_t qi_lazy = qi << 2;
+                ntt_negacyclic_harvey_lazy(temp_ptr, rns_ntt_tables[i]);
+#else
+                // 2^60 < pi < 2^62, then 4*pi < 2^64, we perfrom one reduction from [0, 4*qi) to [0, 2*qi) after ntt.
+                const uint64_t qi_lazy = qi << 1;
+                ntt_negacyclic_harvey_lazy(temp_ptr, rns_ntt_tables[i]);
+                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [qi_lazy](uint64_t u) {
+                    return u -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(u >= qi_lazy)));
+                });
+#endif
+                // lazy subtraction again, results in [0, 2*qi_lazy),
+                // The reduction [0, 2*qi_lazy) -> [0, qi) is done implicitly in multiply_poly_scalar_coeffmod.
+                std::transform(input, input + coeff_count_, temp_ptr, input, [qi_lazy](uint64_t u, uint64_t v) {
+                    return u + qi_lazy - v;
+                });
 
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(
-                    input + (i * coeff_count_), coeff_count_, inv_q_last_mod_q_[i], (*base_q_)[i],
-                    input + (i * coeff_count_));
+                multiply_poly_scalar_coeffmod(input, coeff_count_, inv_q_last_mod_q_[i], (*base_q_)[i], input);
+                input += coeff_count_;
             }
         }
 
@@ -874,7 +893,7 @@ namespace seal
             {
                 // It is not necessary for the negation to be reduced modulo the small prime
                 alpha_sk_ptr[i] =
-                    multiply_uint_uint_mod(temp_ptr[i] + (m_sk_value - input_ptr[i]), inv_prod_B_mod_m_sk_, m_sk_);
+                    multiply_uint_mod(temp_ptr[i] + (m_sk_value - input_ptr[i]), inv_prod_B_mod_m_sk_, m_sk_);
             }
 
             // alpha_sk is now ready for the Shenoy-Kumaresan conversion; however, note that our
@@ -934,7 +953,7 @@ namespace seal
             auto r_m_tilde(allocate_uint(coeff_count_, pool));
             for (size_t i = 0; i < coeff_count_; i++)
             {
-                uint64_t temp = multiply_uint_uint_mod(input_m_tilde_ptr[i], inv_prod_q_mod_m_tilde_, m_tilde_);
+                uint64_t temp = multiply_uint_mod(input_m_tilde_ptr[i], inv_prod_q_mod_m_tilde_, m_tilde_);
                 r_m_tilde[i] = negate_uint_mod(temp, m_tilde_);
             }
 
@@ -954,7 +973,7 @@ namespace seal
                     }
 
                     // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk
-                    *destination = multiply_uint_uint_mod(
+                    *destination = multiply_uint_mod(
                         multiply_add_uint_mod(prod_q_mod_Bsk_elt, temp, *input, base_Bsk_elt), inv_m_tilde_mod_Bsk_elt,
                         base_Bsk_elt);
                 }
@@ -997,7 +1016,7 @@ namespace seal
                 for (size_t k = 0; k < coeff_count_; k++, input++, destination++)
                 {
                     // It is not necessary for the negation to be reduced modulo base_Bsk_elt
-                    *destination = multiply_uint_uint_mod(
+                    *destination = multiply_uint_mod(
                         *input + (base_Bsk_elt.value() - *destination), inv_prod_q_mod_Bsk_elt, base_Bsk_elt);
                 }
             }
@@ -1088,21 +1107,20 @@ namespace seal
                 if (temp_t_gamma[i + coeff_count_] > gamma_div_2)
                 {
                     // Compute -(gamma - a) instead of (a - gamma)
-                    destination[i] = add_uint_uint_mod(
+                    destination[i] = add_uint64_mod(
                         temp_t_gamma[i], (gamma_.value() - temp_t_gamma[i + coeff_count_]) % t_.value(), t_);
                 }
                 // No correction needed
                 else
                 {
-                    destination[i] =
-                        sub_uint_uint_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
+                    destination[i] = sub_uint64_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
                 }
 
                 // If this coefficient was non-zero, multiply by t^(-1)
                 if (0 != destination[i])
                 {
                     // Perform final multiplication by gamma inverse mod t
-                    destination[i] = multiply_uint_uint_mod(destination[i], inv_gamma_mod_t_, t_);
+                    destination[i] = multiply_uint_mod(destination[i], inv_gamma_mod_t_, t_);
                 }
             }
         }

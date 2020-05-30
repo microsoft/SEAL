@@ -82,15 +82,12 @@ namespace seal
             shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
             // Generate secret key
-            uint64_t *secret_key = secret_key_.data().data();
+            RNSIter secret_key(secret_key_.data().data(), coeff_count);
             sample_poly_ternary(random, parms, secret_key);
 
-            auto small_ntt_tables = context_data.small_ntt_tables();
-            for (size_t i = 0; i < coeff_modulus_size; i++)
-            {
-                // Transform the secret s into NTT representation.
-                ntt_negacyclic_harvey(secret_key + (i * coeff_count), small_ntt_tables[i]);
-            }
+            // Transform the secret s into NTT representation.
+            auto ntt_tables = context_data.small_ntt_tables();
+            ntt_negacyclic_harvey(secret_key, coeff_modulus_size, ntt_tables);
 
             // Set the parms_id for secret key
             secret_key_.parms_id() = context_data.parms_id();
@@ -98,7 +95,7 @@ namespace seal
 
         // Set the secret_key_array to have size 1 (first power of secret)
         secret_key_array_ = allocate_poly(coeff_count, coeff_modulus_size, pool_);
-        set_poly_poly(secret_key_.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
+        set_poly(secret_key_.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
         secret_key_array_size_ = 1;
 
         // Secret key has been generated
@@ -171,9 +168,8 @@ namespace seal
         RelinKeys relin_keys;
 
         // Assume the secret key is already transformed into NTT form.
-        generate_kswitch_keys(
-            secret_key_array_.get() + coeff_modulus_size * coeff_count, count, static_cast<KSwitchKeys &>(relin_keys),
-            save_seed);
+        ConstPolyIter secret_key(secret_key_array_.get(), coeff_count, coeff_modulus_size);
+        generate_kswitch_keys(secret_key + 1, count, static_cast<KSwitchKeys &>(relin_keys), save_seed);
 
         // Set the parms_id
         relin_keys.parms_id() = context_data.parms_id();
@@ -229,14 +225,9 @@ namespace seal
             }
 
             // Rotate secret key for each coeff_modulus
-            auto rotated_secret_key(allocate_poly(coeff_count, coeff_modulus_size, pool_));
-            for (size_t i = 0; i < coeff_modulus_size; i++)
-            {
-                const_cast<GaloisTool *>(galois_tool)
-                    ->apply_galois_ntt(
-                        secret_key_.data().data() + i * coeff_count, galois_elt,
-                        rotated_secret_key.get() + i * coeff_count);
-            }
+            SEAL_ALLOCATE_GET_RNS_ITER(rotated_secret_key, coeff_count, coeff_modulus_size, pool_);
+            RNSIter secret_key(secret_key_.data().data(), coeff_count);
+            galois_tool->apply_galois_ntt(secret_key, coeff_modulus_size, galois_elt, rotated_secret_key);
 
             // Initialize Galois key
             // This is the location in the galois_keys vector
@@ -244,7 +235,7 @@ namespace seal
             shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
             // Create Galois keys.
-            generate_one_kswitch_key(rotated_secret_key.get(), galois_keys.data()[index], save_seed);
+            generate_one_kswitch_key(rotated_secret_key, galois_keys.data()[index], save_seed);
         }
 
         // Set the parms_id
@@ -300,28 +291,19 @@ namespace seal
 
         // Need to extend the array
         // Compute powers of secret key until max_power
-        auto new_secret_key_array(allocate_poly(new_size * coeff_count, coeff_modulus_size, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_size, new_secret_key_array.get());
+        auto secret_key_array(allocate_poly_array(new_size, coeff_count, coeff_modulus_size, pool_));
+        set_poly_array(secret_key_array_.get(), old_size, coeff_count, coeff_modulus_size, secret_key_array.get());
+        RNSIter secret_key(secret_key_array.get(), coeff_count);
 
-        size_t poly_ptr_increment = coeff_count * coeff_modulus_size;
-        uint64_t *prev_poly_ptr = new_secret_key_array.get() + (old_size - 1) * poly_ptr_increment;
-        uint64_t *next_poly_ptr = prev_poly_ptr + poly_ptr_increment;
+        PolyIter secret_key_power(secret_key_array.get(), coeff_count, coeff_modulus_size);
+        secret_key_power += (old_size - 1);
+        auto next_secret_key_power = secret_key_power + 1;
 
-        // Since all of the key powers in secret_key_array_ are already
-        // NTT transformed, to get the next one we simply need to compute
-        // a dyadic product of the last one with the first one
-        // [which is equal to NTT(secret_key_)].
-        for (size_t i = old_size; i < new_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_size; j++)
-            {
-                dyadic_product_coeffmod(
-                    prev_poly_ptr + (j * coeff_count), new_secret_key_array.get() + (j * coeff_count), coeff_count,
-                    coeff_modulus[j], next_poly_ptr + (j * coeff_count));
-            }
-            prev_poly_ptr = next_poly_ptr;
-            next_poly_ptr += poly_ptr_increment;
-        }
+        // Since all of the key powers in secret_key_array_ are already NTT transformed, to get the next one we simply
+        // need to compute a dyadic product of the last one with the first one [which is equal to NTT(secret_key_)].
+        SEAL_ITERATE(iter(secret_key_power, next_secret_key_power), new_size - old_size, [&](auto I) {
+            dyadic_product_coeffmod(get<0>(I), secret_key, coeff_modulus_size, coeff_modulus, get<1>(I));
+        });
 
         // Take writer lock to update array
         WriterLock writer_lock(secret_key_array_locker_.acquire_write());
@@ -337,11 +319,11 @@ namespace seal
 
         // Acquire new array
         secret_key_array_size_ = new_size;
-        secret_key_array_.acquire(new_secret_key_array);
+        secret_key_array_.acquire(secret_key_array);
     }
 
     void KeyGenerator::generate_one_kswitch_key(
-        const uint64_t *new_key, std::vector<PublicKey> &destination, bool save_seed)
+        ConstRNSIter new_key, std::vector<PublicKey> &destination, bool save_seed)
     {
         if (!context_->using_keyswitching())
         {
@@ -353,7 +335,6 @@ namespace seal
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
         auto &key_modulus = key_parms.coeff_modulus();
-        shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
         if (!product_fits_in(coeff_count, decomp_mod_count))
@@ -364,41 +345,45 @@ namespace seal
         // KSwitchKeys data allocated from pool given by MemoryManager::GetPool.
         destination.resize(decomp_mod_count);
 
-        auto temp(allocate_uint(coeff_count, pool_));
-        uint64_t factor = 0;
-        for (size_t j = 0; j < decomp_mod_count; j++)
-        {
+        SEAL_ITERATE(iter(new_key, key_modulus, destination, size_t(0)), decomp_mod_count, [&](auto I) {
+            SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count, pool_);
             encrypt_zero_symmetric(
-                secret_key_, context_, key_context_data.parms_id(), true, save_seed, destination[j].data());
-            factor = key_modulus.back().value() % key_modulus[j].value();
-            multiply_poly_scalar_coeffmod(new_key + j * coeff_count, coeff_count, factor, key_modulus[j], temp.get());
-            add_poly_poly_coeffmod(
-                destination[j].data().data() + j * coeff_count, temp.get(), coeff_count, key_modulus[j],
-                destination[j].data().data() + j * coeff_count);
-        }
+                secret_key_, context_, key_context_data.parms_id(), true, save_seed, get<2>(I)->data());
+            uint64_t factor = barrett_reduce_63(key_modulus.back().value(), *get<1>(I));
+            multiply_poly_scalar_coeffmod(get<0>(I), coeff_count, factor, *get<1>(I), temp);
+
+            // We use the SeqIter at get<3>(I) to find the i-th RNS factor of the first destination polynomial.
+            CoeffIter destination_iter = (*iter(get<2>(I)->data()))[get<3>(I)];
+            add_poly_coeffmod(destination_iter, temp, coeff_count, *get<1>(I), destination_iter);
+        });
     }
 
     void KeyGenerator::generate_kswitch_keys(
-        const uint64_t *new_keys, size_t num_keys, KSwitchKeys &destination, bool save_seed)
+        ConstPolyIter new_keys, size_t num_keys, KSwitchKeys &destination, bool save_seed)
     {
         size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
         auto &key_context_data = *context_->key_context_data();
         auto &key_parms = key_context_data.parms();
         size_t coeff_modulus_size = key_parms.coeff_modulus().size();
-        shared_ptr<UniformRandomGenerator> random(key_parms.random_generator()->create());
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_size, num_keys))
         {
             throw logic_error("invalid parameters");
         }
-
-        destination.data().resize(num_keys);
-        auto temp(allocate_uint(coeff_count, pool_));
-        for (size_t l = 0; l < num_keys; l++)
+#ifdef SEAL_DEBUG
+        if (new_keys.poly_modulus_degree() != coeff_count)
         {
-            const uint64_t *new_key_ptr = new_keys + l * coeff_modulus_size * coeff_count;
-            generate_one_kswitch_key(new_key_ptr, destination.data()[l], save_seed);
+            throw invalid_argument("iterator is incompatible with encryption parameters");
         }
+        if (new_keys.coeff_modulus_size() != coeff_modulus_size)
+        {
+            throw invalid_argument("iterator is incompatible with encryption parameters");
+        }
+#endif
+        destination.data().resize(num_keys);
+        SEAL_ITERATE(iter(new_keys, destination.data()), num_keys, [&](auto I) {
+            generate_one_kswitch_key(get<0>(I), *get<1>(I), save_seed);
+        });
     }
 } // namespace seal

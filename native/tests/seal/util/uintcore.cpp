@@ -85,20 +85,20 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0), ptr[1]);
         }
 
-        TEST(UIntCore, SetUIntUInt)
+        TEST(UIntCore, SetUInt2)
         {
-            set_uint_uint(nullptr, 0, nullptr);
+            set_uint(nullptr, 0, nullptr);
 
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto ptr1(allocate_uint(1, pool));
             ptr1[0] = 0x1234567887654321;
             auto ptr2(allocate_uint(1, pool));
             ptr2[0] = 0xFFFFFFFFFFFFFFFF;
-            set_uint_uint(ptr1.get(), 1, ptr2.get());
+            set_uint(ptr1.get(), 1, ptr2.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1234567887654321), ptr2[0]);
 
             ptr1[0] = 0x1231231231231231;
-            set_uint_uint(ptr1.get(), 1, ptr1.get());
+            set_uint(ptr1.get(), 1, ptr1.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1231231231231231), ptr1[0]);
 
             ptr1 = allocate_uint(2, pool);
@@ -107,42 +107,42 @@ namespace sealtest
             ptr1[1] = 0x8765432112345678;
             ptr2[0] = 0xFFFFFFFFFFFFFFFF;
             ptr2[1] = 0xFFFFFFFFFFFFFFFF;
-            set_uint_uint(ptr1.get(), 2, ptr2.get());
+            set_uint(ptr1.get(), 2, ptr2.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1234567887654321), ptr2[0]);
             ASSERT_EQ(static_cast<uint64_t>(0x8765432112345678), ptr2[1]);
 
             ptr1[0] = 0x1231231231231321;
             ptr1[1] = 0x3213213213213211;
-            set_uint_uint(ptr1.get(), 2, ptr1.get());
+            set_uint(ptr1.get(), 2, ptr1.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1231231231231321), ptr1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0x3213213213213211), ptr1[1]);
         }
 
-        TEST(UIntCore, SetUIntUInt2)
+        TEST(UIntCore, SetUInt3)
         {
-            set_uint_uint(nullptr, 0, 0, nullptr);
+            set_uint(nullptr, 0, 0, nullptr);
 
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto ptr1(allocate_uint(1, pool));
             ptr1[0] = 0x1234567887654321;
-            set_uint_uint(nullptr, 0, 1, ptr1.get());
+            set_uint(nullptr, 0, 1, ptr1.get());
             ASSERT_EQ(static_cast<uint64_t>(0), ptr1[0]);
 
             auto ptr2(allocate_uint(1, pool));
             ptr1[0] = 0x1234567887654321;
             ptr2[0] = 0xFFFFFFFFFFFFFFFF;
-            set_uint_uint(ptr1.get(), 1, 1, ptr2.get());
+            set_uint(ptr1.get(), 1, 1, ptr2.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1234567887654321), ptr2[0]);
 
             ptr1[0] = 0x1231231231231231;
-            set_uint_uint(ptr1.get(), 1, 1, ptr1.get());
+            set_uint(ptr1.get(), 1, 1, ptr1.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1231231231231231), ptr1[0]);
 
             ptr1 = allocate_uint(2, pool);
             ptr2 = allocate_uint(2, pool);
             ptr1[0] = 0x1234567887654321;
             ptr1[1] = 0x8765432112345678;
-            set_uint_uint(nullptr, 0, 2, ptr1.get());
+            set_uint(nullptr, 0, 2, ptr1.get());
             ASSERT_EQ(static_cast<uint64_t>(0), ptr1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), ptr1[1]);
 
@@ -150,23 +150,23 @@ namespace sealtest
             ptr1[1] = 0x8765432112345678;
             ptr2[0] = 0xFFFFFFFFFFFFFFFF;
             ptr2[1] = 0xFFFFFFFFFFFFFFFF;
-            set_uint_uint(ptr1.get(), 1, 2, ptr2.get());
+            set_uint(ptr1.get(), 1, 2, ptr2.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1234567887654321), ptr2[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), ptr2[1]);
 
             ptr2[0] = 0xFFFFFFFFFFFFFFFF;
             ptr2[1] = 0xFFFFFFFFFFFFFFFF;
-            set_uint_uint(ptr1.get(), 2, 2, ptr2.get());
+            set_uint(ptr1.get(), 2, 2, ptr2.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1234567887654321), ptr2[0]);
             ASSERT_EQ(static_cast<uint64_t>(0x8765432112345678), ptr2[1]);
 
             ptr1[0] = 0x1231231231231321;
             ptr1[1] = 0x3213213213213211;
-            set_uint_uint(ptr1.get(), 2, 2, ptr1.get());
+            set_uint(ptr1.get(), 2, 2, ptr1.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1231231231231321), ptr1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0x3213213213213211), ptr1[1]);
 
-            set_uint_uint(ptr1.get(), 1, 2, ptr1.get());
+            set_uint(ptr1.get(), 1, 2, ptr1.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1231231231231321), ptr1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), ptr1[1]);
         }
@@ -562,15 +562,15 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(0), ptr[1]);
         }
 
-        TEST(UIntCore, CompareUIntUInt)
+        TEST(UIntCore, CompareUInt)
         {
-            ASSERT_EQ(0, compare_uint_uint(nullptr, nullptr, 0));
-            ASSERT_TRUE(is_equal_uint_uint(nullptr, nullptr, 0));
-            ASSERT_FALSE(is_not_equal_uint_uint(nullptr, nullptr, 0));
-            ASSERT_FALSE(is_greater_than_uint_uint(nullptr, nullptr, 0));
-            ASSERT_FALSE(is_less_than_uint_uint(nullptr, nullptr, 0));
-            ASSERT_TRUE(is_greater_than_or_equal_uint_uint(nullptr, nullptr, 0));
-            ASSERT_TRUE(is_less_than_or_equal_uint_uint(nullptr, nullptr, 0));
+            ASSERT_EQ(0, compare_uint(nullptr, nullptr, 0));
+            ASSERT_TRUE(is_equal_uint(nullptr, nullptr, 0));
+            ASSERT_FALSE(is_not_equal_uint(nullptr, nullptr, 0));
+            ASSERT_FALSE(is_greater_than_uint(nullptr, nullptr, 0));
+            ASSERT_FALSE(is_less_than_uint(nullptr, nullptr, 0));
+            ASSERT_TRUE(is_greater_than_or_equal_uint(nullptr, nullptr, 0));
+            ASSERT_TRUE(is_less_than_or_equal_uint(nullptr, nullptr, 0));
 
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto ptr1(allocate_uint(2, pool));
@@ -579,97 +579,97 @@ namespace sealtest
             ptr1[1] = 0;
             ptr2[0] = 0;
             ptr2[1] = 0;
-            ASSERT_EQ(0, compare_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_not_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_greater_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_less_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_greater_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_less_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_EQ(0, compare_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_not_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_greater_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_less_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_greater_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
 
             ptr1[0] = 0x1234567887654321;
             ptr1[1] = 0x8765432112345678;
             ptr2[0] = 0x1234567887654321;
             ptr2[1] = 0x8765432112345678;
-            ASSERT_EQ(0, compare_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_not_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_greater_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_less_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_greater_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_less_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_EQ(0, compare_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_not_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_greater_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_less_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_greater_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
 
             ptr1[0] = 1;
             ptr1[1] = 0;
             ptr2[0] = 2;
             ptr2[1] = 0;
-            ASSERT_EQ(-1, compare_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_not_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_greater_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_less_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_greater_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_less_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_EQ(-1, compare_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_not_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_greater_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_greater_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
 
             ptr1[0] = 1;
             ptr1[1] = 0xFFFFFFFFFFFFFFFF;
             ptr2[0] = 2;
             ptr2[1] = 0xFFFFFFFFFFFFFFFF;
-            ASSERT_EQ(-1, compare_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_not_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_greater_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_less_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_greater_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_less_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_EQ(-1, compare_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_not_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_greater_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_greater_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
 
             ptr1[0] = 0xFFFFFFFFFFFFFFFF;
             ptr1[1] = 0x0000000000000001;
             ptr2[0] = 0x0000000000000000;
             ptr2[1] = 0x0000000000000002;
-            ASSERT_EQ(-1, compare_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_not_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_greater_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_less_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_greater_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_less_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_EQ(-1, compare_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_not_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_greater_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_greater_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
 
             ptr1[0] = 2;
             ptr1[1] = 0;
             ptr2[0] = 1;
             ptr2[1] = 0;
-            ASSERT_EQ(1, compare_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_not_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_greater_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_less_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_greater_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_less_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_EQ(1, compare_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_not_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_greater_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_less_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_greater_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
 
             ptr1[0] = 2;
             ptr1[1] = 0xFFFFFFFFFFFFFFFF;
             ptr2[0] = 1;
             ptr2[1] = 0xFFFFFFFFFFFFFFFF;
-            ASSERT_EQ(1, compare_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_not_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_greater_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_less_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_greater_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_less_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_EQ(1, compare_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_not_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_greater_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_less_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_greater_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
 
             ptr1[0] = 0xFFFFFFFFFFFFFFFF;
             ptr1[1] = 0x0000000000000003;
             ptr2[0] = 0x0000000000000000;
             ptr2[1] = 0x0000000000000002;
-            ASSERT_EQ(1, compare_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_not_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_greater_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_less_than_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_TRUE(is_greater_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
-            ASSERT_FALSE(is_less_than_or_equal_uint_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_EQ(1, compare_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_not_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_greater_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_less_than_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_TRUE(is_greater_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
+            ASSERT_FALSE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
         }
 
         TEST(UIntCore, GetPowerOfTwo)

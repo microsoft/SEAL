@@ -44,7 +44,7 @@ namespace seal
         // Set the secret_key_array to have size 1 (first power of secret)
         // and copy over data
         secret_key_array_ = allocate_poly(coeff_count, coeff_modulus_size, pool_);
-        set_poly_poly(secret_key.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
+        set_poly(secret_key.data().data(), coeff_count, coeff_modulus_size, secret_key_array_.get());
         secret_key_array_size_ = 1;
     }
 
@@ -93,18 +93,18 @@ namespace seal
         // Therefore, we can (integer) divide by Delta and the answer will round down to m.
 
         // Make a temp destination for all the arithmetic mod qi before calling FastBConverse
-        auto tmp_dest_modq(allocate_zero_poly(coeff_count, coeff_modulus_size, pool));
+        SEAL_ALLOCATE_ZERO_GET_RNS_ITER(tmp_dest_modq, coeff_count, coeff_modulus_size, pool);
 
         // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
-        dot_product_ct_sk_array(encrypted, tmp_dest_modq.get(), pool_);
+        dot_product_ct_sk_array(encrypted, tmp_dest_modq, pool_);
 
         // Allocate a full size destination to write to
         destination.resize(coeff_count);
 
         // Divide scaling variant using BEHZ FullRNS techniques
-        context_data.rns_tool()->decrypt_scale_and_round(tmp_dest_modq.get(), destination.data(), pool);
+        context_data.rns_tool()->decrypt_scale_and_round(tmp_dest_modq, destination.data(), pool);
 
         // How many non-zero coefficients do we really have in the result?
         size_t plain_coeff_count = get_significant_uint64_count_uint(destination.data(), coeff_count);
@@ -141,12 +141,8 @@ namespace seal
         // Resize destination to appropriate size
         destination.resize(rns_poly_uint64_count);
 
-        // Make a temp destination for all the arithmetic mod q1, q2, q3
-        // auto tmp_dest_modq(allocate_zero_poly(coeff_count, decryption_coeff_modulus_size, pool));
-        // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
-        // Now do the dot product of encrypted_copy and the secret key array using NTT.
-        // The secret key powers are already NTT transformed.
-        dot_product_ct_sk_array(encrypted, destination.data(), pool);
+        // Do the dot product of encrypted and the secret key array using NTT.
+        dot_product_ct_sk_array(encrypted, RNSIter(destination.data(), coeff_count), pool);
 
         // Set destination parameters as in encrypted
         destination.parms_id() = encrypted.parms_id();
@@ -171,7 +167,6 @@ namespace seal
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
-        size_t key_rns_poly_uint64_count = mul_safe(coeff_count, coeff_modulus_size);
 
         ReaderLock reader_lock(secret_key_array_locker_.acquire_read());
 
@@ -187,29 +182,19 @@ namespace seal
 
         // Need to extend the array
         // Compute powers of secret key until max_power
-        auto new_secret_key_array(allocate_poly(mul_safe(new_size, coeff_count), coeff_modulus_size, pool_));
-        set_poly_poly(secret_key_array_.get(), old_size * coeff_count, coeff_modulus_size, new_secret_key_array.get());
-
-        set_poly_poly(
-            secret_key_array_.get(), mul_safe(old_size, coeff_count), coeff_modulus_size, new_secret_key_array.get());
-
-        uint64_t *prev_poly_ptr = new_secret_key_array.get() + mul_safe(old_size - 1, key_rns_poly_uint64_count);
-        uint64_t *next_poly_ptr = prev_poly_ptr + key_rns_poly_uint64_count;
+        auto secret_key_array(allocate_poly_array(new_size, coeff_count, coeff_modulus_size, pool_));
+        PolyIter secret_key_array_iter(secret_key_array.get(), coeff_count, coeff_modulus_size);
+        set_poly_array(secret_key_array_.get(), old_size, coeff_count, coeff_modulus_size, secret_key_array_iter);
 
         // Since all of the key powers in secret_key_array_ are already NTT transformed,
         // to get the next one we simply need to compute a dyadic product of the last
         // one with the first one [which is equal to NTT(secret_key_)].
-        for (size_t i = old_size; i < new_size; i++)
-        {
-            for (size_t j = 0; j < coeff_modulus_size; j++)
-            {
+        SEAL_ITERATE(
+            iter(secret_key_array_iter + (old_size - 1), secret_key_array_iter + old_size), new_size - old_size,
+            [&](auto I) {
                 dyadic_product_coeffmod(
-                    prev_poly_ptr + (j * coeff_count), new_secret_key_array.get() + (j * coeff_count), coeff_count,
-                    coeff_modulus[j], next_poly_ptr + (j * coeff_count));
-            }
-            prev_poly_ptr = next_poly_ptr;
-            next_poly_ptr += key_rns_poly_uint64_count;
-        }
+                    get<0>(I), *secret_key_array_iter, coeff_modulus_size, coeff_modulus, get<1>(I));
+            });
 
         // Take writer lock to update array
         WriterLock writer_lock(secret_key_array_locker_.acquire_write());
@@ -225,66 +210,60 @@ namespace seal
 
         // Acquire new array
         secret_key_array_size_ = new_size;
-        secret_key_array_.acquire(new_secret_key_array);
+        secret_key_array_.acquire(move(secret_key_array));
     }
 
     // Compute c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q.
     // Store result in destination in RNS form.
-    void Decryptor::dot_product_ct_sk_array(const Ciphertext &encrypted, uint64_t *destination, MemoryPoolHandle pool)
+    void Decryptor::dot_product_ct_sk_array(const Ciphertext &encrypted, RNSIter destination, MemoryPoolHandle pool)
     {
         auto &context_data = *context_->get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
-        size_t rns_poly_uint64_count = mul_safe(coeff_count, coeff_modulus_size);
-        size_t key_rns_poly_uint64_count =
-            mul_safe(coeff_count, context_->key_context_data()->parms().coeff_modulus().size());
+        size_t key_coeff_modulus_size = context_->key_context_data()->parms().coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
         auto is_ntt_form = encrypted.is_ntt_form();
 
-        auto small_ntt_tables = context_data.small_ntt_tables();
+        auto ntt_tables = context_data.small_ntt_tables();
 
         // Make sure we have enough secret key powers computed
         compute_secret_key_array(encrypted_size - 1);
 
         // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
-
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
-        auto copy_operand1(allocate_uint(coeff_count, pool));
 
-        for (size_t i = 0; i < coeff_modulus_size; i++)
+        SEAL_ALLOCATE_GET_POLY_ITER(encrypted_copy, encrypted_size - 1, coeff_count, coeff_modulus_size, pool);
+        set_poly_array(encrypted.data(1), encrypted_size - 1, coeff_count, coeff_modulus_size, encrypted_copy);
+
+        // Transform c_1, c_2, ... to NTT form unless they already are
+        if (!is_ntt_form)
         {
-            // Initialize pointers for multiplication
-            const uint64_t *encrypted_ptr = encrypted.data(1) + (i * coeff_count);
-            const uint64_t *secret_key_ptr = secret_key_array_.get() + (i * coeff_count);
-            uint64_t *destination_ptr = destination + (i * coeff_count);
-            set_zero_uint(coeff_count, destination_ptr);
-            for (size_t j = 0; j < encrypted_size - 1; j++)
-            {
-                set_uint_uint(encrypted_ptr, coeff_count, copy_operand1.get());
-                if (!is_ntt_form)
-                {
-                    ntt_negacyclic_harvey_lazy(copy_operand1.get(), small_ntt_tables[i]);
-                }
-                // compute c_{j+1} * s^{j+1}
-                dyadic_product_coeffmod(
-                    copy_operand1.get(), secret_key_ptr, coeff_count, coeff_modulus[i], copy_operand1.get());
-                // add c_{j+1} * s^{j+1} to destination
-                add_poly_poly_coeffmod(
-                    destination_ptr, copy_operand1.get(), coeff_count, coeff_modulus[i], destination_ptr);
-                encrypted_ptr += rns_poly_uint64_count;
-                secret_key_ptr += key_rns_poly_uint64_count;
-            }
-            if (!is_ntt_form)
-            {
-                inverse_ntt_negacyclic_harvey(destination_ptr, small_ntt_tables[i]);
-            }
-            // add c_0 into destination
-            add_poly_poly_coeffmod(
-                destination_ptr, encrypted.data() + (i * coeff_count), coeff_count, coeff_modulus[i], destination_ptr);
+            ntt_negacyclic_harvey_lazy(encrypted_copy, encrypted_size - 1, ntt_tables);
         }
+
+        // Compute dyadic product with secret power array
+        auto secret_key_array = PolyIter(secret_key_array_.get(), coeff_count, key_coeff_modulus_size);
+        SEAL_ITERATE(iter(encrypted_copy, secret_key_array), encrypted_size - 1, [&](auto I) {
+            dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_modulus_size, coeff_modulus, get<0>(I));
+        });
+
+        // Aggregate all polynomials together to complete the dot product
+        set_zero_poly(coeff_count, coeff_modulus_size, destination);
+        SEAL_ITERATE(encrypted_copy, encrypted_size - 1, [&](auto I) {
+            add_poly_coeffmod(destination, I, coeff_modulus_size, coeff_modulus, destination);
+        });
+
+        if (!is_ntt_form)
+        {
+            // If the input was not in NTT form, need to transform back
+            inverse_ntt_negacyclic_harvey(destination, coeff_modulus_size, ntt_tables);
+        }
+
+        // Finally add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
+        add_poly_coeffmod(destination, *iter(encrypted), coeff_modulus_size, coeff_modulus, destination);
     }
 
     int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
@@ -315,7 +294,7 @@ namespace seal
         auto norm(allocate_uint(coeff_modulus_size, pool_));
 
         // Storage for noise poly
-        auto noise_poly(allocate_zero_poly(coeff_count, coeff_modulus_size, pool_));
+        SEAL_ALLOCATE_ZERO_GET_RNS_ITER(noise_poly, coeff_count, coeff_modulus_size, pool_);
 
         // Now need to compute c(s) - Delta*m (mod q)
         // Firstly find c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q
@@ -324,23 +303,18 @@ namespace seal
         // in destination_poly.
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
-        dot_product_ct_sk_array(encrypted, noise_poly.get(), pool_);
+        dot_product_ct_sk_array(encrypted, noise_poly, pool_);
 
-        for (size_t i = 0; i < coeff_modulus_size; i++)
-        {
-            // Multiply by plain_modulus and reduce mod coeff_modulus to get
-            // coeff_modulus()*noise.
-            multiply_poly_scalar_coeffmod(
-                noise_poly.get() + i * coeff_count, coeff_count, plain_modulus.value(), coeff_modulus[i],
-                noise_poly.get() + i * coeff_count);
-        }
+        // Multiply by plain_modulus and reduce mod coeff_modulus to get
+        // coeff_modulus()*noise.
+        multiply_poly_scalar_coeffmod(noise_poly, coeff_modulus_size, plain_modulus.value(), coeff_modulus, noise_poly);
 
         // CRT-compose the noise
-        context_data.rns_tool()->base_q()->compose_array(noise_poly.get(), coeff_count, pool_);
+        context_data.rns_tool()->base_q()->compose_array(noise_poly, coeff_count, pool_);
 
         // Next we compute the infinity norm mod parms.coeff_modulus()
         poly_infty_norm_coeffmod(
-            noise_poly.get(), coeff_count, coeff_modulus_size, context_data.total_coeff_modulus(), norm.get(), pool_);
+            noise_poly, coeff_count, coeff_modulus_size, context_data.total_coeff_modulus(), norm.get(), pool_);
 
         // The -1 accounts for scaling the invariant noise by 2;
         // note that we already took plain_modulus into account in compose

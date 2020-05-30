@@ -249,7 +249,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<T> span()
         {
-            return gsl::span<T>(begin(), static_cast<std::ptrdiff_t>(size_));
+            return gsl::span<T>(begin(), size_);
         }
 
         /**
@@ -257,7 +257,7 @@ namespace seal
         */
         SEAL_NODISCARD inline gsl::span<const T> span() const
         {
-            return gsl::span<const T>(cbegin(), static_cast<std::ptrdiff_t>(size_));
+            return gsl::span<const T>(cbegin(), size_);
         }
 #endif
         /**

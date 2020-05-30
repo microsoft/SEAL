@@ -39,12 +39,12 @@ namespace seal
 
                 // Compute fix[0] = floor(numerator / t)
                 uint64_t fix[2] = { 0, 0 };
-                divide_uint128_uint64_inplace(numerator, plain_modulus.value(), fix);
+                divide_uint128_inplace(numerator, plain_modulus.value(), fix);
 
                 // Add to ciphertext: floor(q / t) * m + increment
                 for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    destination[j * coeff_count] = add_uint_uint_mod(
+                    destination[j * coeff_count] = add_uint64_mod(
                         multiply_add_uint_mod(coeff_div_plain_modulus[j], plain.data()[i], fix[0], coeff_modulus[j]),
                         destination[j * coeff_count], coeff_modulus[j]);
                 }
@@ -78,12 +78,12 @@ namespace seal
 
                 // Compute fix[0] = floor(numerator / t)
                 uint64_t fix[2] = { 0, 0 };
-                divide_uint128_uint64_inplace(numerator, plain_modulus.value(), fix);
+                divide_uint128_inplace(numerator, plain_modulus.value(), fix);
 
                 // Add to ciphertext: floor(q / t) * m + increment
                 for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    destination[j * coeff_count] = sub_uint_uint_mod(
+                    destination[j * coeff_count] = sub_uint64_mod(
                         destination[j * coeff_count],
                         multiply_add_uint_mod(coeff_div_plain_modulus[j], plain.data()[i], fix[0], coeff_modulus[j]),
                         coeff_modulus[j]);

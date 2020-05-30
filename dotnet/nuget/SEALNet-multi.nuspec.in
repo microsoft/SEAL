@@ -29,6 +29,7 @@
     <file src="$NUGET_ANDROIDARM64_SEAL_C_PATH$" target="runtimes/android-arm64" />
     <file src="$NUGET_ANDROIDX64_SEAL_C_PATH$" target="runtimes/android-x64" />
     <file src="../../lib/dotnet/$configuration$/netstandard2.0/SEALNet.dll" target="lib/netstandard2.0/" />
+    <file src="../../lib/dotnet/$configuration$/SEALNet.xml" target="lib/netstandard2.0/" />
     <file src="../../LICENSE" target="LICENSE" />
   </files>
 </package>

@@ -271,7 +271,7 @@ namespace seal
             }
 
             // Check that plain_modulus is smaller than total coeff modulus
-            if (!is_less_than_uint_uint(
+            if (!is_less_than_uint(
                     plain_modulus.data(), plain_modulus.uint64_count(), context_data.total_coeff_modulus_.get(),
                     coeff_modulus_size))
             {
@@ -305,7 +305,7 @@ namespace seal
             context_data.upper_half_increment_ = allocate_uint(coeff_modulus_size, pool_);
             auto wide_plain_modulus(duplicate_uint_if_needed(
                 plain_modulus.data(), plain_modulus.uint64_count(), coeff_modulus_size, false, pool_));
-            divide_uint_uint(
+            divide_uint(
                 context_data.total_coeff_modulus_.get(), wide_plain_modulus.get(), coeff_modulus_size,
                 context_data.coeff_div_plain_modulus_.get(), context_data.upper_half_increment_.get(), pool_);
 
@@ -333,7 +333,7 @@ namespace seal
             }
             else
             {
-                sub_uint_uint(
+                sub_uint(
                     context_data.total_coeff_modulus(), wide_plain_modulus.get(), coeff_modulus_size,
                     context_data.plain_upper_half_increment_.get());
             }
@@ -364,7 +364,7 @@ namespace seal
             {
                 uint64_t tmp = (uint64_t(1) << 63) % coeff_modulus[i].value();
                 context_data.plain_upper_half_increment_[i] =
-                    multiply_uint_uint_mod(tmp, sub_safe(coeff_modulus[i].value(), uint64_t(2)), coeff_modulus[i]);
+                    multiply_uint_mod(tmp, sub_safe(coeff_modulus[i].value(), uint64_t(2)), coeff_modulus[i]);
             }
 
             // Compute the upper_half_threshold for this modulus.

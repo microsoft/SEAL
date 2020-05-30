@@ -263,7 +263,7 @@ namespace seal
                 uint64_t count = 0;
                 do
                 {
-                    x = multiply_uint_uint_mod(x, x, modulus);
+                    x = multiply_uint_mod(x, x, modulus);
                     count++;
                 } while (x != value - 1 && count < r - 1);
                 if (x != value - 1)
@@ -402,7 +402,7 @@ namespace seal
             {
                 return false;
             }
-            uint64_t generator_sq = multiply_uint_uint_mod(root, root, modulus);
+            uint64_t generator_sq = multiply_uint_mod(root, root, modulus);
             uint64_t current_generator = root;
 
             // destination is going to always contain the smallest generator found
@@ -416,7 +416,7 @@ namespace seal
                 }
 
                 // Then move on to the next generator
-                current_generator = multiply_uint_uint_mod(current_generator, generator_sq, modulus);
+                current_generator = multiply_uint_mod(current_generator, generator_sq, modulus);
             }
 
             destination = root;

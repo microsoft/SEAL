@@ -72,6 +72,77 @@ namespace sealtest
             }
         }
 
+        TEST(PolyCore, AllocatePolyArray)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            auto ptr(allocate_poly_array(0, 0, 0, pool));
+            ASSERT_TRUE(nullptr == ptr.get());
+
+            ptr = allocate_poly_array(1, 0, 0, pool);
+            ASSERT_TRUE(nullptr == ptr.get());
+
+            ptr = allocate_poly_array(0, 1, 0, pool);
+            ASSERT_TRUE(nullptr == ptr.get());
+
+            ptr = allocate_poly_array(0, 0, 1, pool);
+            ASSERT_TRUE(nullptr == ptr.get());
+
+            ptr = allocate_poly_array(1, 0, 1, pool);
+            ASSERT_TRUE(nullptr == ptr.get());
+
+            ptr = allocate_poly_array(0, 1, 1, pool);
+            ASSERT_TRUE(nullptr == ptr.get());
+
+            ptr = allocate_poly_array(1, 1, 0, pool);
+            ASSERT_TRUE(nullptr == ptr.get());
+
+            ptr = allocate_poly_array(1, 1, 1, pool);
+            ASSERT_TRUE(nullptr != ptr.get());
+
+            ptr = allocate_poly_array(2, 1, 1, pool);
+            ASSERT_TRUE(nullptr != ptr.get());
+        }
+
+        TEST(PolyCore, SetZeroPolyArray)
+        {
+            set_zero_poly_array(0, 0, 0, nullptr);
+
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            auto ptr(allocate_poly_array(1, 1, 1, pool));
+            ptr[0] = 0x1234567812345678;
+            set_zero_poly_array(1, 1, 1, ptr.get());
+            ASSERT_EQ(static_cast<uint64_t>(0), ptr[0]);
+
+            ptr = allocate_poly_array(2, 3, 4, pool);
+            for (size_t i = 0; i < 24; ++i)
+            {
+                ptr[i] = 0x1234567812345678;
+            }
+            set_zero_poly_array(2, 3, 4, ptr.get());
+            for (size_t i = 0; i < 24; ++i)
+            {
+                ASSERT_EQ(static_cast<uint64_t>(0), ptr[i]);
+            }
+        }
+
+        TEST(PolyCore, AllocateZeroPolyArray)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            auto ptr(allocate_zero_poly_array(0, 0, 0, pool));
+            ASSERT_TRUE(nullptr == ptr.get());
+
+            ptr = allocate_zero_poly_array(1, 1, 1, pool);
+            ASSERT_TRUE(nullptr != ptr.get());
+            ASSERT_EQ(static_cast<uint64_t>(0), ptr[0]);
+
+            ptr = allocate_zero_poly_array(2, 3, 4, pool);
+            ASSERT_TRUE(nullptr != ptr.get());
+            for (size_t i = 0; i < 24; ++i)
+            {
+                ASSERT_EQ(static_cast<uint64_t>(0), ptr[i]);
+            }
+        }
+
         TEST(PolyCore, GetPolyCoeff)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
@@ -84,7 +155,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(2), *get_poly_coeff(ptr.get(), 1, 3));
         }
 
-        TEST(PolyCore, SetPolyPoly)
+        TEST(PolyCore, SetPoly)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto ptr1(allocate_poly(2, 3, pool));
@@ -93,13 +164,13 @@ namespace sealtest
             {
                 ptr1[i] = static_cast<uint64_t>(i + 1);
             }
-            set_poly_poly(ptr1.get(), 2, 3, ptr2.get());
+            set_poly(ptr1.get(), 2, 3, ptr2.get());
             for (size_t i = 0; i < 6; ++i)
             {
                 ASSERT_EQ(static_cast<uint64_t>(i + 1), ptr2[i]);
             }
 
-            set_poly_poly(ptr1.get(), 2, 3, ptr1.get());
+            set_poly(ptr1.get(), 2, 3, ptr1.get());
             for (size_t i = 0; i < 6; ++i)
             {
                 ASSERT_EQ(static_cast<uint64_t>(i + 1), ptr2[i]);
@@ -110,8 +181,8 @@ namespace sealtest
             {
                 ptr2[i] = 1ULL;
             }
-            set_poly_poly(ptr1.get(), 2, 3, 3, 4, ptr2.get());
-            ASSERT_EQ(1ULL, ptr2[0]);
+            set_poly(ptr1.get(), 2, 3, 3, 4, ptr2.get());
+            ASSERT_EQ(static_cast<uint64_t>(1), ptr2[0]);
             ASSERT_EQ(static_cast<uint64_t>(2), ptr2[1]);
             ASSERT_EQ(static_cast<uint64_t>(3), ptr2[2]);
             ASSERT_EQ(static_cast<uint64_t>(0), ptr2[3]);
@@ -132,12 +203,47 @@ namespace sealtest
             ptr2[0] = 0xDEADBEEFDEADBEEF;
             ptr2[3] = 0xDEADBEEFDEADBEEF;
 
-            set_poly_poly(ptr1.get(), 2, 3, 1, 2, ptr2.get() + 1);
+            set_poly(ptr1.get(), 2, 3, 1, 2, ptr2.get() + 1);
             ASSERT_EQ(1ULL, ptr2[1]);
             ASSERT_EQ(static_cast<uint64_t>(2), ptr2[2]);
 
             ASSERT_EQ(0xDEADBEEFDEADBEEF, ptr2[0]);
             ASSERT_EQ(0xDEADBEEFDEADBEEF, ptr2[3]);
+        }
+
+        TEST(PolyCore, SetPolyArray)
+        {
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            auto ptr1(allocate_poly_array(1, 2, 3, pool));
+            auto ptr2(allocate_zero_poly_array(1, 2, 3, pool));
+            for (size_t i = 0; i < 6; ++i)
+            {
+                ptr1[i] = static_cast<uint64_t>(i + 1);
+            }
+            set_poly_array(ptr1.get(), 1, 2, 3, ptr2.get());
+            for (size_t i = 0; i < 6; ++i)
+            {
+                ASSERT_EQ(static_cast<uint64_t>(i + 1), ptr2[i]);
+            }
+
+            set_poly_array(ptr1.get(), 1, 2, 3, ptr1.get());
+            for (size_t i = 0; i < 6; ++i)
+            {
+                ASSERT_EQ(static_cast<uint64_t>(i + 1), ptr2[i]);
+            }
+
+            ptr2 = allocate_poly_array(2, 3, 4, pool);
+            for (size_t i = 0; i < 24; ++i)
+            {
+                ptr2[i] = 1ULL;
+            }
+            auto ptr3(allocate_zero_poly_array(2, 3, 4, pool));
+
+            set_poly_array(ptr2.get(), 2, 3, 4, ptr3.get());
+            for (size_t i = 0; i < 24; i++)
+            {
+                ASSERT_EQ(ptr2[i], ptr3[i]);
+            }
         }
 
         TEST(PolyCore, IsZeroPoly)
@@ -159,9 +265,9 @@ namespace sealtest
             }
         }
 
-        TEST(PolyCore, IsEqualPolyPoly)
+        TEST(PolyCore, IsEqualPoly)
         {
-            ASSERT_TRUE(is_equal_poly_poly(nullptr, nullptr, 0, 0));
+            ASSERT_TRUE(is_equal_poly(nullptr, nullptr, 0, 0));
 
             MemoryPool &pool = *global_variables::global_memory_pool;
             auto ptr1(allocate_poly(2, 3, pool));
@@ -170,11 +276,11 @@ namespace sealtest
             {
                 ptr2[i] = ptr1[i] = static_cast<uint64_t>(i + 1);
             }
-            ASSERT_TRUE(is_equal_poly_poly(ptr1.get(), ptr2.get(), 2, 3));
+            ASSERT_TRUE(is_equal_poly(ptr1.get(), ptr2.get(), 2, 3));
             for (size_t i = 0; i < 6; ++i)
             {
                 ptr2[i]--;
-                ASSERT_FALSE(is_equal_poly_poly(ptr1.get(), ptr2.get(), 2, 3));
+                ASSERT_FALSE(is_equal_poly(ptr1.get(), ptr2.get(), 2, 3));
                 ptr2[i]++;
             }
         }

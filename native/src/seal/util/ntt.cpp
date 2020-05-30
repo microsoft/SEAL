@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/modulus.h"
-#include "seal/util/defines.h"
 #include "seal/util/ntt.h"
 #include "seal/util/polyarith.h"
 #include "seal/util/uintarith.h"
@@ -77,7 +75,7 @@ namespace seal
                     *temp_ptr++ = inv_root_powers_[m + i];
                 }
             }
-            set_uint_uint(temp.get() + 1, coeff_count_ - 1, inv_root_powers_.get() + 1);
+            set_uint(temp.get() + 1, coeff_count_ - 1, inv_root_powers_.get() + 1);
 
             temp_ptr = temp.get() + 1;
             for (size_t m = (coeff_count_ >> 1); m > 0; m >>= 1)
@@ -87,7 +85,7 @@ namespace seal
                     *temp_ptr++ = scaled_inv_root_powers_[m + i];
                 }
             }
-            set_uint_uint(temp.get() + 1, coeff_count_ - 1, scaled_inv_root_powers_.get() + 1);
+            set_uint(temp.get() + 1, coeff_count_ - 1, scaled_inv_root_powers_.get() + 1);
 
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
@@ -106,7 +104,7 @@ namespace seal
             for (size_t i = 1; i < coeff_count_; i++)
             {
                 uint64_t *next_destination = destination_start + reverse_bits(i, coeff_count_power_);
-                *next_destination = multiply_uint_uint_mod(*destination, root, modulus_);
+                *next_destination = multiply_uint_mod(*destination, root, modulus_);
                 destination = next_destination;
             }
         }
@@ -118,7 +116,7 @@ namespace seal
             {
                 uint64_t wide_quotient[2]{ 0, 0 };
                 uint64_t wide_coeff[2]{ 0, *input };
-                divide_uint128_uint64_inplace(wide_coeff, modulus_.value(), wide_quotient);
+                divide_uint128_inplace(wide_coeff, modulus_.value(), wide_quotient);
                 *destination = wide_quotient[0];
             }
         }
@@ -225,8 +223,14 @@ namespace seal
 
         For details, see Michael Naehrig and Patrick Longa.
         */
-        void ntt_negacyclic_harvey_lazy(uint64_t *operand, const NTTTables &tables)
+        void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw invalid_argument("operand");
+            }
+#endif
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus << 1;
 
@@ -312,8 +316,14 @@ namespace seal
         }
 
         // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig).
-        void inverse_ntt_negacyclic_harvey_lazy(uint64_t *operand, const NTTTables &tables)
+        void inverse_ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
+#ifdef SEAL_DEBUG
+            if (!operand)
+            {
+                throw invalid_argument("operand");
+            }
+#endif
             uint64_t modulus = tables.modulus().value();
             uint64_t two_times_modulus = modulus << 1;
 
@@ -400,16 +410,16 @@ namespace seal
 
             const uint64_t inv_N = *(tables.get_inv_degree_modulo());
             const uint64_t W = tables.get_from_inv_root_powers(root_index);
-            const uint64_t inv_N_W = multiply_uint_uint_mod(inv_N, W, tables.modulus());
+            const uint64_t inv_N_W = multiply_uint_mod(inv_N, W, tables.modulus());
             uint64_t wide_quotient[2]{ 0, 0 };
             uint64_t wide_coeff[2]{ 0, inv_N };
-            divide_uint128_uint64_inplace(wide_coeff, modulus, wide_quotient);
+            divide_uint128_inplace(wide_coeff, modulus, wide_quotient);
             const uint64_t inv_Nprime = wide_quotient[0];
             wide_quotient[0] = 0;
             wide_quotient[1] = 0;
             wide_coeff[0] = 0;
             wide_coeff[1] = inv_N_W;
-            divide_uint128_uint64_inplace(wide_coeff, modulus, wide_quotient);
+            divide_uint128_inplace(wide_coeff, modulus, wide_quotient);
             const uint64_t inv_N_Wprime = wide_quotient[0];
 
             uint64_t *X = operand;

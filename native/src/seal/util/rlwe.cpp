@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/ciphertext.h"
 #include "seal/randomgen.h"
 #include "seal/randomtostd.h"
 #include "seal/util/clipnormal.h"
@@ -145,7 +146,7 @@ namespace seal
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
-            auto small_ntt_tables = context_data.small_ntt_tables();
+            auto ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = public_key.data().size();
 
             // Make destination have right size and parms_id
@@ -166,7 +167,7 @@ namespace seal
             // c[j] = u * public_key[j]
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
-                ntt_negacyclic_harvey(u.get() + i * coeff_count, small_ntt_tables[i]);
+                ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
                 for (size_t j = 0; j < encrypted_size; j++)
                 {
                     dyadic_product_coeffmod(
@@ -176,7 +177,7 @@ namespace seal
                     // addition with e_0, e_1 is in non-NTT form.
                     if (!is_ntt_form)
                     {
-                        inverse_ntt_negacyclic_harvey(destination.data(j) + i * coeff_count, small_ntt_tables[i]);
+                        inverse_ntt_negacyclic_harvey(destination.data(j) + i * coeff_count, ntt_tables[i]);
                     }
                 }
             }
@@ -191,9 +192,9 @@ namespace seal
                     // addition with e_0, e_1 is in NTT form.
                     if (is_ntt_form)
                     {
-                        ntt_negacyclic_harvey(u.get() + i * coeff_count, small_ntt_tables[i]);
+                        ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
                     }
-                    add_poly_poly_coeffmod(
+                    add_poly_coeffmod(
                         u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
                         destination.data(j) + i * coeff_count);
                 }
@@ -218,7 +219,7 @@ namespace seal
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
-            auto small_ntt_tables = context_data.small_ntt_tables();
+            auto ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = 2;
 
             // If a polynomial is too small to store a seed, disable save_seed.
@@ -253,7 +254,7 @@ namespace seal
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
                     // Transform the c1 into NTT representation.
-                    ntt_negacyclic_harvey(c1 + i * coeff_count, small_ntt_tables[i]);
+                    ntt_negacyclic_harvey(c1 + i * coeff_count, ntt_tables[i]);
                 }
             }
 
@@ -270,13 +271,13 @@ namespace seal
                 if (is_ntt_form)
                 {
                     // Transform the noise e into NTT representation.
-                    ntt_negacyclic_harvey(noise.get() + i * coeff_count, small_ntt_tables[i]);
+                    ntt_negacyclic_harvey(noise.get() + i * coeff_count, ntt_tables[i]);
                 }
                 else
                 {
-                    inverse_ntt_negacyclic_harvey(c0 + i * coeff_count, small_ntt_tables[i]);
+                    inverse_ntt_negacyclic_harvey(c0 + i * coeff_count, ntt_tables[i]);
                 }
-                add_poly_poly_coeffmod(
+                add_poly_coeffmod(
                     noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
                     c0 + i * coeff_count);
                 negate_poly_coeffmod(c0 + i * coeff_count, coeff_count, coeff_modulus[i], c0 + i * coeff_count);
@@ -287,7 +288,7 @@ namespace seal
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
                     // Transform the c1 into non-NTT representation.
-                    inverse_ntt_negacyclic_harvey(c1 + i * coeff_count, small_ntt_tables[i]);
+                    inverse_ntt_negacyclic_harvey(c1 + i * coeff_count, ntt_tables[i]);
                 }
             }
 

@@ -120,8 +120,8 @@ namespace sealtest
         ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ASSERT_FALSE(ctxt2.is_ntt_form());
-        ASSERT_TRUE(is_equal_uint_uint(
-            ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
+        ASSERT_TRUE(
+            is_equal_uint(ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
         ASSERT_TRUE(ctxt.data() != ctxt2.data());
     }
 } // namespace sealtest

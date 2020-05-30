@@ -280,6 +280,9 @@
     <ClCompile Include="seal\util\hash.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="seal\util\iterator.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
     <ClCompile Include="seal\util\mempool.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
