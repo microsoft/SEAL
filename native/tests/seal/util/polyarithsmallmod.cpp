@@ -666,24 +666,23 @@ namespace sealtest
                 SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(result, 4, pool);
 
                 Modulus mod(10);
-                size_t coeff_count = 4;
 
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 0, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 4, 0, mod, result);
                 ASSERT_EQ(0ULL, *result[0]);
                 ASSERT_EQ(0ULL, *result[1]);
                 ASSERT_EQ(0ULL, *result[2]);
                 ASSERT_EQ(0ULL, *result[3]);
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 1, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 4, 1, mod, result);
                 ASSERT_EQ(0ULL, *result[0]);
                 ASSERT_EQ(0ULL, *result[1]);
                 ASSERT_EQ(0ULL, *result[2]);
                 ASSERT_EQ(0ULL, *result[3]);
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 2, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 4, 2, mod, result);
                 ASSERT_EQ(0ULL, *result[0]);
                 ASSERT_EQ(0ULL, *result[1]);
                 ASSERT_EQ(0ULL, *result[2]);
                 ASSERT_EQ(0ULL, *result[3]);
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 3, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 4, 3, mod, result);
                 ASSERT_EQ(0ULL, *result[0]);
                 ASSERT_EQ(0ULL, *result[1]);
                 ASSERT_EQ(0ULL, *result[2]);
@@ -693,22 +692,22 @@ namespace sealtest
                 *poly[1] = 2;
                 *poly[2] = 3;
                 *poly[3] = 4;
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 0, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 4, 0, mod, result);
                 ASSERT_EQ(1ULL, *result[0]);
                 ASSERT_EQ(2ULL, *result[1]);
                 ASSERT_EQ(3ULL, *result[2]);
                 ASSERT_EQ(4ULL, *result[3]);
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 1, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 4, 1, mod, result);
                 ASSERT_EQ(6ULL, *result[0]);
                 ASSERT_EQ(1ULL, *result[1]);
                 ASSERT_EQ(2ULL, *result[2]);
                 ASSERT_EQ(3ULL, *result[3]);
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 2, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 4, 2, mod, result);
                 ASSERT_EQ(7ULL, *result[0]);
                 ASSERT_EQ(6ULL, *result[1]);
                 ASSERT_EQ(1ULL, *result[2]);
                 ASSERT_EQ(2ULL, *result[3]);
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 3, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 4, 3, mod, result);
                 ASSERT_EQ(8ULL, *result[0]);
                 ASSERT_EQ(7ULL, *result[1]);
                 ASSERT_EQ(6ULL, *result[2]);
@@ -718,9 +717,8 @@ namespace sealtest
                 *poly[1] = 2;
                 *poly[2] = 3;
                 *poly[3] = 4;
-                coeff_count = 2;
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 1, mod, result);
-                negacyclic_shift_poly_coeffmod(poly + 2, coeff_count, 1, mod, result + 2);
+                negacyclic_shift_poly_coeffmod(poly, 2, 1, mod, result);
+                negacyclic_shift_poly_coeffmod(poly + 2, 2, 1, mod, result + 2);
                 ASSERT_EQ(8ULL, *result[0]);
                 ASSERT_EQ(1ULL, *result[1]);
                 ASSERT_EQ(6ULL, *result[2]);
@@ -731,7 +729,6 @@ namespace sealtest
                 SEAL_ALLOCATE_ZERO_GET_RNS_ITER(result, 4, 2, pool);
 
                 vector<Modulus> mod{ 10, 11 };
-                size_t coeff_count = 4;
 
                 *poly[0][0] = 1;
                 *poly[0][1] = 2;
@@ -752,7 +749,7 @@ namespace sealtest
                 ASSERT_EQ(3ULL, *result[1][2]);
                 ASSERT_EQ(4ULL, *result[1][3]);
 
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 1, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 2, 1, mod, result);
                 ASSERT_EQ(6ULL, *result[0][0]);
                 ASSERT_EQ(1ULL, *result[0][1]);
                 ASSERT_EQ(2ULL, *result[0][2]);
@@ -762,7 +759,7 @@ namespace sealtest
                 ASSERT_EQ(2ULL, *result[1][2]);
                 ASSERT_EQ(3ULL, *result[1][3]);
 
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 2, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 2, 2, mod, result);
                 ASSERT_EQ(7ULL, *result[0][0]);
                 ASSERT_EQ(6ULL, *result[0][1]);
                 ASSERT_EQ(1ULL, *result[0][2]);
@@ -772,7 +769,7 @@ namespace sealtest
                 ASSERT_EQ(1ULL, *result[1][2]);
                 ASSERT_EQ(2ULL, *result[1][3]);
 
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 3, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 2, 3, mod, result);
                 ASSERT_EQ(8ULL, *result[0][0]);
                 ASSERT_EQ(7ULL, *result[0][1]);
                 ASSERT_EQ(6ULL, *result[0][2]);
@@ -787,7 +784,6 @@ namespace sealtest
                 SEAL_ALLOCATE_ZERO_GET_POLY_ITER(result, 2, 4, 2, pool);
 
                 vector<Modulus> mod{ 10, 11 };
-                size_t coeff_count = 4;
 
                 *poly[0][0][0] = 1;
                 *poly[0][0][1] = 2;
@@ -826,7 +822,7 @@ namespace sealtest
                 ASSERT_EQ(3ULL, *result[1][1][2]);
                 ASSERT_EQ(4ULL, *result[1][1][3]);
 
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 1, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 2, 1, mod, result);
                 ASSERT_EQ(6ULL, *result[0][0][0]);
                 ASSERT_EQ(1ULL, *result[0][0][1]);
                 ASSERT_EQ(2ULL, *result[0][0][2]);
@@ -845,7 +841,7 @@ namespace sealtest
                 ASSERT_EQ(2ULL, *result[1][1][2]);
                 ASSERT_EQ(3ULL, *result[1][1][3]);
 
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 2, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 2, 2, mod, result);
                 ASSERT_EQ(7ULL, *result[0][0][0]);
                 ASSERT_EQ(6ULL, *result[0][0][1]);
                 ASSERT_EQ(1ULL, *result[0][0][2]);
@@ -864,7 +860,7 @@ namespace sealtest
                 ASSERT_EQ(1ULL, *result[1][1][2]);
                 ASSERT_EQ(2ULL, *result[1][1][3]);
 
-                negacyclic_shift_poly_coeffmod(poly, coeff_count, 3, mod, result);
+                negacyclic_shift_poly_coeffmod(poly, 2, 3, mod, result);
                 ASSERT_EQ(8ULL, *result[0][0][0]);
                 ASSERT_EQ(7ULL, *result[0][0][1]);
                 ASSERT_EQ(6ULL, *result[0][0][2]);
