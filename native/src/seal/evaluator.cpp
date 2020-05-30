@@ -2215,9 +2215,9 @@ namespace seal
                     set_uint(t_last, coeff_count, t_ntt);
                 }
 
-                // lazy substraction, results in [0, 2*qi).
+                // Lazy substraction, results in [0, 2*qi).
                 const uint64_t fix = qi - barrett_reduce_63(qk_half, *get<1>(J));
-                SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) { *K += fix; });
+                SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { *K += fix; });
 
                 uint64_t qi_lazy; // some multiples of qi
                 if (scheme == scheme_type::CKKS)
@@ -2225,7 +2225,7 @@ namespace seal
                     ntt_negacyclic_harvey_lazy(t_ntt, *get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
                     qi_lazy = qi << 1;
-                    // reduce from [0, 4qi) to [0, 2qi)
+                    // Reduce from [0, 4qi) to [0, 2qi)
                     SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) {
                         *K -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(*K >= qi_lazy)));
                     });
