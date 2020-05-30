@@ -4,6 +4,7 @@
 
 ### Bug fixes
 
+- Merged pull request [PR 178](https://github.com/microsoft/SEAL/pull/178) to fix a lambda capture issue when building on GCC 7.5.
 - Fixed issue where SEAL.vcxproj could not be compiled with MSBuild outside the solution [(Issue 171)](https://github.com/microsoft/SEAL/issues/171).
 - SEAL 3.5.1 required CMake 3.13 instead of 3.12; this has now been fixed and 3.12 works again [(Issue 167)](https://github.com/microsoft/SEAL/issues/167).
 - Fixed issue in NuSpec file that made local NuGet package generation fail.

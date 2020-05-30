@@ -2215,23 +2215,23 @@ namespace seal
                     set_uint(t_last, coeff_count, t_ntt);
                 }
 
-                // lazy substraction, results in [0, 2*qi).
+                // Lazy substraction, results in [0, 2*qi).
                 const uint64_t fix = qi - barrett_reduce_63(qk_half, *get<1>(J));
-                SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) { *K += fix; });
+                SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { *K += fix; });
 
                 uint64_t qi_lazy; // some multiples of qi
                 if (scheme == scheme_type::CKKS)
                 {
+                    // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
                     ntt_negacyclic_harvey_lazy(t_ntt, *get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
                     qi_lazy = qi << 1;
-                    // reduce from [0, 4qi) to [0, 2qi)
+                    // Reduce from [0, 4qi) to [0, 2qi)
                     SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) {
                         *K -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(*K >= qi_lazy)));
                     });
 #else
-                    // Since now SEAL use at most 60bit moduli, so 8*qi < 2^63.
-                    // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
+                    // Since SEAL uses at most 60bit moduli, 8*qi < 2^63.
                     qi_lazy = qi << 2;
 #endif
                 }
@@ -2244,6 +2244,7 @@ namespace seal
                 // ((ct mod qi) - (ct mod qk)) mod qi
                 SEAL_ITERATE(
                     iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { *get<0>(K) += qi_lazy - *get<1>(K); });
+
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                 multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, *get<3>(J), *get<1>(J), get<0, 1>(J));
                 add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, *get<1>(J), get<0, 0>(J));
