@@ -323,14 +323,14 @@ namespace seal
 
         // This lambda function takes as input an IterTuple with three components:
         //
-        // 1. ConstRNSIter to read an input polynomial from
+        // 1. (Const)RNSIter to read an input polynomial from
         // 2. RNSIter for the output in base q
         // 3. RNSIter for the output in base Bsk
         //
         // It performs steps (1)-(3) of the BEHZ multiplication (see above) on the given input polynomial (given as an
         // RNSIter or ConstRNSIter) and writes the results in base q and base Bsk to the given output
         // iterators.
-        auto behz_extend_base_convert_to_ntt = [&](IterTuple<ConstRNSIter, RNSIter, RNSIter> I) {
+        auto behz_extend_base_convert_to_ntt = [&](auto I) {
             // Make copy of input polynomial (in base q) and convert to NTT form
             // Lazy reduction
             set_poly(get<0>(I), coeff_count, base_q_size, get<1>(I));
@@ -607,13 +607,13 @@ namespace seal
 
         // This lambda function takes as input an IterTuple with three components:
         //
-        // 1. ConstRNSIter to read an input polynomial from
+        // 1. (Const)RNSIter to read an input polynomial from
         // 2. RNSIter for the output in base q
         // 3. RNSIter for the output in base Bsk
         //
         // It performs steps (1)-(3) of the BEHZ multiplication on the given input polynomial (given as an RNSIter
         // or ConstRNSIter) and writes the results in base q and base Bsk to the given output iterators.
-        auto behz_extend_base_convert_to_ntt = [&](IterTuple<ConstRNSIter, RNSIter, RNSIter> I) {
+        auto behz_extend_base_convert_to_ntt = [&](auto I) {
             // Make copy of input polynomial (in base q) and convert to NTT form
             // Lazy reduction
             set_poly(get<0>(I), coeff_count, base_q_size, get<1>(I));

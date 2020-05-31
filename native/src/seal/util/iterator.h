@@ -1573,6 +1573,24 @@ namespace seal
             }
         };
 
+        namespace iterator_internal
+        {
+            template <typename... SEALIters>
+            struct extend_iter_tuple;
+
+            template <typename SEALIter, typename... Rest>
+            struct extend_iter_tuple<SEALIter, IterTuple<Rest...>>
+            {
+                using type = IterTuple<SEALIter, Rest...>;
+            };
+
+            template <typename SEALIter1, typename SEALIter2>
+            struct extend_iter_tuple<SEALIter1, SEALIter2>
+            {
+                using type = IterTuple<SEALIter1, SEALIter2>;
+            };
+        }
+
         template <typename SEALIter, typename... Rest>
         class IterTuple<SEALIter, Rest...> : public SEALIterBase
         {
@@ -1584,9 +1602,9 @@ namespace seal
             using self_type = IterTuple<SEALIter, Rest...>;
 
             // Standard iterator typedefs
-            using value_type = IterTuple<
+            using value_type = typename iterator_internal::extend_iter_tuple<
                 typename std::iterator_traits<SEALIter>::value_type,
-                typename std::iterator_traits<IterTuple<Rest>>::value_type...>;
+                typename std::iterator_traits<IterTuple<Rest...>>::value_type>::type;
             using pointer = void;
             using reference = const value_type &;
             using iterator_category = std::random_access_iterator_tag;
@@ -1969,21 +1987,6 @@ namespace seal
                 static_assert(N < sizeof...(SEALIters), "IterTuple index out of range");
                 return iterator_internal::GetHelperStruct<N>::apply(it);
             }
-
-            template <typename... SEALIters>
-            struct extend_iter_tuple;
-
-            template <typename SEALIter, typename... Rest>
-            struct extend_iter_tuple<SEALIter, IterTuple<Rest...>>
-            {
-                using type = IterTuple<SEALIter, Rest...>;
-            };
-
-            template <typename SEALIter1, typename SEALIter2>
-            struct extend_iter_tuple<SEALIter1, SEALIter2>
-            {
-                using type = IterTuple<SEALIter1, SEALIter2>;
-            };
 
             template <typename T, typename... Rest>
             struct iter_type<
