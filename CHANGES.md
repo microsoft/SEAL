@@ -1,5 +1,12 @@
 # List of Changes
 
+## Version 3.5.3
+
+### Bug fixes
+
+- Fixed a bug in `seal::util::IterTuple<...>` where a part of the `value_type` was constructed incorrectly.
+- Fixed a bug in `Evaluator::mod_switch_drop_to_next` that caused non-inplace modulus switching to fail [(Issue 179)](https://github.com/microsoft/SEAL/issues/179). Thanks s0l0ist!
+
 ## Version 3.5.2
 
 ### Bug fixes

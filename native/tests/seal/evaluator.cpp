@@ -2178,7 +2178,7 @@ namespace sealtest
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -2246,7 +2246,7 @@ namespace sealtest
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -2318,7 +2318,7 @@ namespace sealtest
                 auto target_parms = context->first_context_data()->next_context_data()->next_context_data()->parms_id();
                 evaluator.rescale_to_inplace(encrypted1, target_parms);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted1.parms_id() == target_parms);
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -2367,7 +2367,7 @@ namespace sealtest
                 // Relinearize now
                 evaluator.relinearize_inplace(encrypted1, rlk);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted1.parms_id() == target_parms);
 
                 decryptor.decrypt(encrypted1, plainRes);
@@ -2431,7 +2431,7 @@ namespace sealtest
                 evaluator.relinearize_inplace(encrypted, rlk);
                 evaluator.rescale_to_next_inplace(encrypted);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2490,7 +2490,7 @@ namespace sealtest
                 evaluator.relinearize_inplace(encrypted, rlk);
                 evaluator.rescale_to_next_inplace(encrypted);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2508,7 +2508,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // modulo switching without rescaling for random vectors
+            // modulus switching without rescaling for random vectors
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60, 60, 60 }));
@@ -2547,9 +2547,26 @@ namespace sealtest
                 // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
+                // Not inplace
+                Ciphertext destination;
+                evaluator.mod_switch_to_next(encrypted, destination);
+
+                // check correctness of modulus switching
+                ASSERT_TRUE(destination.parms_id() == next_parms_id);
+
+                decryptor.decrypt(destination, plainRes);
+                encoder.decode(plainRes, output);
+
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(input[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
+
+                // Inplace
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2563,7 +2580,7 @@ namespace sealtest
             }
         }
         {
-            // modulo switching without rescaling for random vectors
+            // modulus switching without rescaling for random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 40, 40, 40, 40, 40 }));
@@ -2602,9 +2619,26 @@ namespace sealtest
                 // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
+                // Not inplace
+                Ciphertext destination;
+                evaluator.mod_switch_to_next(encrypted, destination);
+
+                // check correctness of modulus switching
+                ASSERT_TRUE(destination.parms_id() == next_parms_id);
+
+                decryptor.decrypt(destination, plainRes);
+                encoder.decode(plainRes, output);
+
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(input[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
+
+                // Inplace
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2618,7 +2652,7 @@ namespace sealtest
             }
         }
         {
-            // modulo switching without rescaling for random vectors
+            // modulus switching without rescaling for random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40, 40 }));
@@ -2657,9 +2691,26 @@ namespace sealtest
                 // check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
 
+                // Not inplace
+                Ciphertext destination;
+                evaluator.mod_switch_to_next(encrypted, destination);
+
+                // check correctness of modulus switching
+                ASSERT_TRUE(destination.parms_id() == next_parms_id);
+
+                decryptor.decrypt(destination, plainRes);
+                encoder.decode(plainRes, output);
+
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(input[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
+
+                // Inplace
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                // check correctness of modulo switching
+                // check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
@@ -2738,7 +2789,7 @@ namespace sealtest
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                // check correctness of modulo switching with rescaling
+                // check correctness of modulus switching with rescaling
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
                 // move enc3 to the level of enc1 * enc2
@@ -2821,7 +2872,7 @@ namespace sealtest
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                // check correctness of modulo switching with rescaling
+                // check correctness of modulus switching with rescaling
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
                 // move enc3 to the level of enc1 * enc2
