@@ -323,7 +323,7 @@ namespace seal
 
         // This lambda function takes as input an IterTuple with three components:
         //
-        // 1. ConstRNSIter to read an input polynomial from
+        // 1. (Const)RNSIter to read an input polynomial from
         // 2. RNSIter for the output in base q
         // 3. RNSIter for the output in base Bsk
         //
@@ -387,13 +387,13 @@ namespace seal
             // approach, the multiplication of individual polynomials is done using a dyadic product where the inputs
             // are already in NTT form. The arguments of the lambda function are expected to be as follows:
             //
-            // 1. a PolyIter pointing to the beginning of the first input ciphertext (in NTT form)
-            // 2. a PolyIter pointing to the beginning of the second input ciphertext (in NTT form)
-            // 3. a PtrIter pointing to an array of Modulus elements for the base
+            // 1. a ConstPolyIter pointing to the beginning of the first input ciphertext (in NTT form)
+            // 2. a ConstPolyIter pointing to the beginning of the second input ciphertext (in NTT form)
+            // 3. a ConstModulusIter pointing to an array of Modulus elements for the base
             // 4. the size of the base
             // 5. a PolyIter pointing to the beginning of the output ciphertext
-            auto behz_ciphertext_product = [&](auto in1_iter, auto in2_iter, auto base_iter, size_t base_size,
-                                               auto out_iter) {
+            auto behz_ciphertext_product = [&](ConstPolyIter in1_iter, ConstPolyIter in2_iter,
+                                               ConstModulusIter base_iter, size_t base_size, PolyIter out_iter) {
                 // Create a shifted iterator for the first input
                 auto shifted_in1_iter = in1_iter + curr_encrypted1_first;
 
@@ -607,7 +607,7 @@ namespace seal
 
         // This lambda function takes as input an IterTuple with three components:
         //
-        // 1. ConstRNSIter to read an input polynomial from
+        // 1. (Const)RNSIter to read an input polynomial from
         // 2. RNSIter for the output in base q
         // 3. RNSIter for the output in base Bsk
         //
@@ -653,11 +653,12 @@ namespace seal
         // approach, the multiplication of individual polynomials is done using a dyadic product where the inputs
         // are already in NTT form. The arguments of the lambda function are expected to be as follows:
         //
-        // 1. a PolyIter pointing to the beginning of the input ciphertext (in NTT form)
-        // 3. a PtrIter pointing to an array of Modulus elements for the base
+        // 1. a ConstPolyIter pointing to the beginning of the input ciphertext (in NTT form)
+        // 3. a ConstModulusIter pointing to an array of Modulus elements for the base
         // 4. the size of the base
         // 5. a PolyIter pointing to the beginning of the output ciphertext
-        auto behz_ciphertext_square = [&](auto in_iter, auto base_iter, size_t base_size, auto out_iter) {
+        auto behz_ciphertext_square = [&](ConstPolyIter in_iter, ConstModulusIter base_iter, size_t base_size,
+                                          PolyIter out_iter) {
             // Compute c0^2
             dyadic_product_coeffmod(in_iter[0], in_iter[0], base_size, base_iter, out_iter[0]);
 
@@ -919,7 +920,7 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
-        auto drop_moduli_and_copy = [&](auto in_iter, auto out_iter) {
+        auto drop_modulus_and_copy = [&](ConstPolyIter in_iter, PolyIter out_iter) {
             SEAL_ITERATE(iter(in_iter, out_iter), encrypted_size, [&](auto I) {
                 SEAL_ITERATE(I, next_coeff_modulus_size, [&](auto J) { set_uint(get<0>(J), coeff_count, get<1>(J)); });
             });
@@ -931,7 +932,7 @@ namespace seal
             SEAL_ALLOCATE_GET_POLY_ITER(temp, encrypted_size, coeff_count, next_coeff_modulus_size, pool);
 
             // Copy data over to temp; only copy the RNS components relevant after modulus drop
-            drop_moduli_and_copy(encrypted, temp);
+            drop_modulus_and_copy(encrypted, temp);
 
             // Resize destination before writing
             destination.resize(context_, next_context_data.parms_id(), encrypted_size);
@@ -949,7 +950,7 @@ namespace seal
             destination.scale() = encrypted.scale();
 
             // Copy data over to destination; only copy the RNS components relevant after modulus drop
-            drop_moduli_and_copy(encrypted, destination);
+            drop_modulus_and_copy(encrypted, destination);
         }
     }
 
