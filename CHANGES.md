@@ -1,5 +1,11 @@
 # List of Changes
 
+## Version 3.5.4
+
+### Bug fixes
+
+- `std::void_t` was introduced only in C++17; switched to using a custom implementation [(Issue 180)](https://github.com/microsoft/SEAL/issues/180).
+
 ## Version 3.5.3
 
 ### Bug fixes

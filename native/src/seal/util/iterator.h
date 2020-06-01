@@ -320,16 +320,16 @@ namespace seal
         namespace iterator_internal
         {
             template <typename Enable, typename... Ts>
-            struct iter_type;
+            struct IterType;
 
             template <typename T>
-            struct iter_type<std::enable_if_t<std::is_arithmetic<T>::value>, T>
+            struct IterType<std::enable_if_t<std::is_arithmetic<T>::value>, T>
             {
                 using type = SeqIter<T, void>;
             };
 
             template <typename T>
-            struct iter_type<
+            struct IterType<
                 std::enable_if_t<std::is_base_of<SEALIterBase, std::decay_t<T>>::value && !std::is_pointer<T>::value>,
                 T>
             {
@@ -337,61 +337,61 @@ namespace seal
             };
 
             template <>
-            struct iter_type<void, Ciphertext &>
+            struct IterType<void, Ciphertext &>
             {
                 using type = PolyIter;
             };
 
             template <>
-            struct iter_type<void, const Ciphertext &>
+            struct IterType<void, const Ciphertext &>
             {
                 using type = ConstPolyIter;
             };
 
             template <typename T>
-            struct iter_type<void, const T *>
+            struct IterType<void, const T *>
             {
                 using type = PtrIter<const T *>;
             };
 
             template <typename T>
-            struct iter_type<void, T *>
+            struct IterType<void, T *>
             {
                 using type = PtrIter<T *>;
             };
 
             template <typename T>
-            struct iter_type<void, const T *&>
+            struct IterType<void, const T *&>
             {
                 using type = PtrIter<const T *>;
             };
 
             template <typename T>
-            struct iter_type<void, T *&>
+            struct IterType<void, T *&>
             {
                 using type = PtrIter<T *>;
             };
 
             template <typename T>
-            struct iter_type<void, std::vector<T> &>
+            struct IterType<void, std::vector<T> &>
             {
                 using type = PtrIter<T *>;
             };
 
             template <typename T>
-            struct iter_type<void, const std::vector<T> &>
+            struct IterType<void, const std::vector<T> &>
             {
                 using type = PtrIter<const T *>;
             };
 
             template <typename T>
-            struct iter_type<void, Pointer<T> &>
+            struct IterType<void, Pointer<T> &>
             {
                 using type = PtrIter<T *>;
             };
 
             template <typename T>
-            struct iter_type<void, ConstPointer<T> &>
+            struct IterType<void, ConstPointer<T> &>
             {
                 using type = PtrIter<const T *>;
             };
@@ -1589,7 +1589,7 @@ namespace seal
             {
                 using type = IterTuple<SEALIter1, SEALIter2>;
             };
-        }
+        } // namespace iterator_internal
 
         template <typename SEALIter, typename... Rest>
         class IterTuple<SEALIter, Rest...> : public SEALIterBase
@@ -1965,9 +1965,9 @@ namespace seal
             struct GetHelperStruct
             {
                 template <typename SEALIter, typename... Rest>
-                static auto apply(const IterTuple<SEALIter, Rest...> &it)
+                static auto Apply(const IterTuple<SEALIter, Rest...> &it)
                 {
-                    return GetHelperStruct<N - 1>::apply(it.rest());
+                    return GetHelperStruct<N - 1>::Apply(it.rest());
                 }
             };
 
@@ -1975,7 +1975,7 @@ namespace seal
             struct GetHelperStruct<0>
             {
                 template <typename SEALIter, typename... Rest>
-                static auto apply(const IterTuple<SEALIter, Rest...> &it)
+                static auto Apply(const IterTuple<SEALIter, Rest...> &it)
                 {
                     return it.first();
                 }
@@ -1985,18 +1985,18 @@ namespace seal
             auto get(const IterTuple<SEALIters...> &it)
             {
                 static_assert(N < sizeof...(SEALIters), "IterTuple index out of range");
-                return iterator_internal::GetHelperStruct<N>::apply(it);
+                return iterator_internal::GetHelperStruct<N>::Apply(it);
             }
 
             template <typename T, typename... Rest>
-            struct iter_type<
-                std::void_t<
-                    std::enable_if_t<(sizeof...(Rest) > 0)>, typename iter_type<void, T>::type,
-                    typename iter_type<void, Rest...>::type>,
+            struct IterType<
+                seal_void_t<
+                    std::enable_if_t<(sizeof...(Rest) > 0)>, typename IterType<void, T>::type,
+                    typename IterType<void, Rest...>::type>,
                 T, Rest...>
             {
                 using type = typename extend_iter_tuple<
-                    typename iter_type<void, T>::type, typename iter_type<void, Rest...>::type>::type;
+                    typename IterType<void, T>::type, typename IterType<void, Rest...>::type>::type;
             };
         } // namespace iterator_internal
 
@@ -2014,16 +2014,16 @@ namespace seal
         }
 
         template <typename... Ts>
-        SEAL_NODISCARD inline auto iter(Ts &&... ts) -> typename iterator_internal::iter_type<void, Ts...>::type
+        SEAL_NODISCARD inline auto iter(Ts &&... ts) -> typename iterator_internal::IterType<void, Ts...>::type
         {
             return { std::forward<Ts>(ts)... };
         }
 
         template <typename... Ts>
         SEAL_NODISCARD inline auto reverse_iter(Ts &&... ts)
-            -> ReverseIter<typename iterator_internal::iter_type<void, Ts...>::type>
+            -> ReverseIter<typename iterator_internal::IterType<void, Ts...>::type>
         {
-            return typename iterator_internal::iter_type<void, Ts...>::type(std::forward<Ts>(ts)...);
+            return typename iterator_internal::IterType<void, Ts...>::type(std::forward<Ts>(ts)...);
         }
     } // namespace util
 } // namespace seal
