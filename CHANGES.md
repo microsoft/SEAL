@@ -5,6 +5,7 @@
 ### Bug fixes
 
 - `std::void_t` was introduced only in C++17; switched to using a custom implementation [(Issue 180)](https://github.com/microsoft/SEAL/issues/180).
+- Fixed two independent bugs in `native/src/CMakeConfig.cmd`: The first prevented SEAL to be built in a directory with spaces in the path due to missing quotation marks. Another issue caused MSVC to fail when building SEAL for multiple architectures.
 
 ## Version 3.5.3
 
