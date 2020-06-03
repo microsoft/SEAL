@@ -1554,14 +1554,14 @@ namespace seal
 
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
-            // Slight semantic misuse of RNSIter here, but this works well
+            // Semantic misuse of RNSIter here, but this works well
             RNSIter temp_iter(temp.get(), coeff_modulus_size);
 
             SEAL_ITERATE(iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
                 auto plain_value = *get<0>(I);
                 if (plain_value >= plain_upper_half_threshold)
                 {
-                    add_uint(plain_upper_half_increment, plain_value, coeff_modulus_size, get<1>(I));
+                    add_uint(plain_upper_half_increment, coeff_modulus_size, plain_value, get<1>(I));
                 }
                 else
                 {
@@ -1569,9 +1569,7 @@ namespace seal
                 }
             });
 
-            SEAL_ITERATE(RNSIter(temp.get(), coeff_count), coeff_modulus_size, [&](auto I) {
-                context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
-            });
+            context_data.rns_tool()->base_q()->decompose_array(temp_iter, coeff_count, pool);
         }
         else
         {
@@ -1687,20 +1685,19 @@ namespace seal
         // Resize to fit the entire NTT transformed (ciphertext size) polynomial
         // Note that the new coefficients are automatically set to 0
         plain.resize(coeff_count * coeff_modulus_size);
+        RNSIter plain_iter(plain.data(), coeff_count);
 
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
             // Allocate temporary space for an entire RNS polynomial
-            auto temp(allocate_zero_uint(coeff_count * coeff_modulus_size, pool));
-
             // Slight semantic misuse of RNSIter here, but this works well
-            RNSIter temp_iter(temp.get(), coeff_modulus_size);
+            SEAL_ALLOCATE_ZERO_GET_RNS_ITER(temp, coeff_modulus_size, coeff_count, pool);
 
-            SEAL_ITERATE(iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
+            SEAL_ITERATE(iter(plain.data(), temp), plain_coeff_count, [&](auto I) {
                 auto plain_value = *get<0>(I);
                 if (plain_value >= plain_upper_half_threshold)
                 {
-                    add_uint(plain_upper_half_increment, plain_value, coeff_modulus_size, get<1>(I));
+                    add_uint(plain_upper_half_increment, coeff_modulus_size, plain_value, get<1>(I));
                 }
                 else
                 {
@@ -1708,18 +1705,15 @@ namespace seal
                 }
             });
 
-            SEAL_ITERATE(RNSIter(temp.get(), coeff_count), coeff_modulus_size, [&](auto I) {
-                context_data.rns_tool()->base_q()->decompose_array(I, coeff_count, pool);
-            });
+            context_data.rns_tool()->base_q()->decompose_array(temp, coeff_count, pool);
 
             // Copy data back to plain
-            set_poly(temp.get(), coeff_count, coeff_modulus_size, plain.data());
+            set_poly(temp, coeff_count, coeff_modulus_size, plain.data());
         }
         else
         {
             // Note that in this case plain_upper_half_increment holds its value in RNS form modulo the coeff_modulus
             // primes.
-            RNSIter plain_iter(plain.data(), coeff_count);
 
             // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
             // the plain_upper_half_increment values.
@@ -1735,7 +1729,6 @@ namespace seal
         }
 
         // Transform to NTT domain
-        RNSIter plain_iter(plain.data(), coeff_count);
         ntt_negacyclic_harvey(plain_iter, coeff_modulus_size, coeff_modulus_ntt_tables);
 
         plain.parms_id() = parms_id;

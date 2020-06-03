@@ -1031,7 +1031,7 @@ namespace sealtest
             Modulus plain_modulus(PlainModulus::Batching(64, 40));
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30, 30 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30, 30, 30, 30 }));
 
             auto context = SEALContext::Create(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -1045,6 +1045,7 @@ namespace sealtest
             Plaintext plain;
             vector<int64_t> result;
 
+            // First test with constant plaintext
             batch_encoder.encode(vector<int64_t>(batch_encoder.slot_count(), 7), plain);
             encryptor.encrypt(plain, encrypted);
             evaluator.multiply_plain_inplace(encrypted, plain);
@@ -1059,6 +1060,29 @@ namespace sealtest
             decryptor.decrypt(encrypted, plain);
             batch_encoder.decode(plain, result);
             ASSERT_TRUE(vector<int64_t>(batch_encoder.slot_count(), 49) == result);
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+
+            // Now test a non-constant plaintext
+            vector<int64_t> input(batch_encoder.slot_count() - 1, 7);
+            input.push_back(1);
+            vector<int64_t> true_result(batch_encoder.slot_count() - 1, 49);
+            true_result.push_back(1);
+            batch_encoder.encode(input, plain);
+            encryptor.encrypt(plain, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            decryptor.decrypt(encrypted, plain);
+            batch_encoder.decode(plain, result);
+            ASSERT_TRUE(true_result == result);
+            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+
+            input = vector<int64_t>(batch_encoder.slot_count() - 1, -7);
+            input.push_back(1);
+            batch_encoder.encode(input, plain);
+            encryptor.encrypt(plain, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            decryptor.decrypt(encrypted, plain);
+            batch_encoder.decode(plain, result);
+            ASSERT_TRUE(true_result == result);
             ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
         }
     }

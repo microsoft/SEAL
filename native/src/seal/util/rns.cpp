@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 #include "seal/util/common.h"
+#include "seal/util/iterator.h"
 #include "seal/util/numth.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rns.h"
@@ -27,13 +28,14 @@ namespace seal
                 throw invalid_argument("pool is uninitialized");
             }
 
-            for (size_t i = 0; i < size_; i++)
+            for (size_t i = 0; i < rnsbase.size(); i++)
             {
                 // The base elements cannot be zero
                 if (rnsbase[i].is_zero())
                 {
                     throw invalid_argument("rnsbase is invalid");
                 }
+
                 for (size_t j = 0; j < i; j++)
                 {
                     // The base must be coprime
@@ -46,10 +48,7 @@ namespace seal
 
             // Base is good; now copy it over to rnsbase_
             base_ = allocate<Modulus>(size_, pool_);
-            for (size_t i = 0; i < size_; i++)
-            {
-                base_[i] = rnsbase[i];
-            }
+            copy_n(rnsbase.cbegin(), size_, base_.get());
 
             // Initialize CRT data
             if (!initialize())
@@ -82,26 +81,19 @@ namespace seal
 
         bool RNSBase::contains(const Modulus &value) const noexcept
         {
-            for (size_t i = 0; i < size_; i++)
-            {
-                if (base_[i] == value)
-                {
-                    return true;
-                }
-            }
-            return false;
+            bool result = false;
+            SEAL_ITERATE(iter(base_), size_, [&](auto I) {
+                result = result || (*I == value);
+            });
+            return result;
         }
 
         bool RNSBase::is_subbase_of(const RNSBase &superbase) const noexcept
         {
-            for (size_t sub = 0; sub < size_; sub++)
-            {
-                if (!superbase.contains(base_[sub]))
-                {
-                    return false;
-                }
-            }
-            return true;
+            bool result = true;
+            SEAL_ITERATE(iter(base_), size_, [&](auto I) { result = result && superbase.contains(*I);
+            });
+            return result;
         }
 
         RNSBase RNSBase::extend(Modulus value) const
@@ -111,23 +103,19 @@ namespace seal
                 throw invalid_argument("value cannot be zero");
             }
 
-            for (size_t i = 0; i < size_; i++)
-            {
+            SEAL_ITERATE(iter(base_), size_, [&](auto I) {
                 // The base must be coprime
-                if (!are_coprime(base_[i].value(), value.value()))
+                if (!are_coprime(I->value(), value.value()))
                 {
                     throw logic_error("cannot extend by given value");
                 }
-            }
+            });
 
             // Copy over this base
             RNSBase newbase(pool_);
             newbase.size_ = add_safe(size_, size_t(1));
             newbase.base_ = allocate<Modulus>(newbase.size_, newbase.pool_);
-            for (size_t i = 0; i < size_; i++)
-            {
-                newbase.base_[i] = base_[i];
-            }
+            copy_n(base_.get(), size_, newbase.base_.get());
 
             // Extend with value
             newbase.base_[newbase.size_ - 1] = value;
@@ -143,14 +131,14 @@ namespace seal
 
         RNSBase RNSBase::extend(const RNSBase &other) const
         {
-            for (size_t i = 0; i < size_; i++)
+            // The bases must be coprime
+            for (size_t i = 0; i < other.size_; i++)
             {
-                // The other base must be coprime to this
-                for (size_t j = 0; j < other.size_; j++)
+                for (size_t j = 0; j < i; j++)
                 {
-                    if (!are_coprime(base_[i].value(), other.base_[j].value()))
+                    if (!are_coprime(other[i].value(), base_[j].value()))
                     {
-                        throw logic_error("cannot extend by given base");
+                        throw invalid_argument("rnsbase is invalid");
                     }
                 }
             }
@@ -159,16 +147,10 @@ namespace seal
             RNSBase newbase(pool_);
             newbase.size_ = add_safe(size_, other.size_);
             newbase.base_ = allocate<Modulus>(newbase.size_, newbase.pool_);
-            for (size_t i = 0; i < size_; i++)
-            {
-                newbase.base_[i] = base_[i];
-            }
+            copy_n(base_.get(), size_, newbase.base_.get());
 
             // Extend with other base
-            for (size_t i = 0; i < other.size_; i++)
-            {
-                newbase.base_[size_ + i] = other.base_[i];
-            }
+            copy_n(other.base_.get(), other.size_, newbase.base_.get() + size_);
 
             // Initialize CRT data
             if (!newbase.initialize())
@@ -190,10 +172,7 @@ namespace seal
             RNSBase newbase(pool_);
             newbase.size_ = size_ - 1;
             newbase.base_ = allocate<Modulus>(newbase.size_, newbase.pool_);
-            for (size_t i = 0; i < size_ - 1; i++)
-            {
-                newbase.base_[i] = base_[i];
-            }
+            copy_n(base_.get(), size_ - 1, newbase.base_.get());
 
             // Initialize CRT data
             newbase.initialize();
@@ -249,17 +228,14 @@ namespace seal
             if (size_ > 1)
             {
                 auto rnsbase_values = allocate<uint64_t>(size_, pool_);
-                for (size_t i = 0; i < size_; i++)
-                {
-                    rnsbase_values[i] = base_[i].value();
-                }
+                SEAL_ITERATE(iter(base_, rnsbase_values), size_, [&](auto I) { *get<1>(I) = get<0>(I)->value(); });
 
                 // Create punctured products
-                for (size_t i = 0; i < size_; i++)
-                {
-                    multiply_many_uint64_except(
-                        rnsbase_values.get(), size_, i, punctured_prod_array_.get() + (i * size_), pool_);
-                }
+                // Semantic misuse of RNSIter
+                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+                SEAL_ITERATE(iter(punctured_prod, size_t(0)), size_, [&](auto I) {
+                    multiply_many_uint64_except(rnsbase_values.get(), size_, get<1>(I), *get<0>(I), pool_);
+                });
 
                 // Compute the full product
                 auto temp_mpi(allocate_uint(size_, pool_));
@@ -267,25 +243,20 @@ namespace seal
                 set_uint(temp_mpi.get(), size_, base_prod_.get());
 
                 // Compute inverses of punctured products mod primes
-                for (size_t i = 0; i < size_; i++)
-                {
-                    inv_punctured_prod_mod_base_array_[i] =
-                        modulo_uint(punctured_prod_array_.get() + (i * size_), size_, base_[i]);
-                    if (!try_invert_uint_mod(
-                            inv_punctured_prod_mod_base_array_[i], base_[i], inv_punctured_prod_mod_base_array_[i]))
-                    {
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                base_prod_[0] = base_[0].value();
-                punctured_prod_array_[0] = 1;
-                inv_punctured_prod_mod_base_array_[0] = 1;
+                bool invertible = true;
+                SEAL_ITERATE(iter(punctured_prod, base_, inv_punctured_prod_mod_base_array_), size_, [&](auto I) {
+                    *get<2>(I) = modulo_uint(get<0>(I), size_, *get<1>(I));
+                    invertible = invertible && try_invert_uint_mod(*get<2>(I), *get<1>(I), *get<2>(I));
+                });
+
+                return invertible;
             }
 
-            // Everything went well
+            // Case of a single prime
+            base_prod_[0] = base_[0].value();
+            punctured_prod_array_[0] = 1;
+            inv_punctured_prod_mod_base_array_[0] = 1;
+
             return true;
         }
 
@@ -306,20 +277,9 @@ namespace seal
                 auto value_copy(allocate_uint(size_, pool));
                 set_uint(value, size_, value_copy.get());
 
-                // Temporary space for 128-bit reductions
-                for (size_t i = 0; i < size_; i++)
-                {
-                    // Reduce in blocks
-                    uint64_t temp[2]{ 0, value_copy[size_ - 1] };
-                    for (size_t k = size_ - 1; k--;)
-                    {
-                        temp[0] = value_copy[k];
-                        temp[1] = barrett_reduce_128(temp, base_[i]);
-                    }
-
-                    // Save the result modulo i-th base element
-                    value[i] = temp[1];
-                }
+                SEAL_ITERATE(iter(value, base_), size_, [&](auto I) {
+                    *get<0>(I) = modulo_uint(value_copy.get(), size_, *get<1>(I));
+                });
             }
         }
 
@@ -341,28 +301,24 @@ namespace seal
                     throw logic_error("invalid parameters");
                 }
 
-                // Decompose an array of multi-precision integers into an array of arrays,
-                // one per each base element
-                auto value_copy(allocate_uint(count * size_, pool));
-                for (size_t i = 0; i < count; i++, value += size_)
-                {
-                    set_uint(value, size_, value_copy.get());
+                // Decompose an array of multi-precision integers into an array of arrays, one per each base element
 
-                    // Temporary space for 128-bit reductions
-                    for (size_t j = 0; j < size_; j++)
-                    {
-                        // Reduce in blocks
-                        uint64_t temp[2]{ 0, value_copy[size_ - 1] };
-                        for (size_t k = size_ - 1; k--;)
-                        {
-                            temp[0] = value_copy[k];
-                            temp[1] = barrett_reduce_128(temp, base_[j]);
-                        }
+                // Copy the input array
+                // Semantic misuse of RNSIter
+                SEAL_ALLOCATE_GET_RNS_ITER(value_copy, size_, count, pool);
+                set_uint(value, count * size_, value_copy);
 
-                        // Save the result modulo i-th base element
-                        value[i] = temp[1];
-                    }
-                }
+                // Note how value_copy and value_out have size_ and count reversed
+                RNSIter value_out(value, count);
+
+                // For each output RNS array (one per base element) ...
+                SEAL_ITERATE(iter(base_, value_out), size_, [&](auto I) {
+                    // For each multi-precision integer in value_copy ...
+                    SEAL_ITERATE(iter(get<1>(I), value_copy), count, [&](auto J) {
+                        // Reduce the multi-precision integer modulo the base element and write to value_out
+                        *get<0>(J) = modulo_uint(get<1>(J), size_, *get<0>(I));
+                    });
+                });
             }
         }
 
@@ -386,15 +342,17 @@ namespace seal
                 // Clear the result
                 set_zero_uint(size_, value);
 
+                // Semantic misuse of RNSIter
+                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+
                 // Compose an array of integers (one per base element) into a single multi-precision integer
                 auto temp_mpi(allocate_uint(size_, pool));
-                for (size_t i = 0; i < size_; i++)
-                {
-                    uint64_t temp_prod =
-                        multiply_uint_mod(temp_value[i], inv_punctured_prod_mod_base_array_[i], base_[i]);
-                    multiply_uint(punctured_prod_array_.get() + (i * size_), size_, temp_prod, size_, temp_mpi.get());
-                    add_uint_uint_mod(temp_mpi.get(), value, base_prod_.get(), size_, value);
-                }
+                SEAL_ITERATE(
+                    iter(temp_value, inv_punctured_prod_mod_base_array_, punctured_prod, base_), size_, [&](auto I) {
+                        uint64_t temp_prod = multiply_uint_mod(*get<0>(I), *get<1>(I), *get<3>(I));
+                        multiply_uint(get<2>(I), size_, temp_prod, size_, temp_mpi.get());
+                        add_uint_uint_mod(temp_mpi.get(), value, base_prod_.get(), size_, value);
+                });
             }
         }
 
@@ -416,11 +374,8 @@ namespace seal
                     throw logic_error("invalid parameters");
                 }
 
-                // Compose an array of arrays of integers (one array per base element) into
-                // a single array of multi-precision integers
-                auto temp_array(allocate_uint(count * size_, pool));
-
                 // Merge the coefficients first
+                auto temp_array(allocate_uint(count * size_, pool));
                 for (size_t i = 0; i < count; i++)
                 {
                     for (size_t j = 0; j < size_; j++)
@@ -432,20 +387,22 @@ namespace seal
                 // Clear the result
                 set_zero_uint(count * size_, value);
 
+                // Semantic misuse of RNSIter
+                RNSIter temp_array_iter(temp_array.get(), size_);
+                RNSIter value_iter(value, size_);
+                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+
+                // Compose an array of RNS integers into a single array of multi-precision integers
                 auto temp_mpi(allocate_uint(size_, pool));
-                for (size_t i = 0; i < count; i++)
-                {
-                    // Do CRT compose for each coefficient
-                    for (size_t j = 0; j < size_; j++)
-                    {
-                        uint64_t temp_prod = multiply_uint_mod(
-                            temp_array[(i * size_) + j], inv_punctured_prod_mod_base_array_[j], base_[j]);
-                        multiply_uint(
-                            punctured_prod_array_.get() + (j * size_), size_, temp_prod, size_, temp_mpi.get());
-                        add_uint_uint_mod(
-                            temp_mpi.get(), value + (i * size_), base_prod_.get(), size_, value + (i * size_));
-                    }
-                }
+                SEAL_ITERATE(iter(temp_array_iter, value_iter), count, [&](auto I) {
+                    SEAL_ITERATE(
+                        iter(get<0>(I), inv_punctured_prod_mod_base_array_, punctured_prod, base_), size_,
+                        [&](auto J) {
+                            uint64_t temp_prod = multiply_uint_mod(*get<0>(J), *get<1>(J), *get<3>(J));
+                            multiply_uint(get<2>(J), size_, temp_prod, size_, temp_mpi.get());
+                            add_uint_uint_mod(temp_mpi.get(), get<1>(I), base_prod_.get(), size_, get<1>(I));
+                        });
+                });
             }
         }
 
@@ -838,7 +795,7 @@ namespace seal
                     return u -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(u >= qi_lazy)));
                 });
 #endif
-                // lazy subtraction again, results in [0, 2*qi_lazy),
+                // Lazy subtraction again, results in [0, 2*qi_lazy),
                 // The reduction [0, 2*qi_lazy) -> [0, qi) is done implicitly in multiply_poly_scalar_coeffmod.
                 std::transform(input, input + coeff_count_, temp_ptr, input, [qi_lazy](uint64_t u, uint64_t v) {
                     return u + qi_lazy - v;

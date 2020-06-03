@@ -6,6 +6,7 @@
 
 - `std::void_t` was introduced only in C++17; switched to using a custom implementation [(Issue 180)](https://github.com/microsoft/SEAL/issues/180).
 - Fixed two independent bugs in `native/src/CMakeConfig.cmd`: The first prevented SEAL to be built in a directory with spaces in the path due to missing quotation marks. Another issue caused MSVC to fail when building SEAL for multiple architectures.
+- `RNSBase::decompose_array` had incorrect semantics that made `Evaluator::multiply_plain_normal` and `Evaluator::transform_to_ntt_inplace` (for `Plaintext`) to behave incorrectly in some situations.
 
 ## Version 3.5.3
 

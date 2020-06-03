@@ -391,7 +391,19 @@ namespace seal
             };
 
             template <typename T>
+            struct IterType<void, const Pointer<T> &>
+            {
+                using type = PtrIter<T *>;
+            };
+
+            template <typename T>
             struct IterType<void, ConstPointer<T> &>
+            {
+                using type = PtrIter<const T *>;
+            };
+
+            template <typename T>
+            struct IterType<void, const ConstPointer<T> &>
             {
                 using type = PtrIter<const T *>;
             };
@@ -484,7 +496,7 @@ namespace seal
 
             SEAL_NODISCARD inline difference_type operator-(const self_type &b) const noexcept
             {
-                return static_cast<difference_type>(value_ - b.value_);
+                return static_cast<difference_type>(value_) - static_cast<difference_type>(b.value_);
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -726,7 +738,7 @@ namespace seal
 
             SEAL_NODISCARD inline reference operator->() const noexcept
             {
-                return *this;
+                return **this;
             }
 
             SEAL_NODISCARD inline value_type ptr() const noexcept
@@ -894,7 +906,7 @@ namespace seal
                 return static_cast<bool>(coeff_it_);
             }
 
-            SEAL_NODISCARD inline value_type operator->() const noexcept
+            SEAL_NODISCARD inline reference operator->() const noexcept
             {
                 return **this;
             }
@@ -1065,7 +1077,7 @@ namespace seal
                 return static_cast<bool>(coeff_it_);
             }
 
-            SEAL_NODISCARD inline value_type operator->() const noexcept
+            SEAL_NODISCARD inline reference operator->() const noexcept
             {
                 return **this;
             }
@@ -1237,7 +1249,7 @@ namespace seal
                 return static_cast<bool>(rns_it_);
             }
 
-            SEAL_NODISCARD inline value_type operator->() const noexcept
+            SEAL_NODISCARD inline reference operator->() const noexcept
             {
                 return **this;
             }
@@ -1424,7 +1436,7 @@ namespace seal
                 return static_cast<bool>(rns_it_);
             }
 
-            SEAL_NODISCARD inline value_type operator->() const noexcept
+            SEAL_NODISCARD inline reference operator->() const noexcept
             {
                 return **this;
             }
@@ -1778,7 +1790,7 @@ namespace seal
                 return static_cast<bool>(first_) && static_cast<bool>(rest_);
             }
 
-            SEAL_NODISCARD inline value_type operator->() const noexcept
+            SEAL_NODISCARD inline reference operator->() const noexcept
             {
                 return **this;
             }
@@ -1936,7 +1948,7 @@ namespace seal
                 return static_cast<bool>(first_);
             }
 
-            SEAL_NODISCARD inline value_type operator->() const noexcept
+            SEAL_NODISCARD inline reference operator->() const noexcept
             {
                 return **this;
             }
