@@ -173,7 +173,7 @@ namespace seal
             for (uint64_t i = 0; i <= coeff_count_minus_one; i++, ++operand, index_raw += galois_elt)
             {
                 uint64_t index = index_raw & coeff_count_minus_one;
-                uint64_t result_value = **operand;
+                uint64_t result_value = *operand;
                 if ((index_raw >> coeff_count_power_) & 1)
                 {
                     // Explicit inline
@@ -181,7 +181,7 @@ namespace seal
                     int64_t non_zero = (result_value != 0);
                     result_value = (modulus_value - result_value) & static_cast<uint64_t>(-non_zero);
                 }
-                *result[index] = result_value;
+                result[index] = result_value;
             }
         }
 
@@ -210,7 +210,7 @@ namespace seal
             auto table = iter(permutation_tables_[GetIndexFromElt(galois_elt)]);
 
             // Perform permutation.
-            SEAL_ITERATE(iter(table, result), coeff_count_, [&](auto I) { *get<1>(I) = *operand[*get<0>(I)]; });
+            SEAL_ITERATE(iter(table, result), coeff_count_, [&](auto I) { get<1>(I) = operand[get<0>(I)]; });
         }
     } // namespace util
 } // namespace seal

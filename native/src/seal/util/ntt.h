@@ -172,7 +172,7 @@ namespace seal
             }
 #endif
             SEAL_ITERATE(iter(operand, tables), coeff_modulus_size, [&](auto I) {
-                ntt_negacyclic_harvey_lazy(get<0>(I), *get<1>(I));
+                ntt_negacyclic_harvey_lazy(get<0>(I), get<1>(I));
             });
         }
 
@@ -203,14 +203,15 @@ namespace seal
             std::uint64_t two_times_modulus = modulus * 2;
             std::size_t n = std::size_t(1) << tables.coeff_count_power();
 
-            SEAL_ITERATE(operand, n, [&](auto I) {
-                if (*I >= two_times_modulus)
+            SEAL_ITERATE(operand, n, [&](auto &I) {
+                // Note: I must be passed to the lambda by reference.
+                if (I >= two_times_modulus)
                 {
-                    *I -= two_times_modulus;
+                    I -= two_times_modulus;
                 }
-                if (*I >= modulus)
+                if (I >= modulus)
                 {
-                    *I -= modulus;
+                    I -= modulus;
                 }
             });
         }
@@ -228,7 +229,7 @@ namespace seal
             }
 #endif
             SEAL_ITERATE(iter(operand, tables), coeff_modulus_size, [&](auto I) {
-                ntt_negacyclic_harvey(get<0>(I), *get<1>(I));
+                ntt_negacyclic_harvey(get<0>(I), get<1>(I));
             });
         }
 
@@ -264,7 +265,7 @@ namespace seal
             }
 #endif
             SEAL_ITERATE(iter(operand, tables), coeff_modulus_size, [&](auto I) {
-                inverse_ntt_negacyclic_harvey_lazy(get<0>(I), *get<1>(I));
+                inverse_ntt_negacyclic_harvey_lazy(get<0>(I), get<1>(I));
             });
         }
 
@@ -293,12 +294,12 @@ namespace seal
             std::size_t n = std::size_t(1) << tables.coeff_count_power();
 
             // Final adjustments; compute a[j] = a[j] * n^{-1} mod q.
-            // We incorporated the final adjustment in the butterfly. Only need
-            // to reduce here.
-            SEAL_ITERATE(operand, n, [&](auto I) {
-                if (*I >= modulus)
+            // We incorporated the final adjustment in the butterfly. Only need to reduce here.
+            SEAL_ITERATE(operand, n, [&](auto &I) {
+                // Note: I must be passed to the lambda by reference.
+                if (I >= modulus)
                 {
-                    *I -= modulus;
+                    I -= modulus;
                 }
             });
         }
@@ -317,7 +318,7 @@ namespace seal
             }
 #endif
             SEAL_ITERATE(iter(operand, tables), coeff_modulus_size, [&](auto I) {
-                inverse_ntt_negacyclic_harvey(get<0>(I), *get<1>(I));
+                inverse_ntt_negacyclic_harvey(get<0>(I), get<1>(I));
             });
         }
 

@@ -406,8 +406,8 @@ namespace seal
                 SEAL_ITERATE(iter(shifted_in1_iter, shifted_reversed_in2_iter), steps, [&](auto J) {
                     SEAL_ITERATE(iter(J, base_iter, shifted_out_iter), base_size, [&](auto K) {
                         SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count, pool);
-                        dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, *get<1>(K), temp);
-                        add_poly_coeffmod(temp, get<2>(K), coeff_count, *get<1>(K), get<2>(K));
+                        dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, get<1>(K), temp);
+                        add_poly_coeffmod(temp, get<2>(K), coeff_count, get<1>(K), get<2>(K));
                     });
                 });
             };
@@ -511,8 +511,8 @@ namespace seal
                 // temp_iter must be dereferenced once to produce an appropriate RNSIter
                 SEAL_ITERATE(iter(J, coeff_modulus, temp[I]), coeff_modulus_size, [&](auto K) {
                     SEAL_ALLOCATE_GET_COEFF_ITER(prod, coeff_count, pool);
-                    dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, *get<1>(K), prod);
-                    add_poly_coeffmod(prod, get<2>(K), coeff_count, *get<1>(K), get<2>(K));
+                    dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, get<1>(K), prod);
+                    add_poly_coeffmod(prod, get<2>(K), coeff_count, get<1>(K), get<2>(K));
                 });
             });
         });
@@ -922,7 +922,7 @@ namespace seal
 
         auto drop_modulus_and_copy = [&](ConstPolyIter in_iter, PolyIter out_iter) {
             SEAL_ITERATE(iter(in_iter, out_iter), encrypted_size, [&](auto I) {
-                SEAL_ITERATE(I, next_coeff_modulus_size, [&](auto J) { set_uint(get<0>(J), coeff_count, get<1>(J)); });
+                SEAL_ITERATE(iter(I), next_coeff_modulus_size, [&](auto J) { set_uint(get<0>(J), coeff_count, get<1>(J)); });
             });
         };
 
@@ -1558,14 +1558,14 @@ namespace seal
             RNSIter temp_iter(temp.get(), coeff_modulus_size);
 
             SEAL_ITERATE(iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
-                auto plain_value = *get<0>(I);
+                auto plain_value = get<0>(I);
                 if (plain_value >= plain_upper_half_threshold)
                 {
                     add_uint(plain_upper_half_increment, coeff_modulus_size, plain_value, get<1>(I));
                 }
                 else
                 {
-                    **get<1>(I) = plain_value;
+                    *get<1>(I) = plain_value;
                 }
             });
 
@@ -1578,8 +1578,8 @@ namespace seal
             RNSIter temp_iter(temp.get(), coeff_count);
             SEAL_ITERATE(iter(temp_iter, plain_upper_half_increment), coeff_modulus_size, [&](auto I) {
                 SEAL_ITERATE(iter(get<0>(I), plain.data()), plain_coeff_count, [&](auto J) {
-                    *get<0>(J) = *get<1>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
-                                                                *get<1>(J) >= plain_upper_half_threshold)));
+                    get<0>(J) = get<1>(J) + (get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
+                                                                get<1>(J) >= plain_upper_half_threshold)));
                 });
             });
         }
@@ -1591,9 +1591,9 @@ namespace seal
         SEAL_ITERATE(iter(encrypted), encrypted_size, [&](auto I) {
             SEAL_ITERATE(iter(I, temp_iter, coeff_modulus, ntt_tables), coeff_modulus_size, [&](auto J) {
                 // Lazy reduction
-                ntt_negacyclic_harvey_lazy(get<0>(J), *get<3>(J));
-                dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, *get<2>(J), get<0>(J));
-                inverse_ntt_negacyclic_harvey(get<0>(J), *get<3>(J));
+                ntt_negacyclic_harvey_lazy(get<0>(J), get<3>(J));
+                dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, get<2>(J), get<0>(J));
+                inverse_ntt_negacyclic_harvey(get<0>(J), get<3>(J));
             });
         });
     }
@@ -1694,14 +1694,14 @@ namespace seal
             SEAL_ALLOCATE_ZERO_GET_RNS_ITER(temp, coeff_modulus_size, coeff_count, pool);
 
             SEAL_ITERATE(iter(plain.data(), temp), plain_coeff_count, [&](auto I) {
-                auto plain_value = *get<0>(I);
+                auto plain_value = get<0>(I);
                 if (plain_value >= plain_upper_half_threshold)
                 {
                     add_uint(plain_upper_half_increment, coeff_modulus_size, plain_value, get<1>(I));
                 }
                 else
                 {
-                    **get<1>(I) = plain_value;
+                    *get<1>(I) = plain_value;
                 }
             });
 
@@ -1722,8 +1722,8 @@ namespace seal
 
             SEAL_ITERATE(helper_iter, coeff_modulus_size, [&](auto I) {
                 SEAL_ITERATE(iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
-                    *get<1>(J) = *get<0>(J) + (*get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
-                                                                *get<0>(J) >= plain_upper_half_threshold)));
+                    get<1>(J) = get<0>(J) + (get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
+                                                                get<0>(J) >= plain_upper_half_threshold)));
                 });
             });
         }
@@ -2080,7 +2080,7 @@ namespace seal
         auto t_poly_prod(allocate_zero_poly_array(key_component_count, coeff_count, rns_modulus_size, pool));
 
         SEAL_ITERATE(iter(size_t(0)), rns_modulus_size, [&](auto I) {
-            size_t key_index = (I == decomp_modulus_size ? key_modulus_size - 1 : I.value());
+            size_t key_index = (I == decomp_modulus_size ? key_modulus_size - 1 : I);
 
             // Product of two numbers is up to 60 + 60 = 120 bits, so we can sum up to 256 of them without reduction.
             size_t lazy_reduction_summand_bound = size_t(SEAL_MULTIPLY_ACCUMULATE_USER_MOD_MAX);
@@ -2126,12 +2126,12 @@ namespace seal
                     {
                         SEAL_ITERATE(iter(t_operand, get<0>(K)[key_index], get<1>(K)), coeff_count, [&](auto L) {
                             unsigned long long qword[2]{ 0, 0 };
-                            multiply_uint64(*get<0>(L), *get<1>(L), qword);
+                            multiply_uint64(get<0>(L), get<1>(L), qword);
 
                             // Accumulate product of t_operand and t_key_acc to t_poly_lazy and reduce
-                            add_uint128(qword, *get<2>(L), qword);
-                            *get<2>(L)[0] = barrett_reduce_128(qword, key_modulus[key_index]);
-                            *get<2>(L)[1] = 0;
+                            add_uint128(qword, get<2>(L).ptr(), qword);
+                            get<2>(L)[0] = barrett_reduce_128(qword, key_modulus[key_index]);
+                            get<2>(L)[1] = 0;
                         });
                     }
                     else
@@ -2139,10 +2139,10 @@ namespace seal
                         // Same as above but no reduction
                         SEAL_ITERATE(iter(t_operand, get<0>(K)[key_index], get<1>(K)), coeff_count, [&](auto L) {
                             unsigned long long qword[2]{ 0, 0 };
-                            multiply_uint64(*get<0>(L), *get<1>(L), qword);
-                            add_uint128(qword, *get<2>(L), qword);
-                            *get<2>(L)[0] = qword[0];
-                            *get<2>(L)[1] = qword[1];
+                            multiply_uint64(get<0>(L), get<1>(L), qword);
+                            add_uint128(qword, get<2>(L).ptr(), qword);
+                            get<2>(L)[0] = qword[0];
+                            get<2>(L)[1] = qword[1];
                         });
                     }
                 });
@@ -2161,14 +2161,14 @@ namespace seal
                 if (lazy_reduction_counter == lazy_reduction_summand_bound)
                 {
                     SEAL_ITERATE(iter(get<0>(K), *get<1>(K)), coeff_count, [&](auto L) {
-                        *get<1>(L) = static_cast<uint64_t>(**get<0>(L));
+                        get<1>(L) = static_cast<uint64_t>(*get<0>(L));
                     });
                 }
                 else
                 {
                     // Same as above except need to still do reduction
                     SEAL_ITERATE(iter(get<0>(K), *get<1>(K)), coeff_count, [&](auto L) {
-                        *get<1>(L) = barrett_reduce_128(*get<0>(L), key_modulus[key_index]);
+                        get<1>(L) = barrett_reduce_128(get<0>(L).ptr(), key_modulus[key_index]);
                     });
                 }
             });
@@ -2186,23 +2186,17 @@ namespace seal
             const uint64_t qk = key_modulus[key_modulus_size - 1].value();
             const uint64_t qk_half = qk >> 1;
             SEAL_ITERATE(t_last, coeff_count, [&](auto J) {
-                *J = barrett_reduce_63(*J + qk_half, key_modulus[key_modulus_size - 1]);
+                J = barrett_reduce_63(J + qk_half, key_modulus[key_modulus_size - 1]);
             });
 
             SEAL_ITERATE(iter(I, key_modulus, key_ntt_tables, modswitch_factors), decomp_modulus_size, [&](auto J) {
-                SEAL_ASSERT_TYPE((get<0, 0>(J)), CoeffIter, "encrypted");
-                SEAL_ASSERT_TYPE((get<0, 1>(J)), CoeffIter, "t_poly_prod");
-                SEAL_ASSERT_TYPE(get<1>(J), const Modulus *, "key_modulus");
-                SEAL_ASSERT_TYPE(get<2>(J), NTTTables *, "key_ntt_tables");
-                SEAL_ASSERT_TYPE(get<3>(J), uint64_t *, "modswitch_factors");
-
                 SEAL_ALLOCATE_GET_COEFF_ITER(t_ntt, coeff_count, pool);
 
                 // (ct mod 4qk) mod qi
-                const uint64_t qi = get<1>(J)->value();
+                const uint64_t qi = get<1>(J).value();
                 if (qk > qi)
                 {
-                    modulo_poly_coeffs_63(t_last, coeff_count, *get<1>(J), t_ntt);
+                    modulo_poly_coeffs_63(t_last, coeff_count, get<1>(J), t_ntt);
                 }
                 else
                 {
@@ -2210,19 +2204,19 @@ namespace seal
                 }
 
                 // Lazy substraction, results in [0, 2*qi).
-                const uint64_t fix = qi - barrett_reduce_63(qk_half, *get<1>(J));
-                SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { *K += fix; });
+                const uint64_t fix = qi - barrett_reduce_63(qk_half, get<1>(J));
+                SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { K += fix; });
 
                 uint64_t qi_lazy; // some multiples of qi
                 if (scheme == scheme_type::CKKS)
                 {
                     // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
-                    ntt_negacyclic_harvey_lazy(t_ntt, *get<2>(J));
+                    ntt_negacyclic_harvey_lazy(t_ntt, get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
                     qi_lazy = qi << 1;
                     // Reduce from [0, 4qi) to [0, 2qi)
                     SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) {
-                        *K -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(*K >= qi_lazy)));
+                        K -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(K >= qi_lazy)));
                     });
 #else
                     // Since SEAL uses at most 60bit moduli, 8*qi < 2^63.
@@ -2232,16 +2226,16 @@ namespace seal
                 else if (scheme == scheme_type::BFV)
                 {
                     qi_lazy = qi << 1;
-                    inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), *get<2>(J));
+                    inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<2>(J));
                 }
 
                 // ((ct mod qi) - (ct mod qk)) mod qi
                 SEAL_ITERATE(
-                    iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { *get<0>(K) += qi_lazy - *get<1>(K); });
+                    iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { get<0>(K) += qi_lazy - get<1>(K); });
 
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, *get<3>(J), *get<1>(J), get<0, 1>(J));
-                add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, *get<1>(J), get<0, 0>(J));
+                multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, get<3>(J), get<1>(J), get<0, 1>(J));
+                add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
             });
         });
     }

@@ -83,7 +83,7 @@ namespace seal
         {
             bool result = false;
             SEAL_ITERATE(iter(base_), size_, [&](auto I) {
-                result = result || (*I == value);
+                result = result || (I == value);
             });
             return result;
         }
@@ -91,7 +91,7 @@ namespace seal
         bool RNSBase::is_subbase_of(const RNSBase &superbase) const noexcept
         {
             bool result = true;
-            SEAL_ITERATE(iter(base_), size_, [&](auto I) { result = result && superbase.contains(*I);
+            SEAL_ITERATE(iter(base_), size_, [&](auto I) { result = result && superbase.contains(I);
             });
             return result;
         }
@@ -105,7 +105,7 @@ namespace seal
 
             SEAL_ITERATE(iter(base_), size_, [&](auto I) {
                 // The base must be coprime
-                if (!are_coprime(I->value(), value.value()))
+                if (!are_coprime(I.value(), value.value()))
                 {
                     throw logic_error("cannot extend by given value");
                 }
@@ -228,13 +228,13 @@ namespace seal
             if (size_ > 1)
             {
                 auto rnsbase_values = allocate<uint64_t>(size_, pool_);
-                SEAL_ITERATE(iter(base_, rnsbase_values), size_, [&](auto I) { *get<1>(I) = get<0>(I)->value(); });
+                SEAL_ITERATE(iter(base_, rnsbase_values), size_, [&](auto I) { get<1>(I) = get<0>(I).value(); });
 
                 // Create punctured products
                 // Semantic misuse of RNSIter
                 RNSIter punctured_prod(punctured_prod_array_.get(), size_);
                 SEAL_ITERATE(iter(punctured_prod, size_t(0)), size_, [&](auto I) {
-                    multiply_many_uint64_except(rnsbase_values.get(), size_, get<1>(I), *get<0>(I), pool_);
+                    multiply_many_uint64_except(rnsbase_values.get(), size_, get<1>(I), get<0>(I).ptr(), pool_);
                 });
 
                 // Compute the full product
@@ -245,8 +245,8 @@ namespace seal
                 // Compute inverses of punctured products mod primes
                 bool invertible = true;
                 SEAL_ITERATE(iter(punctured_prod, base_, inv_punctured_prod_mod_base_array_), size_, [&](auto I) {
-                    *get<2>(I) = modulo_uint(get<0>(I), size_, *get<1>(I));
-                    invertible = invertible && try_invert_uint_mod(*get<2>(I), *get<1>(I), *get<2>(I));
+                    get<2>(I) = modulo_uint(get<0>(I), size_, get<1>(I));
+                    invertible = invertible && try_invert_uint_mod(get<2>(I), get<1>(I), get<2>(I));
                 });
 
                 return invertible;
@@ -278,7 +278,7 @@ namespace seal
                 set_uint(value, size_, value_copy.get());
 
                 SEAL_ITERATE(iter(value, base_), size_, [&](auto I) {
-                    *get<0>(I) = modulo_uint(value_copy.get(), size_, *get<1>(I));
+                    get<0>(I) = modulo_uint(value_copy.get(), size_, get<1>(I));
                 });
             }
         }
@@ -316,7 +316,7 @@ namespace seal
                     // For each multi-precision integer in value_copy ...
                     SEAL_ITERATE(iter(get<1>(I), value_copy), count, [&](auto J) {
                         // Reduce the multi-precision integer modulo the base element and write to value_out
-                        *get<0>(J) = modulo_uint(get<1>(J), size_, *get<0>(I));
+                        get<0>(J) = modulo_uint(get<1>(J), size_, get<0>(I));
                     });
                 });
             }
@@ -349,7 +349,7 @@ namespace seal
                 auto temp_mpi(allocate_uint(size_, pool));
                 SEAL_ITERATE(
                     iter(temp_value, inv_punctured_prod_mod_base_array_, punctured_prod, base_), size_, [&](auto I) {
-                        uint64_t temp_prod = multiply_uint_mod(*get<0>(I), *get<1>(I), *get<3>(I));
+                        uint64_t temp_prod = multiply_uint_mod(get<0>(I), get<1>(I), get<3>(I));
                         multiply_uint(get<2>(I), size_, temp_prod, size_, temp_mpi.get());
                         add_uint_uint_mod(temp_mpi.get(), value, base_prod_.get(), size_, value);
                 });
@@ -398,7 +398,7 @@ namespace seal
                     SEAL_ITERATE(
                         iter(get<0>(I), inv_punctured_prod_mod_base_array_, punctured_prod, base_), size_,
                         [&](auto J) {
-                            uint64_t temp_prod = multiply_uint_mod(*get<0>(J), *get<1>(J), *get<3>(J));
+                            uint64_t temp_prod = multiply_uint_mod(get<0>(J), get<1>(J), get<3>(J));
                             multiply_uint(get<2>(J), size_, temp_prod, size_, temp_mpi.get());
                             add_uint_uint_mod(temp_mpi.get(), get<1>(I), base_prod_.get(), size_, get<1>(I));
                         });

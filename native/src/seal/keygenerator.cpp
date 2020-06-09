@@ -348,13 +348,13 @@ namespace seal
         SEAL_ITERATE(iter(new_key, key_modulus, destination, size_t(0)), decomp_mod_count, [&](auto I) {
             SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count, pool_);
             encrypt_zero_symmetric(
-                secret_key_, context_, key_context_data.parms_id(), true, save_seed, get<2>(I)->data());
-            uint64_t factor = barrett_reduce_63(key_modulus.back().value(), *get<1>(I));
-            multiply_poly_scalar_coeffmod(get<0>(I), coeff_count, factor, *get<1>(I), temp);
+                secret_key_, context_, key_context_data.parms_id(), true, save_seed, get<2>(I).data());
+            uint64_t factor = barrett_reduce_63(key_modulus.back().value(), get<1>(I));
+            multiply_poly_scalar_coeffmod(get<0>(I), coeff_count, factor, get<1>(I), temp);
 
             // We use the SeqIter at get<3>(I) to find the i-th RNS factor of the first destination polynomial.
-            CoeffIter destination_iter = (*iter(get<2>(I)->data()))[get<3>(I)];
-            add_poly_coeffmod(destination_iter, temp, coeff_count, *get<1>(I), destination_iter);
+            CoeffIter destination_iter = (*iter(get<2>(I).data()))[get<3>(I)];
+            add_poly_coeffmod(destination_iter, temp, coeff_count, get<1>(I), destination_iter);
         });
     }
 
@@ -383,7 +383,7 @@ namespace seal
 #endif
         destination.data().resize(num_keys);
         SEAL_ITERATE(iter(new_keys, destination.data()), num_keys, [&](auto I) {
-            generate_one_kswitch_key(get<0>(I), *get<1>(I), save_seed);
+            generate_one_kswitch_key(get<0>(I), get<1>(I), save_seed);
         });
     }
 } // namespace seal

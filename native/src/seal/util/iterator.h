@@ -15,6 +15,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <tuple>
 
 namespace seal
 {
@@ -37,7 +38,7 @@ namespace seal
         +-------------------+
         |    Pointer & Size |  Construct  +-----------------+
         | or Ciphertext     |------------>| (Const)PolyIter |  Iterates over RNS polynomials in a ciphertext
-        +-------------------+             +--------+--------+  (coeff_modulus_size-many RNS components)
+        +-------------------+             +-----------------+  (coeff_modulus_size-many RNS components)
                                                    |
                                                    |
                                                    | Dereference
@@ -46,7 +47,7 @@ namespace seal
                                                    v
            +----------------+  Construct   +----------------+
            | Pointer & Size |------------->| (Const)RNSIter |  Iterates over RNS components in an RNS polynomial
-           +----------------+              +-------+--------+  (poly_modulus_degree-many coefficients)
+           +----------------+              +----------------+  (poly_modulus_degree-many coefficients)
                                                    |
                                                    |
                                                    | Dereference
@@ -55,58 +56,63 @@ namespace seal
                                                    v
           +----------------+  Construct  +------------------+
           | Pointer & Size |------------>| (Const)CoeffIter |  Iterates over coefficients (std::uint64_t) in a single
-          +----------------+             +---------+--------+  RNS polynomial component
+          +----------------+             +------------------+  RNS polynomial component
                                                    |
                                                    |
                                                    | Dereference
                                                    |
                                                    |
                                                    v
-                                       +------------------------+  Construct  +---------------+
-                                       | (const) std::uint64_t* |------------>| PtrIter<PtrT> |  Simple wrapper
-                                       +------------------------+             +-------+-------+  for raw pointers
-                                                                                ^     |
-                            +---------+  Construct                              |     |
-                            | MyType* |-----------------------------------------+     | Dereference
-                            +---------+                                               |
-                                                                                      |
-                                                                                      v
-                                                                                  +------+
-                                                                                  | PtrT |  Unusual dereference to PtrT
-                                                                                  +------+
+                                      +-------------------------+
+                                      | (const) std::uint64_t & |
+                                      +-------------------------+
+
+
+        +----------+  Construct   +-------------------+
+        | MyType * |------------->| PtrIter<MyType *> |  Simple wrapper for raw pointers
+        +----------+              +-------------------+
+                                       |          |
+                                       |          |
+                          Dereference  |          |     PtrIter<MyType *>::ptr()
+                                       |          |  or implicit conversion
+                                       |          |
+                                       v          v
+                                +----------+  +----------+
+                                | MyType & |  | MyType * |
+                                +----------+  +----------+
 
         @par IterTuple
         An extremely useful template class is the (variadic) IterTuple<...> that allows multiple SEAL iterators to be
         zipped together. An IterTuple is itself a SEAL iterator and nested IterTuple types are used commonly in the
-        library. Dereferencing an IterTuple always yields another valid IterTuple, with each component dereferenced
-        individually. An IterTuple can in fact also hold raw pointers as its components, but such an IterTuple cannot
-        be dereferenced. Instead, the raw pointer must be first wrapped into a PtrIter object. Dereferencing a PtrIter
-        yields the wrapped raw pointer; hence, an IterTuple holding PtrIter objects can be dereferenced only once.
+        library. Dereferencing an IterTuple always yields an std::tuple, with each IterTuple element dereferenced.
+        Since an IterTuple can be constructed from an std::tuple holding the respective single-parameter constructor
+        arguments for each iterator, the dereferenced std::tuple can often be directly passed on to functions expecting
+        an IterTuple.
 
         The individual components of an IterTuple can be accessed with the seal::util::get<i>(...) functions. The
         behavior of IterTuple is summarized in the following diagram:
 
-                 +-----------------------------------------+
-                 | IterTuple<PolyIter, RNSIter, CoeffIter> |
-                 +--------------------+--------------------+
-                                      |
-                                      |
-                                      | Dereference
-                                      |
-                                      |
-                                      v
-        +-----------------------------+--------------------------+
-        | IterTuple<RNSIter, CoeffIter, PtrIter<std::uint64_t*>> |
-        +------+----------------------+----------------------+---+
-               |                      |                      |
-               |                      |                      |
-               | get<0>               | get<1>               | get<2>
-               |                      |                      |
-               |                      |                      |
-               v                      v                      v
-        +-------------+       +---------------+      +-------------------------+
-        |   RNSIter   |       |   CoeffIter   |      | PtrIter<std::uint64_t*> |
-        +-------------+       +---------------+      +-------------------------+
+             +-----------------------------------------+
+             | IterTuple<PolyIter, RNSIter, CoeffIter> |
+             +-----------------------------------------+
+                                  |
+                                  |
+                                  | Dereference
+                                  |
+                                  |
+                                  v
+        +--------------------------------------------------+
+        | std::tuple<RNSIter, CoeffIter, std::uint64_t &>> |
+        +------+-------------------------------------------+
+               |                   |                   |
+               |                   |                   |
+               |  std::get<0>      |  std::get<1>      |  std::get<2>
+               |                   |                   |
+               |                   |                   |
+               v                   v                   v
+        +-------------+    +---------------+   +-----------------+
+        |   RNSIter   |    |   CoeffIter   |   | std::uint64_t & |
+        +-------------+    +---------------+   +-----------------+
 
         Sometimes we have to use multiple nested iterator tuples. In this case accessing the nested iterators can be
         tedious with nested get<...> calls. Consider the following, where encrypted1 and encrypted2 are Ciphertexts
@@ -126,11 +132,13 @@ namespace seal
         Note that the innermost tuple index appears first in the list, i.e. the order is reversed from what appears in
         a nested get<...> call. The reason for this reversal is that, when deducing what the iterators are, one first
         examines at the innermost scope, and last the outermost scope, corresponding now to the order of the indices.
+        We have also provided similar functions for nested std::tuple objects, which is necessary when accessing
+        the dereferencing of a nested IterTuple.
 
         @par Typedefs for common PtrIter types
         It is very common to use the types PtrIter<Modulus *> and PtrIter<NTTTables *>. To simplify the
         notation, we have set up typedefs for these: ModulusIter and NTTTablesIter. There are also constant versions
-        ConstModulusIter and ConstNTTTablesIter.
+        ConstModulusIter and ConstNTTTablesIter, wrapping pointers to constant Modulus and NTTTables instead.
 
         @par Creating SEAL iterators
         Iterators are easiest to create using the variadic iter function that, when given one or more arguments that can
@@ -141,6 +149,12 @@ namespace seal
         auto J = iter(I, destination);
         auto encrypted1_iter = get<0, 0>(J));
         auto encrypted2_iter = get<0, 1>(J));
+
+        There are three ways to create IterTuples from the iter function. The first way is by passing an IterTuple as
+        input, in which case iter outputs a copy of it; there should be no reason to do this. The second way is by
+        passing a variadic set of constructor arguments; iter will output an IterTuple consisting of SEAL iterators
+        that are compatible with the given constructor arguments. The third way is by passing a std::tuple consisting
+        of a variadic set of constructor arguments; the behavior is as in the second way.
 
         @par Reversing direction with ReverseIter
         In addition to the iterator types described above, we provide ReverseIter<SEALIter> that reverses the direction
@@ -182,7 +196,7 @@ namespace seal
         ntt_negacyclic_harvey_lazy is again implemented using SEAL_ITERATE. Specifically, it contains the following:
 
         SEAL_ITERATE(iter(operand, tables), coeff_modulus_size, [&](auto I) {
-            ntt_negacyclic_harvey_lazy(get<0>(I), *get<1>(I));
+            ntt_negacyclic_harvey_lazy(get<0>(I), get<1>(I));
         });
 
         Here iter outputs an IterTuple<RNSIter, ConstNTTTablesIter>. In this case the lambda function to be called
@@ -195,7 +209,19 @@ namespace seal
             1. Use I, J, K, ... for the lambda function parameters representing SEAL iterators. This is compact and
                makes it very clear that the objects in question are SEAL iterators since such variable names should not
                be used in SEAL in any other context.
-            2. Always pass SEAL iterators by value to the lambda function.
+            2. Lambda functions passed to SEAL_ITERATE should almost always (see 3.) take a parameter of type auto. This
+               will produce simple looking code that performs well with the expected outcome.
+            3. The only exception to 2. is when SEAL_ITERATE operates on a single PtrIter<T *>: dereferencing returns a
+               T &, which may be important to forward by reference to the lambda function. For an example of this, see
+               seal::util::ntt_negacyclic_harvey in seal/util/ntt.h, where the lambda function parameter is auto &.
+
+               Note: IterTuple<PolyIter, CoeffIter> will dereference to std::tuple<RNSIter, std::uint64_t &>, which can
+               safely be passed by value to the lambda function. Hence, a parameter of type auto in the lambda function
+               will most likely work as expected.
+
+               Note: Another approach that would always behave correctly is by using a forwarding reference auto && as
+               the lambda function parameter. However, we feel that this unnecessarily complicates the code for a minor
+               benefit.
 
         @par Iterator overloads of common functions
         Some functions have overloads that directly take either CoeffIter, RNSIter, or PolyIter inputs, and apply the
@@ -211,9 +237,9 @@ namespace seal
         The easiest way to create SeqIter objects is using the seq_iter function. For example, seq_iter(0) returns a
         SeqIter<int> object with initial value 0. Alternatively, the iter function will detect arithmetic types passed
         to it and create SeqIter objects from them. For example, calling iter(0) is equivalent to calling seq_iter(0),
-        and this works also for multi-argument calls to iter. Dereferencing a SeqIter object returns a SeqIter object.
-        To access the value, call SeqIter<T>::value, or use the implicit conversion to type T. For opposite direction
-        indexing, simply wrap a SeqIter into a ReverseIter, or call reverse_iter directly with the start index.
+        and this works also for multi-argument calls to iter. Dereferencing a SeqIter object returns the current value.
+        For opposite direction indexing, simply wrap a SeqIter into a ReverseIter, or call reverse_iter directly with
+        the start index.
 
         @par Note on allocations
         In the future we hope to use the parallel version of std::for_each_n, introduced in C++17. For this to work, be
@@ -237,50 +263,7 @@ namespace seal
         However, the latter does not expose the name of the allocation itself. There are similar macros for allocating
         buffers and setting up RNSIter and CoeffIter objects as well, and all these macros have versions that set the
         allocated memory to zero, e.g. SEAL_ALLOCATE_ZERO_GET_POLY_ITER.
-
-        @par SEAL_ASSERT_TYPE
-        It is not unusual to have multiple nested SEAL_ITERATE calls operating on multiple/nested IterTuple objects. It
-        can become very difficult to keep track of what exactly the different iterators are pointing to, and what their
-        types are (the above convention of using I, J, K, ... does not reveal the type). Hence we sometimes annotate the
-        code and check that the types match what we expect them to be using the SEAL_ASSERT_TYPE macro. For example,
-        consider the following annotated code snippet that negates all RNS polynomials in the Ciphertext encrypted:
-
-        SEAL_ITERATE(iter(encrypted), encrypted_size, [&](auto I) {
-            SEAL_ASSERT_TYPE(I, RNSIter, "encrypted");
-            SEAL_ITERATE(iter(I, coeff_modulus), coeff_modulus_size, [&](auto J) {
-                    SEAL_ASSERT_TYPE(get<0>(J), CoeffIter, "encrypted");
-                    SEAL_ASSERT_TYPE(get<1>(J), Modulus *, "coeff_modulus");
-                    negate_poly_coeffmod(get<0>(J), coeff_count, *get<1>(J), get<0>(J));
-                });
-        });
-
-        Of course, the above could be done in just one line using the PolyIter overload of negate_poly_coeffmod:
-
-        negate_poly_coeffmod(encrypted, encrypted_size, coeff_modulus, encrypted);
-
-        Nevertheless, note how SEAL_ASSERT_TYPE makes it explicit what type the different iterators are, and includes
-        a string that describes what object is iterated over. We use this convention in particularly complex functions
-        to make the code easier to follow and less error-prone. The code will fail to compile if the type of the object
-        in the first parameter does not match the type in the second parameter of the macro.
-
-        There is one caveat one should be aware of. When calling SEAL_ASSERT_TYPE with a multi-index get<...>(I), an
-        extra set of parentheses must be used around the object for the macro arguments to work properly:
-
-        auto I = iter(encrypted1, encrypted2);
-        auto J = iter(I, destination);
-        SEAL_ASSERT_TYPE((get<0, 0>(J)), PolyIter, "encrypted1");
         */
-
-        // Our custom implementation of std::for_each_n
-        template <typename ForwardIt, typename Size, typename Func>
-        inline ForwardIt seal_for_each_n(ForwardIt first, Size size, Func func)
-        {
-            for (; size--; (void)++first)
-            {
-                func(*first);
-            }
-            return first;
-        }
 
         class SEALIterBase
         {};
@@ -416,7 +399,7 @@ namespace seal
             using self_type = SeqIter;
 
             // Standard iterator typedefs
-            using value_type = self_type;
+            using value_type = T;
             using pointer = void;
             using reference = const value_type &;
             using iterator_category = std::random_access_iterator_tag;
@@ -433,7 +416,7 @@ namespace seal
 
             SEAL_NODISCARD inline reference operator*() const noexcept
             {
-                return *this;
+                return value_;
             }
 
             template <typename SizeT>
@@ -565,14 +548,9 @@ namespace seal
                 return !(value_ < compare);
             }
 
-            SEAL_NODISCARD inline T value() const noexcept
-            {
-                return value_;
-            }
-
             SEAL_NODISCARD inline operator T() const noexcept
             {
-                return value();
+                return value_;
             }
 
         private:
@@ -592,27 +570,28 @@ namespace seal
             using self_type = PtrIter<T *>;
 
             // Standard iterator typedefs
-            using value_type = T *;
-            using pointer = void;
-            using reference = const value_type &;
+            using value_type = T &;
+            using pointer = T *;
+            using reference = value_type;
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
             PtrIter() = default;
 
-            PtrIter(value_type ptr) noexcept : ptr_(ptr)
+            template <typename S>
+            PtrIter(S *ptr) noexcept : ptr_(ptr)
             {}
 
             template <typename S>
-            PtrIter(const PtrIter<S *> &copy) noexcept : ptr_(*copy)
-            {}
-
-            template <typename S>
-            PtrIter(const std::vector<S> &arr) noexcept : PtrIter(arr.data())
+            PtrIter(PtrIter<S *> copy) noexcept : ptr_(copy.ptr())
             {}
 
             template <typename S>
             PtrIter(std::vector<S> &arr) noexcept : PtrIter(arr.data())
+            {}
+
+            template <typename S>
+            PtrIter(const std::vector<S> &arr) noexcept : PtrIter(arr.data())
             {}
 
             template <typename S>
@@ -622,19 +601,19 @@ namespace seal
             template <typename S>
             inline self_type &operator=(const PtrIter<S *> &assign) noexcept
             {
-                ptr_ = *assign;
+                ptr_ = assign.ptr();
                 return *this;
             }
 
             SEAL_NODISCARD inline reference operator*() const noexcept
             {
-                return ptr_;
+                return *ptr_;
             }
 
             template <typename SizeT>
-            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
+            SEAL_NODISCARD inline reference operator[](SizeT n) const noexcept
             {
-                return ptr_ + n;
+                return ptr_[n];
             }
 
             inline self_type &operator++() noexcept
@@ -692,13 +671,13 @@ namespace seal
             template <typename S>
             SEAL_NODISCARD inline difference_type operator-(const PtrIter<S *> &b) const noexcept
             {
-                return std::distance(*b, ptr_);
+                return std::distance(b.ptr(), ptr_);
             }
 
             template <typename S>
             SEAL_NODISCARD inline bool operator==(const PtrIter<S *> &compare) const noexcept
             {
-                return ptr_ == *compare;
+                return ptr_ == compare.ptr();
             }
 
             template <typename S>
@@ -710,25 +689,25 @@ namespace seal
             template <typename S>
             SEAL_NODISCARD inline bool operator<(const PtrIter<S *> &compare) const noexcept
             {
-                return ptr_ < *compare;
+                return ptr_ < compare.ptr();
             }
 
             template <typename S>
             SEAL_NODISCARD inline bool operator>(const PtrIter<S *> &compare) const noexcept
             {
-                return ptr_ > *compare;
+                return ptr_ > compare.ptr();
             }
 
             template <typename S>
             SEAL_NODISCARD inline bool operator<=(const PtrIter<S *> &compare) const noexcept
             {
-                return !(ptr_ > *compare);
+                return !(ptr_ > compare.ptr());
             }
 
             template <typename S>
             SEAL_NODISCARD inline bool operator>=(const PtrIter<S *> &compare) const noexcept
             {
-                return !(ptr_ < *compare);
+                return !(ptr_ < compare.ptr());
             }
 
             SEAL_NODISCARD explicit inline operator bool() const noexcept
@@ -741,18 +720,18 @@ namespace seal
                 return **this;
             }
 
-            SEAL_NODISCARD inline value_type ptr() const noexcept
+            SEAL_NODISCARD inline pointer ptr() const noexcept
             {
                 return ptr_;
             }
 
-            SEAL_NODISCARD inline operator value_type() const noexcept
+            SEAL_NODISCARD inline operator pointer() const noexcept
             {
-                return ptr();
+                return ptr_;
             }
 
         private:
-            value_type ptr_ = nullptr;
+            pointer ptr_ = nullptr;
         };
 
         class RNSIter : public SEALIterBase
@@ -769,7 +748,7 @@ namespace seal
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            RNSIter() : coeff_it_(nullptr), step_size_(0)
+            RNSIter() : coeff_it_(), step_size_(0)
             {}
 
             RNSIter(std::uint64_t *ptr, std::size_t poly_modulus_degree)
@@ -779,10 +758,6 @@ namespace seal
             RNSIter(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
-
-            RNSIter(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
 
             SEAL_NODISCARD inline reference operator*() const noexcept
             {
@@ -917,9 +892,9 @@ namespace seal
             }
 
         private:
-            CoeffIter coeff_it_;
+            CoeffIter coeff_it_ = {};
 
-            std::size_t step_size_;
+            std::size_t step_size_ = 0;
         };
 
         class ConstRNSIter : public SEALIterBase
@@ -936,7 +911,7 @@ namespace seal
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            ConstRNSIter() : coeff_it_(nullptr), step_size_(0)
+            ConstRNSIter() : coeff_it_(), step_size_(0)
             {}
 
             ConstRNSIter(const std::uint64_t *ptr, std::size_t poly_modulus_degree)
@@ -946,10 +921,6 @@ namespace seal
             ConstRNSIter(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
-
-            ConstRNSIter(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
 
             ConstRNSIter(const RNSIter &copy)
                 : coeff_it_(static_cast<const std::uint64_t *>(copy)), step_size_(copy.poly_modulus_degree())
@@ -1088,9 +1059,9 @@ namespace seal
             }
 
         private:
-            ConstCoeffIter coeff_it_;
+            ConstCoeffIter coeff_it_ = {};
 
-            std::size_t step_size_;
+            std::size_t step_size_ = 0;
         };
 
         class PolyIter : public SEALIterBase
@@ -1118,10 +1089,6 @@ namespace seal
             PolyIter(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
-
-            PolyIter(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
 
             SEAL_NODISCARD inline reference operator*() const noexcept
             {
@@ -1265,11 +1232,11 @@ namespace seal
             }
 
         private:
-            RNSIter rns_it_;
+            RNSIter rns_it_ = {};
 
-            std::size_t coeff_modulus_size_;
+            std::size_t coeff_modulus_size_ = 0;
 
-            std::size_t step_size_;
+            std::size_t step_size_ = 0;
         };
 
         class ConstPolyIter : public SEALIterBase
@@ -1299,10 +1266,6 @@ namespace seal
             ConstPolyIter(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
-
-            ConstPolyIter(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
 
             ConstPolyIter(const PolyIter &copy)
                 : rns_it_(static_cast<const std::uint64_t *>(copy), copy.poly_modulus_degree()),
@@ -1452,11 +1415,11 @@ namespace seal
             }
 
         private:
-            ConstRNSIter rns_it_;
+            ConstRNSIter rns_it_ = {};
 
-            std::size_t coeff_modulus_size_;
+            std::size_t coeff_modulus_size_ = 0;
 
-            std::size_t step_size_;
+            std::size_t step_size_ = 0;
         };
 
         template <typename SEALIter>
@@ -1482,16 +1445,9 @@ namespace seal
             ReverseIter(const SEALIter &copy) : SEALIter(copy)
             {}
 
-            ReverseIter(SEALIter &&source) : SEALIter(source)
-            {}
-
             ReverseIter(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
-
-            ReverseIter(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
 
             template <typename SizeT>
             SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
@@ -1555,33 +1511,38 @@ namespace seal
                 return *this + (-static_cast<difference_type>(n));
             }
 
-            SEAL_NODISCARD inline difference_type operator-(const self_type &b) const
+            SEAL_NODISCARD inline difference_type operator-(const self_type& b) const
             {
                 // Note the reversed order
                 return static_cast<SEALIter>(*b) - static_cast<SEALIter>(*this);
             }
 
-            SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
+            SEAL_NODISCARD inline bool operator<(const self_type& compare) const noexcept
             {
                 // Note the reversed order
                 return static_cast<SEALIter>(*this) > static_cast<SEALIter>(*compare);
             }
 
-            SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
+            SEAL_NODISCARD inline bool operator>(const self_type& compare) const noexcept
             {
                 // Note the reversed order
                 return static_cast<SEALIter>(*this) < static_cast<SEALIter>(*compare);
             }
 
-            SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
+            SEAL_NODISCARD inline bool operator<=(const self_type& compare) const noexcept
             {
                 // Note the reversed order
                 return !(*this > compare);
             }
 
-            SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
+            SEAL_NODISCARD inline bool operator>=(const self_type& compare) const noexcept
             {
                 return !(*this < compare);
+            }
+
+            SEAL_NODISCARD inline reference operator->() const noexcept
+            {
+                return **this;
             }
         };
 
@@ -1601,6 +1562,21 @@ namespace seal
             {
                 using type = IterTuple<SEALIter1, SEALIter2>;
             };
+
+            template <typename... Ts>
+            struct extend_std_tuple;
+
+            template <typename T, typename... Rest>
+            struct extend_std_tuple<T, std::tuple<Rest...>>
+            {
+                using type = std::tuple<T, Rest...>;
+            };
+
+            template <typename T1, typename T2>
+            struct extend_std_tuple<T1, T2>
+            {
+                using type = std::tuple<T1, T2>;
+            };
         } // namespace iterator_internal
 
         template <typename SEALIter, typename... Rest>
@@ -1608,13 +1584,13 @@ namespace seal
         {
         public:
             static_assert(
-                std::is_base_of<SEALIterBase, SEALIter>::value || std::is_pointer<SEALIter>::value,
-                "Template parameter must derive from seal::util::SEALIterBase or be a raw pointer");
+                std::is_base_of<SEALIterBase, SEALIter>::value,
+                "Template parameter must derive from seal::util::SEALIterBase");
 
             using self_type = IterTuple<SEALIter, Rest...>;
 
             // Standard iterator typedefs
-            using value_type = typename iterator_internal::extend_iter_tuple<
+            using value_type = typename iterator_internal::extend_std_tuple<
                 typename std::iterator_traits<SEALIter>::value_type,
                 typename std::iterator_traits<IterTuple<Rest...>>::value_type>::type;
             using pointer = void;
@@ -1629,17 +1605,35 @@ namespace seal
             IterTuple(SEALIter first, Rest... rest) : first_(first), rest_(rest...)
             {}
 
+            template <typename... Ts>
+            IterTuple(const std::tuple<Ts...> &tp)
+                : IterTuple(seal_apply(
+                      [](auto &&... args) -> IterTuple { return { std::forward<decltype(args)>(args)... };
+                      },
+                      std::forward<decltype(tp)>(tp)))
+            {
+                static_assert(sizeof...(Ts) == sizeof...(Rest) + 1, "std::tuple size does not match seal::util::IterTuple size");
+            }
+
+            template <typename... Ts>
+            IterTuple(std::tuple<Ts...> &&tp)
+                : IterTuple(seal_apply(
+                      [](auto &&... args) -> IterTuple && { return { std::forward<decltype(args)>(args)... }; },
+                      std::forward<decltype(tp)>(tp)))
+            {
+                static_assert(
+                    sizeof...(Ts) == sizeof...(Rest) + 1, "std::tuple size does not match seal::util::IterTuple size");
+            }
+
             IterTuple(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
-            IterTuple(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
-
             SEAL_NODISCARD inline value_type operator*() const noexcept
             {
-                return { *first_, *rest_ };
+                return seal_apply([this](auto &&... args) -> value_type {
+                    return { *first_, std::forward<decltype(args)>(args)... };
+                }, *rest_);
             }
 
             template <typename SizeT>
@@ -1790,7 +1784,7 @@ namespace seal
                 return static_cast<bool>(first_) && static_cast<bool>(rest_);
             }
 
-            SEAL_NODISCARD inline reference operator->() const noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
                 return **this;
             }
@@ -1806,9 +1800,9 @@ namespace seal
             }
 
         private:
-            SEALIter first_;
+            SEALIter first_ = {};
 
-            IterTuple<Rest...> rest_;
+            IterTuple<Rest...> rest_ = {};
         };
 
         template <typename SEALIter>
@@ -1816,13 +1810,13 @@ namespace seal
         {
         public:
             static_assert(
-                std::is_base_of<SEALIterBase, SEALIter>::value || std::is_pointer<SEALIter>::value,
-                "Template parameter must derive from seal::util::SEALIterBase or be a raw pointer");
+                std::is_base_of<SEALIterBase, SEALIter>::value,
+                "Template parameter must derive from seal::util::SEALIterBase");
 
             using self_type = IterTuple<SEALIter>;
 
             // Standard iterator typedefs
-            using value_type = typename std::iterator_traits<SEALIter>::value_type;
+            using value_type = std::tuple<typename std::iterator_traits<SEALIter>::value_type>;
             using pointer = void;
             using reference = const value_type &;
             using iterator_category = std::random_access_iterator_tag;
@@ -1833,15 +1827,19 @@ namespace seal
             IterTuple(SEALIter first) : first_(first)
             {}
 
+            template <typename T>
+            IterTuple(const std::tuple<T> &tp) : IterTuple(std::get<0>(std::forward<decltype(tp)>(tp)))
+            {}
+
+            template <typename T>
+            IterTuple(std::tuple<T> &&tp) : IterTuple(std::get<0>(std::forward<decltype(tp)>(tp)))
+            {}
+
             IterTuple(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
-            IterTuple(self_type &&source) = default;
-
-            self_type &operator=(self_type &&assign) = default;
-
-            SEAL_NODISCARD inline reference operator*() const noexcept
+            SEAL_NODISCARD inline value_type operator*() const noexcept
             {
                 return *first_;
             }
@@ -1959,7 +1957,7 @@ namespace seal
             }
 
         private:
-            SEALIter first_;
+            SEALIter first_ = {};
         };
 
         // Out-of-class operator+ for all SEAL iterators
@@ -1977,7 +1975,7 @@ namespace seal
             struct GetHelperStruct
             {
                 template <typename SEALIter, typename... Rest>
-                static auto Apply(const IterTuple<SEALIter, Rest...> &it)
+                SEAL_NODISCARD static auto Apply(const IterTuple<SEALIter, Rest...> &it) noexcept
                 {
                     return GetHelperStruct<N - 1>::Apply(it.rest());
                 }
@@ -1987,16 +1985,16 @@ namespace seal
             struct GetHelperStruct<0>
             {
                 template <typename SEALIter, typename... Rest>
-                static auto Apply(const IterTuple<SEALIter, Rest...> &it)
+                SEAL_NODISCARD static auto Apply(const IterTuple<SEALIter, Rest...> &it) noexcept
                 {
                     return it.first();
                 }
             };
 
             template <std::size_t N, typename... SEALIters>
-            auto get(const IterTuple<SEALIters...> &it)
+            SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it) noexcept
             {
-                static_assert(N < sizeof...(SEALIters), "IterTuple index out of range");
+                static_assert(N < sizeof...(SEALIters), "seal::util::IterTuple index out of range");
                 return iterator_internal::GetHelperStruct<N>::Apply(it);
             }
 
@@ -2010,29 +2008,48 @@ namespace seal
                 using type = typename extend_iter_tuple<
                     typename IterType<void, T>::type, typename IterType<void, Rest...>::type>::type;
             };
+
+            template <typename... Ts>
+            struct IterType<void, const std::tuple<Ts...> &>
+            {
+                using type = typename IterType<void, Ts...>::type;
+            };
+
+            template <typename... Ts>
+            struct IterType<void, std::tuple<Ts...> &>
+            {
+                using type = typename IterType<void, Ts...>::type;
+            };
         } // namespace iterator_internal
 
         template <
             std::size_t N, std::size_t... Rest, typename... SEALIters, typename = std::enable_if_t<sizeof...(Rest)>>
-        SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it)
+        SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it) noexcept
         {
             return get<Rest...>(iterator_internal::get<N>(it));
         }
 
         template <std::size_t N, typename... SEALIters>
-        SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it)
+        SEAL_NODISCARD inline auto get(const IterTuple<SEALIters...> &it) noexcept
         {
             return iterator_internal::get<N>(it);
         }
 
+        template <
+            std::size_t N, std::size_t... Rest, typename... Ts, typename = std::enable_if_t<sizeof...(Rest)>>
+        SEAL_NODISCARD inline auto get(const std::tuple<Ts...> &tp) noexcept
+        {
+            return get<Rest...>(std::get<N>(tp));
+        }
+
         template <typename... Ts>
-        SEAL_NODISCARD inline auto iter(Ts &&... ts) -> typename iterator_internal::IterType<void, Ts...>::type
+        SEAL_NODISCARD inline auto iter(Ts &&... ts) noexcept -> typename iterator_internal::IterType<void, Ts...>::type
         {
             return { std::forward<Ts>(ts)... };
         }
 
         template <typename... Ts>
-        SEAL_NODISCARD inline auto reverse_iter(Ts &&... ts)
+        SEAL_NODISCARD inline auto reverse_iter(Ts &&... ts) noexcept
             -> ReverseIter<typename iterator_internal::IterType<void, Ts...>::type>
         {
             return typename iterator_internal::IterType<void, Ts...>::type(std::forward<Ts>(ts)...);

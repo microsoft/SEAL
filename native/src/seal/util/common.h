@@ -11,6 +11,8 @@
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
+#include <utility>
+#include <tuple>
 
 namespace seal
 {
@@ -24,6 +26,29 @@ namespace seal
 
         template <typename... Ts>
         using seal_void_t = typename VoidType<Ts...>::type;
+
+        template <typename ForwardIt, typename Size, typename Func>
+        inline ForwardIt seal_for_each_n(ForwardIt first, Size size, Func &&func)
+        {
+            for (; size--; (void)++first)
+            {
+                func(*first);
+            }
+            return first;
+        }
+
+        template <typename Func, typename Tuple, std::size_t... Is>
+        inline decltype(auto) seal_apply_impl(Func &&func, Tuple &&tp, std::index_sequence<Is...>)
+        {
+            return func(std::get<Is>(std::forward<Tuple>(tp))...);
+        }
+
+        template <typename Func, typename Tuple, std::size_t ...Is>
+        inline decltype(auto) seal_apply(Func &&func, Tuple &&tp)
+        {
+            using iseq_t = std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>;
+            return seal_apply_impl(std::forward<Func>(func), std::forward<Tuple>(tp), iseq_t{});
+        }
 
         template <typename T, typename...>
         struct IsUInt64

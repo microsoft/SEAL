@@ -66,21 +66,18 @@ namespace sealtest
             calls = 0;
             SEAL_ITERATE(iter(0), 0, [&](auto I) {
                 calls++;
-                I++;
             });
             ASSERT_EQ(0, calls);
 
             calls = 0;
             SEAL_ITERATE(iter(0), 1, [&](auto I) {
                 calls++;
-                I++;
             });
             ASSERT_EQ(1, calls);
 
             calls = 0;
             SEAL_ITERATE(iter(0), 10, [&](auto I) {
                 calls++;
-                I++;
             });
             ASSERT_EQ(10, calls);
 
@@ -89,22 +86,22 @@ namespace sealtest
             ASSERT_EQ(45, sum);
 
             sum = 0;
-            SEAL_ITERATE(iter(0, reverse_iter(0)), 10, [&](auto I) { sum += get<0>(I).value() + get<1>(I).value(); });
+            SEAL_ITERATE(iter(0, reverse_iter(0)), 10, [&](auto I) { sum += get<0>(I) + get<1>(I); });
         }
 
         TEST(IteratorTest, SeqIter)
         {
             // Construction
             SeqIter<int> s{};
-            ASSERT_EQ(0, s.value());
+            ASSERT_EQ(0, *s);
             s = 1;
-            ASSERT_EQ(1, s.value());
+            ASSERT_EQ(1,*s);
             s = -1;
-            ASSERT_EQ(-1, s.value());
+            ASSERT_EQ(-1, *s);
             SeqIter<size_t> t(5);
-            ASSERT_EQ(5, t.value());
+            ASSERT_EQ(5, *t);
             t = 0;
-            ASSERT_EQ(0, t.value());
+            ASSERT_EQ(0, *t);
             SeqIter<bool> b(true);
             ASSERT_EQ(true, b);
             b = false;
@@ -113,7 +110,7 @@ namespace sealtest
             // Dereference
             s = 10;
             SeqIter<int> u = *s;
-            ASSERT_EQ(10, u.value());
+            ASSERT_EQ(10, *u);
 
             // Array access
             ASSERT_EQ(10, s[0]);
@@ -171,8 +168,8 @@ namespace sealtest
             ASSERT_FALSE(u <= s - 1);
 
             // Value
-            ASSERT_EQ(10, s.value());
-            ASSERT_EQ(11, (s + 1).value());
+            ASSERT_EQ(10, *s);
+            ASSERT_EQ(11, *(s + 1));
         }
 
         TEST(IteratorTest, PtrIter)
@@ -188,40 +185,40 @@ namespace sealtest
 
             // Dereference
             s = arr_zero;
-            PtrIter<int *> u = *s;
+            PtrIter<int *> u = s;
             ASSERT_EQ(arr_zero, u.ptr());
 
             // Array access
-            ASSERT_EQ(-1, *s[-1]);
-            ASSERT_EQ(0, *s[0]);
-            ASSERT_EQ(1, *s[1]);
+            ASSERT_EQ(-1, s[-1]);
+            ASSERT_EQ(0, s[0]);
+            ASSERT_EQ(1, s[1]);
 
             // Increment/Decrement
             u = s--;
-            ASSERT_EQ(0, **u);
-            ASSERT_EQ(-1, **s);
+            ASSERT_EQ(0, *u);
+            ASSERT_EQ(-1, *s);
             u = s++;
-            ASSERT_EQ(-1, **u);
-            ASSERT_EQ(0, **s);
+            ASSERT_EQ(-1, *u);
+            ASSERT_EQ(0, *s);
             u = --s;
-            ASSERT_EQ(-1, **u);
-            ASSERT_EQ(-1, **s);
+            ASSERT_EQ(-1, *u);
+            ASSERT_EQ(-1, *s);
             u = ++s;
-            ASSERT_EQ(0, **u);
-            ASSERT_EQ(0, **s);
+            ASSERT_EQ(0, *u);
+            ASSERT_EQ(0, *s);
             s += 1;
-            ASSERT_EQ(1, **s);
+            ASSERT_EQ(1, *s);
             s -= 1;
-            ASSERT_EQ(0, **s);
+            ASSERT_EQ(0, *s);
             u = s - 1;
-            ASSERT_EQ(0, **s);
-            ASSERT_EQ(-1, **u);
+            ASSERT_EQ(0, *s);
+            ASSERT_EQ(-1, *u);
             u = u + 1;
-            ASSERT_EQ(0, **u);
+            ASSERT_EQ(0, *u);
             s = 1 + u;
-            ASSERT_EQ(1, **s);
+            ASSERT_EQ(1, *s);
             s = -1 + s;
-            ASSERT_EQ(0, **s);
+            ASSERT_EQ(0, *s);
 
             // Difference
             ASSERT_EQ(0, u - s);
@@ -247,6 +244,7 @@ namespace sealtest
             // Pointer
             ASSERT_EQ(arr_zero, s.ptr());
             ASSERT_EQ(arr_zero, static_cast<int *>(s));
+            ASSERT_EQ(arr_zero, static_cast<const int *>(s));
         }
 
         TEST(IteratorTest, RNSIter)
@@ -262,39 +260,39 @@ namespace sealtest
 
             // Dereference
             CoeffIter t = *s;
-            ASSERT_EQ(arr_zero, *t);
+            ASSERT_EQ(arr_zero, t.ptr());
 
             // Array access
-            ASSERT_EQ(0, **s[0]);
-            ASSERT_EQ(2, **s[1]);
-            ASSERT_EQ(4, **s[2]);
+            ASSERT_EQ(0, *s[0]);
+            ASSERT_EQ(2, *s[1]);
+            ASSERT_EQ(4, *s[2]);
 
             // Increment/Decrement
             RNSIter u = s++;
-            ASSERT_EQ(0, ***u);
-            ASSERT_EQ(2, ***s);
+            ASSERT_EQ(0, **u);
+            ASSERT_EQ(2, **s);
             u = s--;
-            ASSERT_EQ(2, ***u);
-            ASSERT_EQ(0, ***s);
+            ASSERT_EQ(2, **u);
+            ASSERT_EQ(0, **s);
             u = ++s;
-            ASSERT_EQ(2, ***u);
-            ASSERT_EQ(2, ***s);
+            ASSERT_EQ(2, **u);
+            ASSERT_EQ(2, **s);
             u = --s;
-            ASSERT_EQ(0, ***u);
-            ASSERT_EQ(0, ***s);
+            ASSERT_EQ(0, **u);
+            ASSERT_EQ(0, **s);
             s += 1;
-            ASSERT_EQ(2, ***s);
+            ASSERT_EQ(2, **s);
             s -= 1;
-            ASSERT_EQ(0, ***s);
+            ASSERT_EQ(0, **s);
             u = s + 1;
-            ASSERT_EQ(0, ***s);
-            ASSERT_EQ(2, ***u);
+            ASSERT_EQ(0, **s);
+            ASSERT_EQ(2, **u);
             u = u - 1;
-            ASSERT_EQ(0, ***u);
+            ASSERT_EQ(0, **u);
             s = 2 + u;
-            ASSERT_EQ(4, ***s);
+            ASSERT_EQ(4, **s);
             s = -1 + s;
-            ASSERT_EQ(2, ***s);
+            ASSERT_EQ(2, **s);
 
             // Difference
             u = s;
@@ -334,40 +332,40 @@ namespace sealtest
 
             // Dereference
             RNSIter t = *s;
-            ASSERT_EQ(arr_zero, **t);
+            ASSERT_EQ(arr_zero, t);
             ASSERT_EQ(2, t.poly_modulus_degree());
 
             // Array access
-            ASSERT_EQ(0, ***s[0]);
-            ASSERT_EQ(6, ***s[1]);
-            ASSERT_EQ(12, ***s[2]);
+            ASSERT_EQ(0, **s[0]);
+            ASSERT_EQ(6, **s[1]);
+            ASSERT_EQ(12, **s[2]);
 
             // Increment/Decrement
             PolyIter u = s++;
-            ASSERT_EQ(0, ****u);
-            ASSERT_EQ(6, ****s);
+            ASSERT_EQ(0, ***u);
+            ASSERT_EQ(6, ***s);
             u = s--;
-            ASSERT_EQ(6, ****u);
-            ASSERT_EQ(0, ****s);
+            ASSERT_EQ(6, ***u);
+            ASSERT_EQ(0, ***s);
             u = ++s;
-            ASSERT_EQ(6, ****u);
-            ASSERT_EQ(6, ****s);
+            ASSERT_EQ(6, ***u);
+            ASSERT_EQ(6, ***s);
             u = --s;
-            ASSERT_EQ(0, ****u);
-            ASSERT_EQ(0, ****s);
+            ASSERT_EQ(0, ***u);
+            ASSERT_EQ(0, ***s);
             s += 1;
-            ASSERT_EQ(6, ****s);
+            ASSERT_EQ(6, ***s);
             s -= 1;
-            ASSERT_EQ(0, ****s);
+            ASSERT_EQ(0, ***s);
             u = s + 1;
-            ASSERT_EQ(0, ****s);
-            ASSERT_EQ(6, ****u);
+            ASSERT_EQ(0, ***s);
+            ASSERT_EQ(6, ***u);
             u = u - 1;
-            ASSERT_EQ(0, ****u);
+            ASSERT_EQ(0, ***u);
             s = 2 + u;
-            ASSERT_EQ(12, ****s);
+            ASSERT_EQ(12, ***s);
             s = -1 + s;
-            ASSERT_EQ(6, ****s);
+            ASSERT_EQ(6, ***s);
 
             // Difference
             u = s;
@@ -394,13 +392,17 @@ namespace sealtest
 
         TEST(IteratorTest, IterTuple)
         {
-            // Construction
+            // Construction/Get
             IterTuple<SeqIter<int>, SeqIter<int>> s(0, 1);
             ASSERT_EQ(0, get<0>(s));
             ASSERT_EQ(1, get<1>(s));
             s = IterTuple<SeqIter<int>, SeqIter<int>>(1, 0);
-            ASSERT_EQ(1, get<0>(s));
-            ASSERT_EQ(0, get<1>(s));
+            ASSERT_EQ(1, *get<0>(s));
+            ASSERT_EQ(0, *get<1>(s));
+
+            // Get
+            ASSERT_EQ(0, get<0>(IterTuple<SeqIter<int>, SeqIter<int>>{ 0, 1 }));
+            ASSERT_EQ(1, get<1>(IterTuple<SeqIter<int>, SeqIter<int>>{ 0, 1 }));
 
             // Dereference
             auto t = *s;
@@ -408,12 +410,12 @@ namespace sealtest
             ASSERT_EQ(0, get<1>(t));
 
             // Array access
-            ASSERT_EQ(1, *get<0>(s[0]));
-            ASSERT_EQ(0, *get<1>(s[0]));
-            ASSERT_EQ(0, *get<0>(s[-1]));
-            ASSERT_EQ(-1, *get<1>(s[-1]));
-            ASSERT_EQ(2, *get<0>(s[1]));
-            ASSERT_EQ(1, *get<1>(s[1]));
+            ASSERT_EQ(1, get<0>(s[0]));
+            ASSERT_EQ(0, get<1>(s[0]));
+            ASSERT_EQ(0, get<0>(s[-1]));
+            ASSERT_EQ(-1, get<1>(s[-1]));
+            ASSERT_EQ(2, get<0>(s[1]));
+            ASSERT_EQ(1, get<1>(s[1]));
 
             // Increment/Decrement
             auto u = s++;
@@ -484,20 +486,20 @@ namespace sealtest
         {
             // Construction
             ReverseIter<SeqIter<int>> s{};
-            ASSERT_EQ(0, s.value());
+            ASSERT_EQ(0, *s);
             s = reverse_iter(-1);
-            ASSERT_EQ(-1, s.value());
+            ASSERT_EQ(-1, *s);
             s = reverse_iter(1);
-            ASSERT_EQ(1, s.value());
+            ASSERT_EQ(1, *s);
             ReverseIter<SeqIter<size_t>> t(5);
-            ASSERT_EQ(5, t.value());
+            ASSERT_EQ(5, *t);
             t = reverse_iter(size_t(0));
-            ASSERT_EQ(0, t.value());
+            ASSERT_EQ(0, *t);
 
             // Dereference
             s = reverse_iter(10);
             SeqIter<int> v = *s;
-            ASSERT_EQ(10, v.value());
+            ASSERT_EQ(10, *v);
 
             // Array access
             ASSERT_EQ(10, s[0]);
