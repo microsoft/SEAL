@@ -64,25 +64,30 @@ namespace sealtest
             int calls, sum;
 
             calls = 0;
+            sum = 0;
             SEAL_ITERATE(iter(0), 0, [&](auto I) {
+                sum += I;
                 calls++;
             });
             ASSERT_EQ(0, calls);
+            ASSERT_EQ(0, sum);
 
             calls = 0;
+            sum = 0;
             SEAL_ITERATE(iter(0), 1, [&](auto I) {
+                sum += I;
                 calls++;
             });
             ASSERT_EQ(1, calls);
+            ASSERT_EQ(0, sum);
 
             calls = 0;
+            sum = 0;
             SEAL_ITERATE(iter(0), 10, [&](auto I) {
+                sum += I;
                 calls++;
             });
             ASSERT_EQ(10, calls);
-
-            sum = 0;
-            SEAL_ITERATE(iter(0), 10, [&](auto I) { sum += I; });
             ASSERT_EQ(45, sum);
 
             sum = 0;

@@ -2207,13 +2207,12 @@ namespace seal
                 const uint64_t fix = qi - barrett_reduce_63(qk_half, get<1>(J));
                 SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { K += fix; });
 
-                uint64_t qi_lazy; // some multiples of qi
+                uint64_t qi_lazy = qi << 1 ; // some multiples of qi
                 if (scheme == scheme_type::CKKS)
                 {
                     // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
                     ntt_negacyclic_harvey_lazy(t_ntt, get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
-                    qi_lazy = qi << 1;
                     // Reduce from [0, 4qi) to [0, 2qi)
                     SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) {
                         K -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(K >= qi_lazy)));
@@ -2225,7 +2224,6 @@ namespace seal
                 }
                 else if (scheme == scheme_type::BFV)
                 {
-                    qi_lazy = qi << 1;
                     inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<2>(J));
                 }
 
