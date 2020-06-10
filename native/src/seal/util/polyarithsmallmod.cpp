@@ -34,7 +34,7 @@ namespace seal
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
-                multiply_uint64(*get<0>(I), scalar, z);
+                multiply_uint64(get<0>(I), scalar, z);
 
                 // Reduces z using base 2^64 Barrett reduction
 
@@ -55,8 +55,7 @@ namespace seal
                 tmp3 = z[0] - tmp1 * modulus_value;
 
                 // Claim: One more subtraction is enough
-                *get<1>(I) =
-                    tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+                get<1>(I) = tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
             });
         }
 
@@ -92,7 +91,7 @@ namespace seal
             SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
                 // Reduces z using base 2^64 Barrett reduction
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
-                multiply_uint64(*get<0>(I), *get<1>(I), z);
+                multiply_uint64(get<0>(I), get<1>(I), z);
 
                 // Multiply input and const_ratio
                 // Round 1
@@ -111,8 +110,7 @@ namespace seal
                 tmp3 = z[0] - tmp1 * modulus_value;
 
                 // Claim: One more subtraction is enough
-                *get<2>(I) =
-                    tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+                get<2>(I) = tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
             });
         }
 
@@ -135,7 +133,7 @@ namespace seal
             // [-modulus,modulus). Keep track of the max.
             uint64_t result = 0;
             SEAL_ITERATE(operand, coeff_count, [&](auto I) {
-                uint64_t poly_coeff = *I % modulus.value();
+                uint64_t poly_coeff = I % modulus.value();
                 if (poly_coeff >= modulus_neg_threshold)
                 {
                     poly_coeff = modulus.value() - poly_coeff;
@@ -190,13 +188,13 @@ namespace seal
             for (size_t i = 0; i < coeff_count; i++, poly++, index_raw++)
             {
                 uint64_t index = index_raw & coeff_count_mod_mask;
-                if (!(index_raw & static_cast<uint64_t>(coeff_count)) || !**poly)
+                if (!(index_raw & static_cast<uint64_t>(coeff_count)) || !*poly)
                 {
-                    *result[index] = **poly;
+                    result[index] = *poly;
                 }
                 else
                 {
-                    *result[index] = modulus.value() - **poly;
+                    result[index] = modulus.value() - *poly;
                 }
             }
         }

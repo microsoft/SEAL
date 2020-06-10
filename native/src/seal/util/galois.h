@@ -47,7 +47,7 @@ namespace seal
                 }
 #endif
                 SEAL_ITERATE(iter(operand, modulus, result), coeff_modulus_size, [&](auto I) {
-                    apply_galois(get<0>(I), galois_elt, *get<1>(I), get<2>(I));
+                    apply_galois(get<0>(I), galois_elt, get<1>(I), get<2>(I));
                 });
             }
 

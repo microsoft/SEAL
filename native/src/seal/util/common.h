@@ -11,42 +11,74 @@
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
+#include <utility>
+#include <tuple>
 
 namespace seal
 {
     namespace util
     {
+        template <typename... Ts>
+        struct VoidType
+        {
+            using type = void;
+        };
+
+        template <typename... Ts>
+        using seal_void_t = typename VoidType<Ts...>::type;
+
+        template <typename ForwardIt, typename Size, typename Func>
+        inline ForwardIt seal_for_each_n(ForwardIt first, Size size, Func &&func)
+        {
+            for (; size--; (void)++first)
+            {
+                func(*first);
+            }
+            return first;
+        }
+
+        template <typename Func, typename Tuple, std::size_t... Is>
+        inline decltype(auto) seal_apply_impl(Func &&func, Tuple &&tp, std::index_sequence<Is...>)
+        {
+            return func(std::get<Is>(std::forward<Tuple>(tp))...);
+        }
+
+        template <typename Func, typename Tuple, std::size_t ...Is>
+        inline decltype(auto) seal_apply(Func &&func, Tuple &&tp)
+        {
+            using iseq_t = std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>;
+            return seal_apply_impl(std::forward<Func>(func), std::forward<Tuple>(tp), iseq_t{});
+        }
+
         template <typename T, typename...>
-        struct is_uint64
+        struct IsUInt64
             : std::conditional<
                   std::is_integral<T>::value && std::is_unsigned<T>::value && (sizeof(T) == sizeof(std::uint64_t)),
                   std::true_type, std::false_type>::type
         {};
 
         template <typename T, typename U, typename... Rest>
-        struct is_uint64<T, U, Rest...>
-            : std::conditional<
-                  is_uint64<T>::value && is_uint64<U, Rest...>::value, std::true_type, std::false_type>::type
+        struct IsUInt64<T, U, Rest...>
+            : std::conditional<IsUInt64<T>::value && IsUInt64<U, Rest...>::value, std::true_type, std::false_type>::type
         {};
 
         template <typename T, typename... Rest>
-        constexpr bool is_uint64_v = is_uint64<T, Rest...>::value;
+        constexpr bool is_uint64_v = IsUInt64<T, Rest...>::value;
 
         template <typename T, typename...>
-        struct is_uint32
+        struct IsUInt32
             : std::conditional<
                   std::is_integral<T>::value && std::is_unsigned<T>::value && (sizeof(T) == sizeof(std::uint32_t)),
                   std::true_type, std::false_type>::type
         {};
 
         template <typename T, typename U, typename... Rest>
-        struct is_uint32<T, U, Rest...>
-            : std::conditional<
-                  is_uint32<T>::value && is_uint32<U, Rest...>::value, std::true_type, std::false_type>::type
+        struct IsUInt32<T, U, Rest...>
+            : std::conditional<IsUInt32<T>::value && IsUInt32<U, Rest...>::value, std::true_type, std::false_type>::type
         {};
 
         template <typename T, typename... Rest>
-        constexpr bool is_uint32_v = is_uint32<T, Rest...>::value;
+        constexpr bool is_uint32_v = IsUInt32<T, Rest...>::value;
 
         template <
             typename T, typename S, typename = std::enable_if_t<std::is_integral<T>::value>,
