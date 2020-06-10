@@ -100,7 +100,7 @@ namespace sealtest
             SeqIter<int> s{};
             ASSERT_EQ(0, *s);
             s = 1;
-            ASSERT_EQ(1,*s);
+            ASSERT_EQ(1, *s);
             s = -1;
             ASSERT_EQ(-1, *s);
             SeqIter<size_t> t(5);

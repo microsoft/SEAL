@@ -82,17 +82,14 @@ namespace seal
         bool RNSBase::contains(const Modulus &value) const noexcept
         {
             bool result = false;
-            SEAL_ITERATE(iter(base_), size_, [&](auto I) {
-                result = result || (I == value);
-            });
+            SEAL_ITERATE(iter(base_), size_, [&](auto I) { result = result || (I == value); });
             return result;
         }
 
         bool RNSBase::is_subbase_of(const RNSBase &superbase) const noexcept
         {
             bool result = true;
-            SEAL_ITERATE(iter(base_), size_, [&](auto I) { result = result && superbase.contains(I);
-            });
+            SEAL_ITERATE(iter(base_), size_, [&](auto I) { result = result && superbase.contains(I); });
             return result;
         }
 
@@ -352,7 +349,7 @@ namespace seal
                         uint64_t temp_prod = multiply_uint_mod(get<0>(I), get<1>(I), get<3>(I));
                         multiply_uint(get<2>(I), size_, temp_prod, size_, temp_mpi.get());
                         add_uint_uint_mod(temp_mpi.get(), value, base_prod_.get(), size_, value);
-                });
+                    });
             }
         }
 
@@ -396,8 +393,7 @@ namespace seal
                 auto temp_mpi(allocate_uint(size_, pool));
                 SEAL_ITERATE(iter(temp_array_iter, value_iter), count, [&](auto I) {
                     SEAL_ITERATE(
-                        iter(get<0>(I), inv_punctured_prod_mod_base_array_, punctured_prod, base_), size_,
-                        [&](auto J) {
+                        iter(get<0>(I), inv_punctured_prod_mod_base_array_, punctured_prod, base_), size_, [&](auto J) {
                             uint64_t temp_prod = multiply_uint_mod(get<0>(J), get<1>(J), get<3>(J));
                             multiply_uint(get<2>(J), size_, temp_prod, size_, temp_mpi.get());
                             add_uint_uint_mod(temp_mpi.get(), get<1>(I), base_prod_.get(), size_, get<1>(I));

@@ -922,7 +922,8 @@ namespace seal
 
         auto drop_modulus_and_copy = [&](ConstPolyIter in_iter, PolyIter out_iter) {
             SEAL_ITERATE(iter(in_iter, out_iter), encrypted_size, [&](auto I) {
-                SEAL_ITERATE(iter(I), next_coeff_modulus_size, [&](auto J) { set_uint(get<0>(J), coeff_count, get<1>(J)); });
+                SEAL_ITERATE(
+                    iter(I), next_coeff_modulus_size, [&](auto J) { set_uint(get<0>(J), coeff_count, get<1>(J)); });
             });
         };
 
@@ -1578,8 +1579,9 @@ namespace seal
             RNSIter temp_iter(temp.get(), coeff_count);
             SEAL_ITERATE(iter(temp_iter, plain_upper_half_increment), coeff_modulus_size, [&](auto I) {
                 SEAL_ITERATE(iter(get<0>(I), plain.data()), plain_coeff_count, [&](auto J) {
-                    get<0>(J) = get<1>(J) + (get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
-                                                                get<1>(J) >= plain_upper_half_threshold)));
+                    get<0>(J) = get<1>(J) +
+                                (get<1>(I) &
+                                 static_cast<uint64_t>(-static_cast<int64_t>(get<1>(J) >= plain_upper_half_threshold)));
                 });
             });
         }
@@ -1722,8 +1724,9 @@ namespace seal
 
             SEAL_ITERATE(helper_iter, coeff_modulus_size, [&](auto I) {
                 SEAL_ITERATE(iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
-                    get<1>(J) = get<0>(J) + (get<1>(I) & static_cast<uint64_t>(-static_cast<int64_t>(
-                                                                get<0>(J) >= plain_upper_half_threshold)));
+                    get<1>(J) = get<0>(J) +
+                                (get<1>(I) &
+                                 static_cast<uint64_t>(-static_cast<int64_t>(get<0>(J) >= plain_upper_half_threshold)));
                 });
             });
         }
@@ -2207,7 +2210,7 @@ namespace seal
                 const uint64_t fix = qi - barrett_reduce_63(qk_half, get<1>(J));
                 SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { K += fix; });
 
-                uint64_t qi_lazy = qi << 1 ; // some multiples of qi
+                uint64_t qi_lazy = qi << 1; // some multiples of qi
                 if (scheme == scheme_type::CKKS)
                 {
                     // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
@@ -2228,8 +2231,7 @@ namespace seal
                 }
 
                 // ((ct mod qi) - (ct mod qk)) mod qi
-                SEAL_ITERATE(
-                    iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { get<0>(K) += qi_lazy - get<1>(K); });
+                SEAL_ITERATE(iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { get<0>(K) += qi_lazy - get<1>(K); });
 
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                 multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, get<3>(J), get<1>(J), get<0, 1>(J));
