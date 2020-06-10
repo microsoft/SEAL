@@ -9,10 +9,10 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
-#include <type_traits>
-#include <vector>
-#include <utility>
 #include <tuple>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace seal
 {
@@ -43,7 +43,7 @@ namespace seal
             return func(std::get<Is>(std::forward<Tuple>(tp))...);
         }
 
-        template <typename Func, typename Tuple, std::size_t ...Is>
+        template <typename Func, typename Tuple, std::size_t... Is>
         inline decltype(auto) seal_apply(Func &&func, Tuple &&tp)
         {
             using iseq_t = std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>;

@@ -12,10 +12,10 @@
 #include <iostream>
 #include <iterator>
 #include <stdexcept>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <tuple>
 
 namespace seal
 {
@@ -1511,31 +1511,31 @@ namespace seal
                 return *this + (-static_cast<difference_type>(n));
             }
 
-            SEAL_NODISCARD inline difference_type operator-(const self_type& b) const
+            SEAL_NODISCARD inline difference_type operator-(const self_type &b) const
             {
                 // Note the reversed order
                 return static_cast<SEALIter>(*b) - static_cast<SEALIter>(*this);
             }
 
-            SEAL_NODISCARD inline bool operator<(const self_type& compare) const noexcept
+            SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
             {
                 // Note the reversed order
                 return static_cast<SEALIter>(*this) > static_cast<SEALIter>(*compare);
             }
 
-            SEAL_NODISCARD inline bool operator>(const self_type& compare) const noexcept
+            SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
             {
                 // Note the reversed order
                 return static_cast<SEALIter>(*this) < static_cast<SEALIter>(*compare);
             }
 
-            SEAL_NODISCARD inline bool operator<=(const self_type& compare) const noexcept
+            SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
             {
                 // Note the reversed order
                 return !(*this > compare);
             }
 
-            SEAL_NODISCARD inline bool operator>=(const self_type& compare) const noexcept
+            SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
             {
                 return !(*this < compare);
             }
@@ -1608,11 +1608,11 @@ namespace seal
             template <typename... Ts>
             IterTuple(const std::tuple<Ts...> &tp)
                 : IterTuple(seal_apply(
-                      [](auto &&... args) -> IterTuple { return { std::forward<decltype(args)>(args)... };
-                      },
+                      [](auto &&... args) -> IterTuple { return { std::forward<decltype(args)>(args)... }; },
                       std::forward<decltype(tp)>(tp)))
             {
-                static_assert(sizeof...(Ts) == sizeof...(Rest) + 1, "std::tuple size does not match seal::util::IterTuple size");
+                static_assert(
+                    sizeof...(Ts) == sizeof...(Rest) + 1, "std::tuple size does not match seal::util::IterTuple size");
             }
 
             template <typename... Ts>
@@ -1631,9 +1631,11 @@ namespace seal
 
             SEAL_NODISCARD inline value_type operator*() const noexcept
             {
-                return seal_apply([this](auto &&... args) -> value_type {
-                    return { *first_, std::forward<decltype(args)>(args)... };
-                }, *rest_);
+                return seal_apply(
+                    [this](auto &&... args) -> value_type {
+                        return { *first_, std::forward<decltype(args)>(args)... };
+                    },
+                    *rest_);
             }
 
             template <typename SizeT>
@@ -2035,8 +2037,7 @@ namespace seal
             return iterator_internal::get<N>(it);
         }
 
-        template <
-            std::size_t N, std::size_t... Rest, typename... Ts, typename = std::enable_if_t<sizeof...(Rest)>>
+        template <std::size_t N, std::size_t... Rest, typename... Ts, typename = std::enable_if_t<sizeof...(Rest)>>
         SEAL_NODISCARD inline auto get(const std::tuple<Ts...> &tp) noexcept
         {
             return get<Rest...>(std::get<N>(tp));

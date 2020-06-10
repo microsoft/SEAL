@@ -12,8 +12,8 @@ else()
 endif()
 
 set(ZLIB_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DSKIP_INSTALL_ALL=ON -Wno-dev)
-if(EXISTS cache_init.txt)
-    set(ZLIB_CMAKE_ARGS "${ZLIB_CMAKE_ARGS} -C../cache_init.txt")
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/cache_init.txt)
+    list(APPEND ZLIB_CMAKE_ARGS -C"${CMAKE_CURRENT_LIST_DIR}/cache_init.txt")
 endif()
 
 include(ExternalProject)
