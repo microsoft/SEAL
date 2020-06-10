@@ -13,7 +13,7 @@
 #include <cstring>
 #include <limits>
 #include <unordered_map>
-#include <zlib.h>
+#include "zlib.h"
 
 using namespace std;
 

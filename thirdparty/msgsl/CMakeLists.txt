@@ -11,10 +11,9 @@ else()
     set(TEMP_BINARY_DIR ${CMAKE_CURRENT_LIST_DIR}/build)
 endif()
 
-if(EXISTS cache_init.txt)
-    set(MSGSL_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DGSL_TEST=OFF -C../cache_init.txt)
-else()
-    set(MSGSL_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DGSL_TEST=OFF)
+set(MSGSL_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DGSL_TEST=OFF)
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/cache_init.txt)
+    list(APPEND MSGSL_CMAKE_ARGS -C"${CMAKE_CURRENT_LIST_DIR}/cache_init.txt")
 endif()
 
 include(ExternalProject)
