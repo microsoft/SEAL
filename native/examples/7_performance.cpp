@@ -81,7 +81,10 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     chrono::microseconds time_rotate_rows_one_step_sum(0);
     chrono::microseconds time_rotate_rows_random_sum(0);
     chrono::microseconds time_rotate_columns_sum(0);
-
+    chrono::microseconds time_serialize_sum(0);
+#ifdef SEAL_USE_ZLIB
+    chrono::microseconds time_serialize_compr_sum(0);
+#endif
     /*
     How many times to run the test?
     */
@@ -249,6 +252,26 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         }
 
         /*
+        [Serialize Ciphertext]
+        */
+        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::none));
+        vector<SEAL_BYTE> buf(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::none);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#ifdef SEAL_USE_ZLIB
+        /*
+        [Serialize Ciphertext]
+        */
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::deflate));
+        buf.resize(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::deflate);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_compr_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#endif
+        /*
         Print a dot to indicate progress.
         */
         cout << ".";
@@ -270,7 +293,10 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     auto avg_rotate_rows_one_step = time_rotate_rows_one_step_sum.count() / (2 * count);
     auto avg_rotate_rows_random = time_rotate_rows_random_sum.count() / count;
     auto avg_rotate_columns = time_rotate_columns_sum.count() / count;
-
+    auto avg_serialize = time_serialize_sum.count() / count;
+#ifdef SEAL_USE_ZLIB
+    auto avg_serialize_compr = time_serialize_compr_sum.count() / count;
+#endif
     cout << "Average batch: " << avg_batch << " microseconds" << endl;
     cout << "Average unbatch: " << avg_unbatch << " microseconds" << endl;
     cout << "Average encrypt: " << avg_encrypt << " microseconds" << endl;
@@ -286,6 +312,10 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         cout << "Average rotate rows random: " << avg_rotate_rows_random << " microseconds" << endl;
         cout << "Average rotate columns: " << avg_rotate_columns << " microseconds" << endl;
     }
+    cout << "Average serialize ciphertext: " << avg_serialize << " microseconds" << endl;
+#ifdef SEAL_USE_ZLIB
+    cout << "Average compressed serialize ciphertext: " << avg_serialize_compr << " microseconds" << endl;
+#endif
     cout.flush();
 }
 
@@ -350,7 +380,10 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     chrono::microseconds time_rotate_one_step_sum(0);
     chrono::microseconds time_rotate_random_sum(0);
     chrono::microseconds time_conjugate_sum(0);
-
+    chrono::microseconds time_serialize_sum(0);
+#ifdef SEAL_USE_ZLIB
+    chrono::microseconds time_serialize_compr_sum(0);
+#endif
     /*
     How many times to run the test?
     */
@@ -498,6 +531,26 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         }
 
         /*
+        [Serialize Ciphertext]
+        */
+        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::none));
+        vector<SEAL_BYTE> buf(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::none);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#ifdef SEAL_USE_ZLIB
+        /*
+        [Serialize Ciphertext]
+        */
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::deflate));
+        buf.resize(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::deflate);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_compr_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#endif
+        /*
         Print a dot to indicate progress.
         */
         cout << ".";
@@ -520,7 +573,10 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     auto avg_rotate_one_step = time_rotate_one_step_sum.count() / (2 * count);
     auto avg_rotate_random = time_rotate_random_sum.count() / count;
     auto avg_conjugate = time_conjugate_sum.count() / count;
-
+    auto avg_serialize = time_serialize_sum.count() / count;
+#ifdef SEAL_USE_ZLIB
+    auto avg_serialize_compr = time_serialize_compr_sum.count() / count;
+#endif
     cout << "Average encode: " << avg_encode << " microseconds" << endl;
     cout << "Average decode: " << avg_decode << " microseconds" << endl;
     cout << "Average encrypt: " << avg_encrypt << " microseconds" << endl;
@@ -537,6 +593,10 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         cout << "Average rotate vector random: " << avg_rotate_random << " microseconds" << endl;
         cout << "Average complex conjugate: " << avg_conjugate << " microseconds" << endl;
     }
+    cout << "Average serialize ciphertext: " << avg_serialize << " microseconds" << endl;
+#ifdef SEAL_USE_ZLIB
+    cout << "Average compressed serialize ciphertext: " << avg_serialize_compr << " microseconds" << endl;
+#endif
     cout.flush();
 }
 
