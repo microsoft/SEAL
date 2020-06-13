@@ -10,6 +10,7 @@
 
 ### Other
 
+- Added pkg-config support [(PR 181)](https://github.com/microsoft/SEAL/pull/181).
 - `seal::util::PtrIter<T *>` now dereferences correctly to `T &` instead of `T *`.
 This results in simpler code, where inside `SEAL_ITERATE` lambda functions dereferences of `seal::util::PtrIter<T *>` do not need to be dereferenced a second time, as was particularly common when iterating over `ModulusIter` and `NTTTablesIter` types.
 - `seal::util::IterTuple` now dereferences to an `std::tuple` of dereferences of its component iterators, so it is no longer possible to directly pass a dereferenced `seal::util::IterTuple` to an inner lambda function in nested `SEAL_ITERATE` calls.
