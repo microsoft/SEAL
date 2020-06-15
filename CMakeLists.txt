@@ -114,8 +114,11 @@ set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
 set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
+set(SEAL_PKGCONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/seal.pc.in)
+set(SEAL_PKGCONFIG_FILENAME ${SEAL_SOURCE_DIR}/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+set(SEAL_PKGCONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 set(SEAL_INCLUDES_BUILD_DIR ${SEAL_SOURCE_DIR}/native/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
@@ -365,9 +368,11 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
         EXCLUDE_FROM_ALL)
     # Set the ZLIB include directory to be relative to this CMakeLists.txt's binary directory
     # for out-of-source builds.
-    set(SEAL_ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
+    set(SEAL_ZLIB_INCLUDE_DIRS
+        ${SEAL_THIRDPARTY_DIR}/zlib/src
+        ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${SEAL_ZLIB_INCLUDE_DIR})
+        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
 endif()
 
 # Google Test
@@ -720,6 +725,13 @@ install(
         ${SEAL_CONFIG_VERSION_FILENAME}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
+# Install the pkg-config file
+install(
+    FILES
+        ${SEAL_PKGCONFIG_FILENAME}
+    DESTINATION
+        ${SEAL_PKGCONFIG_INSTALL_DIR})
+
 # We export SEALTargets from the build tree so it can be used by other projects
 # without requiring an install.
 export(
@@ -789,6 +801,12 @@ configure_file(
 set(SEAL_WINDOWS_SEAL_C_PATH "")
 set(SEAL_LINUX_SEAL_C_PATH "")
 set(SEAL_MACOS_SEAL_C_PATH "")
+
+# Create pkg-config file
+configure_file(
+     ${SEAL_PKGCONFIG_IN_FILENAME}
+     ${SEAL_PKGCONFIG_FILENAME}
+     @ONLY)
 
 # Supporting local building of NuGet package
 if(MSVC)
