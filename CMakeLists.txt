@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.12)
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 3.5.3 LANGUAGES CXX C)
+project(SEAL VERSION 3.5.4 LANGUAGES CXX C)
 
 # Check operating system: for Windows, use Visual Studio solution/project files.
 if(MSVC)
@@ -372,9 +372,11 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
         EXCLUDE_FROM_ALL)
     # Set the ZLIB include directory to be relative to this CMakeLists.txt's binary directory
     # for out-of-source builds.
-    set(SEAL_ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
+    set(SEAL_ZLIB_INCLUDE_DIRS
+        ${SEAL_THIRDPARTY_DIR}/zlib/src
+        ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ${SEAL_ZLIB_INCLUDE_DIR})
+        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
 endif()
 
 # [option] SEAL_USE_ZSTD
@@ -805,6 +807,13 @@ install(
         ${SEAL_CONFIG_FILENAME}
         ${SEAL_CONFIG_VERSION_FILENAME}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
+
+# Install the pkg-config file
+install(
+    FILES
+        ${SEAL_PKGCONFIG_FILENAME}
+    DESTINATION
+        ${SEAL_PKGCONFIG_INSTALL_DIR})
 
 # We export SEALTargets from the build tree so it can be used by other projects
 # without requiring an install.
