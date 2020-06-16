@@ -807,7 +807,7 @@ namespace seal
         encrypted_iter += encrypted_size - 1;
 
         SEAL_ITERATE(iter(size_t(0)), relins_needed, [&](auto I) {
-            switch_key_inplace(
+            this->switch_key_inplace(
                 encrypted, *encrypted_iter, static_cast<const KSwitchKeys &>(relin_keys),
                 RelinKeys::get_index(encrypted_size - 1 - I), pool);
         });
@@ -1987,7 +1987,7 @@ namespace seal
                 if (safe_cast<size_t>(abs(step)) != (coeff_count >> 1))
                 {
                     // Apply rotation for this step
-                    rotate_internal(encrypted, step, galois_keys, pool);
+                    this->rotate_internal(encrypted, step, galois_keys, pool);
                 }
             });
         }
