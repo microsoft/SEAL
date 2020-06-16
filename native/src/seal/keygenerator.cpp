@@ -383,7 +383,7 @@ namespace seal
 #endif
         destination.data().resize(num_keys);
         SEAL_ITERATE(iter(new_keys, destination.data()), num_keys, [&](auto I) {
-            generate_one_kswitch_key(get<0>(I), get<1>(I), save_seed);
+            this->generate_one_kswitch_key(get<0>(I), get<1>(I), save_seed);
         });
     }
 } // namespace seal
