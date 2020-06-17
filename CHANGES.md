@@ -1,8 +1,15 @@
 # List of Changes
 
+## Version 3.6.0
+
+### API Changes
+
+- Added const overloads of `IntArray::begin` and `IntArray::end`.
+- Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
+
 ## Version 3.5.4
 
-### Bug fixes
+### Bug Fixes
 
 - `std::void_t` was introduced only in C++17; switched to using a custom implementation [(Issue 180)](https://github.com/microsoft/SEAL/issues/180).
 - Fixed two independent bugs in `native/src/CMakeConfig.cmd`: The first prevented SEAL to be built in a directory with spaces in the path due to missing quotation marks. Another issue caused MSVC to fail when building SEAL for multiple architectures.
@@ -18,14 +25,14 @@ Instead, the outer lambda function parameter should be wrapped inside another ca
 
 ## Version 3.5.3
 
-### Bug fixes
+### Bug Fixes
 
 - Fixed a bug in `seal::util::IterTuple<...>` where a part of the `value_type` was constructed incorrectly.
 - Fixed a bug in `Evaluator::mod_switch_drop_to_next` that caused non-inplace modulus switching to fail [(Issue 179)](https://github.com/microsoft/SEAL/issues/179). Thanks s0l0ist!
 
 ## Version 3.5.2
 
-### Bug fixes
+### Bug Fixes
 
 - Merged pull request [PR 178](https://github.com/microsoft/SEAL/pull/178) to fix a lambda capture issue when building on GCC 7.5.
 - Fixed issue where SEAL.vcxproj could not be compiled with MSBuild outside the solution [(Issue 171)](https://github.com/microsoft/SEAL/issues/171).
@@ -33,7 +40,7 @@ Instead, the outer lambda function parameter should be wrapped inside another ca
 - Fixed issue in NuSpec file that made local NuGet package generation fail.
 - Fixed issue in NuSpec where XML documentation was not included into the package.
 
-### New features
+### New Features
 
 - Huge improvements to SEAL iterators, including `seal::util::iter` and `seal::util::reverse_iter` functions that can create any type of iterator from appropriate parameters.
 - Added `seal::util::SeqIter<T>` iterator for iterating a sequence of numbers for convenient iteration indexing.
