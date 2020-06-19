@@ -53,32 +53,31 @@ if "%VSVERSION%"=="15.0" (
 
 rem Download Microsoft GSL
 set MSGSLCONFIGDIR="..\..\thirdparty\msgsl\.config\%VSVERSION%\%PROJECTPLATFORM%"
-cd %~dp0
+cd "%~dp0"
 if not exist %MSGSLCONFIGDIR% (
 	mkdir %MSGSLCONFIGDIR%
 )
 cd %MSGSLCONFIGDIR%
-"%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM%
+"%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM% -DMSGSL_PLATFORM=%PROJECTPLATFORM%
 "%CMAKEPATH%" --build . --config "%PROJECTCONFIGURATION%"
 
 rem Copy Microsoft GSL header files into the local source directory
-robocopy ..\..\..\src\include %~dp0 /s
+robocopy ..\..\..\src\include "%~dp0 " /s
 
 rem Download and build ZLIB
 set ZLIBCONFIGDIR="..\..\thirdparty\zlib\.config\%VSVERSION%\%PROJECTPLATFORM%"
-cd %~dp0
+cd "%~dp0"
 if not exist %ZLIBCONFIGDIR% (
 	mkdir %ZLIBCONFIGDIR%
 )
 cd %ZLIBCONFIGDIR%
-"%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM%           ^
-	-DZLIB_PLATFORM="%PROJECTPLATFORM%"
+"%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM% -DZLIB_PLATFORM=%PROJECTPLATFORM%
 
 "%CMAKEPATH%" --build . --config "%PROJECTCONFIGURATION%"
 
 rem Configure Microsoft SEAL
 set CONFIGDIR="..\..\.config\%VSVERSION%\%PROJECTPLATFORM%"
-cd %~dp0
+cd "%~dp0"
 if not exist %CONFIGDIR% (
 	mkdir %CONFIGDIR%
 )

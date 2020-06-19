@@ -274,6 +274,63 @@ namespace sealtest
             }
         }
 
+        TEST(RNSBaseTest, ComposeDecomposeArray)
+        {
+            MemoryPoolHandle pool = MemoryManager::GetPool();
+
+            auto rns_test = [&pool](const RNSBase &base, size_t count, vector<uint64_t> in, vector<uint64_t> out) {
+                auto in_copy = in;
+                base.decompose_array(in_copy.data(), count, pool);
+                ASSERT_TRUE(in_copy == out);
+                base.compose_array(in_copy.data(), count, pool);
+                ASSERT_TRUE(in_copy == in);
+            };
+
+            {
+                RNSBase base({ 2 }, pool);
+                rns_test(base, 1, { 0 }, { 0 });
+                rns_test(base, 1, { 1 }, { 1 });
+            }
+            {
+                RNSBase base({ 5 }, pool);
+                rns_test(base, 3, { 0, 1, 2 }, { 0, 1, 2 });
+            }
+            {
+                RNSBase base({ 3, 5 }, pool);
+                rns_test(base, 1, { 0, 0 }, { 0, 0 });
+                rns_test(base, 1, { 2, 0 }, { 2, 2 });
+                rns_test(base, 1, { 7, 0 }, { 1, 2 });
+                rns_test(base, 2, { 0, 0, 0, 0 }, { 0, 0, 0, 0 });
+                rns_test(base, 2, { 1, 0, 2, 0 }, { 1, 2, 1, 2 });
+                rns_test(base, 2, { 7, 0, 8, 0 }, { 1, 2, 2, 3 });
+            }
+            {
+                RNSBase base({ 3, 5, 7 }, pool);
+                rns_test(base, 1, { 0, 0, 0 }, { 0, 0, 0 });
+                rns_test(base, 1, { 2, 0, 0 }, { 2, 2, 2 });
+                rns_test(base, 1, { 7, 0, 0 }, { 1, 2, 0 });
+                rns_test(base, 2, { 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0 });
+                rns_test(base, 2, { 1, 0, 0, 2, 0, 0 }, { 1, 2, 1, 2, 1, 2 });
+                rns_test(base, 2, { 7, 0, 0, 8, 0, 0 }, { 1, 2, 2, 3, 0, 1 });
+                rns_test(base, 3, { 7, 0, 0, 8, 0, 0, 9, 0, 0 }, { 1, 2, 0, 2, 3, 4, 0, 1, 2 });
+            }
+            {
+                // Large example
+                auto primes = get_primes(1024, 60, 2);
+                vector<uint64_t> in_values{ 0xAAAAAAAAAAA, 0xBBBBBBBBBB, 0xCCCCCCCCCC,
+                                            0xDDDDDDDDDD,  0xEEEEEEEEEE, 0xFFFFFFFFFF };
+                RNSBase base(primes, pool);
+                rns_test(
+                    base, 3, in_values,
+                    { modulo_uint(in_values.data(), primes.size(), primes[0]),
+                      modulo_uint(in_values.data() + 2, primes.size(), primes[0]),
+                      modulo_uint(in_values.data() + 4, primes.size(), primes[0]),
+                      modulo_uint(in_values.data(), primes.size(), primes[1]),
+                      modulo_uint(in_values.data() + 2, primes.size(), primes[1]),
+                      modulo_uint(in_values.data() + 4, primes.size(), primes[1]) });
+            }
+        }
+
         TEST(BaseConvToolTest, Initialize)
         {
             auto pool = MemoryManager::GetPool();

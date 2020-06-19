@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.12)
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 3.5.3 LANGUAGES CXX C)
+project(SEAL VERSION 3.5.4 LANGUAGES CXX C)
 
 # Check operating system: for Windows, use Visual Studio solution/project files.
 if(MSVC)
@@ -114,11 +114,15 @@ set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
 set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
+set(SEAL_PKGCONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/seal.pc.in)
+set(SEAL_PKGCONFIG_FILENAME ${SEAL_SOURCE_DIR}/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+set(SEAL_PKGCONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 set(SEAL_INCLUDES_BUILD_DIR ${SEAL_SOURCE_DIR}/native/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
+set(SEAL_THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
 
 # For extra modules we might have
 list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
@@ -130,10 +134,20 @@ include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckTypeSize)
 
-# We clean up native/src/gsl directory which is no longer used in version >= 3.5.0
+################################################
+# Cleaning up artifacts from previous versions #
+################################################
+
+# Remove native/src/gsl directory which is no longer used in version >= 3.5.0
 if(NOT MSVC AND EXISTS ${SEAL_INCLUDES_BUILD_DIR}/gsl)
     message(STATUS "Removing ${SEAL_INCLUDES_BUILD_DIR}/gsl; this is no longer used by Microsoft SEAL >= 3.5.0")
     file(REMOVE_RECURSE ${SEAL_INCLUDES_BUILD_DIR}/gsl)
+endif()
+
+# Remove thirdparty/zlib/src/CMakeCache.txt: the location changed in SEAL >= 3.5.4
+if(NOT MSVC AND EXISTS ${SEAL_THIRDPARTY_DIR}/zlib/src/CMakeCache.txt)
+    message(STATUS "Removing old ${SEAL_THIRDPARTY_DIR}/zlib/src/CMakeCache.txt")
+    file(REMOVE ${SEAL_THIRDPARTY_DIR}/zlib/src/CMakeCache.txt)
 endif()
 
 ##################################
@@ -237,8 +251,6 @@ function(seal_create_cache_entries dir_name)
     file(APPEND "${cce_file_name}" "set(CMAKE_SYSTEM_VERSION ${CMAKE_SYSTEM_VERSION} CACHE STRING \"\" FORCE)\n")
 endfunction()
 
-set(THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
-
 # [option] SEAL_USE_MSGSL
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
@@ -251,19 +263,19 @@ if(SEAL_USE_MSGSL AND NOT MSVC)
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
             OUTPUT_QUIET
             RESULT_VARIABLE result
-            WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
     else()
-        seal_create_cache_entries(${THIRDPARTY_DIR}/msgsl)
-        if(EXISTS ${THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
+        seal_create_cache_entries(${SEAL_THIRDPARTY_DIR}/msgsl)
+        if(EXISTS ${SEAL_THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
             # Force regenerating make files. When cross compiling we might be
             # compiling more than one platform at a time.
-            file(REMOVE ${THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
+            file(REMOVE ${SEAL_THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
         endif()
         execute_process(
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
             OUTPUT_QUIET
             RESULT_VARIABLE result
-            WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
     endif()
     if(result)
         message(WARNING "Failed to download MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
@@ -276,7 +288,7 @@ if(SEAL_USE_MSGSL AND NOT MSVC)
         COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${THIRDPARTY_DIR}/msgsl)
+        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
     if(result)
         message(WARNING "Failed to build MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
     endif()
@@ -289,9 +301,9 @@ endif()
 # Set up the targets
 if(SEAL_USE_MSGSL AND NOT MSVC)
     add_subdirectory(
-        ${THIRDPARTY_DIR}/msgsl/src
+        ${SEAL_THIRDPARTY_DIR}/msgsl/src
         EXCLUDE_FROM_ALL)
-    set(MSGSL_INCLUDE_DIR ${THIRDPARTY_DIR}/msgsl/src/include)
+    set(MSGSL_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/msgsl/src/include)
 endif()
 
 # [option] SEAL_USE_ZLIB
@@ -311,19 +323,19 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
             OUTPUT_QUIET
             RESULT_VARIABLE result
-            WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zlib)
     else()
-        seal_create_cache_entries(${THIRDPARTY_DIR}/zlib)
-        if(EXISTS ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+        seal_create_cache_entries(${SEAL_THIRDPARTY_DIR}/zlib)
+        if(EXISTS ${SEAL_THIRDPARTY_DIR}/zlib/build/CMakeCache.txt)
             # Force regenerating make files. When cross compiling we might be
             # compiling more than one platform at a time.
-            file(REMOVE ${THIRDPARTY_DIR}/zlib/CMakeCache.txt)
+            file(REMOVE ${SEAL_THIRDPARTY_DIR}/zlib/build/CMakeCache.txt)
         endif()
         execute_process(
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
             OUTPUT_QUIET
             RESULT_VARIABLE result
-            WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zlib)
     endif()
     if(result)
         message(WARNING "Failed to download ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
@@ -346,7 +358,7 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${THIRDPARTY_DIR}/zlib)
+        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zlib)
     if(result)
         message(WARNING "Failed to build ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
     endif()
@@ -355,10 +367,13 @@ endif()
 # Set up the targets
 if(SEAL_USE_ZLIB AND NOT MSVC)
     add_subdirectory(
-        ${THIRDPARTY_DIR}/zlib/src
+        ${SEAL_THIRDPARTY_DIR}/zlib/src
         EXCLUDE_FROM_ALL)
-    list(APPEND SEAL_ZLIB_INCLUDE_DIRS ${THIRDPARTY_DIR}/zlib/src)
-    list(APPEND SEAL_ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
+    # Set the ZLIB include directory to be relative to this CMakeLists.txt's binary directory
+    # for out-of-source builds.
+    set(SEAL_ZLIB_INCLUDE_DIRS
+        ${SEAL_THIRDPARTY_DIR}/zlib/src
+        ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
 endif()
@@ -374,7 +389,7 @@ if(SEAL_BUILD_TESTS AND NOT MSVC)
         COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${THIRDPARTY_DIR}/googletest)
+        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/googletest)
     if(result)
         message(WARNING "Failed to download Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
     endif()
@@ -389,7 +404,7 @@ if(SEAL_BUILD_TESTS AND NOT MSVC)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
         OUTPUT_QUIET
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${THIRDPARTY_DIR}/googletest)
+        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/googletest)
     if(result)
         message(WARNING "Failed to build Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
     endif()
@@ -399,8 +414,8 @@ endif()
 if(SEAL_BUILD_TESTS AND NOT MSVC)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(
-        ${THIRDPARTY_DIR}/googletest/src
-        ${THIRDPARTY_DIR}/googletest/build
+        ${SEAL_THIRDPARTY_DIR}/googletest/src
+        ${SEAL_THIRDPARTY_DIR}/googletest/build
         EXCLUDE_FROM_ALL)
 endif()
 
@@ -717,6 +732,13 @@ install(
         ${SEAL_CONFIG_VERSION_FILENAME}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
+# Install the pkg-config file
+install(
+    FILES
+        ${SEAL_PKGCONFIG_FILENAME}
+    DESTINATION
+        ${SEAL_PKGCONFIG_INSTALL_DIR})
+
 # We export SEALTargets from the build tree so it can be used by other projects
 # without requiring an install.
 export(
@@ -786,6 +808,12 @@ configure_file(
 set(SEAL_WINDOWS_SEAL_C_PATH "")
 set(SEAL_LINUX_SEAL_C_PATH "")
 set(SEAL_MACOS_SEAL_C_PATH "")
+
+# Create pkg-config file
+configure_file(
+     ${SEAL_PKGCONFIG_IN_FILENAME}
+     ${SEAL_PKGCONFIG_FILENAME}
+     @ONLY)
 
 # Supporting local building of NuGet package
 if(MSVC)
