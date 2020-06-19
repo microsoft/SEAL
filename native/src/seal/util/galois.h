@@ -47,7 +47,7 @@ namespace seal
                 }
 #endif
                 SEAL_ITERATE(iter(operand, modulus, result), coeff_modulus_size, [&](auto I) {
-                    apply_galois(get<0>(I), galois_elt, *get<1>(I), get<2>(I));
+                    this->apply_galois(get<0>(I), galois_elt, get<1>(I), get<2>(I));
                 });
             }
 
@@ -71,7 +71,7 @@ namespace seal
 #endif
                 auto coeff_modulus_size = result.coeff_modulus_size();
                 SEAL_ITERATE(iter(operand, result), size, [&](auto I) {
-                    apply_galois(get<0>(I), coeff_modulus_size, galois_elt, modulus, get<1>(I));
+                    this->apply_galois(get<0>(I), coeff_modulus_size, galois_elt, modulus, get<1>(I));
                 });
             }
 
@@ -91,7 +91,7 @@ namespace seal
                 }
 #endif
                 SEAL_ITERATE(iter(operand, result), coeff_modulus_size, [&](auto I) {
-                    apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
+                    this->apply_galois_ntt(get<0>(I), galois_elt, get<1>(I));
                 });
             }
 
@@ -114,7 +114,7 @@ namespace seal
 #endif
                 auto coeff_modulus_size = result.coeff_modulus_size();
                 SEAL_ITERATE(iter(operand, result), size, [&](auto I) {
-                    apply_galois_ntt(get<0>(I), coeff_modulus_size, galois_elt, get<1>(I));
+                    this->apply_galois_ntt(get<0>(I), coeff_modulus_size, galois_elt, get<1>(I));
                 });
             }
 

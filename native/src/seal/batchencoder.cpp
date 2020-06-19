@@ -224,10 +224,9 @@ namespace seal
 
         // First write the values to destination coefficients. Read
         // in top row, then bottom row.
-        using index_type = decltype(values_matrix)::size_type;
         for (size_t i = 0; i < values_matrix_size; i++)
         {
-            *(destination.data() + matrix_reps_index_map_[i]) = values_matrix[static_cast<index_type>(i)];
+            *(destination.data() + matrix_reps_index_map_[i]) = values_matrix[i];
         }
         for (size_t i = values_matrix_size; i < slots_; i++)
         {
@@ -267,13 +266,11 @@ namespace seal
 
         // First write the values to destination coefficients. Read
         // in top row, then bottom row.
-        using index_type = decltype(values_matrix)::size_type;
         for (size_t i = 0; i < values_matrix_size; i++)
         {
             *(destination.data() + matrix_reps_index_map_[i]) =
-                (values_matrix[static_cast<index_type>(i)] < 0)
-                    ? (modulus + static_cast<uint64_t>(values_matrix[static_cast<index_type>(i)]))
-                    : static_cast<uint64_t>(values_matrix[static_cast<index_type>(i)]);
+                (values_matrix[i] < 0) ? (modulus + static_cast<uint64_t>(values_matrix[i]))
+                                       : static_cast<uint64_t>(values_matrix[i]);
         }
         for (size_t i = values_matrix_size; i < slots_; i++)
         {
@@ -436,7 +433,6 @@ namespace seal
 
         auto &context_data = *context_->first_context_data();
 
-        using index_type = decltype(destination)::size_type;
         if (unsigned_gt(destination.size(), numeric_limits<int>::max()) || unsigned_neq(destination.size(), slots_))
         {
             throw invalid_argument("destination has incorrect size");
@@ -457,7 +453,7 @@ namespace seal
         // Read top row
         for (size_t i = 0; i < slots_; i++)
         {
-            destination[static_cast<index_type>(i)] = temp_dest[matrix_reps_index_map_[i]];
+            destination[i] = temp_dest[matrix_reps_index_map_[i]];
         }
     }
 
@@ -479,7 +475,6 @@ namespace seal
         auto &context_data = *context_->first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
-        using index_type = decltype(destination)::size_type;
         if (unsigned_gt(destination.size(), numeric_limits<int>::max()) || unsigned_neq(destination.size(), slots_))
         {
             throw invalid_argument("destination has incorrect size");
@@ -502,10 +497,9 @@ namespace seal
         for (size_t i = 0; i < slots_; i++)
         {
             uint64_t curr_value = temp_dest[matrix_reps_index_map_[i]];
-            destination[static_cast<index_type>(i)] =
-                (curr_value > plain_modulus_div_two)
-                    ? (static_cast<int64_t>(curr_value) - static_cast<int64_t>(modulus))
-                    : static_cast<int64_t>(curr_value);
+            destination[i] = (curr_value > plain_modulus_div_two)
+                                 ? (static_cast<int64_t>(curr_value) - static_cast<int64_t>(modulus))
+                                 : static_cast<int64_t>(curr_value);
         }
     }
 #endif
