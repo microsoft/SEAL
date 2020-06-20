@@ -38,7 +38,7 @@ namespace seal
         +-------------------+
         |    Pointer & Size |  Construct  +-----------------+
         | or Ciphertext     |------------>| (Const)PolyIter |  Iterates over RNS polynomials in a ciphertext
-        +-------------------+             +-----------------+  (coeff_modulus_size-many RNS components)
+        +-------------------+             +--------+--------+  (coeff_modulus_size-many RNS components)
                                                    |
                                                    |
                                                    | Dereference
@@ -47,7 +47,7 @@ namespace seal
                                                    v
            +----------------+  Construct   +----------------+
            | Pointer & Size |------------->| (Const)RNSIter |  Iterates over RNS components in an RNS polynomial
-           +----------------+              +----------------+  (poly_modulus_degree-many coefficients)
+           +----------------+              +-------+--------+  (poly_modulus_degree-many coefficients)
                                                    |
                                                    |
                                                    | Dereference
@@ -56,7 +56,7 @@ namespace seal
                                                    v
           +----------------+  Construct  +------------------+
           | Pointer & Size |------------>| (Const)CoeffIter |  Iterates over coefficients (std::uint64_t) in a single
-          +----------------+             +------------------+  RNS polynomial component
+          +----------------+             +---------+--------+  RNS polynomial component
                                                    |
                                                    |
                                                    | Dereference
@@ -70,7 +70,7 @@ namespace seal
 
         +----------+  Construct   +-------------------+
         | MyType * |------------->| PtrIter<MyType *> |  Simple wrapper for raw pointers
-        +----------+              +-------------------+
+        +----------+              +----+----------+---+
                                        |          |
                                        |          |
                           Dereference  |          |     PtrIter<MyType *>::ptr()
@@ -94,7 +94,7 @@ namespace seal
 
              +-----------------------------------------+
              | IterTuple<PolyIter, RNSIter, CoeffIter> |
-             +-----------------------------------------+
+             +--------------------+--------------------+
                                   |
                                   |
                                   | Dereference
@@ -103,7 +103,7 @@ namespace seal
                                   v
         +--------------------------------------------------+
         | std::tuple<RNSIter, CoeffIter, std::uint64_t &>> |
-        +------+-------------------------------------------+
+        +------+-------------------+-------------------+---+
                |                   |                   |
                |                   |                   |
                |  std::get<0>      |  std::get<1>      |  std::get<2>
