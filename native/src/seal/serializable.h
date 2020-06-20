@@ -42,19 +42,20 @@ namespace seal
                         |
                         |                Serializable<GaloisKeys>::save
                         |                with compr_mode_type::deflate
-                        |
-                +-------v-------+
+                        v
+                +---------------+
                 | Stream/Buffer |        Size ~1 MB (example)
                 +-------+-------+
                         |
                         |
-                     +--v--+
-                     Network             Minimized communication
-                     +--+--+
+                        v
+                   +---------+
+                   | Network |           Minimized communication
+                   +----+----+
                         |
                         |                GaloisKeys::load
-                        |
-                  +-----v------+
+                        v
+                  +------------+
                   | GaloisKeys |         Size 2 MB (example)
                   +------------+
     */
