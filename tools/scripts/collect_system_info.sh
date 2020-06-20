@@ -6,7 +6,7 @@
 CMAKE_CXX_COMPILER=cxx_compiler.out
 CMAKE_ENV=cmake_env.out
 CMAKE_SYSTEM_INFO=system_information.out
-SEALDIR=../native/src
+SEALDIR=..
 
 CMAKE_CXX_COMPILER_CMD=`cmake -LA $SEALDIR|sed -n 's/^CMAKE_CXX_COMPILER:FILEPATH=\(.*\)$/\1/p'`
 
@@ -19,7 +19,7 @@ $CMAKE_CXX_COMPILER_CMD -v 2> $CMAKE_CXX_COMPILER
 
 ARCHIVE_NAME=../system_info.tar
 FILES=(
-	"$SEALDIR/seal/util/config.h"
+	"$SEALDIR/native/src/seal/util/config.h"
 	"$SEALDIR/CMakeCache.txt"
 	"$SEALDIR/CMakeFiles/CMakeOutput.log"
 	"$SEALDIR/CMakeFiles/CMakeError.log"
