@@ -15,17 +15,17 @@ namespace seal
         constexpr double ComplexRoots::PI_;
 
         ComplexRoots::ComplexRoots(size_t degree_of_roots, MemoryPoolHandle pool)
-            : degree_of_roots_(degree_of_roots), pool_(std::move(pool))
+            : degree_of_roots_(degree_of_roots), pool_(move(pool))
         {
 #ifdef SEAL_DEBUG
             int power = util::get_power_of_two(degree_of_roots_);
             if (power < 0)
             {
-                throw std::invalid_argument("degree_of_roots must be a power of two");
+                throw invalid_argument("degree_of_roots must be a power of two");
             }
             else if (power < 3)
             {
-                throw std::invalid_argument("degree_of_roots must be at least 8");
+                throw invalid_argument("degree_of_roots must be at least 8");
             }
 #endif
             roots_ = allocate<complex<double>>(degree_of_roots_ / 8 + 1, pool_);
@@ -35,7 +35,7 @@ namespace seal
             for (size_t i = 0; i <= degree_of_roots_ / 8; i++)
             {
                 roots_[i] =
-                    std::polar<double>(1.0, 2 * PI_ * static_cast<double>(i) / static_cast<double>(degree_of_roots_));
+                    polar<double>(1.0, 2 * PI_ * static_cast<double>(i) / static_cast<double>(degree_of_roots_));
             }
         }
 

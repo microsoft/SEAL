@@ -179,7 +179,7 @@ namespace seal
         {
             if (size_ == 1)
             {
-                throw std::logic_error("cannot drop from base of size 1");
+                throw logic_error("cannot drop from base of size 1");
             }
 
             // Copy over this base
@@ -198,7 +198,7 @@ namespace seal
         {
             if (size_ == 1)
             {
-                throw std::logic_error("cannot drop from base of size 1");
+                throw logic_error("cannot drop from base of size 1");
             }
             if (!contains(value))
             {
@@ -805,7 +805,7 @@ namespace seal
 
                 // lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
                 const uint64_t neg_half_mod = qi - barrett_reduce_63(half, (*base_q_)[i]);
-                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [neg_half_mod](uint64_t u) {
+                transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [neg_half_mod](uint64_t u) {
                     return u + neg_half_mod;
                 });
 #if SEAL_USER_MOD_BIT_COUNT_MAX <= 60
@@ -817,13 +817,13 @@ namespace seal
                 // 2^60 < pi < 2^62, then 4*pi < 2^64, we perfrom one reduction from [0, 4*qi) to [0, 2*qi) after ntt.
                 const uint64_t qi_lazy = qi << 1;
                 ntt_negacyclic_harvey_lazy(temp_ptr, rns_ntt_tables[i]);
-                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [qi_lazy](uint64_t u) {
+                transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [qi_lazy](uint64_t u) {
                     return u -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(u >= qi_lazy)));
                 });
 #endif
                 // Lazy subtraction again, results in [0, 2*qi_lazy),
                 // The reduction [0, 2*qi_lazy) -> [0, qi) is done implicitly in multiply_poly_scalar_coeffmod.
-                std::transform(input, input + coeff_count_, temp_ptr, input, [qi_lazy](uint64_t u, uint64_t v) {
+                transform(input, input + coeff_count_, temp_ptr, input, [qi_lazy](uint64_t u, uint64_t v) {
                     return u + qi_lazy - v;
                 });
 
@@ -939,7 +939,7 @@ namespace seal
             const uint64_t neg_inv_prod_q_mod_m_tilde = negate_uint_mod(inv_prod_q_mod_m_tilde_, m_tilde_);
             uint64_t mulmod_pred = mulmod_preconditioner(neg_inv_prod_q_mod_m_tilde, m_tilde_);
 
-            std::transform(input_m_tilde_ptr, input_m_tilde_ptr + coeff_count_, r_m_tilde.get(), [&](uint64_t x) {
+            transform(input_m_tilde_ptr, input_m_tilde_ptr + coeff_count_, r_m_tilde.get(), [&](uint64_t x) {
                 return fast_multiply_uint_mod(x, neg_inv_prod_q_mod_m_tilde, mulmod_pred, m_tilde_);
             });
 

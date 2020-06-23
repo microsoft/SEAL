@@ -127,11 +127,11 @@ namespace seal
             using value_type = NTTTables;
             using pointer = void;
             using reference = value_type;
-            using difference_type = std::ptrdiff_t;
+            using difference_type = ptrdiff_t;
 
             // LegacyInputIterator allows reference to be equal to value_type so we can construct
             // the return objects on the fly and return by value.
-            using iterator_category = std::input_iterator_tag;
+            using iterator_category = input_iterator_tag;
 
             // Require default constructor
             NTTTablesCreateIter()

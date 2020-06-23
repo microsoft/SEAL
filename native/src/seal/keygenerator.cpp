@@ -323,7 +323,7 @@ namespace seal
     }
 
     void KeyGenerator::generate_one_kswitch_key(
-        ConstRNSIter new_key, std::vector<PublicKey> &destination, bool save_seed)
+        ConstRNSIter new_key, vector<PublicKey> &destination, bool save_seed)
     {
         if (!context_->using_keyswitching())
         {
