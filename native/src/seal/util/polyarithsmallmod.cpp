@@ -12,6 +12,14 @@ namespace seal
 {
     namespace util
     {
+        static uint64_t precompute_mulmod_preconditioner(uint64_t y, const Modulus &modulus)
+        {
+            uint64_t wide_quotient[2]{ 0, 0 };
+            uint64_t wide_coeff[2]{ 0, y };
+            divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient);
+            return wide_quotient[0];
+        }
+
         void multiply_poly_scalar_coeffmod(
             ConstCoeffIter poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, CoeffIter result)
         {
@@ -30,33 +38,21 @@ namespace seal
             }
 #endif
             const uint64_t modulus_value = modulus.value();
-            const uint64_t const_ratio_0 = modulus.const_ratio()[0];
-            const uint64_t const_ratio_1 = modulus.const_ratio()[1];
+            if (scalar >= modulus_value)
+                scalar = barrett_reduce_63(scalar, modulus);
+            const uint64_t scalar_prime = precompute_mulmod_preconditioner(scalar, modulus);
+
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
-                unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
-                multiply_uint64(get<0>(I), scalar, z);
+                unsigned long long tmp1, tmp2;
+                const uint64_t x = get<0>(I);
 
-                // Reduces z using base 2^64 Barrett reduction
-
-                // Multiply input and const_ratio
-                // Round 1
-                multiply_uint64_hw64(z[0], const_ratio_0, &carry);
-                multiply_uint64(z[0], const_ratio_1, tmp2);
-                tmp3 = tmp2[1] + add_uint64(tmp2[0], carry, &tmp1);
-
-                // Round 2
-                multiply_uint64(z[1], const_ratio_0, tmp2);
-                carry = tmp2[1] + add_uint64(tmp1, tmp2[0], &tmp1);
-
-                // This is all we care about
-                tmp1 = z[1] * const_ratio_1 + tmp3 + carry;
-
+                multiply_uint64_hw64(x, scalar_prime, &tmp1);
                 // Barrett subtraction
-                tmp3 = z[0] - tmp1 * modulus_value;
+                tmp2 = scalar * x - tmp1 * modulus_value;
 
                 // Claim: One more subtraction is enough
                 get<1>(I) =
-                    tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+                    tmp2 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp2 >= modulus_value)));
             });
         }
 
@@ -89,6 +85,7 @@ namespace seal
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
+
             SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
                 // Reduces z using base 2^64 Barrett reduction
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
