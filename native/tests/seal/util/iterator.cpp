@@ -22,39 +22,39 @@ namespace sealtest
     {
         TEST(IteratorTest, IterType)
         {
-            ASSERT_TRUE((std::is_same<decltype(iter(int(0))), SeqIter<int>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(size_t(0))), SeqIter<size_t>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(bool(true))), SeqIter<bool>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(double(0.0))), SeqIter<double>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(char(0))), SeqIter<char>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(uint64_t(0))), SeqIter<uint64_t>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(int(0))), SeqIter<int>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(size_t(0))), SeqIter<size_t>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(bool(true))), SeqIter<bool>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(double(0.0))), SeqIter<double>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(char(0))), SeqIter<char>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(uint64_t(0))), SeqIter<uint64_t>>::value));
 
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<Ciphertext &>())), PolyIter>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<const Ciphertext &>())), ConstPolyIter>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<Ciphertext &>())), PolyIter>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<const Ciphertext &>())), ConstPolyIter>::value));
 
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<int *>())), PtrIter<int *>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<const int *>())), PtrIter<const int *>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<void *>())), PtrIter<void *>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<const void *>())), PtrIter<const void *>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<int *>())), PtrIter<int *>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<const int *>())), PtrIter<const int *>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<void *>())), PtrIter<void *>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<const void *>())), PtrIter<const void *>>::value));
 
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<vector<Ciphertext> &>())), PtrIter<Ciphertext *>>::value));
-            ASSERT_TRUE((std::is_same<
+            ASSERT_TRUE((is_same<decltype(iter(declval<vector<Ciphertext> &>())), PtrIter<Ciphertext *>>::value));
+            ASSERT_TRUE((is_same<
                          decltype(iter(declval<const vector<Ciphertext> &>())), PtrIter<const Ciphertext *>>::value));
 
-            ASSERT_TRUE((std::is_same<
+            ASSERT_TRUE((is_same<
                          decltype(iter(declval<int>(), declval<size_t>(), declval<Ciphertext &>())),
                          IterTuple<SeqIter<int>, SeqIter<size_t>, PolyIter>>::value));
 
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<PolyIter>())), PolyIter>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<RNSIter>())), RNSIter>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<CoeffIter>())), CoeffIter>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<PtrIter<int *>>())), PtrIter<int *>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<SeqIter<int>>())), SeqIter<int>>::value));
-            ASSERT_TRUE((std::is_same<decltype(iter(declval<ReverseIter<RNSIter>>())), ReverseIter<RNSIter>>::value));
-            ASSERT_TRUE((std::is_same<
+            ASSERT_TRUE((is_same<decltype(iter(declval<PolyIter>())), PolyIter>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<RNSIter>())), RNSIter>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<CoeffIter>())), CoeffIter>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<PtrIter<int *>>())), PtrIter<int *>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<SeqIter<int>>())), SeqIter<int>>::value));
+            ASSERT_TRUE((is_same<decltype(iter(declval<ReverseIter<RNSIter>>())), ReverseIter<RNSIter>>::value));
+            ASSERT_TRUE((is_same<
                          decltype(iter(declval<ReverseIter<ReverseIter<RNSIter>>>())),
                          ReverseIter<ReverseIter<RNSIter>>>::value));
-            ASSERT_TRUE((std::is_same<
+            ASSERT_TRUE((is_same<
                          decltype(iter(declval<IterTuple<RNSIter, ReverseIter<RNSIter>>>())),
                          IterTuple<RNSIter, ReverseIter<RNSIter>>>::value));
         }

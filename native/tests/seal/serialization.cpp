@@ -132,7 +132,7 @@ namespace sealtest
     TEST(SerializationTest, SaveLoadToStream)
     {
         test_struct st{ 3, ~0, 3.14159 }, st2;
-        using namespace std::placeholders;
+        using namespace placeholders;
         stringstream stream;
 
         auto out_size = Serialization::Save(
@@ -159,7 +159,7 @@ namespace sealtest
     TEST(SerializationTest, SaveLoadToBuffer)
     {
         test_struct st{ 3, ~0, 3.14159 }, st2;
-        using namespace std::placeholders;
+        using namespace placeholders;
 
         constexpr size_t arr_size = 1024;
         SEAL_BYTE buffer[arr_size]{};

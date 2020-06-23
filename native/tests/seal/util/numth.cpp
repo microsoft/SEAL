@@ -166,14 +166,14 @@ namespace sealtest
 
             vector<uint64_t> corrects{ 12, 17 };
             ASSERT_TRUE(try_primitive_root(4, mod, result));
-            ASSERT_TRUE(std::find(corrects.begin(), corrects.end(), result) != corrects.end());
+            ASSERT_TRUE(find(corrects.begin(), corrects.end(), result) != corrects.end());
 
             mod = 1234565441;
             ASSERT_TRUE(try_primitive_root(2, mod, result));
             ASSERT_EQ(1234565440ULL, result);
             corrects = { 984839708, 273658408, 249725733, 960907033 };
             ASSERT_TRUE(try_primitive_root(8, mod, result));
-            ASSERT_TRUE(std::find(corrects.begin(), corrects.end(), result) != corrects.end());
+            ASSERT_TRUE(find(corrects.begin(), corrects.end(), result) != corrects.end());
         }
 
         TEST(NumberTheory, IsPrimitiveRootMod)

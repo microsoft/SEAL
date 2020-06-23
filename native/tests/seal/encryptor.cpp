@@ -297,14 +297,14 @@ namespace sealtest
 
         Ciphertext ct;
         Plaintext pt;
-        std::vector<std::complex<double>> res;
+        vector<complex<double>> res;
         parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
         {
             encryptor.encrypt_zero(ct);
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
             for (auto val : res)
@@ -317,7 +317,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_EQ(pt.parms_id(), next_parms);
@@ -333,7 +333,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
             for (auto val : res)
@@ -346,7 +346,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_EQ(pt.parms_id(), next_parms);
@@ -364,7 +364,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
             for (auto val : res)
@@ -378,7 +378,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_EQ(pt.parms_id(), next_parms);
@@ -411,8 +411,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 1.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 1.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
             encoder.encode(input, context->first_parms_id(), delta, plain);
@@ -447,8 +447,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
             encoder.encode(input, context->first_parms_id(), delta, plain);
@@ -483,8 +483,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size);
+            vector<complex<double>> output(slot_size);
 
             srand(static_cast<unsigned>(time(NULL)));
             int input_bound = 1 << 30;
@@ -530,8 +530,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size);
+            vector<complex<double>> output(slot_size);
 
             srand(static_cast<unsigned>(time(NULL)));
             int input_bound = 1 << 30;
@@ -577,8 +577,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 1.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 1.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
             auto first_context_data = context->first_context_data();
@@ -620,8 +620,8 @@ namespace sealtest
             Plaintext plainRes;
             stringstream stream;
 
-            std::vector<std::complex<double>> input(slot_size, 1.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 1.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
             auto first_context_data = context->first_context_data();

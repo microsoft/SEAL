@@ -20,7 +20,7 @@ namespace seal
 #ifdef SEAL_DEBUG
             if (!(galois_elt & 1) || (galois_elt >= 2 * (uint64_t(1) << coeff_count_power_)))
             {
-                throw std::invalid_argument("Galois element is not valid");
+                throw invalid_argument("Galois element is not valid");
             }
 #endif
             ReaderLock reader_lock(permutation_tables_locker_.acquire_read());
@@ -147,24 +147,24 @@ namespace seal
 #ifdef SEAL_DEBUG
             if (!operand)
             {
-                throw std::invalid_argument("operand");
+                throw invalid_argument("operand");
             }
             if (!result)
             {
-                throw std::invalid_argument("result");
+                throw invalid_argument("result");
             }
             if (operand == result)
             {
-                throw std::invalid_argument("result cannot point to the same value as operand");
+                throw invalid_argument("result cannot point to the same value as operand");
             }
             // Verify coprime conditions.
             if (!(galois_elt & 1) || (galois_elt >= 2 * (uint64_t(1) << coeff_count_power_)))
             {
-                throw std::invalid_argument("Galois element is not valid");
+                throw invalid_argument("Galois element is not valid");
             }
             if (modulus.is_zero())
             {
-                throw std::invalid_argument("modulus");
+                throw invalid_argument("modulus");
             }
 #endif
             const uint64_t modulus_value = modulus.value();
@@ -190,20 +190,20 @@ namespace seal
 #ifdef SEAL_DEBUG
             if (!operand)
             {
-                throw std::invalid_argument("operand");
+                throw invalid_argument("operand");
             }
             if (!result)
             {
-                throw std::invalid_argument("result");
+                throw invalid_argument("result");
             }
             if (operand == result)
             {
-                throw std::invalid_argument("result cannot point to the same value as operand");
+                throw invalid_argument("result cannot point to the same value as operand");
             }
             // Verify coprime conditions.
             if (!(galois_elt & 1) || (galois_elt >= 2 * (uint64_t(1) << coeff_count_power_)))
             {
-                throw std::invalid_argument("Galois element is not valid");
+                throw invalid_argument("Galois element is not valid");
             }
 #endif
             generate_table_ntt(galois_elt, permutation_tables_[GetIndexFromElt(galois_elt)]);
