@@ -443,8 +443,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::EncryptionParameters for .NET
-        wrapper.
+        Enables access to private members of seal::EncryptionParameters for SEAL_C.
         */
         struct EncryptionParametersPrivateHelper;
 
