@@ -228,8 +228,8 @@ namespace seal
                 throw invalid_argument("operand");
             }
 #endif
-            uint64_t modulus = tables.modulus().value();
-            uint64_t two_times_modulus = modulus << 1;
+            Modulus modulus = tables.modulus();
+            uint64_t two_times_modulus = modulus.value() << 1;
 
             // Return the NTT in scrambled order
             size_t n = size_t(1) << tables.coeff_count_power();
@@ -316,8 +316,8 @@ namespace seal
                 throw invalid_argument("operand");
             }
 #endif
-            uint64_t modulus = tables.modulus().value();
-            uint64_t two_times_modulus = modulus << 1;
+            Modulus modulus = tables.modulus();
+            uint64_t two_times_modulus = modulus.value() << 1;
 
             // return the bit-reversed order of NTT.
             size_t n = size_t(1) << tables.coeff_count_power();

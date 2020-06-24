@@ -33,7 +33,7 @@ namespace seal
             }
 #endif
             operand++;
-            return operand - (modulus.value() & (-static_cast<std::uint64_t>(operand >= modulus.value())));
+            return operand - (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand >= modulus.value())));
         }
 
         /**
@@ -52,8 +52,8 @@ namespace seal
                 throw std::out_of_range("operand");
             }
 #endif
-            std::uint64_t carry = static_cast<std::uint64_t>(operand == 0);
-            return operand - 1 + (modulus.value() & (-carry));
+            std::int64_t carry = static_cast<std::int64_t>(operand == 0);
+            return operand - 1 + (modulus.value() & static_cast<std::uint64_t>(-carry));
         }
 
         /**
@@ -73,8 +73,8 @@ namespace seal
                 throw std::out_of_range("operand");
             }
 #endif
-            std::uint64_t non_zero = static_cast<std::uint64_t>(operand != 0);
-            return (modulus.value() - operand) & (-non_zero);
+            std::int64_t non_zero = static_cast<std::int64_t>(operand != 0);
+            return (modulus.value() - operand) & static_cast<std::uint64_t>(-non_zero);
         }
 
         /**
@@ -133,7 +133,7 @@ namespace seal
 #endif
             // Sum of operands modulo Modulus can never wrap around 2^64
             operand1 += operand2;
-            return operand1 - (modulus.value() & (-static_cast<std::uint64_t>(operand1 >= modulus.value())));
+            return operand1 - (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand1 >= modulus.value())));
         }
 
         /**
@@ -161,8 +161,8 @@ namespace seal
             }
 #endif
             unsigned long long temp;
-            std::uint64_t borrow = static_cast<std::uint64_t>(SEAL_SUB_BORROW_UINT64(operand1, operand2, 0, &temp));
-            return static_cast<std::uint64_t>(temp) + (modulus.value() & (-borrow));
+            std::int64_t borrow = static_cast<std::int64_t>(SEAL_SUB_BORROW_UINT64(operand1, operand2, 0, &temp));
+            return static_cast<std::uint64_t>(temp) + (modulus.value() & static_cast<std::uint64_t>(-borrow));
         }
 
         /**
@@ -209,7 +209,7 @@ namespace seal
 
             // One more subtraction is enough
             return static_cast<std::uint64_t>(tmp3) -
-                   (modulus.value() & (-static_cast<std::uint64_t>(tmp3 >= modulus.value())));
+                   (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp3 >= modulus.value())));
         }
 
         /**
@@ -242,7 +242,7 @@ namespace seal
 
             // One more subtraction is enough
             return static_cast<std::uint64_t>(tmp[0]) -
-                   (modulus.value() & (-static_cast<std::uint64_t>(tmp[0] >= modulus.value())));
+                   (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp[0] >= modulus.value())));
         }
 
         /**
@@ -413,7 +413,7 @@ namespace seal
             const std::uint64_t p = modulus.value();
             multiply_uint64_hw64(x, yprime, &tmp1);
             tmp2 = y * x - tmp1 * p;
-            return tmp2 - (p & (-static_cast<std::uint64_t>(tmp2 >= p)));
+            return tmp2 - (p & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp2 >= p)));
         }
 
         /**
