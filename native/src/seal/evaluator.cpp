@@ -417,7 +417,7 @@ namespace seal
             behz_ciphertext_product(encrypted1_Bsk, encrypted2_Bsk, base_Bsk, base_Bsk_size, temp_dest_Bsk);
         });
 
-        // Perform BEHZ step (5): transform data from NTT form 
+        // Perform BEHZ step (5): transform data from NTT form
         // Lazy reduction here. The following multiply_poly_scalar_coeffmod will correct the value back to [0, p)
         inverse_ntt_negacyclic_harvey_lazy(temp_dest_q, dest_size, base_q_ntt_tables);
         inverse_ntt_negacyclic_harvey_lazy(temp_dest_Bsk, dest_size, base_Bsk_ntt_tables);

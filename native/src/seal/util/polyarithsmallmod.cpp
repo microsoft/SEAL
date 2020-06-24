@@ -12,14 +12,6 @@ namespace seal
 {
     namespace util
     {
-        static uint64_t precompute_mulmod_preconditioner(uint64_t y, const Modulus &modulus)
-        {
-            uint64_t wide_quotient[2]{ 0, 0 };
-            uint64_t wide_coeff[2]{ 0, y };
-            divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient);
-            return wide_quotient[0];
-        }
-
         void multiply_poly_scalar_coeffmod(
             ConstCoeffIter poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, CoeffIter result)
         {
