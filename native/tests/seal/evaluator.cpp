@@ -2940,8 +2940,8 @@ namespace sealtest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2),
-                                                complex<double>(3, 3), complex<double>(4, 4) };
+            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
+                                           complex<double>(4, 4) };
             input.resize(slot_size);
 
             vector<complex<double>> output(slot_size, 0);
@@ -3011,8 +3011,8 @@ namespace sealtest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2),
-                                                complex<double>(3, 3), complex<double>(4, 4) };
+            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
+                                           complex<double>(4, 4) };
             input.resize(slot_size);
 
             vector<complex<double>> output(slot_size, 0);
@@ -3088,8 +3088,8 @@ namespace sealtest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2),
-                                                complex<double>(3, 3), complex<double>(4, 4) };
+            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
+                                           complex<double>(4, 4) };
             input.resize(slot_size);
 
             vector<complex<double>> output(slot_size, 0);
@@ -3163,8 +3163,8 @@ namespace sealtest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2),
-                                                complex<double>(3, 3), complex<double>(4, 4) };
+            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
+                                           complex<double>(4, 4) };
             input.resize(slot_size);
 
             vector<complex<double>> output(slot_size, 0);

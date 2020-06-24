@@ -137,9 +137,9 @@ namespace seal
         }
 
         void exponentiate_poly(
-            const uint64_t *poly, size_t poly_coeff_count, size_t poly_coeff_uint64_count,
-            const uint64_t *exponent, size_t exponent_uint64_count, size_t result_coeff_count,
-            size_t result_coeff_uint64_count, uint64_t *result, MemoryPool &pool)
+            const uint64_t *poly, size_t poly_coeff_count, size_t poly_coeff_uint64_count, const uint64_t *exponent,
+            size_t exponent_uint64_count, size_t result_coeff_count, size_t result_coeff_uint64_count, uint64_t *result,
+            MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG
             if (poly == nullptr)

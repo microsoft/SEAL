@@ -16,23 +16,6 @@ namespace seal
 {
     namespace util
     {
-        static uint64_t mulmod_preconditioner(uint64_t y, const Modulus &modulus)
-        {
-            uint64_t wide_quotient[2]{ 0, 0 };
-            uint64_t wide_coeff[2]{ 0, y };
-            divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient);
-            return wide_quotient[0];
-        }
-
-        static inline uint64_t fast_multiply_uint_mod(uint64_t x, uint64_t y, uint64_t yprime, const Modulus &modulus)
-        {
-            unsigned long long tmp1, tmp2;
-            const uint64_t p = modulus.value();
-            multiply_uint64_hw64(x, yprime, &tmp1);
-            tmp2 = y * x - tmp1 * p;
-            return tmp2 - (p & static_cast<uint64_t>(-static_cast<int64_t>(tmp2 >= p)));
-        }
-
         RNSBase::RNSBase(const vector<Modulus> &rnsbase, MemoryPoolHandle pool)
             : pool_(move(pool)), size_(rnsbase.size())
         {

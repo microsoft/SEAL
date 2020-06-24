@@ -17,8 +17,8 @@ namespace seal
     {
         /**
         Returns (operand++) mod modulus.
-        @param[in] operand Should be at most (modulus - 1).
         Correctness: operand must be at most (2 * modulus -2) for correctness.
+        @param[in] operand Should be at most (modulus - 1).
         */
         SEAL_NODISCARD inline std::uint64_t increment_uint_mod(std::uint64_t operand, const Modulus &modulus)
         {
@@ -33,8 +33,7 @@ namespace seal
             }
 #endif
             operand++;
-            return operand - (modulus.value() &
-                              static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand >= modulus.value())));
+            return operand - (modulus.value() & (-static_cast<std::uint64_t>(operand >= modulus.value()));
         }
 
         /**
@@ -53,14 +52,14 @@ namespace seal
                 throw std::out_of_range("operand");
             }
 #endif
-            std::int64_t carry = (operand == 0);
-            return operand - 1 + (modulus.value() & static_cast<std::uint64_t>(-carry));
+            std::uint64_t carry = static_cast<std::uint64_t>(operand == 0);
+            return operand - 1 + (modulus.value() & (-carry));
         }
 
         /**
         Returns (-operand) mod modulus.
-        @param[in] operand Should be at most (modulus - 1).
         Correctness: operand must be at most modulus for correctness.
+        @param[in] operand Should be at most (modulus - 1).
         */
         SEAL_NODISCARD inline std::uint64_t negate_uint_mod(std::uint64_t operand, const Modulus &modulus)
         {
@@ -74,14 +73,14 @@ namespace seal
                 throw std::out_of_range("operand");
             }
 #endif
-            std::int64_t non_zero = (operand != 0);
-            return (modulus.value() - operand) & static_cast<std::uint64_t>(-non_zero);
+            std::uint64_t non_zero = static_cast<std::uint64_t>(operand != 0);
+            return (modulus.value() - operand) & (-non_zero);
         }
 
         /**
         Returns (operand * inv(2)) mod modulus.
-        @param[in] operand Should be at most (modulus - 1).
         Correctness: operand must be even and at most (2 * modulus - 2) or odd and at most (modulus - 2).
+        @param[in] operand Should be at most (modulus - 1).
         */
         SEAL_NODISCARD inline std::uint64_t div2_uint_mod(std::uint64_t operand, const Modulus &modulus)
         {
@@ -98,7 +97,7 @@ namespace seal
             if (operand & 1)
             {
                 unsigned long long temp;
-                int64_t carry = add_uint64(operand, modulus.value(), 0, &temp);
+                unsigned char carry = add_uint64(operand, modulus.value(), 0, &temp);
                 operand = temp >> 1;
                 if (carry)
                 {
@@ -111,9 +110,9 @@ namespace seal
 
         /**
         Returns (operand1 + operand2) mod modulus.
+        Correctness: (operand1 + operand2) must be at most (2 * modulus - 1).
         @param[in] operand1 Should be at most (modulus - 1).
         @param[in] operand2 Should be at most (modulus - 1).
-        Correctness: (operand1 + operand2) must be at most (2 * modulus - 1).
         */
         SEAL_NODISCARD inline std::uint64_t add_uint64_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
@@ -134,15 +133,14 @@ namespace seal
 #endif
             // Sum of operands modulo Modulus can never wrap around 2^64
             operand1 += operand2;
-            return operand1 - (modulus.value() &
-                               static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand1 >= modulus.value())));
+            return operand1 - (modulus.value() & (-static_cast<std::uint64_t>(operand1 >= modulus.value())));
         }
 
         /**
         Returns (operand1 - operand2) mod modulus.
+        Correctness: (operand1 - operand2) must be at most (modulus - 1) and at least (-modulus).
         @param[in] operand1 Should be at most (modulus - 1).
         @param[in] operand2 Should be at most (modulus - 1).
-        Correctness: (operand1 - operand2) must be at most (modulus - 1) and at least (-modulus).
         */
         SEAL_NODISCARD inline std::uint64_t sub_uint64_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
@@ -163,15 +161,15 @@ namespace seal
             }
 #endif
             unsigned long long temp;
-            std::int64_t borrow = SEAL_SUB_BORROW_UINT64(operand1, operand2, 0, &temp);
-            return static_cast<std::uint64_t>(temp) + (modulus.value() & static_cast<std::uint64_t>(-borrow));
+            std::uint64_t borrow = static_cast<std::uint64_t>(SEAL_SUB_BORROW_UINT64(operand1, operand2, 0, &temp));
+            return static_cast<std::uint64_t>(temp) + (modulus.value() & (-borrow));
         }
 
         /**
         Returns input mod modulus. This is not standard Barrett reduction.
+        Correctness: input - floor(input*const_ratio/2^128)*modulus must be bounded by 0 and 2^64-1.
         @param[in] input Should be at most 128-bit.
         @param[in] modulus Should be at most 63-bit (this is a loose bound).
-        Correctness: input - floor(input*const_ratio/2^128)*modulus must be bounded by 0 and 2^64-1.
         */
         template <typename T, typename = std::enable_if_t<is_uint64_v<T>>>
         SEAL_NODISCARD inline std::uint64_t barrett_reduce_128(const T *input, const Modulus &modulus)
@@ -211,13 +209,13 @@ namespace seal
 
             // One more subtraction is enough
             return static_cast<std::uint64_t>(tmp3) -
-                   (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp3 >= modulus.value())));
+                   (modulus.value() & (-static_cast<std::uint64_t>(tmp3 >= modulus.value())));
         }
 
         /**
         Returns input mod modulus. This is not standard Barrett reduction.
+        Correctness: input - floor(input*const_ratio/2^128)*modulus is always bounded by 0 and 2^64-1.
         @param[in] input Should be at most 63-bit.
-        Correctness: input - floor(input*const_ratio/2^128)*modulus is always true.
         */
         template <typename T, typename = std::enable_if_t<is_uint64_v<T>>>
         SEAL_NODISCARD inline std::uint64_t barrett_reduce_63(T input, const Modulus &modulus)
@@ -244,8 +242,7 @@ namespace seal
 
             // One more subtraction is enough
             return static_cast<std::uint64_t>(tmp[0]) -
-                   (modulus.value() &
-                    static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp[0] >= modulus.value())));
+                   (modulus.value() & (-static_cast<std::uint64_t>(tmp[0] >= modulus.value())));
         }
 
         /**
@@ -377,5 +374,46 @@ namespace seal
         */
         SEAL_NODISCARD std::uint64_t dot_product_mod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t count, const Modulus &modulus);
+
+        /**
+        Returns y << 64 / modulus in a single word.
+        This is required for a variant of Barrett reduction.
+        @param[in] y Must be less than modulus.
+        */
+        SEAL_NODISCARD inline std::uint64_t multiply_uint_mod_fast_get_operand(std::uint64_t y, const Modulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (y >= modulus.value())
+            {
+                throw std::invalid_argument("input must be less than modulus");
+            }
+#endif
+            std::uint64_t wide_quotient[2]{ 0, 0 };
+            std::uint64_t wide_coeff[2]{ 0, y };
+            divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient);
+            return wide_quotient[0];
+        }
+
+        /**
+        Returns x * y mod modulus.
+        This is a highly-optimized variant of Barrett reduction.
+        Correctness: modulus should be at most 63-bit, and y must be less than modulus.
+        @param[in] yprime Returned from multiply_uint_mod_fast_get_operand.
+        */
+        SEAL_NODISCARD inline std::uint64_t multiply_uint_mod_fast(
+            std::uint64_t x, std::uint64_t y, std::uint64_t yprime, const Modulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (y >= modulus.value())
+            {
+                throw std::invalid_argument("operand y must be less than modulus");
+            }
+#endif
+            unsigned long long tmp1, tmp2;
+            const std::uint64_t p = modulus.value();
+            multiply_uint64_hw64(x, yprime, &tmp1);
+            tmp2 = y * x - tmp1 * p;
+            return tmp2 - (p & (-static_cast<std::uint64_t>(tmp2 >= p)));
+        }
     } // namespace util
 } // namespace seal

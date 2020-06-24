@@ -322,8 +322,7 @@ namespace seal
         secret_key_array_.acquire(secret_key_array);
     }
 
-    void KeyGenerator::generate_one_kswitch_key(
-        ConstRNSIter new_key, vector<PublicKey> &destination, bool save_seed)
+    void KeyGenerator::generate_one_kswitch_key(ConstRNSIter new_key, vector<PublicKey> &destination, bool save_seed)
     {
         if (!context_->using_keyswitching())
         {

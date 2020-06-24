@@ -38,8 +38,8 @@ namespace sealtest
             ASSERT_TRUE((is_same<decltype(iter(declval<const void *>())), PtrIter<const void *>>::value));
 
             ASSERT_TRUE((is_same<decltype(iter(declval<vector<Ciphertext> &>())), PtrIter<Ciphertext *>>::value));
-            ASSERT_TRUE((is_same<
-                         decltype(iter(declval<const vector<Ciphertext> &>())), PtrIter<const Ciphertext *>>::value));
+            ASSERT_TRUE(
+                (is_same<decltype(iter(declval<const vector<Ciphertext> &>())), PtrIter<const Ciphertext *>>::value));
 
             ASSERT_TRUE((is_same<
                          decltype(iter(declval<int>(), declval<size_t>(), declval<Ciphertext &>())),
