@@ -441,11 +441,11 @@ namespace seal
                 else
                 {
                     const uint64_t mulmod_pred =
-                        mulmod_preconditioner(inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
+                        multiply_uint_mod_fast_get_operand(inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
                     for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
                     {
                         *temp_ptr =
-                            fast_multiply_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, mulmod_pred, ibase_elt);
+                            multiply_uint_mod_fast(*in, inv_ibase_punctured_prod_mod_ibase_elt, mulmod_pred, ibase_elt);
                     }
                 }
             }
@@ -855,11 +855,11 @@ namespace seal
             uint64_t *alpha_sk_ptr = alpha_sk.get();
             uint64_t *temp_ptr = temp.get();
             const uint64_t m_sk_value = m_sk_.value();
-            const uint64_t mulmod_pred = mulmod_preconditioner(inv_prod_B_mod_m_sk_, m_sk_);
+            const uint64_t mulmod_pred = multiply_uint_mod_fast_get_operand(inv_prod_B_mod_m_sk_, m_sk_);
             for (size_t i = 0; i < coeff_count_; i++)
             {
                 // It is not necessary for the negation to be reduced modulo the small prime
-                alpha_sk_ptr[i] = fast_multiply_uint_mod(
+                alpha_sk_ptr[i] = multiply_uint_mod_fast(
                     temp_ptr[i] + (m_sk_value - input_ptr[i]), inv_prod_B_mod_m_sk_, mulmod_pred, m_sk_);
             }
 
@@ -920,10 +920,10 @@ namespace seal
             auto r_m_tilde(allocate_uint(coeff_count_, pool));
             // Negate once here
             const uint64_t neg_inv_prod_q_mod_m_tilde = negate_uint_mod(inv_prod_q_mod_m_tilde_, m_tilde_);
-            uint64_t mulmod_pred = mulmod_preconditioner(neg_inv_prod_q_mod_m_tilde, m_tilde_);
+            uint64_t mulmod_pred = multiply_uint_mod_fast_get_operand(neg_inv_prod_q_mod_m_tilde, m_tilde_);
 
             transform(input_m_tilde_ptr, input_m_tilde_ptr + coeff_count_, r_m_tilde.get(), [&](uint64_t x) {
-                return fast_multiply_uint_mod(x, neg_inv_prod_q_mod_m_tilde, mulmod_pred, m_tilde_);
+                return multiply_uint_mod_fast(x, neg_inv_prod_q_mod_m_tilde, mulmod_pred, m_tilde_);
             });
 
             for (size_t k = 0; k < base_Bsk_size; k++)
@@ -931,7 +931,7 @@ namespace seal
                 Modulus base_Bsk_elt = (*base_Bsk_)[k];
                 uint64_t inv_m_tilde_mod_Bsk_elt = inv_m_tilde_mod_Bsk_[k];
                 uint64_t prod_q_mod_Bsk_elt = prod_q_mod_Bsk_[k];
-                mulmod_pred = mulmod_preconditioner(inv_m_tilde_mod_Bsk_elt, base_Bsk_elt);
+                mulmod_pred = multiply_uint_mod_fast_get_operand(inv_m_tilde_mod_Bsk_elt, base_Bsk_elt);
                 for (size_t i = 0; i < coeff_count_; i++, destination++, input++)
                 {
                     // We need centered reduction of r_m_tilde modulo Bsk. Note that m_tilde is chosen
@@ -943,7 +943,7 @@ namespace seal
                     }
 
                     // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk
-                    *destination = fast_multiply_uint_mod(
+                    *destination = multiply_uint_mod_fast(
                         multiply_add_uint_mod(prod_q_mod_Bsk_elt, temp, *input, base_Bsk_elt), inv_m_tilde_mod_Bsk_elt,
                         mulmod_pred, base_Bsk_elt);
                 }
@@ -983,11 +983,11 @@ namespace seal
             {
                 Modulus base_Bsk_elt = (*base_Bsk_)[i];
                 uint64_t inv_prod_q_mod_Bsk_elt = inv_prod_q_mod_Bsk_[i];
-                uint64_t mulmod_pred = mulmod_preconditioner(inv_prod_q_mod_Bsk_elt, base_Bsk_elt);
+                uint64_t mulmod_pred = multiply_uint_mod_fast_get_operand(inv_prod_q_mod_Bsk_elt, base_Bsk_elt);
                 for (size_t k = 0; k < coeff_count_; k++, input++, destination++)
                 {
                     // It is not necessary for the negation to be reduced modulo base_Bsk_elt
-                    *destination = fast_multiply_uint_mod(
+                    *destination = multiply_uint_mod_fast(
                         *input + (base_Bsk_elt.value() - *destination), inv_prod_q_mod_Bsk_elt, mulmod_pred,
                         base_Bsk_elt);
                 }
