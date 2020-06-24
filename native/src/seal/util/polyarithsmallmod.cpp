@@ -30,9 +30,9 @@ namespace seal
             }
 #endif
             const uint64_t modulus_value = modulus.value();
-            if (scalar >= modulus_value)
-                scalar = barrett_reduce_63(scalar, modulus);
-            const uint64_t scalar_prime = precompute_mulmod_preconditioner(scalar, modulus);
+            // scalar must be first reduced modulo modulus
+            modulo_uint_inplace(&scalar, 1, modulus);
+            const uint64_t scalar_prime = multiply_uint_mod_fast_get_operand(scalar, modulus);
 
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 unsigned long long tmp1, tmp2;

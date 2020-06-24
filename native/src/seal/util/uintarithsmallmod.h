@@ -33,7 +33,7 @@ namespace seal
             }
 #endif
             operand++;
-            return operand - (modulus.value() & (-static_cast<std::uint64_t>(operand >= modulus.value()));
+            return operand - (modulus.value() & (-static_cast<std::uint64_t>(operand >= modulus.value())));
         }
 
         /**
@@ -414,6 +414,27 @@ namespace seal
             multiply_uint64_hw64(x, yprime, &tmp1);
             tmp2 = y * x - tmp1 * p;
             return tmp2 - (p & (-static_cast<std::uint64_t>(tmp2 >= p)));
+        }
+
+        /**
+        Returns x * y mod modulus or x * y mod modulus + modulus.
+        This is a highly-optimized variant of Barrett reduction and reduce to [0, 2 * modulus - 1].
+        Correctness: modulus should be at most 63-bit, and y must be less than modulus.
+        @param[in] yprime Returned from multiply_uint_mod_fast_get_operand.
+        */
+        SEAL_NODISCARD inline std::uint64_t multiply_uint_mod_fast_lazy(
+            std::uint64_t x, std::uint64_t y, std::uint64_t yprime, const Modulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (y >= modulus.value())
+            {
+                throw std::invalid_argument("operand y must be less than modulus");
+            }
+#endif
+            unsigned long long tmp1;
+            const std::uint64_t p = modulus.value();
+            multiply_uint64_hw64(x, yprime, &tmp1);
+            return y * x - tmp1 * p;
         }
     } // namespace util
 } // namespace seal

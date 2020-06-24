@@ -114,10 +114,7 @@ namespace seal
         {
             for (size_t i = 0; i < coeff_count_; i++, input++, destination++)
             {
-                uint64_t wide_quotient[2]{ 0, 0 };
-                uint64_t wide_coeff[2]{ 0, *input };
-                divide_uint128_inplace(wide_coeff, modulus_.value(), wide_quotient);
-                *destination = wide_quotient[0];
+                *destination = multiply_uint_mod_fast_get_operand(*input, modulus_);
             }
         }
 
@@ -251,34 +248,30 @@ namespace seal
                         uint64_t *X = operand + j1;
                         uint64_t *Y = X + t;
                         uint64_t tx;
-                        unsigned long long Q;
+                        uint64_t Q;
                         for (size_t j = j1; j < j2; j += 4)
                         {
                             tx = *X - (two_times_modulus &
                                        static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = *Y * W - Q * modulus;
+                            Q = multiply_uint_mod_fast_lazy(*Y, W, Wprime, modulus);
                             *X++ = tx + Q;
                             *Y++ = tx + two_times_modulus - Q;
 
                             tx = *X - (two_times_modulus &
                                        static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = *Y * W - Q * modulus;
+                            Q = multiply_uint_mod_fast_lazy(*Y, W, Wprime, modulus);
                             *X++ = tx + Q;
                             *Y++ = tx + two_times_modulus - Q;
 
                             tx = *X - (two_times_modulus &
                                        static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = *Y * W - Q * modulus;
+                            Q = multiply_uint_mod_fast_lazy(*Y, W, Wprime, modulus);
                             *X++ = tx + Q;
                             *Y++ = tx + two_times_modulus - Q;
 
                             tx = *X - (two_times_modulus &
                                        static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = *Y * W - Q * modulus;
+                            Q = multiply_uint_mod_fast_lazy(*Y, W, Wprime, modulus);
                             *X++ = tx + Q;
                             *Y++ = tx + two_times_modulus - Q;
                         }
@@ -296,15 +289,14 @@ namespace seal
                         uint64_t *X = operand + j1;
                         uint64_t *Y = X + t;
                         uint64_t tx;
-                        unsigned long long Q;
+                        uint64_t Q;
                         for (size_t j = j1; j < j2; j++)
                         {
                             // The Harvey butterfly: assume X, Y in [0, 2p), and return X', Y' in [0, 4p).
                             // X', Y' = X + WY, X - WY (mod p).
                             tx = *X - (two_times_modulus &
                                        static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, *Y, &Q);
-                            Q = W * *Y - Q * modulus;
+                            Q = multiply_uint_mod_fast_lazy(*Y, W, Wprime, modulus);
                             *X++ = tx + Q;
                             *Y++ = tx + two_times_modulus - Q;
                         }
@@ -346,36 +338,31 @@ namespace seal
                         uint64_t *Y = X + t;
                         uint64_t tx;
                         uint64_t ty;
-                        unsigned long long Q;
                         for (size_t j = j1; j < j2; j += 4)
                         {
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
                                          static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, ty, &Q);
-                            *Y++ = ty * W - Q * modulus;
+                            *Y++ = multiply_uint_mod_fast_lazy(ty, W, Wprime, modulus);
 
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
                                          static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, ty, &Q);
-                            *Y++ = ty * W - Q * modulus;
+                            *Y++ = multiply_uint_mod_fast_lazy(ty, W, Wprime, modulus);
 
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
                                          static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, ty, &Q);
-                            *Y++ = ty * W - Q * modulus;
+                            *Y++ = multiply_uint_mod_fast_lazy(ty, W, Wprime, modulus);
 
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
                                          static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, ty, &Q);
-                            *Y++ = ty * W - Q * modulus;
+                            *Y++ = multiply_uint_mod_fast_lazy(ty, W, Wprime, modulus);
                         }
                         j1 += (t << 1);
                     }
@@ -392,15 +379,13 @@ namespace seal
                         uint64_t *Y = X + t;
                         uint64_t tx;
                         uint64_t ty;
-                        unsigned long long Q;
                         for (size_t j = j1; j < j2; j++)
                         {
                             tx = *X + *Y;
                             ty = *X + two_times_modulus - *Y;
                             *X++ = tx - (two_times_modulus &
                                          static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            multiply_uint64_hw64(Wprime, ty, &Q);
-                            *Y++ = ty * W - Q * modulus;
+                            *Y++ = multiply_uint_mod_fast_lazy(ty, W, Wprime, modulus);
                         }
                         j1 += (t << 1);
                     }
@@ -411,31 +396,20 @@ namespace seal
             const uint64_t inv_N = *(tables.get_inv_degree_modulo());
             const uint64_t W = tables.get_from_inv_root_powers(root_index);
             const uint64_t inv_N_W = multiply_uint_mod(inv_N, W, tables.modulus());
-            uint64_t wide_quotient[2]{ 0, 0 };
-            uint64_t wide_coeff[2]{ 0, inv_N };
-            divide_uint128_inplace(wide_coeff, modulus, wide_quotient);
-            const uint64_t inv_Nprime = wide_quotient[0];
-            wide_quotient[0] = 0;
-            wide_quotient[1] = 0;
-            wide_coeff[0] = 0;
-            wide_coeff[1] = inv_N_W;
-            divide_uint128_inplace(wide_coeff, modulus, wide_quotient);
-            const uint64_t inv_N_Wprime = wide_quotient[0];
+            const uint64_t inv_Nprime = multiply_uint_mod_fast_get_operand(inv_N, modulus);
+            const uint64_t inv_N_Wprime = multiply_uint_mod_fast_get_operand(inv_N_W, modulus);
 
             uint64_t *X = operand;
             uint64_t *Y = X + (n >> 1);
             uint64_t tx;
             uint64_t ty;
-            unsigned long long Q;
             for (size_t j = (n >> 1); j < n; j++)
             {
                 tx = *X + *Y;
                 tx -= two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus));
                 ty = *X + two_times_modulus - *Y;
-                multiply_uint64_hw64(inv_Nprime, tx, &Q);
-                *X++ = inv_N * tx - Q * modulus;
-                multiply_uint64_hw64(inv_N_Wprime, ty, &Q);
-                *Y++ = inv_N_W * ty - Q * modulus;
+                *X++ = multiply_uint_mod_fast_lazy(tx, inv_N, inv_Nprime, modulus);
+                *Y++ = multiply_uint_mod_fast_lazy(ty, inv_N_W, inv_N_Wprime, modulus);
             }
         }
     } // namespace util
