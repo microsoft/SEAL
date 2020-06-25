@@ -170,24 +170,16 @@ namespace seal
 #endif
 
 #ifndef SEAL_MULTIPLY_UINT64
-#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)     \
-    {                                                           \
-        multiply_uint64_generic(operand1, operand2, result128); \
-    }
+#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128) multiply_uint64_generic(operand1, operand2, result128);
 #endif
 
 #ifndef SEAL_DIVIDE_UINT128_UINT64
-#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result)             \
-    {                                                                          \
-        divide_uint128_uint64_inplace_generic(numerator, denominator, result); \
-    }
+#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result) \
+    divide_uint128_uint64_inplace_generic(numerator, denominator, result);
 #endif
 
 #ifndef SEAL_MULTIPLY_UINT64_HW64
-#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64)     \
-    {                                                           \
-        multiply_uint64_hw64_generic(operand1, operand2, hw64); \
-    }
+#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) multiply_uint64_hw64_generic(operand1, operand2, hw64);
 #endif
 
 #ifndef SEAL_MSB_INDEX_UINT64
@@ -195,10 +187,14 @@ namespace seal
 #endif
 
 // Check whether an object is of expected type; this requires the type_traits header to be included
-#define SEAL_ASSERT_TYPE(obj, expected, message)      \
-    static_assert(                                    \
-        std::is_same<decltype(obj), expected>::value, \
-        "In " __FILE__ ":" SEAL_STRINGIZE(__LINE__) " expected " SEAL_STRINGIZE(expected) " (message: " message ")");
+#define SEAL_ASSERT_TYPE(obj, expected, message)                                                                    \
+    do                                                                                                              \
+    {                                                                                                               \
+        static_assert(                                                                                              \
+            std::is_same<decltype(obj), expected>::value,                                                           \
+            "In " __FILE__ ":" SEAL_STRINGIZE(__LINE__) " expected " SEAL_STRINGIZE(expected) " (message: " message \
+                                                                                              ")");                 \
+    } while (false)
 
 // This macro can be used to allocate temporary buffer and create a PolyIter object pointing to it. This is convenient
 // when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the iterator.
