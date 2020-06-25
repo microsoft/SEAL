@@ -33,7 +33,8 @@ namespace seal
             }
 #endif
             operand++;
-            return operand - (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand >= modulus.value())));
+            return operand - (modulus.value() &
+                              static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand >= modulus.value())));
         }
 
         /**
@@ -133,7 +134,8 @@ namespace seal
 #endif
             // Sum of operands modulo Modulus can never wrap around 2^64
             operand1 += operand2;
-            return operand1 - (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand1 >= modulus.value())));
+            return operand1 - (modulus.value() &
+                               static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand1 >= modulus.value())));
         }
 
         /**
@@ -242,7 +244,8 @@ namespace seal
 
             // One more subtraction is enough
             return static_cast<std::uint64_t>(tmp[0]) -
-                   (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp[0] >= modulus.value())));
+                   (modulus.value() &
+                    static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp[0] >= modulus.value())));
         }
 
         /**
