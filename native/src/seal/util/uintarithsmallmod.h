@@ -266,7 +266,6 @@ namespace seal
             return barrett_reduce_128(z, modulus);
         }
 
-
         /**
         This struct contains a operand and a precomputed quotient: (operand << 64) / modulus, for a specific modulus.
         When passed to multiply_uint_mod, a faster variant of Barrett reduction will be performed.
@@ -285,8 +284,8 @@ namespace seal
                     throw std::invalid_argument("input must be less than modulus");
                 }
 #endif
-                std::uint64_t wide_quotient[2] { 0, 0 };
-                std::uint64_t wide_coeff[2] { 0, operand };
+                std::uint64_t wide_quotient[2]{ 0, 0 };
+                std::uint64_t wide_coeff[2]{ 0, operand };
                 divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient);
                 quotient = wide_quotient[0];
             }

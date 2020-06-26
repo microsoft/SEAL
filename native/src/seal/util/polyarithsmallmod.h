@@ -560,7 +560,8 @@ namespace seal
         }
 
         inline void multiply_poly_scalar_coeffmod(
-            ConstPolyIter poly_array, std::size_t size, MultiplyUIntModOperand scalar, ConstModulusIter modulus, PolyIter result)
+            ConstPolyIter poly_array, std::size_t size, MultiplyUIntModOperand scalar, ConstModulusIter modulus,
+            PolyIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly_array && size > 0)

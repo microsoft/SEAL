@@ -41,7 +41,8 @@ namespace seal
         }
 
         void multiply_poly_scalar_coeffmod(
-            ConstCoeffIter poly, size_t coeff_count, MultiplyUIntModOperand scalar, const Modulus &modulus, CoeffIter result)
+            ConstCoeffIter poly, size_t coeff_count, MultiplyUIntModOperand scalar, const Modulus &modulus,
+            CoeffIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_count > 0)
