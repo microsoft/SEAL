@@ -313,7 +313,7 @@ namespace seal
             std::uint64_t x, MultiplyUIntModOperand y, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
-            if (y >= modulus.value())
+            if (y.operand >= modulus.value())
             {
                 throw std::invalid_argument("operand y must be less than modulus");
             }
@@ -334,7 +334,7 @@ namespace seal
             std::uint64_t x, MultiplyUIntModOperand y, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
-            if (y >= modulus.value())
+            if (y.operand >= modulus.value())
             {
                 throw std::invalid_argument("operand y must be less than modulus");
             }
