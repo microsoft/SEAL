@@ -379,6 +379,70 @@ namespace seal
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t count, const Modulus &modulus);
 
         /**
+        This struct contains a operand and a precomputed quotient: (operand << 64) / modulus, for a specific modulus.
+        When passed to multiply_uint_mod, a faster variant of Barrett reduction will be performed.
+        Operand must be less than modulus.
+        */
+        struct MultiplyUIntModOperand {
+            std::uint64_t operand;
+            std::uint64_t quotient;
+
+            void set_quotient(const Modulus &modulus) {
+#ifdef SEAL_DEBUG
+                if (operand >= modulus.value())
+                {
+                    throw std::invalid_argument("input must be less than modulus");
+                }
+#endif
+                std::uint64_t wide_quotient[2] { 0, 0 };
+                std::uint64_t wide_coeff[2] { 0, operand };
+                divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient);
+                quotient = wide_quotient[0];
+            }
+        };
+
+        /**
+        Returns x * y mod modulus.
+        This is a highly-optimized variant of Barrett reduction.
+        Correctness: modulus should be at most 63-bit, and y must be less than modulus.
+        */
+        SEAL_NODISCARD inline std::uint64_t multiply_uint_mod(
+            std::uint64_t x, MultiplyUIntModOperand y, const Modulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (y >= modulus.value())
+            {
+                throw std::invalid_argument("operand y must be less than modulus");
+            }
+#endif
+            unsigned long long tmp1, tmp2;
+            const std::uint64_t p = modulus.value();
+            multiply_uint64_hw64(x, y.quotient, &tmp1);
+            tmp2 = y.operand * x - tmp1 * p;
+            return tmp2 - (p & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp2 >= p)));
+        }
+
+        /**
+        Returns x * y mod modulus or x * y mod modulus + modulus.
+        This is a highly-optimized variant of Barrett reduction and reduce to [0, 2 * modulus - 1].
+        Correctness: modulus should be at most 63-bit, and y must be less than modulus.
+        */
+        SEAL_NODISCARD inline std::uint64_t multiply_uint_mod_lazy(
+            std::uint64_t x, MultiplyUIntModOperand y, const Modulus &modulus)
+        {
+#ifdef SEAL_DEBUG
+            if (y >= modulus.value())
+            {
+                throw std::invalid_argument("operand y must be less than modulus");
+            }
+#endif
+            unsigned long long tmp1;
+            const std::uint64_t p = modulus.value();
+            multiply_uint64_hw64(x, y.quotient, &tmp1);
+            return y.operand * x - tmp1 * p;
+        }
+
+        /**
         Returns y << 64 / modulus in a single word.
         This is required for a variant of Barrett reduction.
         @param[in] y Must be less than modulus.
