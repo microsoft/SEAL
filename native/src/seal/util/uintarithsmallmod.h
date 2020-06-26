@@ -115,7 +115,7 @@ namespace seal
         @param[in] operand1 Should be at most (modulus - 1).
         @param[in] operand2 Should be at most (modulus - 1).
         */
-        SEAL_NODISCARD inline std::uint64_t add_uint64_mod(
+        SEAL_NODISCARD inline std::uint64_t add_uint_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -144,7 +144,7 @@ namespace seal
         @param[in] operand1 Should be at most (modulus - 1).
         @param[in] operand2 Should be at most (modulus - 1).
         */
-        SEAL_NODISCARD inline std::uint64_t sub_uint64_mod(
+        SEAL_NODISCARD inline std::uint64_t sub_uint_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
@@ -272,11 +272,13 @@ namespace seal
         When passed to multiply_uint_mod, a faster variant of Barrett reduction will be performed.
         Operand must be less than modulus.
         */
-        struct MultiplyUIntModOperand {
+        struct MultiplyUIntModOperand
+        {
             std::uint64_t operand;
             std::uint64_t quotient;
 
-            void set_quotient(const Modulus &modulus) {
+            void set_quotient(const Modulus &modulus)
+            {
 #ifdef SEAL_DEBUG
                 if (operand >= modulus.value())
                 {
@@ -287,6 +289,18 @@ namespace seal
                 std::uint64_t wide_coeff[2] { 0, operand };
                 divide_uint128_inplace(wide_coeff, modulus.value(), wide_quotient);
                 quotient = wide_quotient[0];
+            }
+
+            void set(std::uint64_t new_operand, const Modulus &modulus)
+            {
+#ifdef SEAL_DEBUG
+                if (new_operand >= modulus.value())
+                {
+                    throw std::invalid_argument("input must be less than modulus");
+                }
+#endif
+                operand = new_operand;
+                set_quotient(modulus);
             }
         };
 

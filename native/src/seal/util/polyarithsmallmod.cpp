@@ -32,8 +32,7 @@ namespace seal
             // scalar must be first reduced modulo modulus
             modulo_uint_inplace(&scalar, 1, modulus);
             MultiplyUIntModOperand temp_scalar;
-            temp_scalar.operand = scalar;
-            temp_scalar.set_quotient(modulus);
+            temp_scalar.set(scalar, modulus);
 
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 unsigned long long tmp1, tmp2;

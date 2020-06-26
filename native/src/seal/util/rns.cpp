@@ -242,9 +242,9 @@ namespace seal
                 // Compute inverses of punctured products mod primes
                 bool invertible = true;
                 SEAL_ITERATE(iter(punctured_prod, base_, inv_punctured_prod_mod_base_array_), size_, [&](auto I) {
-                    get<2>(I).operand = modulo_uint(get<0>(I), size_, get<1>(I));
-                    invertible = invertible && try_invert_uint_mod(get<2>(I).operand, get<1>(I), get<2>(I).operand);
-                    get<2>(I).set_quotient(get<1>(I));
+                    uint64_t temp = modulo_uint(get<0>(I), size_, get<1>(I));
+                    invertible = invertible && try_invert_uint_mod(temp, get<1>(I), temp);
+                    get<2>(I).set(temp, get<1>(I));
                 });
 
                 return invertible;
@@ -253,8 +253,7 @@ namespace seal
             // Case of a single prime
             base_prod_[0] = base_[0].value();
             punctured_prod_array_[0] = 1;
-            inv_punctured_prod_mod_base_array_[0].operand = 1;
-            inv_punctured_prod_mod_base_array_[0].set_quotient(base_[0]);
+            inv_punctured_prod_mod_base_array_[0].set(1, base_[0]);
 
             return true;
         }
@@ -610,46 +609,47 @@ namespace seal
                 prod_B_mod_q_[i] = modulo_uint(base_B_->base_prod(), base_B_size, (*base_q_)[i]);
             }
 
+            uint64_t temp;
+
             // Compute prod(q)^(-1) mod Bsk
             inv_prod_q_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
             for (size_t i = 0; i < base_Bsk_size; i++)
             {
-                inv_prod_q_mod_Bsk_[i].operand = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
-                if (!try_invert_uint_mod(inv_prod_q_mod_Bsk_[i].operand, (*base_Bsk_)[i], inv_prod_q_mod_Bsk_[i].operand))
+                temp = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
+                if (!try_invert_uint_mod(temp, (*base_Bsk_)[i], temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
-                inv_prod_q_mod_Bsk_[i].set_quotient((*base_Bsk_)[i]);
+                inv_prod_q_mod_Bsk_[i].set(temp, (*base_Bsk_)[i]);
             }
 
             // Compute prod(B)^(-1) mod m_sk
-            inv_prod_B_mod_m_sk_.operand = modulo_uint(base_B_->base_prod(), base_B_size, m_sk_);
-            if (!try_invert_uint_mod(inv_prod_B_mod_m_sk_.operand, m_sk_, inv_prod_B_mod_m_sk_.operand))
+            temp = modulo_uint(base_B_->base_prod(), base_B_size, m_sk_);
+            if (!try_invert_uint_mod(temp, m_sk_, temp))
             {
                 throw logic_error("invalid rns bases");
             }
-            inv_prod_B_mod_m_sk_.set_quotient(m_sk_);
+            inv_prod_B_mod_m_sk_.set(temp, m_sk_);
 
             // Compute m_tilde^(-1) mod Bsk
             inv_m_tilde_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
             for (size_t i = 0; i < base_Bsk_size; i++)
             {
                 if (!try_invert_uint_mod(
-                        barrett_reduce_63(m_tilde_.value(), (*base_Bsk_)[i]), (*base_Bsk_)[i], inv_m_tilde_mod_Bsk_[i].operand))
+                        barrett_reduce_63(m_tilde_.value(), (*base_Bsk_)[i]), (*base_Bsk_)[i], temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
-                inv_m_tilde_mod_Bsk_[i].set_quotient((*base_Bsk_)[i].value());
+                inv_m_tilde_mod_Bsk_[i].set(temp, (*base_Bsk_)[i]);
             }
 
             // Compute prod(q)^(-1) mod m_tilde
-            neg_inv_prod_q_mod_m_tilde_.operand = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
-            if (!try_invert_uint_mod(neg_inv_prod_q_mod_m_tilde_.operand, m_tilde_, neg_inv_prod_q_mod_m_tilde_.operand))
+            temp = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
+            if (!try_invert_uint_mod(temp, m_tilde_, temp))
             {
                 throw logic_error("invalid rns bases");
             }
-            neg_inv_prod_q_mod_m_tilde_.operand = negate_uint_mod(neg_inv_prod_q_mod_m_tilde_.operand, m_tilde_);
-            neg_inv_prod_q_mod_m_tilde_.set_quotient(m_tilde_);
+            neg_inv_prod_q_mod_m_tilde_.set(negate_uint_mod(temp, m_tilde_), m_tilde_);
 
             // Compute prod(q) mod Bsk
             prod_q_mod_Bsk_ = allocate_uint(base_Bsk_size, pool_);
@@ -661,19 +661,17 @@ namespace seal
             if (base_t_gamma_)
             {
                 // Compute gamma^(-1) mod t
-                if (!try_invert_uint_mod(gamma_.value() % t_.value(), t_, inv_gamma_mod_t_.operand))
+                if (!try_invert_uint_mod(gamma_.value() % t_.value(), t_, temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
-                inv_gamma_mod_t_.set_quotient(t_);
+                inv_gamma_mod_t_.set(temp, t_);
 
                 // Compute prod({t, gamma}) mod q
                 prod_t_gamma_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size, pool_);
                 for (size_t i = 0; i < base_q_size; i++)
                 {
-                    prod_t_gamma_mod_q_[i].operand =
-                        multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), (*base_q_)[i]);
-                    prod_t_gamma_mod_q_[i].set_quotient((*base_q_)[i]);
+                    prod_t_gamma_mod_q_[i].set(multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), (*base_q_)[i]), (*base_q_)[i]);
                 }
 
                 // Compute -prod(q)^(-1) mod {t, gamma}
@@ -685,8 +683,7 @@ namespace seal
                     {
                         throw logic_error("invalid rns bases");
                     }
-                    neg_inv_q_mod_t_gamma_[i].operand = negate_uint_mod(neg_inv_q_mod_t_gamma_[i].operand, (*base_t_gamma_)[i]);
-                    neg_inv_q_mod_t_gamma_[i].set_quotient((*base_t_gamma_)[i]);
+                    neg_inv_q_mod_t_gamma_[i].set(negate_uint_mod(neg_inv_q_mod_t_gamma_[i].operand, (*base_t_gamma_)[i]), (*base_t_gamma_)[i]);
                 }
             }
 
@@ -695,11 +692,11 @@ namespace seal
             inv_q_last_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size - 1, pool_);
             for (size_t i = 0; i < base_q_size - 1; i++)
             {
-                if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), (*base_q_)[i], inv_q_last_mod_q_[i].operand))
+                if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), (*base_q_)[i], temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
-                inv_q_last_mod_q_[i].set_quotient((*base_q_)[i]);
+                inv_q_last_mod_q_[i].set(temp, (*base_q_)[i]);
             }
         }
 
@@ -736,7 +733,7 @@ namespace seal
                 uint64_t half_mod = barrett_reduce_63(half, (*base_q_)[i]);
                 for (size_t j = 0; j < coeff_count_; j++)
                 {
-                    temp_ptr[j] = sub_uint64_mod(temp_ptr[j], half_mod, (*base_q_)[i]);
+                    temp_ptr[j] = sub_uint_mod(temp_ptr[j], half_mod, (*base_q_)[i]);
                 }
 
                 sub_poly_coeffmod(
@@ -1023,8 +1020,7 @@ namespace seal
             for (size_t i = 0; i < base_q_size; i++)
             {
                 MultiplyUIntModOperand m_tilde_temp;
-                m_tilde_temp.operand = m_tilde_.value();
-                m_tilde_temp.set_quotient((*base_q_)[i]);
+                m_tilde_temp.set(m_tilde_.value(), (*base_q_)[i]);
                 multiply_poly_scalar_coeffmod(
                     input + (i * coeff_count_), coeff_count_, m_tilde_temp, (*base_q_)[i], temp.get() + (i * coeff_count_));
             }
@@ -1077,13 +1073,13 @@ namespace seal
                 if (temp_t_gamma[i + coeff_count_] > gamma_div_2)
                 {
                     // Compute -(gamma - a) instead of (a - gamma)
-                    destination[i] = add_uint64_mod(
+                    destination[i] = add_uint_mod(
                         temp_t_gamma[i], (gamma_.value() - temp_t_gamma[i + coeff_count_]) % t_.value(), t_);
                 }
                 // No correction needed
                 else
                 {
-                    destination[i] = sub_uint64_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
+                    destination[i] = sub_uint_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
                 }
 
                 // If this coefficient was non-zero, multiply by t^(-1)

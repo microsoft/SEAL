@@ -44,7 +44,7 @@ namespace seal
                 // Add to ciphertext: floor(q / t) * m + increment
                 for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    destination[j * coeff_count] = add_uint64_mod(
+                    destination[j * coeff_count] = add_uint_mod(
                         multiply_add_uint_mod(coeff_div_plain_modulus[j], plain.data()[i], fix[0], coeff_modulus[j]),
                         destination[j * coeff_count], coeff_modulus[j]);
                 }
@@ -83,7 +83,7 @@ namespace seal
                 // Add to ciphertext: floor(q / t) * m + increment
                 for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    destination[j * coeff_count] = sub_uint64_mod(
+                    destination[j * coeff_count] = sub_uint_mod(
                         destination[j * coeff_count],
                         multiply_add_uint_mod(coeff_div_plain_modulus[j], plain.data()[i], fix[0], coeff_modulus[j]),
                         coeff_modulus[j]);
