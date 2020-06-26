@@ -35,7 +35,6 @@ namespace seal
             temp_scalar.set(scalar, modulus);
 
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
-                unsigned long long tmp1, tmp2;
                 const uint64_t x = get<0>(I);
                 get<1>(I) = multiply_uint_mod(x, temp_scalar, modulus);
             });
@@ -59,7 +58,6 @@ namespace seal
             }
 #endif
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
-                unsigned long long tmp1, tmp2;
                 const uint64_t x = get<0>(I);
                 get<1>(I) = multiply_uint_mod(x, scalar, modulus);
             });
