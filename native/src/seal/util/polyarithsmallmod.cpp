@@ -29,22 +29,16 @@ namespace seal
                 throw invalid_argument("modulus");
             }
 #endif
-            const uint64_t modulus_value = modulus.value();
             // scalar must be first reduced modulo modulus
             modulo_uint_inplace(&scalar, 1, modulus);
-            const uint64_t scalar_prime = multiply_uint_mod_fast_get_operand(scalar, modulus);
+            MultiplyUIntModOperand temp_scalar;
+            temp_scalar.operand = scalar;
+            temp_scalar.set_quotient(modulus);
 
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 unsigned long long tmp1, tmp2;
                 const uint64_t x = get<0>(I);
-
-                multiply_uint64_hw64(x, scalar_prime, &tmp1);
-                // Barrett subtraction
-                tmp2 = scalar * x - tmp1 * modulus_value;
-
-                // Claim: One more subtraction is enough
-                get<1>(I) =
-                    tmp2 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp2 >= modulus_value)));
+                get<1>(I) = multiply_uint_mod(x, temp_scalar, modulus);
             });
         }
 

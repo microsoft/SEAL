@@ -60,18 +60,18 @@ namespace sealtest
             int coeff_count_power = 1;
             Modulus modulus(0xffffffffffc0001ULL);
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
-            ASSERT_EQ(1ULL, tables->get_from_root_powers(0));
-            ASSERT_EQ(288794978602139552ULL, tables->get_from_root_powers(1));
+            ASSERT_EQ(1ULL, tables->get_from_root_powers(0).operand);
+            ASSERT_EQ(288794978602139552ULL, tables->get_from_root_powers(1).operand);
             uint64_t inv;
-            try_invert_uint_mod(tables->get_from_root_powers(1), modulus.value(), inv);
-            ASSERT_EQ(inv, tables->get_from_inv_root_powers(1));
+            try_invert_uint_mod(tables->get_from_root_powers(1).operand, modulus.value(), inv);
+            ASSERT_EQ(inv, tables->get_from_inv_root_powers(1).operand);
 
             coeff_count_power = 2;
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
-            ASSERT_EQ(1ULL, tables->get_from_root_powers(0));
-            ASSERT_EQ(288794978602139552ULL, tables->get_from_root_powers(1));
-            ASSERT_EQ(178930308976060547ULL, tables->get_from_root_powers(2));
-            ASSERT_EQ(748001537669050592ULL, tables->get_from_root_powers(3));
+            ASSERT_EQ(1ULL, tables->get_from_root_powers(0).operand);
+            ASSERT_EQ(288794978602139552ULL, tables->get_from_root_powers(1).operand);
+            ASSERT_EQ(178930308976060547ULL, tables->get_from_root_powers(2).operand);
+            ASSERT_EQ(748001537669050592ULL, tables->get_from_root_powers(3).operand);
         }
 
         TEST(NTTTablesTest, NegacyclicNTTTest)
