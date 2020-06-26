@@ -75,8 +75,8 @@ namespace seal
             punctured_prod_array_ = allocate_uint(size_ * size_, pool_);
             set_uint(copy.punctured_prod_array_.get(), size_ * size_, punctured_prod_array_.get());
 
-            inv_punctured_prod_mod_base_array_ = allocate_uint(size_, pool_);
-            set_uint(copy.inv_punctured_prod_mod_base_array_.get(), size_, inv_punctured_prod_mod_base_array_.get());
+            inv_punctured_prod_mod_base_array_ = allocate<MultiplyUIntModOperand>(size_, pool_);
+            copy_n(copy.inv_punctured_prod_mod_base_array_.get(), size_, inv_punctured_prod_mod_base_array_.get());
         }
 
         bool RNSBase::contains(const Modulus &value) const noexcept
@@ -220,7 +220,7 @@ namespace seal
 
             base_prod_ = allocate_uint(size_, pool_);
             punctured_prod_array_ = allocate_zero_uint(size_ * size_, pool_);
-            inv_punctured_prod_mod_base_array_ = allocate_uint(size_, pool_);
+            inv_punctured_prod_mod_base_array_ = allocate<MultiplyUIntModOperand>(size_, pool_);
 
             if (size_ > 1)
             {
@@ -242,8 +242,9 @@ namespace seal
                 // Compute inverses of punctured products mod primes
                 bool invertible = true;
                 SEAL_ITERATE(iter(punctured_prod, base_, inv_punctured_prod_mod_base_array_), size_, [&](auto I) {
-                    get<2>(I) = modulo_uint(get<0>(I), size_, get<1>(I));
-                    invertible = invertible && try_invert_uint_mod(get<2>(I), get<1>(I), get<2>(I));
+                    get<2>(I).operand = modulo_uint(get<0>(I), size_, get<1>(I));
+                    invertible = invertible && try_invert_uint_mod(get<2>(I).operand, get<1>(I), get<2>(I).operand);
+                    get<2>(I).set_quotient(get<1>(I));
                 });
 
                 return invertible;
@@ -252,7 +253,8 @@ namespace seal
             // Case of a single prime
             base_prod_[0] = base_[0].value();
             punctured_prod_array_[0] = 1;
-            inv_punctured_prod_mod_base_array_[0] = 1;
+            inv_punctured_prod_mod_base_array_[0].operand = 1;
+            inv_punctured_prod_mod_base_array_[0].set_quotient(base_[0]);
 
             return true;
         }
@@ -428,10 +430,10 @@ namespace seal
             auto temp(allocate_poly(count, ibase_size, pool));
             for (size_t i = 0; i < ibase_size; i++)
             {
-                uint64_t inv_ibase_punctured_prod_mod_ibase_elt = ibase_.inv_punctured_prod_mod_base_array()[i];
+                MultiplyUIntModOperand inv_ibase_punctured_prod_mod_ibase_elt = ibase_.inv_punctured_prod_mod_base_array()[i];
                 Modulus ibase_elt = ibase_[i];
                 uint64_t *temp_ptr = temp.get() + i;
-                if (inv_ibase_punctured_prod_mod_ibase_elt == 1)
+                if (inv_ibase_punctured_prod_mod_ibase_elt.operand == 1)
                 {
                     for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
                     {
@@ -440,12 +442,10 @@ namespace seal
                 }
                 else
                 {
-                    const uint64_t mulmod_pred =
-                        multiply_uint_mod_fast_get_operand(inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
                     for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
                     {
                         *temp_ptr =
-                            multiply_uint_mod_fast(*in, inv_ibase_punctured_prod_mod_ibase_elt, mulmod_pred, ibase_elt);
+                            multiply_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
                     }
                 }
             }
@@ -611,40 +611,45 @@ namespace seal
             }
 
             // Compute prod(q)^(-1) mod Bsk
-            inv_prod_q_mod_Bsk_ = allocate_uint(base_Bsk_size, pool_);
+            inv_prod_q_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
             for (size_t i = 0; i < base_Bsk_size; i++)
             {
-                inv_prod_q_mod_Bsk_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
-                if (!try_invert_uint_mod(inv_prod_q_mod_Bsk_[i], (*base_Bsk_)[i], inv_prod_q_mod_Bsk_[i]))
+                inv_prod_q_mod_Bsk_[i].operand = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
+                if (!try_invert_uint_mod(inv_prod_q_mod_Bsk_[i].operand, (*base_Bsk_)[i], inv_prod_q_mod_Bsk_[i].operand))
                 {
                     throw logic_error("invalid rns bases");
                 }
+                inv_prod_q_mod_Bsk_[i].set_quotient((*base_Bsk_)[i]);
             }
 
             // Compute prod(B)^(-1) mod m_sk
-            inv_prod_B_mod_m_sk_ = modulo_uint(base_B_->base_prod(), base_B_size, m_sk_);
-            if (!try_invert_uint_mod(inv_prod_B_mod_m_sk_, m_sk_, inv_prod_B_mod_m_sk_))
+            inv_prod_B_mod_m_sk_.operand = modulo_uint(base_B_->base_prod(), base_B_size, m_sk_);
+            if (!try_invert_uint_mod(inv_prod_B_mod_m_sk_.operand, m_sk_, inv_prod_B_mod_m_sk_.operand))
             {
                 throw logic_error("invalid rns bases");
             }
+            inv_prod_B_mod_m_sk_.set_quotient(m_sk_);
 
             // Compute m_tilde^(-1) mod Bsk
-            inv_m_tilde_mod_Bsk_ = allocate_uint(base_Bsk_size, pool_);
+            inv_m_tilde_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
             for (size_t i = 0; i < base_Bsk_size; i++)
             {
                 if (!try_invert_uint_mod(
-                        m_tilde_.value() % (*base_Bsk_)[i].value(), (*base_Bsk_)[i], inv_m_tilde_mod_Bsk_[i]))
+                        barrett_reduce_63(m_tilde_.value(), (*base_Bsk_)[i]), (*base_Bsk_)[i], inv_m_tilde_mod_Bsk_[i].operand))
                 {
                     throw logic_error("invalid rns bases");
                 }
+                inv_m_tilde_mod_Bsk_[i].set_quotient((*base_Bsk_)[i].value());
             }
 
             // Compute prod(q)^(-1) mod m_tilde
-            inv_prod_q_mod_m_tilde_ = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
-            if (!try_invert_uint_mod(inv_prod_q_mod_m_tilde_, m_tilde_, inv_prod_q_mod_m_tilde_))
+            neg_inv_prod_q_mod_m_tilde_.operand = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
+            if (!try_invert_uint_mod(neg_inv_prod_q_mod_m_tilde_.operand, m_tilde_, neg_inv_prod_q_mod_m_tilde_.operand))
             {
                 throw logic_error("invalid rns bases");
             }
+            neg_inv_prod_q_mod_m_tilde_.operand = negate_uint_mod(neg_inv_prod_q_mod_m_tilde_.operand, m_tilde_);
+            neg_inv_prod_q_mod_m_tilde_.set_quotient(m_tilde_);
 
             // Compute prod(q) mod Bsk
             prod_q_mod_Bsk_ = allocate_uint(base_Bsk_size, pool_);
@@ -854,18 +859,16 @@ namespace seal
             auto alpha_sk(allocate_uint(coeff_count_, pool));
             uint64_t *alpha_sk_ptr = alpha_sk.get();
             uint64_t *temp_ptr = temp.get();
-            const uint64_t m_sk_value = m_sk_.value();
-            const uint64_t mulmod_pred = multiply_uint_mod_fast_get_operand(inv_prod_B_mod_m_sk_, m_sk_);
             for (size_t i = 0; i < coeff_count_; i++)
             {
                 // It is not necessary for the negation to be reduced modulo the small prime
-                alpha_sk_ptr[i] = multiply_uint_mod_fast(
-                    temp_ptr[i] + (m_sk_value - input_ptr[i]), inv_prod_B_mod_m_sk_, mulmod_pred, m_sk_);
+                alpha_sk_ptr[i] = multiply_uint_mod(
+                    temp_ptr[i] + (m_sk_.value() - input_ptr[i]), inv_prod_B_mod_m_sk_, m_sk_);
             }
 
             // alpha_sk is now ready for the Shenoy-Kumaresan conversion; however, note that our
             // alpha_sk here is not a centered reduction, so we need to apply a correction below.
-            const uint64_t m_sk_div_2 = m_sk_value >> 1;
+            const uint64_t m_sk_div_2 = m_sk_.value() >> 1;
             for (size_t i = 0; i < base_q_size; i++)
             {
                 Modulus base_q_elt = (*base_q_)[i];
@@ -876,7 +879,7 @@ namespace seal
                     if (alpha_sk_ptr[k] > m_sk_div_2)
                     {
                         *destination = multiply_add_uint_mod(
-                            prod_B_mod_q_elt, m_sk_value - alpha_sk_ptr[k], *destination, base_q_elt);
+                            prod_B_mod_q_elt, negate_uint_mod(alpha_sk_ptr[k], m_sk_), *destination, base_q_elt);
                     }
                     // No correction needed
                     else
@@ -918,20 +921,15 @@ namespace seal
 
             // Compute r_m_tilde
             auto r_m_tilde(allocate_uint(coeff_count_, pool));
-            // Negate once here
-            const uint64_t neg_inv_prod_q_mod_m_tilde = negate_uint_mod(inv_prod_q_mod_m_tilde_, m_tilde_);
-            uint64_t mulmod_pred = multiply_uint_mod_fast_get_operand(neg_inv_prod_q_mod_m_tilde, m_tilde_);
 
             transform(input_m_tilde_ptr, input_m_tilde_ptr + coeff_count_, r_m_tilde.get(), [&](uint64_t x) {
-                return multiply_uint_mod_fast(x, neg_inv_prod_q_mod_m_tilde, mulmod_pred, m_tilde_);
+                return multiply_uint_mod(x, neg_inv_prod_q_mod_m_tilde_, m_tilde_);
             });
 
             for (size_t k = 0; k < base_Bsk_size; k++)
             {
                 Modulus base_Bsk_elt = (*base_Bsk_)[k];
-                uint64_t inv_m_tilde_mod_Bsk_elt = inv_m_tilde_mod_Bsk_[k];
                 uint64_t prod_q_mod_Bsk_elt = prod_q_mod_Bsk_[k];
-                mulmod_pred = multiply_uint_mod_fast_get_operand(inv_m_tilde_mod_Bsk_elt, base_Bsk_elt);
                 for (size_t i = 0; i < coeff_count_; i++, destination++, input++)
                 {
                     // We need centered reduction of r_m_tilde modulo Bsk. Note that m_tilde is chosen
@@ -943,9 +941,7 @@ namespace seal
                     }
 
                     // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk
-                    *destination = multiply_uint_mod_fast(
-                        multiply_add_uint_mod(prod_q_mod_Bsk_elt, temp, *input, base_Bsk_elt), inv_m_tilde_mod_Bsk_elt,
-                        mulmod_pred, base_Bsk_elt);
+                    *destination = multiply_uint_mod(multiply_add_uint_mod(prod_q_mod_Bsk_elt, temp, *input, base_Bsk_elt), inv_m_tilde_mod_Bsk_[k], base_Bsk_elt);
                 }
             }
         }
@@ -982,14 +978,10 @@ namespace seal
             for (size_t i = 0; i < base_Bsk_size; i++)
             {
                 Modulus base_Bsk_elt = (*base_Bsk_)[i];
-                uint64_t inv_prod_q_mod_Bsk_elt = inv_prod_q_mod_Bsk_[i];
-                uint64_t mulmod_pred = multiply_uint_mod_fast_get_operand(inv_prod_q_mod_Bsk_elt, base_Bsk_elt);
                 for (size_t k = 0; k < coeff_count_; k++, input++, destination++)
                 {
                     // It is not necessary for the negation to be reduced modulo base_Bsk_elt
-                    *destination = multiply_uint_mod_fast(
-                        *input + (base_Bsk_elt.value() - *destination), inv_prod_q_mod_Bsk_elt, mulmod_pred,
-                        base_Bsk_elt);
+                    *destination = multiply_uint_mod(*input + (base_Bsk_elt.value() - *destination), inv_prod_q_mod_Bsk_[i], base_Bsk_elt);
                 }
             }
         }

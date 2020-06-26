@@ -7,6 +7,7 @@
 #include "seal/modulus.h"
 #include "seal/util/ntt.h"
 #include "seal/util/pointer.h"
+#include "seal/util/uintarithsmallmod.h"
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -95,7 +96,7 @@ namespace seal
                 return punctured_prod_array_.get();
             }
 
-            SEAL_NODISCARD inline const std::uint64_t *inv_punctured_prod_mod_base_array() const noexcept
+            SEAL_NODISCARD inline const MultiplyUIntModOperand *inv_punctured_prod_mod_base_array() const noexcept
             {
                 return inv_punctured_prod_mod_base_array_.get();
             }
@@ -121,7 +122,7 @@ namespace seal
 
             Pointer<std::uint64_t> punctured_prod_array_;
 
-            Pointer<std::uint64_t> inv_punctured_prod_mod_base_array_;
+            Pointer<MultiplyUIntModOperand> inv_punctured_prod_mod_base_array_;
         };
 
         class BaseConverter
@@ -324,13 +325,13 @@ namespace seal
             Pointer<BaseConverter> base_q_to_t_gamma_conv_;
 
             // prod(q)^(-1) mod Bsk
-            Pointer<std::uint64_t> inv_prod_q_mod_Bsk_;
+            Pointer<MultiplyUIntModOperand> inv_prod_q_mod_Bsk_;
 
             // prod(q)^(-1) mod m_tilde
-            std::uint64_t inv_prod_q_mod_m_tilde_ = 0;
+            MultiplyUIntModOperand neg_inv_prod_q_mod_m_tilde_;
 
             // prod(B)^(-1) mod m_sk
-            std::uint64_t inv_prod_B_mod_m_sk_ = 0;
+            MultiplyUIntModOperand inv_prod_B_mod_m_sk_;
 
             // gamma^(-1) mod t
             std::uint64_t inv_gamma_mod_t_ = 0;
@@ -339,7 +340,7 @@ namespace seal
             Pointer<std::uint64_t> prod_B_mod_q_;
 
             // m_tilde^(-1) mod Bsk
-            Pointer<std::uint64_t> inv_m_tilde_mod_Bsk_;
+            Pointer<MultiplyUIntModOperand> inv_m_tilde_mod_Bsk_;
 
             // prod(q) mod Bsk
             Pointer<std::uint64_t> prod_q_mod_Bsk_;
