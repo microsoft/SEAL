@@ -87,13 +87,11 @@ namespace seal
         void NTTTables::ntt_powers_of_primitive_root(uint64_t root, MultiplyUIntModOperand *destination) const
         {
             MultiplyUIntModOperand *destination_start = destination;
-            destination_start->operand = 1;
-            destination_start->set_quotient(modulus_);
+            destination_start->set(1, modulus_);
             for (size_t i = 1; i < coeff_count_; i++)
             {
                 MultiplyUIntModOperand *next_destination = destination_start + reverse_bits(i, coeff_count_power_);
-                next_destination->operand = multiply_uint_mod(destination->operand, root, modulus_);
-                next_destination->set_quotient(modulus_);
+                next_destination->set(multiply_uint_mod(destination->operand, root, modulus_), modulus_);
                 destination = next_destination;
             }
         }
@@ -372,8 +370,7 @@ namespace seal
             MultiplyUIntModOperand inv_N = tables.inv_degree_modulo();
             MultiplyUIntModOperand W = tables.get_from_inv_root_powers(root_index);
             MultiplyUIntModOperand inv_N_W;
-            inv_N_W.operand = multiply_uint_mod(inv_N.operand, W, modulus);
-            inv_N_W.set_quotient(modulus);
+            inv_N_W.set(multiply_uint_mod(inv_N.operand, W, modulus), modulus);
 
             uint64_t *X = operand;
             uint64_t *Y = X + (n >> 1);

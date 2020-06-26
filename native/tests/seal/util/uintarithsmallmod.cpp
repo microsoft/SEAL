@@ -88,55 +88,55 @@ namespace sealtest
         TEST(UIntArithSmallMod, AddUIntMod)
         {
             Modulus mod(2);
-            ASSERT_EQ(0ULL, add_uint64_mod(0, 0, mod));
-            ASSERT_EQ(1ULL, add_uint64_mod(0, 1, mod));
-            ASSERT_EQ(1ULL, add_uint64_mod(1, 0, mod));
-            ASSERT_EQ(0ULL, add_uint64_mod(1, 1, mod));
+            ASSERT_EQ(0ULL, add_uint_mod(0, 0, mod));
+            ASSERT_EQ(1ULL, add_uint_mod(0, 1, mod));
+            ASSERT_EQ(1ULL, add_uint_mod(1, 0, mod));
+            ASSERT_EQ(0ULL, add_uint_mod(1, 1, mod));
 
             mod = 10;
-            ASSERT_EQ(0ULL, add_uint64_mod(0, 0, mod));
-            ASSERT_EQ(1ULL, add_uint64_mod(0, 1, mod));
-            ASSERT_EQ(1ULL, add_uint64_mod(1, 0, mod));
-            ASSERT_EQ(2ULL, add_uint64_mod(1, 1, mod));
-            ASSERT_EQ(4ULL, add_uint64_mod(7, 7, mod));
-            ASSERT_EQ(3ULL, add_uint64_mod(6, 7, mod));
+            ASSERT_EQ(0ULL, add_uint_mod(0, 0, mod));
+            ASSERT_EQ(1ULL, add_uint_mod(0, 1, mod));
+            ASSERT_EQ(1ULL, add_uint_mod(1, 0, mod));
+            ASSERT_EQ(2ULL, add_uint_mod(1, 1, mod));
+            ASSERT_EQ(4ULL, add_uint_mod(7, 7, mod));
+            ASSERT_EQ(3ULL, add_uint_mod(6, 7, mod));
 
             mod = 2305843009211596801ULL;
-            ASSERT_EQ(0ULL, add_uint64_mod(0, 0, mod));
-            ASSERT_EQ(1ULL, add_uint64_mod(0, 1, mod));
-            ASSERT_EQ(1ULL, add_uint64_mod(1, 0, mod));
-            ASSERT_EQ(2ULL, add_uint64_mod(1, 1, mod));
-            ASSERT_EQ(0ULL, add_uint64_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
-            ASSERT_EQ(1ULL, add_uint64_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
-            ASSERT_EQ(2305843009211596799ULL, add_uint64_mod(2305843009211596800ULL, 2305843009211596800ULL, mod));
+            ASSERT_EQ(0ULL, add_uint_mod(0, 0, mod));
+            ASSERT_EQ(1ULL, add_uint_mod(0, 1, mod));
+            ASSERT_EQ(1ULL, add_uint_mod(1, 0, mod));
+            ASSERT_EQ(2ULL, add_uint_mod(1, 1, mod));
+            ASSERT_EQ(0ULL, add_uint_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(1ULL, add_uint_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(2305843009211596799ULL, add_uint_mod(2305843009211596800ULL, 2305843009211596800ULL, mod));
         }
 
         TEST(UIntArithSmallMod, SubUIntMod)
         {
             Modulus mod(2);
-            ASSERT_EQ(0ULL, sub_uint64_mod(0, 0, mod));
-            ASSERT_EQ(1ULL, sub_uint64_mod(0, 1, mod));
-            ASSERT_EQ(1ULL, sub_uint64_mod(1, 0, mod));
-            ASSERT_EQ(0ULL, sub_uint64_mod(1, 1, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(0, 0, mod));
+            ASSERT_EQ(1ULL, sub_uint_mod(0, 1, mod));
+            ASSERT_EQ(1ULL, sub_uint_mod(1, 0, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(1, 1, mod));
 
             mod = 10;
-            ASSERT_EQ(0ULL, sub_uint64_mod(0, 0, mod));
-            ASSERT_EQ(9ULL, sub_uint64_mod(0, 1, mod));
-            ASSERT_EQ(1ULL, sub_uint64_mod(1, 0, mod));
-            ASSERT_EQ(0ULL, sub_uint64_mod(1, 1, mod));
-            ASSERT_EQ(0ULL, sub_uint64_mod(7, 7, mod));
-            ASSERT_EQ(9ULL, sub_uint64_mod(6, 7, mod));
-            ASSERT_EQ(1ULL, sub_uint64_mod(7, 6, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(0, 0, mod));
+            ASSERT_EQ(9ULL, sub_uint_mod(0, 1, mod));
+            ASSERT_EQ(1ULL, sub_uint_mod(1, 0, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(1, 1, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(7, 7, mod));
+            ASSERT_EQ(9ULL, sub_uint_mod(6, 7, mod));
+            ASSERT_EQ(1ULL, sub_uint_mod(7, 6, mod));
 
             mod = 2305843009211596801ULL;
-            ASSERT_EQ(0ULL, sub_uint64_mod(0, 0, mod));
-            ASSERT_EQ(2305843009211596800ULL, sub_uint64_mod(0, 1, mod));
-            ASSERT_EQ(1ULL, sub_uint64_mod(1, 0, mod));
-            ASSERT_EQ(0ULL, sub_uint64_mod(1, 1, mod));
-            ASSERT_EQ(2305843009211596800ULL, sub_uint64_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
-            ASSERT_EQ(1ULL, sub_uint64_mod(1152921504605798401ULL, 1152921504605798400ULL, mod));
-            ASSERT_EQ(0ULL, sub_uint64_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
-            ASSERT_EQ(0ULL, sub_uint64_mod(2305843009211596800ULL, 2305843009211596800ULL, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(0, 0, mod));
+            ASSERT_EQ(2305843009211596800ULL, sub_uint_mod(0, 1, mod));
+            ASSERT_EQ(1ULL, sub_uint_mod(1, 0, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(1, 1, mod));
+            ASSERT_EQ(2305843009211596800ULL, sub_uint_mod(1152921504605798400ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(1ULL, sub_uint_mod(1152921504605798401ULL, 1152921504605798400ULL, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(1152921504605798401ULL, 1152921504605798401ULL, mod));
+            ASSERT_EQ(0ULL, sub_uint_mod(2305843009211596800ULL, 2305843009211596800ULL, mod));
         }
 
         TEST(UIntArithSmallMod, BarrettReduce128)
