@@ -1020,7 +1020,7 @@ namespace seal
             for (size_t i = 0; i < base_q_size; i++)
             {
                 MultiplyUIntModOperand m_tilde_temp;
-                m_tilde_temp.set(m_tilde_.value(), (*base_q_)[i]);
+                m_tilde_temp.set(barrett_reduce_63(m_tilde_.value(), (*base_q_)[i]), (*base_q_)[i]);
                 multiply_poly_scalar_coeffmod(
                     input + (i * coeff_count_), coeff_count_, m_tilde_temp, (*base_q_)[i], temp.get() + (i * coeff_count_));
             }
