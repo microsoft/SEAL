@@ -334,7 +334,7 @@ namespace seal
             MultiplyUIntModOperand inv_prod_B_mod_m_sk_;
 
             // gamma^(-1) mod t
-            std::uint64_t inv_gamma_mod_t_ = 0;
+            MultiplyUIntModOperand inv_gamma_mod_t_;
 
             // prod(B) mod q
             Pointer<std::uint64_t> prod_B_mod_q_;
@@ -346,13 +346,13 @@ namespace seal
             Pointer<std::uint64_t> prod_q_mod_Bsk_;
 
             // -prod(q)^(-1) mod {t, gamma}
-            Pointer<std::uint64_t> neg_inv_q_mod_t_gamma_;
+            Pointer<MultiplyUIntModOperand> neg_inv_q_mod_t_gamma_;
 
             // prod({t, gamma}) mod q
-            Pointer<std::uint64_t> prod_t_gamma_mod_q_;
+            Pointer<MultiplyUIntModOperand> prod_t_gamma_mod_q_;
 
             // q[last]^(-1) mod q[i] for i = 0..last-1
-            Pointer<std::uint64_t> inv_q_last_mod_q_;
+            Pointer<MultiplyUIntModOperand> inv_q_last_mod_q_;
 
             // NTTTables for Bsk
             Pointer<NTTTables> base_Bsk_ntt_tables_;

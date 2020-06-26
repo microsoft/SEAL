@@ -661,41 +661,45 @@ namespace seal
             if (base_t_gamma_)
             {
                 // Compute gamma^(-1) mod t
-                if (!try_invert_uint_mod(gamma_.value() % t_.value(), t_, inv_gamma_mod_t_))
+                if (!try_invert_uint_mod(gamma_.value() % t_.value(), t_, inv_gamma_mod_t_.operand))
                 {
                     throw logic_error("invalid rns bases");
                 }
+                inv_gamma_mod_t_.set_quotient(t_);
 
                 // Compute prod({t, gamma}) mod q
-                prod_t_gamma_mod_q_ = allocate_uint(base_q_size, pool_);
+                prod_t_gamma_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size, pool_);
                 for (size_t i = 0; i < base_q_size; i++)
                 {
-                    prod_t_gamma_mod_q_[i] =
+                    prod_t_gamma_mod_q_[i].operand =
                         multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), (*base_q_)[i]);
+                    prod_t_gamma_mod_q_[i].set_quotient((*base_q_)[i]);
                 }
 
                 // Compute -prod(q)^(-1) mod {t, gamma}
-                neg_inv_q_mod_t_gamma_ = allocate_uint(base_t_gamma_size, pool_);
+                neg_inv_q_mod_t_gamma_ = allocate<MultiplyUIntModOperand>(base_t_gamma_size, pool_);
                 for (size_t i = 0; i < base_t_gamma_size; i++)
                 {
-                    neg_inv_q_mod_t_gamma_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_t_gamma_)[i]);
-                    if (!try_invert_uint_mod(neg_inv_q_mod_t_gamma_[i], (*base_t_gamma_)[i], neg_inv_q_mod_t_gamma_[i]))
+                    neg_inv_q_mod_t_gamma_[i].operand = modulo_uint(base_q_->base_prod(), base_q_size, (*base_t_gamma_)[i]);
+                    if (!try_invert_uint_mod(neg_inv_q_mod_t_gamma_[i].operand, (*base_t_gamma_)[i], neg_inv_q_mod_t_gamma_[i].operand))
                     {
                         throw logic_error("invalid rns bases");
                     }
-                    neg_inv_q_mod_t_gamma_[i] = negate_uint_mod(neg_inv_q_mod_t_gamma_[i], (*base_t_gamma_)[i]);
+                    neg_inv_q_mod_t_gamma_[i].operand = negate_uint_mod(neg_inv_q_mod_t_gamma_[i].operand, (*base_t_gamma_)[i]);
+                    neg_inv_q_mod_t_gamma_[i].set_quotient((*base_t_gamma_)[i]);
                 }
             }
 
             // Compute q[last]^(-1) mod q[i] for i = 0..last-1
             // This is used by modulus switching and rescaling
-            inv_q_last_mod_q_ = allocate_uint(base_q_size - 1, pool_);
+            inv_q_last_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size - 1, pool_);
             for (size_t i = 0; i < base_q_size - 1; i++)
             {
-                if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), (*base_q_)[i], inv_q_last_mod_q_[i]))
+                if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), (*base_q_)[i], inv_q_last_mod_q_[i].operand))
                 {
                     throw logic_error("invalid rns bases");
                 }
+                inv_q_last_mod_q_[i].set_quotient((*base_q_)[i]);
             }
         }
 
@@ -1018,9 +1022,11 @@ namespace seal
             auto temp(allocate_poly(coeff_count_, base_q_size, pool));
             for (size_t i = 0; i < base_q_size; i++)
             {
+                MultiplyUIntModOperand m_tilde_temp;
+                m_tilde_temp.operand = m_tilde_.value();
+                m_tilde_temp.set_quotient((*base_q_)[i]);
                 multiply_poly_scalar_coeffmod(
-                    input + (i * coeff_count_), coeff_count_, m_tilde_.value(), (*base_q_)[i],
-                    temp.get() + (i * coeff_count_));
+                    input + (i * coeff_count_), coeff_count_, m_tilde_temp, (*base_q_)[i], temp.get() + (i * coeff_count_));
             }
 
             // Now convert to Bsk

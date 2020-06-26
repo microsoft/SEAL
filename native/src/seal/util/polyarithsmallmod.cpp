@@ -42,6 +42,30 @@ namespace seal
             });
         }
 
+        void multiply_poly_scalar_coeffmod(
+            ConstCoeffIter poly, size_t coeff_count, MultiplyUIntModOperand scalar, const Modulus &modulus, CoeffIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && coeff_count > 0)
+            {
+                throw invalid_argument("poly");
+            }
+            if (!result && coeff_count > 0)
+            {
+                throw invalid_argument("result");
+            }
+            if (modulus.is_zero())
+            {
+                throw invalid_argument("modulus");
+            }
+#endif
+            SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
+                unsigned long long tmp1, tmp2;
+                const uint64_t x = get<0>(I);
+                get<1>(I) = multiply_uint_mod(x, scalar, modulus);
+            });
+        }
+
         void dyadic_product_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, size_t coeff_count, const Modulus &modulus,
             CoeffIter result)
