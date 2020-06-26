@@ -527,6 +527,65 @@ namespace seal
             });
         }
 
+        void multiply_poly_scalar_coeffmod(
+            ConstCoeffIter poly, std::size_t coeff_count, MultiplyUIntModOperand scalar, const Modulus &modulus,
+            CoeffIter result);
+
+        inline void multiply_poly_scalar_coeffmod(
+            ConstRNSIter poly, std::size_t coeff_modulus_size, MultiplyUIntModOperand scalar, ConstModulusIter modulus,
+            RNSIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && coeff_modulus_size > 0)
+            {
+                throw std::invalid_argument("poly");
+            }
+            if (!result && coeff_modulus_size > 0)
+            {
+                throw std::invalid_argument("result");
+            }
+            if (!modulus && coeff_modulus_size > 0)
+            {
+                throw std::invalid_argument("modulus");
+            }
+            if (poly.poly_modulus_degree() != result.poly_modulus_degree())
+            {
+                throw std::invalid_argument("incompatible iterators");
+            }
+#endif
+            auto poly_modulus_degree = result.poly_modulus_degree();
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+                multiply_poly_scalar_coeffmod(get<0>(I), poly_modulus_degree, scalar, get<1>(I), get<2>(I));
+            });
+        }
+
+        inline void multiply_poly_scalar_coeffmod(
+            ConstPolyIter poly_array, std::size_t size, MultiplyUIntModOperand scalar, ConstModulusIter modulus, PolyIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly_array && size > 0)
+            {
+                throw std::invalid_argument("poly_array");
+            }
+            if (!result && size > 0)
+            {
+                throw std::invalid_argument("result");
+            }
+            if (!modulus && size > 0)
+            {
+                throw std::invalid_argument("modulus");
+            }
+            if (poly_array.coeff_modulus_size() != result.coeff_modulus_size())
+            {
+                throw std::invalid_argument("incompatible iterators");
+            }
+#endif
+            auto coeff_modulus_size = result.coeff_modulus_size();
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
+                multiply_poly_scalar_coeffmod(get<0>(I), coeff_modulus_size, scalar, modulus, get<1>(I));
+            });
+        }
+
         void dyadic_product_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
             CoeffIter result);
