@@ -437,7 +437,7 @@ namespace seal
                 {
                     for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
                     {
-                        *temp_ptr = barrett_reduce_63(*in, ibase_elt);
+                        *temp_ptr = barrett_reduce_64(*in, ibase_elt);
                     }
                 }
                 else
@@ -635,7 +635,7 @@ namespace seal
             inv_m_tilde_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
             for (size_t i = 0; i < base_Bsk_size; i++)
             {
-                if (!try_invert_uint_mod(barrett_reduce_63(m_tilde_.value(), (*base_Bsk_)[i]), (*base_Bsk_)[i], temp))
+                if (!try_invert_uint_mod(barrett_reduce_64(m_tilde_.value(), (*base_Bsk_)[i]), (*base_Bsk_)[i], temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
@@ -724,7 +724,7 @@ namespace seal
             uint64_t half = last_modulus.value() >> 1;
             for (size_t j = 0; j < coeff_count_; j++)
             {
-                last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
+                last_ptr[j] = barrett_reduce_64(last_ptr[j] + half, last_modulus);
             }
 
             auto temp(allocate_uint(coeff_count_, pool));
@@ -732,9 +732,9 @@ namespace seal
             for (size_t i = 0; i < base_q_size - 1; i++)
             {
                 // (ct mod qk) mod qi
-                modulo_poly_coeffs_63(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
+                modulo_poly_coeffs(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
 
-                uint64_t half_mod = barrett_reduce_63(half, (*base_q_)[i]);
+                uint64_t half_mod = barrett_reduce_64(half, (*base_q_)[i]);
                 for (size_t j = 0; j < coeff_count_; j++)
                 {
                     temp_ptr[j] = sub_uint_mod(temp_ptr[j], half_mod, (*base_q_)[i]);
@@ -778,7 +778,7 @@ namespace seal
             uint64_t half = last_modulus.value() >> 1;
             for (size_t j = 0; j < coeff_count_; j++)
             {
-                last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
+                last_ptr[j] = barrett_reduce_64(last_ptr[j] + half, last_modulus);
             }
 
             auto temp(allocate_uint(coeff_count_, pool));
@@ -789,7 +789,7 @@ namespace seal
                 // (ct mod qk) mod qi
                 if (qi < last_modulus.value())
                 {
-                    modulo_poly_coeffs_63(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
+                    modulo_poly_coeffs(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
                 }
                 else
                 {
@@ -797,7 +797,7 @@ namespace seal
                 }
 
                 // lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
-                const uint64_t neg_half_mod = qi - barrett_reduce_63(half, (*base_q_)[i]);
+                const uint64_t neg_half_mod = qi - barrett_reduce_64(half, (*base_q_)[i]);
                 transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [neg_half_mod](uint64_t u) {
                     return u + neg_half_mod;
                 });
@@ -1027,7 +1027,7 @@ namespace seal
             for (size_t i = 0; i < base_q_size; i++)
             {
                 MultiplyUIntModOperand m_tilde_temp;
-                m_tilde_temp.set(barrett_reduce_63(m_tilde_.value(), (*base_q_)[i]), (*base_q_)[i]);
+                m_tilde_temp.set(barrett_reduce_64(m_tilde_.value(), (*base_q_)[i]), (*base_q_)[i]);
                 multiply_poly_scalar_coeffmod(
                     input + (i * coeff_count_), coeff_count_, m_tilde_temp, (*base_q_)[i],
                     temp.get() + (i * coeff_count_));

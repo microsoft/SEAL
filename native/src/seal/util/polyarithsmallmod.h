@@ -36,8 +36,7 @@ namespace seal
             }
 #endif
             std::transform(poly, poly + coeff_count, result, [&](auto coeff) {
-                uint64_t temp[2]{ coeff, 0 };
-                return barrett_reduce_128(temp, modulus);
+                return barrett_reduce_64(coeff, modulus);
             });
         }
 
@@ -92,84 +91,6 @@ namespace seal
             auto coeff_modulus_size = result.coeff_modulus_size();
             SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
                 modulo_poly_coeffs(get<0>(I), coeff_modulus_size, modulus, get<1>(I));
-            });
-        }
-
-        inline void modulo_poly_coeffs_63(
-            ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result)
-        {
-#ifdef SEAL_DEBUG
-            if (!poly && coeff_count > 0)
-            {
-                throw std::invalid_argument("poly");
-            }
-            if (!result && coeff_count > 0)
-            {
-                throw std::invalid_argument("result");
-            }
-            if (modulus.is_zero())
-            {
-                throw std::invalid_argument("modulus");
-            }
-#endif
-            // This function is the fastest for reducing polynomial coefficients,
-            // but requires that the input coefficients are at most 63 bits, unlike
-            // modulo_poly_coeffs that allows also 64-bit coefficients.
-            std::transform(
-                poly, poly + coeff_count, result, [&](auto coeff) { return barrett_reduce_63(coeff, modulus); });
-        }
-
-        inline void modulo_poly_coeffs_63(
-            ConstRNSIter poly, std::size_t coeff_modulus_size, ConstModulusIter modulus, RNSIter result)
-        {
-#ifdef SEAL_DEBUG
-            if (!poly && coeff_modulus_size > 0)
-            {
-                throw std::invalid_argument("poly");
-            }
-            if (!result && coeff_modulus_size > 0)
-            {
-                throw std::invalid_argument("result");
-            }
-            if (!modulus && coeff_modulus_size > 0)
-            {
-                throw std::invalid_argument("modulus");
-            }
-            if (poly.poly_modulus_degree() != result.poly_modulus_degree())
-            {
-                throw std::invalid_argument("incompatible iterators");
-            }
-#endif
-            auto poly_modulus_degree = result.poly_modulus_degree();
-            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
-                modulo_poly_coeffs_63(get<0>(I), poly_modulus_degree, get<1>(I), get<2>(I));
-            });
-        }
-
-        inline void modulo_poly_coeffs_63(
-            ConstPolyIter poly_array, std::size_t size, ConstModulusIter modulus, PolyIter result)
-        {
-#ifdef SEAL_DEBUG
-            if (!poly_array && size > 0)
-            {
-                throw std::invalid_argument("poly_array");
-            }
-            if (!result && size > 0)
-            {
-                throw std::invalid_argument("result");
-            }
-            if (!modulus && size > 0)
-            {
-                throw std::invalid_argument("modulus");
-            }
-            if (poly_array.coeff_modulus_size() != result.coeff_modulus_size())
-            {
-                throw std::invalid_argument("incompatible iterators");
-            }
-#endif
-            auto coeff_modulus_size = result.coeff_modulus_size();
-            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
-                modulo_poly_coeffs_63(get<0>(I), coeff_modulus_size, modulus, get<1>(I));
             });
         }
 

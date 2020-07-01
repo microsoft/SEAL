@@ -2117,7 +2117,7 @@ namespace seal
                     // Perform RNS conversion (modular reduction)
                     else
                     {
-                        modulo_poly_coeffs_63(t_target[J], coeff_count, key_modulus[key_index], t_ntt);
+                        modulo_poly_coeffs(t_target[J], coeff_count, key_modulus[key_index], t_ntt);
                     }
                     // NTT conversion lazy outputs in [0, 4q)
                     ntt_negacyclic_harvey_lazy(t_ntt, key_ntt_tables[key_index]);
@@ -2190,7 +2190,7 @@ namespace seal
             const uint64_t qk = key_modulus[key_modulus_size - 1].value();
             const uint64_t qk_half = qk >> 1;
             SEAL_ITERATE(t_last, coeff_count, [&](auto J) {
-                J = barrett_reduce_63(J + qk_half, key_modulus[key_modulus_size - 1]);
+                J = barrett_reduce_64(J + qk_half, key_modulus[key_modulus_size - 1]);
             });
 
             SEAL_ITERATE(iter(I, key_modulus, key_ntt_tables, modswitch_factors), decomp_modulus_size, [&](auto J) {
@@ -2200,7 +2200,7 @@ namespace seal
                 const uint64_t qi = get<1>(J).value();
                 if (qk > qi)
                 {
-                    modulo_poly_coeffs_63(t_last, coeff_count, get<1>(J), t_ntt);
+                    modulo_poly_coeffs(t_last, coeff_count, get<1>(J), t_ntt);
                 }
                 else
                 {
@@ -2208,7 +2208,7 @@ namespace seal
                 }
 
                 // Lazy substraction, results in [0, 2*qi).
-                const uint64_t fix = qi - barrett_reduce_63(qk_half, get<1>(J));
+                const uint64_t fix = qi - barrett_reduce_64(qk_half, get<1>(J));
                 SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { K += fix; });
 
                 uint64_t qi_lazy = qi << 1; // some multiples of qi

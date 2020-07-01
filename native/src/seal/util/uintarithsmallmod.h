@@ -169,9 +169,8 @@ namespace seal
 
         /**
         Returns input mod modulus. This is not standard Barrett reduction.
-        Correctness: input - floor(input*const_ratio/2^128)*modulus must be bounded by 0 and 2^64-1.
+        Correctness: modulus must be at most 63-bit.
         @param[in] input Should be at most 128-bit.
-        @param[in] modulus Should be at most 63-bit (this is a loose bound).
         */
         template <typename T, typename = std::enable_if_t<is_uint64_v<T>>>
         SEAL_NODISCARD inline std::uint64_t barrett_reduce_128(const T *input, const Modulus &modulus)
@@ -216,25 +215,19 @@ namespace seal
 
         /**
         Returns input mod modulus. This is not standard Barrett reduction.
-        Correctness: input - floor(input*const_ratio/2^128)*modulus is always bounded by 0 and 2^64-1.
-        @param[in] input Should be at most 63-bit.
+        Correctness: modulus must be at most 63-bit.
         */
         template <typename T, typename = std::enable_if_t<is_uint64_v<T>>>
-        SEAL_NODISCARD inline std::uint64_t barrett_reduce_63(T input, const Modulus &modulus)
+        SEAL_NODISCARD inline std::uint64_t barrett_reduce_64(T input, const Modulus &modulus)
         {
 #ifdef SEAL_DEBUG
             if (modulus.is_zero())
             {
                 throw std::invalid_argument("modulus");
             }
-            if (input >> 63)
-            {
-                throw std::invalid_argument("input");
-            }
 #endif
             // Reduces input using base 2^64 Barrett reduction
-            // input must be at most 63 bits
-
+            // floor(2^64 / mod) == floor( floor(2^128 / mod) )
             unsigned long long tmp[2];
             const std::uint64_t *const_ratio = modulus.const_ratio().data();
             multiply_uint64(input, const_ratio[1], tmp);
@@ -363,8 +356,14 @@ namespace seal
 
             if (value_uint64_count == 1)
             {
-                value[0] %= modulus.value();
-                return;
+                if (*value < modulus.value())
+                {
+                    return;
+                }
+                else
+                {
+                    *value = barrett_reduce_64(*value, modulus);
+                }
             }
 
             // Starting from the top, reduce always 128-bit blocks
@@ -397,10 +396,8 @@ namespace seal
                 // If value < modulus no operation is needed
                 if (*value < modulus.value())
                     return *value;
-                else if (*value << 63)
-                    return *value % modulus.value();
                 else
-                    return barrett_reduce_63(*value, modulus);
+                    return barrett_reduce_64(*value, modulus);
             }
 
             // Temporary space for 128-bit reductions
