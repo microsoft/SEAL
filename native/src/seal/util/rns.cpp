@@ -877,21 +877,24 @@ namespace seal
             for (size_t i = 0; i < base_q_size; i++)
             {
                 Modulus base_q_elt = (*base_q_)[i];
-                uint64_t prod_B_mod_q_elt = prod_B_mod_q_[i];
+                MultiplyUIntModOperand prod_B_mod_q_elt;
+                prod_B_mod_q_elt.set(prod_B_mod_q_[i], base_q_elt);
+                MultiplyUIntModOperand neg_prod_B_mod_q_elt;
+                neg_prod_B_mod_q_elt.set(base_q_elt.value() - prod_B_mod_q_[i], base_q_elt);
                 for (size_t k = 0; k < coeff_count_; k++, destination++)
                 {
                     // Correcting alpha_sk since it represents a negative value
                     if (alpha_sk_ptr[k] > m_sk_div_2)
                     {
                         *destination = multiply_add_uint_mod(
-                            prod_B_mod_q_elt, negate_uint_mod(alpha_sk_ptr[k], m_sk_), *destination, base_q_elt);
+                            negate_uint_mod(alpha_sk_ptr[k], m_sk_), prod_B_mod_q_elt, *destination, base_q_elt);
                     }
                     // No correction needed
                     else
                     {
                         // It is not necessary for the negation to be reduced modulo the small prime
                         *destination = multiply_add_uint_mod(
-                            base_q_elt.value() - prod_B_mod_q_[i], alpha_sk_ptr[k], *destination, base_q_elt);
+                            alpha_sk_ptr[k], neg_prod_B_mod_q_elt, *destination, base_q_elt);
                     }
                 }
             }
@@ -934,7 +937,8 @@ namespace seal
             for (size_t k = 0; k < base_Bsk_size; k++)
             {
                 Modulus base_Bsk_elt = (*base_Bsk_)[k];
-                uint64_t prod_q_mod_Bsk_elt = prod_q_mod_Bsk_[k];
+                MultiplyUIntModOperand prod_q_mod_Bsk_elt;
+                prod_q_mod_Bsk_elt.set(prod_q_mod_Bsk_[k], base_Bsk_elt);
                 for (size_t i = 0; i < coeff_count_; i++, destination++, input++)
                 {
                     // We need centered reduction of r_m_tilde modulo Bsk. Note that m_tilde is chosen
@@ -947,7 +951,7 @@ namespace seal
 
                     // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk
                     *destination = multiply_uint_mod(
-                        multiply_add_uint_mod(prod_q_mod_Bsk_elt, temp, *input, base_Bsk_elt), inv_m_tilde_mod_Bsk_[k],
+                        multiply_add_uint_mod(temp, prod_q_mod_Bsk_elt, *input, base_Bsk_elt), inv_m_tilde_mod_Bsk_[k],
                         base_Bsk_elt);
                 }
             }

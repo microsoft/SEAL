@@ -426,6 +426,16 @@ namespace seal
             return barrett_reduce_128(temp, modulus);
         }
 
+        /**
+        Returns (operand1 * operand2) + operand3 mod modulus.
+        Correctness: Follows the condition of multiply_uint_mod.
+        */
+        inline std::uint64_t multiply_add_uint_mod(
+            std::uint64_t operand1, MultiplyUIntModOperand operand2, std::uint64_t operand3, const Modulus &modulus)
+        {
+            return add_uint_mod(multiply_uint_mod(operand1, operand2, modulus), operand3, modulus);
+        }
+
         inline bool try_invert_uint_mod(std::uint64_t operand, const Modulus &modulus, std::uint64_t &result)
         {
             return try_invert_uint_mod(operand, modulus.value(), result);

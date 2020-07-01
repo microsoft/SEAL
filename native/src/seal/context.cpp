@@ -301,19 +301,25 @@ namespace seal
             }
 
             // Calculate coeff_div_plain_modulus (BFV-"Delta") and the remainder upper_half_increment
-            context_data.coeff_div_plain_modulus_ = allocate_uint(coeff_modulus_size, pool_);
+            auto temp_coeff_div_plain_modulus = allocate_uint(coeff_modulus_size, pool_);
+            context_data.coeff_div_plain_modulus_ = allocate<MultiplyUIntModOperand>(coeff_modulus_size, pool_);
             context_data.upper_half_increment_ = allocate_uint(coeff_modulus_size, pool_);
             auto wide_plain_modulus(duplicate_uint_if_needed(
                 plain_modulus.data(), plain_modulus.uint64_count(), coeff_modulus_size, false, pool_));
             divide_uint(
                 context_data.total_coeff_modulus_.get(), wide_plain_modulus.get(), coeff_modulus_size,
-                context_data.coeff_div_plain_modulus_.get(), context_data.upper_half_increment_.get(), pool_);
+                temp_coeff_div_plain_modulus.get(), context_data.upper_half_increment_.get(), pool_);
 
             // Store the non-RNS form of upper_half_increment for BFV encryption
             context_data.coeff_modulus_mod_plain_modulus_ = context_data.upper_half_increment_[0];
 
             // Decompose coeff_div_plain_modulus into RNS factors
-            coeff_modulus_base->decompose(context_data.coeff_div_plain_modulus_.get(), pool_);
+            coeff_modulus_base->decompose(temp_coeff_div_plain_modulus.get(), pool_);
+
+            for (size_t i = 0; i < coeff_modulus_size; i++)
+            {
+                context_data.coeff_div_plain_modulus_[i].set(temp_coeff_div_plain_modulus[i], coeff_modulus_base->base()[i]);
+            }
 
             // Decompose upper_half_increment into RNS factors
             coeff_modulus_base->decompose(context_data.upper_half_increment_.get(), pool_);
