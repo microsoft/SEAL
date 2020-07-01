@@ -482,5 +482,30 @@ namespace sealtest
             y.set(2305843009211596800ULL, mod);
             ASSERT_EQ(2305843009211596802ULL, multiply_uint_mod_lazy(2305843009211596800ULL, y, mod));
         }
+
+
+        TEST(UIntArithSmallMod, MultiplyAddMod2)
+        {
+            Modulus mod(7);
+            MultiplyUIntModOperand y;
+            y.set(0, mod);
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(0, y, 0, mod));
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(1, y, 0, mod));
+            ASSERT_EQ(1ULL, multiply_add_uint_mod(0, 0, 1, mod));
+            y.set(1, mod);
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(0, y, 0, mod));
+            y.set(4, mod);
+            ASSERT_EQ(3ULL, multiply_add_uint_mod(3, y, 5, mod));
+
+            mod = 0x1FFFFFFFFFFFFFFFULL;
+            y.set(0, mod);
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(0, y, 0, mod));
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(1, y, 0, mod));
+            ASSERT_EQ(1ULL, multiply_add_uint_mod(0, y, 1, mod));
+            y.set(1, mod);
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(0, y, 0, mod));
+            y.set(mod.value() - 1, mod);
+            ASSERT_EQ(0ULL, multiply_add_uint_mod(mod.value() - 1, y, mod.value() - 1, mod));
+        }
     } // namespace util
 } // namespace sealtest
