@@ -30,9 +30,8 @@ namespace seal
             }
 #endif
             // scalar must be first reduced modulo modulus
-            modulo_uint_inplace(&scalar, 1, modulus);
             MultiplyUIntModOperand temp_scalar;
-            temp_scalar.set(scalar, modulus);
+            temp_scalar.set(barrett_reduce_64(scalar, modulus), modulus);
 
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);

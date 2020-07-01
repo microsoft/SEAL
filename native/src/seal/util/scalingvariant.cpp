@@ -45,7 +45,7 @@ namespace seal
                 for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
                     destination[j * coeff_count] = add_uint_mod(
-                        multiply_add_uint_mod(coeff_div_plain_modulus[j], plain.data()[i], fix[0], coeff_modulus[j]),
+                        multiply_add_uint_mod(plain.data()[i], coeff_div_plain_modulus[j], fix[0], coeff_modulus[j]),
                         destination[j * coeff_count], coeff_modulus[j]);
                 }
             }
@@ -85,7 +85,7 @@ namespace seal
                 {
                     destination[j * coeff_count] = sub_uint_mod(
                         destination[j * coeff_count],
-                        multiply_add_uint_mod(coeff_div_plain_modulus[j], plain.data()[i], fix[0], coeff_modulus[j]),
+                        multiply_add_uint_mod(plain.data()[i], coeff_div_plain_modulus[j], fix[0], coeff_modulus[j]),
                         coeff_modulus[j]);
                 }
             }
