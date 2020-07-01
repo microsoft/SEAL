@@ -371,5 +371,116 @@ namespace sealtest
             ASSERT_EQ(32, dot_product_mod(arr1, arr2, 32, mod));
             ASSERT_EQ(64, dot_product_mod(arr1, arr2, 64, mod));
         }
+
+        TEST(UIntArithSmallMod, MultiplyUIntModOperand)
+        {
+            Modulus mod(3);
+            MultiplyUIntModOperand y;
+            y.set(1, mod);
+            ASSERT_EQ(1ULL, y.operand);
+            ASSERT_EQ(6148914691236517205ULL, y.quotient);
+            y.set(2, mod);
+            y.set_quotient(mod);
+            ASSERT_EQ(2ULL, y.operand);
+            ASSERT_EQ(12297829382473034410ULL, y.quotient);
+
+            mod = 2147483647ULL;
+            y.set(1, mod);
+            ASSERT_EQ(1ULL, y.operand);
+            ASSERT_EQ(8589934596ULL, y.quotient);
+            y.set(2147483646ULL, mod);
+            y.set_quotient(mod);
+            ASSERT_EQ(2147483646ULL, y.operand);
+            ASSERT_EQ(18446744065119617019ULL, y.quotient);
+
+            mod = 2305843009211596801ULL;
+            y.set(1, mod);
+            ASSERT_EQ(1ULL, y.operand);
+            ASSERT_EQ(8ULL, y.quotient);
+            y.set(2305843009211596800ULL, mod);
+            y.set_quotient(mod);
+            ASSERT_EQ(2305843009211596800ULL, y.operand);
+            ASSERT_EQ(18446744073709551607ULL, y.quotient);
+        }
+
+        TEST(UIntArithSmallMod, MultiplyUIntMod2)
+        {
+            Modulus mod(2);
+            MultiplyUIntModOperand y;
+            y.set(0, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod(0, y, mod));
+            ASSERT_EQ(0ULL, multiply_uint_mod(1, y, mod));
+            y.set(1, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod(0, y, mod));
+            ASSERT_EQ(1ULL, multiply_uint_mod(1, y, mod));
+
+            mod = 10;
+            y.set(0, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod(0, y, mod));
+            ASSERT_EQ(0ULL, multiply_uint_mod(1, y, mod));
+            y.set(1, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod(0, y, mod));
+            ASSERT_EQ(1ULL, multiply_uint_mod(1, y, mod));
+            y.set(6, mod);
+            ASSERT_EQ(2ULL, multiply_uint_mod(7, y, mod));
+            y.set(7, mod);
+            ASSERT_EQ(9ULL, multiply_uint_mod(7, y, mod));
+            ASSERT_EQ(2ULL, multiply_uint_mod(6, y, mod));
+
+            mod = 2305843009211596801ULL;
+            y.set(0, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod(0, y, mod));
+            ASSERT_EQ(0ULL, multiply_uint_mod(1, y, mod));
+            y.set(1, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod(0, y, mod));
+            ASSERT_EQ(1ULL, multiply_uint_mod(1, y, mod));
+            y.set(1152921504605798400ULL, mod);
+            ASSERT_EQ(576460752302899200ULL, multiply_uint_mod(1152921504605798401ULL, y, mod));
+            y.set(1152921504605798401ULL, mod);
+            ASSERT_EQ(576460752302899200ULL, multiply_uint_mod(1152921504605798400ULL, y, mod));
+            ASSERT_EQ(1729382256908697601ULL, multiply_uint_mod(1152921504605798401ULL, y, mod));
+            y.set(2305843009211596800ULL, mod);
+            ASSERT_EQ(1ULL, multiply_uint_mod(2305843009211596800ULL, y, mod));
+        }
+
+        TEST(UIntArithSmallMod, MultiplyUIntModLazy)
+        {
+            Modulus mod(2);
+            MultiplyUIntModOperand y;
+            y.set(0, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(0, y, mod));
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(1, y, mod));
+            y.set(1, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(0, y, mod));
+            ASSERT_EQ(1ULL, multiply_uint_mod_lazy(1, y, mod));
+
+            mod = 10;
+            y.set(0, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(0, y, mod));
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(1, y, mod));
+            y.set(1, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(0, y, mod));
+            ASSERT_EQ(1ULL, multiply_uint_mod_lazy(1, y, mod));
+            y.set(6, mod);
+            ASSERT_EQ(2ULL, multiply_uint_mod_lazy(7, y, mod));
+            y.set(7, mod);
+            ASSERT_EQ(9ULL, multiply_uint_mod_lazy(7, y, mod));
+            ASSERT_EQ(2ULL, multiply_uint_mod_lazy(6, y, mod));
+
+            mod = 2305843009211596801ULL;
+            y.set(0, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(0, y, mod));
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(1, y, mod));
+            y.set(1, mod);
+            ASSERT_EQ(0ULL, multiply_uint_mod_lazy(0, y, mod));
+            ASSERT_EQ(1ULL, multiply_uint_mod_lazy(1, y, mod));
+            y.set(1152921504605798400ULL, mod);
+            ASSERT_EQ(576460752302899200ULL, multiply_uint_mod_lazy(1152921504605798401ULL, y, mod));
+            y.set(1152921504605798401ULL, mod);
+            ASSERT_EQ(576460752302899200ULL, multiply_uint_mod_lazy(1152921504605798400ULL, y, mod));
+            ASSERT_EQ(1729382256908697601ULL, multiply_uint_mod_lazy(1152921504605798401ULL, y, mod));
+            y.set(2305843009211596800ULL, mod);
+            ASSERT_EQ(2305843009211596802ULL, multiply_uint_mod_lazy(2305843009211596800ULL, y, mod));
+        }
     } // namespace util
 } // namespace sealtest

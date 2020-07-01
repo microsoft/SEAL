@@ -41,7 +41,8 @@ namespace seal
         }
 
         void multiply_poly_scalar_coeffmod(
-            ConstCoeffIter poly, size_t coeff_count, MultiplyUIntModOperand scalar, const Modulus &modulus, CoeffIter result)
+            ConstCoeffIter poly, size_t coeff_count, MultiplyUIntModOperand scalar, const Modulus &modulus,
+            CoeffIter result)
         {
 #ifdef SEAL_DEBUG
             if (!poly && coeff_count > 0)
@@ -139,7 +140,7 @@ namespace seal
             // [-modulus,modulus). Keep track of the max.
             uint64_t result = 0;
             SEAL_ITERATE(operand, coeff_count, [&](auto I) {
-                uint64_t poly_coeff = I % modulus.value();
+                uint64_t poly_coeff = barrett_reduce_64(I, modulus);
                 if (poly_coeff >= modulus_neg_threshold)
                 {
                     poly_coeff = modulus.value() - poly_coeff;

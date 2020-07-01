@@ -362,7 +362,7 @@ namespace seal
             context_data.plain_upper_half_increment_ = allocate_uint(coeff_modulus_size, pool_);
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
-                uint64_t tmp = (uint64_t(1) << 63) % coeff_modulus[i].value();
+                uint64_t tmp = barrett_reduce_64(uint64_t(1) << 63, coeff_modulus[i]);
                 context_data.plain_upper_half_increment_[i] =
                     multiply_uint_mod(tmp, sub_safe(coeff_modulus[i].value(), uint64_t(2)), coeff_modulus[i]);
             }

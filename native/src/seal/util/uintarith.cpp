@@ -605,7 +605,7 @@ namespace seal
             // Initially: power = operand and intermediate = 1, product is not initialized.
             while (true)
             {
-                if ((*exponent_copy.get() % 2) == 1)
+                if (*exponent_copy.get() & uint64_t(0x1))
                 {
                     multiply_truncate_uint(powerptr, intermediateptr, result_uint64_count, productptr);
                     swap(productptr, intermediateptr);

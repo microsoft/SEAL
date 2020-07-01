@@ -8,8 +8,8 @@
 #include "seal/util/defines.h"
 #include "seal/util/iterator.h"
 #include "seal/util/pointer.h"
-#include "seal/util/uintcore.h"
 #include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
 #include <stdexcept>
 
 namespace seal

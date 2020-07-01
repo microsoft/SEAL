@@ -109,21 +109,20 @@ namespace seal
             // Set up source of randomness that produces 32 bit random things.
             RandomToStandardAdapter engine(rng);
 
-            // We sample numbers up to 2^63-1 to use barrett_reduce_63
-            constexpr uint64_t max_random = static_cast<uint64_t>(0x7FFFFFFFFFFFFFFFULL);
+            constexpr uint64_t max_random = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
             for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 auto &modulus = coeff_modulus[j];
-                uint64_t max_multiple = max_random - barrett_reduce_63(max_random, modulus) - 1;
+                uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
                 for (size_t i = 0; i < coeff_count; i++)
                 {
                     // This ensures uniform distribution.
                     uint64_t rand;
                     do
                     {
-                        rand = (static_cast<uint64_t>(engine()) << 31) | (static_cast<uint64_t>(engine() >> 1));
+                        rand = (static_cast<uint64_t>(engine()) << 32) | static_cast<uint64_t>(engine());
                     } while (rand >= max_multiple);
-                    destination[i + j * coeff_count] = barrett_reduce_63(rand, modulus);
+                    destination[i + j * coeff_count] = barrett_reduce_64(rand, modulus);
                 }
             }
         }

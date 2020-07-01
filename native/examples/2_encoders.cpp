@@ -276,7 +276,7 @@ void example_batch_encoder()
     vector<uint64_t> pod_matrix2;
     for (size_t i = 0; i < slot_count; i++)
     {
-        pod_matrix2.push_back((i % 2) + 1);
+        pod_matrix2.push_back((i & size_t(0x1)) + 1);
     }
     Plaintext plain_matrix2;
     batch_encoder.encode(pod_matrix2, plain_matrix2);

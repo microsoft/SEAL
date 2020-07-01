@@ -284,7 +284,7 @@ namespace SEALNetExamples
             ulong[] podMatrix2 = new ulong[slotCount];
             for (ulong i = 0; i < slotCount; i++)
             {
-                podMatrix2[i] = (i % 2) + 1;
+                podMatrix2[i] = (i & 1) + 1;
             }
             using Plaintext plainMatrix2 = new Plaintext();
             batchEncoder.Encode(podMatrix2, plainMatrix2);
