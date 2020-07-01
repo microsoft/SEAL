@@ -77,6 +77,23 @@ namespace sealtest
             ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, result);
             ASSERT_TRUE(add_uint64(0xF00F00F00F00F00FULL, 0x0FF0FF0FF0FF0FF0ULL, 1, &result));
             ASSERT_EQ(0x0ULL, result);
+
+            ASSERT_FALSE(add_uint64(0ULL, 0ULL, &result));
+            ASSERT_EQ(0ULL, result);
+            ASSERT_FALSE(add_uint64(1ULL, 1ULL, &result));
+            ASSERT_EQ(2ULL, result);
+            ASSERT_FALSE(add_uint64(1ULL, 0ULL, &result));
+            ASSERT_EQ(1ULL, result);
+            ASSERT_FALSE(add_uint64(0ULL, 1ULL, &result));
+            ASSERT_EQ(1ULL, result);
+            ASSERT_TRUE(add_uint64(0xFFFFFFFFFFFFFFFFULL, 1ULL, &result));
+            ASSERT_EQ(0ULL, result);
+            ASSERT_TRUE(add_uint64(1ULL, 0xFFFFFFFFFFFFFFFFULL, &result));
+            ASSERT_EQ(0ULL, result);
+            ASSERT_TRUE(add_uint64(2ULL, 0xFFFFFFFFFFFFFFFEULL, 0, &result));
+            ASSERT_EQ(0ULL, result);
+            ASSERT_FALSE(add_uint64(0xF00F00F00F00F00FULL, 0x0FF0FF0FF0FF0FF0ULL, 0, &result));
+            ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, result);
         }
 
 #if SEAL_COMPILER == SEAL_COMPILER_MSVC
