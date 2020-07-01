@@ -241,7 +241,8 @@ namespace SEALNetExamples
                     expensive than rotating by just one step.
                     */
                     int rowSize = (int)batchEncoder.SlotCount / 2;
-                    int randomRotation = rnd.Next() % rowSize;
+                    // rowSize is always a power of 2.
+                    int randomRotation = rnd.Next() & (rowSize - 1);
                     timeRotateRowsRandomSum.Start();
                     evaluator.RotateRowsInplace(encrypted, randomRotation, galKeys);
                     timeRotateRowsRandomSum.Stop();
@@ -504,7 +505,8 @@ namespace SEALNetExamples
                     /*
                     [Rotate Vector Random]
                     */
-                    int randomRotation = rnd.Next() % (int)ckksEncoder.SlotCount;
+                    // ckksEncoder.SlotCount is always a power of 2.
+                    int randomRotation = rnd.Next() & ((int)ckksEncoder.SlotCount - 1);
                     timeRotateRandomSum.Start();
                     evaluator.RotateVectorInplace(encrypted, randomRotation, galKeys);
                     timeRotateRandomSum.Stop();
