@@ -285,7 +285,7 @@ namespace seal
             {
                 throw invalid_argument("ntt_size must be a power of two");
             }
-            if (bit_size >= 63 || bit_size <= 1)
+            if (bit_size > SEAL_MOD_BIT_COUNT_MAX || bit_size < SEAL_MOD_BIT_COUNT_MIN)
             {
                 throw invalid_argument("bit_size is invalid");
             }
