@@ -660,7 +660,7 @@ namespace seal
             if (base_t_gamma_)
             {
                 // Compute gamma^(-1) mod t
-                if (!try_invert_uint_mod(gamma_.value() % t_.value(), t_, temp))
+                if (!try_invert_uint_mod(barrett_reduce_64(gamma_.value(), t_), t_, temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
@@ -1082,12 +1082,12 @@ namespace seal
                 {
                     // Compute -(gamma - a) instead of (a - gamma)
                     destination[i] = add_uint_mod(
-                        temp_t_gamma[i], (gamma_.value() - temp_t_gamma[i + coeff_count_]) % t_.value(), t_);
+                        temp_t_gamma[i], barrett_reduce_64(gamma_.value() - temp_t_gamma[i + coeff_count_], t_), t_);
                 }
                 // No correction needed
                 else
                 {
-                    destination[i] = sub_uint_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
+                    destination[i] = sub_uint_mod(temp_t_gamma[i], barrett_reduce_64(temp_t_gamma[i + coeff_count_], t_), t_);
                 }
 
                 // If this coefficient was non-zero, multiply by t^(-1)

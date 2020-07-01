@@ -232,7 +232,8 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
             expensive than rotating by just one step.
             */
             size_t row_size = batch_encoder.slot_count() / 2;
-            int random_rotation = static_cast<int>(rd() % row_size);
+            // row_size is always a power of 2
+            int random_rotation = static_cast<int>(rd() & (row_size - 1));
             time_start = chrono::high_resolution_clock::now();
             evaluator.rotate_rows_inplace(encrypted, random_rotation, gal_keys);
             time_end = chrono::high_resolution_clock::now();
@@ -482,7 +483,8 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
             /*
             [Rotate Vector Random]
             */
-            int random_rotation = static_cast<int>(rd() % ckks_encoder.slot_count());
+            // ckks_encoder.slot_count() is always a power of 2.
+            int random_rotation = static_cast<int>(rd() & (ckks_encoder.slot_count() - 1));
             time_start = chrono::high_resolution_clock::now();
             evaluator.rotate_vector_inplace(encrypted, random_rotation, gal_keys);
             time_end = chrono::high_resolution_clock::now();
