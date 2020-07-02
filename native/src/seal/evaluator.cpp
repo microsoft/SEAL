@@ -2208,7 +2208,7 @@ namespace seal
                     set_uint(t_last, coeff_count, t_ntt);
                 }
 
-                // Lazy substraction, results in [0, 2*qi).
+                // Lazy substraction, results in [0, 2*qi), since fix is in [0, qi].
                 const uint64_t fix = qi - barrett_reduce_64(qk_half, get<1>(J));
                 SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { K += fix; });
 

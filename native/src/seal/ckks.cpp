@@ -148,7 +148,9 @@ namespace seal
             {
                 for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count, barrett_reduce_64(coeffu, coeff_modulus[j]));
+                    fill_n(
+                        destination.data() + (j * coeff_count), coeff_count,
+                        barrett_reduce_64(coeffu, coeff_modulus[j]));
                 }
             }
         }

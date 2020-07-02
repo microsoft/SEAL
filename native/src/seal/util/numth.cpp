@@ -384,8 +384,8 @@ namespace seal
                 attempt_counter++;
 
                 // Set destination to be a random number modulo modulus
-                destination = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
-                destination = barrett_reduce_64(destination, modulus);
+                destination =
+                    barrett_reduce_64((static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd()), modulus);
 
                 // Raise the random number to power the size of the quotient
                 // to get rid of irrelevant part

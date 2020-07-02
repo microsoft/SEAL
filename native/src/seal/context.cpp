@@ -318,7 +318,8 @@ namespace seal
 
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
-                context_data.coeff_div_plain_modulus_[i].set(temp_coeff_div_plain_modulus[i], coeff_modulus_base->base()[i]);
+                context_data.coeff_div_plain_modulus_[i].set(
+                    temp_coeff_div_plain_modulus[i], coeff_modulus_base->base()[i]);
             }
 
             // Decompose upper_half_increment into RNS factors

@@ -483,7 +483,6 @@ namespace sealtest
             ASSERT_EQ(2305843009211596802ULL, multiply_uint_mod_lazy(2305843009211596800ULL, y, mod));
         }
 
-
         TEST(UIntArithSmallMod, MultiplyAddMod2)
         {
             Modulus mod(7);

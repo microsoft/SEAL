@@ -893,8 +893,8 @@ namespace seal
                     else
                     {
                         // It is not necessary for the negation to be reduced modulo the small prime
-                        *destination = multiply_add_uint_mod(
-                            alpha_sk_ptr[k], neg_prod_B_mod_q_elt, *destination, base_q_elt);
+                        *destination =
+                            multiply_add_uint_mod(alpha_sk_ptr[k], neg_prod_B_mod_q_elt, *destination, base_q_elt);
                     }
                 }
             }
@@ -1091,7 +1091,8 @@ namespace seal
                 // No correction needed
                 else
                 {
-                    destination[i] = sub_uint_mod(temp_t_gamma[i], barrett_reduce_64(temp_t_gamma[i + coeff_count_], t_), t_);
+                    destination[i] =
+                        sub_uint_mod(temp_t_gamma[i], barrett_reduce_64(temp_t_gamma[i + coeff_count_], t_), t_);
                 }
 
                 // If this coefficient was non-zero, multiply by t^(-1)
