@@ -2200,6 +2200,7 @@ namespace seal
                 const uint64_t qi = get<1>(J).value();
                 if (qk > qi)
                 {
+                    // This cannot be spared. NTT only tolerates input that is less than 4*modulus (i.e. qk <=4*qi).
                     modulo_poly_coeffs(t_last, coeff_count, get<1>(J), t_ntt);
                 }
                 else
