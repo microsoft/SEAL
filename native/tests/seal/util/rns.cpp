@@ -911,14 +911,14 @@ namespace sealtest
                 ASSERT_EQ(0ULL, in[1]);
 
                 // Next a case with non-trivial rounding
-                in[0] = 4;
-                in[1] = 12;
+                in[0] = 12;
+                in[1] = 11;
                 in[2] = 4;
-                in[3] = 12;
+                in[3] = 3;
 
                 rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
-                ASSERT_EQ(1ULL, in[0]);
-                ASSERT_EQ(2ULL, in[1]);
+                ASSERT_EQ(4ULL, in[0]);
+                ASSERT_EQ(3ULL, in[1]);
 
                 // Input array (19, 15)
                 in[0] = 6;

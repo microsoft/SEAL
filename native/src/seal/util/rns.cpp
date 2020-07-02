@@ -724,7 +724,7 @@ namespace seal
             uint64_t half = last_modulus.value() >> 1;
             for (size_t j = 0; j < coeff_count_; j++)
             {
-                last_ptr[j] = barrett_reduce_64(last_ptr[j] + half, last_modulus);
+                last_ptr[j] = add_uint_mod(last_ptr[j], half, last_modulus);
             }
 
             auto temp(allocate_uint(coeff_count_, pool));
@@ -778,7 +778,7 @@ namespace seal
             uint64_t half = last_modulus.value() >> 1;
             for (size_t j = 0; j < coeff_count_; j++)
             {
-                last_ptr[j] = barrett_reduce_64(last_ptr[j] + half, last_modulus);
+                last_ptr[j] = add_uint_mod(last_ptr[j], half, last_modulus);
             }
 
             auto temp(allocate_uint(coeff_count_, pool));

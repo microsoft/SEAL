@@ -196,6 +196,9 @@ namespace seal
                 std::size_t poly_modulus_degree, const RNSBase &coeff_modulus, const Modulus &plain_modulus,
                 MemoryPoolHandle pool);
 
+            /**
+            @param[in] input Must be in RNS form, i.e. coefficient must be less than the associated modulus.
+            */
             void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
 
             void divide_and_round_q_last_ntt_inplace(
