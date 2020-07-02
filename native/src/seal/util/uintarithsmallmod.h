@@ -433,7 +433,7 @@ namespace seal
         inline std::uint64_t multiply_add_uint_mod(
             std::uint64_t operand1, MultiplyUIntModOperand operand2, std::uint64_t operand3, const Modulus &modulus)
         {
-            return add_uint_mod(multiply_uint_mod(operand1, operand2, modulus), operand3, modulus);
+            return add_uint_mod(multiply_uint_mod(operand1, operand2, modulus), barrett_reduce_64(operand3, modulus), modulus);
         }
 
         inline bool try_invert_uint_mod(std::uint64_t operand, const Modulus &modulus, std::uint64_t &result)
