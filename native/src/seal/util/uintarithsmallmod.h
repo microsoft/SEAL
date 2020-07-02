@@ -18,7 +18,6 @@ namespace seal
         /**
         Returns (operand++) mod modulus.
         Correctness: operand must be at most (2 * modulus -2) for correctness.
-        @param[in] operand Should be at most (modulus - 1).
         */
         SEAL_NODISCARD inline std::uint64_t increment_uint_mod(std::uint64_t operand, const Modulus &modulus)
         {
@@ -27,7 +26,7 @@ namespace seal
             {
                 throw std::invalid_argument("modulus");
             }
-            if (operand >= modulus.value())
+            if (operand > (modulus.value() - 1) << 1)
             {
                 throw std::out_of_range("operand");
             }
@@ -60,7 +59,6 @@ namespace seal
         /**
         Returns (-operand) mod modulus.
         Correctness: operand must be at most modulus for correctness.
-        @param[in] operand Should be at most (modulus - 1).
         */
         SEAL_NODISCARD inline std::uint64_t negate_uint_mod(std::uint64_t operand, const Modulus &modulus)
         {
@@ -112,8 +110,6 @@ namespace seal
         /**
         Returns (operand1 + operand2) mod modulus.
         Correctness: (operand1 + operand2) must be at most (2 * modulus - 1).
-        @param[in] operand1 Should be at most (modulus - 1).
-        @param[in] operand2 Should be at most (modulus - 1).
         */
         SEAL_NODISCARD inline std::uint64_t add_uint_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
@@ -123,13 +119,9 @@ namespace seal
             {
                 throw std::invalid_argument("modulus");
             }
-            if (operand1 >= modulus.value())
+            if (operand1 + operand2 >= modulus.value() << 1)
             {
-                throw std::out_of_range("operand1");
-            }
-            if (operand2 >= modulus.value())
-            {
-                throw std::out_of_range("operand2");
+                throw std::out_of_range("operands");
             }
 #endif
             // Sum of operands modulo Modulus can never wrap around 2^64
@@ -433,7 +425,8 @@ namespace seal
         inline std::uint64_t multiply_add_uint_mod(
             std::uint64_t operand1, MultiplyUIntModOperand operand2, std::uint64_t operand3, const Modulus &modulus)
         {
-            return add_uint_mod(multiply_uint_mod(operand1, operand2, modulus), barrett_reduce_64(operand3, modulus), modulus);
+            return add_uint_mod(
+                multiply_uint_mod(operand1, operand2, modulus), barrett_reduce_64(operand3, modulus), modulus);
         }
 
         inline bool try_invert_uint_mod(std::uint64_t operand, const Modulus &modulus, std::uint64_t &result)

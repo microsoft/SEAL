@@ -525,8 +525,8 @@ namespace seal
                     {
                         for (std::size_t j = 0; j < coeff_modulus_size; j++)
                         {
-                            destination[i + (j * coeff_count)] =
-                                util::negate_uint_mod(util::barrett_reduce_64(coeffu, coeff_modulus[j]), coeff_modulus[j]);
+                            destination[i + (j * coeff_count)] = util::negate_uint_mod(
+                                util::barrett_reduce_64(coeffu, coeff_modulus[j]), coeff_modulus[j]);
                         }
                     }
                     else

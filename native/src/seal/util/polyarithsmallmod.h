@@ -35,9 +35,8 @@ namespace seal
                 throw std::invalid_argument("modulus");
             }
 #endif
-            std::transform(poly, poly + coeff_count, result, [&](auto coeff) {
-                return barrett_reduce_64(coeff, modulus);
-            });
+            std::transform(
+                poly, poly + coeff_count, result, [&](auto coeff) { return barrett_reduce_64(coeff, modulus); });
         }
 
         inline void modulo_poly_coeffs(
