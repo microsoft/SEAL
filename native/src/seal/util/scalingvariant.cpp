@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <stdexcept>
 #include "seal/encryptor.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/scalingvariant.h"
 #include "seal/util/uintarith.h"
+#include <stdexcept>
 
 using namespace std;
 
@@ -48,10 +48,11 @@ namespace seal
 
                 // Add to ciphertext: floor(q / t) * m + increment
                 size_t coeff_index = get<1>(I);
-                SEAL_ITERATE(iter(destination, coeff_modulus, coeff_div_plain_modulus), coeff_modulus_size, [&](auto J) {
-                    uint64_t scaled_rounded_coeff = multiply_add_uint_mod(get<0>(I), get<2>(J), fix[0], get<1>(J));
-                    get<0>(J)[coeff_index] = add_uint_mod(get<0>(J)[coeff_index], scaled_rounded_coeff, get<1>(J));
-                });
+                SEAL_ITERATE(
+                    iter(destination, coeff_modulus, coeff_div_plain_modulus), coeff_modulus_size, [&](auto J) {
+                        uint64_t scaled_rounded_coeff = multiply_add_uint_mod(get<0>(I), get<2>(J), fix[0], get<1>(J));
+                        get<0>(J)[coeff_index] = add_uint_mod(get<0>(J)[coeff_index], scaled_rounded_coeff, get<1>(J));
+                    });
             });
         }
 
@@ -90,10 +91,11 @@ namespace seal
 
                 // Add to ciphertext: floor(q / t) * m + increment
                 size_t coeff_index = get<1>(I);
-                SEAL_ITERATE(iter(destination, coeff_modulus, coeff_div_plain_modulus), coeff_modulus_size, [&](auto J) {
-                    uint64_t scaled_rounded_coeff = multiply_add_uint_mod(get<0>(I), get<2>(J), fix[0], get<1>(J));
-                    get<0>(J)[coeff_index] = sub_uint_mod(get<0>(J)[coeff_index], scaled_rounded_coeff, get<1>(J));
-                });
+                SEAL_ITERATE(
+                    iter(destination, coeff_modulus, coeff_div_plain_modulus), coeff_modulus_size, [&](auto J) {
+                        uint64_t scaled_rounded_coeff = multiply_add_uint_mod(get<0>(I), get<2>(J), fix[0], get<1>(J));
+                        get<0>(J)[coeff_index] = sub_uint_mod(get<0>(J)[coeff_index], scaled_rounded_coeff, get<1>(J));
+                    });
             });
         }
     } // namespace util

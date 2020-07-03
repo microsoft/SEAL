@@ -5,9 +5,9 @@
 
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
+#include "seal/util/iterator.h"
 #include "seal/util/ntt.h"
 #include "seal/util/pointer.h"
-#include "seal/util/iterator.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <cstddef>
 #include <cstdint>
@@ -162,8 +162,7 @@ namespace seal
 
             void fast_convert(ConstCoeffIter in, CoeffIter out, MemoryPoolHandle pool) const;
 
-            void fast_convert_array(
-                ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const;
+            void fast_convert_array(ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const;
 
         private:
             BaseConverter(const BaseConverter &copy) = delete;
@@ -200,35 +199,35 @@ namespace seal
             /**
             @param[in] input Must be in RNS form, i.e. coefficient must be less than the associated modulus.
             */
-            void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
+            void divide_and_round_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const;
 
             void divide_and_round_q_last_ntt_inplace(
-                std::uint64_t *input, const NTTTables *rns_ntt_tables, MemoryPoolHandle pool) const;
+                RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const;
 
             /**
             Shenoy-Kumaresan conversion from Bsk to q
             */
-            void fastbconv_sk(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv_sk(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
             Montgomery reduction mod q; changes base from Bsk U {m_tilde} to Bsk
             */
-            void sm_mrq(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void sm_mrq(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
             Divide by q and fast floor from q U Bsk to Bsk
             */
-            void fast_floor(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fast_floor(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
             Fast base conversion from q to Bsk U {m_tilde}
             */
-            void fastbconv_m_tilde(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv_m_tilde(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
             Compute round(t/q * |input|_q) mod t exactly
             */
-            void decrypt_scale_and_round(const uint64_t *phase, uint64_t *destination, MemoryPoolHandle pool) const;
+            void decrypt_scale_and_round(ConstRNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const;
 
             SEAL_NODISCARD inline auto inv_q_last_mod_q() const noexcept
             {
