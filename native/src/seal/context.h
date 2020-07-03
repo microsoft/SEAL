@@ -400,7 +400,7 @@ namespace seal
             }
 
             /**
-            Return the non-RNS form of upppoer_half_increment which is q mod t.
+            Return the non-RNS form of upper_half_increment which is q mod t.
             */
             SEAL_NODISCARD inline auto coeff_modulus_mod_plain_modulus() const noexcept -> std::uint64_t
             {
