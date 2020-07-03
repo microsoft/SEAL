@@ -1337,7 +1337,7 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            multiply_add_plain_with_scaling_variant(plain, context_data, encrypted.data());
+            multiply_add_plain_with_scaling_variant(plain, context_data, *iter(encrypted));
             break;
         }
 
@@ -1411,7 +1411,7 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            multiply_sub_plain_with_scaling_variant(plain, context_data, encrypted.data());
+            multiply_sub_plain_with_scaling_variant(plain, context_data, *iter(encrypted));
             break;
         }
 
