@@ -408,7 +408,7 @@ namespace sealtest
             auto bct_test = [&](const BaseConverter &bct, const vector<uint64_t> &in, const vector<uint64_t> &out) {
                 uint64_t in_array[3 * 3], out_array[3 * 3];
                 copy(in.cbegin(), in.cend(), in_array);
-                bct.fast_convert_array(in.data(), 3, out_array, pool);
+                bct.fast_convert_array(ConstRNSIter(in.data(), 3), RNSIter(out_array, 3), pool);
                 for (size_t i = 0; i < out.size(); i++)
                 {
                     ASSERT_EQ(out[i], out_array[i]);

@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 #include "seal/util/common.h"
-#include "seal/util/iterator.h"
 #include "seal/util/numth.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rns.h"
@@ -403,61 +402,66 @@ namespace seal
             }
         }
 
-        void BaseConverter::fast_convert(const uint64_t *in, uint64_t *out, MemoryPoolHandle pool) const
+        void BaseConverter::fast_convert(ConstCoeffIter in, CoeffIter out, MemoryPoolHandle pool) const
         {
             size_t ibase_size = ibase_.size();
             size_t obase_size = obase_.size();
 
-            auto temp(allocate_uint(ibase_size, pool));
-            for (size_t i = 0; i < ibase_size; i++)
-            {
-                temp[i] = multiply_uint_mod(in[i], ibase_.inv_punctured_prod_mod_base_array()[i], ibase_[i]);
-            }
+            SEAL_ALLOCATE_GET_COEFF_ITER(temp, ibase_size, pool);
+            SEAL_ITERATE(iter(temp, in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base()), ibase_size, [&](auto I) {
+                get<0>(I) = multiply_uint_mod(get<1>(I), get<2>(I), get<3>(I));
+            });
 
-            for (size_t j = 0; j < obase_size; j++)
-            {
-                out[j] = dot_product_mod(temp.get(), base_change_matrix_[j].get(), ibase_size, obase_[j]);
-            }
+            //for (size_t j = 0; j < obase_size; j++)
+            SEAL_ITERATE(iter(out, base_change_matrix_, obase_.base()), obase_size, [&](auto I) {
+                get<0>(I) = dot_product_mod(temp, get<1>(I).get(), ibase_size, get<2>(I));
+            });
         }
 
         void BaseConverter::fast_convert_array(
-            const uint64_t *in, size_t count, uint64_t *out, MemoryPoolHandle pool) const
+            ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const
         {
+#ifdef SEAL_DEBUG
+            if (in.poly_modulus_degree() != out.poly_modulus_degree())
+            {
+                throw invalid_argument("in and out are incompatible");
+            }
+#endif
             size_t ibase_size = ibase_.size();
             size_t obase_size = obase_.size();
+            size_t count = in.poly_modulus_degree();
 
-            auto temp(allocate_poly(count, ibase_size, pool));
-            for (size_t i = 0; i < ibase_size; i++)
-            {
-                MultiplyUIntModOperand inv_ibase_punctured_prod_mod_ibase_elt =
-                    ibase_.inv_punctured_prod_mod_base_array()[i];
-                Modulus ibase_elt = ibase_[i];
-                uint64_t *temp_ptr = temp.get() + i;
-                if (inv_ibase_punctured_prod_mod_ibase_elt.operand == 1)
+            // Semantic misuse of RNSIter
+            SEAL_ALLOCATE_GET_RNS_ITER(temp, ibase_size, count, pool);
+
+            SEAL_ITERATE(iter(in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base(), size_t(0)), ibase_size, [&](auto I) {
+                // The current ibase index
+                size_t ibase_index = get<3>(I);
+
+                if (get<1>(I).operand == 1)
                 {
-                    for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
-                    {
-                        *temp_ptr = barrett_reduce_64(*in, ibase_elt);
-                    }
+                    // No multiplication needed
+                    SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
+                        // Reduce modulo ibase element
+                        get<1>(J)[ibase_index] = barrett_reduce_64(get<0>(J), get<2>(I));
+                    });
                 }
                 else
                 {
-                    for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
-                    {
-                        *temp_ptr = multiply_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
-                    }
+                    // Multiplication needed
+                    SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
+                        // Multiply coefficient of in with ibase_.inv_punctured_prod_mod_base_array_ element
+                        get<1>(J)[ibase_index] = multiply_uint_mod(get<0>(J), get<1>(I), get<2>(I));
+                    });
                 }
-            }
+            });
 
-            for (size_t j = 0; j < obase_size; j++)
-            {
-                uint64_t *temp_ptr = temp.get();
-                Modulus obase_elt = obase_[j];
-                for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_size)
-                {
-                    *out = dot_product_mod(temp_ptr, base_change_matrix_[j].get(), ibase_size, obase_elt);
-                }
-            }
+            SEAL_ITERATE(iter(out, base_change_matrix_, obase_.base()), obase_size, [&](auto I) {
+                SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
+                    // Compute the base conversion sum modulo obase element
+                    get<0>(J) = dot_product_mod(get<1>(J), get<1>(I).get(), ibase_size, get<2>(I));
+                });
+            });
         }
 
         void BaseConverter::initialize()
@@ -468,23 +472,21 @@ namespace seal
                 throw logic_error("invalid parameters");
             }
 
-            auto ibase_values = allocate<uint64_t>(ibase_.size(), pool_);
-            for (size_t i = 0; i < ibase_.size(); i++)
-            {
-                ibase_values[i] = ibase_[i].value();
-            }
-
-            // Compute the base-change matrix
+            // Create the base-change matrix rows
             base_change_matrix_ = allocate<Pointer<uint64_t>>(obase_.size(), pool_);
-            for (size_t i = 0; i < obase_.size(); i++)
-            {
-                base_change_matrix_[i] = allocate_uint(ibase_.size(), pool_);
-                for (size_t j = 0; j < ibase_.size(); j++)
-                {
-                    base_change_matrix_[i][j] =
-                        modulo_uint(ibase_.punctured_prod_array() + (j * ibase_.size()), ibase_.size(), obase_[i]);
-                }
-            }
+
+            SEAL_ITERATE(iter(base_change_matrix_, obase_.base()), obase_.size(), [&](auto I) {
+                // Create the base-change matrix columns
+                get<0>(I) = allocate_uint(ibase_.size(), pool_);
+
+                // Semantic misuse of RNSIter
+                ConstRNSIter ibase_punctured_prod_array(ibase_.punctured_prod_array(), ibase_.size());
+
+                SEAL_ITERATE(iter(get<0>(I), ibase_punctured_prod_array), ibase_.size(), [&](auto J) {
+                    // Base-change matrix contains the punctured products of ibase elements modulo the obase
+                    get<0>(J) = modulo_uint(get<1>(J), ibase_.size(), get<1>(I));
+                });
+            });
         }
 
         RNSTool::RNSTool(
@@ -851,12 +853,12 @@ namespace seal
             auto base_B_size = base_B_->size();
 
             // Fast convert B -> q; input is in Bsk but we only use B
-            base_B_to_q_conv_->fast_convert_array(input, coeff_count_, destination, pool);
+            base_B_to_q_conv_->fast_convert_array(ConstRNSIter(input, coeff_count_), RNSIter(destination, coeff_count_), pool);
 
             // Compute alpha_sk
             // Fast convert B -> {m_sk}; input is in Bsk but we only use B
             auto temp(allocate_uint(coeff_count_, pool));
-            base_B_to_m_sk_conv_->fast_convert_array(input, coeff_count_, temp.get(), pool);
+            base_B_to_m_sk_conv_->fast_convert_array(ConstRNSIter(input, coeff_count_), RNSIter(temp.get(), coeff_count_), pool);
 
             // Take the m_sk part of input, subtract from temp, and multiply by inv_prod_B_mod_m_sk_
             // input_sk is allocated in input + (base_B_size * coeff_count_)
@@ -982,7 +984,7 @@ namespace seal
             auto base_Bsk_size = base_Bsk_->size();
 
             // Convert q -> Bsk
-            base_q_to_Bsk_conv_->fast_convert_array(input, coeff_count_, destination, pool);
+            base_q_to_Bsk_conv_->fast_convert_array(ConstRNSIter(input, coeff_count_), RNSIter(destination, coeff_count_), pool);
 
             // Move input pointer to past the base q components
             input += base_q_size * coeff_count_;
@@ -1038,11 +1040,11 @@ namespace seal
             }
 
             // Now convert to Bsk
-            base_q_to_Bsk_conv_->fast_convert_array(temp.get(), coeff_count_, destination, pool);
+            base_q_to_Bsk_conv_->fast_convert_array(ConstRNSIter(temp.get(), coeff_count_), RNSIter(destination, coeff_count_), pool);
 
             // Finally convert to {m_tilde}
             base_q_to_m_tilde_conv_->fast_convert_array(
-                temp.get(), coeff_count_, destination + (base_Bsk_size * coeff_count_), pool);
+                ConstRNSIter(temp.get(), coeff_count_), RNSIter(destination + (base_Bsk_size * coeff_count_), coeff_count_), pool);
         }
 
         void RNSTool::decrypt_scale_and_round(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
@@ -1063,7 +1065,7 @@ namespace seal
             auto temp_t_gamma(allocate_poly(coeff_count_, base_t_gamma_size, pool));
 
             // Convert from q to {t, gamma}
-            base_q_to_t_gamma_conv_->fast_convert_array(temp.get(), coeff_count_, temp_t_gamma.get(), pool);
+            base_q_to_t_gamma_conv_->fast_convert_array(ConstRNSIter(temp.get(), coeff_count_), RNSIter(temp_t_gamma.get(), coeff_count_), pool);
 
             // Multiply by -prod(q)^(-1) mod {t, gamma}
             for (size_t i = 0; i < base_t_gamma_size; i++)

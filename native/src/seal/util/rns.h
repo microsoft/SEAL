@@ -7,6 +7,7 @@
 #include "seal/modulus.h"
 #include "seal/util/ntt.h"
 #include "seal/util/pointer.h"
+#include "seal/util/iterator.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <cstddef>
 #include <cstdint>
@@ -159,10 +160,10 @@ namespace seal
                 return obase_;
             }
 
-            void fast_convert(const std::uint64_t *in, std::uint64_t *out, MemoryPoolHandle pool) const;
+            void fast_convert(ConstCoeffIter in, CoeffIter out, MemoryPoolHandle pool) const;
 
             void fast_convert_array(
-                const std::uint64_t *in, std::size_t count, std::uint64_t *out, MemoryPoolHandle pool) const;
+                ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const;
 
         private:
             BaseConverter(const BaseConverter &copy) = delete;
