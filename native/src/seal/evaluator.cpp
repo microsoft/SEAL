@@ -1556,8 +1556,7 @@ namespace seal
 
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
-            // Semantic misuse of RNSIter here, but this works well
-            RNSIter temp_iter(temp.get(), coeff_modulus_size);
+            StrideIter<uint64_t *> temp_iter(temp.get(), coeff_modulus_size);
 
             SEAL_ITERATE(iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
                 auto plain_value = get<0>(I);

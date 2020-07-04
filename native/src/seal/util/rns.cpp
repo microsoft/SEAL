@@ -227,8 +227,7 @@ namespace seal
                 SEAL_ITERATE(iter(base_, rnsbase_values), size_, [&](auto I) { get<1>(I) = get<0>(I).value(); });
 
                 // Create punctured products
-                // Semantic misuse of RNSIter
-                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+                StrideIter<uint64_t *> punctured_prod(punctured_prod_array_.get(), size_);
                 SEAL_ITERATE(iter(punctured_prod, size_t(0)), size_, [&](auto I) {
                     multiply_many_uint64_except(rnsbase_values.get(), size_, get<1>(I), get<0>(I).ptr(), pool_);
                 });
@@ -300,9 +299,9 @@ namespace seal
 
                 // Decompose an array of multi-precision integers into an array of arrays, one per each base element
 
-                // Copy the input array
-                // Semantic misuse of RNSIter
-                SEAL_ALLOCATE_GET_RNS_ITER(value_copy, size_, count, pool);
+                // Copy the input array into a temporary location and set a StrideIter pointing to it
+                // Note that the stride size is size_
+                SEAL_ALLOCATE_GET_STRIDE_ITER(value_copy, uint64_t, count, size_, pool);
                 set_uint(value, count * size_, value_copy);
 
                 // Note how value_copy and value_out have size_ and count reversed
@@ -339,8 +338,7 @@ namespace seal
                 // Clear the result
                 set_zero_uint(size_, value);
 
-                // Semantic misuse of RNSIter
-                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+                StrideIter<uint64_t *> punctured_prod(punctured_prod_array_.get(), size_);
 
                 // Compose an array of integers (one per base element) into a single multi-precision integer
                 auto temp_mpi(allocate_uint(size_, pool));
@@ -384,10 +382,9 @@ namespace seal
                 // Clear the result
                 set_zero_uint(count * size_, value);
 
-                // Semantic misuse of RNSIter
-                RNSIter temp_array_iter(temp_array.get(), size_);
-                RNSIter value_iter(value, size_);
-                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+                StrideIter<uint64_t *> temp_array_iter(temp_array.get(), size_);
+                StrideIter<uint64_t *> value_iter(value, size_);
+                StrideIter<uint64_t *> punctured_prod(punctured_prod_array_.get(), size_);
 
                 // Compose an array of RNS integers into a single array of multi-precision integers
                 auto temp_mpi(allocate_uint(size_, pool));
@@ -430,8 +427,8 @@ namespace seal
             size_t obase_size = obase_.size();
             size_t count = in.poly_modulus_degree();
 
-            // Semantic misuse of RNSIter
-            SEAL_ALLOCATE_GET_RNS_ITER(temp, ibase_size, count, pool);
+            // Note that the stride size is ibase_size
+            SEAL_ALLOCATE_GET_STRIDE_ITER(temp, uint64_t, count, ibase_size, pool);
 
             SEAL_ITERATE(
                 iter(in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base(), size_t(0)), ibase_size,
@@ -480,9 +477,7 @@ namespace seal
                 // Create the base-change matrix columns
                 get<0>(I) = allocate_uint(ibase_.size(), pool_);
 
-                // Semantic misuse of RNSIter
-                ConstRNSIter ibase_punctured_prod_array(ibase_.punctured_prod_array(), ibase_.size());
-
+                StrideIter<const uint64_t *> ibase_punctured_prod_array(ibase_.punctured_prod_array(), ibase_.size());
                 SEAL_ITERATE(iter(get<0>(I), ibase_punctured_prod_array), ibase_.size(), [&](auto J) {
                     // Base-change matrix contains the punctured products of ibase elements modulo the obase
                     get<0>(J) = modulo_uint(get<1>(J), ibase_.size(), get<1>(I));

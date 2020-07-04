@@ -33,7 +33,7 @@ namespace seal
         to use with the SEAL_ITERATE macro, which expands to std::for_each_n in C++17 and to seal::util::seal_for_each_n
         in C++14. All SEAL iterators derive from SEALIterBase.
 
-        The SEAL iterator classes behave as illustrated by the following diagram:
+        The most important SEAL iterator classes behave as illustrated by the following diagram:
 
         +-------------------+
         |    Pointer & Size |  Construct  +-----------------+
@@ -67,6 +67,11 @@ namespace seal
                                       | (const) std::uint64_t & |
                                       +-------------------------+
 
+        @par PtrIter and StrideIter
+        PtrIter<T *> and StrideIter<T *> are both templated SEAL iterators that wrap raw pointers. The difference between
+        these two types is that advancing PtrIter<T *> always advances the wrapped pointer by one, whereas the step size
+        (stride) can be set to be anything for a StrideIter<T *>. CoeffIter is a typedef of PtrIter<std::uint64_t *> and
+        and RNSIter is almost the same as StrideIter<std::uint64_t *>, but still a different type.
 
         +----------+  Construct   +-------------------+
         | MyType * |------------->| PtrIter<MyType *> |  Simple wrapper for raw pointers
@@ -80,6 +85,19 @@ namespace seal
                                 +----------+  +----------+
                                 | MyType & |  | MyType * |
                                 +----------+  +----------+
+
+        +----------+  Construct   +----------------------+
+        | MyType * |------------->| StrideIter<MyType *> |  Simple wrapper for raw pointers with custom stride size
+        +----------+              +-----+----------+-----+
+                                        |          |
+                                        |          |
+                           Dereference  |          |     StrideIter<MyType *>::ptr()
+                                        |          |  or implicit conversion
+                                        |          |
+                                        v          v
+                                 +----------+  +----------+
+                                 | MyType & |  | MyType * |
+                                 +----------+  +----------+
 
         @par IterTuple
         An extremely useful template class is the (variadic) IterTuple<...> that allows multiple SEAL iterators to be
@@ -261,8 +279,7 @@ namespace seal
         SEAL_ALLOCATE_GET_POLY_ITER(temp, count, poly_modulus_degree, coeff_modulus_size, pool);
 
         However, the latter does not expose the name of the allocation itself. There are similar macros for allocating
-        buffers and setting up RNSIter and CoeffIter objects as well, and all these macros have versions that set the
-        allocated memory to zero, e.g. SEAL_ALLOCATE_ZERO_GET_POLY_ITER.
+        buffers and setting up PtrIter<T *>, StrideIter<T *>, RNSIter, and CoeffIter objects as well.
         */
 
         class SEALIterBase
@@ -273,6 +290,9 @@ namespace seal
 
         template <typename T>
         class PtrIter;
+
+        template <typename T>
+        class StrideIter;
 
         class RNSIter;
 
@@ -734,6 +754,199 @@ namespace seal
             pointer ptr_ = nullptr;
         };
 
+        template <typename T>
+        class StrideIter<T *> : public SEALIterBase
+        {
+        public:
+            using self_type = StrideIter;
+
+            // Standard iterator typedefs
+            using value_type = PtrIter<T *>;
+            using pointer = T *;
+            using reference = const value_type &;
+            using iterator_category = std::random_access_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+
+            StrideIter() = default;
+
+            template <typename S>
+            StrideIter(S *ptr, std::size_t stride) noexcept : ptr_it_(ptr), stride_(stride)
+            {}
+
+            template <typename S>
+            StrideIter(StrideIter<S *> copy) noexcept : ptr_it_(copy.ptr()), stride_(copy.stride())
+            {}
+
+            template <typename S>
+            StrideIter(std::vector<S> &arr, std::size_t stride) noexcept : StrideIter(arr.data(), stride)
+            {}
+
+            template <typename S>
+            StrideIter(const std::vector<S> &arr, std::size_t stride) noexcept : StrideIter(arr.data(), stride)
+            {}
+
+            template <typename S>
+            StrideIter(const Pointer<S> &arr, std::size_t stride) noexcept : StrideIter(arr.get(), stride)
+            {}
+
+            template <typename S>
+            inline self_type &operator=(const StrideIter<S *> &assign) noexcept
+            {
+                ptr_it_ = assign.ptr();
+                stride_ = assign.stride();
+                return *this;
+            }
+
+            SEAL_NODISCARD inline reference operator*() const noexcept
+            {
+                return ptr_it_;
+            }
+
+            template <typename SizeT>
+            SEAL_NODISCARD inline value_type operator[](SizeT n) const noexcept
+            {
+                self_type result(*this);
+                result += static_cast<difference_type>(n);
+                return *result;
+            }
+
+            inline self_type &operator++() noexcept
+            {
+                ptr_it_ += static_cast<difference_type>(stride_);
+                return *this;
+            }
+
+            inline self_type operator++(int) noexcept
+            {
+                self_type result(*this);
+                ptr_it_ += static_cast<difference_type>(stride_);
+                return result;
+            }
+
+            inline self_type &operator--() noexcept
+            {
+                ptr_it_ -= static_cast<difference_type>(stride_);
+                return *this;
+            }
+
+            inline self_type operator--(int) noexcept
+            {
+                self_type result(*this);
+                ptr_it_ -= static_cast<difference_type>(stride_);
+                return result;
+            }
+
+            template <typename SizeT>
+            inline self_type &operator+=(SizeT n) noexcept
+            {
+                ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(stride_);
+                return *this;
+            }
+
+            template <typename SizeT>
+            SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
+            {
+                self_type result(*this);
+                result.ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(stride_);
+                return result;
+            }
+
+            template <typename SizeT>
+            inline self_type &operator-=(SizeT n) noexcept
+            {
+                ptr_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(stride_);
+                return *this;
+            }
+
+            template <typename SizeT>
+            SEAL_NODISCARD inline self_type operator-(SizeT n) const noexcept
+            {
+                return *this + (-static_cast<difference_type>(n));
+            }
+
+            template <typename S>
+            SEAL_NODISCARD inline difference_type operator-(const StrideIter<S *> &b) const
+            {
+#ifdef SEAL_DEBUG
+                if (!stride_)
+                {
+                    throw std::logic_error("stride cannot be zero");
+                }
+                if (stride_ != b.stride_)
+                {
+                    throw std::invalid_argument("incompatible iterators");
+                }
+#endif
+                return (ptr_it_ - b.ptr_it_) / static_cast<difference_type>(stride_);
+            }
+
+            template <typename S>
+            SEAL_NODISCARD inline bool operator==(const StrideIter<S *> &compare) const noexcept
+            {
+                return ptr_it_ == compare.ptr_it_;
+            }
+
+            template <typename S>
+            SEAL_NODISCARD inline bool operator!=(const StrideIter<S *> &compare) const noexcept
+            {
+                return !(*this == compare);
+            }
+
+            template <typename S>
+            SEAL_NODISCARD inline bool operator<(const StrideIter<S *> &compare) const noexcept
+            {
+                return ptr_it_ < compare.ptr_it_;
+            }
+
+            template <typename S>
+            SEAL_NODISCARD inline bool operator>(const StrideIter<S *> &compare) const noexcept
+            {
+                return ptr_it_ > compare.ptr_it_;
+            }
+
+            template <typename S>
+            SEAL_NODISCARD inline bool operator<=(const StrideIter<S *> &compare) const noexcept
+            {
+                return !(ptr_it_ > compare.ptr_it_);
+            }
+
+            template <typename S>
+            SEAL_NODISCARD inline bool operator>=(const StrideIter<S *> &compare) const noexcept
+            {
+                return !(ptr_it_ < compare.ptr_it_);
+            }
+
+            SEAL_NODISCARD explicit inline operator bool() const noexcept
+            {
+                return static_cast<bool>(ptr_it_);
+            }
+
+            SEAL_NODISCARD inline reference operator->() const noexcept
+            {
+                return **this;
+            }
+
+            SEAL_NODISCARD inline std::size_t stride() const noexcept
+            {
+                return stride_;
+            }
+
+            SEAL_NODISCARD inline pointer ptr() const noexcept
+            {
+                return ptr_it_.ptr();
+            }
+
+            SEAL_NODISCARD inline operator pointer() const noexcept
+            {
+                return ptr_it_.operator pointer();
+            }
+
+        private:
+            PtrIter<T *> ptr_it_ = {};
+
+            std::size_t stride_ = 0;
+        };
+
         class RNSIter : public SEALIterBase
         {
         public:
@@ -748,20 +961,30 @@ namespace seal
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            RNSIter() : coeff_it_(), step_size_(0)
+            RNSIter() : ptr_it_(), step_size_(0)
             {}
 
             RNSIter(std::uint64_t *ptr, std::size_t poly_modulus_degree)
-                : coeff_it_(ptr), step_size_(poly_modulus_degree)
+                : ptr_it_(ptr), step_size_(poly_modulus_degree)
             {}
 
             RNSIter(const self_type &copy) = default;
 
             self_type &operator=(const self_type &assign) = default;
 
+            template <typename S>
+            RNSIter(const StrideIter<S *> &stride_it) : RNSIter(stride_it.ptr(), stride_it.stride()) {}
+
+            template <typename S>
+            self_type &operator=(const StrideIter<S *> &assign)
+            {
+                ptr_it_ = assign;
+                step_size_ = assign.stride();
+            }
+
             SEAL_NODISCARD inline reference operator*() const noexcept
             {
-                return coeff_it_;
+                return ptr_it_;
             }
 
             template <typename SizeT>
@@ -774,34 +997,34 @@ namespace seal
 
             inline self_type &operator++() noexcept
             {
-                coeff_it_ += static_cast<difference_type>(step_size_);
+                ptr_it_ += static_cast<difference_type>(step_size_);
                 return *this;
             }
 
             inline self_type operator++(int) noexcept
             {
                 self_type result(*this);
-                coeff_it_ += static_cast<difference_type>(step_size_);
+                ptr_it_ += static_cast<difference_type>(step_size_);
                 return result;
             }
 
             inline self_type &operator--() noexcept
             {
-                coeff_it_ -= static_cast<difference_type>(step_size_);
+                ptr_it_ -= static_cast<difference_type>(step_size_);
                 return *this;
             }
 
             inline self_type operator--(int) noexcept
             {
                 self_type result(*this);
-                coeff_it_ -= static_cast<difference_type>(step_size_);
+                ptr_it_ -= static_cast<difference_type>(step_size_);
                 return result;
             }
 
             template <typename SizeT>
             inline self_type &operator+=(SizeT n) noexcept
             {
-                coeff_it_ += n * static_cast<difference_type>(step_size_);
+                ptr_it_ += n * static_cast<difference_type>(step_size_);
                 return *this;
             }
 
@@ -809,14 +1032,14 @@ namespace seal
             SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
             {
                 self_type result(*this);
-                result.coeff_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                result.ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return result;
             }
 
             template <typename SizeT>
             inline self_type &operator-=(SizeT n) noexcept
             {
-                coeff_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                ptr_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return *this;
             }
 
@@ -838,12 +1061,12 @@ namespace seal
                     throw std::invalid_argument("incompatible iterators");
                 }
 #endif
-                return (coeff_it_ - b.coeff_it_) / static_cast<difference_type>(step_size_);
+                return (ptr_it_ - b.ptr_it_) / static_cast<difference_type>(step_size_);
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return coeff_it_ == compare.coeff_it_;
+                return ptr_it_ == compare.ptr_it_;
             }
 
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
@@ -853,32 +1076,32 @@ namespace seal
 
             SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
             {
-                return coeff_it_ < compare.coeff_it_;
+                return ptr_it_ < compare.ptr_it_;
             }
 
             SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
             {
-                return coeff_it_ > compare.coeff_it_;
+                return ptr_it_ > compare.ptr_it_;
             }
 
             SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
             {
-                return !(coeff_it_ > compare.coeff_it_);
+                return !(ptr_it_ > compare.ptr_it_);
             }
 
             SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
             {
-                return !(coeff_it_ < compare.coeff_it_);
+                return !(ptr_it_ < compare.ptr_it_);
             }
 
             SEAL_NODISCARD inline operator std::uint64_t *() const noexcept
             {
-                return static_cast<std::uint64_t *>(coeff_it_);
+                return static_cast<std::uint64_t *>(ptr_it_);
             }
 
             SEAL_NODISCARD explicit inline operator bool() const noexcept
             {
-                return static_cast<bool>(coeff_it_);
+                return static_cast<bool>(ptr_it_);
             }
 
             SEAL_NODISCARD inline reference operator->() const noexcept
@@ -892,7 +1115,7 @@ namespace seal
             }
 
         private:
-            CoeffIter coeff_it_ = {};
+            CoeffIter ptr_it_ = {};
 
             std::size_t step_size_ = 0;
         };
@@ -911,11 +1134,11 @@ namespace seal
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            ConstRNSIter() : coeff_it_(), step_size_(0)
+            ConstRNSIter() : ptr_it_(), step_size_(0)
             {}
 
             ConstRNSIter(const std::uint64_t *ptr, std::size_t poly_modulus_degree)
-                : coeff_it_(ptr), step_size_(poly_modulus_degree)
+                : ptr_it_(ptr), step_size_(poly_modulus_degree)
             {}
 
             ConstRNSIter(const self_type &copy) = default;
@@ -923,12 +1146,22 @@ namespace seal
             self_type &operator=(const self_type &assign) = default;
 
             ConstRNSIter(const RNSIter &copy)
-                : coeff_it_(static_cast<const std::uint64_t *>(copy)), step_size_(copy.poly_modulus_degree())
+                : ptr_it_(static_cast<const std::uint64_t *>(copy)), step_size_(copy.poly_modulus_degree())
             {}
+
+            template <typename S>
+            ConstRNSIter(const StrideIter<S *> &stride_it) : ConstRNSIter(stride_it.ptr(), stride_it.stride()) {}
+
+            template <typename S>
+            self_type &operator=(const StrideIter<S *> &assign)
+            {
+                ptr_it_ = assign;
+                step_size_ = assign.stride();
+            }
 
             SEAL_NODISCARD inline reference operator*() const noexcept
             {
-                return coeff_it_;
+                return ptr_it_;
             }
 
             template <typename SizeT>
@@ -941,34 +1174,34 @@ namespace seal
 
             inline self_type &operator++() noexcept
             {
-                coeff_it_ += static_cast<difference_type>(step_size_);
+                ptr_it_ += static_cast<difference_type>(step_size_);
                 return *this;
             }
 
             inline self_type operator++(int) noexcept
             {
                 self_type result(*this);
-                coeff_it_ += static_cast<difference_type>(step_size_);
+                ptr_it_ += static_cast<difference_type>(step_size_);
                 return result;
             }
 
             inline self_type &operator--() noexcept
             {
-                coeff_it_ -= static_cast<difference_type>(step_size_);
+                ptr_it_ -= static_cast<difference_type>(step_size_);
                 return *this;
             }
 
             inline self_type operator--(int) noexcept
             {
                 self_type result(*this);
-                coeff_it_ -= static_cast<difference_type>(step_size_);
+                ptr_it_ -= static_cast<difference_type>(step_size_);
                 return result;
             }
 
             template <typename SizeT>
             inline self_type &operator+=(SizeT n) noexcept
             {
-                coeff_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return *this;
             }
 
@@ -976,14 +1209,14 @@ namespace seal
             SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
             {
                 self_type result(*this);
-                result.coeff_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                result.ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return result;
             }
 
             template <typename SizeT>
             inline self_type &operator-=(SizeT n) noexcept
             {
-                coeff_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                ptr_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return *this;
             }
 
@@ -1005,12 +1238,12 @@ namespace seal
                     throw std::invalid_argument("incompatible iterators");
                 }
 #endif
-                return (coeff_it_ - b.coeff_it_) / static_cast<difference_type>(step_size_);
+                return (ptr_it_ - b.ptr_it_) / static_cast<difference_type>(step_size_);
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
             {
-                return coeff_it_ == compare.coeff_it_;
+                return ptr_it_ == compare.ptr_it_;
             }
 
             SEAL_NODISCARD inline bool operator!=(const self_type &compare) const noexcept
@@ -1020,32 +1253,32 @@ namespace seal
 
             SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
             {
-                return coeff_it_ < compare.coeff_it_;
+                return ptr_it_ < compare.ptr_it_;
             }
 
             SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
             {
-                return coeff_it_ > compare.coeff_it_;
+                return ptr_it_ > compare.ptr_it_;
             }
 
             SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
             {
-                return !(coeff_it_ > compare.coeff_it_);
+                return !(ptr_it_ > compare.ptr_it_);
             }
 
             SEAL_NODISCARD inline bool operator>=(const self_type &compare) const noexcept
             {
-                return !(coeff_it_ < compare.coeff_it_);
+                return !(ptr_it_ < compare.ptr_it_);
             }
 
             SEAL_NODISCARD inline operator const std::uint64_t *() const noexcept
             {
-                return static_cast<const std::uint64_t *>(coeff_it_);
+                return static_cast<const std::uint64_t *>(ptr_it_);
             }
 
             SEAL_NODISCARD explicit inline operator bool() const noexcept
             {
-                return static_cast<bool>(coeff_it_);
+                return static_cast<bool>(ptr_it_);
             }
 
             SEAL_NODISCARD inline reference operator->() const noexcept
@@ -1059,7 +1292,7 @@ namespace seal
             }
 
         private:
-            ConstCoeffIter coeff_it_ = {};
+            ConstCoeffIter ptr_it_ = {};
 
             std::size_t step_size_ = 0;
         };
@@ -1105,34 +1338,34 @@ namespace seal
 
             inline self_type &operator++() noexcept
             {
-                rns_it_.coeff_it_ += step_size_;
+                rns_it_.ptr_it_ += step_size_;
                 return *this;
             }
 
             inline self_type operator++(int) noexcept
             {
                 self_type result(*this);
-                rns_it_.coeff_it_ += step_size_;
+                rns_it_.ptr_it_ += step_size_;
                 return result;
             }
 
             inline self_type &operator--() noexcept
             {
-                rns_it_.coeff_it_ -= step_size_;
+                rns_it_.ptr_it_ -= step_size_;
                 return *this;
             }
 
             inline self_type operator--(int) noexcept
             {
                 self_type result(*this);
-                rns_it_.coeff_it_ -= step_size_;
+                rns_it_.ptr_it_ -= step_size_;
                 return result;
             }
 
             template <typename SizeT>
             inline self_type &operator+=(SizeT n) noexcept
             {
-                rns_it_.coeff_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                rns_it_.ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return *this;
             }
 
@@ -1140,14 +1373,14 @@ namespace seal
             SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
             {
                 self_type result(*this);
-                result.rns_it_.coeff_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                result.rns_it_.ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return result;
             }
 
             template <typename SizeT>
             inline self_type &operator-=(SizeT n) noexcept
             {
-                rns_it_.coeff_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                rns_it_.ptr_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return *this;
             }
 
@@ -1173,7 +1406,7 @@ namespace seal
                     throw std::invalid_argument("incompatible iterators");
                 }
 #endif
-                return (rns_it_.coeff_it_ - b.rns_it_.coeff_it_) / static_cast<difference_type>(step_size_);
+                return (rns_it_.ptr_it_ - b.rns_it_.ptr_it_) / static_cast<difference_type>(step_size_);
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -1223,7 +1456,7 @@ namespace seal
 
             SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
             {
-                return rns_it_.step_size_;
+                return rns_it_.poly_modulus_degree();
             }
 
             SEAL_NODISCARD inline std::size_t coeff_modulus_size() const noexcept
@@ -1270,7 +1503,7 @@ namespace seal
             ConstPolyIter(const PolyIter &copy)
                 : rns_it_(static_cast<const std::uint64_t *>(copy), copy.poly_modulus_degree()),
                   coeff_modulus_size_(copy.coeff_modulus_size()),
-                  step_size_(mul_safe(rns_it_.step_size_, coeff_modulus_size_))
+                  step_size_(mul_safe(rns_it_.poly_modulus_degree(), coeff_modulus_size_))
             {}
 
             SEAL_NODISCARD inline reference operator*() const noexcept
@@ -1288,34 +1521,34 @@ namespace seal
 
             inline self_type &operator++() noexcept
             {
-                rns_it_.coeff_it_ += step_size_;
+                rns_it_.ptr_it_ += step_size_;
                 return *this;
             }
 
             inline self_type operator++(int) noexcept
             {
                 self_type result(*this);
-                rns_it_.coeff_it_ += step_size_;
+                rns_it_.ptr_it_ += step_size_;
                 return result;
             }
 
             inline self_type &operator--() noexcept
             {
-                rns_it_.coeff_it_ -= step_size_;
+                rns_it_.ptr_it_ -= step_size_;
                 return *this;
             }
 
             inline self_type operator--(int) noexcept
             {
                 self_type result(*this);
-                rns_it_.coeff_it_ -= step_size_;
+                rns_it_.ptr_it_ -= step_size_;
                 return result;
             }
 
             template <typename SizeT>
             inline self_type &operator+=(SizeT n) noexcept
             {
-                rns_it_.coeff_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                rns_it_.ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return *this;
             }
 
@@ -1323,14 +1556,14 @@ namespace seal
             SEAL_NODISCARD inline self_type operator+(SizeT n) const noexcept
             {
                 self_type result(*this);
-                result.rns_it_.coeff_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                result.rns_it_.ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return result;
             }
 
             template <typename SizeT>
             inline self_type &operator-=(SizeT n) noexcept
             {
-                rns_it_.coeff_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
+                rns_it_.ptr_it_ -= static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return *this;
             }
 
@@ -1356,7 +1589,7 @@ namespace seal
                     throw std::invalid_argument("incompatible iterators");
                 }
 #endif
-                return (rns_it_.coeff_it_ - b.rns_it_.coeff_it_) / static_cast<difference_type>(step_size_);
+                return (rns_it_.ptr_it_ - b.rns_it_.ptr_it_) / static_cast<difference_type>(step_size_);
             }
 
             SEAL_NODISCARD inline bool operator==(const self_type &compare) const noexcept
@@ -1406,7 +1639,7 @@ namespace seal
 
             SEAL_NODISCARD inline std::size_t poly_modulus_degree() const noexcept
             {
-                return rns_it_.step_size_;
+                return rns_it_.poly_modulus_degree();
             }
 
             SEAL_NODISCARD inline std::size_t coeff_modulus_size() const noexcept

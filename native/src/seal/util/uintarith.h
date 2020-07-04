@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
-#include <set>
 #include <stdexcept>
 #include <type_traits>
 
