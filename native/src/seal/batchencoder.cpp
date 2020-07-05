@@ -5,11 +5,11 @@
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
 #include "seal/util/polycore.h"
+#include <algorithm>
 #include <cstdlib>
 #include <limits>
 #include <random>
 #include <stdexcept>
-#include <algorithm>
 
 using namespace std;
 using namespace seal::util;
@@ -302,7 +302,9 @@ namespace seal
             throw invalid_argument("plain is not valid for encryption parameters");
         }
 #ifdef SEAL_DEBUG
-        if (!all_of(plain.data(), plain.data() + plain.coeff_count(), [&](auto coeff) { return coeff < context_data.parms().plain_modulus().value(); }))
+        if (!all_of(plain.data(), plain.data() + plain.coeff_count(), [&](auto coeff) {
+                return coeff < context_data.parms().plain_modulus().value();
+            }))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }

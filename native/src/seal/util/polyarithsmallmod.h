@@ -35,8 +35,8 @@ namespace seal
                 throw std::invalid_argument("modulus");
             }
 #endif
-            SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
-                get<1>(I) = barrett_reduce_64(get<0>(I), modulus); });
+            SEAL_ITERATE(
+                iter(poly, result), coeff_count, [&](auto I) { get<1>(I) = barrett_reduce_64(get<0>(I), modulus); });
         }
 
         inline void modulo_poly_coeffs(
