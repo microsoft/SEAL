@@ -199,17 +199,15 @@ namespace seal
 // This macro can be used to allocate a temporary buffer and create a PtrIter<T *> object pointing to it. This is
 // convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the
 // iterator.
-#define SEAL_ALLOCATE_GET_PTR_ITER(name, type, size, pool) \
-    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(           \
-        seal::util::allocate<type>(size, pool));           \
+#define SEAL_ALLOCATE_GET_PTR_ITER(name, type, size, pool)                               \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(seal::util::allocate<type>(size, pool)); \
     seal::util::PtrIter<type *> name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get());
 
 // This macro can be used to allocate a temporary buffer and create a StrideIter<T *> object pointing to it. This is
 // convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the
 // iterator.
-#define SEAL_ALLOCATE_GET_STRIDE_ITER(name, type, size, stride, pool)          \
-    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(                               \
-        seal::util::allocate<type>(seal::util::mul_safe(size, stride), pool)); \
+#define SEAL_ALLOCATE_GET_STRIDE_ITER(name, type, size, stride, pool)                                                  \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(seal::util::allocate<type>(seal::util::mul_safe(size, stride), pool)); \
     seal::util::StrideIter<type *> name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), stride);
 
 // This macro can be used to allocate a temporary buffer and create a PolyIter object pointing to it. This is convenient
@@ -242,7 +240,7 @@ namespace seal
         seal::util::allocate_zero_poly(poly_modulus_degree, coeff_modulus_size, pool));      \
     seal::util::RNSIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree);
 
-// This macro can be used to allocate a temporary buffer and create a CoeffIter object pointing to it. This is 
+// This macro can be used to allocate a temporary buffer and create a CoeffIter object pointing to it. This is
 // convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the
 // iterator.
 #define SEAL_ALLOCATE_GET_COEFF_ITER(name, poly_modulus_degree, pool)                                  \

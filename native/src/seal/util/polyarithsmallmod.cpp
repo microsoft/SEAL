@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/polyarith.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintcore.h"

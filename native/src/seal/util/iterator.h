@@ -68,10 +68,11 @@ namespace seal
                                       +-------------------------+
 
         @par PtrIter and StrideIter
-        PtrIter<T *> and StrideIter<T *> are both templated SEAL iterators that wrap raw pointers. The difference between
-        these two types is that advancing PtrIter<T *> always advances the wrapped pointer by one, whereas the step size
-        (stride) can be set to be anything for a StrideIter<T *>. CoeffIter is a typedef of PtrIter<std::uint64_t *> and
-        and RNSIter is almost the same as StrideIter<std::uint64_t *>, but still a different type.
+        PtrIter<T *> and StrideIter<T *> are both templated SEAL iterators that wrap raw pointers. The difference
+        between these two types is that advancing PtrIter<T *> always advances the wrapped pointer by one, whereas the
+        step size (stride) can be set to be anything for a StrideIter<T *>. CoeffIter is a typedef of
+        PtrIter<std::uint64_t *> and and RNSIter is almost the same as StrideIter<std::uint64_t *>, but still a
+        different type.
 
         +----------+  Construct   +-------------------+
         | MyType * |------------->| PtrIter<MyType *> |  Simple wrapper for raw pointers
@@ -872,18 +873,18 @@ namespace seal
                 {
                     throw std::logic_error("stride cannot be zero");
                 }
-                if (stride_ != b.stride_)
+                if (stride_ != b.stride())
                 {
                     throw std::invalid_argument("incompatible iterators");
                 }
 #endif
-                return (ptr_it_ - b.ptr_it_) / static_cast<difference_type>(stride_);
+                return (ptr_it_ - *b) / static_cast<difference_type>(stride_);
             }
 
             template <typename S>
             SEAL_NODISCARD inline bool operator==(const StrideIter<S *> &compare) const noexcept
             {
-                return ptr_it_ == compare.ptr_it_;
+                return ptr_it_ == *compare;
             }
 
             template <typename S>
@@ -895,25 +896,25 @@ namespace seal
             template <typename S>
             SEAL_NODISCARD inline bool operator<(const StrideIter<S *> &compare) const noexcept
             {
-                return ptr_it_ < compare.ptr_it_;
+                return ptr_it_ < *compare;
             }
 
             template <typename S>
             SEAL_NODISCARD inline bool operator>(const StrideIter<S *> &compare) const noexcept
             {
-                return ptr_it_ > compare.ptr_it_;
+                return ptr_it_ > *compare;
             }
 
             template <typename S>
             SEAL_NODISCARD inline bool operator<=(const StrideIter<S *> &compare) const noexcept
             {
-                return !(ptr_it_ > compare.ptr_it_);
+                return !(ptr_it_ > *compare);
             }
 
             template <typename S>
             SEAL_NODISCARD inline bool operator>=(const StrideIter<S *> &compare) const noexcept
             {
-                return !(ptr_it_ < compare.ptr_it_);
+                return !(ptr_it_ < *compare);
             }
 
             SEAL_NODISCARD explicit inline operator bool() const noexcept
@@ -964,8 +965,7 @@ namespace seal
             RNSIter() : ptr_it_(), step_size_(0)
             {}
 
-            RNSIter(std::uint64_t *ptr, std::size_t poly_modulus_degree)
-                : ptr_it_(ptr), step_size_(poly_modulus_degree)
+            RNSIter(std::uint64_t *ptr, std::size_t poly_modulus_degree) : ptr_it_(ptr), step_size_(poly_modulus_degree)
             {}
 
             RNSIter(const self_type &copy) = default;
@@ -973,7 +973,8 @@ namespace seal
             self_type &operator=(const self_type &assign) = default;
 
             template <typename S>
-            RNSIter(const StrideIter<S *> &stride_it) : RNSIter(stride_it.ptr(), stride_it.stride()) {}
+            RNSIter(const StrideIter<S *> &stride_it) : RNSIter(stride_it.ptr(), stride_it.stride())
+            {}
 
             template <typename S>
             self_type &operator=(const StrideIter<S *> &assign)
@@ -1150,7 +1151,8 @@ namespace seal
             {}
 
             template <typename S>
-            ConstRNSIter(const StrideIter<S *> &stride_it) : ConstRNSIter(stride_it.ptr(), stride_it.stride()) {}
+            ConstRNSIter(const StrideIter<S *> &stride_it) : ConstRNSIter(stride_it.ptr(), stride_it.stride())
+            {}
 
             template <typename S>
             self_type &operator=(const StrideIter<S *> &assign)
