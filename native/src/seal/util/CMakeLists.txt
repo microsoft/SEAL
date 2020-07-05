@@ -13,7 +13,6 @@ target_sources(seal_obj PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/iterator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
     ${CMAKE_CURRENT_LIST_DIR}/numth.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.cpp
     ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rlwe.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rns.cpp
@@ -52,7 +51,6 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/msvc.h
         ${CMAKE_CURRENT_LIST_DIR}/numth.h
         ${CMAKE_CURRENT_LIST_DIR}/pointer.h
-        ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.h
         ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.h
         ${CMAKE_CURRENT_LIST_DIR}/polycore.h
         ${CMAKE_CURRENT_LIST_DIR}/rlwe.h

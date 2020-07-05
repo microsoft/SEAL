@@ -14,6 +14,7 @@ This struct handles precomputation data for Barrett style modular multiplication
 ### Other
 
 - Significant performance improvements from merging pull request [(PR 185)](https://github.com/microsoft/SEAL/pull/185) and implementing other improvements of the same style (see above).
+- Removed a lot of old and unused code.
 
 ## Version 3.5.4
 

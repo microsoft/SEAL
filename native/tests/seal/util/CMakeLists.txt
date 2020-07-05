@@ -11,7 +11,6 @@ target_sources(sealtest
         ${CMAKE_CURRENT_LIST_DIR}/locks.cpp
         ${CMAKE_CURRENT_LIST_DIR}/mempool.cpp
         ${CMAKE_CURRENT_LIST_DIR}/numth.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/polyarithmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/polyarithsmallmod.cpp
         ${CMAKE_CURRENT_LIST_DIR}/polycore.cpp
         ${CMAKE_CURRENT_LIST_DIR}/rns.cpp

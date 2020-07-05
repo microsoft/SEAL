@@ -994,14 +994,7 @@ namespace seal
             SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, quotient);
         }
 
-        void divide_uint128_inplace(std::uint64_t *numerator, std::uint64_t denominator, std::uint64_t *quotient);
-
         void divide_uint192_inplace(std::uint64_t *numerator, std::uint64_t denominator, std::uint64_t *quotient);
-
-        void exponentiate_uint(
-            const std::uint64_t *operand, std::size_t operand_uint64_count, const std::uint64_t *exponent,
-            std::size_t exponent_uint64_count, std::size_t result_uint64_count, std::uint64_t *result,
-            MemoryPool &pool);
 
         SEAL_NODISCARD std::uint64_t exponentiate_uint_safe(std::uint64_t operand, std::uint64_t exponent);
 
